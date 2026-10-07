@@ -9,10 +9,20 @@
 <body>
   <header>
     <h1>SGP ONE · Control de Mecanizado</h1>
-    <span class="status">LAB</span>
+    <div class="header-right">
+      <span class="sync-ok">GitHub activo</span>
+      <span class="status">LAB</span>
+    </div>
   </header>
-
   <main>
+    <section class="demo-panel">
+      <div>
+        <strong>Prueba de edición en vivo</strong>
+        <span>Simula el avance logístico de la reserva del ID 1305055.</span>
+      </div>
+      <button id="simulateButton">Avanzar estado</button>
+      <span id="demoMessage"></span>
+    </section>
     <section class="toolbar">
       <input id="search" type="search" placeholder="Buscar ID, reserva, proyecto, producción o sistema…" />
       <select id="stateFilter">
@@ -27,35 +37,24 @@
         <option value="FRAMES_2">FRAMES_2</option>
       </select>
     </section>
-
     <section class="summary">
       <div class="metric"><span>Registros visibles</span><strong id="mTotal">0</strong></div>
       <div class="metric"><span>Aluminio entregado</span><strong id="mDelivered">0</strong></div>
       <div class="metric"><span>Pendiente bodega</span><strong id="mWarehouse">0</strong></div>
       <div class="metric"><span>Pendiente abastecimiento</span><strong id="mSupply">0</strong></div>
     </section>
-
     <section class="table-wrap">
       <table>
         <thead>
           <tr>
-            <th>ID</th>
-            <th>Reserva</th>
-            <th>Semana</th>
-            <th>Proyecto</th>
-            <th>Producción</th>
-            <th>Sistema</th>
-            <th>Estado reserva</th>
-            <th>Peso reserva</th>
-            <th>Cant. Vent</th>
-            <th>Control</th>
+            <th>ID</th><th>Reserva</th><th>Semana</th><th>Proyecto</th><th>Producción</th>
+            <th>Sistema</th><th>Estado reserva</th><th>Peso reserva</th><th>Cant. Vent</th><th>Control</th>
           </tr>
         </thead>
         <tbody id="trackingBody"></tbody>
       </table>
     </section>
   </main>
-
   <script src="app.js"></script>
 </body>
 </html>
