@@ -3,107 +3,59 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SGP ONE LAB</title>
-  <style>
-    :root {
-      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      color: #172033;
-      background: #f4f6f9;
-    }
-    * { box-sizing: border-box; }
-    body { margin: 0; }
-    header {
-      background: #172033;
-      color: white;
-      padding: 18px 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    header h1 { margin: 0; font-size: 20px; }
-    .status {
-      background: #dff7e7;
-      color: #176b3a;
-      padding: 6px 10px;
-      border-radius: 999px;
-      font-size: 13px;
-      font-weight: 700;
-    }
-    main { max-width: 1100px; margin: 0 auto; padding: 28px 20px; }
-    .hero {
-      background: white;
-      border-radius: 16px;
-      padding: 24px;
-      box-shadow: 0 8px 24px rgba(23,32,51,.08);
-      margin-bottom: 20px;
-    }
-    .hero h2 { margin-top: 0; }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 16px;
-    }
-    .card {
-      background: white;
-      border-radius: 14px;
-      padding: 18px;
-      box-shadow: 0 6px 18px rgba(23,32,51,.07);
-    }
-    .card strong { display: block; margin-bottom: 8px; }
-    .metric { font-size: 28px; font-weight: 800; }
-    button {
-      margin-top: 14px;
-      border: 0;
-      border-radius: 10px;
-      padding: 10px 14px;
-      font-weight: 700;
-      cursor: pointer;
-      background: #172033;
-      color: white;
-    }
-    #message { margin-top: 14px; font-weight: 700; }
-  </style>
+  <title>SGP ONE LAB · Control de Mecanizado</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <header>
-    <h1>SGP ONE LAB</h1>
-    <span class="status">GitHub conectado</span>
+    <h1>SGP ONE · Control de Mecanizado</h1>
+    <span class="status">LAB</span>
   </header>
 
   <main>
-    <section class="hero">
-      <h2>Prototipo web de SGP ONE</h2>
-      <p>Esta página fue creada directamente desde ChatGPT dentro del repositorio GitHub.</p>
-      <button id="testButton">Probar interfaz</button>
-      <div id="message"></div>
+    <section class="toolbar">
+      <input id="search" type="search" placeholder="Buscar ID, reserva, proyecto, producción o sistema…" />
+      <select id="stateFilter">
+        <option value="">Todos los estados</option>
+        <option value="ALUMINIO_ENTREGADO">Aluminio Entregado</option>
+        <option value="PENDIENTE_BODEGA">Pendiente por Bodega</option>
+        <option value="PENDIENTE_ABASTECIMIENTO">Pendiente por Abastecimiento</option>
+      </select>
+      <select id="lineFilter">
+        <option value="">Paneles + Frames</option>
+        <option value="PANELES_2">PANELES_2</option>
+        <option value="FRAMES_2">FRAMES_2</option>
+      </select>
     </section>
 
-    <section class="grid">
-      <article class="card">
-        <strong>Producciones</strong>
-        <div class="metric">700</div>
-        <span>Registros de referencia del entorno actual.</span>
-      </article>
+    <section class="summary">
+      <div class="metric"><span>Registros visibles</span><strong id="mTotal">0</strong></div>
+      <div class="metric"><span>Aluminio entregado</span><strong id="mDelivered">0</strong></div>
+      <div class="metric"><span>Pendiente bodega</span><strong id="mWarehouse">0</strong></div>
+      <div class="metric"><span>Pendiente abastecimiento</span><strong id="mSupply">0</strong></div>
+    </section>
 
-      <article class="card">
-        <strong>Seguimiento Aluminio</strong>
-        <div class="metric">340</div>
-        <span>Registros productivos del archivo de prueba.</span>
-      </article>
-
-      <article class="card">
-        <strong>Módulo siguiente</strong>
-        <div class="metric">MEC</div>
-        <span>Control de mecanizado Paneles / Frames.</span>
-      </article>
+    <section class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Reserva</th>
+            <th>Semana</th>
+            <th>Proyecto</th>
+            <th>Producción</th>
+            <th>Sistema</th>
+            <th>Estado reserva</th>
+            <th>Peso reserva</th>
+            <th>Cant. Vent</th>
+            <th>Control</th>
+          </tr>
+        </thead>
+        <tbody id="trackingBody"></tbody>
+      </table>
     </section>
   </main>
 
-  <script>
-    document.getElementById("testButton").addEventListener("click", function () {
-      document.getElementById("message").textContent =
-        "Prueba correcta: HTML + CSS + JavaScript funcionando.";
-    });
-  </script>
+  <script src="app.js"></script>
 </body>
 </html>
