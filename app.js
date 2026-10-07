@@ -12,7 +12,9 @@ const els = {
   total: document.querySelector("#mTotal"),
   delivered: document.querySelector("#mDelivered"),
   warehouse: document.querySelector("#mWarehouse"),
-  supply: document.querySelector("#mSupply")
+  supply: document.querySelector("#mSupply"),
+  simulate: document.querySelector("#simulateButton"),
+  demoMessage: document.querySelector("#demoMessage")
 };
 
 function labelState(state) {
@@ -65,5 +67,23 @@ function render() {
   }).join("");
 }
 
+function advanceDemoState() {
+  const row = trackingRows.find(r => r.id === "1305055");
+  if (!row) return;
+
+  if (row.estado === "PENDIENTE_ABASTECIMIENTO") {
+    row.estado = "PENDIENTE_BODEGA";
+  } else if (row.estado === "PENDIENTE_BODEGA") {
+    row.estado = "ALUMINIO_ENTREGADO";
+  } else {
+    row.estado = "PENDIENTE_ABASTECIMIENTO";
+  }
+
+  const [label] = labelState(row.estado);
+  els.demoMessage.textContent = "1305055 → " + label;
+  render();
+}
+
 [els.search, els.state, els.line].forEach(el => el.addEventListener("input", render));
+els.simulate.addEventListener("click", advanceDemoState);
 render();
