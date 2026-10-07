@@ -3,58 +3,126 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SGP ONE LAB · Control de Mecanizado</title>
-  <link rel="stylesheet" href="styles.css?v=20261007-1720" />
+  <title>SGP ONE LAB</title>
+  <link rel="stylesheet" href="styles.css?v=20261007-1730" />
 </head>
 <body>
-  <header>
-    <h1>SGP ONE · Control de Mecanizado</h1>
-    <div class="header-right">
-      <span class="sync-ok">GitHub activo</span>
-      <span class="status">LAB v3</span>
-    </div>
-  </header>
-  <main>
-    <section class="demo-panel">
-      <div>
-        <strong>Prueba de edición en vivo</strong>
-        <span>Simula el avance logístico de la reserva del ID 1305055.</span>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <strong>SGP ONE</strong>
+        <span>LAB</span>
       </div>
-      <button id="simulateButton">Avanzar estado</button>
-      <span id="demoMessage"></span>
+
+      <nav class="nav">
+        <button data-view="inicio">Inicio</button>
+        <button class="active" data-view="mecanizado">Control de Mecanizado</button>
+        <button data-view="actualizacion">Actualización diaria</button>
+      </nav>
+
+      <div class="sidebar-foot">
+        <span>Entorno de desarrollo</span>
+        <strong>GitHub Pages</strong>
+      </div>
+    </aside>
+
+    <section class="workspace">
+      <header class="topbar">
+        <div>
+          <span class="eyebrow">SGP ONE</span>
+          <h1>Plataforma de Producción</h1>
+        </div>
+        <div class="topbar-status">
+          <span class="sync-ok">GitHub activo</span>
+          <span class="status">LAB v4</span>
+        </div>
+      </header>
+
+      <main>
+        <section class="view placeholder-view" data-view-panel="inicio" hidden>
+          <div class="page-heading">
+            <span class="eyebrow">Inicio</span>
+            <h2>Panel general</h2>
+            <p>Esta vista será el resumen operativo de SGP ONE.</p>
+          </div>
+          <div class="placeholder-card">
+            Próximo paso: indicadores de producción, carga semanal y alertas.
+          </div>
+        </section>
+
+        <section class="view" data-view-panel="mecanizado">
+          <div class="page-heading">
+            <span class="eyebrow">Operación</span>
+            <h2>Control de Mecanizado</h2>
+            <p>Seguimiento de disponibilidad logística de aluminio para Paneles y Frames.</p>
+          </div>
+
+          <section class="demo-panel">
+            <div>
+              <strong>Prueba de edición en vivo</strong>
+              <span>Simula el avance logístico de la reserva del ID 1305055.</span>
+            </div>
+            <button id="simulateButton">Avanzar estado</button>
+            <span id="demoMessage"></span>
+          </section>
+
+          <section class="toolbar">
+            <input id="search" type="search" placeholder="Buscar ID, reserva, proyecto, producción o sistema…" />
+            <select id="stateFilter">
+              <option value="">Todos los estados</option>
+              <option value="ALUMINIO_ENTREGADO">Aluminio Entregado</option>
+              <option value="PENDIENTE_BODEGA">Pendiente por Bodega</option>
+              <option value="PENDIENTE_ABASTECIMIENTO">Pendiente por Abastecimiento</option>
+            </select>
+            <select id="lineFilter">
+              <option value="">Paneles + Frames</option>
+              <option value="PANELES_2">PANELES_2</option>
+              <option value="FRAMES_2">FRAMES_2</option>
+            </select>
+          </section>
+
+          <section class="summary">
+            <div class="metric"><span>Registros visibles</span><strong id="mTotal">0</strong></div>
+            <div class="metric"><span>Aluminio entregado</span><strong id="mDelivered">0</strong></div>
+            <div class="metric"><span>Pendiente bodega</span><strong id="mWarehouse">0</strong></div>
+            <div class="metric"><span>Pendiente abastecimiento</span><strong id="mSupply">0</strong></div>
+          </section>
+
+          <section class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Reserva</th>
+                  <th>Semana</th>
+                  <th>Proyecto</th>
+                  <th>Producción</th>
+                  <th>Sistema</th>
+                  <th>Estado reserva</th>
+                  <th>Peso reserva</th>
+                  <th>Cant. Vent</th>
+                  <th>Control</th>
+                </tr>
+              </thead>
+              <tbody id="trackingBody"></tbody>
+            </table>
+          </section>
+        </section>
+
+        <section class="view placeholder-view" data-view-panel="actualizacion" hidden>
+          <div class="page-heading">
+            <span class="eyebrow">Datos</span>
+            <h2>Actualización diaria</h2>
+            <p>En esta vista conectaremos SALDOS, Seguimiento Aluminio, Vidrio y NC.</p>
+          </div>
+          <div class="placeholder-card">
+            El backend real se conectará después de validar la base de datos.
+          </div>
+        </section>
+      </main>
     </section>
-    <section class="toolbar">
-      <input id="search" type="search" placeholder="Buscar ID, reserva, proyecto, producción o sistema…" />
-      <select id="stateFilter">
-        <option value="">Todos los estados</option>
-        <option value="ALUMINIO_ENTREGADO">Aluminio Entregado</option>
-        <option value="PENDIENTE_BODEGA">Pendiente por Bodega</option>
-        <option value="PENDIENTE_ABASTECIMIENTO">Pendiente por Abastecimiento</option>
-      </select>
-      <select id="lineFilter">
-        <option value="">Paneles + Frames</option>
-        <option value="PANELES_2">PANELES_2</option>
-        <option value="FRAMES_2">FRAMES_2</option>
-      </select>
-    </section>
-    <section class="summary">
-      <div class="metric"><span>Registros visibles</span><strong id="mTotal">0</strong></div>
-      <div class="metric"><span>Aluminio entregado</span><strong id="mDelivered">0</strong></div>
-      <div class="metric"><span>Pendiente bodega</span><strong id="mWarehouse">0</strong></div>
-      <div class="metric"><span>Pendiente abastecimiento</span><strong id="mSupply">0</strong></div>
-    </section>
-    <section class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th><th>Reserva</th><th>Semana</th><th>Proyecto</th><th>Producción</th>
-            <th>Sistema</th><th>Estado reserva</th><th>Peso reserva</th><th>Cant. Vent</th><th>Control</th>
-          </tr>
-        </thead>
-        <tbody id="trackingBody"></tbody>
-      </table>
-    </section>
-  </main>
-  <script src="app.js?v=20261007-1720"></script>
+  </div>
+
+  <script type="module" src="app.js?v=20261007-1730"></script>
 </body>
 </html>
