@@ -1,0 +1,99 @@
+:root {
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #172033;
+  background: #f4f6f9;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: #f4f6f9; }
+header {
+  background: #172033;
+  color: #fff;
+  padding: 18px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+header h1 { margin: 0; font-size: 20px; }
+.status {
+  background: #dff7e7;
+  color: #176b3a;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+}
+main { max-width: 1280px; margin: 0 auto; padding: 24px; }
+.toolbar, .summary, .table-wrap {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 6px 18px rgba(23,32,51,.07);
+}
+.toolbar {
+  padding: 18px;
+  display: grid;
+  grid-template-columns: 1fr 180px 180px;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.toolbar input, .toolbar select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d8deea;
+  border-radius: 10px;
+  background: #fff;
+}
+.summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.metric {
+  padding: 18px;
+  background: #fff;
+}
+.metric span { display: block; font-size: 12px; color: #667085; }
+.metric strong { display: block; margin-top: 4px; font-size: 26px; }
+.table-wrap { overflow: auto; }
+table { width: 100%; border-collapse: collapse; min-width: 980px; }
+th, td {
+  padding: 12px 14px;
+  text-align: left;
+  border-bottom: 1px solid #edf0f5;
+  font-size: 13px;
+  vertical-align: top;
+}
+th {
+  position: sticky;
+  top: 0;
+  background: #f8fafc;
+  color: #475467;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+.badge {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 5px 8px;
+  font-size: 11px;
+  font-weight: 800;
+}
+.badge.entregado { background: #dff7e7; color: #176b3a; }
+.badge.bodega { background: #fff0cc; color: #8a5a00; }
+.badge.abastecimiento { background: #fde2e2; color: #9f1d1d; }
+.line-tag {
+  display: inline-block;
+  margin: 2px 4px 2px 0;
+  padding: 4px 7px;
+  border-radius: 7px;
+  background: #eef2f8;
+  font-size: 11px;
+  font-weight: 700;
+}
+.empty { padding: 26px; text-align: center; color: #667085; }
+@media (max-width: 800px) {
+  .toolbar { grid-template-columns: 1fr; }
+  .summary { grid-template-columns: repeat(2, 1fr); }
+}
