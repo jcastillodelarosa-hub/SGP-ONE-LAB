@@ -240,3 +240,28 @@ th {
   .nav { grid-template-columns: 1fr; }
   .summary { grid-template-columns: 1fr; }
 }
+
+.import-card {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 6px 18px rgba(23,32,51,.07);
+  padding: 18px;
+  margin-bottom: 16px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.import-card input { flex: 1 1 320px; }
+.import-card button {
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 14px;
+  background: #172033;
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+}
+.import-card button:disabled { opacity: .45; cursor: not-allowed; }
+#importStatus { flex-basis: 100%; font-size: 13px; color: #667085; }
+.import-summary { margin-top: 0; }
