@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SGP ONE LAB</title>
-  <link rel="stylesheet" href="styles.css?v=40" />
+  <link rel="stylesheet" href="styles.css?v=41" />
   <script src="config.js?v=20261008-1300"></script>
 </head>
 <body>
@@ -42,7 +42,7 @@
           <input id="authPassword" type="password" placeholder="Contraseña" autocomplete="current-password" />
           <button id="authLogin">Ingresar</button>
           <button id="authLogout" hidden>Cerrar sesión</button>
-          <span class="status">LAB v40</span>
+          <span class="status">LAB v41</span>
         </div>
       </header>
 
@@ -136,9 +136,19 @@
             <div class="metric"><span>Unidades</span><strong id="qUnits">0</strong></div>            <div class="metric"><span>Visibles</span><strong id="qVisible">0</strong></div>
           </section>
           <div id="queryStatus" class="placeholder-card">Selecciona una semana y pulsa Consultar semana.</div>
-          <section class="table-wrap programming-summary">
-            <table><thead><tr><th>Sistema</th><th>Reservas</th><th>Producciones</th><th>Unidades</th><th>Prod. con Muntin</th><th>Unid. con Muntin</th></tr></thead>
-            <tbody id="systemSummaryBody"><tr><td colspan="6" class="empty">Sin consulta</td></tr></tbody></table>
+          <section class="programming-summary-grid">
+            <div class="table-wrap programming-summary">
+              <table><thead><tr><th>Sistema</th><th>Reservas</th><th>Producciones</th><th>Unidades</th><th>Prod. con Muntin</th><th>Unid. con Muntin</th></tr></thead>
+              <tbody id="systemSummaryBody"><tr><td colspan="6" class="empty">Sin consulta</td></tr></tbody></table>
+            </div>
+            <div class="table-wrap programming-summary">
+              <table><thead><tr><th>Sistema</th><th>Proyecto</th><th>Retail</th><th>Total</th></tr></thead>
+              <tbody id="typeSummaryBody"><tr><td colspan="4" class="empty">Sin consulta</td></tr></tbody></table>
+            </div>
+          </section>
+          <section class="table-wrap reservation-summary">
+            <table><thead><tr><th>Reserva</th><th>Sistema</th><th>Acabado</th><th>Producciones</th><th>Unidades</th><th>Prod. con Muntin</th><th>Unid. con Muntin</th></tr></thead>
+            <tbody id="reservationSummaryBody"><tr><td colspan="7" class="empty">Sin consulta</td></tr></tbody></table>
           </section>
           <section class="table-wrap">
             <table>
@@ -259,6 +269,6 @@
     </section>
   </div>
 
-  <script type="module" src="app.js?v=40"></script>
+  <script type="module" src="app.js?v=41"></script>
 </body>
 </html>
