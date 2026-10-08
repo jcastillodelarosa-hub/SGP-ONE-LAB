@@ -299,3 +299,10 @@ tr.has-muntin{box-shadow:inset 5px 0 0 #f59e0b}.reservation-tone-1.has-muntin,.r
 
 /* v39 programming hierarchy */
 .has-muntin-summary{background:rgba(237,233,254,.72)!important}.has-muntin-summary td:first-child{border-left:4px solid #8b5cf6}.muntin-metric{border-color:#8b5cf6}.muntin-badge{background:#ddd6fe!important;color:#4c1d95!important}.reservation-alt{background:rgba(226,232,240,.42)!important}.reservation-start td{border-top:2px solid rgba(100,116,139,.35)}tr.has-muntin{box-shadow:inset 5px 0 0 #8b5cf6!important;background-image:linear-gradient(rgba(139,92,246,.08),rgba(139,92,246,.08))!important}
+
+.programming-summary-grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(320px,.75fr);gap:14px;align-items:start;margin:.8rem 0 1rem}
+.programming-summary-grid .programming-summary{margin:0}.reservation-summary{margin:0 0 1rem}
+.programming-summary tfoot td,.reservation-summary tfoot td{font-weight:800;border-top:2px solid #cbd5e1;background:#f8fafc}
+.detail-tools{display:flex;gap:12px;align-items:center;margin:12px 0 8px;font-size:.84rem}.detail-tools span{color:#64748b}
+#programmingDetailTable thead th{vertical-align:top;min-width:95px}.detail-head{display:flex;align-items:center;justify-content:space-between;gap:4px;white-space:nowrap}.detail-head button{padding:1px 5px;min-width:auto;font-size:.7rem}.column-filter{width:100%;min-width:72px;margin-top:5px;padding:5px 6px;font-size:.72rem;box-sizing:border-box}
+@media(max-width:1100px){.programming-summary-grid{grid-template-columns:1fr}}
