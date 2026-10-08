@@ -39,7 +39,6 @@ const els = {
   authUser: document.querySelector("#authUser"),
   authPassword: document.querySelector("#authPassword"),
   authLogin: document.querySelector("#authLogin"),
-  activateAdmin: document.querySelector("#activateAdmin"),
   authLogout: document.querySelector("#authLogout"),
   importStatus: document.querySelector("#importStatus"),
   iTotal: document.querySelector("#iTotal"),
@@ -155,7 +154,7 @@ async function refreshAuthStatus() {
     const token = sessionStorage.getItem(APP_SESSION_KEY);
     if (!token) {
       els.authStatus.textContent = "Sin sesión";
-      els.authUser.hidden = false; els.authPassword.hidden = false; els.authLogin.hidden = false; els.activateAdmin.hidden = false; els.authLogout.hidden = true;
+      els.authUser.hidden = false; els.authPassword.hidden = false; els.authLogin.hidden = false; els.authLogout.hidden = true;
       return null;
     }
     const client = await getSupabaseClient();
@@ -167,7 +166,7 @@ async function refreshAuthStatus() {
       return null;
     }
     els.authStatus.textContent = `${data.nombre} · ${data.rol}`;
-    els.authUser.hidden = true; els.authPassword.hidden = true; els.authLogin.hidden = true; els.activateAdmin.hidden = true; els.authLogout.hidden = false;
+    els.authUser.hidden = true; els.authPassword.hidden = true; els.authLogin.hidden = true; els.authLogout.hidden = false;
     return data;
   } catch {
     els.authStatus.textContent = "Auth no disponible";
@@ -190,23 +189,6 @@ async function requestCredentialAccess() {
     els.authPassword.value = "";
     els.authStatus.textContent = "Usuario o contraseña incorrectos.";
   } finally { els.authLogin.disabled = false; }
-}
-async function activateInitialAdmin() {
-  const usuario = String(els.authUser.value || "").trim();
-  const password = els.authPassword.value || "";
-  if (!usuario || password.length < 10) { els.authStatus.textContent = "Usa jcastillo y una contraseña de mínimo 10 caracteres."; return; }
-  els.activateAdmin.disabled = true; els.authStatus.textContent = "Activando administrador…";
-  try {
-    const client = await getSupabaseClient();
-    const { data, error } = await client.rpc("sgp_activar_admin_inicial", { p_usuario: usuario, p_password: password });
-    if (error) throw error;
-    els.authPassword.value = "";
-    els.authStatus.textContent = "Administrador activado. Ya puedes ingresar.";
-    els.activateAdmin.hidden = true;
-  } catch (error) {
-    els.authPassword.value = "";
-    els.authStatus.textContent = error.message?.includes("ACTIVACION_CERRADA") ? "La activación inicial ya está cerrada." : "No fue posible activar el administrador.";
-  } finally { els.activateAdmin.disabled = false; }
 }
 async function logout() {
   const token=sessionStorage.getItem(APP_SESSION_KEY);
@@ -458,6 +440,5 @@ openView("mecanizado");
 renderMecanizado();
 
 els.authLogin.addEventListener("click", requestCredentialAccess);
-els.activateAdmin.addEventListener("click", activateInitialAdmin);
 els.authLogout.addEventListener("click", logout);
 refreshAuthStatus();
