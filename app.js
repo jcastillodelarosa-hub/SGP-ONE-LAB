@@ -473,7 +473,7 @@ async function openPieceModal(mode,value){
   const token=sessionStorage.getItem(APP_SESSION_KEY),year=Number(els.queryYear.value),week=Number(els.queryWeek.value),dest=line==='PANELES_2'?'PANEL':'FRAME';
   els.pieceModal.hidden=false;els.pieceModalTitle.textContent=(mode==='reserva'?'Reserva ':'Producción ')+value;els.pieceModalMeta.textContent='Consultando piezas '+dest+'…';els.pieceProfileBody.innerHTML='';
   try{const client=await getSupabaseClient();const {data,error}=await client.rpc('sgp_consultar_piezas_semana',{p_token:token,p_anio:year,p_semana:week});if(error)throw error;
-    const src=(data?.piezas||[]).filter(r=>String(r.destino_productivo).toUpperCase()===dest&&(mode==='reserva'?String(r.reserva)===String(value):String(r.produccion)===String(value)));
+    const src=(data?.piezas||[]).filter(r=>String(r.tipo_pieza).toUpperCase()===dest&&(mode==='reserva'?String(r.reserva)===String(value):String(r.produccion)===String(value)));
     const profiles=new Map();src.forEach(r=>{const key=[r.codigo_sap,r.descripcion].join('|');if(!profiles.has(key))profiles.set(key,{perfil:r.codigo_sap,descripcion:r.descripcion,cantidad:0,marks:[]});const p=profiles.get(key);p.cantidad+=Number(r.cantidad||0);p.marks.push(r)});
     const rows=[...profiles.values()].sort((x,y)=>String(x.perfil).localeCompare(String(y.perfil),undefined,{numeric:true}));
     const systems=[...new Set(src.map(r=>r.sistema).filter(Boolean))].join(', '),finishes=[...new Set(src.map(r=>r.acabado).filter(Boolean))].join(', ');
