@@ -49,9 +49,21 @@ const els = {
   pCodes: document.querySelector("#pCodes"),
   pUnclassified: document.querySelector("#pUnclassified"),
   pErrors: document.querySelector("#pErrors"),
-  accessoriesFile: document.querySelector("#accessoriesFile"), validateAccessories: document.querySelector("#validateAccessories"), accessoriesStatus: document.querySelector("#accessoriesStatus"), xTotal: document.querySelector("#xTotal"), xRelated: document.querySelector("#xRelated"), xNoMatch: document.querySelector("#xNoMatch"), xErrors: document.querySelector("#xErrors"),
+  accessoriesFile: document.querySelector("#accessoriesFile"), validateAccessories: document.querySelector("#validateAccessories"), accessoriesStatus: document.querySelector("#accessoriesStatus"), xTotal: document.querySelector("#xTotal"), xRelated: document.querySelector("#xRelated"), xNoMatch: document.querySelector("#xNoMatch"), xErrors: document.querySelector("#xErrors"), accessoriesNoMatchWrap: document.querySelector("#accessoriesNoMatchWrap"), accessoriesNoMatchBody: document.querySelector("#accessoriesNoMatchBody"),
   glassFile: document.querySelector("#glassFile"), validateGlass: document.querySelector("#validateGlass"), glassStatus: document.querySelector("#glassStatus"), gTotal: document.querySelector("#gTotal"), gRelated: document.querySelector("#gRelated"), gSkipped: document.querySelector("#gSkipped"), gErrors: document.querySelector("#gErrors")
 };
+
+function escapeHtml(value) {
+  return String(value ?? "").replace(/[&<>"']/g, char => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[char]));
+}
+function renderAccessoryNoMatches(relation) {
+  if (!els.accessoriesNoMatchWrap || !els.accessoriesNoMatchBody) return;
+  const rows = relation?.noMatchRows || [];
+  els.accessoriesNoMatchWrap.hidden = rows.length === 0;
+  els.accessoriesNoMatchBody.innerHTML = rows.length
+    ? rows.map(row => `<tr><td>${escapeHtml(row.produccion)}</td><td>${escapeHtml(row.sistema)}</td><td>${escapeHtml(row.filas)}</td><td>${escapeHtml(row.codigo_sap || "—")}</td><td>Producción + Sistema no existe en la programación validada</td></tr>`).join("")
+    : '<tr><td colspan="5" class="empty">Sin grupos pendientes</td></tr>';
+}
 
 function currentFilters() { return { q: els.search.value, estado: els.state.value, linea: els.line.value }; }
 function renderMecanizado() {
@@ -72,6 +84,7 @@ function refreshWeeklyRelations() {
     const relation = relateAccessories(validatedAccessories.rows, validatedProductions);
     els.xRelated.textContent = relation.related;
     els.xNoMatch.textContent = relation.noMatch;
+    renderAccessoryNoMatches(relation);
     els.accessoriesStatus.textContent = validatedAccessories.errors.length
       ? `Bloqueado: ${validatedAccessories.errors.length} error(es).`
       : `Correcto: ${validatedAccessories.rows.length} filas · ${relation.sourceGroups} grupos Producción + Sistema · ${relation.related} relacionados · ${relation.noMatch} sin relación · ${relation.conflicts} conflictos.`;
@@ -190,6 +203,7 @@ async function validateAccessoriesFile() {
     els.xTotal.textContent=result.rows.length; els.xErrors.textContent=result.errors.length;
     els.xRelated.textContent=validatedProductions.length?relation.related:"—";
     els.xNoMatch.textContent=validatedProductions.length?relation.noMatch:"—";
+    renderAccessoryNoMatches(validatedProductions.length ? relation : { noMatchRows: [] });
     els.accessoriesStatus.textContent=result.errors.length?`Bloqueado: ${result.errors.length} error(es).`:validatedProductions.length?`Correcto: ${result.rows.length} filas · ${relation.sourceGroups} grupos Producción + Sistema · ${relation.related} relacionados · ${relation.noMatch} sin relación · ${relation.conflicts} conflictos.`:`Estructura correcta: ${result.rows.length} registros. Valida primero Programación para ejecutar el cruce Producción + Sistema.`;
   }catch(error){els.accessoriesStatus.textContent="Error: "+error.message;}finally{els.validateAccessories.disabled=false;}
 }
