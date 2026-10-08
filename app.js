@@ -135,14 +135,15 @@ function weeklyPackageStatus() {
 }
 function refreshWeeklyPackageGate() {
   const status = weeklyPackageStatus();
-  els.commit.disabled = true;
-  els.commit.textContent = status.ready ? "Paquete listo ✓" : "Carga final bloqueada";
+  const token = sessionStorage.getItem(APP_SESSION_KEY);
+  els.commit.disabled = !(status.ready && token);
+  els.commit.textContent = status.ready ? (token ? "Cargar semana" : "Inicia sesión para cargar") : "Carga final bloqueada";
   if (els.previewLoad) els.previewLoad.disabled = !status.ready;
   els.commit.title = status.ready
-    ? "Las 4 fuentes están validadas. La escritura a Supabase permanece deshabilitada en LAB."
+    ? "Las 4 fuentes están validadas. La carga requiere sesión autorizada y doble confirmación."
     : "Pendiente: " + status.blockers.join(", ");
   if (status.ready) {
-    els.importStatus.textContent = `Paquete semanal listo para carga: Programación + Piezas + Accesorios + Vidrio validados. Escritura a Supabase aún deshabilitada en LAB.`;
+    els.importStatus.textContent = `Paquete semanal listo para carga: Programación + Piezas + Accesorios + Vidrio validados. La escritura requiere confirmación explícita.`;
   }
 }
 
@@ -410,8 +411,37 @@ async function previewWeeklyLoad() {
 }
 
 async function commitProgramming() {
-  // LAB safety: deliberately no writes. Production commit will be enabled only after explicit approval.
-  refreshWeeklyPackageGate();
+  const status = weeklyPackageStatus();
+  if (!status.ready) { refreshWeeklyPackageGate(); return; }
+  const user = await refreshAuthStatus();
+  if (!user || !["ADMINISTRADOR","COORDINADOR"].includes(user.rol)) {
+    els.importStatus.textContent = "Carga bloqueada: se requiere rol ADMINISTRADOR o COORDINADOR."; refreshWeeklyPackageGate(); return;
+  }
+  const token = sessionStorage.getItem(APP_SESSION_KEY);
+  const year = validatedProductions[0]?.anio;
+  const piecesPayload = prepareAluminumPiecePayload(validatedPieces.rows, validatedProductions);
+  const accessoriesPayload = prepareAccessoryPayload(validatedAccessories.rows, validatedProductions);
+  const glassPayload = prepareGlassPayload(validatedGlass.rows, validatedProductions);
+  const total = validatedProductions.length + piecesPayload.length + accessoriesPayload.length + glassPayload.length;
+  const summary = `ESCRITURA REAL EN SUPABASE\n\nSemana: ${targetWeek} / ${year}\nUsuario: ${user.nombre} (${user.rol})\nProgramación: ${validatedProductions.length}\nPiezas: ${piecesPayload.length}\nAccesorios: ${accessoriesPayload.length}\nVidrio: ${glassPayload.length}\nTOTAL: ${total} registros\n\n¿Deseas continuar?`;
+  if (!window.confirm(summary)) return;
+  const phrase = window.prompt(`Confirmación final. Escribe exactamente: CARGAR SEMANA ${targetWeek}`);
+  if (phrase !== `CARGAR SEMANA ${targetWeek}`) { els.importStatus.textContent = "Carga cancelada: confirmación final incorrecta."; return; }
+  els.commit.disabled = true; els.commit.textContent = "Cargando…";
+  try {
+    const client = await getSupabaseClient();
+    const { data, error } = await client.rpc("sgp_cargar_paquete_semanal", {
+      p_token: token, p_anio: year, p_semana: targetWeek, p_programacion: validatedProductions,
+      p_piezas: piecesPayload, p_accesorios: accessoriesPayload, p_vidrio: glassPayload
+    });
+    if (error) throw error;
+    els.importStatus.textContent = `Carga aplicada ✓ Lote ${data.id_lote_carga}. Total insertado: ${data.insertados?.total ?? total}.`;
+    els.commit.textContent = "Semana cargada ✓"; els.commit.disabled = true;
+    if (els.previewStatus) els.previewStatus.textContent = `Escritura realizada: SÍ · Lote ${data.id_lote_carga} · Usuario ${data.usuario}.`;
+  } catch (error) {
+    els.importStatus.textContent = "La carga NO fue aplicada: " + error.message;
+    refreshWeeklyPackageGate();
+  }
 }
 
 els.nav.forEach(button => button.addEventListener("click", () => openView(button.dataset.view)));
