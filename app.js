@@ -3,10 +3,10 @@ import { createMecanizadoModule } from "./src/modules/mecanizado.js";
 import { readProgrammingWorkbook, summarizeProgramming } from "./src/domain/production-importer.js";
 import { importProductions } from "./src/services/production-import-repository.js";
 import { readAluminumTrackingWorkbook, summarizeAluminumTracking } from "./src/domain/aluminum-tracking-importer.js";
-import { readAluminumPiecesWorkbook, summarizeAluminumPieces, classifyAluminumPieces, relateAluminumPieces } from "./src/domain/aluminum-pieces-importer.js";
+import { readAluminumPiecesWorkbook, summarizeAluminumPieces, classifyAluminumPieces, relateAluminumPieces, prepareAluminumPiecePayload } from "./src/domain/aluminum-pieces-importer.js";
 import { classifyPieceCodes } from "./src/services/piece-master-repository.js";
-import { readAccessoriesWorkbook, relateAccessories } from "./src/domain/accessories-importer.js";
-import { readGlassWorkbook, relateGlass } from "./src/domain/glass-importer.js";
+import { readAccessoriesWorkbook, relateAccessories, prepareAccessoryPayload } from "./src/domain/accessories-importer.js";
+import { readGlassWorkbook, relateGlass, prepareGlassPayload } from "./src/domain/glass-importer.js";
 import { getSupabaseClient } from "./src/services/supabase-client.js";
 
 const mecanizado = createMecanizadoModule(trackingRows);
@@ -266,7 +266,7 @@ async function validatePiecesFile() {
     els.pRelated.textContent = pieceRelation ? pieceRelation.related : "—";
     els.pNoMatch.textContent = pieceRelation ? pieceRelation.noMatch : "—";
     renderPiecesNoMatches(pieceRelation || { noMatchRows: [] });
-    validatedPieces = { rows: result.rows, errors: result.errors, unclassified: classification.unclassified.length, conflicts: pieceRelation?.conflicts || 0 };
+    validatedPieces = { rows: classification.rows, errors: result.errors, unclassified: classification.unclassified.length, conflicts: pieceRelation?.conflicts || 0 };
     const lineText = Object.entries(summary.lines).map(([line,count]) => `${line}: ${count}`).join(" · ");
     els.piecesStatus.textContent = result.errors.length
       ? `Validación bloqueada: ${result.errors.length} error(es) de estructura.`
@@ -328,11 +328,23 @@ async function previewWeeklyLoad() {
     const { data, error } = await client.rpc("sgp_previsualizar_carga_semanal", { p_anio: year, p_semana: targetWeek });
     if (error) throw error;
     const existing = data?.existente || {};
-    const glassRows = validatedGlass?.rows?.length ?? 0;
+    const piecesPayload = prepareAluminumPiecePayload(validatedPieces.rows, validatedProductions);
+    const accessoriesPayload = prepareAccessoryPayload(validatedAccessories.rows, validatedProductions);
+    const glassPayload = prepareGlassPayload(validatedGlass.rows, validatedProductions);
+    els.previewStatus.textContent = "Previsualización correcta. Ejecutando validación server-side…";
+    const { data: serverCheck, error: serverError } = await client.rpc("sgp_validar_paquete_semanal", {
+      p_anio: year, p_semana: targetWeek, p_programacion: validatedProductions,
+      p_piezas: piecesPayload, p_accesorios: accessoriesPayload, p_vidrio: glassPayload
+    });
+    if (serverError) throw serverError;
+    const counts = serverCheck?.conteos || {};
+    const errs = serverCheck?.errores || {};
+    const serverOk = serverCheck?.valido === true;
     els.previewStatus.innerHTML =
       `<strong>${escapeHtml(data?.modo || "—")} · Semana ${escapeHtml(targetWeek)} / ${escapeHtml(year)}</strong><br>` +
-      `Paquete actual: ${validatedProductions.length} producciones · ${validatedPieces.rows.length} piezas · ${validatedAccessories.rows.length} accesorios · ${glassRows} vidrio.<br>` +
+      `Servidor: <strong>${serverOk ? "Validación servidor ✓" : "BLOQUEADO"}</strong> · ${counts.programacion ?? 0} producciones · ${counts.piezas ?? 0} piezas · ${counts.accesorios ?? 0} accesorios · ${counts.vidrio ?? 0} vidrio.<br>` +
       `Existente en Supabase: ${existing.producciones ?? 0} producciones · ${existing.piezas_aluminio ?? 0} piezas · ${existing.accesorios ?? 0} accesorios · ${existing.vidrio_relacionado ?? 0} vidrio · ${existing.lotes ?? 0} lotes.<br>` +
+      (serverOk ? "" : `Errores servidor: ${escapeHtml(JSON.stringify(errs))}<br>`) +
       `Escritura realizada: <strong>NO</strong>.`;
   } catch (error) {
     els.previewStatus.textContent = "No fue posible previsualizar: " + error.message;
