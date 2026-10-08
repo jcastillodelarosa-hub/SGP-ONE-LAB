@@ -7,6 +7,7 @@ import { readAluminumPiecesWorkbook, summarizeAluminumPieces, classifyAluminumPi
 import { classifyPieceCodes } from "./src/services/piece-master-repository.js";
 import { readAccessoriesWorkbook, relateAccessories } from "./src/domain/accessories-importer.js";
 import { readGlassWorkbook, relateGlass } from "./src/domain/glass-importer.js";
+import { getSupabaseClient } from "./src/services/supabase-client.js";
 
 const mecanizado = createMecanizadoModule(trackingRows);
 let validatedProductions = [];
@@ -32,6 +33,8 @@ const els = {
   validate: document.querySelector("#validateProgramming"),
   targetWeek: document.querySelector("#targetWeek"),
   commit: document.querySelector("#commitProgramming"),
+  previewLoad: document.querySelector("#previewWeeklyLoad"),
+  previewStatus: document.querySelector("#previewWeeklyStatus"),
   importStatus: document.querySelector("#importStatus"),
   iTotal: document.querySelector("#iTotal"),
   iKeys: document.querySelector("#iKeys"),
@@ -129,6 +132,7 @@ function refreshWeeklyPackageGate() {
   const status = weeklyPackageStatus();
   els.commit.disabled = true;
   els.commit.textContent = status.ready ? "Paquete listo ✓" : "Carga final bloqueada";
+  if (els.previewLoad) els.previewLoad.disabled = !status.ready;
   els.commit.title = status.ready
     ? "Las 4 fuentes están validadas. La escritura a Supabase permanece deshabilitada en LAB."
     : "Pendiente: " + status.blockers.join(", ");
@@ -312,6 +316,31 @@ async function validateGlassFile() {
   }catch(error){validatedGlass=null;els.glassStatus.textContent="Error: "+error.message;}finally{els.validateGlass.disabled=false;refreshWeeklyPackageGate();}
 }
 
+async function previewWeeklyLoad() {
+  const status = weeklyPackageStatus();
+  if (!status.ready) { els.previewStatus.textContent = "El paquete debe estar completamente validado."; return; }
+  els.previewLoad.disabled = true;
+  els.previewStatus.textContent = "Consultando Supabase…";
+  try {
+    const client = await getSupabaseClient();
+    const yearValues = [...new Set(validatedProductions.map(r => Number(r.anio)).filter(Number.isFinite))];
+    const year = yearValues.length === 1 ? yearValues[0] : new Date().getFullYear();
+    const { data, error } = await client.rpc("sgp_previsualizar_carga_semanal", { p_anio: year, p_semana: targetWeek });
+    if (error) throw error;
+    const existing = data?.existente || {};
+    const glassRows = validatedGlass?.rows?.length ?? 0;
+    els.previewStatus.innerHTML =
+      `<strong>${escapeHtml(data?.modo || "—")} · Semana ${escapeHtml(targetWeek)} / ${escapeHtml(year)}</strong><br>` +
+      `Paquete actual: ${validatedProductions.length} producciones · ${validatedPieces.rows.length} piezas · ${validatedAccessories.rows.length} accesorios · ${glassRows} vidrio.<br>` +
+      `Existente en Supabase: ${existing.producciones ?? 0} producciones · ${existing.piezas_aluminio ?? 0} piezas · ${existing.accesorios ?? 0} accesorios · ${existing.vidrio_relacionado ?? 0} vidrio · ${existing.lotes ?? 0} lotes.<br>` +
+      `Escritura realizada: <strong>NO</strong>.`;
+  } catch (error) {
+    els.previewStatus.textContent = "No fue posible previsualizar: " + error.message;
+  } finally {
+    els.previewLoad.disabled = !weeklyPackageStatus().ready;
+  }
+}
+
 async function commitProgramming() {
   // LAB safety: deliberately no writes. Production commit will be enabled only after explicit approval.
   refreshWeeklyPackageGate();
@@ -336,6 +365,7 @@ els.validateAluminum.addEventListener("click", validateAluminumFile);
 els.validatePieces.addEventListener("click", validatePiecesFile);
 els.validateAccessories.addEventListener("click", validateAccessoriesFile);
 els.validateGlass.addEventListener("click", validateGlassFile);
+els.previewLoad.addEventListener("click", previewWeeklyLoad);
 els.commit.addEventListener("click", commitProgramming);
 
 openView("mecanizado");
