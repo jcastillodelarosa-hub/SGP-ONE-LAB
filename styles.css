@@ -285,3 +285,6 @@ th {
 }
 .source-card > span { grid-column:1/-1; }
 @media (max-width:900px) { .source-card { grid-template-columns:1fr; } .source-card > span { grid-column:auto; } }
+
+.topbar-status #authEmail{max-width:220px;padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px}
+.topbar-status #authLogin,.topbar-status #authLogout{padding:8px 12px;border:0;border-radius:8px;cursor:pointer}
