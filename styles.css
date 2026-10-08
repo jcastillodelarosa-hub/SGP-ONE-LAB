@@ -265,3 +265,23 @@ th {
 .import-card button:disabled { opacity: .45; cursor: not-allowed; }
 #importStatus { flex-basis: 100%; font-size: 13px; color: #667085; }
 .import-summary { margin-top: 0; }
+
+.source-card {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 6px 18px rgba(23,32,51,.07);
+  padding: 18px;
+  margin: 20px 0 16px;
+  display: grid;
+  grid-template-columns: minmax(260px,1fr) minmax(260px,1fr) auto;
+  gap: 12px;
+  align-items: center;
+}
+.source-card strong, .source-card span { display:block; }
+.source-card span { margin-top:4px; color:#667085; font-size:12px; }
+.source-card button {
+  border:0; border-radius:10px; padding:10px 14px; background:#172033;
+  color:#fff; font-weight:800; cursor:pointer;
+}
+.source-card > span { grid-column:1/-1; }
+@media (max-width:900px) { .source-card { grid-template-columns:1fr; } .source-card > span { grid-column:auto; } }
