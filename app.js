@@ -3,7 +3,7 @@ import { createMecanizadoModule } from "./src/modules/mecanizado.js";
 import { readProgrammingWorkbook, summarizeProgramming } from "./src/domain/production-importer.js";
 import { importProductions } from "./src/services/production-import-repository.js";
 import { readAluminumTrackingWorkbook, summarizeAluminumTracking } from "./src/domain/aluminum-tracking-importer.js";
-import { readAluminumPiecesWorkbook, summarizeAluminumPieces, classifyAluminumPieces, relateAluminumPieceOrders } from "./src/domain/aluminum-pieces-importer.js";
+import { readAluminumPiecesWorkbook, summarizeAluminumPieces, classifyAluminumPieces, relateAluminumPieces } from "./src/domain/aluminum-pieces-importer.js";
 import { classifyPieceCodes } from "./src/services/piece-master-repository.js";
 import { readAccessoriesWorkbook, relateAccessories } from "./src/domain/accessories-importer.js";
 import { readGlassWorkbook, relateGlass } from "./src/domain/glass-importer.js";
@@ -48,6 +48,7 @@ const els = {
   pOrders: document.querySelector("#pOrders"),
   pCodes: document.querySelector("#pCodes"),
   pUnclassified: document.querySelector("#pUnclassified"),
+  pRelated: document.querySelector("#pRelated"),
   pNoMatch: document.querySelector("#pNoMatch"),
   pErrors: document.querySelector("#pErrors"),
   piecesNoMatchWrap: document.querySelector("#piecesNoMatchWrap"),
@@ -64,8 +65,8 @@ function renderPiecesNoMatches(relation) {
   const rows = relation?.noMatchRows || [];
   els.piecesNoMatchWrap.hidden = rows.length === 0;
   els.piecesNoMatchBody.innerHTML = rows.length
-    ? rows.map(row => `<tr><td>${escapeHtml(row.id)}</td><td>${escapeHtml(row.produccion || "—")}</td><td>${escapeHtml(row.sistema || "—")}</td><td>${escapeHtml(row.semana || "—")}</td><td>${escapeHtml(row.motivo)}</td></tr>`).join("")
-    : '<tr><td colspan="5" class="empty">Sin diferencias informativas</td></tr>';
+    ? rows.map(row => `<tr><td>${escapeHtml(row.produccion || "—")}</td><td>${escapeHtml(row.sistema || "—")}</td><td>${escapeHtml(row.order_co || "—")}</td><td>${escapeHtml(row.filas)}</td><td>${escapeHtml(row.codigos_sap)}</td><td>${escapeHtml(row.motivo)}</td></tr>`).join("")
+    : '<tr><td colspan="6" class="empty">Sin diferencias informativas</td></tr>';
 }
 
 function renderAccessoryNoMatches(relation) {
@@ -201,7 +202,8 @@ async function validatePiecesFile() {
     await new Promise(resolve => requestAnimationFrame(resolve));
     const classification = classifyAluminumPieces(result.rows, master);
     els.pUnclassified.textContent = classification.unclassified.length;
-    const pieceRelation = validatedProductions.length ? relateAluminumPieceOrders(result.rows, validatedProductions) : null;
+    const pieceRelation = validatedProductions.length ? relateAluminumPieces(result.rows, validatedProductions) : null;
+    els.pRelated.textContent = pieceRelation ? pieceRelation.related : "—";
     els.pNoMatch.textContent = pieceRelation ? pieceRelation.noMatch : "—";
     renderPiecesNoMatches(pieceRelation || { noMatchRows: [] });
     const lineText = Object.entries(summary.lines).map(([line,count]) => `${line}: ${count}`).join(" · ");
@@ -209,7 +211,7 @@ async function validatePiecesFile() {
       ? `Validación bloqueada: ${result.errors.length} error(es) de estructura.`
       : classification.unclassified.length
         ? `Terminado. ${lineText}. ${classification.unclassified.length} fila(s) con SAP no clasificado.`
-        : `Terminado. ${summary.total} filas clasificadas · ${summary.sapCodes} códigos SAP · ${lineText} · 0 sin clasificar${pieceRelation ? ` · ${pieceRelation.noMatch} PANELES_2 sin orden (informativo)` : ""}.`;
+        : `Terminado. ${summary.total} filas clasificadas · ${summary.sapCodes} códigos SAP · ${lineText} · 0 sin clasificar${pieceRelation ? ` · ${pieceRelation.sourceGroups} grupos Producción + Sistema · ${pieceRelation.related} relacionados · ${pieceRelation.noMatch} sin relación informativa · ${pieceRelation.conflicts} conflictos` : ""}.`;
   } catch (error) {
     els.pUnclassified.textContent = "—";
     els.piecesStatus.textContent = "Error: " + error.message;
