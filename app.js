@@ -90,6 +90,25 @@ function renderGlassNoMatches(relation) {
     : '<tr><td colspan="5" class="empty">Sin IDs pendientes</td></tr>';
 }
 
+function invalidateWeeklySource(source) {
+  if (source === "programming") {
+    validatedProductions = [];
+    targetWeek = null;
+    validatedPieces = null;
+    validatedAccessories = null;
+    validatedGlass = null;
+    els.pRelated.textContent = "—"; els.pNoMatch.textContent = "—";
+    els.xRelated.textContent = "—"; els.xNoMatch.textContent = "—";
+    els.gRelated.textContent = "—"; els.gNoMatch.textContent = "—";
+    renderPiecesNoMatches({noMatchRows:[]});
+    renderAccessoryNoMatches({noMatchRows:[]});
+    renderGlassNoMatches({noMatchRows:[]});
+  } else if (source === "pieces") validatedPieces = null;
+  else if (source === "accessories") validatedAccessories = null;
+  else if (source === "glass") validatedGlass = null;
+  refreshWeeklyPackageGate();
+}
+
 function weeklyPackageStatus() {
   const blockers = [];
   if (!targetWeek) blockers.push("Semana a cargar");
@@ -307,7 +326,11 @@ window.addEventListener("unhandledrejection", event => {
 });
 [els.search, els.state, els.line].forEach(el => el.addEventListener("input", renderMecanizado));
 els.simulate.addEventListener("click", () => { els.demoMessage.textContent = mecanizado.advanceDemoState(); renderMecanizado(); });
-els.targetWeek.addEventListener("input", () => { validatedProductions=[]; targetWeek=null; els.commit.textContent="Carga final bloqueada"; els.commit.disabled=true; els.importStatus.textContent="Semana modificada. Vuelve a validar Programación y las fuentes relacionadas."; refreshWeeklyPackageGate(); });
+els.targetWeek.addEventListener("input", () => { invalidateWeeklySource("programming"); els.commit.textContent="Carga final bloqueada"; els.commit.disabled=true; els.importStatus.textContent="Semana modificada. Vuelve a validar Programación y las fuentes relacionadas."; });
+els.files.addEventListener("change", () => { invalidateWeeklySource("programming"); els.importStatus.textContent="Archivos de Programación modificados. Vuelve a validar el paquete."; });
+els.piecesFile.addEventListener("change", () => { invalidateWeeklySource("pieces"); els.piecesStatus.textContent="Archivo modificado. Vuelve a validar el listado de piezas."; });
+els.accessoriesFile.addEventListener("change", () => { invalidateWeeklySource("accessories"); els.accessoriesStatus.textContent="Archivo modificado. Vuelve a validar Accesorios."; });
+els.glassFile.addEventListener("change", () => { invalidateWeeklySource("glass"); els.glassStatus.textContent="Archivo modificado. Vuelve a validar Vidrio."; });
 els.validate.addEventListener("click", validateProgrammingFiles);
 els.validateAluminum.addEventListener("click", validateAluminumFile);
 els.validatePieces.addEventListener("click", validatePiecesFile);
