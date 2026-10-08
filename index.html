@@ -18,6 +18,7 @@
       <nav class="nav">
         <button data-view="inicio">Inicio</button>
         <button class="active" data-view="mecanizado">Control de Mecanizado</button>
+        <button data-view="programacion">Programación semanal</button>
         <button data-view="carga-semanal">Carga semanal</button>
         <button data-view="actualizacion">Actualización diaria</button>
       </nav>
@@ -41,7 +42,7 @@
           <input id="authPassword" type="password" placeholder="Contraseña" autocomplete="current-password" />
           <button id="authLogin">Ingresar</button>
           <button id="authLogout" hidden>Cerrar sesión</button>
-          <span class="status">LAB v35</span>
+          <span class="status">LAB v36</span>
         </div>
       </header>
 
@@ -112,6 +113,34 @@
                 </tr>
               </thead>
               <tbody id="trackingBody"></tbody>
+            </table>
+          </section>
+        </section>
+
+        <section class="view" data-view-panel="programacion" hidden>
+          <div class="page-heading">
+            <span class="eyebrow">Programación</span>
+            <h2>Programación semanal</h2>
+            <p>Consulta la programación almacenada en SGP ONE directamente desde Supabase.</p>
+          </div>
+          <section class="toolbar">
+            <input id="queryYear" type="number" min="2020" max="2100" value="2026" aria-label="Año" />
+            <input id="queryWeek" type="number" min="1" max="53" value="41" aria-label="Semana" />
+            <select id="queryLine"><option value="">PANELES_2 + FRAMES_2</option><option value="PANELES_2">PANELES_2</option><option value="FRAMES_2">FRAMES_2</option></select>
+            <input id="querySearch" type="search" placeholder="Buscar producción, sistema, proyecto o cliente…" />
+            <button id="queryProgramming">Consultar semana</button>
+          </section>
+          <section class="summary">
+            <div class="metric"><span>Semana</span><strong id="qWeek">—</strong></div>
+            <div class="metric"><span>Producciones</span><strong id="qTotal">0</strong></div>
+            <div class="metric"><span>Unidades</span><strong id="qUnits">0</strong></div>
+            <div class="metric"><span>Visibles</span><strong id="qVisible">0</strong></div>
+          </section>
+          <div id="queryStatus" class="placeholder-card">Selecciona una semana y pulsa Consultar semana.</div>
+          <section class="table-wrap">
+            <table>
+              <thead><tr><th>Prioridad</th><th>Línea</th><th>ID</th><th>Producción</th><th>Sistema</th><th>Proyecto</th><th>Cantidad</th><th>Estado</th><th>Aluminio</th><th>Vidrio</th></tr></thead>
+              <tbody id="queryProgrammingBody"><tr><td colspan="10" class="empty">Sin consulta</td></tr></tbody>
             </table>
           </section>
         </section>
@@ -227,6 +256,6 @@
     </section>
   </div>
 
-  <script type="module" src="app.js?v=35"></script>
+  <script type="module" src="app.js?v=36"></script>
 </body>
 </html>
