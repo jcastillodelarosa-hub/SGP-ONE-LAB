@@ -4,7 +4,7 @@ import { readProgrammingWorkbook, summarizeProgramming } from "./src/domain/prod
 import { importProductions } from "./src/services/production-import-repository.js";
 import { readAluminumTrackingWorkbook, summarizeAluminumTracking } from "./src/domain/aluminum-tracking-importer.js";
 import { readAluminumPiecesWorkbook, summarizeAluminumPieces, classifyAluminumPieces } from "./src/domain/aluminum-pieces-importer.js";
-import { loadPieceMaster } from "./src/services/piece-master-repository.js";
+import { classifyPieceCodes } from "./src/services/piece-master-repository.js";
 
 const mecanizado = createMecanizadoModule(trackingRows);
 let validatedProductions = [];
@@ -122,21 +122,31 @@ async function validatePiecesFile() {
   els.validatePieces.disabled = true;
   els.piecesStatus.textContent = "Validando estructura…";
   try {
+    els.piecesStatus.textContent = "1/3 Leyendo archivo XLSX…";
+    await new Promise(resolve => requestAnimationFrame(resolve));
     const result = await readAluminumPiecesWorkbook(file);
     const summary = summarizeAluminumPieces(result.rows);
-    const master = await loadPieceMaster();
-    const classification = classifyAluminumPieces(result.rows, master);
     els.pTotal.textContent = summary.total;
     els.pOrders.textContent = summary.productionOrders;
     els.pCodes.textContent = summary.sapCodes;
     els.pErrors.textContent = result.errors.length;
+    els.piecesStatus.textContent = `2/3 Estructura leída: ${summary.total} filas. Consultando ${summary.sapCodes} códigos SAP en el Maestro…`;
+    await new Promise(resolve => requestAnimationFrame(resolve));
+    const requestedCodes = [...new Set(result.rows.map(row => row.codigo_sap))];
+    const master = await Promise.race([
+      classifyPieceCodes(requestedCodes),
+      new Promise((_, reject) => setTimeout(() => reject(new Error("La consulta al Maestro superó 15 segundos.")), 15000))
+    ]);
+    els.piecesStatus.textContent = "3/3 Clasificando piezas…";
+    await new Promise(resolve => requestAnimationFrame(resolve));
+    const classification = classifyAluminumPieces(result.rows, master);
     els.pUnclassified.textContent = classification.unclassified.length;
     const lineText = Object.entries(summary.lines).map(([line,count]) => `${line}: ${count}`).join(" · ");
     els.piecesStatus.textContent = result.errors.length
       ? `Validación bloqueada: ${result.errors.length} error(es) de estructura.`
       : classification.unclassified.length
-        ? `Estructura correcta. ${lineText}. ${classification.unclassified.length} fila(s) con SAP no clasificado en Maestro de Piezas.`
-        : `Estructura y Maestro correctos. ${lineText}. ${master.length} códigos activos disponibles en el Maestro.`;
+        ? `Terminado. ${lineText}. ${classification.unclassified.length} fila(s) con SAP no clasificado.`
+        : `Terminado. ${summary.total} filas clasificadas · ${summary.sapCodes} códigos SAP · ${lineText} · 0 sin clasificar.`;
   } catch (error) {
     els.pUnclassified.textContent = "—";
     els.piecesStatus.textContent = "Error: " + error.message;
