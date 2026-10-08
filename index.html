@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SGP ONE LAB</title>
-  <link rel="stylesheet" href="styles.css?v=20261008-0800" />
+  <link rel="stylesheet" href="styles.css?v=20261008-0900" />
 </head>
 <body>
   <div class="app-shell">
@@ -35,7 +35,7 @@
         </div>
         <div class="topbar-status">
           <span class="sync-ok">GitHub activo</span>
-          <span class="status">LAB v12</span>
+          <span class="status">LAB v13</span>
         </div>
       </header>
 
@@ -135,19 +135,7 @@
             </table>
           </section>
           <section class="source-card">
-            <div><strong>2. Seguimiento de aluminio</strong><span>Estado logístico por ID|RESERVA. Línea Prog. no determina destino y Último Estado se ignora.</span></div>
-            <input id="aluminumTrackingFile" type="file" accept=".xlsx" />
-            <button id="validateAluminum">Validar seguimiento de aluminio</button>
-            <span id="aluminumStatus">Pendiente de archivo.</span>
-          </section>
-          <section class="summary import-summary">
-            <div class="metric"><span>Seguimientos válidos</span><strong id="aTotal">0</strong></div>
-            <div class="metric"><span>Reservas</span><strong id="aReservations">0</strong></div>
-            <div class="metric"><span>Entregado</span><strong id="aDelivered">0</strong></div>
-            <div class="metric"><span>Errores</span><strong id="aErrors">0</strong></div>
-          </section>
-          <section class="source-card">
-            <div><strong>3. Listado de piezas de aluminio</strong><span>Detalle físico por código SAP. Se valida por separado del seguimiento logístico.</span></div>
+            <div><strong>2. Listado de piezas de aluminio</strong><span>Detalle físico por código SAP. Se valida por separado del seguimiento logístico.</span></div>
             <input id="aluminumPiecesFile" type="file" accept=".xlsx" />
             <button id="validatePieces">Validar listado de piezas</button>
             <span id="piecesStatus">Pendiente de archivo.</span>
@@ -159,6 +147,30 @@
             <div class="metric"><span>Sin clasificar</span><strong id="pUnclassified">—</strong></div>
             <div class="metric"><span>Errores estructura</span><strong id="pErrors">0</strong></div>
           </section>
+          <section class="source-card">
+            <div><strong>3. Accesorios</strong><span>Archivo semanal. Se relacionará con la programación por Producción + Sistema.</span></div>
+            <input id="accessoriesFile" type="file" accept=".xlsx" />
+            <button id="validateAccessories">Validar accesorios</button>
+            <span id="accessoriesStatus">Pendiente de archivo.</span>
+          </section>
+          <section class="summary import-summary">
+            <div class="metric"><span>Registros accesorios</span><strong id="xTotal">0</strong></div>
+            <div class="metric"><span>Relacionados</span><strong id="xRelated">—</strong></div>
+            <div class="metric"><span>Sin relación</span><strong id="xNoMatch">—</strong></div>
+            <div class="metric"><span>Errores</span><strong id="xErrors">0</strong></div>
+          </section>
+          <section class="source-card">
+            <div><strong>4. Vidrio</strong><span>Archivo semanal. Aplica a Paneles y se relacionará con la programación por ID.</span></div>
+            <input id="glassFile" type="file" accept=".xlsx" />
+            <button id="validateGlass">Validar vidrio</button>
+            <span id="glassStatus">Pendiente de archivo.</span>
+          </section>
+          <section class="summary import-summary">
+            <div class="metric"><span>Registros vidrio</span><strong id="gTotal">0</strong></div>
+            <div class="metric"><span>Relacionados</span><strong id="gRelated">—</strong></div>
+            <div class="metric"><span>Ignorados</span><strong id="gSkipped">—</strong></div>
+            <div class="metric"><span>Errores</span><strong id="gErrors">0</strong></div>
+          </section>
         </section>
 
         <section class="view placeholder-view" data-view-panel="actualizacion" hidden>
@@ -167,14 +179,23 @@
             <h2>Actualización diaria</h2>
             <p>En esta vista conectaremos SALDOS, Seguimiento Aluminio, Vidrio y NC.</p>
           </div>
-          <div class="placeholder-card">
-            El backend real se conectará después de validar la base de datos.
-          </div>
+          <section class="source-card">
+            <div><strong>Seguimiento de aluminio</strong><span>Carga diaria de estado logístico por ID|RESERVA. Exclusivo del control PANELES_2 / FRAMES_2.</span></div>
+            <input id="aluminumTrackingFile" type="file" accept=".xlsx" />
+            <button id="validateAluminum">Validar seguimiento de aluminio</button>
+            <span id="aluminumStatus">Pendiente de archivo.</span>
+          </section>
+          <section class="summary import-summary">
+            <div class="metric"><span>Seguimientos válidos</span><strong id="aTotal">0</strong></div>
+            <div class="metric"><span>Reservas</span><strong id="aReservations">0</strong></div>
+            <div class="metric"><span>Entregado</span><strong id="aDelivered">0</strong></div>
+            <div class="metric"><span>Errores</span><strong id="aErrors">0</strong></div>
+          </section>
         </section>
       </main>
     </section>
   </div>
 
-  <script type="module" src="app.js?v=20261008-0800"></script>
+  <script type="module" src="app.js?v=20261008-0900"></script>
 </body>
 </html>
