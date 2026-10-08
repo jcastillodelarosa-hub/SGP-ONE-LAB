@@ -1,9 +1,6 @@
 window.SGP_CONFIG = Object.freeze({
-  // Completar después de crear el proyecto Supabase.
-  // Project URL, por ejemplo: https://xxxxxxxx.supabase.co
-  supabaseUrl: "",
-
-  // Usar únicamente la publishable key del proyecto.
-  // NUNCA pegar service_role, secret key ni contraseña de base de datos aquí.
-  supabasePublishableKey: ""
+  // Configuración pública del LAB. Esta URL y publishable key están diseñadas para uso en navegador.
+  // La seguridad de los datos sigue dependiendo de RLS/RPC en Supabase.
+  supabaseUrl: "https://ocvxbwzqxbrfndkvjmfx.supabase.co",
+  supabasePublishableKey: "sb_publishable_DD7RmnEZdIV8zKh6E3lMpw_ROWqs3rt"
 });
