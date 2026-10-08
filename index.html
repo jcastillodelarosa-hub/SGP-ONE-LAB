@@ -36,7 +36,11 @@
         </div>
         <div class="topbar-status">
           <span class="sync-ok">GitHub activo</span>
-          <span class="status">LAB v28</span>
+          <span id="authStatus" class="status">Sin sesión</span>
+          <input id="authEmail" type="email" placeholder="correo@empresa.com" autocomplete="email" />
+          <button id="authLogin">Acceso por correo</button>
+          <button id="authLogout" hidden>Cerrar sesión</button>
+          <span class="status">LAB v29</span>
         </div>
       </header>
 
@@ -222,6 +226,6 @@
     </section>
   </div>
 
-  <script type="module" src="app.js?v=28"></script>
+  <script type="module" src="app.js?v=29"></script>
 </body>
 </html>
