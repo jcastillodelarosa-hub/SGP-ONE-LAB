@@ -75,3 +75,31 @@ export function summarizeAluminumPieces(rows) {
     lines
   };
 }
+
+export function classifyAluminumPieces(rows, masterRows) {
+  const master = new Map((masterRows || []).map(row => [String(row.codigo_sap ?? "").trim(), row]));
+  const classified = [], unclassified = [];
+  for (const row of rows) {
+    const match = master.get(String(row.codigo_sap ?? "").trim());
+    if (!match) {
+      unclassified.push(row);
+      classified.push({ ...row, tipo_pieza: null, destino_productivo: null, estado_clasificacion: "SAP_NO_CLASIFICADO" });
+      continue;
+    }
+    classified.push({
+      ...row,
+      tipo_pieza: match.tipo_pieza,
+      destino_productivo: match.destino_productivo,
+      observacion_maestro: match.observacion ?? null,
+      estado_clasificacion: "CLASIFICADO"
+    });
+  }
+  const byType = {}, byDestination = {};
+  for (const row of classified) {
+    const type = row.tipo_pieza || "SIN_CLASIFICAR";
+    const dest = row.destino_productivo || "SIN_CLASIFICAR";
+    byType[type] = (byType[type] || 0) + 1;
+    byDestination[dest] = (byDestination[dest] || 0) + 1;
+  }
+  return { rows: classified, unclassified, byType, byDestination };
+}
