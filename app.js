@@ -13,6 +13,7 @@ let validatedProductions = [];
 let validatedAccessories = null;
 let validatedGlass = null;
 let validatedPieces = null;
+let targetWeek = null;
 
 const els = {
   nav: document.querySelectorAll("[data-view]"),
@@ -29,6 +30,7 @@ const els = {
   demoMessage: document.querySelector("#demoMessage"),
   files: document.querySelector("#programmingFiles"),
   validate: document.querySelector("#validateProgramming"),
+  targetWeek: document.querySelector("#targetWeek"),
   commit: document.querySelector("#commitProgramming"),
   importStatus: document.querySelector("#importStatus"),
   iTotal: document.querySelector("#iTotal"),
@@ -90,6 +92,7 @@ function renderGlassNoMatches(relation) {
 
 function weeklyPackageStatus() {
   const blockers = [];
+  if (!targetWeek) blockers.push("Semana a cargar");
   if (!validatedProductions.length) blockers.push("Programación");
   if (!validatedPieces) blockers.push("Listado de piezas");
   if (!validatedAccessories) blockers.push("Accesorios");
@@ -150,6 +153,9 @@ function refreshWeeklyRelations() {
 
 async function validateProgrammingFiles() {
   const files = [...(els.files.files || [])];
+  const requestedWeek = Number(els.targetWeek.value);
+  if (!Number.isInteger(requestedWeek) || requestedWeek < 1 || requestedWeek > 53) { validatedProductions=[]; targetWeek=null; els.importStatus.textContent="Indica una semana válida (1 a 53) antes de validar."; refreshWeeklyPackageGate(); return; }
+  targetWeek = requestedWeek;
   if (!files.length) { els.importStatus.textContent = "Selecciona archivos XLSX."; return; }
   els.validate.disabled = true;
   els.commit.disabled = true;
@@ -166,6 +172,8 @@ async function validateProgrammingFiles() {
       if (allKeys.has(row.key_produccion)) errors.push({ id: row.id, reason: "KEY duplicada entre archivos" });
       allKeys.add(row.key_produccion);
     }
+    const weekMismatches = rows.filter(row => Number(row.semana_base) !== requestedWeek);
+    if (weekMismatches.length) errors.push({ reason: `${weekMismatches.length} producción(es) no pertenecen a la semana ${requestedWeek}` });
     validatedProductions = errors.length ? [] : rows;
     const summary = summarizeProgramming(rows);
     els.iTotal.textContent = summary.total;
@@ -177,9 +185,10 @@ async function validateProgrammingFiles() {
       return `<tr><td>${week}</td><td>${line}</td><td>${count}</td></tr>`;
     }).join("") : '<tr><td colspan="3" class="empty">Sin registros válidos</td></tr>';
     els.commit.disabled = true;
-    els.importStatus.textContent = errors.length ? `Validación bloqueada: ${errors.length} error(es).` : `Validación correcta: ${rows.length} producciones listas.`;
+    els.importStatus.textContent = errors.length ? `Validación bloqueada para semana ${requestedWeek}: ${errors.map(e=>e.reason).filter(Boolean).join(" · ")}` : `Validación correcta: semana ${requestedWeek} · ${rows.length} producciones listas.`;
   } catch (error) {
     validatedProductions = [];
+    targetWeek = null;
     els.importStatus.textContent = "Error: " + error.message;
   } finally { els.validate.disabled = false; refreshWeeklyRelations(); refreshWeeklyPackageGate(); }
 }
@@ -298,6 +307,7 @@ window.addEventListener("unhandledrejection", event => {
 });
 [els.search, els.state, els.line].forEach(el => el.addEventListener("input", renderMecanizado));
 els.simulate.addEventListener("click", () => { els.demoMessage.textContent = mecanizado.advanceDemoState(); renderMecanizado(); });
+els.targetWeek.addEventListener("input", () => { validatedProductions=[]; targetWeek=null; els.commit.textContent="Carga final bloqueada"; els.commit.disabled=true; els.importStatus.textContent="Semana modificada. Vuelve a validar Programación y las fuentes relacionadas."; refreshWeeklyPackageGate(); });
 els.validate.addEventListener("click", validateProgrammingFiles);
 els.validateAluminum.addEventListener("click", validateAluminumFile);
 els.validatePieces.addEventListener("click", validatePiecesFile);
