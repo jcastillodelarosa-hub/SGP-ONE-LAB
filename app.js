@@ -415,35 +415,56 @@ async function commitProgramming() {
   if (!status.ready) { refreshWeeklyPackageGate(); return; }
   const user = await refreshAuthStatus();
   if (!user || !["ADMINISTRADOR","COORDINADOR"].includes(user.rol)) {
-    els.importStatus.textContent = "Carga bloqueada: se requiere rol ADMINISTRADOR o COORDINADOR."; refreshWeeklyPackageGate(); return;
+    els.importStatus.textContent = "CARGA RECHAZADA ✕ Se requiere rol ADMINISTRADOR o COORDINADOR."; refreshWeeklyPackageGate(); return;
   }
   const token = sessionStorage.getItem(APP_SESSION_KEY);
-  const year = validatedProductions[0]?.anio;
+  const year = Number(validatedProductions[0]?.anio);
+  const week = Number(targetWeek);
   const piecesPayload = prepareAluminumPiecePayload(validatedPieces.rows, validatedProductions);
   const accessoriesPayload = prepareAccessoryPayload(validatedAccessories.rows, validatedProductions);
   const glassPayload = prepareGlassPayload(validatedGlass.rows, validatedProductions);
   const total = validatedProductions.length + piecesPayload.length + accessoriesPayload.length + glassPayload.length;
-  const summary = `ESCRITURA REAL EN SUPABASE\n\nSemana: ${targetWeek} / ${year}\nUsuario: ${user.nombre} (${user.rol})\nProgramación: ${validatedProductions.length}\nPiezas: ${piecesPayload.length}\nAccesorios: ${accessoriesPayload.length}\nVidrio: ${glassPayload.length}\nTOTAL: ${total} registros\n\n¿Deseas continuar?`;
-  if (!window.confirm(summary)) return;
-  const phrase = window.prompt(`Confirmación final. Escribe exactamente: CARGAR SEMANA ${targetWeek}`);
-  if (phrase !== `CARGAR SEMANA ${targetWeek}`) { els.importStatus.textContent = "Carga cancelada: confirmación final incorrecta."; return; }
-  els.commit.disabled = true; els.commit.textContent = "Cargando…";
+  const client = await getSupabaseClient();
+
+  els.importStatus.textContent = "Preflight: comprobando sesión, rol y estado de la semana…";
+  const { data: preflight, error: preflightError } = await client.rpc("sgp_preflight_carga_semanal", { p_token: token, p_anio: year, p_semana: week });
+  if (preflightError || !preflight?.ok) {
+    const msg = preflightError?.message || "Preflight no válido";
+    els.importStatus.textContent = "CARGA RECHAZADA ✕ " + msg; window.alert("CARGA RECHAZADA ✕\n\n" + msg); refreshWeeklyPackageGate(); return;
+  }
+  if (preflight.semana_ya_cargada) {
+    const msg = `La semana ${week} / ${year} ya figura cargada en el servidor.`;
+    els.importStatus.textContent = "CARGA RECHAZADA ✕ " + msg; window.alert(msg); return;
+  }
+
+  const summary = `ESCRITURA REAL EN SUPABASE\n\nSemana: ${week} / ${year}\nUsuario: ${user.nombre} (${user.rol})\nProgramación: ${validatedProductions.length}\nPiezas: ${piecesPayload.length}\nAccesorios: ${accessoriesPayload.length}\nVidrio: ${glassPayload.length}\nTOTAL: ${total} registros\n\n¿Deseas continuar?`;
+  if (!window.confirm(summary)) { els.importStatus.textContent = "Carga cancelada por el usuario."; return; }
+  const phrase = window.prompt(`Confirmación final. Escribe exactamente: CARGAR SEMANA ${week}`);
+  if (phrase !== `CARGAR SEMANA ${week}`) { els.importStatus.textContent = "Carga cancelada: confirmación final incorrecta."; return; }
+
+  els.commit.disabled = true; els.commit.textContent = "Enviando 8.478 registros…";
+  els.importStatus.textContent = "SOLICITUD ENVIADA… No cierres esta pestaña. Esperando confirmación del servidor.";
+  if (els.previewStatus) els.previewStatus.textContent = "Estado: solicitud de carga enviada; esperando respuesta transaccional.";
+  await new Promise(resolve => setTimeout(resolve, 50));
   try {
-    const client = await getSupabaseClient();
     const { data, error } = await client.rpc("sgp_cargar_paquete_semanal", {
-      p_token: token, p_anio: year, p_semana: targetWeek, p_programacion: validatedProductions,
+      p_token: token, p_anio: year, p_semana: week, p_programacion: validatedProductions,
       p_piezas: piecesPayload, p_accesorios: accessoriesPayload, p_vidrio: glassPayload
     });
     if (error) throw error;
-    els.importStatus.textContent = `Carga aplicada ✓ Lote ${data.id_lote_carga}. Total insertado: ${data.insertados?.total ?? total}.`;
+    const inserted = data?.insertados?.total ?? total;
+    els.importStatus.textContent = `CARGA COMPLETADA ✓ Semana ${week} · Lote ${data.id_lote_carga} · ${inserted} registros.`;
     els.commit.textContent = "Semana cargada ✓"; els.commit.disabled = true;
-    if (els.previewStatus) els.previewStatus.textContent = `Escritura realizada: SÍ · Lote ${data.id_lote_carga} · Usuario ${data.usuario}.`;
+    if (els.previewStatus) els.previewStatus.textContent = `Escritura realizada: SÍ ✓ · Lote ${data.id_lote_carga} · Usuario ${data.usuario} · Total ${inserted}.`;
+    window.alert(`CARGA COMPLETADA ✓\n\nSemana ${week} / ${year}\nLote: ${data.id_lote_carga}\nRegistros insertados: ${inserted}`);
   } catch (error) {
-    els.importStatus.textContent = "La carga NO fue aplicada: " + error.message;
+    const msg = [error?.message,error?.details,error?.hint].filter(Boolean).join(" · ") || String(error);
+    els.importStatus.textContent = "CARGA RECHAZADA ✕ " + msg;
+    if (els.previewStatus) els.previewStatus.textContent = "Escritura realizada: NO. Error: " + msg;
+    window.alert("CARGA RECHAZADA ✕\n\nNo se confirmó ninguna escritura.\n\n" + msg);
     refreshWeeklyPackageGate();
   }
 }
-
 els.nav.forEach(button => button.addEventListener("click", () => openView(button.dataset.view)));
 window.addEventListener("error", event => {
   console.error("SGP ONE:", event.error || event.message);
