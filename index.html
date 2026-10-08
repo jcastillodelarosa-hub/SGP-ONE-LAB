@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SGP ONE LAB</title>
-  <link rel="stylesheet" href="styles.css?v=20261008-0500" />
+  <link rel="stylesheet" href="styles.css?v=20261008-0600" />
 </head>
 <body>
   <div class="app-shell">
@@ -35,7 +35,7 @@
         </div>
         <div class="topbar-status">
           <span class="sync-ok">GitHub activo</span>
-          <span class="status">LAB v9</span>
+          <span class="status">LAB v10</span>
         </div>
       </header>
 
@@ -65,19 +65,6 @@
             </div>
             <button id="simulateButton">Avanzar estado</button>
             <span id="demoMessage"></span>
-          </section>
-
-          <section class="source-card">
-            <div><strong>3. Listado de piezas de aluminio</strong><span>Detalle físico por código SAP. Se valida por separado del seguimiento logístico.</span></div>
-            <input id="aluminumPiecesFile" type="file" accept=".xlsx" />
-            <button id="validatePieces">Validar listado de piezas</button>
-            <span id="piecesStatus">Pendiente de archivo.</span>
-          </section>
-          <section class="summary import-summary">
-            <div class="metric"><span>Filas de piezas</span><strong id="pTotal">0</strong></div>
-            <div class="metric"><span>Órdenes producción</span><strong id="pOrders">0</strong></div>
-            <div class="metric"><span>Códigos SAP únicos</span><strong id="pCodes">0</strong></div>
-            <div class="metric"><span>Errores estructura</span><strong id="pErrors">0</strong></div>
           </section>
 
           <section class="toolbar">
@@ -132,7 +119,7 @@
           <section class="import-card">
             <input id="programmingFiles" type="file" accept=".xlsx" multiple />
             <button id="validateProgramming">Validar archivos</button>
-            <button id="commitProgramming" disabled>Cargar a Supabase</button>
+            <button id="commitProgramming" disabled title="Se habilitará únicamente cuando el paquete semanal completo esté validado.">Carga final bloqueada</button>
             <span id="importStatus">Selecciona uno o más archivos XLSX.</span>
           </section>
           <section class="summary import-summary">
@@ -169,6 +156,7 @@
             <div class="metric"><span>Filas de piezas</span><strong id="pTotal">0</strong></div>
             <div class="metric"><span>Órdenes producción</span><strong id="pOrders">0</strong></div>
             <div class="metric"><span>Códigos SAP únicos</span><strong id="pCodes">0</strong></div>
+            <div class="metric"><span>Sin clasificar</span><strong id="pUnclassified">—</strong></div>
             <div class="metric"><span>Errores estructura</span><strong id="pErrors">0</strong></div>
           </section>
         </section>
@@ -187,6 +175,6 @@
     </section>
   </div>
 
-  <script type="module" src="app.js?v=20261008-0500"></script>
+  <script type="module" src="app.js?v=20261008-0600"></script>
 </body>
 </html>
