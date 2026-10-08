@@ -99,3 +99,30 @@ export function relateAccessories(rows, productions) {
     relatedRows, noMatchRows, conflictRows
   };
 }
+
+
+export function prepareAccessoryPayload(rows, productions) {
+  const normalize = value => String(value ?? "").trim().toUpperCase().replace(/\s+/g, " ");
+  const index = new Map();
+  for (const p of productions || []) {
+    const k = `${normalize(p.produccion)}|${normalize(p.sistema)}`;
+    if (!index.has(k)) index.set(k, new Map());
+    const byId = index.get(k), id = String(p.id ?? "").trim();
+    if (!id) continue;
+    if (!byId.has(id)) byId.set(id, []);
+    byId.get(id).push(p);
+  }
+  return (rows || []).map((row, i) => {
+    const byId = index.get(`${normalize(row.produccion)}|${normalize(row.sistema)}`) || new Map();
+    const ids = [...byId.keys()];
+    const id = ids.length === 1 ? ids[0] : null;
+    const matches = id ? byId.get(id) : [];
+    // Accesorios pertenece a la producción subyacente. Solo asignamos key si existe una única línea.
+    const keys = [...new Set((matches || []).map(x => x.key_produccion).filter(Boolean))];
+    return {
+      ...row, fila_origen: i + 2, id,
+      key_produccion: keys.length === 1 ? keys[0] : null,
+      estado_relacion_produccion: id ? "RELACIONADO" : "SIN_RELACION"
+    };
+  });
+}
