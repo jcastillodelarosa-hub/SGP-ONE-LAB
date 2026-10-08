@@ -1,11 +1,10 @@
 import { getSupabaseClient } from "./supabase-client.js";
 
-export async function loadPieceMaster() {
+export async function classifyPieceCodes(codes) {
+  const uniqueCodes = [...new Set((codes || []).map(v => String(v ?? "").trim()).filter(Boolean))];
+  if (!uniqueCodes.length) return [];
   const supabase = await getSupabaseClient();
-  const { data, error } = await supabase
-    .from("sgp_maestro_piezas")
-    .select("codigo_sap,tipo_pieza,destino_productivo,observacion,activo,lineas_aplicables")
-    .eq("activo", "SI");
-  if (error) throw error;
+  const { data, error } = await supabase.rpc("sgp_clasificar_piezas_aluminio", { p_codigos: uniqueCodes });
+  if (error) throw new Error("No fue posible consultar el Maestro de Piezas: " + error.message);
   return data || [];
 }
