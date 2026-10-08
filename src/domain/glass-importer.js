@@ -54,3 +54,30 @@ export function relateGlass(rows,productions){
   }
   return {related,noMatch,conflicts,sourceGroups:sourceGroups.size,relatedRows,noMatchRows,conflictRows};
 }
+
+
+export function prepareGlassPayload(rows, productions) {
+  const panels = new Map();
+  for (const p of productions || []) {
+    if (p.id_linea !== "PANELES_2") continue;
+    const id = String(p.id ?? "").trim();
+    if (!id) continue;
+    if (!panels.has(id)) panels.set(id, []);
+    panels.get(id).push(p);
+  }
+  return (rows || []).map((row, i) => {
+    const matches = panels.get(String(row.id_export ?? "").trim()) || [];
+    const match = matches.length === 1 ? matches[0] : null;
+    return {
+      id_export: row.id_export,
+      produccion: row.produccion,
+      sistema: row.sistema,
+      fuente: row.fuente,
+      fila_origen: i + 2,
+      id: match?.id ?? null,
+      key_produccion: match?.key_produccion ?? null,
+      estado_relacion_produccion: match ? "RELACIONADO" : "SIN_RELACION",
+      datos_origen: row.raw ?? null
+    };
+  });
+}
