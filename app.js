@@ -5,6 +5,8 @@ import { importProductions } from "./src/services/production-import-repository.j
 import { readAluminumTrackingWorkbook, summarizeAluminumTracking } from "./src/domain/aluminum-tracking-importer.js";
 import { readAluminumPiecesWorkbook, summarizeAluminumPieces, classifyAluminumPieces } from "./src/domain/aluminum-pieces-importer.js";
 import { classifyPieceCodes } from "./src/services/piece-master-repository.js";
+import { readAccessoriesWorkbook, relateAccessories } from "./src/domain/accessories-importer.js";
+import { readGlassWorkbook, relateGlass } from "./src/domain/glass-importer.js";
 
 const mecanizado = createMecanizadoModule(trackingRows);
 let validatedProductions = [];
@@ -44,7 +46,9 @@ const els = {
   pOrders: document.querySelector("#pOrders"),
   pCodes: document.querySelector("#pCodes"),
   pUnclassified: document.querySelector("#pUnclassified"),
-  pErrors: document.querySelector("#pErrors")
+  pErrors: document.querySelector("#pErrors"),
+  accessoriesFile: document.querySelector("#accessoriesFile"), validateAccessories: document.querySelector("#validateAccessories"), accessoriesStatus: document.querySelector("#accessoriesStatus"), xTotal: document.querySelector("#xTotal"), xRelated: document.querySelector("#xRelated"), xNoMatch: document.querySelector("#xNoMatch"), xErrors: document.querySelector("#xErrors"),
+  glassFile: document.querySelector("#glassFile"), validateGlass: document.querySelector("#validateGlass"), glassStatus: document.querySelector("#glassStatus"), gTotal: document.querySelector("#gTotal"), gRelated: document.querySelector("#gRelated"), gSkipped: document.querySelector("#gSkipped"), gErrors: document.querySelector("#gErrors")
 };
 
 function currentFilters() { return { q: els.search.value, estado: els.state.value, linea: els.line.value }; }
@@ -156,6 +160,32 @@ async function validatePiecesFile() {
   }
 }
 
+async function validateAccessoriesFile() {
+  const file=els.accessoriesFile.files?.[0];
+  if(!file){els.accessoriesStatus.textContent="Selecciona el archivo de Accesorios.";return;}
+  els.validateAccessories.disabled=true; els.accessoriesStatus.textContent="Validando…";
+  try{
+    const result=await readAccessoriesWorkbook(file);
+    const relation=relateAccessories(result.rows,validatedProductions);
+    els.xTotal.textContent=result.rows.length; els.xErrors.textContent=result.errors.length;
+    els.xRelated.textContent=validatedProductions.length?relation.related:"—";
+    els.xNoMatch.textContent=validatedProductions.length?relation.noMatch:"—";
+    els.accessoriesStatus.textContent=result.errors.length?`Bloqueado: ${result.errors.length} error(es).`:validatedProductions.length?`Correcto: ${result.rows.length} registros · ${relation.related} relacionados · ${relation.noMatch} sin relación · ${relation.conflicts} conflictos.`:`Estructura correcta: ${result.rows.length} registros. Valida primero Programación para ejecutar el cruce Producción + Sistema.`;
+  }catch(error){els.accessoriesStatus.textContent="Error: "+error.message;}finally{els.validateAccessories.disabled=false;}
+}
+async function validateGlassFile() {
+  const file=els.glassFile.files?.[0];
+  if(!file){els.glassStatus.textContent="Selecciona el archivo de Vidrio.";return;}
+  els.validateGlass.disabled=true; els.glassStatus.textContent="Validando…";
+  try{
+    const result=await readGlassWorkbook(file);
+    const relation=relateGlass(result.rows,validatedProductions);
+    els.gTotal.textContent=result.rows.length; els.gSkipped.textContent=result.skipped.length; els.gErrors.textContent=result.errors.length;
+    els.gRelated.textContent=validatedProductions.length?relation.related:"—";
+    els.glassStatus.textContent=validatedProductions.length?`Correcto: ${result.rows.length} registros útiles · ${relation.related} relacionados con PANELES_2 · ${relation.noMatch} sin relación · ${relation.conflicts} conflictos.`:`Estructura leída: ${result.rows.length} registros útiles. Valida primero Programación para ejecutar el cruce por ID.`;
+  }catch(error){els.glassStatus.textContent="Error: "+error.message;}finally{els.validateGlass.disabled=false;}
+}
+
 async function commitProgramming() {
   if (!validatedProductions.length) return;
   els.commit.disabled = true;
@@ -181,6 +211,8 @@ els.simulate.addEventListener("click", () => { els.demoMessage.textContent = mec
 els.validate.addEventListener("click", validateProgrammingFiles);
 els.validateAluminum.addEventListener("click", validateAluminumFile);
 els.validatePieces.addEventListener("click", validatePiecesFile);
+els.validateAccessories.addEventListener("click", validateAccessoriesFile);
+els.validateGlass.addEventListener("click", validateGlassFile);
 els.commit.addEventListener("click", commitProgramming);
 
 openView("mecanizado");
