@@ -437,10 +437,12 @@ async function commitProgramming() {
     els.importStatus.textContent = "CARGA RECHAZADA ✕ " + msg; window.alert(msg); return;
   }
 
-  const summary = `ESCRITURA REAL EN SUPABASE\n\nSemana: ${week} / ${year}\nUsuario: ${user.nombre} (${user.rol})\nProgramación: ${validatedProductions.length}\nPiezas: ${piecesPayload.length}\nAccesorios: ${accessoriesPayload.length}\nVidrio: ${glassPayload.length}\nTOTAL: ${total} registros\n\n¿Deseas continuar?`;
-  if (!window.confirm(summary)) { els.importStatus.textContent = "Carga cancelada por el usuario."; return; }
-  const phrase = window.prompt(`Confirmación final. Escribe exactamente: CARGAR SEMANA ${week}`);
-  if (phrase !== `CARGAR SEMANA ${week}`) { els.importStatus.textContent = "Carga cancelada: confirmación final incorrecta."; return; }
+  const summary = `CONFIRMAR CARGA REAL\n\nSemana: ${week} / ${year}\nUsuario: ${user.nombre} (${user.rol})\nProgramación: ${validatedProductions.length}\nPiezas: ${piecesPayload.length}\nAccesorios: ${accessoriesPayload.length}\nVidrio: ${glassPayload.length}\nTOTAL: ${total} registros\n\n¿CONFIRMAR LA CARGA DE LA SEMANA ${week}?\n\nAceptar = SÍ   ·   Cancelar = NO`;
+  if (!window.confirm(summary)) {
+    els.importStatus.textContent = `Carga de semana ${week} cancelada. No se realizó ninguna escritura.`;
+    if (els.previewStatus) els.previewStatus.textContent = "Escritura realizada: NO · Usuario seleccionó NO.";
+    return;
+  }
 
   els.commit.disabled = true; els.commit.textContent = "Enviando 8.478 registros…";
   els.importStatus.textContent = "SOLICITUD ENVIADA… No cierres esta pestaña. Esperando confirmación del servidor.";
