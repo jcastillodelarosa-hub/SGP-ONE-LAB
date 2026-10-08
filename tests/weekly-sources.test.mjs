@@ -12,7 +12,8 @@ test("accesorios exige contrato real y relaciona por Produccion + Sistema",()=>{
 test("vidrio relaciona por ID solo contra PANELES_2",()=>{
  const r=transformGlassRows([{ID:"100",Producción:"P",Sistema:"S"},{ID:""}]);
  assert.equal(r.rows.length,1); assert.equal(r.skipped.length,1);
- assert.deepEqual(relateGlass(r.rows,[{id:"100",id_linea:"PANELES_2"},{id:"200",id_linea:"FRAMES_2"}]),{related:1,noMatch:0,conflicts:0});
+ const rel=relateGlass(r.rows,[{id:"100",id_linea:"PANELES_2"},{id:"200",id_linea:"FRAMES_2"}]);
+ assert.equal(rel.related,1); assert.equal(rel.noMatch,0); assert.equal(rel.conflicts,0); assert.equal(rel.sourceGroups,1);
 });
 
 test("accesorios no trata PANELES_2 y FRAMES_2 del mismo ID como conflicto",()=>{
@@ -33,4 +34,10 @@ test("accesorios solo marca conflicto cuando Produccion + Sistema apunta a IDs d
  ];
  const rel=relateAccessories(rows,productions);
  assert.equal(rel.related,0); assert.equal(rel.conflicts,1);
+});
+
+test("vidrio agrupa IDs repetidos y deja no relacionados como diagnóstico informativo",()=>{
+ const rows=[{id_export:"100",produccion:"P1",sistema:"S1"},{id_export:"100",produccion:"P1",sistema:"S1"},{id_export:"999",produccion:"P9",sistema:"S9"}];
+ const rel=relateGlass(rows,[{id:"100",id_linea:"PANELES_2"}]);
+ assert.equal(rel.sourceGroups,2); assert.equal(rel.related,1); assert.equal(rel.noMatch,1); assert.equal(rel.noMatchRows[0].id_export,"999"); assert.equal(rel.noMatchRows[0].filas,1);
 });
