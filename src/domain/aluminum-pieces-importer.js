@@ -104,22 +104,35 @@ export function classifyAluminumPieces(rows, masterRows) {
   return { rows: classified, unclassified, byType, byDestination };
 }
 
-export function relateAluminumPieceOrders(rows, productions) {
-  const normalize = value => String(value ?? "").trim();
-  const listedOrders = new Set((rows || []).map(row => normalize(row.id_orden_produccion)).filter(Boolean));
-  const panelProductions = (productions || []).filter(row => row.id_linea === "PANELES_2");
-  const missing = panelProductions.filter(row => !listedOrders.has(normalize(row.id)));
-  return {
-    panelProductions: panelProductions.length,
-    listedOrders: listedOrders.size,
-    related: panelProductions.length - missing.length,
-    noMatch: missing.length,
-    noMatchRows: missing.map(row => ({
-      id: normalize(row.id),
-      produccion: row.produccion ?? null,
-      sistema: row.sistema ?? null,
-      semana: row.semana ?? null,
-      motivo: "Producción PANELES_2 sin orden en el listado de piezas validado"
-    }))
-  };
+export function relateAluminumPieces(rows, productions) {
+  const norm = value => String(value ?? "").trim().toUpperCase().replace(/\s+/g, " ");
+  const key = (production, system) => norm(production) + "||" + norm(system);
+  const sourceGroups = new Map();
+  for (const row of rows || []) {
+    if (!row.produccion || !row.sistema) continue;
+    const k = key(row.produccion, row.sistema);
+    if (!sourceGroups.has(k)) sourceGroups.set(k,{produccion:row.produccion,sistema:row.sistema,order_co:row.order_co,filas:0,codigos:new Set()});
+    const g=sourceGroups.get(k); g.filas++; if(row.codigo_sap)g.codigos.add(row.codigo_sap);
+  }
+  const programGroups = new Map();
+  for (const row of productions || []) {
+    if (row.id_linea !== "PANELES_2") continue;
+    const k=key(row.produccion,row.sistema);
+    if (!programGroups.has(k)) programGroups.set(k,[]);
+    programGroups.get(k).push(row);
+  }
+  let related=0,noMatch=0,conflicts=0;
+  const noMatchRows=[],conflictRows=[];
+  for (const [k,source] of sourceGroups) {
+    const matches=programGroups.get(k)||[];
+    const ids=[...new Set(matches.map(r=>String(r.id??"").trim()).filter(Boolean))];
+    if (!matches.length) {
+      noMatch++;
+      noMatchRows.push({...source,codigos_sap:source.codigos.size,motivo:"Producción + Sistema no existe en PANELES_2 de la programación validada"});
+    } else if (ids.length>1) {
+      conflicts++;
+      conflictRows.push({source,matches});
+    } else related++;
+  }
+  return {sourceGroups:sourceGroups.size,related,noMatch,conflicts,noMatchRows,conflictRows};
 }
