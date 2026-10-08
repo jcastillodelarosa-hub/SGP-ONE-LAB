@@ -1,0 +1,12 @@
+-- SGP ONE maestro de piezas
+-- Fuente autoritativa: 228 códigos confirmados.
+-- La carga física se aplica en Supabase como migración master_piezas_228.
+-- Este archivo documenta el contrato y validaciones del dataset migrado.
+-- Columnas: codigo_sap,tipo_pieza,destino_productivo,observacion,activo
+-- Validación esperada:
+-- total=228; únicos=228; activos=228
+-- PANEL=75; FRAME=82; COVER=41; REFUERZO=22; MUNTIN=8
+-- destino PANEL=102; destino FRAME=126
+--
+-- El dataset completo fue aplicado preservando literalmente CODIGO_SAP,
+-- TIPO_PIEZA, DESTINO_PRODUCTIVO y OBSERVACION del maestro autoritativo.
