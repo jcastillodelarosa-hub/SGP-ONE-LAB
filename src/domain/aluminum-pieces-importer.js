@@ -136,3 +136,31 @@ export function relateAluminumPieces(rows, productions) {
   }
   return {sourceGroups:sourceGroups.size,related,noMatch,conflicts,noMatchRows,conflictRows};
 }
+
+
+export function prepareAluminumPiecePayload(rows, productions) {
+  const norm = value => String(value ?? "").trim().toUpperCase().replace(/\s+/g, " ");
+  const key = (production, system) => norm(production) + "||" + norm(system);
+  const panels = new Map();
+  for (const p of productions || []) {
+    if (p.id_linea !== "PANELES_2") continue;
+    const k = key(p.produccion, p.sistema);
+    if (!panels.has(k)) panels.set(k, []);
+    panels.get(k).push(p);
+  }
+  return (rows || []).map((row, index) => {
+    const matches = panels.get(key(row.produccion, row.sistema)) || [];
+    const ids = [...new Set(matches.map(x => String(x.id ?? "").trim()).filter(Boolean))];
+    const match = ids.length === 1 ? matches.find(x => String(x.id) === ids[0]) : null;
+    return {
+      ...row,
+      fila_origen: index + 2,
+      id: match?.id ?? null,
+      key_produccion: match?.key_produccion ?? null,
+      id_linea_origen: row.linea ?? null,
+      id_linea_destino: match?.id_linea ?? null,
+      estado_relacion_produccion: match ? "RELACIONADO" : "SIN_RELACION",
+      unidades: number(row.unidades)
+    };
+  });
+}
