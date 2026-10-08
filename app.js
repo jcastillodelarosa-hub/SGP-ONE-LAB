@@ -50,7 +50,7 @@ const els = {
   pUnclassified: document.querySelector("#pUnclassified"),
   pErrors: document.querySelector("#pErrors"),
   accessoriesFile: document.querySelector("#accessoriesFile"), validateAccessories: document.querySelector("#validateAccessories"), accessoriesStatus: document.querySelector("#accessoriesStatus"), xTotal: document.querySelector("#xTotal"), xRelated: document.querySelector("#xRelated"), xNoMatch: document.querySelector("#xNoMatch"), xErrors: document.querySelector("#xErrors"), accessoriesNoMatchWrap: document.querySelector("#accessoriesNoMatchWrap"), accessoriesNoMatchBody: document.querySelector("#accessoriesNoMatchBody"),
-  glassFile: document.querySelector("#glassFile"), validateGlass: document.querySelector("#validateGlass"), glassStatus: document.querySelector("#glassStatus"), gTotal: document.querySelector("#gTotal"), gRelated: document.querySelector("#gRelated"), gSkipped: document.querySelector("#gSkipped"), gErrors: document.querySelector("#gErrors")
+  glassFile: document.querySelector("#glassFile"), validateGlass: document.querySelector("#validateGlass"), glassStatus: document.querySelector("#glassStatus"), gTotal: document.querySelector("#gTotal"), gRelated: document.querySelector("#gRelated"), gNoMatch: document.querySelector("#gNoMatch"), gSkipped: document.querySelector("#gSkipped"), gErrors: document.querySelector("#gErrors"), glassNoMatchWrap: document.querySelector("#glassNoMatchWrap"), glassNoMatchBody: document.querySelector("#glassNoMatchBody")
 };
 
 function escapeHtml(value) {
@@ -63,6 +63,15 @@ function renderAccessoryNoMatches(relation) {
   els.accessoriesNoMatchBody.innerHTML = rows.length
     ? rows.map(row => `<tr><td>${escapeHtml(row.produccion)}</td><td>${escapeHtml(row.sistema)}</td><td>${escapeHtml(row.filas)}</td><td>${escapeHtml(row.codigo_sap || "—")}</td><td>Producción + Sistema no existe en la programación validada</td></tr>`).join("")
     : '<tr><td colspan="5" class="empty">Sin grupos pendientes</td></tr>';
+}
+
+function renderGlassNoMatches(relation) {
+  if (!els.glassNoMatchWrap || !els.glassNoMatchBody) return;
+  const rows = relation?.noMatchRows || [];
+  els.glassNoMatchWrap.hidden = rows.length === 0;
+  els.glassNoMatchBody.innerHTML = rows.length
+    ? rows.map(row => `<tr><td>${escapeHtml(row.id_export)}</td><td>${escapeHtml(row.produccion || "—")}</td><td>${escapeHtml(row.sistema || "—")}</td><td>${escapeHtml(row.filas)}</td><td>${escapeHtml(row.motivo)}</td></tr>`).join("")
+    : '<tr><td colspan="5" class="empty">Sin IDs pendientes</td></tr>';
 }
 
 function currentFilters() { return { q: els.search.value, estado: els.state.value, linea: els.line.value }; }
@@ -92,7 +101,9 @@ function refreshWeeklyRelations() {
   if (validatedGlass) {
     const relation = relateGlass(validatedGlass.rows, validatedProductions);
     els.gRelated.textContent = relation.related;
-    els.glassStatus.textContent = `Correcto: ${validatedGlass.rows.length} registros útiles · ${relation.related} relacionados con PANELES_2 · ${relation.noMatch} sin relación · ${relation.conflicts} conflictos.`;
+    els.gNoMatch.textContent = relation.noMatch;
+    renderGlassNoMatches(relation);
+    els.glassStatus.textContent = `Correcto: ${validatedGlass.rows.length} registros útiles · ${relation.sourceGroups} IDs únicos · ${relation.related} relacionados con PANELES_2 · ${relation.noMatch} sin relación informativa · ${relation.conflicts} conflictos.`;
   }
 }
 
@@ -217,7 +228,9 @@ async function validateGlassFile() {
     const relation=relateGlass(result.rows,validatedProductions);
     els.gTotal.textContent=result.rows.length; els.gSkipped.textContent=result.skipped.length; els.gErrors.textContent=result.errors.length;
     els.gRelated.textContent=validatedProductions.length?relation.related:"—";
-    els.glassStatus.textContent=validatedProductions.length?`Correcto: ${result.rows.length} registros útiles · ${relation.related} relacionados con PANELES_2 · ${relation.noMatch} sin relación · ${relation.conflicts} conflictos.`:`Estructura leída: ${result.rows.length} registros útiles. Valida primero Programación para ejecutar el cruce por ID.`;
+    els.gNoMatch.textContent=validatedProductions.length?relation.noMatch:"—";
+    renderGlassNoMatches(validatedProductions.length ? relation : { noMatchRows: [] });
+    els.glassStatus.textContent=validatedProductions.length?`Correcto: ${result.rows.length} registros útiles · ${relation.sourceGroups} IDs únicos · ${relation.related} relacionados con PANELES_2 · ${relation.noMatch} sin relación informativa · ${relation.conflicts} conflictos.`:`Estructura leída: ${result.rows.length} registros útiles. Valida primero Programación para ejecutar el cruce por ID.`;
   }catch(error){els.glassStatus.textContent="Error: "+error.message;}finally{els.validateGlass.disabled=false;}
 }
 
