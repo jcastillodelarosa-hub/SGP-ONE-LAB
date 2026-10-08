@@ -296,3 +296,6 @@ th {
 .reservation-badge{white-space:nowrap;font-weight:700}.reservation-start td{border-top:2px solid rgba(100,116,139,.38)}
 .reservation-tone-1{background:rgba(219,234,254,.42)}.reservation-tone-2{background:rgba(220,252,231,.40)}.reservation-tone-3{background:rgba(254,243,199,.38)}.reservation-tone-4{background:rgba(243,232,255,.38)}.reservation-tone-5{background:rgba(255,228,230,.35)}.reservation-tone-6{background:rgba(207,250,254,.35)}
 tr.has-muntin{box-shadow:inset 5px 0 0 #f59e0b}.reservation-tone-1.has-muntin,.reservation-tone-2.has-muntin,.reservation-tone-3.has-muntin,.reservation-tone-4.has-muntin,.reservation-tone-5.has-muntin,.reservation-tone-6.has-muntin{background-image:linear-gradient(rgba(245,158,11,.10),rgba(245,158,11,.10))}
+
+/* v39 programming hierarchy */
+.has-muntin-summary{background:rgba(237,233,254,.72)!important}.has-muntin-summary td:first-child{border-left:4px solid #8b5cf6}.muntin-metric{border-color:#8b5cf6}.muntin-badge{background:#ddd6fe!important;color:#4c1d95!important}.reservation-alt{background:rgba(226,232,240,.42)!important}.reservation-start td{border-top:2px solid rgba(100,116,139,.35)}tr.has-muntin{box-shadow:inset 5px 0 0 #8b5cf6!important;background-image:linear-gradient(rgba(139,92,246,.08),rgba(139,92,246,.08))!important}
