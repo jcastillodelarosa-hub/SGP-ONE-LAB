@@ -12,6 +12,7 @@ const mecanizado = createMecanizadoModule(trackingRows);
 let validatedProductions = [];
 let validatedAccessories = null;
 let validatedGlass = null;
+let validatedPieces = null;
 
 const els = {
   nav: document.querySelectorAll("[data-view]"),
@@ -87,6 +88,33 @@ function renderGlassNoMatches(relation) {
     : '<tr><td colspan="5" class="empty">Sin IDs pendientes</td></tr>';
 }
 
+function weeklyPackageStatus() {
+  const blockers = [];
+  if (!validatedProductions.length) blockers.push("Programación");
+  if (!validatedPieces) blockers.push("Listado de piezas");
+  if (!validatedAccessories) blockers.push("Accesorios");
+  if (!validatedGlass) blockers.push("Vidrio");
+  if (validatedPieces?.errors?.length) blockers.push("Errores en piezas");
+  if (validatedPieces?.unclassified) blockers.push("SAP sin clasificar");
+  if (validatedPieces?.conflicts) blockers.push("Conflictos en piezas");
+  if (validatedAccessories?.errors?.length) blockers.push("Errores en accesorios");
+  if (validatedAccessories?.conflicts) blockers.push("Conflictos en accesorios");
+  if (validatedGlass?.errors?.length) blockers.push("Errores en vidrio");
+  if (validatedGlass?.conflicts) blockers.push("Conflictos en vidrio");
+  return { ready: blockers.length === 0, blockers };
+}
+function refreshWeeklyPackageGate() {
+  const status = weeklyPackageStatus();
+  els.commit.disabled = true;
+  els.commit.textContent = status.ready ? "Paquete listo ✓" : "Carga final bloqueada";
+  els.commit.title = status.ready
+    ? "Las 4 fuentes están validadas. La escritura a Supabase permanece deshabilitada en LAB."
+    : "Pendiente: " + status.blockers.join(", ");
+  if (status.ready) {
+    els.importStatus.textContent = `Paquete semanal listo para carga: Programación + Piezas + Accesorios + Vidrio validados. Escritura a Supabase aún deshabilitada en LAB.`;
+  }
+}
+
 function currentFilters() { return { q: els.search.value, estado: els.state.value, linea: els.line.value }; }
 function renderMecanizado() {
   const rows = mecanizado.filterRows(currentFilters());
@@ -153,7 +181,7 @@ async function validateProgrammingFiles() {
   } catch (error) {
     validatedProductions = [];
     els.importStatus.textContent = "Error: " + error.message;
-  } finally { els.validate.disabled = false; }
+  } finally { els.validate.disabled = false; refreshWeeklyRelations(); refreshWeeklyPackageGate(); }
 }
 async function validateAluminumFile() {
   const file = els.aluminumFile.files?.[0];
@@ -206,6 +234,7 @@ async function validatePiecesFile() {
     els.pRelated.textContent = pieceRelation ? pieceRelation.related : "—";
     els.pNoMatch.textContent = pieceRelation ? pieceRelation.noMatch : "—";
     renderPiecesNoMatches(pieceRelation || { noMatchRows: [] });
+    validatedPieces = { rows: result.rows, errors: result.errors, unclassified: classification.unclassified.length, conflicts: pieceRelation?.conflicts || 0 };
     const lineText = Object.entries(summary.lines).map(([line,count]) => `${line}: ${count}`).join(" · ");
     els.piecesStatus.textContent = result.errors.length
       ? `Validación bloqueada: ${result.errors.length} error(es) de estructura.`
@@ -213,10 +242,12 @@ async function validatePiecesFile() {
         ? `Terminado. ${lineText}. ${classification.unclassified.length} fila(s) con SAP no clasificado.`
         : `Terminado. ${summary.total} filas clasificadas · ${summary.sapCodes} códigos SAP · ${lineText} · 0 sin clasificar${pieceRelation ? ` · ${pieceRelation.sourceGroups} grupos Producción + Sistema · ${pieceRelation.related} relacionados · ${pieceRelation.noMatch} sin relación informativa · ${pieceRelation.conflicts} conflictos` : ""}.`;
   } catch (error) {
+    validatedPieces = null;
     els.pUnclassified.textContent = "—";
     els.piecesStatus.textContent = "Error: " + error.message;
   } finally {
     els.validatePieces.disabled = false;
+    refreshWeeklyPackageGate();
   }
 }
 
@@ -232,8 +263,9 @@ async function validateAccessoriesFile() {
     els.xRelated.textContent=validatedProductions.length?relation.related:"—";
     els.xNoMatch.textContent=validatedProductions.length?relation.noMatch:"—";
     renderAccessoryNoMatches(validatedProductions.length ? relation : { noMatchRows: [] });
+    validatedAccessories.conflicts = relation.conflicts;
     els.accessoriesStatus.textContent=result.errors.length?`Bloqueado: ${result.errors.length} error(es).`:validatedProductions.length?`Correcto: ${result.rows.length} filas · ${relation.sourceGroups} grupos Producción + Sistema · ${relation.related} relacionados · ${relation.noMatch} sin relación · ${relation.conflicts} conflictos.`:`Estructura correcta: ${result.rows.length} registros. Valida primero Programación para ejecutar el cruce Producción + Sistema.`;
-  }catch(error){els.accessoriesStatus.textContent="Error: "+error.message;}finally{els.validateAccessories.disabled=false;}
+  }catch(error){validatedAccessories=null;els.accessoriesStatus.textContent="Error: "+error.message;}finally{els.validateAccessories.disabled=false;refreshWeeklyPackageGate();}
 }
 async function validateGlassFile() {
   const file=els.glassFile.files?.[0];
@@ -247,21 +279,14 @@ async function validateGlassFile() {
     els.gRelated.textContent=validatedProductions.length?relation.related:"—";
     els.gNoMatch.textContent=validatedProductions.length?relation.noMatch:"—";
     renderGlassNoMatches(validatedProductions.length ? relation : { noMatchRows: [] });
+    validatedGlass.conflicts = relation.conflicts;
     els.glassStatus.textContent=validatedProductions.length?`Correcto: ${result.rows.length} registros útiles · ${relation.sourceGroups} IDs únicos · ${relation.related} relacionados con PANELES_2 · ${relation.noMatch} sin relación informativa · ${relation.conflicts} conflictos.`:`Estructura leída: ${result.rows.length} registros útiles. Valida primero Programación para ejecutar el cruce por ID.`;
-  }catch(error){els.glassStatus.textContent="Error: "+error.message;}finally{els.validateGlass.disabled=false;}
+  }catch(error){validatedGlass=null;els.glassStatus.textContent="Error: "+error.message;}finally{els.validateGlass.disabled=false;refreshWeeklyPackageGate();}
 }
 
 async function commitProgramming() {
-  if (!validatedProductions.length) return;
-  els.commit.disabled = true;
-  els.importStatus.textContent = "Cargando a Supabase…";
-  try {
-    const result = await importProductions(validatedProductions);
-    els.importStatus.textContent = `Carga completada: ${result.written} producciones.`;
-  } catch (error) {
-    els.importStatus.textContent = "Carga no ejecutada: " + error.message;
-    els.commit.disabled = true;
-  }
+  // LAB safety: deliberately no writes. Production commit will be enabled only after explicit approval.
+  refreshWeeklyPackageGate();
 }
 
 els.nav.forEach(button => button.addEventListener("click", () => openView(button.dataset.view)));
