@@ -25,17 +25,23 @@ Este eje describe disponibilidad logística de la reserva. No representa progres
 - El patinador reporta qué sale hacia Picking y qué piezas quedan pendientes.
 - La línea confirma independientemente lo recibido.
 
-## Paneles y Frames
+## Paneles 2 y Frames 2 — alcance del módulo de aluminio
 
-Las reservas de aluminio son compartidas entre Paneles y Frames. El estado de la reserva se almacena una sola vez por reserva y se consume desde las producciones relacionadas.
+**El Maestro de Piezas de aluminio, su clasificación PANEL / FRAME / COVER / REFUERZO / MUNTIN y el Control de Mecanizado que usa esta clasificación aplican exclusivamente a las líneas `PANELES_2` y `FRAMES_2`.**
 
-El origen `Línea Prog.` de un archivo compartido no determina el destino productivo.
+No se debe extender esta clasificación automáticamente a `PANELES`, `FRAMES` ni a ninguna otra línea de SGP ONE.
+
+Las reservas de aluminio de este módulo son compartidas conceptualmente entre `PANELES_2` y `FRAMES_2`. El estado logístico de una reserva se modela una sola vez y se consume desde las producciones relacionadas.
+
+El origen `Línea Prog.` del archivo compartido no determina el destino productivo.
 
 ## Seguimiento Aluminio
 
 Clave física: `ID|RESERVA`.
 
 Relación hacia programación/control: por `ID`.
+
+Al relacionar este módulo con Producciones, sus consumidores válidos son exclusivamente `PANELES_2` y `FRAMES_2`.
 
 Campos principales:
 
