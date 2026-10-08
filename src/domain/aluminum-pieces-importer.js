@@ -103,3 +103,23 @@ export function classifyAluminumPieces(rows, masterRows) {
   }
   return { rows: classified, unclassified, byType, byDestination };
 }
+
+export function relateAluminumPieceOrders(rows, productions) {
+  const normalize = value => String(value ?? "").trim();
+  const listedOrders = new Set((rows || []).map(row => normalize(row.id_orden_produccion)).filter(Boolean));
+  const panelProductions = (productions || []).filter(row => row.id_linea === "PANELES_2");
+  const missing = panelProductions.filter(row => !listedOrders.has(normalize(row.id)));
+  return {
+    panelProductions: panelProductions.length,
+    listedOrders: listedOrders.size,
+    related: panelProductions.length - missing.length,
+    noMatch: missing.length,
+    noMatchRows: missing.map(row => ({
+      id: normalize(row.id),
+      produccion: row.produccion ?? null,
+      sistema: row.sistema ?? null,
+      semana: row.semana ?? null,
+      motivo: "Producción PANELES_2 sin orden en el listado de piezas validado"
+    }))
+  };
+}
