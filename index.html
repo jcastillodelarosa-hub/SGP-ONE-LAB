@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SGP ONE LAB</title>
-  <link rel="stylesheet" href="styles.css?v=20261007-1730" />
+  <link rel="stylesheet" href="styles.css?v=20261008-0100" />
 </head>
 <body>
   <div class="app-shell">
@@ -17,7 +17,7 @@
       <nav class="nav">
         <button data-view="inicio">Inicio</button>
         <button class="active" data-view="mecanizado">Control de Mecanizado</button>
-        <button data-view="actualizacion">Actualización diaria</button>
+        <button data-view="carga-semanal">Carga semanal</button>\n        <button data-view="actualizacion">Actualización diaria</button>
       </nav>
 
       <div class="sidebar-foot">
@@ -34,7 +34,7 @@
         </div>
         <div class="topbar-status">
           <span class="sync-ok">GitHub activo</span>
-          <span class="status">LAB v4</span>
+          <span class="status">LAB v5</span>
         </div>
       </header>
 
@@ -54,7 +54,7 @@
           <div class="page-heading">
             <span class="eyebrow">Operación</span>
             <h2>Control de Mecanizado</h2>
-            <p>Seguimiento de disponibilidad logística de aluminio para Paneles y Frames.</p>
+            <p>Seguimiento de disponibilidad logística de aluminio exclusivamente para PANELES_2 y FRAMES_2.</p>
           </div>
 
           <section class="demo-panel">
@@ -75,7 +75,7 @@
               <option value="PENDIENTE_ABASTECIMIENTO">Pendiente por Abastecimiento</option>
             </select>
             <select id="lineFilter">
-              <option value="">Paneles + Frames</option>
+              <option value="">PANELES_2 + FRAMES_2</option>
               <option value="PANELES_2">PANELES_2</option>
               <option value="FRAMES_2">FRAMES_2</option>
             </select>
@@ -109,6 +109,32 @@
           </section>
         </section>
 
+        <section class="view placeholder-view" data-view-panel="carga-semanal" hidden>
+          <div class="page-heading">
+            <span class="eyebrow">Programación</span>
+            <h2>Carga semanal</h2>
+            <p>Importa archivos XLSX de programación de PANELES_2 y FRAMES_2, valida la carga y prepara el envío a Supabase.</p>
+          </div>
+          <section class="import-card">
+            <input id="programmingFiles" type="file" accept=".xlsx" multiple />
+            <button id="validateProgramming">Validar archivos</button>
+            <button id="commitProgramming" disabled>Cargar a Supabase</button>
+            <span id="importStatus">Selecciona uno o más archivos XLSX.</span>
+          </section>
+          <section class="summary import-summary">
+            <div class="metric"><span>Producciones válidas</span><strong id="iTotal">0</strong></div>
+            <div class="metric"><span>Keys únicas</span><strong id="iKeys">0</strong></div>
+            <div class="metric"><span>Errores</span><strong id="iErrors">0</strong></div>
+            <div class="metric"><span>Alcance</span><strong>P2 + F2</strong></div>
+          </section>
+          <section class="table-wrap">
+            <table>
+              <thead><tr><th>Semana</th><th>Línea</th><th>Registros</th></tr></thead>
+              <tbody id="importSummaryBody"><tr><td colspan="3" class="empty">Sin validar</td></tr></tbody>
+            </table>
+          </section>
+        </section>
+
         <section class="view placeholder-view" data-view-panel="actualizacion" hidden>
           <div class="page-heading">
             <span class="eyebrow">Datos</span>
@@ -123,6 +149,6 @@
     </section>
   </div>
 
-  <script type="module" src="app.js?v=20261007-1730"></script>
+  <script type="module" src="app.js?v=20261008-0100"></script>
 </body>
 </html>
