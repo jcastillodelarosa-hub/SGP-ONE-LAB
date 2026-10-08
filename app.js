@@ -17,6 +17,11 @@ let validatedPieces = null;
 let targetWeek = null;
 let queriedProductions = [];
 let queriedSystemSummary = [];
+let detailSort = { key: null, dir: 1 };
+let detailColumnFilters = {};
+let detailColumns = [
+ {key:'reserva_al',label:'Reserva'}, {key:'prioridad_programacion',label:'Prioridad'}, {key:'id_linea',label:'Línea'}, {key:'id',label:'ID'}, {key:'produccion',label:'Producción'}, {key:'sistema',label:'Sistema'}, {key:'acabado',label:'Acabado'}, {key:'proyecto',label:'Proyecto'}, {key:'cantidad',label:'Cantidad'}, {key:'muntin',label:'Muntin'}, {key:'porc_vidrio',label:'Vidrio'}
+];
 
 const els = {
   nav: document.querySelectorAll("[data-view]"),
@@ -68,7 +73,7 @@ const els = {
   piecesNoMatchBody: document.querySelector("#piecesNoMatchBody"),
   accessoriesFile: document.querySelector("#accessoriesFile"), validateAccessories: document.querySelector("#validateAccessories"), accessoriesStatus: document.querySelector("#accessoriesStatus"), xTotal: document.querySelector("#xTotal"), xRelated: document.querySelector("#xRelated"), xNoMatch: document.querySelector("#xNoMatch"), xErrors: document.querySelector("#xErrors"), accessoriesNoMatchWrap: document.querySelector("#accessoriesNoMatchWrap"), accessoriesNoMatchBody: document.querySelector("#accessoriesNoMatchBody"),
   glassFile: document.querySelector("#glassFile"), validateGlass: document.querySelector("#validateGlass"), glassStatus: document.querySelector("#glassStatus"), gTotal: document.querySelector("#gTotal"), gRelated: document.querySelector("#gRelated"), gNoMatch: document.querySelector("#gNoMatch"), gSkipped: document.querySelector("#gSkipped"), gErrors: document.querySelector("#gErrors"), glassNoMatchWrap: document.querySelector("#glassNoMatchWrap"), glassNoMatchBody: document.querySelector("#glassNoMatchBody"),
-  queryYear: document.querySelector("#queryYear"), queryWeek: document.querySelector("#queryWeek"), queryLine: document.querySelector("#queryLine"), querySearch: document.querySelector("#querySearch"), queryProgramming: document.querySelector("#queryProgramming"), queryStatus: document.querySelector("#queryStatus"), queryBody: document.querySelector("#queryProgrammingBody"), qWeek: document.querySelector("#qWeek"), qTotal: document.querySelector("#qTotal"), qUnits: document.querySelector("#qUnits"), qVisible: document.querySelector("#qVisible"), systemSummaryBody: document.querySelector("#systemSummaryBody"), typeSummaryBody: document.querySelector("#typeSummaryBody"), reservationSummaryBody: document.querySelector("#reservationSummaryBody"), typeSummaryBody: document.querySelector("#typeSummaryBody"), reservationSummaryBody: document.querySelector("#reservationSummaryBody")
+  queryYear: document.querySelector("#queryYear"), queryWeek: document.querySelector("#queryWeek"), queryLine: document.querySelector("#queryLine"), querySearch: document.querySelector("#querySearch"), queryProgramming: document.querySelector("#queryProgramming"), queryStatus: document.querySelector("#queryStatus"), queryBody: document.querySelector("#queryProgrammingBody"), qWeek: document.querySelector("#qWeek"), qTotal: document.querySelector("#qTotal"), qUnits: document.querySelector("#qUnits"), qVisible: document.querySelector("#qVisible"), systemSummaryBody: document.querySelector("#systemSummaryBody"), typeSummaryBody: document.querySelector("#typeSummaryBody"), reservationSummaryBody: document.querySelector("#reservationSummaryBody"), systemSummaryFoot: document.querySelector("#systemSummaryFoot"), typeSummaryFoot: document.querySelector("#typeSummaryFoot"), reservationSummaryFoot: document.querySelector("#reservationSummaryFoot"), queryHead: document.querySelector("#queryProgrammingHead"), typeSummaryBody: document.querySelector("#typeSummaryBody"), reservationSummaryBody: document.querySelector("#reservationSummaryBody")
 };
 
 function escapeHtml(value) {
@@ -421,60 +426,47 @@ function filteredProgrammingRows() {
   const term=els.querySearch.value.trim().toLowerCase();
   return queriedProductions.filter(r=>(!line||r.id_linea===line)&&(!term||[r.id,r.reserva_al,r.produccion,r.sistema,r.proyecto,r.cliente,r.acabado].some(v=>String(v??"").toLowerCase().includes(term))));
 }
-function renderQueriedProgramming() {
+function renderDetailHead(){
+  if(!els.queryHead)return;
+  els.queryHead.innerHTML='<tr>'+detailColumns.map((c,i)=>`<th><div class="detail-head"><span data-sort="${c.key}">${escapeHtml(c.label)}${detailSort.key===c.key?(detailSort.dir>0?' ▲':' ▼'):''}</span><span><button type="button" data-move="${i}:-1" title="Mover a la izquierda">←</button><button type="button" data-move="${i}:1" title="Mover a la derecha">→</button></span></div><input class="column-filter" data-filter="${c.key}" value="${escapeHtml(detailColumnFilters[c.key]||'')}" placeholder="Filtrar…"></th>`).join('')+'</tr>';
+}
+function detailValue(r,key){
+  if(key==='muntin')return hasMuntin(r)?'SI':'NO';
+  return r[key]??'';
+}
+function renderQueriedProgramming(){
   if(!els.queryBody)return;
-  const rows=filteredProgrammingRows();
-  const units=rows.reduce((n,r)=>n+Number(r.cantidad||0),0);
-  els.qTotal.textContent=rows.length; els.qUnits.textContent=units; els.qVisible.textContent=rows.length;
-
-  const systems=new Map();
-  rows.forEach(r=>{
-    const key=r.sistema||"SIN SISTEMA",reserva=String(r.reserva_al??"").trim()||"SIN RESERVA";
-    if(!systems.has(key))systems.set(key,{sistema:key,reservas:new Set(),producciones:0,unidades:0,prodMuntin:0,unidMuntin:0});
-    const g=systems.get(key);g.reservas.add(reserva);g.producciones++;g.unidades+=Number(r.cantidad||0);
-    if(hasMuntin(r)){g.prodMuntin++;g.unidMuntin+=Number(r.cantidad||0);}
+  const baseRows=filteredProgrammingRows();
+  const units=baseRows.reduce((n,r)=>n+Number(r.cantidad||0),0);
+  els.qTotal.textContent=baseRows.length;els.qUnits.textContent=units;els.qVisible.textContent=baseRows.length;
+  const systems=new Map(),types=new Map(),reservations=new Map();
+  baseRows.forEach(r=>{
+    const system=r.sistema||'SIN SISTEMA',reserva=String(r.reserva_al??'').trim()||'SIN RESERVA',acabado=r.acabado||'SIN ACABADO',qty=Number(r.cantidad||0),hm=hasMuntin(r);
+    if(!systems.has(system))systems.set(system,{sistema:system,reservas:new Set(),producciones:0,unidades:0,prodMuntin:0,unidMuntin:0});
+    const sg=systems.get(system);sg.reservas.add(reserva);sg.producciones++;sg.unidades+=qty;if(hm){sg.prodMuntin++;sg.unidMuntin+=qty}
+    if(!types.has(system))types.set(system,{sistema:system,proyecto:0,retail:0});
+    const tg=types.get(system),tipo=String(r.tipo||'').toUpperCase();if(tipo==='PROYECTO')tg.proyecto+=qty;if(tipo==='RETAIL')tg.retail+=qty;
+    const rk=reserva+'|'+system+'|'+acabado;if(!reservations.has(rk))reservations.set(rk,{reserva,sistema:system,acabado,producciones:0,unidades:0,prodMuntin:0,unidMuntin:0});
+    const rg=reservations.get(rk);rg.producciones++;rg.unidades+=qty;if(hm){rg.prodMuntin++;rg.unidMuntin+=qty}
   });
-  const summary=[...systems.values()].sort((x,y)=>y.unidades-x.unidades||x.sistema.localeCompare(y.sistema));
-  els.systemSummaryBody.innerHTML=summary.length?summary.map(g=>`<tr class="${g.prodMuntin?"has-muntin-summary":""}"><td><strong>${escapeHtml(g.sistema)}</strong></td><td>${g.reservas.size}</td><td>${g.producciones}</td><td><strong>${g.unidades}</strong></td><td>${g.prodMuntin}</td><td>${g.unidMuntin}</td></tr>`).join(""):'<tr><td colspan="6" class="empty">Sin datos</td></tr>';
-  const typeMap=new Map(), reservationMap=new Map();
-  rows.forEach(r=>{
-    const system=r.sistema||"SIN SISTEMA",type=String(r.tipo||"").trim().toUpperCase(),reserva=String(r.reserva_al??"").trim()||"SIN RESERVA",acabado=r.acabado||"SIN ACABADO";
-    if(!typeMap.has(system))typeMap.set(system,{sistema:system,proyecto:0,retail:0});
-    const t=typeMap.get(system); if(type==="PROYECTO")t.proyecto+=Number(r.cantidad||0); else if(type==="RETAIL")t.retail+=Number(r.cantidad||0);
-    const rk=reserva+"|"+system+"|"+acabado;
-    if(!reservationMap.has(rk))reservationMap.set(rk,{reserva,sistema:system,acabado,producciones:0,unidades:0,prodMuntin:0,unidMuntin:0});
-    const g=reservationMap.get(rk);g.producciones++;g.unidades+=Number(r.cantidad||0);if(hasMuntin(r)){g.prodMuntin++;g.unidMuntin+=Number(r.cantidad||0);}
-  });
-  const typeRows=[...typeMap.values()].sort((x,y)=>(y.proyecto+y.retail)-(x.proyecto+x.retail));
-  els.typeSummaryBody.innerHTML=typeRows.length?typeRows.map(g=>`<tr><td><strong>${escapeHtml(g.sistema)}</strong></td><td>${g.proyecto}</td><td>${g.retail}</td><td><strong>${g.proyecto+g.retail}</strong></td></tr>`).join(""):'<tr><td colspan="4" class="empty">Sin datos</td></tr>';
-  const reservationRows=[...reservationMap.values()].sort((x,y)=>x.reserva.localeCompare(y.reserva,undefined,{numeric:true})||x.sistema.localeCompare(y.sistema)||x.acabado.localeCompare(y.acabado));
-  els.reservationSummaryBody.innerHTML=reservationRows.length?reservationRows.map(g=>`<tr class="${g.prodMuntin?"has-muntin-summary":""}"><td><strong>${escapeHtml(g.reserva)}</strong></td><td>${escapeHtml(g.sistema)}</td><td>${escapeHtml(g.acabado)}</td><td>${g.producciones}</td><td><strong>${g.unidades}</strong></td><td>${g.prodMuntin}</td><td>${g.unidMuntin}</td></tr>`).join(""):'<tr><td colspan="7" class="empty">Sin datos</td></tr>';
+  const summary=[...systems.values()].sort((x,y)=>y.unidades-x.unidades);
+  els.systemSummaryBody.innerHTML=summary.map(g=>`<tr class="${g.prodMuntin?'has-muntin-summary':''}"><td><strong>${escapeHtml(g.sistema)}</strong></td><td>${g.reservas.size}</td><td>${g.producciones}</td><td><strong>${g.unidades}</strong></td><td>${g.prodMuntin}</td><td>${g.unidMuntin}</td></tr>`).join('');
+  els.systemSummaryFoot.innerHTML=`<tr><td>TOTAL</td><td>${new Set(baseRows.map(r=>String(r.reserva_al??'').trim()||'SIN RESERVA')).size}</td><td>${baseRows.length}</td><td>${units}</td><td>${baseRows.filter(hasMuntin).length}</td><td>${baseRows.filter(hasMuntin).reduce((n,r)=>n+Number(r.cantidad||0),0)}</td></tr>`;
+  const typeRows=[...types.values()].sort((x,y)=>(y.proyecto+y.retail)-(x.proyecto+x.retail));
+  els.typeSummaryBody.innerHTML=typeRows.map(g=>`<tr><td><strong>${escapeHtml(g.sistema)}</strong></td><td>${g.proyecto}</td><td>${g.retail}</td><td><strong>${g.proyecto+g.retail}</strong></td></tr>`).join('');
+  const projectTotal=typeRows.reduce((n,g)=>n+g.proyecto,0),retailTotal=typeRows.reduce((n,g)=>n+g.retail,0);
+  els.typeSummaryFoot.innerHTML=`<tr><td>TOTAL</td><td>${projectTotal}</td><td>${retailTotal}</td><td>${projectTotal+retailTotal}</td></tr>`;
+  const rr=[...reservations.values()].sort((x,y)=>x.reserva.localeCompare(y.reserva,undefined,{numeric:true})||x.sistema.localeCompare(y.sistema));
+  els.reservationSummaryBody.innerHTML=rr.map(g=>`<tr class="${g.prodMuntin?'has-muntin-summary':''}"><td><strong>${escapeHtml(g.reserva)}</strong></td><td>${escapeHtml(g.sistema)}</td><td>${escapeHtml(g.acabado)}</td><td>${g.producciones}</td><td><strong>${g.unidades}</strong></td><td>${g.prodMuntin}</td><td>${g.unidMuntin}</td></tr>`).join('');
+  els.reservationSummaryFoot.innerHTML=`<tr><td>TOTAL</td><td></td><td></td><td>${baseRows.length}</td><td>${units}</td><td>${baseRows.filter(hasMuntin).length}</td><td>${baseRows.filter(hasMuntin).reduce((n,r)=>n+Number(r.cantidad||0),0)}</td></tr>`;
 
-  const typeMap=new Map(), reservationMap=new Map();
-  rows.forEach(r=>{
-    const system=r.sistema||"SIN SISTEMA", type=String(r.tipo||"").trim().toUpperCase(), reserva=String(r.reserva_al??"").trim()||"SIN RESERVA", acabado=r.acabado||"SIN ACABADO";
-    if(!typeMap.has(system)) typeMap.set(system,{sistema:system,proyecto:0,retail:0});
-    const t=typeMap.get(system); if(type==="PROYECTO") t.proyecto+=Number(r.cantidad||0); else if(type==="RETAIL") t.retail+=Number(r.cantidad||0);
-    const key=reserva+"|"+system+"|"+acabado;
-    if(!reservationMap.has(key)) reservationMap.set(key,{reserva,sistema:system,acabado,producciones:0,unidades:0,prodMuntin:0,unidMuntin:0});
-    const g=reservationMap.get(key); g.producciones++; g.unidades+=Number(r.cantidad||0); if(hasMuntin(r)){g.prodMuntin++;g.unidMuntin+=Number(r.cantidad||0);}
-  });
-  const typeRows=[...typeMap.values()].sort((x,y)=>(y.proyecto+y.retail)-(x.proyecto+x.retail));
-  els.typeSummaryBody.innerHTML=typeRows.length?typeRows.map(g=>`<tr><td><strong>${escapeHtml(g.sistema)}</strong></td><td>${g.proyecto}</td><td>${g.retail}</td><td><strong>${g.proyecto+g.retail}</strong></td></tr>`).join(""):'<tr><td colspan="4" class="empty">Sin datos</td></tr>';
-  const reservationRows=[...reservationMap.values()].sort((x,y)=>x.reserva.localeCompare(y.reserva,undefined,{numeric:true})||x.sistema.localeCompare(y.sistema)||x.acabado.localeCompare(y.acabado));
-  els.reservationSummaryBody.innerHTML=reservationRows.length?reservationRows.map(g=>`<tr class="${g.prodMuntin?"has-muntin-summary":""}"><td><strong>${escapeHtml(g.reserva)}</strong></td><td>${escapeHtml(g.sistema)}</td><td>${escapeHtml(g.acabado)}</td><td>${g.producciones}</td><td><strong>${g.unidades}</strong></td><td>${g.prodMuntin}</td><td>${g.unidMuntin}</td></tr>`).join(""):'<tr><td colspan="7" class="empty">Sin datos</td></tr>';
-
-  let previousReserva=null,reservaIndex=-1;
-  els.queryBody.innerHTML=rows.length?rows.map(r=>{
-    const reserva=String(r.reserva_al??"").trim()||"SIN RESERVA";
-    const starts=reserva!==previousReserva;if(starts){reservaIndex++;previousReserva=reserva;}
-    const alternate=reservaIndex%2===0?"reservation-alt":"";
-    const muntin=hasMuntin(r);
-    return `<tr class="${alternate} ${muntin?"has-muntin":""} ${starts?"reservation-start":""}">
-      <td><strong class="reservation-badge">${escapeHtml(reserva)}</strong></td><td>${escapeHtml(r.prioridad_programacion??"—")}</td><td>${escapeHtml(r.id_linea)}</td><td>${escapeHtml(r.id)}</td>
-      <td>${escapeHtml(r.produccion)}</td><td>${escapeHtml(r.sistema)}</td><td>${escapeHtml(r.acabado??"—")}</td><td>${escapeHtml(r.proyecto)}</td>
-      <td>${escapeHtml(r.cantidad??0)}</td><td>${muntin?`<strong class="muntin-badge">SÍ · ${escapeHtml(r.cantidad_muntin??r.cantidad??"")}</strong>`:"—"}</td><td>${escapeHtml(r.porc_vidrio??"—")}</td></tr>`;
-  }).join(""):'<tr><td colspan="11" class="empty">No hay registros con los filtros seleccionados.</td></tr>';
+  let rows=baseRows.filter(r=>detailColumns.every(c=>!detailColumnFilters[c.key]||String(detailValue(r,c.key)).toLowerCase().includes(detailColumnFilters[c.key].toLowerCase())));
+  if(detailSort.key)rows=[...rows].sort((x,y)=>String(detailValue(x,detailSort.key)).localeCompare(String(detailValue(y,detailSort.key)),undefined,{numeric:true})*detailSort.dir);
+  els.qVisible.textContent=rows.length;renderDetailHead();
+  let prev=null,idx=-1;
+  els.queryBody.innerHTML=rows.length?rows.map(r=>{const reserva=String(r.reserva_al??'').trim()||'SIN RESERVA';if(reserva!==prev){idx++;prev=reserva}const hm=hasMuntin(r);
+    return `<tr class="${idx%2===0?'reservation-alt':''} ${hm?'has-muntin':''}">${detailColumns.map(c=>{let v=detailValue(r,c.key);if(c.key==='reserva_al')v=reserva;if(c.key==='muntin')v=hm?'SÍ · '+(r.cantidad_muntin??r.cantidad??''):'—';return `<td>${escapeHtml(v||'—')}</td>`}).join('')}</tr>`;
+  }).join(''):`<tr><td colspan="${detailColumns.length}" class="empty">No hay registros con los filtros seleccionados.</td></tr>`;
 }
 async function queryWeeklyProgramming() {
   const token=sessionStorage.getItem(APP_SESSION_KEY), year=Number(els.queryYear.value), week=Number(els.queryWeek.value);
@@ -572,6 +564,9 @@ els.previewLoad.addEventListener("click", previewWeeklyLoad);
 els.queryProgramming?.addEventListener("click", queryWeeklyProgramming);
 els.queryLine?.addEventListener("change", renderQueriedProgramming);
 els.querySearch?.addEventListener("input", renderQueriedProgramming);
+els.queryHead?.addEventListener("click",e=>{const sort=e.target.closest("[data-sort]"),move=e.target.closest("[data-move]");if(sort){const key=sort.dataset.sort;if(detailSort.key===key)detailSort.dir*=-1;else detailSort={key,dir:1};renderQueriedProgramming()}if(move){const [i,d]=move.dataset.move.split(":").map(Number),j=i+d;if(j>=0&&j<detailColumns.length){[detailColumns[i],detailColumns[j]]=[detailColumns[j],detailColumns[i]];renderQueriedProgramming()}}});
+els.queryHead?.addEventListener("input",e=>{if(e.target.matches("[data-filter]")){detailColumnFilters[e.target.dataset.filter]=e.target.value;renderQueriedProgramming()}});
+
 els.commit.addEventListener("click", commitProgramming);
 
 openView("mecanizado");
