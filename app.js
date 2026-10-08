@@ -36,7 +36,8 @@ const els = {
   previewLoad: document.querySelector("#previewWeeklyLoad"),
   previewStatus: document.querySelector("#previewWeeklyStatus"),
   authStatus: document.querySelector("#authStatus"),
-  authEmail: document.querySelector("#authEmail"),
+  authUser: document.querySelector("#authUser"),
+  authPassword: document.querySelector("#authPassword"),
   authLogin: document.querySelector("#authLogin"),
   authLogout: document.querySelector("#authLogout"),
   importStatus: document.querySelector("#importStatus"),
@@ -146,42 +147,54 @@ function refreshWeeklyPackageGate() {
 }
 
 
+const APP_SESSION_KEY = "sgp_one_session";
+
 async function refreshAuthStatus() {
   try {
+    const token = sessionStorage.getItem(APP_SESSION_KEY);
+    if (!token) {
+      els.authStatus.textContent = "Sin sesión";
+      els.authUser.hidden = false; els.authPassword.hidden = false; els.authLogin.hidden = false; els.authLogout.hidden = true;
+      return null;
+    }
     const client = await getSupabaseClient();
-    const { data } = await client.auth.getSession();
-    const user = data?.session?.user || null;
-    els.authStatus.textContent = user ? `Sesión: ${user.email || "autenticada"}` : "Sin sesión";
-    els.authEmail.hidden = Boolean(user);
-    els.authLogin.hidden = Boolean(user);
-    els.authLogout.hidden = !user;
-    return user;
-  } catch (error) {
+    const { data, error } = await client.rpc("sgp_sesion_actual", { p_token: token });
+    if (error || !data?.valida) {
+      sessionStorage.removeItem(APP_SESSION_KEY);
+      els.authStatus.textContent = "Sesión vencida";
+      els.authUser.hidden = false; els.authPassword.hidden = false; els.authLogin.hidden = false; els.authLogout.hidden = true;
+      return null;
+    }
+    els.authStatus.textContent = `${data.nombre} · ${data.rol}`;
+    els.authUser.hidden = true; els.authPassword.hidden = true; els.authLogin.hidden = true; els.authLogout.hidden = false;
+    return data;
+  } catch {
     els.authStatus.textContent = "Auth no disponible";
     return null;
   }
 }
-async function requestEmailAccess() {
-  const email = String(els.authEmail.value || "").trim();
-  if (!email || !email.includes("@")) { els.authStatus.textContent = "Indica un correo válido."; return; }
-  els.authLogin.disabled = true;
-  els.authStatus.textContent = "Enviando acceso…";
+async function requestCredentialAccess() {
+  const usuario = String(els.authUser.value || "").trim();
+  const password = els.authPassword.value || "";
+  if (!usuario || !password) { els.authStatus.textContent = "Ingresa usuario y contraseña."; return; }
+  els.authLogin.disabled = true; els.authStatus.textContent = "Validando…";
   try {
     const client = await getSupabaseClient();
-    const { error } = await client.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: window.location.origin + window.location.pathname + "?v=29" }
-    });
+    const { data, error } = await client.rpc("sgp_login", { p_usuario: usuario, p_password: password });
     if (error) throw error;
-    els.authStatus.textContent = "Revisa tu correo para iniciar sesión.";
-  } catch (error) {
-    els.authStatus.textContent = "No fue posible enviar el acceso: " + error.message;
+    sessionStorage.setItem(APP_SESSION_KEY, data.token);
+    els.authPassword.value = "";
+    await refreshAuthStatus();
+  } catch {
+    els.authPassword.value = "";
+    els.authStatus.textContent = "Usuario o contraseña incorrectos.";
   } finally { els.authLogin.disabled = false; }
 }
 async function logout() {
-  const client = await getSupabaseClient();
-  await client.auth.signOut();
-  await refreshAuthStatus();
+  const token=sessionStorage.getItem(APP_SESSION_KEY);
+  try { if(token){ const client=await getSupabaseClient(); await client.rpc("sgp_logout",{p_token:token}); } } finally {
+    sessionStorage.removeItem(APP_SESSION_KEY); await refreshAuthStatus();
+  }
 }
 
 function currentFilters() { return { q: els.search.value, estado: els.state.value, linea: els.line.value }; }
@@ -426,6 +439,6 @@ els.commit.addEventListener("click", commitProgramming);
 openView("mecanizado");
 renderMecanizado();
 
-els.authLogin.addEventListener("click", requestEmailAccess);
+els.authLogin.addEventListener("click", requestCredentialAccess);
 els.authLogout.addEventListener("click", logout);
 refreshAuthStatus();
