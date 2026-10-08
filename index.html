@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SGP ONE LAB</title>
-  <link rel="stylesheet" href="styles.css?v=20261008-0100" />
+  <link rel="stylesheet" href="styles.css?v=20261008-0200" />
 </head>
 <body>
   <div class="app-shell">
@@ -17,7 +17,8 @@
       <nav class="nav">
         <button data-view="inicio">Inicio</button>
         <button class="active" data-view="mecanizado">Control de Mecanizado</button>
-        <button data-view="carga-semanal">Carga semanal</button>\n        <button data-view="actualizacion">Actualización diaria</button>
+        <button data-view="carga-semanal">Carga semanal</button>
+        <button data-view="actualizacion">Actualización diaria</button>
       </nav>
 
       <div class="sidebar-foot">
@@ -34,7 +35,7 @@
         </div>
         <div class="topbar-status">
           <span class="sync-ok">GitHub activo</span>
-          <span class="status">LAB v5</span>
+          <span class="status">LAB v6</span>
         </div>
       </header>
 
@@ -113,7 +114,7 @@
           <div class="page-heading">
             <span class="eyebrow">Programación</span>
             <h2>Carga semanal</h2>
-            <p>Importa archivos XLSX de programación de PANELES_2 y FRAMES_2, valida la carga y prepara el envío a Supabase.</p>
+            <p>Valida el paquete semanal de PANELES_2 y FRAMES_2 antes de cualquier escritura en Supabase.</p>
           </div>
           <section class="import-card">
             <input id="programmingFiles" type="file" accept=".xlsx" multiple />
@@ -133,6 +134,18 @@
               <tbody id="importSummaryBody"><tr><td colspan="3" class="empty">Sin validar</td></tr></tbody>
             </table>
           </section>
+          <section class="source-card">
+            <div><strong>2. Seguimiento de aluminio</strong><span>Estado logístico por ID|RESERVA. Línea Prog. no determina destino y Último Estado se ignora.</span></div>
+            <input id="aluminumTrackingFile" type="file" accept=".xlsx" />
+            <button id="validateAluminum">Validar aluminio</button>
+            <span id="aluminumStatus">Pendiente de archivo.</span>
+          </section>
+          <section class="summary import-summary">
+            <div class="metric"><span>Seguimientos válidos</span><strong id="aTotal">0</strong></div>
+            <div class="metric"><span>Reservas</span><strong id="aReservations">0</strong></div>
+            <div class="metric"><span>Entregado</span><strong id="aDelivered">0</strong></div>
+            <div class="metric"><span>Errores</span><strong id="aErrors">0</strong></div>
+          </section>
         </section>
 
         <section class="view placeholder-view" data-view-panel="actualizacion" hidden>
@@ -149,6 +162,6 @@
     </section>
   </div>
 
-  <script type="module" src="app.js?v=20261008-0100"></script>
+  <script type="module" src="app.js?v=20261008-0200"></script>
 </body>
 </html>
