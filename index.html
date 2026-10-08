@@ -36,7 +36,7 @@
         </div>
         <div class="topbar-status">
           <span class="sync-ok">GitHub activo</span>
-          <span class="status">LAB v22</span>
+          <span class="status">LAB v23</span>
         </div>
       </header>
 
@@ -146,13 +146,14 @@
             <div class="metric"><span>Órdenes producción</span><strong id="pOrders">0</strong></div>
             <div class="metric"><span>Códigos SAP únicos</span><strong id="pCodes">0</strong></div>
             <div class="metric"><span>Sin clasificar</span><strong id="pUnclassified">—</strong></div>
-            <div class="metric"><span>Sin orden</span><strong id="pNoMatch">—</strong></div>
+            <div class="metric"><span>Relacionados</span><strong id="pRelated">—</strong></div>
+            <div class="metric"><span>Sin relación</span><strong id="pNoMatch">—</strong></div>
             <div class="metric"><span>Errores estructura</span><strong id="pErrors">0</strong></div>
           </section>
           <section class="table-wrap" id="piecesNoMatchWrap" hidden>
             <table>
-              <thead><tr><th>ID</th><th>Producción</th><th>Sistema</th><th>Semana</th><th>Motivo</th></tr></thead>
-              <tbody id="piecesNoMatchBody"><tr><td colspan="5" class="empty">Sin diferencias informativas</td></tr></tbody>
+              <thead><tr><th>Producción</th><th>Sistema</th><th>Orden CO</th><th>Filas</th><th>Códigos SAP</th><th>Motivo</th></tr></thead>
+              <tbody id="piecesNoMatchBody"><tr><td colspan="6" class="empty">Sin diferencias informativas</td></tr></tbody>
             </table>
           </section>
           <section class="source-card">
@@ -217,6 +218,6 @@
     </section>
   </div>
 
-  <script type="module" src="app.js?v=22"></script>
+  <script type="module" src="app.js?v=23"></script>
 </body>
 </html>
