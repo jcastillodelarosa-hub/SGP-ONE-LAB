@@ -3,7 +3,8 @@ import { createMecanizadoModule } from "./src/modules/mecanizado.js";
 import { readProgrammingWorkbook, summarizeProgramming } from "./src/domain/production-importer.js";
 import { importProductions } from "./src/services/production-import-repository.js";
 import { readAluminumTrackingWorkbook, summarizeAluminumTracking } from "./src/domain/aluminum-tracking-importer.js";
-import { readAluminumPiecesWorkbook, summarizeAluminumPieces } from "./src/domain/aluminum-pieces-importer.js";
+import { readAluminumPiecesWorkbook, summarizeAluminumPieces, classifyAluminumPieces } from "./src/domain/aluminum-pieces-importer.js";
+import { loadPieceMaster } from "./src/services/piece-master-repository.js";
 
 const mecanizado = createMecanizadoModule(trackingRows);
 let validatedProductions = [];
@@ -123,15 +124,21 @@ async function validatePiecesFile() {
   try {
     const result = await readAluminumPiecesWorkbook(file);
     const summary = summarizeAluminumPieces(result.rows);
+    const master = await loadPieceMaster();
+    const classification = classifyAluminumPieces(result.rows, master);
     els.pTotal.textContent = summary.total;
     els.pOrders.textContent = summary.productionOrders;
     els.pCodes.textContent = summary.sapCodes;
     els.pErrors.textContent = result.errors.length;
+    els.pUnclassified.textContent = classification.unclassified.length;
     const lineText = Object.entries(summary.lines).map(([line,count]) => `${line}: ${count}`).join(" · ");
     els.piecesStatus.textContent = result.errors.length
       ? `Validación bloqueada: ${result.errors.length} error(es) de estructura.`
-      : `Estructura correcta. ${lineText}. Clasificación contra Maestro de Piezas se ejecutará antes del commit final.`;
+      : classification.unclassified.length
+        ? `Estructura correcta. ${lineText}. ${classification.unclassified.length} fila(s) con SAP no clasificado en Maestro de Piezas.`
+        : `Estructura y Maestro correctos. ${lineText}. ${master.length} códigos activos disponibles en el Maestro.`;
   } catch (error) {
+    els.pUnclassified.textContent = "—";
     els.piecesStatus.textContent = "Error: " + error.message;
   } finally {
     els.validatePieces.disabled = false;
