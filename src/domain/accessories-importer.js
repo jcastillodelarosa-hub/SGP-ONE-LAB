@@ -53,16 +53,49 @@ export async function readAccessoriesWorkbook(file) {
   return transformAccessoryRows(XLSX.utils.sheet_to_json(sheet,{defval:null,raw:true}),file.name);
 }
 export function relateAccessories(rows, productions) {
-  const index=new Map();
-  for(const p of productions||[]) {
-    const key=`${String(p.produccion??"").trim()}|${String(p.sistema??"").trim()}`;
-    if(!index.has(key)) index.set(key,[]);
-    index.get(key).push(p);
+  const normalize = value => String(value ?? "").trim().toUpperCase().replace(/\s+/g, " ");
+  const preparedIndex = new Map();
+  for (const p of productions || []) {
+    const relationKey = `${normalize(p.produccion)}|${normalize(p.sistema)}`;
+    if (!preparedIndex.has(relationKey)) preparedIndex.set(relationKey, new Map());
+    const byId = preparedIndex.get(relationKey);
+    const id = String(p.id ?? "").trim();
+    if (!id) continue;
+    if (!byId.has(id)) byId.set(id, { id, lines:new Set(), keys:new Set() });
+    const candidate = byId.get(id);
+    candidate.lines.add(p.id_linea);
+    candidate.keys.add(p.key_produccion);
   }
-  let related=0,noMatch=0,conflicts=0;
-  for(const row of rows) {
-    const matches=index.get(`${row.produccion}|${row.sistema}`)||[];
-    if(matches.length===1) related++; else if(matches.length===0) noMatch++; else conflicts++;
+
+  // El contrato histórico diagnostica producciones únicas del archivo de Accesorios,
+  // no cada fila física. PANELES_2 + FRAMES_2 del mismo ID NO son conflicto.
+  const sourceGroups = new Map();
+  for (const row of rows || []) {
+    const relationKey = `${normalize(row.produccion)}|${normalize(row.sistema)}`;
+    if (!sourceGroups.has(relationKey)) sourceGroups.set(relationKey, { ...row, filas:0 });
+    sourceGroups.get(relationKey).filas++;
   }
-  return {related,noMatch,conflicts};
+
+  let related=0, noMatch=0, conflicts=0;
+  const relatedRows=[], noMatchRows=[], conflictRows=[];
+  for (const [relationKey, source] of sourceGroups) {
+    const byId = preparedIndex.get(relationKey) || new Map();
+    const ids = [...byId.keys()];
+    if (ids.length === 0) {
+      noMatch++;
+      noMatchRows.push(source);
+    } else if (ids.length > 1) {
+      conflicts++;
+      conflictRows.push({ source, ids });
+    } else {
+      related++;
+      const match=byId.get(ids[0]);
+      relatedRows.push({ source, id:ids[0], lines:[...match.lines], keys:[...match.keys] });
+    }
+  }
+  return {
+    related, noMatch, conflicts,
+    sourceGroups:sourceGroups.size,
+    relatedRows, noMatchRows, conflictRows
+  };
 }
