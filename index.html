@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SGP ONE LAB</title>
-  <link rel="stylesheet" href="styles.css?v=38" />
+  <link rel="stylesheet" href="styles.css?v=39" />
   <script src="config.js?v=20261008-1300"></script>
 </head>
 <body>
@@ -42,7 +42,7 @@
           <input id="authPassword" type="password" placeholder="Contraseña" autocomplete="current-password" />
           <button id="authLogin">Ingresar</button>
           <button id="authLogout" hidden>Cerrar sesión</button>
-          <span class="status">LAB v38</span>
+          <span class="status">LAB v39</span>
         </div>
       </header>
 
@@ -133,14 +133,11 @@
           <section class="summary">
             <div class="metric"><span>Semana</span><strong id="qWeek">—</strong></div>
             <div class="metric"><span>Producciones</span><strong id="qTotal">0</strong></div>
-            <div class="metric"><span>Unidades</span><strong id="qUnits">0</strong></div>
-            <div class="metric"><span>Visibles</span><strong id="qVisible">0</strong></div>
-            <div class="metric muntin-metric"><span>Producciones con Muntin</span><strong id="qMuntinProd">0</strong></div>
-            <div class="metric muntin-metric"><span>Unidades con Muntin</span><strong id="qMuntinUnits">0</strong></div>
+            <div class="metric"><span>Unidades</span><strong id="qUnits">0</strong></div>            <div class="metric"><span>Visibles</span><strong id="qVisible">0</strong></div>
           </section>
           <div id="queryStatus" class="placeholder-card">Selecciona una semana y pulsa Consultar semana.</div>
           <section class="table-wrap programming-summary">
-            <table><thead><tr><th>Sistema</th><th>Acabado</th><th>Producciones</th><th>Unidades programadas</th><th>Prod. con Muntin</th><th>Unid. con Muntin</th></tr></thead>
+            <table><thead><tr><th>Sistema</th><th>Reservas</th><th>Producciones</th><th>Unidades</th><th>Prod. con Muntin</th><th>Unid. con Muntin</th></tr></thead>
             <tbody id="systemSummaryBody"><tr><td colspan="6" class="empty">Sin consulta</td></tr></tbody></table>
           </section>
           <section class="table-wrap">
@@ -262,6 +259,6 @@
     </section>
   </div>
 
-  <script type="module" src="app.js?v=38"></script>
+  <script type="module" src="app.js?v=39"></script>
 </body>
 </html>
