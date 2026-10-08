@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SGP ONE LAB</title>
-  <link rel="stylesheet" href="styles.css?v=46" />
+  <link rel="stylesheet" href="styles.css?v=47" />
   <script src="config.js?v=20261008-1300"></script>
 </head>
 <body>
@@ -42,7 +42,7 @@
           <input id="authPassword" type="password" placeholder="Contraseña" autocomplete="current-password" />
           <button id="authLogin">Ingresar</button>
           <button id="authLogout" hidden>Cerrar sesión</button>
-          <span class="status">LAB v46</span>
+          <span class="status">LAB v47</span>
         </div>
       </header>
 
@@ -274,12 +274,14 @@
       <div class="piece-modal-card" role="dialog" aria-modal="true" aria-labelledby="pieceModalTitle">
         <div class="piece-modal-head"><div><span class="eyebrow">Detalle de piezas</span><h2 id="pieceModalTitle">Piezas</h2></div><button id="closePieceModal" type="button">✕</button></div>
         <div id="pieceModalMeta" class="piece-modal-meta"></div>
-        <div class="table-wrap"><table><thead><tr><th>Perfil</th><th>Descripción</th><th>Cantidad</th><th></th></tr></thead><tbody id="pieceProfileBody"></tbody><tfoot id="pieceProfileFoot"></tfoot></table></div>
+        <div class="piece-view-tabs"><button type="button" data-piece-view="summary" class="active">Resumen</button><button type="button" data-piece-view="expanded">Ampliado</button><button type="button" data-piece-view="detailed">Detallado</button></div>
+        <div id="pieceDetailedOptions" class="piece-detail-options" hidden><strong>Desplegar:</strong><label><input type="checkbox" value="marca" checked> Marca</label><label><input type="checkbox" value="fabricacion" checked> Fabricación</label><label><input type="checkbox" value="longitud" checked> Longitud</label><span>En Detallado puedes mover columnas con ← →.</span></div>
+        <div class="table-wrap"><table><thead id="pieceProfileHead"></thead><tbody id="pieceProfileBody"></tbody><tfoot id="pieceProfileFoot"></tfoot></table></div>
       </div>
     </div>
     </section>
   </div>
 
-  <script type="module" src="app.js?v=46"></script>
+  <script type="module" src="app.js?v=47"></script>
 </body>
 </html>
