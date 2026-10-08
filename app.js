@@ -20,7 +20,7 @@ let queriedSystemSummary = [];
 let detailSort = { key: null, dir: 1 };
 let detailColumnFilters = {};
 let detailColumns = [
- {key:'reserva_al',label:'Reserva'}, {key:'prioridad_programacion',label:'Prioridad'}, {key:'id_linea',label:'Línea'}, {key:'id',label:'ID'}, {key:'produccion',label:'Producción'}, {key:'sistema',label:'Sistema'}, {key:'acabado',label:'Acabado'}, {key:'proyecto',label:'Proyecto'}, {key:'cantidad',label:'Cantidad'}, {key:'muntin',label:'Muntin'}, {key:'porc_vidrio',label:'Vidrio'}
+ {key:'reserva_al',label:'Reserva'}, {key:'id_linea',label:'Línea'}, {key:'id',label:'ID'}, {key:'produccion',label:'Producción'}, {key:'sistema',label:'Sistema'}, {key:'acabado',label:'Acabado'}, {key:'proyecto',label:'Proyecto'}, {key:'cantidad',label:'Cantidad'}, {key:'muntin',label:'Muntin'}, {key:'porc_vidrio',label:'Vidrio'}
 ];
 
 const els = {
@@ -73,7 +73,7 @@ const els = {
   piecesNoMatchBody: document.querySelector("#piecesNoMatchBody"),
   accessoriesFile: document.querySelector("#accessoriesFile"), validateAccessories: document.querySelector("#validateAccessories"), accessoriesStatus: document.querySelector("#accessoriesStatus"), xTotal: document.querySelector("#xTotal"), xRelated: document.querySelector("#xRelated"), xNoMatch: document.querySelector("#xNoMatch"), xErrors: document.querySelector("#xErrors"), accessoriesNoMatchWrap: document.querySelector("#accessoriesNoMatchWrap"), accessoriesNoMatchBody: document.querySelector("#accessoriesNoMatchBody"),
   glassFile: document.querySelector("#glassFile"), validateGlass: document.querySelector("#validateGlass"), glassStatus: document.querySelector("#glassStatus"), gTotal: document.querySelector("#gTotal"), gRelated: document.querySelector("#gRelated"), gNoMatch: document.querySelector("#gNoMatch"), gSkipped: document.querySelector("#gSkipped"), gErrors: document.querySelector("#gErrors"), glassNoMatchWrap: document.querySelector("#glassNoMatchWrap"), glassNoMatchBody: document.querySelector("#glassNoMatchBody"),
-  queryYear: document.querySelector("#queryYear"), queryWeek: document.querySelector("#queryWeek"), queryLine: document.querySelector("#queryLine"), querySearch: document.querySelector("#querySearch"), queryProgramming: document.querySelector("#queryProgramming"), queryStatus: document.querySelector("#queryStatus"), queryBody: document.querySelector("#queryProgrammingBody"), qWeek: document.querySelector("#qWeek"), qTotal: document.querySelector("#qTotal"), qUnits: document.querySelector("#qUnits"), qVisible: document.querySelector("#qVisible"), systemSummaryBody: document.querySelector("#systemSummaryBody"), typeSummaryBody: document.querySelector("#typeSummaryBody"), reservationSummaryBody: document.querySelector("#reservationSummaryBody"), systemSummaryFoot: document.querySelector("#systemSummaryFoot"), typeSummaryFoot: document.querySelector("#typeSummaryFoot"), reservationSummaryFoot: document.querySelector("#reservationSummaryFoot"), queryHead: document.querySelector("#queryProgrammingHead"), typeSummaryBody: document.querySelector("#typeSummaryBody"), reservationSummaryBody: document.querySelector("#reservationSummaryBody")
+  queryYear: document.querySelector("#queryYear"), queryWeek: document.querySelector("#queryWeek"), queryLine: document.querySelector("#queryLine"), querySearch: document.querySelector("#querySearch"), queryProgramming: document.querySelector("#queryProgramming"), queryStatus: document.querySelector("#queryStatus"), queryBody: document.querySelector("#queryProgrammingBody"), qWeek: document.querySelector("#qWeek"), qTotal: document.querySelector("#qTotal"), qUnits: document.querySelector("#qUnits"), qVisible: document.querySelector("#qVisible"), systemSummaryBody: document.querySelector("#systemSummaryBody"), typeSummaryBody: document.querySelector("#typeSummaryBody"), reservationSummaryBody: document.querySelector("#reservationSummaryBody"), systemSummaryFoot: document.querySelector("#systemSummaryFoot"), typeSummaryFoot: document.querySelector("#typeSummaryFoot"), reservationSummaryFoot: document.querySelector("#reservationSummaryFoot"), queryHead: document.querySelector("#queryProgrammingHead"), pieceGroup: document.querySelector("#pieceGroup"), loadPieces: document.querySelector("#loadPieces"), pieceStatus: document.querySelector("#pieceStatus"), pieceWrap: document.querySelector("#pieceWrap"), pieceBody: document.querySelector("#pieceBody"), pieceFoot: document.querySelector("#pieceFoot"), typeSummaryBody: document.querySelector("#typeSummaryBody"), reservationSummaryBody: document.querySelector("#reservationSummaryBody")
 };
 
 function escapeHtml(value) {
@@ -456,8 +456,8 @@ function renderQueriedProgramming(){
   els.typeSummaryBody.innerHTML=typeRows.map(g=>`<tr><td><strong>${escapeHtml(g.sistema)}</strong></td><td>${g.proyecto}</td><td>${g.retail}</td><td><strong>${g.proyecto+g.retail}</strong></td></tr>`).join('');
   const projectTotal=typeRows.reduce((n,g)=>n+g.proyecto,0),retailTotal=typeRows.reduce((n,g)=>n+g.retail,0);
   els.typeSummaryFoot.innerHTML=`<tr><td>TOTAL</td><td>${projectTotal}</td><td>${retailTotal}</td><td>${projectTotal+retailTotal}</td></tr>`;
-  const rr=[...reservations.values()].sort((x,y)=>x.reserva.localeCompare(y.reserva,undefined,{numeric:true})||x.sistema.localeCompare(y.sistema));
-  els.reservationSummaryBody.innerHTML=rr.map(g=>`<tr class="${g.prodMuntin?'has-muntin-summary':''}"><td><strong>${escapeHtml(g.reserva)}</strong></td><td>${escapeHtml(g.sistema)}</td><td>${escapeHtml(g.acabado)}</td><td>${g.producciones}</td><td><strong>${g.unidades}</strong></td><td>${g.prodMuntin}</td><td>${g.unidMuntin}</td></tr>`).join('');
+  const rr=[...reservations.values()].sort((x,y)=>x.sistema.localeCompare(y.sistema)||x.reserva.localeCompare(y.reserva,undefined,{numeric:true})||x.acabado.localeCompare(y.acabado));
+  els.reservationSummaryBody.innerHTML=rr.map(g=>`<tr class="${g.prodMuntin?'has-muntin-summary':''}"><td><strong>${escapeHtml(g.sistema)}</strong></td><td>${escapeHtml(g.reserva)}</td><td>${escapeHtml(g.acabado)}</td><td>${g.producciones}</td><td><strong>${g.unidades}</strong></td><td>${g.prodMuntin}</td><td>${g.unidMuntin}</td></tr>`).join('');
   els.reservationSummaryFoot.innerHTML=`<tr><td>TOTAL</td><td></td><td></td><td>${baseRows.length}</td><td>${units}</td><td>${baseRows.filter(hasMuntin).length}</td><td>${baseRows.filter(hasMuntin).reduce((n,r)=>n+Number(r.cantidad||0),0)}</td></tr>`;
 
   let rows=baseRows.filter(r=>detailColumns.every(c=>!detailColumnFilters[c.key]||String(detailValue(r,c.key)).toLowerCase().includes(detailColumnFilters[c.key].toLowerCase())));
@@ -467,6 +467,18 @@ function renderQueriedProgramming(){
   els.queryBody.innerHTML=rows.length?rows.map(r=>{const reserva=String(r.reserva_al??'').trim()||'SIN RESERVA';if(reserva!==prev){idx++;prev=reserva}const hm=hasMuntin(r);
     return `<tr class="${idx%2===0?'reservation-alt':''} ${hm?'has-muntin':''}">${detailColumns.map(c=>{let v=detailValue(r,c.key);if(c.key==='reserva_al')v=reserva;if(c.key==='muntin')v=hm?'SÍ · '+(r.cantidad_muntin??r.cantidad??''):'—';return `<td>${escapeHtml(v||'—')}</td>`}).join('')}</tr>`;
   }).join(''):`<tr><td colspan="${detailColumns.length}" class="empty">No hay registros con los filtros seleccionados.</td></tr>`;
+}
+async function loadWeeklyPieces(){
+  const line=els.queryLine.value;if(!line){els.pieceStatus.textContent='Selecciona PANELES_2 o FRAMES_2 para desplegar piezas.';return}
+  const token=sessionStorage.getItem(APP_SESSION_KEY),year=Number(els.queryYear.value),week=Number(els.queryWeek.value),dest=line==='PANELES_2'?'PANEL':'FRAME';
+  els.loadPieces.disabled=true;els.pieceStatus.textContent='Consultando piezas '+dest+'…';
+  try{const client=await getSupabaseClient();const {data,error}=await client.rpc('sgp_consultar_piezas_semana',{p_token:token,p_anio:year,p_semana:week});if(error)throw error;
+    const src=(data?.piezas||[]).filter(r=>String(r.destino_productivo).toUpperCase()===dest),group=els.pieceGroup.value,map=new Map();
+    src.forEach(r=>{const g=group==='reserva'?r.reserva:r.produccion||r.key_produccion,key=[g,r.sistema,r.codigo_sap,r.descripcion,r.acabado].join('|');if(!map.has(key))map.set(key,{grupo:g,sistema:r.sistema,sap:r.codigo_sap,descripcion:r.descripcion,acabado:r.acabado,filas:0,piezas:0});const x=map.get(key);x.filas+=Number(r.filas||0);x.piezas+=Number(r.cantidad||0)});
+    const rows=[...map.values()].sort((x,y)=>String(x.grupo).localeCompare(String(y.grupo),undefined,{numeric:true})||String(x.sap).localeCompare(String(y.sap),undefined,{numeric:true}));
+    els.pieceBody.innerHTML=rows.map(x=>`<tr><td><strong>${escapeHtml(x.grupo)}</strong></td><td>${escapeHtml(x.sistema)}</td><td>${escapeHtml(x.sap)}</td><td>${escapeHtml(x.descripcion)}</td><td>${escapeHtml(x.acabado)}</td><td>${x.filas}</td><td><strong>${x.piezas}</strong></td></tr>`).join('');
+    els.pieceFoot.innerHTML=`<tr><td>TOTAL</td><td></td><td></td><td></td><td></td><td>${src.reduce((n,r)=>n+Number(r.filas||0),0)}</td><td>${src.reduce((n,r)=>n+Number(r.cantidad||0),0)}</td></tr>`;els.pieceWrap.hidden=false;els.pieceStatus.textContent=`${dest}: ${src.length} combinaciones de pieza cargadas.`;
+  }catch(e){els.pieceStatus.textContent='No fue posible consultar piezas: '+e.message}finally{els.loadPieces.disabled=false}
 }
 async function queryWeeklyProgramming() {
   const token=sessionStorage.getItem(APP_SESSION_KEY), year=Number(els.queryYear.value), week=Number(els.queryWeek.value);
@@ -564,6 +576,8 @@ els.previewLoad.addEventListener("click", previewWeeklyLoad);
 els.queryProgramming?.addEventListener("click", queryWeeklyProgramming);
 els.queryLine?.addEventListener("change", renderQueriedProgramming);
 els.querySearch?.addEventListener("input", renderQueriedProgramming);
+els.loadPieces?.addEventListener("click",loadWeeklyPieces);
+els.pieceGroup?.addEventListener("change",()=>{if(!els.pieceWrap.hidden)loadWeeklyPieces()});
 els.queryHead?.addEventListener("click",e=>{const sort=e.target.closest("[data-sort]"),move=e.target.closest("[data-move]");if(sort){const key=sort.dataset.sort;if(detailSort.key===key)detailSort.dir*=-1;else detailSort={key,dir:1};renderQueriedProgramming()}if(move){const [i,d]=move.dataset.move.split(":").map(Number),j=i+d;if(j>=0&&j<detailColumns.length){[detailColumns[i],detailColumns[j]]=[detailColumns[j],detailColumns[i]];renderQueriedProgramming()}}});
 els.queryHead?.addEventListener("change",e=>{if(e.target.matches("[data-filter]")){detailColumnFilters[e.target.dataset.filter]=e.target.value;renderQueriedProgramming()}});
 
