@@ -413,20 +413,29 @@ async function previewWeeklyLoad() {
   }
 }
 
+function reservationToneClass(reserva) {
+  const tones=["reservation-tone-1","reservation-tone-2","reservation-tone-3","reservation-tone-4","reservation-tone-5","reservation-tone-6"];
+  let hash=0; for (const ch of String(reserva ?? "SIN RESERVA")) hash=((hash<<5)-hash)+ch.charCodeAt(0);
+  return tones[Math.abs(hash)%tones.length];
+}
 function renderQueriedProgramming() {
   if (!els.queryBody) return;
   const line = els.queryLine.value;
   const term = els.querySearch.value.trim().toLowerCase();
-  const rows = queriedProductions.filter(r => (!line || r.id_linea === line) && (!term || [r.id,r.produccion,r.sistema,r.proyecto,r.cliente].some(v => String(v ?? "").toLowerCase().includes(term))));
+  const rows = queriedProductions.filter(r => (!line || r.id_linea === line) && (!term || [r.id,r.reserva_al,r.produccion,r.sistema,r.proyecto,r.cliente].some(v => String(v ?? "").toLowerCase().includes(term))));
   els.qVisible.textContent = rows.length;
+  let previousReserva=null;
   els.queryBody.innerHTML = rows.length ? rows.map(r => {
-    const hasMuntin = !["","NO","N","0","FALSE"].includes(String(r.muntin ?? "").trim().toUpperCase());
-    return `<tr class="${hasMuntin ? "has-muntin" : ""}">
-    <td>${escapeHtml(r.prioridad_programacion ?? "—")}</td><td>${escapeHtml(r.id_linea)}</td><td>${escapeHtml(r.id)}</td>
-    <td>${escapeHtml(r.produccion)}</td><td>${escapeHtml(r.sistema)}</td><td>${escapeHtml(r.acabado ?? "—")}</td><td>${escapeHtml(r.proyecto)}</td>
-    <td>${escapeHtml(r.cantidad ?? 0)}</td><td>${hasMuntin ? `<strong class="muntin-badge">SÍ · ${escapeHtml(r.cantidad_muntin ?? r.cantidad ?? "")}</strong>` : "—"}</td>
-    <td>${escapeHtml(r.porc_vidrio ?? "—")}</td></tr>`;
-  }).join("") : '<tr><td colspan="10" class="empty">No hay registros con los filtros seleccionados.</td></tr>';
+    const reserva=String(r.reserva_al ?? "").trim() || "SIN RESERVA";
+    const hasMuntin=!["","NO","N","0","FALSE"].includes(String(r.muntin ?? "").trim().toUpperCase());
+    const startsGroup=reserva!==previousReserva; previousReserva=reserva;
+    return `<tr class="${reservationToneClass(reserva)} ${hasMuntin ? "has-muntin" : ""} ${startsGroup ? "reservation-start" : ""}">
+      <td><strong class="reservation-badge">${escapeHtml(reserva)}</strong></td>
+      <td>${escapeHtml(r.prioridad_programacion ?? "—")}</td><td>${escapeHtml(r.id_linea)}</td><td>${escapeHtml(r.id)}</td>
+      <td>${escapeHtml(r.produccion)}</td><td>${escapeHtml(r.sistema)}</td><td>${escapeHtml(r.acabado ?? "—")}</td><td>${escapeHtml(r.proyecto)}</td>
+      <td>${escapeHtml(r.cantidad ?? 0)}</td><td>${hasMuntin ? `<strong class="muntin-badge">SÍ · ${escapeHtml(r.cantidad_muntin ?? r.cantidad ?? "")}</strong>` : "—"}</td>
+      <td>${escapeHtml(r.porc_vidrio ?? "—")}</td></tr>`;
+  }).join("") : '<tr><td colspan="11" class="empty">No hay registros con los filtros seleccionados.</td></tr>';
 }
 async function queryWeeklyProgramming() {
   const token=sessionStorage.getItem(APP_SESSION_KEY), year=Number(els.queryYear.value), week=Number(els.queryWeek.value);
