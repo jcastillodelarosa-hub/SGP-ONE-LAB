@@ -3,6 +3,7 @@ import { createMecanizadoModule } from "./src/modules/mecanizado.js";
 import { readProgrammingWorkbook, summarizeProgramming } from "./src/domain/production-importer.js";
 import { importProductions } from "./src/services/production-import-repository.js";
 import { readAluminumTrackingWorkbook, summarizeAluminumTracking } from "./src/domain/aluminum-tracking-importer.js";
+import { readAluminumPiecesWorkbook, summarizeAluminumPieces } from "./src/domain/aluminum-pieces-importer.js";
 
 const mecanizado = createMecanizadoModule(trackingRows);
 let validatedProductions = [];
@@ -34,7 +35,14 @@ const els = {
   aTotal: document.querySelector("#aTotal"),
   aReservations: document.querySelector("#aReservations"),
   aDelivered: document.querySelector("#aDelivered"),
-  aErrors: document.querySelector("#aErrors")
+  aErrors: document.querySelector("#aErrors"),
+  piecesFile: document.querySelector("#aluminumPiecesFile"),
+  validatePieces: document.querySelector("#validatePieces"),
+  piecesStatus: document.querySelector("#piecesStatus"),
+  pTotal: document.querySelector("#pTotal"),
+  pOrders: document.querySelector("#pOrders"),
+  pCodes: document.querySelector("#pCodes"),
+  pErrors: document.querySelector("#pErrors")
 };
 
 function currentFilters() { return { q: els.search.value, estado: els.state.value, linea: els.line.value }; }
@@ -107,6 +115,29 @@ async function validateAluminumFile() {
   }
 }
 
+async function validatePiecesFile() {
+  const file = els.piecesFile.files?.[0];
+  if (!file) { els.piecesStatus.textContent = "Selecciona el listado de piezas."; return; }
+  els.validatePieces.disabled = true;
+  els.piecesStatus.textContent = "Validando estructura…";
+  try {
+    const result = await readAluminumPiecesWorkbook(file);
+    const summary = summarizeAluminumPieces(result.rows);
+    els.pTotal.textContent = summary.total;
+    els.pOrders.textContent = summary.productionOrders;
+    els.pCodes.textContent = summary.sapCodes;
+    els.pErrors.textContent = result.errors.length;
+    const lineText = Object.entries(summary.lines).map(([line,count]) => `${line}: ${count}`).join(" · ");
+    els.piecesStatus.textContent = result.errors.length
+      ? `Validación bloqueada: ${result.errors.length} error(es) de estructura.`
+      : `Estructura correcta. ${lineText}. Clasificación contra Maestro de Piezas se ejecutará antes del commit final.`;
+  } catch (error) {
+    els.piecesStatus.textContent = "Error: " + error.message;
+  } finally {
+    els.validatePieces.disabled = false;
+  }
+}
+
 async function commitProgramming() {
   if (!validatedProductions.length) return;
   els.commit.disabled = true;
@@ -125,6 +156,7 @@ els.nav.forEach(button => button.addEventListener("click", () => openView(button
 els.simulate.addEventListener("click", () => { els.demoMessage.textContent = mecanizado.advanceDemoState(); renderMecanizado(); });
 els.validate.addEventListener("click", validateProgrammingFiles);
 els.validateAluminum.addEventListener("click", validateAluminumFile);
+els.validatePieces.addEventListener("click", validatePiecesFile);
 els.commit.addEventListener("click", commitProgramming);
 
 openView("mecanizado");
