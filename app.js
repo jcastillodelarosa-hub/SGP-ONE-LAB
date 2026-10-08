@@ -565,7 +565,7 @@ els.queryProgramming?.addEventListener("click", queryWeeklyProgramming);
 els.queryLine?.addEventListener("change", renderQueriedProgramming);
 els.querySearch?.addEventListener("input", renderQueriedProgramming);
 els.queryHead?.addEventListener("click",e=>{const sort=e.target.closest("[data-sort]"),move=e.target.closest("[data-move]");if(sort){const key=sort.dataset.sort;if(detailSort.key===key)detailSort.dir*=-1;else detailSort={key,dir:1};renderQueriedProgramming()}if(move){const [i,d]=move.dataset.move.split(":").map(Number),j=i+d;if(j>=0&&j<detailColumns.length){[detailColumns[i],detailColumns[j]]=[detailColumns[j],detailColumns[i]];renderQueriedProgramming()}}});
-els.queryHead?.addEventListener("input",e=>{if(e.target.matches("[data-filter]")){detailColumnFilters[e.target.dataset.filter]=e.target.value;renderQueriedProgramming()}});
+els.queryHead?.addEventListener("change",e=>{if(e.target.matches("[data-filter]")){detailColumnFilters[e.target.dataset.filter]=e.target.value;renderQueriedProgramming()}});
 
 els.commit.addEventListener("click", commitProgramming);
 
