@@ -68,7 +68,7 @@ const els = {
   piecesNoMatchBody: document.querySelector("#piecesNoMatchBody"),
   accessoriesFile: document.querySelector("#accessoriesFile"), validateAccessories: document.querySelector("#validateAccessories"), accessoriesStatus: document.querySelector("#accessoriesStatus"), xTotal: document.querySelector("#xTotal"), xRelated: document.querySelector("#xRelated"), xNoMatch: document.querySelector("#xNoMatch"), xErrors: document.querySelector("#xErrors"), accessoriesNoMatchWrap: document.querySelector("#accessoriesNoMatchWrap"), accessoriesNoMatchBody: document.querySelector("#accessoriesNoMatchBody"),
   glassFile: document.querySelector("#glassFile"), validateGlass: document.querySelector("#validateGlass"), glassStatus: document.querySelector("#glassStatus"), gTotal: document.querySelector("#gTotal"), gRelated: document.querySelector("#gRelated"), gNoMatch: document.querySelector("#gNoMatch"), gSkipped: document.querySelector("#gSkipped"), gErrors: document.querySelector("#gErrors"), glassNoMatchWrap: document.querySelector("#glassNoMatchWrap"), glassNoMatchBody: document.querySelector("#glassNoMatchBody"),
-  queryYear: document.querySelector("#queryYear"), queryWeek: document.querySelector("#queryWeek"), queryLine: document.querySelector("#queryLine"), querySearch: document.querySelector("#querySearch"), queryProgramming: document.querySelector("#queryProgramming"), queryStatus: document.querySelector("#queryStatus"), queryBody: document.querySelector("#queryProgrammingBody"), qWeek: document.querySelector("#qWeek"), qTotal: document.querySelector("#qTotal"), qUnits: document.querySelector("#qUnits"), qVisible: document.querySelector("#qVisible"), qMuntinProd: document.querySelector("#qMuntinProd"), qMuntinUnits: document.querySelector("#qMuntinUnits"), systemSummaryBody: document.querySelector("#systemSummaryBody")
+  queryYear: document.querySelector("#queryYear"), queryWeek: document.querySelector("#queryWeek"), queryLine: document.querySelector("#queryLine"), querySearch: document.querySelector("#querySearch"), queryProgramming: document.querySelector("#queryProgramming"), queryStatus: document.querySelector("#queryStatus"), queryBody: document.querySelector("#queryProgrammingBody"), qWeek: document.querySelector("#qWeek"), qTotal: document.querySelector("#qTotal"), qUnits: document.querySelector("#qUnits"), qVisible: document.querySelector("#qVisible"), systemSummaryBody: document.querySelector("#systemSummaryBody")
 };
 
 function escapeHtml(value) {
@@ -413,29 +413,41 @@ async function previewWeeklyLoad() {
   }
 }
 
-function reservationToneClass(reserva) {
-  const tones=["reservation-tone-1","reservation-tone-2","reservation-tone-3","reservation-tone-4","reservation-tone-5","reservation-tone-6"];
-  let hash=0; for (const ch of String(reserva ?? "SIN RESERVA")) hash=((hash<<5)-hash)+ch.charCodeAt(0);
-  return tones[Math.abs(hash)%tones.length];
+function hasMuntin(r) {
+  return !["","NO","N","0","FALSE"].includes(String(r.muntin ?? "").trim().toUpperCase());
+}
+function filteredProgrammingRows() {
+  const line=els.queryLine.value;
+  const term=els.querySearch.value.trim().toLowerCase();
+  return queriedProductions.filter(r=>(!line||r.id_linea===line)&&(!term||[r.id,r.reserva_al,r.produccion,r.sistema,r.proyecto,r.cliente,r.acabado].some(v=>String(v??"").toLowerCase().includes(term))));
 }
 function renderQueriedProgramming() {
-  if (!els.queryBody) return;
-  const line = els.queryLine.value;
-  const term = els.querySearch.value.trim().toLowerCase();
-  const rows = queriedProductions.filter(r => (!line || r.id_linea === line) && (!term || [r.id,r.reserva_al,r.produccion,r.sistema,r.proyecto,r.cliente].some(v => String(v ?? "").toLowerCase().includes(term))));
-  els.qVisible.textContent = rows.length;
-  let previousReserva=null;
-  els.queryBody.innerHTML = rows.length ? rows.map(r => {
-    const reserva=String(r.reserva_al ?? "").trim() || "SIN RESERVA";
-    const hasMuntin=!["","NO","N","0","FALSE"].includes(String(r.muntin ?? "").trim().toUpperCase());
-    const startsGroup=reserva!==previousReserva; previousReserva=reserva;
-    return `<tr class="${reservationToneClass(reserva)} ${hasMuntin ? "has-muntin" : ""} ${startsGroup ? "reservation-start" : ""}">
-      <td><strong class="reservation-badge">${escapeHtml(reserva)}</strong></td>
-      <td>${escapeHtml(r.prioridad_programacion ?? "—")}</td><td>${escapeHtml(r.id_linea)}</td><td>${escapeHtml(r.id)}</td>
-      <td>${escapeHtml(r.produccion)}</td><td>${escapeHtml(r.sistema)}</td><td>${escapeHtml(r.acabado ?? "—")}</td><td>${escapeHtml(r.proyecto)}</td>
-      <td>${escapeHtml(r.cantidad ?? 0)}</td><td>${hasMuntin ? `<strong class="muntin-badge">SÍ · ${escapeHtml(r.cantidad_muntin ?? r.cantidad ?? "")}</strong>` : "—"}</td>
-      <td>${escapeHtml(r.porc_vidrio ?? "—")}</td></tr>`;
-  }).join("") : '<tr><td colspan="11" class="empty">No hay registros con los filtros seleccionados.</td></tr>';
+  if(!els.queryBody)return;
+  const rows=filteredProgrammingRows();
+  const units=rows.reduce((n,r)=>n+Number(r.cantidad||0),0);
+  els.qTotal.textContent=rows.length; els.qUnits.textContent=units; els.qVisible.textContent=rows.length;
+
+  const systems=new Map();
+  rows.forEach(r=>{
+    const key=r.sistema||"SIN SISTEMA",reserva=String(r.reserva_al??"").trim()||"SIN RESERVA";
+    if(!systems.has(key))systems.set(key,{sistema:key,reservas:new Set(),producciones:0,unidades:0,prodMuntin:0,unidMuntin:0});
+    const g=systems.get(key);g.reservas.add(reserva);g.producciones++;g.unidades+=Number(r.cantidad||0);
+    if(hasMuntin(r)){g.prodMuntin++;g.unidMuntin+=Number(r.cantidad||0);}
+  });
+  const summary=[...systems.values()].sort((x,y)=>y.unidades-x.unidades||x.sistema.localeCompare(y.sistema));
+  els.systemSummaryBody.innerHTML=summary.length?summary.map(g=>`<tr class="${g.prodMuntin?"has-muntin-summary":""}"><td><strong>${escapeHtml(g.sistema)}</strong></td><td>${g.reservas.size}</td><td>${g.producciones}</td><td><strong>${g.unidades}</strong></td><td>${g.prodMuntin}</td><td>${g.unidMuntin}</td></tr>`).join(""):'<tr><td colspan="6" class="empty">Sin datos</td></tr>';
+
+  let previousReserva=null,reservaIndex=-1;
+  els.queryBody.innerHTML=rows.length?rows.map(r=>{
+    const reserva=String(r.reserva_al??"").trim()||"SIN RESERVA";
+    const starts=reserva!==previousReserva;if(starts){reservaIndex++;previousReserva=reserva;}
+    const alternate=reservaIndex%2===0?"reservation-alt":"";
+    const muntin=hasMuntin(r);
+    return `<tr class="${alternate} ${muntin?"has-muntin":""} ${starts?"reservation-start":""}">
+      <td><strong class="reservation-badge">${escapeHtml(reserva)}</strong></td><td>${escapeHtml(r.prioridad_programacion??"—")}</td><td>${escapeHtml(r.id_linea)}</td><td>${escapeHtml(r.id)}</td>
+      <td>${escapeHtml(r.produccion)}</td><td>${escapeHtml(r.sistema)}</td><td>${escapeHtml(r.acabado??"—")}</td><td>${escapeHtml(r.proyecto)}</td>
+      <td>${escapeHtml(r.cantidad??0)}</td><td>${muntin?`<strong class="muntin-badge">SÍ · ${escapeHtml(r.cantidad_muntin??r.cantidad??"")}</strong>`:"—"}</td><td>${escapeHtml(r.porc_vidrio??"—")}</td></tr>`;
+  }).join(""):'<tr><td colspan="11" class="empty">No hay registros con los filtros seleccionados.</td></tr>';
 }
 async function queryWeeklyProgramming() {
   const token=sessionStorage.getItem(APP_SESSION_KEY), year=Number(els.queryYear.value), week=Number(els.queryWeek.value);
@@ -446,9 +458,7 @@ async function queryWeeklyProgramming() {
     const {data,error}=await client.rpc("sgp_consultar_programacion_semana",{p_token:token,p_anio:year,p_semana:week});
     if(error) throw error;
     queriedProductions=data?.producciones || []; queriedSystemSummary=data?.resumen_sistemas || [];
-    els.qWeek.textContent=`${week} / ${year}`; els.qTotal.textContent=data?.total_producciones ?? 0; els.qUnits.textContent=data?.total_unidades ?? 0;
-    els.qMuntinProd.textContent=data?.muntin?.producciones ?? 0; els.qMuntinUnits.textContent=data?.muntin?.unidades ?? 0;
-    els.systemSummaryBody.innerHTML=queriedSystemSummary.length ? queriedSystemSummary.map(r=>`<tr class="${Number(r.producciones_muntin)>0 ? "has-muntin" : ""}"><td><strong>${escapeHtml(r.sistema)}</strong></td><td>${escapeHtml(r.acabado ?? "—")}</td><td>${escapeHtml(r.producciones)}</td><td><strong>${escapeHtml(r.unidades)}</strong></td><td>${escapeHtml(r.producciones_muntin)}</td><td>${escapeHtml(r.unidades_muntin)}</td></tr>`).join("") : '<tr><td colspan="6" class="empty">Sin datos</td></tr>';
+    els.qWeek.textContent=`${week} / ${year}`;
     els.queryStatus.textContent=queriedProductions.length ? `Semana ${week} cargada desde Supabase ✓ · ${queriedProductions.length} producciones.` : `No hay programación almacenada para la semana ${week} / ${year}.`;
     renderQueriedProgramming();
   } catch(error) { queriedProductions=[]; els.queryStatus.textContent="No fue posible consultar: "+error.message; renderQueriedProgramming(); }
