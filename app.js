@@ -10,6 +10,8 @@ import { readGlassWorkbook, relateGlass } from "./src/domain/glass-importer.js";
 
 const mecanizado = createMecanizadoModule(trackingRows);
 let validatedProductions = [];
+let validatedAccessories = null;
+let validatedGlass = null;
 
 const els = {
   nav: document.querySelectorAll("[data-view]"),
@@ -64,6 +66,23 @@ function openView(viewName) {
   els.views.forEach(view => { view.hidden = view.dataset.viewPanel !== viewName; });
   els.nav.forEach(button => button.classList.toggle("active", button.dataset.view === viewName));
 }
+function refreshWeeklyRelations() {
+  if (!validatedProductions.length) return;
+  if (validatedAccessories) {
+    const relation = relateAccessories(validatedAccessories.rows, validatedProductions);
+    els.xRelated.textContent = relation.related;
+    els.xNoMatch.textContent = relation.noMatch;
+    els.accessoriesStatus.textContent = validatedAccessories.errors.length
+      ? `Bloqueado: ${validatedAccessories.errors.length} error(es).`
+      : `Correcto: ${validatedAccessories.rows.length} registros · ${relation.related} relacionados · ${relation.noMatch} sin relación · ${relation.conflicts} conflictos.`;
+  }
+  if (validatedGlass) {
+    const relation = relateGlass(validatedGlass.rows, validatedProductions);
+    els.gRelated.textContent = relation.related;
+    els.glassStatus.textContent = `Correcto: ${validatedGlass.rows.length} registros útiles · ${relation.related} relacionados con PANELES_2 · ${relation.noMatch} sin relación · ${relation.conflicts} conflictos.`;
+  }
+}
+
 async function validateProgrammingFiles() {
   const files = [...(els.files.files || [])];
   if (!files.length) { els.importStatus.textContent = "Selecciona archivos XLSX."; return; }
@@ -166,6 +185,7 @@ async function validateAccessoriesFile() {
   els.validateAccessories.disabled=true; els.accessoriesStatus.textContent="Validando…";
   try{
     const result=await readAccessoriesWorkbook(file);
+    validatedAccessories=result;
     const relation=relateAccessories(result.rows,validatedProductions);
     els.xTotal.textContent=result.rows.length; els.xErrors.textContent=result.errors.length;
     els.xRelated.textContent=validatedProductions.length?relation.related:"—";
@@ -179,6 +199,7 @@ async function validateGlassFile() {
   els.validateGlass.disabled=true; els.glassStatus.textContent="Validando…";
   try{
     const result=await readGlassWorkbook(file);
+    validatedGlass=result;
     const relation=relateGlass(result.rows,validatedProductions);
     els.gTotal.textContent=result.rows.length; els.gSkipped.textContent=result.skipped.length; els.gErrors.textContent=result.errors.length;
     els.gRelated.textContent=validatedProductions.length?relation.related:"—";
