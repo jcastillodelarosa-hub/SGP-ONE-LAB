@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SGP ONE LAB</title>
-  <link rel="stylesheet" href="styles.css?v=42" />
+  <link rel="stylesheet" href="styles.css?v=43" />
   <script src="config.js?v=20261008-1300"></script>
 </head>
 <body>
@@ -42,7 +42,7 @@
           <input id="authPassword" type="password" placeholder="Contraseña" autocomplete="current-password" />
           <button id="authLogin">Ingresar</button>
           <button id="authLogout" hidden>Cerrar sesión</button>
-          <span class="status">LAB v42</span>
+          <span class="status">LAB v43</span>
         </div>
       </header>
 
@@ -147,9 +147,10 @@
             </div>
           </section>
           <section class="table-wrap reservation-summary">
-            <table><thead><tr><th>Reserva</th><th>Sistema</th><th>Acabado</th><th>Producciones</th><th>Unidades</th><th>Prod. con Muntin</th><th>Unid. con Muntin</th></tr></thead>
+            <table><thead><tr><th>Sistema</th><th>Reserva</th><th>Acabado</th><th>Producciones</th><th>Unidades</th><th>Prod. con Muntin</th><th>Unid. con Muntin</th></tr></thead>
             <tbody id="reservationSummaryBody"><tr><td colspan="7" class="empty">Sin consulta</td></tr></tbody><tfoot id="reservationSummaryFoot"></tfoot></table>
           </section>
+          <section class="detail-tools"><strong>Piezas</strong><select id="pieceGroup"><option value="reserva">Por reserva</option><option value="produccion">Por producción</option></select><button id="loadPieces" type="button">Desplegar piezas</button><span id="pieceStatus">Usa el filtro PANELES_2 o FRAMES_2 para consultar.</span></section><section class="table-wrap" id="pieceWrap" hidden><table><thead><tr><th>Grupo</th><th>Sistema</th><th>SAP</th><th>Descripción</th><th>Acabado</th><th>Filas</th><th>Piezas</th></tr></thead><tbody id="pieceBody"></tbody><tfoot id="pieceFoot"></tfoot></table></section>
           <section class="detail-tools">
             <strong>Detalle</strong><span>Haz clic en un encabezado para ordenar. Usa los filtros por columna. Las flechas cambian la posición de la columna.</span>
           </section>
@@ -272,6 +273,6 @@
     </section>
   </div>
 
-  <script type="module" src="app.js?v=42"></script>
+  <script type="module" src="app.js?v=43"></script>
 </body>
 </html>
