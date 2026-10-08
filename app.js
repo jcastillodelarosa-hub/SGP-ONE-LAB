@@ -2,6 +2,7 @@ import { trackingRows } from "./src/data/mock-data.js";
 import { createMecanizadoModule } from "./src/modules/mecanizado.js";
 import { readProgrammingWorkbook, summarizeProgramming } from "./src/domain/production-importer.js";
 import { importProductions } from "./src/services/production-import-repository.js";
+import { readAluminumTrackingWorkbook, summarizeAluminumTracking } from "./src/domain/aluminum-tracking-importer.js";
 
 const mecanizado = createMecanizadoModule(trackingRows);
 let validatedProductions = [];
@@ -26,7 +27,14 @@ const els = {
   iTotal: document.querySelector("#iTotal"),
   iKeys: document.querySelector("#iKeys"),
   iErrors: document.querySelector("#iErrors"),
-  importBody: document.querySelector("#importSummaryBody")
+  importBody: document.querySelector("#importSummaryBody"),
+  aluminumFile: document.querySelector("#aluminumTrackingFile"),
+  validateAluminum: document.querySelector("#validateAluminum"),
+  aluminumStatus: document.querySelector("#aluminumStatus"),
+  aTotal: document.querySelector("#aTotal"),
+  aReservations: document.querySelector("#aReservations"),
+  aDelivered: document.querySelector("#aDelivered"),
+  aErrors: document.querySelector("#aErrors")
 };
 
 function currentFilters() { return { q: els.search.value, estado: els.state.value, linea: els.line.value }; }
@@ -77,6 +85,28 @@ async function validateProgrammingFiles() {
     els.importStatus.textContent = "Error: " + error.message;
   } finally { els.validate.disabled = false; }
 }
+async function validateAluminumFile() {
+  const file = els.aluminumFile.files?.[0];
+  if (!file) { els.aluminumStatus.textContent = "Selecciona el archivo de seguimiento."; return; }
+  els.validateAluminum.disabled = true;
+  els.aluminumStatus.textContent = "Validando…";
+  try {
+    const result = await readAluminumTrackingWorkbook(file);
+    const summary = summarizeAluminumTracking(result.rows);
+    els.aTotal.textContent = summary.total;
+    els.aReservations.textContent = summary.reservations;
+    els.aDelivered.textContent = summary.states.ALUMINIO_ENTREGADO || 0;
+    els.aErrors.textContent = result.errors.length;
+    els.aluminumStatus.textContent = result.errors.length
+      ? `Validación bloqueada: ${result.errors.length} error(es).`
+      : `Correcto: ${summary.total} seguimientos, ${summary.reservations} reservas, ${result.skipped} filas de control omitidas.`;
+  } catch (error) {
+    els.aluminumStatus.textContent = "Error: " + error.message;
+  } finally {
+    els.validateAluminum.disabled = false;
+  }
+}
+
 async function commitProgramming() {
   if (!validatedProductions.length) return;
   els.commit.disabled = true;
@@ -94,6 +124,7 @@ els.nav.forEach(button => button.addEventListener("click", () => openView(button
 [els.search, els.state, els.line].forEach(el => el.addEventListener("input", renderMecanizado));
 els.simulate.addEventListener("click", () => { els.demoMessage.textContent = mecanizado.advanceDemoState(); renderMecanizado(); });
 els.validate.addEventListener("click", validateProgrammingFiles);
+els.validateAluminum.addEventListener("click", validateAluminumFile);
 els.commit.addEventListener("click", commitProgramming);
 
 openView("mecanizado");
