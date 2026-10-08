@@ -43,6 +43,7 @@ const els = {
   pTotal: document.querySelector("#pTotal"),
   pOrders: document.querySelector("#pOrders"),
   pCodes: document.querySelector("#pCodes"),
+  pUnclassified: document.querySelector("#pUnclassified"),
   pErrors: document.querySelector("#pErrors")
 };
 
@@ -87,7 +88,7 @@ async function validateProgrammingFiles() {
       const [week, line] = key.split("|");
       return `<tr><td>${week}</td><td>${line}</td><td>${count}</td></tr>`;
     }).join("") : '<tr><td colspan="3" class="empty">Sin registros válidos</td></tr>';
-    els.commit.disabled = errors.length > 0 || rows.length === 0;
+    els.commit.disabled = true;
     els.importStatus.textContent = errors.length ? `Validación bloqueada: ${errors.length} error(es).` : `Validación correcta: ${rows.length} producciones listas.`;
   } catch (error) {
     validatedProductions = [];
@@ -164,11 +165,17 @@ async function commitProgramming() {
     els.importStatus.textContent = `Carga completada: ${result.written} producciones.`;
   } catch (error) {
     els.importStatus.textContent = "Carga no ejecutada: " + error.message;
-    els.commit.disabled = false;
+    els.commit.disabled = true;
   }
 }
 
 els.nav.forEach(button => button.addEventListener("click", () => openView(button.dataset.view)));
+window.addEventListener("error", event => {
+  console.error("SGP ONE:", event.error || event.message);
+});
+window.addEventListener("unhandledrejection", event => {
+  console.error("SGP ONE:", event.reason);
+});
 [els.search, els.state, els.line].forEach(el => el.addEventListener("input", renderMecanizado));
 els.simulate.addEventListener("click", () => { els.demoMessage.textContent = mecanizado.advanceDemoState(); renderMecanizado(); });
 els.validate.addEventListener("click", validateProgrammingFiles);
