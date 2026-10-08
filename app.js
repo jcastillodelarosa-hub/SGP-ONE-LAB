@@ -15,6 +15,7 @@ let validatedAccessories = null;
 let validatedGlass = null;
 let validatedPieces = null;
 let targetWeek = null;
+let queriedProductions = [];
 
 const els = {
   nav: document.querySelectorAll("[data-view]"),
@@ -65,7 +66,8 @@ const els = {
   piecesNoMatchWrap: document.querySelector("#piecesNoMatchWrap"),
   piecesNoMatchBody: document.querySelector("#piecesNoMatchBody"),
   accessoriesFile: document.querySelector("#accessoriesFile"), validateAccessories: document.querySelector("#validateAccessories"), accessoriesStatus: document.querySelector("#accessoriesStatus"), xTotal: document.querySelector("#xTotal"), xRelated: document.querySelector("#xRelated"), xNoMatch: document.querySelector("#xNoMatch"), xErrors: document.querySelector("#xErrors"), accessoriesNoMatchWrap: document.querySelector("#accessoriesNoMatchWrap"), accessoriesNoMatchBody: document.querySelector("#accessoriesNoMatchBody"),
-  glassFile: document.querySelector("#glassFile"), validateGlass: document.querySelector("#validateGlass"), glassStatus: document.querySelector("#glassStatus"), gTotal: document.querySelector("#gTotal"), gRelated: document.querySelector("#gRelated"), gNoMatch: document.querySelector("#gNoMatch"), gSkipped: document.querySelector("#gSkipped"), gErrors: document.querySelector("#gErrors"), glassNoMatchWrap: document.querySelector("#glassNoMatchWrap"), glassNoMatchBody: document.querySelector("#glassNoMatchBody")
+  glassFile: document.querySelector("#glassFile"), validateGlass: document.querySelector("#validateGlass"), glassStatus: document.querySelector("#glassStatus"), gTotal: document.querySelector("#gTotal"), gRelated: document.querySelector("#gRelated"), gNoMatch: document.querySelector("#gNoMatch"), gSkipped: document.querySelector("#gSkipped"), gErrors: document.querySelector("#gErrors"), glassNoMatchWrap: document.querySelector("#glassNoMatchWrap"), glassNoMatchBody: document.querySelector("#glassNoMatchBody"),
+  queryYear: document.querySelector("#queryYear"), queryWeek: document.querySelector("#queryWeek"), queryLine: document.querySelector("#queryLine"), querySearch: document.querySelector("#querySearch"), queryProgramming: document.querySelector("#queryProgramming"), queryStatus: document.querySelector("#queryStatus"), queryBody: document.querySelector("#queryProgrammingBody"), qWeek: document.querySelector("#qWeek"), qTotal: document.querySelector("#qTotal"), qUnits: document.querySelector("#qUnits"), qVisible: document.querySelector("#qVisible")
 };
 
 function escapeHtml(value) {
@@ -410,6 +412,35 @@ async function previewWeeklyLoad() {
   }
 }
 
+function renderQueriedProgramming() {
+  if (!els.queryBody) return;
+  const line = els.queryLine.value;
+  const term = els.querySearch.value.trim().toLowerCase();
+  const rows = queriedProductions.filter(r => (!line || r.id_linea === line) && (!term || [r.id,r.produccion,r.sistema,r.proyecto,r.cliente].some(v => String(v ?? "").toLowerCase().includes(term))));
+  els.qVisible.textContent = rows.length;
+  els.queryBody.innerHTML = rows.length ? rows.map(r => `<tr>
+    <td>${escapeHtml(r.prioridad_programacion ?? "—")}</td><td>${escapeHtml(r.id_linea)}</td><td>${escapeHtml(r.id)}</td>
+    <td>${escapeHtml(r.produccion)}</td><td>${escapeHtml(r.sistema)}</td><td>${escapeHtml(r.proyecto)}</td>
+    <td>${escapeHtml(r.cantidad ?? 0)}</td><td>${escapeHtml(r.estado_produccion ?? "—")}</td>
+    <td>${escapeHtml(r.porc_aluminio ?? "—")}</td><td>${escapeHtml(r.porc_vidrio ?? "—")}</td>
+  </tr>`).join("") : '<tr><td colspan="10" class="empty">No hay registros con los filtros seleccionados.</td></tr>';
+}
+async function queryWeeklyProgramming() {
+  const token=sessionStorage.getItem(APP_SESSION_KEY), year=Number(els.queryYear.value), week=Number(els.queryWeek.value);
+  if (!token) { els.queryStatus.textContent="Inicia sesión para consultar la programación."; return; }
+  els.queryProgramming.disabled=true; els.queryStatus.textContent=`Consultando semana ${week} / ${year}…`;
+  try {
+    const client=await getSupabaseClient();
+    const {data,error}=await client.rpc("sgp_consultar_programacion_semana",{p_token:token,p_anio:year,p_semana:week});
+    if(error) throw error;
+    queriedProductions=data?.producciones || [];
+    els.qWeek.textContent=`${week} / ${year}`; els.qTotal.textContent=data?.total_producciones ?? 0; els.qUnits.textContent=data?.total_unidades ?? 0;
+    els.queryStatus.textContent=queriedProductions.length ? `Semana ${week} cargada desde Supabase ✓ · ${queriedProductions.length} producciones.` : `No hay programación almacenada para la semana ${week} / ${year}.`;
+    renderQueriedProgramming();
+  } catch(error) { queriedProductions=[]; els.queryStatus.textContent="No fue posible consultar: "+error.message; renderQueriedProgramming(); }
+  finally { els.queryProgramming.disabled=false; }
+}
+
 async function commitProgramming() {
   const status = weeklyPackageStatus();
   if (!status.ready) { refreshWeeklyPackageGate(); return; }
@@ -487,6 +518,9 @@ els.validatePieces.addEventListener("click", validatePiecesFile);
 els.validateAccessories.addEventListener("click", validateAccessoriesFile);
 els.validateGlass.addEventListener("click", validateGlassFile);
 els.previewLoad.addEventListener("click", previewWeeklyLoad);
+els.queryProgramming?.addEventListener("click", queryWeeklyProgramming);
+els.queryLine?.addEventListener("change", renderQueriedProgramming);
+els.querySearch?.addEventListener("input", renderQueriedProgramming);
 els.commit.addEventListener("click", commitProgramming);
 
 openView("mecanizado");
