@@ -74,7 +74,7 @@ function refreshWeeklyRelations() {
     els.xNoMatch.textContent = relation.noMatch;
     els.accessoriesStatus.textContent = validatedAccessories.errors.length
       ? `Bloqueado: ${validatedAccessories.errors.length} error(es).`
-      : `Correcto: ${validatedAccessories.rows.length} registros · ${relation.related} relacionados · ${relation.noMatch} sin relación · ${relation.conflicts} conflictos.`;
+      : `Correcto: ${validatedAccessories.rows.length} filas · ${relation.sourceGroups} grupos Producción + Sistema · ${relation.related} relacionados · ${relation.noMatch} sin relación · ${relation.conflicts} conflictos.`;
   }
   if (validatedGlass) {
     const relation = relateGlass(validatedGlass.rows, validatedProductions);
@@ -190,7 +190,7 @@ async function validateAccessoriesFile() {
     els.xTotal.textContent=result.rows.length; els.xErrors.textContent=result.errors.length;
     els.xRelated.textContent=validatedProductions.length?relation.related:"—";
     els.xNoMatch.textContent=validatedProductions.length?relation.noMatch:"—";
-    els.accessoriesStatus.textContent=result.errors.length?`Bloqueado: ${result.errors.length} error(es).`:validatedProductions.length?`Correcto: ${result.rows.length} registros · ${relation.related} relacionados · ${relation.noMatch} sin relación · ${relation.conflicts} conflictos.`:`Estructura correcta: ${result.rows.length} registros. Valida primero Programación para ejecutar el cruce Producción + Sistema.`;
+    els.accessoriesStatus.textContent=result.errors.length?`Bloqueado: ${result.errors.length} error(es).`:validatedProductions.length?`Correcto: ${result.rows.length} filas · ${relation.sourceGroups} grupos Producción + Sistema · ${relation.related} relacionados · ${relation.noMatch} sin relación · ${relation.conflicts} conflictos.`:`Estructura correcta: ${result.rows.length} registros. Valida primero Programación para ejecutar el cruce Producción + Sistema.`;
   }catch(error){els.accessoriesStatus.textContent="Error: "+error.message;}finally{els.validateAccessories.disabled=false;}
 }
 async function validateGlassFile() {
