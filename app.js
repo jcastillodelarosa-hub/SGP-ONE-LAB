@@ -35,6 +35,10 @@ const els = {
   commit: document.querySelector("#commitProgramming"),
   previewLoad: document.querySelector("#previewWeeklyLoad"),
   previewStatus: document.querySelector("#previewWeeklyStatus"),
+  authStatus: document.querySelector("#authStatus"),
+  authEmail: document.querySelector("#authEmail"),
+  authLogin: document.querySelector("#authLogin"),
+  authLogout: document.querySelector("#authLogout"),
   importStatus: document.querySelector("#importStatus"),
   iTotal: document.querySelector("#iTotal"),
   iKeys: document.querySelector("#iKeys"),
@@ -139,6 +143,45 @@ function refreshWeeklyPackageGate() {
   if (status.ready) {
     els.importStatus.textContent = `Paquete semanal listo para carga: Programación + Piezas + Accesorios + Vidrio validados. Escritura a Supabase aún deshabilitada en LAB.`;
   }
+}
+
+
+async function refreshAuthStatus() {
+  try {
+    const client = await getSupabaseClient();
+    const { data } = await client.auth.getSession();
+    const user = data?.session?.user || null;
+    els.authStatus.textContent = user ? `Sesión: ${user.email || "autenticada"}` : "Sin sesión";
+    els.authEmail.hidden = Boolean(user);
+    els.authLogin.hidden = Boolean(user);
+    els.authLogout.hidden = !user;
+    return user;
+  } catch (error) {
+    els.authStatus.textContent = "Auth no disponible";
+    return null;
+  }
+}
+async function requestEmailAccess() {
+  const email = String(els.authEmail.value || "").trim();
+  if (!email || !email.includes("@")) { els.authStatus.textContent = "Indica un correo válido."; return; }
+  els.authLogin.disabled = true;
+  els.authStatus.textContent = "Enviando acceso…";
+  try {
+    const client = await getSupabaseClient();
+    const { error } = await client.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: window.location.origin + window.location.pathname + "?v=29" }
+    });
+    if (error) throw error;
+    els.authStatus.textContent = "Revisa tu correo para iniciar sesión.";
+  } catch (error) {
+    els.authStatus.textContent = "No fue posible enviar el acceso: " + error.message;
+  } finally { els.authLogin.disabled = false; }
+}
+async function logout() {
+  const client = await getSupabaseClient();
+  await client.auth.signOut();
+  await refreshAuthStatus();
 }
 
 function currentFilters() { return { q: els.search.value, estado: els.state.value, linea: els.line.value }; }
@@ -382,3 +425,7 @@ els.commit.addEventListener("click", commitProgramming);
 
 openView("mecanizado");
 renderMecanizado();
+
+els.authLogin.addEventListener("click", requestEmailAccess);
+els.authLogout.addEventListener("click", logout);
+refreshAuthStatus();
