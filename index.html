@@ -36,7 +36,7 @@
         </div>
         <div class="topbar-status">
           <span class="sync-ok">GitHub activo</span>
-          <span class="status">LAB v26</span>
+          <span class="status">LAB v27</span>
         </div>
       </header>
 
@@ -123,7 +123,9 @@
             <input id="programmingFiles" type="file" accept=".xlsx" multiple />
             <button id="validateProgramming">Validar archivos</button>
             <button id="commitProgramming" disabled title="Se marcará como listo únicamente cuando el paquete semanal completo esté validado. La escritura permanece deshabilitada en LAB.">Carga final bloqueada</button>
+            <button id="previewWeeklyLoad" disabled>Previsualizar carga</button>
             <span id="importStatus">Selecciona uno o más archivos XLSX.</span>
+            <div id="previewWeeklyStatus" class="placeholder-card">Dry-run pendiente. No realiza escrituras.</div>
           </section>
           <section class="summary import-summary">
             <div class="metric"><span>Producciones válidas</span><strong id="iTotal">0</strong></div>
@@ -220,6 +222,6 @@
     </section>
   </div>
 
-  <script type="module" src="app.js?v=26"></script>
+  <script type="module" src="app.js?v=27"></script>
 </body>
 </html>
