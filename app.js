@@ -18,6 +18,7 @@ let targetWeek = null;
 let queriedProductions = [];
 let queriedSystemSummary = [];
 let detailSort = { key: null, dir: 1 };
+let currentPieceRows=[];let currentPieceView='summary';let pieceDetailColumns=['perfil','descripcion','marca','fabricacion','longitud','cantidad'];
 let detailColumnFilters = {};
 let detailColumns = [
  {key:'reserva_al',label:'Reserva'}, {key:'id_linea',label:'Línea'}, {key:'id',label:'ID'}, {key:'produccion',label:'Producción'}, {key:'sistema',label:'Sistema'}, {key:'acabado',label:'Acabado'}, {key:'proyecto',label:'Proyecto'}, {key:'cantidad',label:'Cantidad'}, {key:'muntin',label:'Muntin'}, {key:'porc_vidrio',label:'Vidrio'}
@@ -73,7 +74,7 @@ const els = {
   piecesNoMatchBody: document.querySelector("#piecesNoMatchBody"),
   accessoriesFile: document.querySelector("#accessoriesFile"), validateAccessories: document.querySelector("#validateAccessories"), accessoriesStatus: document.querySelector("#accessoriesStatus"), xTotal: document.querySelector("#xTotal"), xRelated: document.querySelector("#xRelated"), xNoMatch: document.querySelector("#xNoMatch"), xErrors: document.querySelector("#xErrors"), accessoriesNoMatchWrap: document.querySelector("#accessoriesNoMatchWrap"), accessoriesNoMatchBody: document.querySelector("#accessoriesNoMatchBody"),
   glassFile: document.querySelector("#glassFile"), validateGlass: document.querySelector("#validateGlass"), glassStatus: document.querySelector("#glassStatus"), gTotal: document.querySelector("#gTotal"), gRelated: document.querySelector("#gRelated"), gNoMatch: document.querySelector("#gNoMatch"), gSkipped: document.querySelector("#gSkipped"), gErrors: document.querySelector("#gErrors"), glassNoMatchWrap: document.querySelector("#glassNoMatchWrap"), glassNoMatchBody: document.querySelector("#glassNoMatchBody"),
-  queryYear: document.querySelector("#queryYear"), queryWeek: document.querySelector("#queryWeek"), queryLine: document.querySelector("#queryLine"), querySearch: document.querySelector("#querySearch"), queryProgramming: document.querySelector("#queryProgramming"), queryStatus: document.querySelector("#queryStatus"), queryBody: document.querySelector("#queryProgrammingBody"), qWeek: document.querySelector("#qWeek"), qTotal: document.querySelector("#qTotal"), qUnits: document.querySelector("#qUnits"), qVisible: document.querySelector("#qVisible"), systemSummaryBody: document.querySelector("#systemSummaryBody"), typeSummaryBody: document.querySelector("#typeSummaryBody"), reservationSummaryBody: document.querySelector("#reservationSummaryBody"), systemSummaryFoot: document.querySelector("#systemSummaryFoot"), typeSummaryFoot: document.querySelector("#typeSummaryFoot"), reservationSummaryFoot: document.querySelector("#reservationSummaryFoot"), queryHead: document.querySelector("#queryProgrammingHead"), pieceModal: document.querySelector("#pieceModal"), pieceModalTitle: document.querySelector("#pieceModalTitle"), pieceModalMeta: document.querySelector("#pieceModalMeta"), pieceProfileBody: document.querySelector("#pieceProfileBody"), pieceProfileFoot: document.querySelector("#pieceProfileFoot"), closePieceModal: document.querySelector("#closePieceModal"), typeSummaryBody: document.querySelector("#typeSummaryBody"), reservationSummaryBody: document.querySelector("#reservationSummaryBody")
+  queryYear: document.querySelector("#queryYear"), queryWeek: document.querySelector("#queryWeek"), queryLine: document.querySelector("#queryLine"), querySearch: document.querySelector("#querySearch"), queryProgramming: document.querySelector("#queryProgramming"), queryStatus: document.querySelector("#queryStatus"), queryBody: document.querySelector("#queryProgrammingBody"), qWeek: document.querySelector("#qWeek"), qTotal: document.querySelector("#qTotal"), qUnits: document.querySelector("#qUnits"), qVisible: document.querySelector("#qVisible"), systemSummaryBody: document.querySelector("#systemSummaryBody"), typeSummaryBody: document.querySelector("#typeSummaryBody"), reservationSummaryBody: document.querySelector("#reservationSummaryBody"), systemSummaryFoot: document.querySelector("#systemSummaryFoot"), typeSummaryFoot: document.querySelector("#typeSummaryFoot"), reservationSummaryFoot: document.querySelector("#reservationSummaryFoot"), queryHead: document.querySelector("#queryProgrammingHead"), pieceModal: document.querySelector("#pieceModal"), pieceModalTitle: document.querySelector("#pieceModalTitle"), pieceModalMeta: document.querySelector("#pieceModalMeta"), pieceProfileBody: document.querySelector("#pieceProfileBody"), pieceProfileHead: document.querySelector("#pieceProfileHead"), pieceProfileFoot: document.querySelector("#pieceProfileFoot"), pieceDetailedOptions: document.querySelector("#pieceDetailedOptions"), closePieceModal: document.querySelector("#closePieceModal"), typeSummaryBody: document.querySelector("#typeSummaryBody"), reservationSummaryBody: document.querySelector("#reservationSummaryBody")
 };
 
 function escapeHtml(value) {
@@ -468,18 +469,45 @@ function renderQueriedProgramming(){
     return `<tr class="${idx%2===0?'reservation-alt':''} ${hm?'has-muntin':''}">${detailColumns.map(c=>{let v=detailValue(r,c.key);if(c.key==='reserva_al')return `<td><button class="piece-link" data-piece-mode="reserva" data-piece-value="${escapeHtml(reserva)}">${escapeHtml(reserva)}</button></td>`;if(c.key==='produccion')return `<td><button class="piece-link" data-piece-mode="produccion" data-piece-value="${escapeHtml(r.produccion)}">${escapeHtml(r.produccion)}</button></td>`;if(c.key==='muntin')v=hm?'SÍ · '+(r.cantidad_muntin??r.cantidad??''):'—';return `<td>${escapeHtml(v||'—')}</td>`}).join('')}</tr>`;
   }).join(''):`<tr><td colspan="${detailColumns.length}" class="empty">No hay registros con los filtros seleccionados.</td></tr>`;
 }
+function basePieceDescription(s){
+  return String(s||'').replace(/\s+[A-Z]$/i,'').trim();
+}
+function renderPieceModal(){
+  const src=currentPieceRows;
+  document.querySelectorAll('[data-piece-view]').forEach(b=>b.classList.toggle('active',b.dataset.pieceView===currentPieceView));
+  els.pieceDetailedOptions.hidden=currentPieceView!=='detailed';
+  if(currentPieceView==='summary'){
+    const map=new Map();src.forEach(r=>{const k=r.codigo_sap;if(!map.has(k))map.set(k,{perfil:k,descripcion:basePieceDescription(r.descripcion),cantidad:0});map.get(k).cantidad+=Number(r.cantidad||0)});
+    const rows=[...map.values()].sort((x,y)=>String(x.perfil).localeCompare(String(y.perfil),undefined,{numeric:true}));
+    els.pieceProfileHead.innerHTML='<tr><th>Perfil</th><th>Descripción</th><th>Cantidad</th></tr>';
+    els.pieceProfileBody.innerHTML=rows.map(x=>`<tr><td><strong>${escapeHtml(x.perfil)}</strong></td><td>${escapeHtml(x.descripcion)}</td><td><strong>${x.cantidad}</strong></td></tr>`).join('');
+    els.pieceProfileFoot.innerHTML=`<tr><td>TOTAL</td><td></td><td>${rows.reduce((n,x)=>n+x.cantidad,0)}</td></tr>`;return;
+  }
+  if(currentPieceView==='expanded'){
+    const map=new Map();src.forEach(r=>{const k=[r.codigo_sap,r.marca].join('|');if(!map.has(k))map.set(k,{perfil:r.codigo_sap,descripcion:basePieceDescription(r.descripcion),marca:r.marca||'—',cantidad:0});map.get(k).cantidad+=Number(r.cantidad||0)});
+    const rows=[...map.values()].sort((x,y)=>String(x.perfil).localeCompare(String(y.perfil),undefined,{numeric:true})||String(x.marca).localeCompare(String(y.marca),undefined,{numeric:true}));
+    els.pieceProfileHead.innerHTML='<tr><th>Perfil</th><th>Descripción</th><th>Marca</th><th>Cantidad</th></tr>';
+    els.pieceProfileBody.innerHTML=rows.map(x=>`<tr><td><strong>${escapeHtml(x.perfil)}</strong></td><td>${escapeHtml(x.descripcion)}</td><td>${escapeHtml(x.marca)}</td><td><strong>${x.cantidad}</strong></td></tr>`).join('');
+    els.pieceProfileFoot.innerHTML=`<tr><td>TOTAL</td><td></td><td></td><td>${rows.reduce((n,x)=>n+x.cantidad,0)}</td></tr>`;return;
+  }
+  const selected=[...els.pieceDetailedOptions.querySelectorAll('input:checked')].map(x=>x.value);
+  const fixed=['perfil','descripcion'],cols=[...pieceDetailColumns].filter(c=>fixed.includes(c)||selected.includes(c)||c==='cantidad');
+  const labels={perfil:'Perfil',descripcion:'Descripción',marca:'Marca',fabricacion:'Fabricación',longitud:'Longitud',cantidad:'Cantidad'};
+  const map=new Map();src.forEach(r=>{const obj={perfil:r.codigo_sap,descripcion:basePieceDescription(r.descripcion),marca:r.marca||'—',fabricacion:r.fabricacion||'—',longitud:r.longitud||'—'};const k=cols.filter(c=>c!=='cantidad').map(c=>obj[c]).join('|');if(!map.has(k))map.set(k,{...obj,cantidad:0});map.get(k).cantidad+=Number(r.cantidad||0)});
+  const rows=[...map.values()];
+  els.pieceProfileHead.innerHTML='<tr>'+cols.map((c,i)=>`<th><span>${labels[c]}</span> <button type="button" data-piece-move="${c}:-1">←</button><button type="button" data-piece-move="${c}:1">→</button></th>`).join('')+'</tr>';
+  els.pieceProfileBody.innerHTML=rows.map(x=>'<tr>'+cols.map(c=>`<td>${c==='perfil'?'<strong>'+escapeHtml(x[c])+'</strong>':escapeHtml(x[c])}</td>`).join('')+'</tr>').join('');
+  els.pieceProfileFoot.innerHTML='<tr>'+cols.map((c,i)=>`<td>${i===0?'TOTAL':c==='cantidad'?rows.reduce((n,x)=>n+x.cantidad,0):''}</td>`).join('')+'</tr>';
+}
 async function openPieceModal(mode,value){
   const line=els.queryLine.value;if(!line){alert('Selecciona primero PANELES_2 o FRAMES_2.');return}
-  const token=sessionStorage.getItem(APP_SESSION_KEY),year=Number(els.queryYear.value),week=Number(els.queryWeek.value),dest=line==='PANELES_2'?'PANEL':'FRAME';
-  els.pieceModal.hidden=false;els.pieceModalTitle.textContent=(mode==='reserva'?'Reserva ':'Producción ')+value;els.pieceModalMeta.textContent='Consultando piezas '+dest+'…';els.pieceProfileBody.innerHTML='';
+  const token=sessionStorage.getItem(APP_SESSION_KEY),year=Number(els.queryYear.value),week=Number(els.queryWeek.value),type=line==='PANELES_2'?'PANEL':'FRAME';
+  els.pieceModal.hidden=false;els.pieceModalTitle.textContent=(mode==='reserva'?'Reserva ':'Producción ')+value;els.pieceModalMeta.textContent='Consultando piezas '+type+'…';
   try{const client=await getSupabaseClient();const {data,error}=await client.rpc('sgp_consultar_piezas_semana',{p_token:token,p_anio:year,p_semana:week});if(error)throw error;
-    const src=(data?.piezas||[]).filter(r=>String(r.tipo_pieza).toUpperCase()===dest&&(mode==='reserva'?String(r.reserva)===String(value):String(r.produccion)===String(value)));
-    const profiles=new Map();src.forEach(r=>{const key=[r.codigo_sap,r.descripcion].join('|');if(!profiles.has(key))profiles.set(key,{perfil:r.codigo_sap,descripcion:r.descripcion,cantidad:0,marks:[]});const p=profiles.get(key);p.cantidad+=Number(r.cantidad||0);p.marks.push(r)});
-    const rows=[...profiles.values()].sort((x,y)=>String(x.perfil).localeCompare(String(y.perfil),undefined,{numeric:true}));
-    const systems=[...new Set(src.map(r=>r.sistema).filter(Boolean))].join(', '),finishes=[...new Set(src.map(r=>r.acabado).filter(Boolean))].join(', ');
-    els.pieceModalMeta.innerHTML=`<strong>Línea:</strong> ${escapeHtml(dest)} &nbsp; <strong>Sistema:</strong> ${escapeHtml(systems||'—')} &nbsp; <strong>Acabado:</strong> ${escapeHtml(finishes||'—')} &nbsp; <strong>Piezas:</strong> ${src.reduce((n,r)=>n+Number(r.cantidad||0),0)}`;
-    els.pieceProfileBody.innerHTML=rows.length?rows.map((p,i)=>`<tr><td><strong>${escapeHtml(p.perfil)}</strong></td><td>${escapeHtml(p.descripcion)}</td><td><strong>${p.cantidad}</strong></td><td><button type="button" data-expand-profile="${i}">Ampliar</button></td></tr><tr class="profile-marks" data-profile-marks="${i}" hidden><td colspan="4"><table class="marks-table"><thead><tr><th>Marca</th><th>Fabricación</th><th>Descripción</th><th>Cantidad</th></tr></thead><tbody>${p.marks.sort((x,y)=>String(x.marca).localeCompare(String(y.marca),undefined,{numeric:true})).map(m=>`<tr><td>${escapeHtml(m.marca||'—')}</td><td>${escapeHtml(m.fabricacion||'—')}</td><td>${escapeHtml(m.descripcion||'—')}</td><td>${escapeHtml(m.cantidad||0)}</td></tr>`).join('')}</tbody></table></td></tr>`).join(''):'<tr><td colspan="4" class="empty">No hay piezas relacionadas para esta selección.</td></tr>';
-    els.pieceProfileFoot.innerHTML=`<tr><td>TOTAL</td><td></td><td>${rows.reduce((n,p)=>n+p.cantidad,0)}</td><td></td></tr>`;
+    currentPieceRows=(data?.piezas||[]).filter(r=>String(r.tipo_pieza).toUpperCase()===type&&(mode==='reserva'?String(r.reserva)===String(value):String(r.produccion)===String(value)));
+    const systems=[...new Set(currentPieceRows.map(r=>r.sistema).filter(Boolean))].join(', '),finishes=[...new Set(currentPieceRows.map(r=>r.acabado).filter(Boolean))].join(', ');
+    els.pieceModalMeta.innerHTML=`<strong>Línea:</strong> ${escapeHtml(type)} &nbsp; <strong>Sistema:</strong> ${escapeHtml(systems||'—')} &nbsp; <strong>Acabado:</strong> ${escapeHtml(finishes||'—')}`;
+    currentPieceView='summary';renderPieceModal();
   }catch(e){els.pieceModalMeta.textContent='No fue posible consultar piezas: '+e.message}
 }
 async function queryWeeklyProgramming() {
@@ -580,6 +608,10 @@ els.queryLine?.addEventListener("change", renderQueriedProgramming);
 els.querySearch?.addEventListener("input", renderQueriedProgramming);
 els.queryBody?.addEventListener("click",e=>{const b=e.target.closest("[data-piece-mode]");if(b)openPieceModal(b.dataset.pieceMode,b.dataset.pieceValue)});
 els.closePieceModal?.addEventListener("click",()=>els.pieceModal.hidden=true);
+document.querySelectorAll('[data-piece-view]').forEach(b=>b.addEventListener('click',()=>{currentPieceView=b.dataset.pieceView;renderPieceModal()}));
+els.pieceDetailedOptions?.addEventListener('change',renderPieceModal);
+els.pieceProfileHead?.addEventListener('click',e=>{const b=e.target.closest('[data-piece-move]');if(!b)return;const [key,d]=b.dataset.pieceMove.split(':'),i=pieceDetailColumns.indexOf(key),j=i+Number(d);if(i>=0&&j>=0&&j<pieceDetailColumns.length){[pieceDetailColumns[i],pieceDetailColumns[j]]=[pieceDetailColumns[j],pieceDetailColumns[i]];renderPieceModal()}});
+
 els.pieceModal?.addEventListener("click",e=>{if(e.target===els.pieceModal)els.pieceModal.hidden=true;const b=e.target.closest("[data-expand-profile]");if(b){const row=els.pieceProfileBody.querySelector(`[data-profile-marks="${b.dataset.expandProfile}"]`);if(row){row.hidden=!row.hidden;b.textContent=row.hidden?"Ampliar":"Ocultar"}}});
 els.queryHead?.addEventListener("click",e=>{const sort=e.target.closest("[data-sort]"),move=e.target.closest("[data-move]");if(sort){const key=sort.dataset.sort;if(detailSort.key===key)detailSort.dir*=-1;else detailSort={key,dir:1};renderQueriedProgramming()}if(move){const [i,d]=move.dataset.move.split(":").map(Number),j=i+d;if(j>=0&&j<detailColumns.length){[detailColumns[i],detailColumns[j]]=[detailColumns[j],detailColumns[i]];renderQueriedProgramming()}}});
 els.queryHead?.addEventListener("change",e=>{if(e.target.matches("[data-filter]")){detailColumnFilters[e.target.dataset.filter]=e.target.value;renderQueriedProgramming()}});
