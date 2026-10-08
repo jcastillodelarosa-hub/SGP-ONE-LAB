@@ -3,7 +3,7 @@ import { createMecanizadoModule } from "./src/modules/mecanizado.js";
 import { readProgrammingWorkbook, summarizeProgramming } from "./src/domain/production-importer.js";
 import { importProductions } from "./src/services/production-import-repository.js";
 import { readAluminumTrackingWorkbook, summarizeAluminumTracking } from "./src/domain/aluminum-tracking-importer.js";
-import { readAluminumPiecesWorkbook, summarizeAluminumPieces, classifyAluminumPieces } from "./src/domain/aluminum-pieces-importer.js";
+import { readAluminumPiecesWorkbook, summarizeAluminumPieces, classifyAluminumPieces, relateAluminumPieceOrders } from "./src/domain/aluminum-pieces-importer.js";
 import { classifyPieceCodes } from "./src/services/piece-master-repository.js";
 import { readAccessoriesWorkbook, relateAccessories } from "./src/domain/accessories-importer.js";
 import { readGlassWorkbook, relateGlass } from "./src/domain/glass-importer.js";
@@ -48,7 +48,10 @@ const els = {
   pOrders: document.querySelector("#pOrders"),
   pCodes: document.querySelector("#pCodes"),
   pUnclassified: document.querySelector("#pUnclassified"),
+  pNoMatch: document.querySelector("#pNoMatch"),
   pErrors: document.querySelector("#pErrors"),
+  piecesNoMatchWrap: document.querySelector("#piecesNoMatchWrap"),
+  piecesNoMatchBody: document.querySelector("#piecesNoMatchBody"),
   accessoriesFile: document.querySelector("#accessoriesFile"), validateAccessories: document.querySelector("#validateAccessories"), accessoriesStatus: document.querySelector("#accessoriesStatus"), xTotal: document.querySelector("#xTotal"), xRelated: document.querySelector("#xRelated"), xNoMatch: document.querySelector("#xNoMatch"), xErrors: document.querySelector("#xErrors"), accessoriesNoMatchWrap: document.querySelector("#accessoriesNoMatchWrap"), accessoriesNoMatchBody: document.querySelector("#accessoriesNoMatchBody"),
   glassFile: document.querySelector("#glassFile"), validateGlass: document.querySelector("#validateGlass"), glassStatus: document.querySelector("#glassStatus"), gTotal: document.querySelector("#gTotal"), gRelated: document.querySelector("#gRelated"), gNoMatch: document.querySelector("#gNoMatch"), gSkipped: document.querySelector("#gSkipped"), gErrors: document.querySelector("#gErrors"), glassNoMatchWrap: document.querySelector("#glassNoMatchWrap"), glassNoMatchBody: document.querySelector("#glassNoMatchBody")
 };
@@ -56,6 +59,15 @@ const els = {
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, char => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[char]));
 }
+function renderPiecesNoMatches(relation) {
+  if (!els.piecesNoMatchWrap || !els.piecesNoMatchBody) return;
+  const rows = relation?.noMatchRows || [];
+  els.piecesNoMatchWrap.hidden = rows.length === 0;
+  els.piecesNoMatchBody.innerHTML = rows.length
+    ? rows.map(row => `<tr><td>${escapeHtml(row.id)}</td><td>${escapeHtml(row.produccion || "—")}</td><td>${escapeHtml(row.sistema || "—")}</td><td>${escapeHtml(row.semana || "—")}</td><td>${escapeHtml(row.motivo)}</td></tr>`).join("")
+    : '<tr><td colspan="5" class="empty">Sin diferencias informativas</td></tr>';
+}
+
 function renderAccessoryNoMatches(relation) {
   if (!els.accessoriesNoMatchWrap || !els.accessoriesNoMatchBody) return;
   const rows = relation?.noMatchRows || [];
@@ -189,12 +201,15 @@ async function validatePiecesFile() {
     await new Promise(resolve => requestAnimationFrame(resolve));
     const classification = classifyAluminumPieces(result.rows, master);
     els.pUnclassified.textContent = classification.unclassified.length;
+    const pieceRelation = validatedProductions.length ? relateAluminumPieceOrders(result.rows, validatedProductions) : null;
+    els.pNoMatch.textContent = pieceRelation ? pieceRelation.noMatch : "—";
+    renderPiecesNoMatches(pieceRelation || { noMatchRows: [] });
     const lineText = Object.entries(summary.lines).map(([line,count]) => `${line}: ${count}`).join(" · ");
     els.piecesStatus.textContent = result.errors.length
       ? `Validación bloqueada: ${result.errors.length} error(es) de estructura.`
       : classification.unclassified.length
         ? `Terminado. ${lineText}. ${classification.unclassified.length} fila(s) con SAP no clasificado.`
-        : `Terminado. ${summary.total} filas clasificadas · ${summary.sapCodes} códigos SAP · ${lineText} · 0 sin clasificar.`;
+        : `Terminado. ${summary.total} filas clasificadas · ${summary.sapCodes} códigos SAP · ${lineText} · 0 sin clasificar${pieceRelation ? ` · ${pieceRelation.noMatch} PANELES_2 sin orden (informativo)` : ""}.`;
   } catch (error) {
     els.pUnclassified.textContent = "—";
     els.piecesStatus.textContent = "Error: " + error.message;
