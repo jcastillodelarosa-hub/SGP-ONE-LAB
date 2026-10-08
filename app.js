@@ -68,7 +68,7 @@ const els = {
   piecesNoMatchBody: document.querySelector("#piecesNoMatchBody"),
   accessoriesFile: document.querySelector("#accessoriesFile"), validateAccessories: document.querySelector("#validateAccessories"), accessoriesStatus: document.querySelector("#accessoriesStatus"), xTotal: document.querySelector("#xTotal"), xRelated: document.querySelector("#xRelated"), xNoMatch: document.querySelector("#xNoMatch"), xErrors: document.querySelector("#xErrors"), accessoriesNoMatchWrap: document.querySelector("#accessoriesNoMatchWrap"), accessoriesNoMatchBody: document.querySelector("#accessoriesNoMatchBody"),
   glassFile: document.querySelector("#glassFile"), validateGlass: document.querySelector("#validateGlass"), glassStatus: document.querySelector("#glassStatus"), gTotal: document.querySelector("#gTotal"), gRelated: document.querySelector("#gRelated"), gNoMatch: document.querySelector("#gNoMatch"), gSkipped: document.querySelector("#gSkipped"), gErrors: document.querySelector("#gErrors"), glassNoMatchWrap: document.querySelector("#glassNoMatchWrap"), glassNoMatchBody: document.querySelector("#glassNoMatchBody"),
-  queryYear: document.querySelector("#queryYear"), queryWeek: document.querySelector("#queryWeek"), queryLine: document.querySelector("#queryLine"), querySearch: document.querySelector("#querySearch"), queryProgramming: document.querySelector("#queryProgramming"), queryStatus: document.querySelector("#queryStatus"), queryBody: document.querySelector("#queryProgrammingBody"), qWeek: document.querySelector("#qWeek"), qTotal: document.querySelector("#qTotal"), qUnits: document.querySelector("#qUnits"), qVisible: document.querySelector("#qVisible"), systemSummaryBody: document.querySelector("#systemSummaryBody")
+  queryYear: document.querySelector("#queryYear"), queryWeek: document.querySelector("#queryWeek"), queryLine: document.querySelector("#queryLine"), querySearch: document.querySelector("#querySearch"), queryProgramming: document.querySelector("#queryProgramming"), queryStatus: document.querySelector("#queryStatus"), queryBody: document.querySelector("#queryProgrammingBody"), qWeek: document.querySelector("#qWeek"), qTotal: document.querySelector("#qTotal"), qUnits: document.querySelector("#qUnits"), qVisible: document.querySelector("#qVisible"), systemSummaryBody: document.querySelector("#systemSummaryBody"), typeSummaryBody: document.querySelector("#typeSummaryBody"), reservationSummaryBody: document.querySelector("#reservationSummaryBody")
 };
 
 function escapeHtml(value) {
@@ -436,6 +436,19 @@ function renderQueriedProgramming() {
   });
   const summary=[...systems.values()].sort((x,y)=>y.unidades-x.unidades||x.sistema.localeCompare(y.sistema));
   els.systemSummaryBody.innerHTML=summary.length?summary.map(g=>`<tr class="${g.prodMuntin?"has-muntin-summary":""}"><td><strong>${escapeHtml(g.sistema)}</strong></td><td>${g.reservas.size}</td><td>${g.producciones}</td><td><strong>${g.unidades}</strong></td><td>${g.prodMuntin}</td><td>${g.unidMuntin}</td></tr>`).join(""):'<tr><td colspan="6" class="empty">Sin datos</td></tr>';
+  const typeMap=new Map(), reservationMap=new Map();
+  rows.forEach(r=>{
+    const system=r.sistema||"SIN SISTEMA",type=String(r.tipo||"").trim().toUpperCase(),reserva=String(r.reserva_al??"").trim()||"SIN RESERVA",acabado=r.acabado||"SIN ACABADO";
+    if(!typeMap.has(system))typeMap.set(system,{sistema:system,proyecto:0,retail:0});
+    const t=typeMap.get(system); if(type==="PROYECTO")t.proyecto+=Number(r.cantidad||0); else if(type==="RETAIL")t.retail+=Number(r.cantidad||0);
+    const rk=reserva+"|"+system+"|"+acabado;
+    if(!reservationMap.has(rk))reservationMap.set(rk,{reserva,sistema:system,acabado,producciones:0,unidades:0,prodMuntin:0,unidMuntin:0});
+    const g=reservationMap.get(rk);g.producciones++;g.unidades+=Number(r.cantidad||0);if(hasMuntin(r)){g.prodMuntin++;g.unidMuntin+=Number(r.cantidad||0);}
+  });
+  const typeRows=[...typeMap.values()].sort((x,y)=>(y.proyecto+y.retail)-(x.proyecto+x.retail));
+  els.typeSummaryBody.innerHTML=typeRows.length?typeRows.map(g=>`<tr><td><strong>${escapeHtml(g.sistema)}</strong></td><td>${g.proyecto}</td><td>${g.retail}</td><td><strong>${g.proyecto+g.retail}</strong></td></tr>`).join(""):'<tr><td colspan="4" class="empty">Sin datos</td></tr>';
+  const reservationRows=[...reservationMap.values()].sort((x,y)=>x.reserva.localeCompare(y.reserva,undefined,{numeric:true})||x.sistema.localeCompare(y.sistema)||x.acabado.localeCompare(y.acabado));
+  els.reservationSummaryBody.innerHTML=reservationRows.length?reservationRows.map(g=>`<tr class="${g.prodMuntin?"has-muntin-summary":""}"><td><strong>${escapeHtml(g.reserva)}</strong></td><td>${escapeHtml(g.sistema)}</td><td>${escapeHtml(g.acabado)}</td><td>${g.producciones}</td><td><strong>${g.unidades}</strong></td><td>${g.prodMuntin}</td><td>${g.unidMuntin}</td></tr>`).join(""):'<tr><td colspan="7" class="empty">Sin datos</td></tr>';
 
   let previousReserva=null,reservaIndex=-1;
   els.queryBody.innerHTML=rows.length?rows.map(r=>{
