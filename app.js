@@ -865,19 +865,30 @@ async function applyNcAluminum(){
 document.querySelector("#previewNcAl")?.addEventListener("click",previewNcAluminum);
 document.querySelector("#applyNcAl")?.addEventListener("click",applyNcAluminum);
 
+
 let ncViewRows=[],ncViewFilters={};
-const ncCols=[['semaforo',''],['consecutivo','Consecutivo'],['semana_nc','Sem. NC'],['linea','Línea'],['creacion','Creación'],['dias_abierta','Días'],['estado','Estado'],['reserva','Reserva'],['reserva_solucion','Reserva solución'],['produccion','Producción'],['sistema','Sistema'],['referencia','Referencia'],['perfil_mm','Perfil'],['acabado','Acabado'],['concepto','Concepto'],['causa','Causa'],['responsable','Responsable']];
-function ncFmt(v,k){if(v==null)return "";if(k==='creacion')return String(v).slice(0,10);return String(v)}
+let ncCols=[['consecutivo','Consecutivo'],['semana_nc','Sem. NC'],['linea','Línea'],['creacion','Creación'],['dias_abierta','Días'],['semaforo',''],['estado','Estado'],['reserva','Reserva'],['reserva_solucion','Reserva solución'],['produccion','Producción'],['sistema','Sistema'],['referencia','Referencia'],['perfil_mm','Perfil mm'],['perfil_in','Perfil pulg.'],['no_cortes','# Cortes'],['acabado','Acabado'],['concepto','Concepto'],['causa','Causa'],['responsable','Responsable']];
+function ncInches(v){let n=Number(String(v??'').replace(',','.'));if(!Number.isFinite(n))return '';let x=n/25.4,w=Math.floor(x),q=Math.round((x-w)*16);if(q===16){w++;q=0}if(!q)return w+'″';const g=(a,b)=>b?g(b,a%b):a,d=g(q,16);return w+' '+(q/d)+'/'+(16/d)+'″'}
+function ncFmt(r,k){let v=k==='perfil_in'?ncInches(r.perfil_mm):r[k];if(v==null)return "";if(k==='creacion')return String(v).slice(0,10);return String(v)}
 function renderNcView(){
  const head=document.querySelector("#ncViewHead"),body=document.querySelector("#ncViewBody");if(!head||!body)return;
- head.innerHTML='<tr>'+ncCols.map(([k,l])=>'<th>'+l+'</th>').join('')+'</tr><tr class="filter-row">'+ncCols.map(([k])=>k==='semaforo'?'<th></th>':`<th><input data-ncf="${k}" value="${escapeHtml(ncViewFilters[k]||'')}" placeholder="Filtrar"></th>`).join('')+'</tr>';
- const rows=ncViewRows.filter(r=>ncCols.every(([k])=>!ncViewFilters[k]||ncFmt(r[k],k).toLowerCase().includes(ncViewFilters[k].toLowerCase())));
- body.innerHTML=rows.map(r=>`<tr class="${String(r.estado).toLowerCase()==='finalizada'?'nc-finalized':''}"><td><span class="nc-light ${String(r.semaforo).toLowerCase()}" title="${r.dias_abierta} días"></span></td>${ncCols.slice(1).map(([k])=>`<td>${escapeHtml(ncFmt(r[k],k))}</td>`).join('')}</tr>`).join('')||'<tr><td colspan="17" class="empty">Sin NC para los filtros seleccionados</td></tr>';
+ head.innerHTML='<tr>'+ncCols.map(([k,l],i)=>`<th draggable="true" data-nccol="${i}">${l}</th>`).join('')+'</tr><tr class="filter-row">'+ncCols.map(([k])=>k==='semaforo'?'<th></th>':`<th><input data-ncf="${k}" value="${escapeHtml(ncViewFilters[k]||'')}" placeholder="Filtrar"></th>`).join('')+'</tr>';
+ const rows=ncViewRows.filter(r=>ncCols.every(([k])=>!ncViewFilters[k]||ncFmt(r,k).toLowerCase().includes(ncViewFilters[k].toLowerCase())));
+ body.innerHTML=rows.map(r=>`<tr class="${String(r.estado).toLowerCase()==='finalizada'?'nc-finalized':''}">${ncCols.map(([k])=>k==='semaforo'? `<td><span class="nc-light ${String(r.semaforo).toLowerCase()}" title="${r.dias_abierta} días"></span></td>`:`<td>${escapeHtml(ncFmt(r,k))}</td>`).join('')}</tr>`).join('')||`<tr><td colspan="${ncCols.length}" class="empty">Sin NC para los filtros seleccionados</td></tr>`;
  head.querySelectorAll('[data-ncf]').forEach(x=>x.addEventListener('input',e=>{ncViewFilters[e.target.dataset.ncf]=e.target.value;renderNcView();const n=document.querySelector(`[data-ncf="${e.target.dataset.ncf}"]`);n?.focus();n?.setSelectionRange(n.value.length,n.value.length)}));
+ let drag=null;head.querySelectorAll('[data-nccol]').forEach(th=>{th.addEventListener('dragstart',()=>drag=Number(th.dataset.nccol));th.addEventListener('dragover',e=>e.preventDefault());th.addEventListener('drop',e=>{e.preventDefault();const to=Number(th.dataset.nccol);if(drag===null||drag===to)return;const [c]=ncCols.splice(drag,1);ncCols.splice(to,0,c);drag=null;renderNcView()})});
+}
+function openNcMetric(kind){
+ const tests={consult:r=>String(r.estado).toLowerCase()==='consultada',audit:r=>String(r.estado).toLowerCase()==='sin auditar',overdue:r=>String(r.estado).toLowerCase()!=='finalizada'&&Number(r.dias_abierta)>2,nosolution:r=>r.sin_solucion};
+ const titles={consult:'NC en consulta',audit:'NC sin auditar',overdue:'NC con más de 2 días sin finalizar',nosolution:'NC sin solución'},rows=ncViewRows.filter(tests[kind]);
+ document.querySelector("#ncMetricTitle").textContent=titles[kind]+' · '+rows.length;
+ document.querySelector("#ncMetricBody").innerHTML=rows.map(r=>`<tr><td>${escapeHtml(r.consecutivo)}</td><td>${escapeHtml(r.reserva)}</td><td>${escapeHtml(r.estado)}</td><td>${escapeHtml(ncFmt(r,'creacion'))}</td><td>${r.dias_abierta}</td><td>${escapeHtml(r.reserva_solucion||'')}</td><td>${escapeHtml(ncInches(r.perfil_mm))}</td><td>${escapeHtml(r.no_cortes??'')}</td></tr>`).join('')||'<tr><td colspan="8" class="empty">Sin registros</td></tr>';document.querySelector("#ncMetricModal").hidden=false;
 }
 async function loadNcOperational(){
  const status=document.querySelector("#ncViewStatus");try{status.textContent="Consultando NC…";const client=await getSupabaseClient(),token=sessionStorage.getItem("sgp_one_session"),week=Number(document.querySelector("#ncViewWeek").value)||null;
  const {data,error}=await client.rpc("sgp_consultar_nc_aluminio",{p_token:token,p_semana:week});if(error)throw error;ncViewRows=data.filas||[];ncViewFilters={};
- document.querySelector("#ncMConsult").textContent=data.metricas.en_consulta;document.querySelector("#ncMAudit").textContent=data.metricas.sin_auditar;document.querySelector("#ncMOverdue").textContent=data.metricas.mas_2_dias;document.querySelector("#ncMNoSolution").textContent=data.metricas.sin_solucion;renderNcView();status.textContent=`Semana Maestra ${data.semana} · ${ncViewRows.length} NC`;
+ document.querySelector("#ncMConsult").textContent=data.metricas.en_consulta;document.querySelector("#ncMAudit").textContent=data.metricas.sin_auditar;document.querySelector("#ncMOverdue").textContent=data.metricas.mas_2_dias;document.querySelector("#ncMNoSolution").textContent=data.metricas.sin_solucion;document.querySelector("#ncMPlant").textContent=data.metricas.planta;document.querySelector("#ncMSupplier").textContent=data.metricas.proveedor;renderNcView();status.textContent=`Semana Maestra ${data.semana} · ${ncViewRows.length} NC`;
  }catch(e){status.textContent="Consulta rechazada ✕ "+e.message}}
 document.querySelector("#loadNcView")?.addEventListener("click",loadNcOperational);
+document.querySelectorAll(".nc-metric-btn").forEach(b=>b.addEventListener("click",()=>openNcMetric(b.dataset.ncmetric)));
+document.querySelector("#closeNcMetric")?.addEventListener("click",()=>document.querySelector("#ncMetricModal").hidden=true);
