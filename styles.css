@@ -399,3 +399,11 @@ tr.has-muntin{box-shadow:inset 5px 0 0 #f59e0b}.reservation-tone-1.has-muntin,.r
 .weekly-final-checks{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:24px 0}.weekly-final-checks span{padding:15px;border-radius:10px;background:#f2f4f7;color:#667085;font-weight:800;text-align:center}.weekly-final-checks span.ok{background:#e7f9f0;color:#08764b}.weekly-final-checks span.ok:before{content:"✓ ";font-weight:900}
 .weekly-final-actions{display:flex;gap:12px;margin-bottom:14px}.weekly-final-actions button{flex:1}.weekly-final-actions #commitProgramming:not(:disabled){background:#2563eb;color:#fff}
 @media(max-width:900px){.weekly-tabs{grid-template-columns:1fr 1fr}.weekly-upload-row{grid-template-columns:1fr}.weekly-final-checks{grid-template-columns:1fr 1fr}}
+
+/* LAB v54 · cristal roto reconocible */
+.broken-glass-svg{clip-path:none!important;overflow:visible!important;background:transparent!important;border:0!important}
+.broken-glass-svg:before,.broken-glass-svg:after{display:none!important}
+.broken-glass-svg svg{width:32px;height:32px;display:block;overflow:visible}
+.broken-glass-svg svg rect{fill:none;stroke:#183b78;stroke-width:3}
+.broken-glass-svg svg path{fill:none;stroke:#183b78;stroke-width:2.8;stroke-linecap:round;stroke-linejoin:round}
+.daily-tab.active .broken-glass-svg svg rect,.daily-tab.active .broken-glass-svg svg path{stroke:#0867ef}
