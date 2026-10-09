@@ -887,9 +887,10 @@ function openNcMetric(kind){
 async function loadNcOperational(){
  const status=document.querySelector("#ncViewStatus");try{status.textContent="Consultando NC…";const client=await getSupabaseClient(),token=sessionStorage.getItem("sgp_one_session"),week=Number(document.querySelector("#ncViewWeek").value)||null;
  const {data,error}=await client.rpc("sgp_consultar_nc_aluminio",{p_token:token,p_semana:week});if(error)throw error;ncViewRows=data.filas||[];ncViewFilters={};
- const {data:lineSummary,error:lineErr}=await client.rpc("sgp_resumen_nc_aluminio_linea",{p_token:token,p_semana:week});if(lineErr)throw lineErr;
+ const [{data:lineSummary,error:lineErr},{data:originMetrics,error:originErr}]=await Promise.all([client.rpc("sgp_resumen_nc_aluminio_linea",{p_token:token,p_semana:week}),client.rpc("sgp_metricas_origen_nc_aluminio",{p_token:token,p_semana:week})]);if(lineErr)throw lineErr;if(originErr)throw originErr;
+ document.querySelector("#ncMPlant").textContent=originMetrics.planta;document.querySelector("#ncMSupplier").textContent=originMetrics.proveedor;
  document.querySelector("#ncLineSummary").innerHTML=(lineSummary||[]).map(x=>`<div class="nc-line-card"><strong>${escapeHtml(x.linea)}</strong><span>Total NC <b>${x.total}</b></span><span>Planta <b>${x.planta}</b></span><span>Proveedor <b>${x.proveedor}</b></span></div>`).join('');
- document.querySelector("#ncMConsult").textContent=data.metricas.en_consulta;document.querySelector("#ncMAudit").textContent=data.metricas.sin_auditar;document.querySelector("#ncMOverdue").textContent=data.metricas.mas_2_dias;document.querySelector("#ncMNoSolution").textContent=data.metricas.sin_solucion;document.querySelector("#ncMPlant").textContent=data.metricas.planta;document.querySelector("#ncMSupplier").textContent=data.metricas.proveedor;renderNcView();status.textContent=`Semana Maestra ${data.semana} · ${ncViewRows.length} NC`;
+ document.querySelector("#ncMConsult").textContent=data.metricas.en_consulta;document.querySelector("#ncMAudit").textContent=data.metricas.sin_auditar;document.querySelector("#ncMOverdue").textContent=data.metricas.mas_2_dias;document.querySelector("#ncMNoSolution").textContent=data.metricas.sin_solucion;renderNcView();status.textContent=`Semana Maestra ${data.semana} · ${ncViewRows.length} NC`;
  }catch(e){status.textContent="Consulta rechazada ✕ "+e.message}}
 document.querySelector("#loadNcView")?.addEventListener("click",loadNcOperational);
 document.querySelectorAll(".nc-metric-btn").forEach(b=>b.addEventListener("click",()=>openNcMetric(b.dataset.ncmetric)));
