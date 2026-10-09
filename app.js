@@ -21,6 +21,7 @@ let dailyExportRows = [];
 let glassLocationPreview = null;
 let glassLocationRows = [];
 let queriedProductions = [];
+let assemblyRows = [];
 let queriedSystemSummary = [];
 let detailSort = { key: null, dir: 1 };
 let currentPieceRows=[];let currentPieceView='summary';let pieceDetailColumns=['perfil','descripcion','marca','fabricacion','longitud','cantidad'];
@@ -58,6 +59,7 @@ const els = {
   iKeys: document.querySelector("#iKeys"),
   iErrors: document.querySelector("#iErrors"),
   importBody: document.querySelector("#importSummaryBody"),
+  assemblyWeek: document.querySelector("#assemblyWeek"), assemblyLine: document.querySelector("#assemblyLine"), assemblyState: document.querySelector("#assemblyState"), assemblySearch: document.querySelector("#assemblySearch"), loadAssembly: document.querySelector("#loadAssembly"), assemblyStatus: document.querySelector("#assemblyStatus"), assemblyBody: document.querySelector("#assemblyBody"), asTotal: document.querySelector("#asTotal"), asBalance: document.querySelector("#asBalance"), asOpen: document.querySelector("#asOpen"), asClosed: document.querySelector("#asClosed"), asAssembled: document.querySelector("#asAssembled"),
   dailyExportLine: document.querySelector("#dailyExportLine"),
   dailyExportFile: document.querySelector("#dailyExportFile"),
   previewDailyExport: document.querySelector("#previewDailyExport"),
@@ -581,6 +583,23 @@ async function queryWeeklyProgramming() {
 }
 
 
+
+function renderAssembly(){
+  if(!els.assemblyBody)return;
+  const q=String(els.assemblySearch?.value||"").trim().toLowerCase(),state=els.assemblyState?.value||"";
+  const rows=assemblyRows.filter(r=>(!state||r.estado_produccion===state)&&(!q||[r.id,r.produccion,r.sistema,r.reserva_al,r.proyecto,r.acabado].some(v=>String(v??"").toLowerCase().includes(q))));
+  const n=v=>Number(v??0), pct=v=>v==null?"—":(n(v)<=1?Math.round(n(v)*100):Math.round(n(v)))+"%";
+  els.asTotal.textContent=rows.length;els.asBalance.textContent=rows.reduce((a,r)=>a+n(r.saldo_ensamble),0);
+  els.asOpen.textContent=rows.filter(r=>r.estado_produccion==="ABIERTA").length;els.asClosed.textContent=rows.filter(r=>r.estado_produccion==="CERRADA").length;els.asAssembled.textContent=rows.filter(r=>r.estado_produccion==="ENSAMBLADA").length;
+  els.assemblyBody.innerHTML=rows.length?rows.map(r=>`<tr><td>${escapeHtml(r.semana_actual??r.semana_base)}</td><td><strong>${escapeHtml(r.id)}</strong></td><td>${escapeHtml(r.produccion||"—")}</td><td>${escapeHtml(r.sistema||"—")}</td><td>${escapeHtml(r.proyecto||"—")}</td><td class="num">${escapeHtml(r.cantidad??"—")}</td><td class="num">${escapeHtml(r.ensamblado??"—")}</td><td class="num assembly-balance"><strong>${escapeHtml(r.saldo_ensamble??"—")}</strong></td><td><span class="assembly-state state-${String(r.estado_produccion||"").toLowerCase()}">${escapeHtml(r.estado_produccion||"—")}</span></td><td class="num">${pct(r.porc_vidrio)}</td><td>${escapeHtml(r.reserva_al||"—")}</td><td>${escapeHtml(r.estado_reserva_al||"—")}</td><td>${escapeHtml(r.acabado||"—")}</td><td>${escapeHtml(r.orden_oves||"—")}</td></tr>`).join(""):'<tr><td colspan="14" class="empty">No hay órdenes con estos filtros.</td></tr>';
+}
+async function loadAssembly(){
+ const token=sessionStorage.getItem(APP_SESSION_KEY);if(!token){els.assemblyStatus.textContent="Inicia sesión para consultar.";return}
+ els.loadAssembly.disabled=true;els.assemblyStatus.textContent="Consultando estado actual…";
+ try{const client=await getSupabaseClient();const week=els.assemblyWeek.value?Number(els.assemblyWeek.value):null;const {data,error}=await client.rpc("sgp_consultar_ensamble",{p_token:token,p_semana:week,p_linea:els.assemblyLine.value});if(error)throw error;assemblyRows=data.filas||[];renderAssembly();els.assemblyStatus.textContent=`Actualizado ✓ ${assemblyRows.length} órdenes · datos actuales de SGP.`;}
+ catch(e){els.assemblyStatus.textContent="Consulta rechazada ✕ "+e.message}finally{els.loadAssembly.disabled=false}
+}
+
 function resetDailyExport(){
   dailyExportPreview=null;dailyExportRows=[];
   if(els.applyDailyExport)els.applyDailyExport.disabled=true;
@@ -755,6 +774,9 @@ els.dailyExportLine?.addEventListener("change",()=>{resetDailyExport();els.daily
 els.glassLocationFile?.addEventListener("change",()=>{resetGlassLocation();els.glassLocationStatus.textContent="Archivo modificado. Vuelve a validar y depurar.";});
 els.previewGlassLocation?.addEventListener("click",previewGlassLocation);
 els.applyGlassLocation?.addEventListener("click",applyGlassLocation);
+els.loadAssembly?.addEventListener("click",loadAssembly);
+els.assemblyState?.addEventListener("change",renderAssembly);els.assemblySearch?.addEventListener("input",renderAssembly);
+els.assemblyWeek?.addEventListener("change",loadAssembly);els.assemblyLine?.addEventListener("change",loadAssembly);
 els.previewDailyExport?.addEventListener("click",previewDailyExport);
 els.applyDailyExport?.addEventListener("click",applyDailyExport);
 els.validate.addEventListener("click", validateProgrammingFiles);
