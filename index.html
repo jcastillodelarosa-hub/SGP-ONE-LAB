@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SGP ONE LAB</title>
-  <link rel="stylesheet" href="styles.css?v=72" />
+  <link rel="stylesheet" href="styles.css?v=73" />
   <script src="config.js?v=20261008-1300"></script>
 </head>
 <body>
@@ -43,7 +43,7 @@
           <input id="authPassword" type="password" placeholder="Contraseña" autocomplete="current-password" />
           <button id="authLogin">Ingresar</button>
           <button id="authLogout" hidden>Cerrar sesión</button>
-          <span class="status">LAB v72</span>
+          <span class="status">LAB v73</span>
         </div>
       </header>
 
@@ -301,8 +301,21 @@
             <div class="daily-info"><strong>ⓘ Criterio actual</strong><span>Producción inicializada: se incluye solo con Saldo Ensamble &gt; 0. Producción aún no inicializada: se conserva hasta recibir su primer Export diario.</span></div>
           </section>
           <section class="daily-tab-panel" data-daily-panel="nc-al" hidden>
-            <div class="daily-empty-panel"><span class="daily-empty-icon">⌕</span><h3>NC Aluminio</h3><p>Estado y datos de las no conformidades de aluminio por línea.</p><strong>Importador pendiente de mapear.</strong></div>
-          </section>
+ <div class="daily-panel-heading"><span class="daily-heading-icon icon-file" aria-hidden="true"></span><div><h3>NC Aluminio</h3><p>La Semana NC indica cuándo se creó. La Semana Maestra se obtiene de Reserva → Reserva AL de la programación vigente.</p></div></div>
+ <div class="daily-upload-row">
+  <label class="daily-file-field"><span>Export NC</span><input id="ncAlFile" type="file" accept=".xlsx" /></label>
+  <button id="previewNcAl" class="daily-outline-action">Validar y cruzar</button>
+  <button id="applyNcAl" class="daily-primary-action" disabled>Aplicar actualización</button>
+ </div>
+ <div id="ncAlStatus" class="daily-status">Selecciona el Export NC Aluminio.</div>
+ <div class="daily-metrics">
+  <span class="daily-metric-card"><small>Recibidas</small><strong id="ncAlReceived">0</strong></span>
+  <span class="daily-metric-card"><small>Con Semana Maestra</small><strong id="ncAlMatched">0</strong></span>
+  <span class="daily-metric-card"><small>Sin programación</small><strong id="ncAlMissing">0</strong></span>
+  <span class="daily-metric-card"><small>Reserva ambigua</small><strong id="ncAlAmbiguous">0</strong></span>
+ </div>
+ <div id="ncAlWeekSummary" class="daily-status">Sin validación.</div>
+</section>
           <section class="daily-tab-panel" data-daily-panel="nc-glass" hidden>
             <div class="daily-empty-panel"><span class="broken-glass-icon broken-glass-large" aria-hidden="true"></span><h3>NC Vidrio</h3><p>Estado y datos de las no conformidades de vidrio por línea.</p><strong>Importador pendiente de mapear.</strong></div>
           </section>
@@ -332,6 +345,6 @@
     </section>
   </div>
 
-  <script type="module" src="app.js?v=72"></script>
+  <script type="module" src="app.js?v=73"></script>
 </body>
 </html>
