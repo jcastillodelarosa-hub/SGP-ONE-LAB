@@ -548,3 +548,10 @@ tr.has-muntin{box-shadow:inset 5px 0 0 #f59e0b}.reservation-tone-1.has-muntin,.r
 #ncMetricModal.modal:not([hidden]){display:flex!important;position:fixed!important;inset:0!important;z-index:10000!important;align-items:center!important;justify-content:center!important;padding:24px;background:rgba(15,23,42,.42)}
 #ncMetricModal .nc-metric-modal-card{position:relative!important;margin:0!important;max-height:86vh!important;overflow:hidden;background:#fff;border-radius:16px;box-shadow:0 24px 70px rgba(15,23,42,.3)}
 .nc-line-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin:8px 0 12px}.nc-line-card{display:grid;grid-template-columns:1.4fr repeat(3,1fr);align-items:center;gap:12px;padding:12px 16px;border:1px solid #d8e2f2;border-radius:12px;background:#f7f9fc}.nc-line-card>strong{font-size:14px}.nc-line-card span{font-size:11px;color:#64748b}.nc-line-card span b{display:block;font-size:20px;color:#0f172a}.draggable-th{cursor:grab!important;user-select:none}.draggable-th:active{cursor:grabbing!important}
+
+/* NC dashboard visual distinction v79 */
+.nc-summary .metric span{font-size:14px!important;font-weight:700!important;color:#334155}.nc-summary .metric strong{font-size:29px!important;line-height:1.1}
+.nc-summary .nc-orange{background:#fff0d6!important;border-color:#f59e0b!important}.nc-summary .nc-orange span,.nc-summary .nc-orange strong{color:#9a4b00!important}
+.nc-summary .nc-red{background:#ffe8e8!important;border-color:#ef4444!important}.nc-summary .nc-red span,.nc-summary .nc-red strong{color:#a51d1d!important}
+.nc-summary .nc-warning{background:#e9f2ff!important;border-color:#3b82f6!important}.nc-summary .nc-warning span,.nc-summary .nc-warning strong{color:#174ea6!important}
+.nc-summary .nc-metric-btn:first-child{background:#eef8f1!important;border-color:#4caf6a!important}.nc-summary .nc-metric-btn:first-child span,.nc-summary .nc-metric-btn:first-child strong{color:#176b35!important}
