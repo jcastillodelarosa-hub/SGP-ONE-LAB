@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SGP ONE LAB</title>
-  <link rel="stylesheet" href="styles.css?v=47" />
+  <link rel="stylesheet" href="styles.css?v=48" />
   <script src="config.js?v=20261008-1300"></script>
 </head>
 <body>
@@ -42,7 +42,7 @@
           <input id="authPassword" type="password" placeholder="Contraseña" autocomplete="current-password" />
           <button id="authLogin">Ingresar</button>
           <button id="authLogout" hidden>Cerrar sesión</button>
-          <span class="status">LAB v47</span>
+          <span class="status">LAB v48</span>
         </div>
       </header>
 
@@ -252,16 +252,31 @@
 
         <section class="view placeholder-view" data-view-panel="actualizacion" hidden>
           <div class="page-heading">
-            <span class="eyebrow">Datos</span>
+            <span class="eyebrow">Datos operativos</span>
             <h2>Actualización diaria</h2>
-            <p>En esta vista conectaremos SALDOS, Seguimiento Aluminio, Vidrio y NC.</p>
+            <p>Actualiza cada fuente de forma independiente. Las fuentes disponibles dependen de la configuración de cada línea SGP.</p>
           </div>
-          <section class="source-card">
-            <div><strong>Seguimiento de aluminio</strong><span>Carga diaria de estado logístico por ID|RESERVA. Exclusivo del control PANELES_2 / FRAMES_2.</span></div>
-            <input id="aluminumTrackingFile" type="file" accept=".xlsx" />
-            <button id="validateAluminum">Validar seguimiento de aluminio</button>
-            <span id="aluminumStatus">Pendiente de archivo.</span>
+          <section class="daily-grid">
+            <article class="daily-card" data-daily-source="EXPORT">
+              <div><span class="eyebrow">Estado operativo</span><h3>Export diario</h3><p>Actualiza saldos, reserva, semana actual, % vidrio y presencia de producciones.</p></div>
+              <label>Línea<select id="dailyExportLine"><option value="PANELES_2">PANELES_2</option><option value="FRAMES_2">FRAMES_2</option></select></label>
+              <input id="dailyExportFile" type="file" accept=".xlsx" />
+              <div class="daily-actions"><button id="previewDailyExport">Validar y comparar</button><button id="applyDailyExport" disabled>Aplicar actualización</button></div>
+              <span id="dailyExportStatus">Selecciona el Export de una sola línea.</span>
+              <div id="dailyExportMetrics" class="daily-metrics"><span>Recibidos <strong>—</strong></span><span>Coinciden <strong>—</strong></span><span>Nuevos <strong>—</strong></span><span>Ya no aparecen <strong>—</strong></span></div>
+            </article>
+            <article class="daily-card pending-source"><div><span class="eyebrow">Vidrio</span><h3>Ubicación de vidrio</h3><p>Ubicaciones actuales de los vidrios asociados a las órdenes.</p></div><span>Importador pendiente de mapear.</span></article>
+            <article class="daily-card pending-source"><div><span class="eyebrow">No conformidades</span><h3>NC Aluminio</h3><p>Estado y datos de las NC de aluminio por línea.</p></div><span>Importador pendiente de mapear.</span></article>
+            <article class="daily-card pending-source"><div><span class="eyebrow">No conformidades</span><h3>NC Vidrio</h3><p>Estado y datos de las NC de vidrio por línea.</p></div><span>Importador pendiente de mapear.</span></article>
+            <article class="daily-card pending-source"><div><span class="eyebrow">Abastecimiento</span><h3>Seguimiento de aluminio</h3><p>Estado logístico y seguimiento del aluminio.</p></div>
+              <input id="aluminumTrackingFile" type="file" accept=".xlsx" />
+              <button id="validateAluminum">Validar seguimiento</button><span id="aluminumStatus">Pendiente de archivo.</span>
+            </article>
           </section>
+          <section class="summary import-summary">
+            <div class="metric"><span>Seguimientos válidos</span><strong id="aTotal">0</strong></div><div class="metric"><span>Reservas</span><strong id="aReservations">0</strong></div><div class="metric"><span>Entregado</span><strong id="aDelivered">0</strong></div><div class="metric"><span>Errores</span><strong id="aErrors">0</strong></div>
+          </section>
+        </section>
           <section class="summary import-summary">
             <div class="metric"><span>Seguimientos válidos</span><strong id="aTotal">0</strong></div>
             <div class="metric"><span>Reservas</span><strong id="aReservations">0</strong></div>
@@ -282,6 +297,6 @@
     </section>
   </div>
 
-  <script type="module" src="app.js?v=47"></script>
+  <script type="module" src="app.js?v=48"></script>
 </body>
 </html>
