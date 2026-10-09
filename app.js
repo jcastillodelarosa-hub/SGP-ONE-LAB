@@ -10,6 +10,7 @@ import { readGlassWorkbook, relateGlass, prepareGlassPayload } from "./src/domai
 import { readGlassLocationWorkbook, filterGlassLocationRows } from "./src/domain/glass-location-importer.js?v=62";
 import { getSupabaseClient } from "./src/services/supabase-client.js";
 import { readNcAluminumWorkbook } from "./src/domain/nc-aluminum-importer.js?v=73";
+import { readNcGlassWorkbook } from "./src/domain/nc-glass-importer.js?v=84";
 
 const mecanizado = createMecanizadoModule(trackingRows);
 let validatedProductions = [];
@@ -923,3 +924,11 @@ function renderNcColumnPicker(){
  box.querySelectorAll('[data-nccolvis]').forEach(x=>x.addEventListener('change',()=>{x.checked?ncHiddenCols.delete(x.dataset.nccolvis):ncHiddenCols.add(x.dataset.nccolvis);localStorage.setItem("sgp_nc_hidden_cols",JSON.stringify([...ncHiddenCols]));renderNcView()}));
 }
 document.querySelector("#ncChooseColumns")?.addEventListener("click",()=>{const b=document.querySelector("#ncColumnPicker");b.hidden=!b.hidden;if(!b.hidden)renderNcColumnPicker()});
+
+let ncGlassRows=[],ncGlassPreview=null;
+async function previewNcGlass(){
+ const file=document.querySelector("#ncGlassFile")?.files?.[0],status=document.querySelector("#ncGlassStatus"),btn=document.querySelector("#applyNcGlass");if(!file){status.textContent="Selecciona el Export NC Vidrio.";return}
+ try{status.textContent="Leyendo NC Vidrio…";btn.disabled=true;ncGlassRows=await readNcGlassWorkbook(file);const client=await getSupabaseClient(),token=sessionStorage.getItem("sgp_one_session");const {data,error}=await client.rpc("sgp_previsualizar_nc_vidrio",{p_token:token,p_datos:ncGlassRows});if(error)throw error;ncGlassPreview={...data,file:file.name};document.querySelector("#ncGlassReceived").textContent=data.recibidos||0;document.querySelector("#ncGlassNew").textContent=data.nuevos||0;document.querySelector("#ncGlassUpdated").textContent=data.actualizados||0;document.querySelector("#ncGlassWeeks").textContent="Semana Maestro detectada: "+(data.por_semana||[]).join(", ");status.textContent="Validación completada. No se ha escrito información.";btn.disabled=false}catch(e){status.textContent="Validación rechazada ✕ "+e.message}}
+async function applyNcGlass(){
+ if(!ncGlassPreview)return;const status=document.querySelector("#ncGlassStatus"),btn=document.querySelector("#applyNcGlass");try{btn.disabled=true;status.textContent="Aplicando NC Vidrio…";const client=await getSupabaseClient(),token=sessionStorage.getItem("sgp_one_session");const {data,error}=await client.rpc("sgp_aplicar_nc_vidrio",{p_token:token,p_nombre_archivo:ncGlassPreview.file,p_datos:ncGlassRows});if(error)throw error;status.textContent=`NC Vidrio actualizado ✓ · ${data.nuevos} nuevas · ${data.actualizados} actualizadas`}catch(e){status.textContent="Aplicación rechazada ✕ "+e.message;btn.disabled=false}}
+document.querySelector("#previewNcGlass")?.addEventListener("click",previewNcGlass);document.querySelector("#applyNcGlass")?.addEventListener("click",applyNcGlass);
