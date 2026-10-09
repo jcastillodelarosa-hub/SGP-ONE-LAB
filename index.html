@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SGP ONE LAB</title>
-  <link rel="stylesheet" href="styles.css?v=64" />
+  <link rel="stylesheet" href="styles.css?v=65" />
   <script src="config.js?v=20261008-1300"></script>
 </head>
 <body>
@@ -43,7 +43,7 @@
           <input id="authPassword" type="password" placeholder="Contraseña" autocomplete="current-password" />
           <button id="authLogin">Ingresar</button>
           <button id="authLogout" hidden>Cerrar sesión</button>
-          <span class="status">LAB v64</span>
+          <span class="status">LAB v65</span>
         </div>
       </header>
 
@@ -90,8 +90,8 @@
  </section>
  <div id="locationReportStatus" class="daily-status">Abre esta pestaña para actualizar el reporte.</div>
  <div class="location-report-grid">
-  <section class="table-wrap"><table><thead><tr><th>Reserva</th><th>Burros</th><th>Cant. vidrio</th></tr></thead><tbody id="locationByReservation"><tr><td colspan="3" class="empty">Sin consulta</td></tr></tbody></table></section>
-  <section class="table-wrap"><table><thead><tr><th>Burro</th><th>Reservas</th><th># Reservas</th><th>Cant. vidrio en burro</th></tr></thead><tbody id="locationMixedRacks"><tr><td colspan="4" class="empty">Sin consulta</td></tr></tbody></table></section>
+  <section class="table-wrap location-compact"><table><thead><tr><th>Reserva</th><th>Burros</th><th>Cant. vidrio</th></tr></thead><tbody id="locationByReservation"><tr><td colspan="3" class="empty">Sin consulta</td></tr></tbody></table></section>
+  <section class="table-wrap location-compact"><table><thead><tr><th>Burro</th><th>Clasificación</th><th>Reservas</th><th># Reservas</th><th>Cant. vidrio</th></tr></thead><tbody id="locationMixedRacks"><tr><td colspan="5" class="empty">Sin consulta</td></tr></tbody></table></section>
  </div>
 </div>
 <div id="glassDetailModal" class="modal glass-detail-modal" hidden><div class="modal-card">
@@ -332,6 +332,6 @@
     </section>
   </div>
 
-  <script type="module" src="app.js?v=64"></script>
+  <script type="module" src="app.js?v=65"></script>
 </body>
 </html>
