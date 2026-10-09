@@ -24,7 +24,7 @@ export async function readGlassLocationWorkbook(file){
     const estado=clean(pick(r,["Estado Orden"]));
     const dimensiones=clean(pick(r,["Dimensiones"]));
     const composicion=clean(pick(r,["Composiciòn","Composición","Composicion"]));
-    const clave=[orden,ordenSap,item,posicion,estado,dimensiones,composicion].map(x=>String(x??"")).join("|");
+    // Stable identity: location/state/available are intentionally excluded so movements become updates, not new rows.\n    const clave=[orden,ordenSap,item,dimensiones,composicion].map(x=>String(x??"")).join("|");
     rows.push({
       fila_origen:i+2,orden,orden_sap:ordenSap===null?null:String(ordenSap),proyecto:clean(pick(r,["Proyecto"])),
       item:item===null?null:String(item),disponible,posicion,posicion_anterior:clean(pick(r,["Posicion Anterior"])),
