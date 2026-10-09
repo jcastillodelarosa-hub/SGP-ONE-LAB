@@ -876,7 +876,7 @@ function renderNcView(){
  const rows=ncViewRows.filter(r=>ncCols.every(([k])=>!ncViewFilters[k]||ncFmt(r,k).toLowerCase().includes(ncViewFilters[k].toLowerCase())));
  body.innerHTML=rows.map(r=>`<tr class="${String(r.estado).toLowerCase()==='finalizada'?'nc-finalized':''}">${ncCols.map(([k])=>k==='semaforo'? `<td><span class="nc-light ${String(r.semaforo).toLowerCase()}" title="${r.dias_abierta} días"></span></td>`:`<td>${escapeHtml(ncFmt(r,k))}</td>`).join('')}</tr>`).join('')||`<tr><td colspan="${ncCols.length}" class="empty">Sin NC para los filtros seleccionados</td></tr>`;
  head.querySelectorAll('[data-ncf]').forEach(x=>x.addEventListener('input',e=>{ncViewFilters[e.target.dataset.ncf]=e.target.value;renderNcView();const n=document.querySelector(`[data-ncf="${e.target.dataset.ncf}"]`);n?.focus();n?.setSelectionRange(n.value.length,n.value.length)}));
- let drag=null;head.querySelectorAll('[data-nccol]').forEach(th=>{th.addEventListener('dragstart',()=>drag=Number(th.dataset.nccol));th.addEventListener('dragover',e=>e.preventDefault());th.addEventListener('drop',e=>{e.preventDefault();const to=Number(th.dataset.nccol);if(drag===null||drag===to)return;const [c]=ncCols.splice(drag,1);ncCols.splice(to,0,c);drag=null;renderNcView()})});
+ let drag=null;head.querySelectorAll('[data-nccol]').forEach(th=>{th.addEventListener('dragstart',e=>{drag=Number(th.dataset.nccol);th.classList.add('col-dragging');e.dataTransfer.effectAllowed='move'});th.addEventListener('dragover',e=>{e.preventDefault();const r=th.getBoundingClientRect(),after=e.clientX>r.left+r.width/2;head.querySelectorAll('.col-drop-left,.col-drop-right').forEach(x=>x.classList.remove('col-drop-left','col-drop-right'));th.classList.add(after?'col-drop-right':'col-drop-left');e.dataTransfer.dropEffect='move'});th.addEventListener('dragleave',()=>th.classList.remove('col-drop-left','col-drop-right'));th.addEventListener('drop',e=>{e.preventDefault();const r=th.getBoundingClientRect(),after=e.clientX>r.left+r.width/2;let to=Number(th.dataset.nccol)+(after?1:0);if(drag===null)return;const [c]=ncCols.splice(drag,1);if(drag<to)to--;ncCols.splice(to,0,c);drag=null;renderNcView()});th.addEventListener('dragend',()=>{drag=null;head.querySelectorAll('.col-dragging,.col-drop-left,.col-drop-right').forEach(x=>x.classList.remove('col-dragging','col-drop-left','col-drop-right'))})});
 }
 function openNcMetric(kind){
  const tests={consult:r=>String(r.estado).toLowerCase()==='consultada',audit:r=>String(r.estado).toLowerCase()==='sin auditar',overdue:r=>String(r.estado).toLowerCase()!=='finalizada'&&Number(r.dias_abierta)>2,nosolution:r=>r.sin_solucion};
@@ -899,9 +899,14 @@ document.querySelector("#closeNcMetric")?.addEventListener("click",()=>document.
 function enableDraggableColumns(root=document){
  root.querySelectorAll('table').forEach(table=>{
   if(table.classList.contains('nc-operational-table')||table.dataset.dragReady)return;
-  const row=table.tHead?.rows?.[0];if(!row||row.cells.length<2)return;table.dataset.dragReady='1';
-  let from=null;
-  [...row.cells].forEach((th,i)=>{th.draggable=true;th.classList.add('draggable-th');th.addEventListener('dragstart',()=>from=i);th.addEventListener('dragover',e=>e.preventDefault());th.addEventListener('drop',e=>{e.preventDefault();const to=[...row.cells].indexOf(th);if(from==null||from===to)return;[...table.rows].forEach(tr=>{if(tr.cells.length<=Math.max(from,to))return;const cell=tr.cells[from];const ref=tr.cells[to];if(from<to)ref.after(cell);else ref.before(cell)});from=null})});
+  const row=table.tHead?.rows?.[0];if(!row||row.cells.length<2)return;table.dataset.dragReady='1';let from=null;
+  [...row.cells].forEach(th=>{th.draggable=true;th.classList.add('draggable-th');
+   th.addEventListener('dragstart',e=>{from=[...row.cells].indexOf(th);th.classList.add('col-dragging');e.dataTransfer.effectAllowed='move'});
+   th.addEventListener('dragover',e=>{e.preventDefault();const r=th.getBoundingClientRect(),after=e.clientX>r.left+r.width/2;row.querySelectorAll('.col-drop-left,.col-drop-right').forEach(x=>x.classList.remove('col-drop-left','col-drop-right'));th.classList.add(after?'col-drop-right':'col-drop-left');e.dataTransfer.dropEffect='move'});
+   th.addEventListener('dragleave',()=>th.classList.remove('col-drop-left','col-drop-right'));
+   th.addEventListener('drop',e=>{e.preventDefault();if(from==null)return;const cells=[...row.cells],target=cells.indexOf(th),r=th.getBoundingClientRect(),after=e.clientX>r.left+r.width/2;let to=target+(after?1:0);[...table.rows].forEach(tr=>{if(tr.cells.length!==cells.length)return;const moving=tr.cells[from];let dest=to;if(from<dest)dest--;if(dest>=tr.cells.length)tr.append(moving);else tr.cells[dest].before(moving)});from=null;row.querySelectorAll('.col-drop-left,.col-drop-right').forEach(x=>x.classList.remove('col-drop-left','col-drop-right'))});
+   th.addEventListener('dragend',()=>{from=null;row.querySelectorAll('.col-dragging,.col-drop-left,.col-drop-right').forEach(x=>x.classList.remove('col-dragging','col-drop-left','col-drop-right'))});
+  });
  });
 }
 const tableDragObserver=new MutationObserver(()=>enableDraggableColumns());tableDragObserver.observe(document.body,{childList:true,subtree:true});enableDraggableColumns();
