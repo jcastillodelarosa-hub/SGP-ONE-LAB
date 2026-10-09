@@ -56,21 +56,26 @@ export function transformAluminumTrackingRows(sourceRows, fileName = "") {
       key_seguimiento: key,
       id,
       anio: number(src["Año Prog."]),
+      anio_prog: number(src["Año Prog."]),
       semana: number(src["Semana Prog."]),
+      semana_prog: number(src["Semana Prog."]),
       tipo_orden: clean(src["Tipo Orden"]),
       reserva,
       peso_reserva_sap: number(src["Peso Reserva SAP"]),
       estado_entrega_corte: clean(src["Estado Entrega Corte"]),
-      estado,
+      estado: clean(src.Estado),
+      estado_normalizado: estado,
       proyecto: clean(src.Proyecto),
       produccion: clean(src["Producción"]),
       sistema: clean(src.Sistema),
+      linea_prog: clean(src["Línea Prog."]),
       bodega: clean(src.Bodega),
       cant_vent: number(src["Cant. Vent"]),
       porcentaje_vidrio: number(src.porcentaje_vidrio),
       vent_cant_vidrio: number(src["Vent cant Vidrio"]),
       cant_pz: number(src["Cant. Pz"]),
       acabado: clean(src.Acabado),
+      ultimo_estado: clean(src["Último Estado"]),
       quote: clean(src.Quote),
       sistema_pvc: clean(src["Sistema PVC?"]),
       is_service: clean(src.is_service),
@@ -90,6 +95,6 @@ export async function readAluminumTrackingWorkbook(file) {
 
 export function summarizeAluminumTracking(rows) {
   const states = Object.fromEntries(SGP.reservationStates.map(s => [s, 0]));
-  for (const row of rows) states[row.estado] = (states[row.estado] || 0) + 1;
+  for (const row of rows) states[row.estado_normalizado] = (states[row.estado_normalizado] || 0) + 1;
   return { total: rows.length, reservations: new Set(rows.map(r => r.reserva)).size, states };
 }
