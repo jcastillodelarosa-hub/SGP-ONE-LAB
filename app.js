@@ -61,6 +61,7 @@ const els = {
   applyDailyExport: document.querySelector("#applyDailyExport"),
   dailyExportStatus: document.querySelector("#dailyExportStatus"),
   dailyExportMetrics: document.querySelector("#dailyExportMetrics"),
+  dailyExportWeeks: document.querySelector("#dailyExportWeeks"),
   aluminumFile: document.querySelector("#aluminumTrackingFile"),
   validateAluminum: document.querySelector("#validateAluminum"),
   aluminumStatus: document.querySelector("#aluminumStatus"),
@@ -538,10 +539,12 @@ async function queryWeeklyProgramming() {
 function resetDailyExport(){
   dailyExportPreview=null;dailyExportRows=[];
   if(els.applyDailyExport)els.applyDailyExport.disabled=true;
-  if(els.dailyExportMetrics)els.dailyExportMetrics.innerHTML='<span>Recibidos <strong>—</strong></span><span>Coinciden <strong>—</strong></span><span>Nuevos <strong>—</strong></span><span>Ya no aparecen <strong>—</strong></span>';
+  if(els.dailyExportMetrics)els.dailyExportMetrics.innerHTML='<span>Recibidos <strong>—</strong></span><span>Coinciden <strong>—</strong></span><span>Fuera de base <strong>—</strong></span><span>Ausentes (sem. incluidas) <strong>—</strong></span>'; if(els.dailyExportWeeks)els.dailyExportWeeks.innerHTML='';
 }
 function renderDailyExportMetrics(p){
-  els.dailyExportMetrics.innerHTML=`<span>Recibidos <strong>${p.recibidos}</strong></span><span>Coinciden <strong>${p.coinciden}</strong></span><span>Nuevos <strong>${p.nuevos}</strong></span><span>Ya no aparecen <strong>${p.ausentes}</strong></span>`;
+  const weeks=p.semanas||[]; const absent=weeks.reduce((n,w)=>n+(w.ausentes||0),0);
+  els.dailyExportMetrics.innerHTML=`<span>Recibidos <strong>${p.recibidos}</strong></span><span>Coinciden <strong>${p.coinciden}</strong></span><span>Fuera de base <strong>${p.nuevos}</strong></span><span>Ausentes (sem. incluidas) <strong>${absent}</strong></span>`;
+  if(els.dailyExportWeeks)els.dailyExportWeeks.innerHTML='<table><thead><tr><th>Semana</th><th>Export</th><th>Base SGP</th><th>Coinciden</th><th>Fuera base</th><th>Ausentes</th><th>Acción</th></tr></thead><tbody>'+weeks.map(w=>`<tr><td>${w.semana}</td><td>${w.registros_export}</td><td>${w.registros_base}</td><td>${w.coinciden}</td><td>${w.fuera_base}</td><td>${w.ausentes}</td><td><strong>${w.accion==='NO_INCLUIDA_NO_TOCAR'?'No incluida · no tocar':w.accion==='FUERA_BASE'?'Fuera de base':'Comparar'}</strong></td></tr>`).join('')+'</tbody></table>';
 }
 async function previewDailyExport(){
   const token=sessionStorage.getItem(APP_SESSION_KEY),file=els.dailyExportFile?.files?.[0],line=els.dailyExportLine?.value;
@@ -568,7 +571,7 @@ async function previewDailyExport(){
 async function applyDailyExport(){
   if(!dailyExportPreview||!dailyExportRows.length)return;
   const token=sessionStorage.getItem(APP_SESSION_KEY),p=dailyExportPreview;
-  const msg=`APLICAR EXPORT DIARIO\n\nLínea: ${p.line}\nArchivo: ${p.fileName}\nRecibidos: ${p.recibidos}\nCoinciden: ${p.coinciden}\nNuevos: ${p.nuevos}\nYa no aparecen: ${p.ausentes}\n\nLa programación base semanal no se elimina. ¿Aplicar actualización?`;
+  const msg=`APLICAR EXPORT DIARIO\n\nLínea: ${p.line}\nArchivo: ${p.fileName}\nRecibidos: ${p.recibidos}\nCoinciden: ${p.coinciden}\nFuera de base: ${p.nuevos}\nLa ausencia se aplica únicamente a semanas incluidas en el Export.\n\nLa programación base semanal no se elimina. ¿Aplicar actualización?`;
   if(!window.confirm(msg))return;
   els.applyDailyExport.disabled=true;els.dailyExportStatus.textContent='Aplicando actualización diaria…';
   try{
@@ -576,7 +579,7 @@ async function applyDailyExport(){
     const {data,error}=await client.rpc('sgp_aplicar_export_diario',{p_token:token,p_linea:p.line,p_nombre_archivo:p.fileName,p_datos:dailyExportRows});
     if(error)throw error;
     els.dailyExportStatus.textContent=`Actualización aplicada ✓ ${data.actualizados} actualizados · ${data.nuevos} nuevos · ${data.ausentes} ya no aparecen.`;
-    window.alert(`EXPORT ACTUALIZADO ✓\n\nLínea: ${p.line}\nActualizados: ${data.actualizados}\nNuevos: ${data.nuevos}\nYa no aparecen: ${data.ausentes}`);
+    window.alert(`EXPORT ACTUALIZADO ✓\n\nLínea: ${p.line}\nActualizados: ${data.actualizados}\nFuera de base: ${data.fuera_base}\nAusentes en semanas incluidas: ${data.ausentes}`);
     dailyExportPreview=null;dailyExportRows=[];
   }catch(e){els.dailyExportStatus.textContent='Actualización rechazada ✕ '+e.message;els.applyDailyExport.disabled=false}
 }
