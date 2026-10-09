@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SGP ONE LAB</title>
-  <link rel="stylesheet" href="styles.css?v=50" />
+  <link rel="stylesheet" href="styles.css?v=51" />
   <script src="config.js?v=20261008-1300"></script>
 </head>
 <body>
@@ -42,7 +42,7 @@
           <input id="authPassword" type="password" placeholder="Contraseña" autocomplete="current-password" />
           <button id="authLogin">Ingresar</button>
           <button id="authLogout" hidden>Cerrar sesión</button>
-          <span class="status">LAB v50</span>
+          <span class="status">LAB v51</span>
         </div>
       </header>
 
@@ -258,11 +258,11 @@
           </div>
 
           <div class="daily-tabs" role="tablist" aria-label="Fuentes de actualización diaria">
-            <button class="daily-tab active" data-daily-tab="export"><span class="daily-tab-icon">▤</span>Export diario</button>
-            <button class="daily-tab" data-daily-tab="glass-location"><span class="daily-tab-icon">⌖</span>Ubicación de vidrio</button>
-            <button class="daily-tab" data-daily-tab="nc-al"><span class="daily-tab-icon">⌕</span>NC Aluminio</button>
-            <button class="daily-tab" data-daily-tab="nc-glass"><span class="broken-glass-icon" aria-hidden="true"></span>NC Vidrio</button>
-            <button class="daily-tab" data-daily-tab="al-track"><span class="daily-tab-icon">▣</span>Seguimiento de aluminio</button>
+            <button class="daily-tab active" data-daily-tab="export"><span class="daily-tab-icon icon-export" aria-hidden="true">▤</span><span>Export diario</span></button>
+            <button class="daily-tab" data-daily-tab="glass-location"><span class="daily-tab-icon icon-glass-location" aria-hidden="true">◆</span><span>Ubicación de vidrio</span></button>
+            <button class="daily-tab" data-daily-tab="nc-al"><span class="daily-tab-icon icon-nc-al" aria-hidden="true">⚙</span><span>NC Aluminio</span></button>
+            <button class="daily-tab" data-daily-tab="nc-glass"><span class="broken-glass-icon" aria-hidden="true"><i></i></span><span>NC Vidrio</span></button>
+            <button class="daily-tab" data-daily-tab="al-track"><span class="daily-tab-icon icon-al-track" aria-hidden="true">▣</span><span>Seguimiento de aluminio</span></button>
           </div>
 
           <section class="daily-tab-panel active" data-daily-panel="export">
@@ -317,6 +317,6 @@
     </section>
   </div>
 
-  <script type="module" src="app.js?v=50"></script>
+  <script type="module" src="app.js?v=51"></script>
 </body>
 </html>
