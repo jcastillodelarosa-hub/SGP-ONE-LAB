@@ -851,7 +851,7 @@ async function previewNcAluminum(){
   const {data:newRows,error:newErr}=await client.rpc("sgp_previsualizar_nuevas_nc_aluminio",{p_token:token,p_datos:ncAlRows});if(newErr)throw newErr;ncAlNewRows=newRows||[];ncAlPreview={...data,file:file.name};
   document.querySelector("#ncAlReceived").textContent=data.recibidos||0;document.querySelector("#ncAlMatched").textContent=data.relacionados||0;
   document.querySelector("#ncAlMissing").textContent=data.sin_programacion||0;document.querySelector("#ncAlAmbiguous").textContent=data.ambiguos||0;
-  const weeks=(data.por_semana||[]).map(x=>`Semana Maestra ${x.semana}: ${x.cantidad} NC`).join(" · "); document.querySelector("#ncAlWeekSummary").textContent=(weeks?weeks+" · ":"")+"Fuera de programación actual: "+(data.fuera_programacion??data.sin_programacion??0)+". Semana NC se conserva como fecha de creación.";
+  const weeks=(data.por_semana||[]).map(x=>`Semana Maestro ${x.semana}: ${x.cantidad} NC`).join(" · "); document.querySelector("#ncAlWeekSummary").textContent=(weeks?weeks+" · ":"")+"Fuera de programación actual: "+(data.fuera_programacion??data.sin_programacion??0)+". Semana NC se conserva como fecha de creación.";
   status.textContent="Validación completada. No se ha escrito información.";btn.disabled=false;
  }catch(e){status.textContent="Validación rechazada ✕ "+e.message;btn.disabled=true}
 }
@@ -859,7 +859,7 @@ async function applyNcAluminum(){
  if(!ncAlPreview||!ncAlRows.length)return; const btn=document.querySelector("#applyNcAl"),status=document.querySelector("#ncAlStatus");
  try{btn.disabled=true;status.textContent="Aplicando NC Aluminio…";const client=await getSupabaseClient(),token=sessionStorage.getItem("sgp_one_session");
  const {data,error}=await client.rpc("sgp_aplicar_nc_aluminio",{p_token:token,p_nombre_archivo:ncAlPreview.file,p_datos:ncAlRows});if(error)throw error;
- status.textContent=`NC Aluminio actualizado ✓ · ${data.nuevos} nuevas · ${data.actualizados} actualizadas · ${data.relacionados} con Semana Maestra`;
+ status.textContent=`NC Aluminio actualizado ✓ · ${data.nuevos} nuevas · ${data.actualizados} actualizadas · ${data.relacionados} con Semana Maestro`;
  if(ncAlNewRows.length){const modal=document.querySelector("#ncNewModal"),table=modal.querySelector("table");document.querySelector("#ncNewTitle").textContent=`NC agregadas en esta carga · ${ncAlNewRows.length}`;document.querySelector("#ncNewBody").innerHTML=ncAlNewRows.map(r=>`<tr><td>${escapeHtml(r.consecutivo)}</td><td>${escapeHtml(r.linea||'')}</td><td>${escapeHtml(r.semana_nc||'')}</td><td>${escapeHtml(r.referencia||'')}</td><td>${escapeHtml(r.acabado||'')}</td><td><span class="nc-state-pill">${escapeHtml(r.estado||'')}</span></td><td>${escapeHtml(String(r.creacion||'').slice(0,10))}</td><td>${escapeHtml(r.reserva_solucion||'')}</td><td>${escapeHtml(ncInches(r.perfil_mm))}</td><td>${escapeHtml(r.no_cortes||'')}</td></tr>`).join('');modal.hidden=false;delete table.dataset.dragReady;enableDraggableColumns(modal)}
  }catch(e){status.textContent="Aplicación rechazada ✕ "+e.message;btn.disabled=false}
 }
@@ -868,14 +868,16 @@ document.querySelector("#applyNcAl")?.addEventListener("click",applyNcAluminum);
 
 
 let ncViewRows=[],ncViewFilters={};
+let ncHiddenCols=new Set(JSON.parse(localStorage.getItem("sgp_nc_hidden_cols")||"[]"));
 let ncCols=[['consecutivo','Consecutivo'],['semana_nc','Sem. NC'],['linea','Línea'],['creacion','Creación'],['dias_abierta','Días'],['semaforo',''],['estado','Estado'],['reserva','Reserva'],['reserva_solucion','Reserva solución'],['produccion','Producción'],['sistema','Sistema'],['referencia','Referencia'],['perfil_mm','Perfil mm'],['perfil_in','Perfil pulg.'],['no_cortes','# Cortes'],['acabado','Acabado'],['concepto','Concepto'],['causa','Causa'],['responsable','Responsable']];
 function ncInches(v){let n=Number(String(v??'').replace(',','.'));if(!Number.isFinite(n))return '';let x=n/25.4,w=Math.floor(x),q=Math.round((x-w)*16);if(q===16){w++;q=0}if(!q)return w+'″';const g=(a,b)=>b?g(b,a%b):a,d=g(q,16);return w+' '+(q/d)+'/'+(16/d)+'″'}
 function ncFmt(r,k){let v=k==='perfil_in'?ncInches(r.perfil_mm):r[k];if(v==null)return "";if(k==='creacion')return String(v).slice(0,10);return String(v)}
 function renderNcView(){
  const head=document.querySelector("#ncViewHead"),body=document.querySelector("#ncViewBody");if(!head||!body)return;
- head.innerHTML='<tr>'+ncCols.map(([k,l],i)=>`<th draggable="true" data-nccol="${i}">${l}</th>`).join('')+'</tr><tr class="filter-row">'+ncCols.map(([k])=>k==='semaforo'?'<th></th>':`<th><input data-ncf="${k}" value="${escapeHtml(ncViewFilters[k]||'')}" placeholder="Filtrar"></th>`).join('')+'</tr>';
- const rows=ncViewRows.filter(r=>ncCols.every(([k])=>!ncViewFilters[k]||ncFmt(r,k).toLowerCase().includes(ncViewFilters[k].toLowerCase())));
- body.innerHTML=rows.map(r=>`<tr class="${String(r.estado).toLowerCase()==='finalizada'?'nc-finalized':''}">${ncCols.map(([k])=>k==='semaforo'? `<td><span class="nc-light ${String(r.semaforo).toLowerCase()}" title="${r.dias_abierta} días"></span></td>`:`<td>${escapeHtml(ncFmt(r,k))}</td>`).join('')}</tr>`).join('')||`<tr><td colspan="${ncCols.length}" class="empty">Sin NC para los filtros seleccionados</td></tr>`;
+ const visibleCols=ncCols.filter(([k])=>!ncHiddenCols.has(k));
+ head.innerHTML='<tr>'+visibleCols.map(([k,l],i)=>`<th draggable="true" data-nccol="${i}">${l}</th>`).join('')+'</tr><tr class="filter-row">'+visibleCols.map(([k])=>k==='semaforo'?'<th></th>':`<th><input data-ncf="${k}" value="${escapeHtml(ncViewFilters[k]||'')}" placeholder="Filtrar"></th>`).join('')+'</tr>';
+ const rows=ncViewRows.filter(r=>visibleCols.every(([k])=>!ncViewFilters[k]||ncFmt(r,k).toLowerCase().includes(ncViewFilters[k].toLowerCase())));
+ body.innerHTML=rows.map(r=>`<tr class="${String(r.estado).toLowerCase()==='finalizada'?'nc-finalized':''}">${visibleCols.map(([k])=>k==='semaforo'? `<td><span class="nc-light ${String(r.semaforo).toLowerCase()}" title="${r.dias_abierta} días"></span></td>`:`<td>${escapeHtml(ncFmt(r,k))}</td>`).join('')}</tr>`).join('')||`<tr><td colspan="${visibleCols.length}" class="empty">Sin NC para los filtros seleccionados</td></tr>`;
  head.querySelectorAll('[data-ncf]').forEach(x=>x.addEventListener('input',e=>{ncViewFilters[e.target.dataset.ncf]=e.target.value;renderNcView();const n=document.querySelector(`[data-ncf="${e.target.dataset.ncf}"]`);n?.focus();n?.setSelectionRange(n.value.length,n.value.length)}));
  let drag=null;head.querySelectorAll('[data-nccol]').forEach(th=>{th.addEventListener('dragstart',e=>{drag=Number(th.dataset.nccol);th.classList.add('col-dragging');e.dataTransfer.effectAllowed='move'});th.addEventListener('dragover',e=>{e.preventDefault();const r=th.getBoundingClientRect(),after=e.clientX>r.left+r.width/2;head.querySelectorAll('.col-drop-left,.col-drop-right').forEach(x=>x.classList.remove('col-drop-left','col-drop-right'));th.classList.add(after?'col-drop-right':'col-drop-left');e.dataTransfer.dropEffect='move'});th.addEventListener('dragleave',()=>th.classList.remove('col-drop-left','col-drop-right'));th.addEventListener('drop',e=>{e.preventDefault();const r=th.getBoundingClientRect(),after=e.clientX>r.left+r.width/2;let to=Number(th.dataset.nccol)+(after?1:0);if(drag===null)return;const [c]=ncCols.splice(drag,1);if(drag<to)to--;ncCols.splice(to,0,c);drag=null;renderNcView()});th.addEventListener('dragend',()=>{drag=null;head.querySelectorAll('.col-dragging,.col-drop-left,.col-drop-right').forEach(x=>x.classList.remove('col-dragging','col-drop-left','col-drop-right'))})});
 }
@@ -892,7 +894,7 @@ async function loadNcOperational(){
  const [{data:lineSummary,error:lineErr},{data:originMetrics,error:originErr}]=await Promise.all([client.rpc("sgp_resumen_nc_aluminio_linea",{p_token:token,p_semana:week}),client.rpc("sgp_metricas_origen_nc_aluminio",{p_token:token,p_semana:week})]);if(lineErr)throw lineErr;if(originErr)throw originErr;
  document.querySelector("#ncMPlant").textContent=originMetrics.planta;document.querySelector("#ncMSupplier").textContent=originMetrics.proveedor;
  document.querySelector("#ncLineSummary").innerHTML=(lineSummary||[]).map(x=>`<div class="nc-line-card"><strong>${escapeHtml(x.linea)}</strong><span>Total NC <b>${x.total}</b></span><span>Planta <b>${x.planta}</b></span><span>Proveedor <b>${x.proveedor}</b></span></div>`).join('');
- document.querySelector("#ncMConsult").textContent=data.metricas.en_consulta;document.querySelector("#ncMAudit").textContent=data.metricas.sin_auditar;document.querySelector("#ncMOverdue").textContent=data.metricas.mas_2_dias;document.querySelector("#ncMNoSolution").textContent=data.metricas.sin_solucion;renderNcView();status.textContent=`Semana Maestra ${data.semana} · ${ncViewRows.length} NC`;
+ document.querySelector("#ncMConsult").textContent=data.metricas.en_consulta;document.querySelector("#ncMAudit").textContent=data.metricas.sin_auditar;document.querySelector("#ncMOverdue").textContent=data.metricas.mas_2_dias;document.querySelector("#ncMNoSolution").textContent=data.metricas.sin_solucion;renderNcView();status.textContent=`Semana Maestro ${data.semana} · ${ncViewRows.length} NC`;
  }catch(e){status.textContent="Consulta rechazada ✕ "+e.message}}
 document.querySelector("#loadNcView")?.addEventListener("click",loadNcOperational);
 document.querySelectorAll(".nc-metric-btn").forEach(b=>b.addEventListener("click",()=>openNcMetric(b.dataset.ncmetric)));
@@ -914,3 +916,10 @@ function enableDraggableColumns(root=document){
 const tableDragObserver=new MutationObserver(()=>enableDraggableColumns());tableDragObserver.observe(document.body,{childList:true,subtree:true});enableDraggableColumns();
 
 document.querySelector("#closeNcNew")?.addEventListener("click",()=>document.querySelector("#ncNewModal").hidden=true);
+
+function renderNcColumnPicker(){
+ const box=document.querySelector("#ncColumnPicker");if(!box)return;
+ box.innerHTML='<div class="nc-column-picker-head"><strong>Campos visibles</strong><span>Selecciona qué columnas mostrar</span></div><div class="nc-column-picker-grid">'+ncCols.map(([k,l])=>`<label><input type="checkbox" data-nccolvis="${k}" ${ncHiddenCols.has(k)?'':'checked'}> ${escapeHtml(l||'Semáforo')}</label>`).join('')+'</div>';
+ box.querySelectorAll('[data-nccolvis]').forEach(x=>x.addEventListener('change',()=>{x.checked?ncHiddenCols.delete(x.dataset.nccolvis):ncHiddenCols.add(x.dataset.nccolvis);localStorage.setItem("sgp_nc_hidden_cols",JSON.stringify([...ncHiddenCols]));renderNcView()}));
+}
+document.querySelector("#ncChooseColumns")?.addEventListener("click",()=>{const b=document.querySelector("#ncColumnPicker");b.hidden=!b.hidden;if(!b.hidden)renderNcColumnPicker()});
