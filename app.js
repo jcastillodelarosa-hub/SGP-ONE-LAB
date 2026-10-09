@@ -7,7 +7,7 @@ import { readAluminumPiecesWorkbook, summarizeAluminumPieces, classifyAluminumPi
 import { classifyPieceCodes } from "./src/services/piece-master-repository.js";
 import { readAccessoriesWorkbook, relateAccessories, prepareAccessoryPayload } from "./src/domain/accessories-importer.js";
 import { readGlassWorkbook, relateGlass, prepareGlassPayload } from "./src/domain/glass-importer.js";
-import { readGlassLocationWorkbook, filterGlassLocationRows } from "./src/domain/glass-location-importer.js?v=60";
+import { readGlassLocationWorkbook, filterGlassLocationRows } from "./src/domain/glass-location-importer.js?v=61";
 import { getSupabaseClient } from "./src/services/supabase-client.js";
 
 const mecanizado = createMecanizadoModule(trackingRows);
@@ -59,7 +59,7 @@ const els = {
   iKeys: document.querySelector("#iKeys"),
   iErrors: document.querySelector("#iErrors"),
   importBody: document.querySelector("#importSummaryBody"),
-  assemblyWeek: document.querySelector("#assemblyWeek"), assemblyLine: document.querySelector("#assemblyLine"), assemblyState: document.querySelector("#assemblyState"), assemblySearch: document.querySelector("#assemblySearch"), loadAssembly: document.querySelector("#loadAssembly"), assemblyStatus: document.querySelector("#assemblyStatus"), assemblyBody: document.querySelector("#assemblyBody"), asTotal: document.querySelector("#asTotal"), asBalance: document.querySelector("#asBalance"), asOpen: document.querySelector("#asOpen"), asClosed: document.querySelector("#asClosed"), asAssembled: document.querySelector("#asAssembled"),
+  assemblySheetTab:document.querySelector("#assemblySheetTab"),assemblyLocationReportTab:document.querySelector("#assemblyLocationReportTab"),assemblySheetPanel:document.querySelector("#assemblySheetPanel"),assemblyLocationReportPanel:document.querySelector("#assemblyLocationReportPanel"),glassDetailModal:document.querySelector("#glassDetailModal"),glassDetailTitle:document.querySelector("#glassDetailTitle"),glassDetailMeta:document.querySelector("#glassDetailMeta"),glassDetailSummary:document.querySelector("#glassDetailSummary"),glassDetailBody:document.querySelector("#glassDetailBody"),closeGlassDetail:document.querySelector("#closeGlassDetail"),lrPrepared:document.querySelector("#lrPrepared"),lrNovelty:document.querySelector("#lrNovelty"),lrTransfer:document.querySelector("#lrTransfer"),lrOther:document.querySelector("#lrOther"),lrRacks:document.querySelector("#lrRacks"),lrMixed:document.querySelector("#lrMixed"),locationReportStatus:document.querySelector("#locationReportStatus"),locationByReservation:document.querySelector("#locationByReservation"),locationMixedRacks:document.querySelector("#locationMixedRacks"),assemblyWeek: document.querySelector("#assemblyWeek"), assemblyLine: document.querySelector("#assemblyLine"), assemblyState: document.querySelector("#assemblyState"), assemblySearch: document.querySelector("#assemblySearch"), loadAssembly: document.querySelector("#loadAssembly"), assemblyStatus: document.querySelector("#assemblyStatus"), assemblyBody: document.querySelector("#assemblyBody"), asTotal: document.querySelector("#asTotal"), asBalance: document.querySelector("#asBalance"), asOpen: document.querySelector("#asOpen"), asClosed: document.querySelector("#asClosed"), asAssembled: document.querySelector("#asAssembled"),
   dailyExportLine: document.querySelector("#dailyExportLine"),
   dailyExportFile: document.querySelector("#dailyExportFile"),
   previewDailyExport: document.querySelector("#previewDailyExport"),
@@ -591,8 +591,33 @@ function renderAssembly(){
   const n=v=>Number(v??0), pct=v=>v==null?"—":(n(v)<=1?Math.round(n(v)*100):Math.round(n(v)))+"%";
   els.asTotal.textContent=rows.length;els.asBalance.textContent=rows.reduce((a,r)=>a+n(r.saldo_ensamble),0);
   els.asOpen.textContent=rows.filter(r=>r.estado_produccion==="ABIERTA").length;els.asClosed.textContent=rows.filter(r=>r.estado_produccion==="CERRADA").length;els.asAssembled.textContent=rows.filter(r=>r.estado_produccion==="ENSAMBLADA").length;
-  els.assemblyBody.innerHTML=rows.length?rows.map(r=>`<tr><td>${escapeHtml(r.semana_actual??r.semana_base)}</td><td><strong>${escapeHtml(r.id)}</strong></td><td>${escapeHtml(r.produccion||"—")}</td><td>${escapeHtml(r.sistema||"—")}</td><td class="num">${escapeHtml(r.cantidad??"—")}</td><td class="num">${escapeHtml(r.ensamblado??"—")}</td><td class="num assembly-balance"><strong>${escapeHtml(r.saldo_ensamble??"—")}</strong></td><td><span class="assembly-state state-${String(r.estado_produccion||"").toLowerCase()}">${escapeHtml(r.estado_produccion||"—")}</span></td><td class="num">${pct(r.porc_vidrio)}</td><td>${escapeHtml(r.tipo_vidrio||"—")}</td><td class="assembly-measures">${escapeHtml(r.medidas||"—")}</td><td class="assembly-location">${escapeHtml(r.ubicacion_vidrio||"—")}</td><td>${escapeHtml(r.reserva_al||"—")}</td><td>${escapeHtml(r.estado_reserva_al||"—")}</td><td>${escapeHtml(r.acabado||"—")}</td><td>${escapeHtml(r.orden_oves||"—")}</td></tr>`).join(""):'<tr><td colspan="16" class="empty">No hay órdenes con estos filtros.</td></tr>';
+  els.assemblyBody.innerHTML=rows.length?rows.map(r=>`<tr><td>${escapeHtml(r.semana_actual??r.semana_base)}</td><td><strong>${escapeHtml(r.id)}</strong></td><td>${escapeHtml(r.produccion||"—")}</td><td>${escapeHtml(r.sistema||"—")}</td><td class="num">${escapeHtml(r.cantidad??"—")}</td><td class="num">${escapeHtml(r.ensamblado??"—")}</td><td class="num assembly-balance"><strong>${escapeHtml(r.saldo_ensamble??"—")}</strong></td><td><span class="assembly-state state-${String(r.estado_produccion||"").toLowerCase()}">${escapeHtml(r.estado_produccion||"—")}</span></td><td class="num">${pct(r.porc_vidrio)}</td><td>${escapeHtml(r.tipo_vidrio||"—")}</td><td class="assembly-measures">${escapeHtml(r.medidas||"—")}</td><td class="assembly-location">${r.ubicacion_vidrio&&r.ubicacion_vidrio!=="—"?`<button class="glass-location-link" data-glass-key="${escapeHtml(r.key_produccion)}" data-glass-id="${escapeHtml(r.id)}">${escapeHtml(r.ubicacion_vidrio)}</button>`:"—"}</td><td>${escapeHtml(r.reserva_al||"—")}</td><td>${escapeHtml(r.estado_reserva_al||"—")}</td><td>${escapeHtml(r.acabado||"—")}</td><td>${escapeHtml(r.orden_oves||"—")}</td></tr>`).join(""):'<tr><td colspan="16" class="empty">No hay órdenes con estos filtros.</td></tr>';
 }
+
+async function openGlassDetail(key,id){
+ const token=sessionStorage.getItem(APP_SESSION_KEY);if(!token)return;
+ els.glassDetailModal.hidden=false;els.glassDetailTitle.textContent="Orden "+id;els.glassDetailMeta.textContent="Consultando ubicación actual…";els.glassDetailSummary.innerHTML="";els.glassDetailBody.innerHTML="";
+ try{const client=await getSupabaseClient();const {data,error}=await client.rpc("sgp_detalle_ubicacion_vidrio",{p_token:token,p_key_produccion:key});if(error)throw error;
+  els.glassDetailMeta.textContent=\`\${data.unidades||0} vidrios · \${data.burros||0} burros\`;
+  els.glassDetailSummary.innerHTML=(data.resumen||[]).map(x=>\`<span class="glass-summary \${String(x.categoria).toLowerCase()}"><strong>\${x.unidades}</strong><small>\${escapeHtml(x.categoria)} · \${x.burros} burros</small></span>\`).join("");
+  const groups=["PREPARADO","NOVEDAD","OTROS"];const icons={PREPARADO:"✓",NOVEDAD:"!",OTROS:"•"};
+  els.glassDetailBody.innerHTML=groups.map(g=>{const rows=(data.detalle||[]).filter(x=>x.categoria===g);if(!rows.length)return"";return \`<section class="glass-detail-group group-\${g.toLowerCase()}"><h4><i>\${icons[g]}</i> \${g}</h4>\${rows.map(x=>\`<div class="glass-detail-row"><div><strong>(\${x.unidades}) \${escapeHtml(x.posicion||"Sin ubicación")}</strong><span>\${escapeHtml(x.estado||g)}</span></div><p>\${escapeHtml(x.composiciones||"—")}</p></div>\`).join("")}</section>\`}).join("");
+ }catch(e){els.glassDetailMeta.textContent="No se pudo consultar: "+e.message}
+}
+async function loadLocationReport(){
+ const token=sessionStorage.getItem(APP_SESSION_KEY);if(!token){els.locationReportStatus.textContent="Inicia sesión para consultar.";return}
+ els.locationReportStatus.textContent="Actualizando reporte de ubicaciones…";
+ try{const client=await getSupabaseClient();const {data,error}=await client.rpc("sgp_reporte_ubicaciones_vidrio",{p_token:token});if(error)throw error;const m=data.metricas||{};
+  els.lrPrepared.textContent=m.preparadas??0;els.lrNovelty.textContent=m.novedad??0;els.lrTransfer.textContent=m.traslado??0;els.lrOther.textContent=m.otros??0;els.lrRacks.textContent=m.burros??0;els.lrMixed.textContent=data.burros_mixtos??0;
+  els.locationByReservation.innerHTML=(data.por_reserva||[]).map(r=>\`<tr><td>\${escapeHtml(r.reserva)}</td><td class="num"><strong>\${r.burros}</strong></td><td class="num">\${r.unidades}</td></tr>\`).join("")||'<tr><td colspan="3" class="empty">Sin ubicaciones</td></tr>';
+  els.locationMixedRacks.innerHTML=(data.mixtos||[]).map(r=>\`<tr><td><strong>\${escapeHtml(r.posicion)}</strong></td><td>\${escapeHtml(r.reservas)}</td><td class="num">\${r.cantidad_reservas}</td><td class="num">\${r.unidades}</td></tr>\`).join("")||'<tr><td colspan="4" class="empty">No hay burros con reservas mezcladas</td></tr>';
+  els.locationReportStatus.textContent="Reporte actualizado ✓ datos de ubicación activos.";
+ }catch(e){els.locationReportStatus.textContent="Consulta rechazada ✕ "+e.message}
+}
+function openAssemblyTab(tab){
+ const report=tab==="report";els.assemblySheetPanel.hidden=report;els.assemblyLocationReportPanel.hidden=!report;els.assemblySheetTab.classList.toggle("active",!report);els.assemblyLocationReportTab.classList.toggle("active",report);if(report)loadLocationReport();
+}
+
 async function loadAssembly(){
  const token=sessionStorage.getItem(APP_SESSION_KEY);if(!token){els.assemblyStatus.textContent="Inicia sesión para consultar.";return}
  els.loadAssembly.disabled=true;els.assemblyStatus.textContent="Consultando estado actual…";
@@ -775,6 +800,11 @@ els.glassLocationFile?.addEventListener("change",()=>{resetGlassLocation();els.g
 els.previewGlassLocation?.addEventListener("click",previewGlassLocation);
 els.applyGlassLocation?.addEventListener("click",applyGlassLocation);
 els.loadAssembly?.addEventListener("click",loadAssembly);
+els.assemblyBody?.addEventListener("click",e=>{const b=e.target.closest("[data-glass-key]");if(b)openGlassDetail(b.dataset.glassKey,b.dataset.glassId)});
+els.closeGlassDetail?.addEventListener("click",()=>els.glassDetailModal.hidden=true);
+els.glassDetailModal?.addEventListener("click",e=>{if(e.target===els.glassDetailModal)els.glassDetailModal.hidden=true});
+els.assemblySheetTab?.addEventListener("click",()=>openAssemblyTab("sheet"));
+els.assemblyLocationReportTab?.addEventListener("click",()=>openAssemblyTab("report"));
 els.assemblyState?.addEventListener("change",renderAssembly);els.assemblySearch?.addEventListener("input",renderAssembly);
 els.assemblyWeek?.addEventListener("change",loadAssembly);els.assemblyLine?.addEventListener("change",loadAssembly);
 els.previewDailyExport?.addEventListener("click",previewDailyExport);
