@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SGP ONE LAB</title>
-  <link rel="stylesheet" href="styles.css?v=87" />
+  <link rel="stylesheet" href="styles.css?v=88" />
   <script src="config.js?v=20261008-1300"></script>
 </head>
 <body>
@@ -45,7 +45,7 @@
           <input id="authPassword" type="password" placeholder="Contraseña" autocomplete="current-password" />
           <button id="authLogin">Ingresar</button>
           <button id="authLogout" hidden>Cerrar sesión</button>
-          <span class="status">LAB v87</span>
+          <span class="status">LAB v88</span>
         </div>
       </header>
 
@@ -324,11 +324,11 @@
             <div class="daily-panel-heading"><div><h3>Seguimiento de aluminio</h3><p>Estado logístico y seguimiento del aluminio.</p></div></div>
             <div class="daily-upload-row daily-upload-simple">
               <label class="daily-file-field"><span>Archivo</span><input id="aluminumTrackingFile" type="file" accept=".xlsx" /></label>
-              <button id="validateAluminum" class="daily-outline-action">Validar seguimiento</button>
+              <button id="validateAluminum" class="daily-outline-action">Validar seguimiento</button><button id="applyAluminumTracking" class="daily-primary-action" disabled>Aplicar actualización</button>
               <span id="aluminumStatus">Pendiente de archivo.</span>
             </div>
             <section class="summary import-summary">
-              <div class="metric"><span>Seguimientos válidos</span><strong id="aTotal">0</strong></div><div class="metric"><span>Reservas</span><strong id="aReservations">0</strong></div><div class="metric"><span>Entregado</span><strong id="aDelivered">0</strong></div><div class="metric"><span>Errores</span><strong id="aErrors">0</strong></div>
+              <div class="metric"><span>Registros</span><strong id="aTotal">0</strong></div><div class="metric"><span>Nuevas reservas</span><strong id="aReservations">0</strong></div><div class="metric"><span>Existentes</span><strong id="aDelivered">0</strong></div><div class="metric"><span>Cambios</span><strong id="aErrors">—</strong></div>
             </section>
           </section>
         </section>
@@ -346,6 +346,6 @@
     </section>
   </div>
 
-  <script type="module" src="app.js?v=87"></script>
+  <script type="module" src="app.js?v=88"></script>
 </body>
 </html>
