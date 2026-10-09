@@ -598,10 +598,10 @@ async function openGlassDetail(key,id){
  const token=sessionStorage.getItem(APP_SESSION_KEY);if(!token)return;
  els.glassDetailModal.hidden=false;els.glassDetailTitle.textContent="Orden "+id;els.glassDetailMeta.textContent="Consultando ubicación actual…";els.glassDetailSummary.innerHTML="";els.glassDetailBody.innerHTML="";
  try{const client=await getSupabaseClient();const {data,error}=await client.rpc("sgp_detalle_ubicacion_vidrio",{p_token:token,p_key_produccion:key});if(error)throw error;
-  els.glassDetailMeta.textContent=\`\${data.unidades||0} vidrios · \${data.burros||0} burros\`;
-  els.glassDetailSummary.innerHTML=(data.resumen||[]).map(x=>\`<span class="glass-summary \${String(x.categoria).toLowerCase()}"><strong>\${x.unidades}</strong><small>\${escapeHtml(x.categoria)} · \${x.burros} burros</small></span>\`).join("");
+  els.glassDetailMeta.textContent=`${data.unidades||0} vidrios · ${data.burros||0} burros`;
+  els.glassDetailSummary.innerHTML=(data.resumen||[]).map(x=>`<span class="glass-summary ${String(x.categoria).toLowerCase()}"><strong>${x.unidades}</strong><small>${escapeHtml(x.categoria)} · ${x.burros} burros</small></span>`).join("");
   const groups=["PREPARADO","NOVEDAD","OTROS"];const icons={PREPARADO:"✓",NOVEDAD:"!",OTROS:"•"};
-  els.glassDetailBody.innerHTML=groups.map(g=>{const rows=(data.detalle||[]).filter(x=>x.categoria===g);if(!rows.length)return"";return \`<section class="glass-detail-group group-\${g.toLowerCase()}"><h4><i>\${icons[g]}</i> \${g}</h4>\${rows.map(x=>\`<div class="glass-detail-row"><div><strong>(\${x.unidades}) \${escapeHtml(x.posicion||"Sin ubicación")}</strong><span>\${escapeHtml(x.estado||g)}</span></div><p>\${escapeHtml(x.composiciones||"—")}</p></div>\`).join("")}</section>\`}).join("");
+  els.glassDetailBody.innerHTML=groups.map(g=>{const rows=(data.detalle||[]).filter(x=>x.categoria===g);if(!rows.length)return"";return `<section class="glass-detail-group group-${g.toLowerCase()}"><h4><i>${icons[g]}</i> ${g}</h4>${rows.map(x=>`<div class="glass-detail-row"><div><strong>(${x.unidades}) ${escapeHtml(x.posicion||"Sin ubicación")}</strong><span>${escapeHtml(x.estado||g)}</span></div><p>${escapeHtml(x.composiciones||"—")}</p></div>`).join("")}</section>`}).join("");
  }catch(e){els.glassDetailMeta.textContent="No se pudo consultar: "+e.message}
 }
 async function loadLocationReport(){
@@ -609,8 +609,8 @@ async function loadLocationReport(){
  els.locationReportStatus.textContent="Actualizando reporte de ubicaciones…";
  try{const client=await getSupabaseClient();const {data,error}=await client.rpc("sgp_reporte_ubicaciones_vidrio",{p_token:token});if(error)throw error;const m=data.metricas||{};
   els.lrPrepared.textContent=m.preparadas??0;els.lrNovelty.textContent=m.novedad??0;els.lrTransfer.textContent=m.traslado??0;els.lrOther.textContent=m.otros??0;els.lrRacks.textContent=m.burros??0;els.lrMixed.textContent=data.burros_mixtos??0;
-  els.locationByReservation.innerHTML=(data.por_reserva||[]).map(r=>\`<tr><td>\${escapeHtml(r.reserva)}</td><td class="num"><strong>\${r.burros}</strong></td><td class="num">\${r.unidades}</td></tr>\`).join("")||'<tr><td colspan="3" class="empty">Sin ubicaciones</td></tr>';
-  els.locationMixedRacks.innerHTML=(data.mixtos||[]).map(r=>\`<tr><td><strong>\${escapeHtml(r.posicion)}</strong></td><td>\${escapeHtml(r.reservas)}</td><td class="num">\${r.cantidad_reservas}</td><td class="num">\${r.unidades}</td></tr>\`).join("")||'<tr><td colspan="4" class="empty">No hay burros con reservas mezcladas</td></tr>';
+  els.locationByReservation.innerHTML=(data.por_reserva||[]).map(r=>`<tr><td>${escapeHtml(r.reserva)}</td><td class="num"><strong>${r.burros}</strong></td><td class="num">${r.unidades}</td></tr>`).join("")||'<tr><td colspan="3" class="empty">Sin ubicaciones</td></tr>';
+  els.locationMixedRacks.innerHTML=(data.mixtos||[]).map(r=>`<tr><td><strong>${escapeHtml(r.posicion)}</strong></td><td>${escapeHtml(r.reservas)}</td><td class="num">${r.cantidad_reservas}</td><td class="num">${r.unidades}</td></tr>`).join("")||'<tr><td colspan="4" class="empty">No hay burros con reservas mezcladas</td></tr>';
   els.locationReportStatus.textContent="Reporte actualizado ✓ datos de ubicación activos.";
  }catch(e){els.locationReportStatus.textContent="Consulta rechazada ✕ "+e.message}
 }
