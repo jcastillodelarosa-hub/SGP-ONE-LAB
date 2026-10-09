@@ -14,6 +14,7 @@ export async function readGlassLocationWorkbook(file){
   const missing=required.filter(h=>!headers.includes(h));
   if(missing.length)throw new Error("Faltan columnas requeridas: "+missing.join(", "));
   const rows=[];
+  let invalid=0;
   source.forEach((r,i)=>{
     const orden=normOve(pick(r,["Orden"]));
     if(!orden){invalid++;return;}
