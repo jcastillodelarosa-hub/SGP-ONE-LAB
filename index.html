@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SGP ONE LAB</title>
-  <link rel="stylesheet" href="styles.css?v=57" />
+  <link rel="stylesheet" href="styles.css?v=58" />
   <script src="config.js?v=20261008-1300"></script>
 </head>
 <body>
@@ -43,7 +43,7 @@
           <input id="authPassword" type="password" placeholder="Contraseña" autocomplete="current-password" />
           <button id="authLogin">Ingresar</button>
           <button id="authLogout" hidden>Cerrar sesión</button>
-          <span class="status">LAB v57</span>
+          <span class="status">LAB v58</span>
         </div>
       </header>
 
@@ -263,7 +263,7 @@
           </section>
 
           <section class="daily-tab-panel" data-daily-panel="glass-location" hidden>
-            <div class="daily-panel-heading daily-export-heading"><span class="daily-heading-icon glass-location-heading-icon" aria-hidden="true">⌖</span><div><h3>Ubicación de vidrio</h3><p>Carga el Reporte Disponible completo. Durante esta etapa se cruza contra las OVES conocidas en SGP; el filtro por Saldo Ensamble se activará cuando los saldos diarios estén inicializados.</p></div></div>
+            <div class="daily-panel-heading daily-export-heading"><span class="daily-heading-icon glass-location-heading-icon" aria-hidden="true">⌖</span><div><h3>Ubicación de vidrio</h3><p>Carga el Reporte Disponible completo. Cruza el Reporte Disponible contra las OVES de PANELES_2. Las producciones con saldo diario inicializado y Saldo Ensamble = 0 se excluyen.</p></div></div>
             <div class="daily-upload-row daily-upload-simple">
               <label class="daily-file-field"><span>Reporte Disponible</span><input id="glassLocationFile" type="file" accept=".xlsx" /></label>
               <button id="previewGlassLocation" class="daily-outline-action">Validar y depurar</button>
@@ -276,9 +276,9 @@
               <span class="daily-metric-card metric-out"><i class="metric-icon icon-warning">!</i><span><small>Fuera de SGP</small><strong>—</strong></span></span>
               <span class="daily-metric-card metric-absent"><i class="metric-icon icon-minus">−</i><span><small>OVES sin ubicación</small><strong>—</strong></span></span>
             </div>
-            <div class="daily-detail-title"><strong>Depuración por OVES conocidas</strong><span>Hasta inicializar los saldos diarios se consideran las OVES válidas de PANELES_2 cargadas en SGP.</span></div>
+            <div class="daily-detail-title"><strong>Depuración por OVES conocidas</strong><span>Se consideran las OVES vigentes según el estado de inicialización de cada producción.</span></div>
             <div id="glassLocationSummary" class="glass-location-summary"></div>
-            <div class="daily-info"><strong>ⓘ Criterio temporal</strong><span>El filtro definitivo será PANELES_2 + Saldo Ensamble &gt; 0. Mientras no exista una actualización diaria de saldos confiable, no se excluirán producciones por el saldo inicial.</span></div>
+            <div class="daily-info"><strong>ⓘ Criterio actual</strong><span>Producción inicializada: se incluye solo con Saldo Ensamble &gt; 0. Producción aún no inicializada: se conserva hasta recibir su primer Export diario.</span></div>
           </section>
           <section class="daily-tab-panel" data-daily-panel="nc-al" hidden>
             <div class="daily-empty-panel"><span class="daily-empty-icon">⌕</span><h3>NC Aluminio</h3><p>Estado y datos de las no conformidades de aluminio por línea.</p><strong>Importador pendiente de mapear.</strong></div>
@@ -312,6 +312,6 @@
     </section>
   </div>
 
-  <script type="module" src="app.js?v=57"></script>
+  <script type="module" src="app.js?v=58"></script>
 </body>
 </html>
