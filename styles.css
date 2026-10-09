@@ -600,3 +600,11 @@ th.col-drop-right::after{right:-2px}
 #ncGlassTable{width:100%;min-width:1500px}#ncGlassTable thead th{position:sticky;top:0;background:#edf3fb;z-index:2}#ncGlassTable .filter-row th{top:35px;padding:4px}#ncGlassTable .filter-row input{width:100%;min-width:70px;border:1px solid #d7e0ec;border-radius:5px;padding:5px;font-size:11px}
 #ncGlassTable tr.ncg-closed td{background:#eef9f0}#ncGlassTable tr.ncg-open td:first-child{border-left:4px solid #ef4444}
 @media(max-width:900px){.nc-glass-summary{grid-template-columns:repeat(2,1fr)}}
+
+/* NC Vidrio summary cards v87 */
+.nc-glass-summary{gap:14px;margin:16px 0 20px}
+.nc-glass-summary .daily-metric-card{position:relative;display:flex;flex-direction:column;justify-content:center;min-height:92px;padding:16px 18px;border:1px solid #e2e8f0;border-radius:14px;background:#fff;box-shadow:0 5px 16px rgba(15,23,42,.06);overflow:hidden}
+.nc-glass-summary .daily-metric-card:before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:#64748b}
+.nc-glass-summary .daily-metric-card small{font-size:12px;font-weight:750;color:#64748b;margin-bottom:4px}.nc-glass-summary .daily-metric-card strong{font-size:30px;line-height:1;font-weight:850;color:#17233a}
+.nc-glass-summary .daily-metric-card:nth-child(2):before{background:#ef4444}.nc-glass-summary .daily-metric-card:nth-child(3):before{background:#22c55e}.nc-glass-summary .daily-metric-card:nth-child(4):before{background:#2563eb}.nc-glass-summary .daily-metric-card:nth-child(5):before{background:#f59e0b}
+#ncGlassTable th[data-ncgcol]{cursor:grab;user-select:none}#ncGlassTable th[data-ncgcol]:active{cursor:grabbing}
