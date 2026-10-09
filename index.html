@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SGP ONE LAB</title>
-  <link rel="stylesheet" href="styles.css?v=62" />
+  <link rel="stylesheet" href="styles.css?v=63" />
   <script src="config.js?v=20261008-1300"></script>
 </head>
 <body>
@@ -43,7 +43,7 @@
           <input id="authPassword" type="password" placeholder="Contraseña" autocomplete="current-password" />
           <button id="authLogin">Ingresar</button>
           <button id="authLogout" hidden>Cerrar sesión</button>
-          <span class="status">LAB v62</span>
+          <span class="status">LAB v63</span>
         </div>
       </header>
 
@@ -83,15 +83,15 @@
  <section class="summary location-report-summary">
   <div class="metric"><span>Unidades preparadas</span><strong id="lrPrepared">—</strong></div>
   <div class="metric"><span>Unidades novedad</span><strong id="lrNovelty">—</strong></div>
-  <div class="metric"><span>Unidades traslado (T)</span><strong id="lrTransfer">—</strong></div>
+  <div class="metric"><span>Unidades traslado (T/L)</span><strong id="lrTransfer">—</strong></div>
   <div class="metric"><span>Unidades otros</span><strong id="lrOther">—</strong></div>
   <div class="metric"><span>Burros totales</span><strong id="lrRacks">—</strong></div>
   <div class="metric"><span>Burros con reservas mezcladas</span><strong id="lrMixed">—</strong></div>
  </section>
  <div id="locationReportStatus" class="daily-status">Abre esta pestaña para actualizar el reporte.</div>
  <div class="location-report-grid">
-  <section class="table-wrap"><table><thead><tr><th>Reserva</th><th>Burros</th><th>Unidades</th></tr></thead><tbody id="locationByReservation"><tr><td colspan="3" class="empty">Sin consulta</td></tr></tbody></table></section>
-  <section class="table-wrap"><table><thead><tr><th>Burro</th><th>Reservas</th><th># Reservas</th><th>Unidades</th></tr></thead><tbody id="locationMixedRacks"><tr><td colspan="4" class="empty">Sin consulta</td></tr></tbody></table></section>
+  <section class="table-wrap"><table><thead><tr><th>Reserva</th><th>Burros</th><th>Cant. vidrio</th></tr></thead><tbody id="locationByReservation"><tr><td colspan="3" class="empty">Sin consulta</td></tr></tbody></table></section>
+  <section class="table-wrap"><table><thead><tr><th>Burro</th><th>Reservas</th><th># Reservas</th><th>Cant. vidrio en burro</th></tr></thead><tbody id="locationMixedRacks"><tr><td colspan="4" class="empty">Sin consulta</td></tr></tbody></table></section>
  </div>
 </div>
 <div id="glassDetailModal" class="modal glass-detail-modal" hidden><div class="modal-card">
@@ -332,6 +332,6 @@
     </section>
   </div>
 
-  <script type="module" src="app.js?v=62"></script>
+  <script type="module" src="app.js?v=63"></script>
 </body>
 </html>
