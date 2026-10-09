@@ -7,6 +7,7 @@ import { readAluminumPiecesWorkbook, summarizeAluminumPieces, classifyAluminumPi
 import { classifyPieceCodes } from "./src/services/piece-master-repository.js";
 import { readAccessoriesWorkbook, relateAccessories, prepareAccessoryPayload } from "./src/domain/accessories-importer.js";
 import { readGlassWorkbook, relateGlass, prepareGlassPayload } from "./src/domain/glass-importer.js";
+import { readGlassLocationWorkbook, filterGlassLocationRows } from "./src/domain/glass-location-importer.js";
 import { getSupabaseClient } from "./src/services/supabase-client.js";
 
 const mecanizado = createMecanizadoModule(trackingRows);
@@ -17,6 +18,8 @@ let validatedPieces = null;
 let targetWeek = null;
 let dailyExportPreview = null;
 let dailyExportRows = [];
+let glassLocationPreview = null;
+let glassLocationRows = [];
 let queriedProductions = [];
 let queriedSystemSummary = [];
 let detailSort = { key: null, dir: 1 };
@@ -62,6 +65,12 @@ const els = {
   dailyExportStatus: document.querySelector("#dailyExportStatus"),
   dailyExportMetrics: document.querySelector("#dailyExportMetrics"),
   dailyExportWeeks: document.querySelector("#dailyExportWeeks"),
+  glassLocationFile: document.querySelector("#glassLocationFile"),
+  previewGlassLocation: document.querySelector("#previewGlassLocation"),
+  applyGlassLocation: document.querySelector("#applyGlassLocation"),
+  glassLocationStatus: document.querySelector("#glassLocationStatus"),
+  glassLocationMetrics: document.querySelector("#glassLocationMetrics"),
+  glassLocationSummary: document.querySelector("#glassLocationSummary"),
   aluminumFile: document.querySelector("#aluminumTrackingFile"),
   validateAluminum: document.querySelector("#validateAluminum"),
   aluminumStatus: document.querySelector("#aluminumStatus"),
@@ -620,6 +629,55 @@ async function applyDailyExport(){
   }catch(e){els.dailyExportStatus.textContent='Actualización rechazada ✕ '+e.message;els.applyDailyExport.disabled=false}
 }
 
+
+function resetGlassLocation(){
+  glassLocationPreview=null; glassLocationRows=[];
+  if(els.applyGlassLocation)els.applyGlassLocation.disabled=true;
+  if(els.glassLocationMetrics)els.glassLocationMetrics.innerHTML='<span class="daily-metric-card metric-received"><i class="metric-icon icon-file"></i><span><small>Registros recibidos</small><strong>—</strong></span></span><span class="daily-metric-card metric-match"><i class="metric-icon icon-check">✓</i><span><small>Registros relacionados</small><strong>—</strong></span></span><span class="daily-metric-card metric-out"><i class="metric-icon icon-warning">!</i><span><small>Fuera de SGP</small><strong>—</strong></span></span><span class="daily-metric-card metric-absent"><i class="metric-icon icon-minus">−</i><span><small>OVES sin ubicación</small><strong>—</strong></span></span>';
+  if(els.glassLocationSummary)els.glassLocationSummary.innerHTML='';
+}
+function renderGlassLocationPreview(parsed,filtered,server){
+  const related=filtered.matched.length;
+  els.glassLocationMetrics.innerHTML=`<span class="daily-metric-card metric-received"><i class="metric-icon icon-file"></i><span><small>Registros recibidos</small><strong>${parsed.received}</strong></span></span><span class="daily-metric-card metric-match"><i class="metric-icon icon-check">✓</i><span><small>Registros relacionados</small><strong>${related}</strong></span></span><span class="daily-metric-card metric-out"><i class="metric-icon icon-warning">!</i><span><small>Fuera de SGP</small><strong>${filtered.outside}</strong></span></span><span class="daily-metric-card metric-absent"><i class="metric-icon icon-minus">−</i><span><small>OVES sin ubicación</small><strong>${filtered.missingOves.length}</strong></span></span>`;
+  const sample=filtered.missingOves.slice(0,12);
+  els.glassLocationSummary.innerHTML=`<div class="glass-location-facts"><span><strong>${server.producciones_activas}</strong><small>Producciones con saldo</small></span><span><strong>${filtered.activeOves}</strong><small>OVES activas</small></span><span><strong>${filtered.foundOves}</strong><small>OVES encontradas</small></span><span><strong>${filtered.matchedProductions}</strong><small>Producciones con ubicación</small></span></div>${sample.length?`<div class="glass-location-missing"><strong>OVES activas sin registro en el reporte</strong><span>${sample.map(escapeHtml).join(" · ")}${filtered.missingOves.length>sample.length?" · …":""}</span></div>`:'<div class="glass-location-ok">Todas las OVES activas fueron encontradas en el reporte.</div>'}`;
+}
+async function previewGlassLocation(){
+  const token=sessionStorage.getItem(APP_SESSION_KEY),file=els.glassLocationFile?.files?.[0];
+  resetGlassLocation();
+  if(!token){els.glassLocationStatus.textContent='Inicia sesión para validar el reporte.';return}
+  if(!file){els.glassLocationStatus.textContent='Selecciona el Reporte Disponible XLSX.';return}
+  els.previewGlassLocation.disabled=true; els.glassLocationStatus.textContent='Leyendo reporte y construyendo índice de OVES…';
+  try{
+    const [parsed,client]=await Promise.all([readGlassLocationWorkbook(file),getSupabaseClient()]);
+    els.glassLocationStatus.textContent=`Reporte leído: ${parsed.received} filas. Consultando OVES activas…`;
+    const {data:server,error}=await client.rpc('sgp_preparar_ubicacion_vidrio',{p_token:token});
+    if(error)throw error;
+    const filtered=filterGlassLocationRows(parsed.rows,server.relaciones||[]);
+    glassLocationRows=filtered.matched;
+    glassLocationPreview={fileName:file.name,received:parsed.received,filtered,server};
+    renderGlassLocationPreview(parsed,filtered,server);
+    els.glassLocationStatus.textContent=`Validación lista ✓ ${parsed.received} filas leídas · ${filtered.matched.length} relacionadas · solo esas filas se enviarán al servidor.`;
+    els.applyGlassLocation.disabled=false;
+  }catch(e){els.glassLocationStatus.textContent='Validación rechazada ✕ '+e.message}
+  finally{els.previewGlassLocation.disabled=false}
+}
+async function applyGlassLocation(){
+  const p=glassLocationPreview,token=sessionStorage.getItem(APP_SESSION_KEY);
+  if(!p||!token)return;
+  const msg=`APLICAR UBICACIÓN DE VIDRIO\n\nArchivo: ${p.fileName}\nRecibidos: ${p.received}\nRegistros relacionados: ${p.filtered.matched.length}\nOVES activas: ${p.filtered.activeOves}\nOVES encontradas: ${p.filtered.foundOves}\nOVES sin ubicación: ${p.filtered.missingOves.length}\n\nSolo se almacenará información de PANELES_2 con Saldo Ensamble > 0. ¿Aplicar actualización?`;
+  if(!window.confirm(msg))return;
+  els.applyGlassLocation.disabled=true; els.glassLocationStatus.textContent=`Aplicando ${glassLocationRows.length} registros depurados…`;
+  try{
+    const client=await getSupabaseClient();
+    const {data,error}=await client.rpc('sgp_aplicar_ubicacion_vidrio',{p_token:token,p_nombre_archivo:p.fileName,p_registros_recibidos:p.received,p_datos:glassLocationRows});
+    if(error)throw error;
+    els.glassLocationStatus.textContent=`Ubicación aplicada ✓ ${data.relacionados} relaciones · ${data.oves_encontradas}/${data.oves_activas} OVES encontradas · ${data.cambios} cambios registrados.`;
+    window.alert(`UBICACIÓN DE VIDRIO ACTUALIZADA ✓\n\nOVES activas: ${data.oves_activas}\nOVES encontradas: ${data.oves_encontradas}\nOVES sin ubicación: ${data.oves_sin_ubicacion}\nCambios: ${data.cambios}`);
+    glassLocationPreview=null; glassLocationRows=[];
+  }catch(e){els.glassLocationStatus.textContent='Actualización rechazada ✕ '+e.message;els.applyGlassLocation.disabled=false}
+}
+
 async function commitProgramming() {
   const status = weeklyPackageStatus();
   if (!status.ready) { refreshWeeklyPackageGate(); return; }
@@ -654,7 +712,7 @@ async function commitProgramming() {
     return;
   }
 
-  els.commit.disabled = true; els.commit.textContent = "Enviando 8.478 registros…";
+  els.commit.disabled = true; els.commit.textContent = `Enviando ${total.toLocaleString("es-CO")} registros…`;
   els.importStatus.textContent = "SOLICITUD ENVIADA… No cierres esta pestaña. Esperando confirmación del servidor.";
   if (els.previewStatus) els.previewStatus.textContent = "Estado: solicitud de carga enviada; esperando respuesta transaccional.";
   await new Promise(resolve => setTimeout(resolve, 50));
@@ -694,6 +752,9 @@ els.glassFile.addEventListener("change", () => { invalidateWeeklySource("glass")
 document.querySelectorAll("[data-daily-tab]").forEach(b=>b.addEventListener("click",()=>openDailyTab(b.dataset.dailyTab)));
 els.dailyExportFile?.addEventListener("change",()=>{resetDailyExport();els.dailyExportStatus.textContent="Archivo modificado. Vuelve a validar y comparar.";});
 els.dailyExportLine?.addEventListener("change",()=>{resetDailyExport();els.dailyExportStatus.textContent="Línea modificada. Selecciona y valida el Export correspondiente.";});
+els.glassLocationFile?.addEventListener("change",()=>{resetGlassLocation();els.glassLocationStatus.textContent="Archivo modificado. Vuelve a validar y depurar.";});
+els.previewGlassLocation?.addEventListener("click",previewGlassLocation);
+els.applyGlassLocation?.addEventListener("click",applyGlassLocation);
 els.previewDailyExport?.addEventListener("click",previewDailyExport);
 els.applyDailyExport?.addEventListener("click",applyDailyExport);
 els.validate.addEventListener("click", validateProgrammingFiles);
