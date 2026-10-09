@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SGP ONE LAB</title>
-  <link rel="stylesheet" href="styles.css?v=55" />
+  <link rel="stylesheet" href="styles.css?v=56" />
   <script src="config.js?v=20261008-1300"></script>
 </head>
 <body>
@@ -19,6 +19,7 @@
         <button data-view="inicio">Inicio</button>
         <button class="active" data-view="mecanizado">Control de Mecanizado</button>
         <button data-view="programacion">Programación semanal</button>
+        <button data-view="ensamble">Hoja de ensamble</button>
         <button data-view="carga-semanal">Carga semanal</button>
         <button data-view="actualizacion">Actualización diaria</button>
       </nav>
@@ -42,7 +43,7 @@
           <input id="authPassword" type="password" placeholder="Contraseña" autocomplete="current-password" />
           <button id="authLogin">Ingresar</button>
           <button id="authLogout" hidden>Cerrar sesión</button>
-          <span class="status">LAB v55</span>
+          <span class="status">LAB v56</span>
         </div>
       </header>
 
@@ -56,6 +57,28 @@
           <div class="placeholder-card">
             Próximo paso: indicadores de producción, carga semanal y alertas.
           </div>
+        </section>
+
+        <section class="view" data-view-panel="ensamble" hidden>
+          <div class="page-heading"><span class="eyebrow">Operación</span><h2>Hoja de ensamble</h2><p>Vista provisional para seguimiento de las órdenes y sus cambios diarios.</p></div>
+          <section class="toolbar assembly-toolbar">
+            <select id="assemblyWeek"><option value="">Todas las semanas</option><option value="41">Semana 41</option><option value="42" selected>Semana 42</option></select>
+            <select id="assemblyLine"><option value="PANELES_2">PANELES_2</option><option value="FRAMES_2">FRAMES_2</option></select>
+            <select id="assemblyState"><option value="">Todos los estados</option><option value="ABIERTA">Abierta</option><option value="CERRADA">Cerrada</option><option value="ENSAMBLADA">Ensamblada</option><option value="FINALIZADA">Finalizada</option></select>
+            <input id="assemblySearch" type="search" placeholder="Buscar ID, producción, sistema, reserva, proyecto…" />
+            <button id="loadAssembly">Actualizar</button>
+          </section>
+          <section class="summary assembly-summary">
+            <div class="metric"><span>Órdenes visibles</span><strong id="asTotal">—</strong></div>
+            <div class="metric"><span>Saldo ensamble</span><strong id="asBalance">—</strong></div>
+            <div class="metric"><span>Abiertas</span><strong id="asOpen">—</strong></div>
+            <div class="metric"><span>Cerradas</span><strong id="asClosed">—</strong></div>
+            <div class="metric"><span>Ensambladas</span><strong id="asAssembled">—</strong></div>
+          </section>
+          <div id="assemblyStatus" class="daily-status">Selecciona una semana y pulsa Actualizar.</div>
+          <section class="table-wrap assembly-table-wrap"><table><thead><tr>
+            <th>Sem.</th><th>ID</th><th>Producción</th><th>Sistema</th><th>Proyecto</th><th>Cant.</th><th>Ensamblado</th><th>Saldo Ens.</th><th>Estado</th><th>% Vidrio</th><th>Reserva</th><th>Estado reserva</th><th>Acabado</th><th>OVES</th>
+          </tr></thead><tbody id="assemblyBody"><tr><td colspan="14" class="empty">Sin consulta</td></tr></tbody></table></section>
         </section>
 
         <section class="view" data-view-panel="mecanizado">
@@ -289,6 +312,6 @@
     </section>
   </div>
 
-  <script type="module" src="app.js?v=55"></script>
+  <script type="module" src="app.js?v=56"></script>
 </body>
 </html>
