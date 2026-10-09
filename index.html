@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SGP ONE LAB</title>
-  <link rel="stylesheet" href="styles.css?v=56" />
+  <link rel="stylesheet" href="styles.css?v=57" />
   <script src="config.js?v=20261008-1300"></script>
 </head>
 <body>
@@ -19,7 +19,7 @@
         <button data-view="inicio">Inicio</button>
         <button class="active" data-view="mecanizado">Control de Mecanizado</button>
         <button data-view="programacion">Programación semanal</button>
-        <button data-view="ensamble">Hoja de ensamble</button>
+        <button data-view="ensamble">Ensamble</button>
         <button data-view="carga-semanal">Carga semanal</button>
         <button data-view="actualizacion">Actualización diaria</button>
       </nav>
@@ -43,7 +43,7 @@
           <input id="authPassword" type="password" placeholder="Contraseña" autocomplete="current-password" />
           <button id="authLogin">Ingresar</button>
           <button id="authLogout" hidden>Cerrar sesión</button>
-          <span class="status">LAB v56</span>
+          <span class="status">LAB v57</span>
         </div>
       </header>
 
@@ -60,7 +60,7 @@
         </section>
 
         <section class="view" data-view-panel="ensamble" hidden>
-          <div class="page-heading"><span class="eyebrow">Operación</span><h2>Hoja de ensamble</h2><p>Vista provisional para seguimiento de las órdenes y sus cambios diarios.</p></div>
+          <div class="page-heading"><span class="eyebrow">Operación</span><h2>Ensamble</h2><p>Vista provisional para seguimiento de las órdenes y sus cambios diarios.</p></div>
           <section class="toolbar assembly-toolbar">
             <select id="assemblyWeek"><option value="">Todas las semanas</option><option value="41">Semana 41</option><option value="42" selected>Semana 42</option></select>
             <select id="assemblyLine"><option value="PANELES_2">PANELES_2</option><option value="FRAMES_2">FRAMES_2</option></select>
@@ -77,8 +77,8 @@
           </section>
           <div id="assemblyStatus" class="daily-status">Selecciona una semana y pulsa Actualizar.</div>
           <section class="table-wrap assembly-table-wrap"><table><thead><tr>
-            <th>Sem.</th><th>ID</th><th>Producción</th><th>Sistema</th><th>Proyecto</th><th>Cant.</th><th>Ensamblado</th><th>Saldo Ens.</th><th>Estado</th><th>% Vidrio</th><th>Reserva</th><th>Estado reserva</th><th>Acabado</th><th>OVES</th>
-          </tr></thead><tbody id="assemblyBody"><tr><td colspan="14" class="empty">Sin consulta</td></tr></tbody></table></section>
+            <th>Sem.</th><th>ID</th><th>Producción</th><th>Sistema</th><th>Cant.</th><th>Ensamblado</th><th>Saldo Ens.</th><th>Estado</th><th>% Vidrio</th><th>Tipo vidrio</th><th>Medidas</th><th>Ubicación vidrio</th><th>Reserva</th><th>Estado reserva</th><th>Acabado</th><th>OVES</th>
+          </tr></thead><tbody id="assemblyBody"><tr><td colspan="16" class="empty">Sin consulta</td></tr></tbody></table></section>
         </section>
 
         <section class="view" data-view-panel="mecanizado">
@@ -312,6 +312,6 @@
     </section>
   </div>
 
-  <script type="module" src="app.js?v=56"></script>
+  <script type="module" src="app.js?v=57"></script>
 </body>
 </html>
