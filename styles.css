@@ -365,3 +365,25 @@ tr.has-muntin{box-shadow:inset 5px 0 0 #f59e0b}.reservation-tone-1.has-muntin,.r
 .daily-tab.active .broken-glass-icon{border-color:#dbe4fb;background:#f8faff!important}.daily-tab.active .broken-glass-icon:before{background:#315cb4}
 .broken-glass-large{width:82px!important;height:82px!important;flex-basis:82px!important;border-color:#dbe4fb!important;background:#f8faff!important}.broken-glass-large:before{background:#315cb4!important}
 @media(max-width:1100px){.daily-tab{min-height:58px}}
+
+/* LAB v52 · visual aprobado para Actualización diaria */
+.daily-tabs{background:#dfe8fb;border:1px solid #cfdcf5;padding:5px 5px 0;gap:5px}
+.daily-tab{background:#edf3ff!important;color:#182b4f!important;min-height:64px;font-size:.94rem}
+.daily-tab.active{background:#fff!important;color:#0755c9!important;box-shadow:inset 0 4px 0 #1769ff}
+.daily-tab-icon,.broken-glass-icon{background:transparent!important;color:#0d4fae!important;border:0}
+.daily-tab.active .daily-tab-icon{background:#e6f0ff!important;color:#0867ef!important}
+.icon-glass-location{font-size:0;color:transparent!important;position:relative}.icon-glass-location:before{content:"";width:15px;height:20px;border:3px solid #183b78;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:block}.icon-glass-location:after{content:"";position:absolute;width:5px;height:5px;border:2px solid #183b78;border-radius:50%;left:13px;top:11px}
+.icon-nc-al{font-size:1.55rem!important;color:#183b78!important}.icon-al-track{font-size:0;color:transparent!important;position:relative}.icon-al-track:before{content:"▣";font-size:1.45rem;color:#183b78}
+.broken-glass-icon{background:#fff!important}.broken-glass-icon:before{background:#183b78!important}.broken-glass-icon:after{background:#fff!important}
+.daily-export-heading{display:flex;align-items:center;gap:14px}.daily-heading-icon{width:54px;height:54px;flex:0 0 54px;border-radius:50%;background:#e2efff;display:inline-block;position:relative}
+.icon-file:before{content:"";position:absolute;width:16px;height:21px;border-radius:2px;background:#1670f8;left:50%;top:50%;transform:translate(-50%,-50%);clip-path:polygon(0 0,68% 0,100% 28%,100% 100%,0 100%)}.icon-file:after{content:"";position:absolute;width:8px;height:2px;background:#fff;box-shadow:0 5px 0 #fff;left:50%;top:48%;transform:translateX(-50%)}
+.daily-tab-panel .daily-metrics{gap:16px}.daily-tab-panel .daily-metrics .daily-metric-card{display:flex;align-items:center;gap:15px;min-height:82px;padding:14px 18px;border:0}
+.daily-metric-card>span{padding:0!important;background:transparent!important;border:0!important}.daily-metric-card small{font-size:.84rem!important}.daily-metric-card strong{font-size:1.65rem!important;margin-top:3px}
+.metric-icon{position:relative;display:grid;place-items:center;width:48px;height:48px;flex:0 0 48px;border-radius:50%;font-style:normal;font-weight:900;font-size:1.45rem}
+.metric-received{background:linear-gradient(100deg,#eaf3ff,#f3f7ff)!important}.metric-received .metric-icon{background:#d6e9ff}.metric-received small,.metric-received strong{color:#124fa7!important}
+.metric-match{background:linear-gradient(100deg,#e7f9f0,#f0fbf6)!important}.metric-match .metric-icon{background:#c9f2df;color:#12a467}.metric-match small,.metric-match strong{color:#08764b!important}
+.metric-out{background:linear-gradient(100deg,#fff4d9,#fff9e9)!important}.metric-out .metric-icon{background:#ffe8ad;color:#f0a000}.metric-out small,.metric-out strong{color:#9b6500!important}.metric-out .icon-warning{clip-path:polygon(50% 0,100% 90%,0 90%);border-radius:0;padding-top:7px}
+.metric-absent{background:linear-gradient(100deg,#eef2f8,#f7f9fc)!important}.metric-absent .metric-icon{background:#dbe2ee;color:#60708a}.metric-absent small,.metric-absent strong{color:#43536d!important}
+.daily-week-table thead th{text-align:center!important;color:#3b5278;background:#f6f9fd}.daily-week-table tbody td{text-align:center!important}.daily-week-table tbody td:first-child{text-align:left!important}.daily-week-table .cell-export{color:#0867ef;font-weight:800}.daily-week-table .cell-base{color:#5a38d6;font-weight:800}.daily-week-table .cell-match{color:#0a9a5a;font-weight:800}.daily-week-table .cell-out{color:#ed9700;font-weight:800}.daily-week-table .cell-absent{color:#d92d20;font-weight:800}
+.week-status{display:inline-block;padding:5px 10px;border-radius:7px;font-weight:800}.week-out .week-status{background:#dceaff;color:#1358bb}.week-update .week-status{background:#d8f6e6;color:#087847}.week-safe .week-status{background:#edf1f6;color:#59677d}
+.daily-info{background:#edf6ff;border-color:#8bc4ff}.daily-info strong{color:#0867ef}
