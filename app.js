@@ -887,8 +887,20 @@ function openNcMetric(kind){
 async function loadNcOperational(){
  const status=document.querySelector("#ncViewStatus");try{status.textContent="Consultando NC…";const client=await getSupabaseClient(),token=sessionStorage.getItem("sgp_one_session"),week=Number(document.querySelector("#ncViewWeek").value)||null;
  const {data,error}=await client.rpc("sgp_consultar_nc_aluminio",{p_token:token,p_semana:week});if(error)throw error;ncViewRows=data.filas||[];ncViewFilters={};
+ const {data:lineSummary,error:lineErr}=await client.rpc("sgp_resumen_nc_aluminio_linea",{p_token:token,p_semana:week});if(lineErr)throw lineErr;
+ document.querySelector("#ncLineSummary").innerHTML=(lineSummary||[]).map(x=>`<div class="nc-line-card"><strong>${escapeHtml(x.linea)}</strong><span>Total NC <b>${x.total}</b></span><span>Planta <b>${x.planta}</b></span><span>Proveedor <b>${x.proveedor}</b></span></div>`).join('');
  document.querySelector("#ncMConsult").textContent=data.metricas.en_consulta;document.querySelector("#ncMAudit").textContent=data.metricas.sin_auditar;document.querySelector("#ncMOverdue").textContent=data.metricas.mas_2_dias;document.querySelector("#ncMNoSolution").textContent=data.metricas.sin_solucion;document.querySelector("#ncMPlant").textContent=data.metricas.planta;document.querySelector("#ncMSupplier").textContent=data.metricas.proveedor;renderNcView();status.textContent=`Semana Maestra ${data.semana} · ${ncViewRows.length} NC`;
  }catch(e){status.textContent="Consulta rechazada ✕ "+e.message}}
 document.querySelector("#loadNcView")?.addEventListener("click",loadNcOperational);
 document.querySelectorAll(".nc-metric-btn").forEach(b=>b.addEventListener("click",()=>openNcMetric(b.dataset.ncmetric)));
 document.querySelector("#closeNcMetric")?.addEventListener("click",()=>document.querySelector("#ncMetricModal").hidden=true);
+
+function enableDraggableColumns(root=document){
+ root.querySelectorAll('table').forEach(table=>{
+  if(table.classList.contains('nc-operational-table')||table.dataset.dragReady)return;
+  const row=table.tHead?.rows?.[0];if(!row||row.cells.length<2)return;table.dataset.dragReady='1';
+  let from=null;
+  [...row.cells].forEach((th,i)=>{th.draggable=true;th.classList.add('draggable-th');th.addEventListener('dragstart',()=>from=i);th.addEventListener('dragover',e=>e.preventDefault());th.addEventListener('drop',e=>{e.preventDefault();const to=[...row.cells].indexOf(th);if(from==null||from===to)return;[...table.rows].forEach(tr=>{if(tr.cells.length<=Math.max(from,to))return;const cell=tr.cells[from];const ref=tr.cells[to];if(from<to)ref.after(cell);else ref.before(cell)});from=null})});
+ });
+}
+const tableDragObserver=new MutationObserver(()=>enableDraggableColumns());tableDragObserver.observe(document.body,{childList:true,subtree:true});enableDraggableColumns();
