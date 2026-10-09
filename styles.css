@@ -505,3 +505,16 @@ tr.has-muntin{box-shadow:inset 5px 0 0 #f59e0b}.reservation-tone-1.has-muntin,.r
 .location-report-grid>.table-wrap:nth-child(2) th:nth-child(4){width:18%}
 .location-report-grid>.table-wrap:nth-child(2) th:nth-child(5){width:28%}
 .location-report-grid table thead th{font-weight:800;color:#17233a}
+
+/* Location report balance v71 */
+.location-report-grid{grid-template-columns:minmax(500px,.95fr) minmax(720px,1.75fr);gap:12px}
+.location-report-grid>.table-wrap:first-child{width:auto;max-width:none}
+.location-report-grid>.table-wrap:first-child th:first-child,.location-report-grid>.table-wrap:first-child td:first-child{width:38%}
+.location-report-grid>.table-wrap:first-child th:nth-child(2),.location-report-grid>.table-wrap:first-child td:nth-child(2){width:28%}
+.location-report-grid>.table-wrap:first-child th:nth-child(3),.location-report-grid>.table-wrap:first-child td:nth-child(3){width:34%}
+.location-report-grid>.table-wrap:nth-child(2) th:nth-child(1){width:15%}
+.location-report-grid>.table-wrap:nth-child(2) th:nth-child(2){width:16%}
+.location-report-grid>.table-wrap:nth-child(2) th:nth-child(3){width:34%}
+.location-report-grid>.table-wrap:nth-child(2) th:nth-child(4){width:20%}
+.location-report-grid>.table-wrap:nth-child(2) th:nth-child(5){width:15%}
+.location-report-grid>.table-wrap:nth-child(2) th:nth-child(5),.location-report-grid>.table-wrap:nth-child(2) td:nth-child(5){padding-left:5px;padding-right:5px;text-align:center;white-space:nowrap}
