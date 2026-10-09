@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SGP ONE LAB</title>
-  <link rel="stylesheet" href="styles.css?v=82" />
+  <link rel="stylesheet" href="styles.css?v=83" />
   <script src="config.js?v=20261008-1300"></script>
 </head>
 <body>
@@ -44,7 +44,7 @@
           <input id="authPassword" type="password" placeholder="Contraseña" autocomplete="current-password" />
           <button id="authLogin">Ingresar</button>
           <button id="authLogout" hidden>Cerrar sesión</button>
-          <span class="status">LAB v82</span>
+          <span class="status">LAB v83</span>
         </div>
       </header>
 
@@ -206,7 +206,7 @@
           </section>
         </section>
 
-        <section class="view" data-view-panel="nc-aluminio" hidden><div class="page-heading"><span class="eyebrow">Calidad · Aluminio</span><h2>NC Aluminio</h2><p>Seguimiento operativo por Semana Maestra.</p></div><section class="toolbar nc-toolbar"><label>Semana Maestra <input id="ncViewWeek" type="number" min="1" max="53" value="41"></label><button id="loadNcView">Consultar</button></section><div id="ncLineSummary" class="nc-line-summary"></div><section class="nc-origin-compare"><div><span>NC Planta</span><strong id="ncMPlant">—</strong></div><b>vs</b><div><span>NC Proveedor</span><strong id="ncMSupplier">—</strong></div></section><section class="summary nc-summary"><button class="metric nc-metric-btn" data-ncmetric="consult"><span>NC en consulta</span><strong id="ncMConsult">—</strong></button><button class="metric nc-orange nc-metric-btn" data-ncmetric="audit"><span>NC sin auditar</span><strong id="ncMAudit">—</strong></button><button class="metric nc-red nc-metric-btn" data-ncmetric="overdue"><span>Más de 2 días sin finalizar</span><strong id="ncMOverdue">—</strong></button><button class="metric nc-warning nc-metric-btn" data-ncmetric="nosolution"><span>NC sin solución</span><strong id="ncMNoSolution">—</strong></button></section><div id="ncViewStatus" class="daily-status">Consulta la Semana Maestra.</div><section class="table-wrap nc-operational-wrap"><table class="nc-operational-table"><thead id="ncViewHead"></thead><tbody id="ncViewBody"></tbody></table></section></section><div id="ncNewModal" class="modal" hidden><div class="modal-card nc-metric-modal-card"><div class="modal-head"><h3 id="ncNewTitle">NC nuevas</h3><button id="closeNcNew">Cerrar</button></div><div class="table-wrap"><table><thead><tr><th>NC</th><th>Línea</th><th>Sem. NC</th><th>Referencia</th><th>Acabado</th><th>Estado</th><th>Creación</th><th>Reserva solución</th><th>Perfil</th><th>Cortes</th></tr></thead><tbody id="ncNewBody"></tbody></table></div></div></div><div id="ncMetricModal" class="modal" hidden><div class="modal-card nc-metric-modal-card"><div class="modal-head"><h3 id="ncMetricTitle">NC</h3><button id="closeNcMetric">Cerrar</button></div><div class="table-wrap"><table><thead><tr><th>NC</th><th>Referencia</th><th>Acabado</th><th>Estado</th><th>Creación</th><th>Días</th><th>Reserva solución</th><th>Perfil</th><th>Cortes</th></tr></thead><tbody id="ncMetricBody"></tbody></table></div></div></div><section class="view placeholder-view" data-view-panel="carga-semanal" hidden>
+        <section class="view" data-view-panel="nc-aluminio" hidden><div class="page-heading"><span class="eyebrow">Calidad · Aluminio</span><h2>NC Aluminio</h2><p>Seguimiento operativo por Semana Maestro.</p></div><section class="toolbar nc-toolbar"><label>Semana Maestro <input id="ncViewWeek" type="number" min="1" max="53" value="41"></label><button id="loadNcView">Consultar</button><button id="ncChooseColumns" type="button">Campos visibles</button></section><div id="ncLineSummary" class="nc-line-summary"></div><section class="nc-origin-compare"><div><span>NC Planta</span><strong id="ncMPlant">—</strong></div><b>vs</b><div><span>NC Proveedor</span><strong id="ncMSupplier">—</strong></div></section><section class="summary nc-summary"><button class="metric nc-metric-btn" data-ncmetric="consult"><span>NC en consulta</span><strong id="ncMConsult">—</strong></button><button class="metric nc-orange nc-metric-btn" data-ncmetric="audit"><span>NC sin auditar</span><strong id="ncMAudit">—</strong></button><button class="metric nc-red nc-metric-btn" data-ncmetric="overdue"><span>Más de 2 días sin finalizar</span><strong id="ncMOverdue">—</strong></button><button class="metric nc-warning nc-metric-btn" data-ncmetric="nosolution"><span>NC sin solución</span><strong id="ncMNoSolution">—</strong></button></section><div id="ncViewStatus" class="daily-status">Consulta la Semana Maestro.</div><div id="ncColumnPicker" class="nc-column-picker" hidden></div><section class="table-wrap nc-operational-wrap"><table class="nc-operational-table"><thead id="ncViewHead"></thead><tbody id="ncViewBody"></tbody></table></section></section><div id="ncNewModal" class="modal" hidden><div class="modal-card nc-metric-modal-card"><div class="modal-head"><h3 id="ncNewTitle">NC nuevas</h3><button id="closeNcNew">Cerrar</button></div><div class="table-wrap"><table><thead><tr><th>NC</th><th>Línea</th><th>Sem. NC</th><th>Referencia</th><th>Acabado</th><th>Estado</th><th>Creación</th><th>Reserva solución</th><th>Perfil</th><th>Cortes</th></tr></thead><tbody id="ncNewBody"></tbody></table></div></div></div><div id="ncMetricModal" class="modal" hidden><div class="modal-card nc-metric-modal-card"><div class="modal-head"><h3 id="ncMetricTitle">NC</h3><button id="closeNcMetric">Cerrar</button></div><div class="table-wrap"><table><thead><tr><th>NC</th><th>Referencia</th><th>Acabado</th><th>Estado</th><th>Creación</th><th>Días</th><th>Reserva solución</th><th>Perfil</th><th>Cortes</th></tr></thead><tbody id="ncMetricBody"></tbody></table></div></div></div><section class="view placeholder-view" data-view-panel="carga-semanal" hidden>
           <div class="page-heading"><span class="eyebrow">Programación</span><h2>Carga semanal</h2><p>Valida cada fuente en secuencia. Al completar el paquete se habilitan la previsualización final y la carga.</p></div>
           <div class="weekly-tabs" role="tablist">
             <button class="weekly-tab active" data-weekly-tab="programming"><span>1</span>Programación</button>
@@ -302,7 +302,7 @@
             <div class="daily-info"><strong>ⓘ Criterio actual</strong><span>Producción inicializada: se incluye solo con Saldo Ensamble &gt; 0. Producción aún no inicializada: se conserva hasta recibir su primer Export diario.</span></div>
           </section>
           <section class="daily-tab-panel" data-daily-panel="nc-al" hidden>
- <div class="daily-panel-heading"><span class="daily-heading-icon icon-file" aria-hidden="true"></span><div><h3>NC Aluminio</h3><p>La Semana NC indica cuándo se creó. La Semana Maestra se obtiene de Reserva → Reserva AL de la programación vigente.</p></div></div>
+ <div class="daily-panel-heading"><span class="daily-heading-icon icon-file" aria-hidden="true"></span><div><h3>NC Aluminio</h3><p>La Semana NC indica cuándo se creó. La Semana Maestro se obtiene de Reserva → Reserva AL de la programación vigente.</p></div></div>
  <div class="daily-upload-row">
   <label class="daily-file-field"><span>Export NC</span><input id="ncAlFile" type="file" accept=".xlsx" /></label>
   <button id="previewNcAl" class="daily-outline-action">Validar y cruzar</button>
@@ -311,7 +311,7 @@
  <div id="ncAlStatus" class="daily-status">Selecciona el Export NC Aluminio.</div>
  <div class="daily-metrics">
   <span class="daily-metric-card"><small>Recibidas</small><strong id="ncAlReceived">0</strong></span>
-  <span class="daily-metric-card"><small>Con Semana Maestra</small><strong id="ncAlMatched">0</strong></span>
+  <span class="daily-metric-card"><small>Con Semana Maestro</small><strong id="ncAlMatched">0</strong></span>
   <span class="daily-metric-card"><small>Fuera de programación actual</small><strong id="ncAlMissing">0</strong></span>
   <span class="daily-metric-card"><small>Reserva ambigua</small><strong id="ncAlAmbiguous">0</strong></span>
  </div>
@@ -346,6 +346,6 @@
     </section>
   </div>
 
-  <script type="module" src="app.js?v=82"></script>
+  <script type="module" src="app.js?v=83"></script>
 </body>
 </html>
