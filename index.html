@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SGP ONE LAB</title>
-  <link rel="stylesheet" href="styles.css?v=48" />
+  <link rel="stylesheet" href="styles.css?v=49" />
   <script src="config.js?v=20261008-1300"></script>
 </head>
 <body>
@@ -42,7 +42,7 @@
           <input id="authPassword" type="password" placeholder="Contraseña" autocomplete="current-password" />
           <button id="authLogin">Ingresar</button>
           <button id="authLogout" hidden>Cerrar sesión</button>
-          <span class="status">LAB v48</span>
+          <span class="status">LAB v49</span>
         </div>
       </header>
 
@@ -263,7 +263,7 @@
               <input id="dailyExportFile" type="file" accept=".xlsx" />
               <div class="daily-actions"><button id="previewDailyExport">Validar y comparar</button><button id="applyDailyExport" disabled>Aplicar actualización</button></div>
               <span id="dailyExportStatus">Selecciona el Export de una sola línea.</span>
-              <div id="dailyExportMetrics" class="daily-metrics"><span>Recibidos <strong>—</strong></span><span>Coinciden <strong>—</strong></span><span>Nuevos <strong>—</strong></span><span>Ya no aparecen <strong>—</strong></span></div>
+              <div id="dailyExportMetrics" class="daily-metrics"><span>Recibidos <strong>—</strong></span><span>Coinciden <strong>—</strong></span><span>Fuera de base <strong>—</strong></span><span>Ausentes (sem. incluidas) <strong>—</strong></span></div><div id="dailyExportWeeks" class="daily-week-table"></div>
             </article>
             <article class="daily-card pending-source"><div><span class="eyebrow">Vidrio</span><h3>Ubicación de vidrio</h3><p>Ubicaciones actuales de los vidrios asociados a las órdenes.</p></div><span>Importador pendiente de mapear.</span></article>
             <article class="daily-card pending-source"><div><span class="eyebrow">No conformidades</span><h3>NC Aluminio</h3><p>Estado y datos de las NC de aluminio por línea.</p></div><span>Importador pendiente de mapear.</span></article>
@@ -290,6 +290,6 @@
     </section>
   </div>
 
-  <script type="module" src="app.js?v=48"></script>
+  <script type="module" src="app.js?v=49"></script>
 </body>
 </html>
