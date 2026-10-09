@@ -851,7 +851,7 @@ async function previewNcAluminum(){
   ncAlPreview={...data,file:file.name};
   document.querySelector("#ncAlReceived").textContent=data.recibidos||0;document.querySelector("#ncAlMatched").textContent=data.relacionados||0;
   document.querySelector("#ncAlMissing").textContent=data.sin_programacion||0;document.querySelector("#ncAlAmbiguous").textContent=data.ambiguos||0;
-  document.querySelector("#ncAlWeekSummary").textContent="Cruce listo. Semana Maestra se calcula únicamente desde Reserva → Reserva AL; Semana NC se conserva como fecha de creación.";
+  const weeks=(data.por_semana||[]).map(x=>`Semana Maestra ${x.semana}: ${x.cantidad} NC`).join(" · "); document.querySelector("#ncAlWeekSummary").textContent=(weeks?weeks+" · ":"")+"Fuera de programación actual: "+(data.fuera_programacion??data.sin_programacion??0)+". Semana NC se conserva como fecha de creación.";
   status.textContent="Validación completada. No se ha escrito información.";btn.disabled=false;
  }catch(e){status.textContent="Validación rechazada ✕ "+e.message;btn.disabled=true}
 }
