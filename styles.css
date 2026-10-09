@@ -400,10 +400,22 @@ tr.has-muntin{box-shadow:inset 5px 0 0 #f59e0b}.reservation-tone-1.has-muntin,.r
 .weekly-final-actions{display:flex;gap:12px;margin-bottom:14px}.weekly-final-actions button{flex:1}.weekly-final-actions #commitProgramming:not(:disabled){background:#2563eb;color:#fff}
 @media(max-width:900px){.weekly-tabs{grid-template-columns:1fr 1fr}.weekly-upload-row{grid-template-columns:1fr}.weekly-final-checks{grid-template-columns:1fr 1fr}}
 
-/* LAB v54 · cristal roto reconocible */
+/* LAB v55 · cristal roto reconocible */
 .broken-glass-svg{clip-path:none!important;overflow:visible!important;background:transparent!important;border:0!important}
 .broken-glass-svg:before,.broken-glass-svg:after{display:none!important}
 .broken-glass-svg svg{width:32px;height:32px;display:block;overflow:visible}
 .broken-glass-svg svg rect{fill:none;stroke:#183b78;stroke-width:3}
 .broken-glass-svg svg path{fill:none;stroke:#183b78;stroke-width:2.8;stroke-linecap:round;stroke-linejoin:round}
 .daily-tab.active .broken-glass-svg svg rect,.daily-tab.active .broken-glass-svg svg path{stroke:#0867ef}
+
+/* v55 · Ubicación de vidrio */
+.daily-upload-simple{grid-template-columns:minmax(280px,1fr) auto auto;align-items:end}
+.glass-location-heading-icon{display:grid;place-items:center;width:42px;height:42px;border-radius:12px;background:#eef4ff;color:#315cba;font-size:24px;font-weight:800}
+.glass-location-summary{margin-top:14px}
+.glass-location-facts{display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));gap:10px}
+.glass-location-facts span{display:flex;flex-direction:column;gap:3px;padding:12px 14px;border:1px solid #e3e8f1;border-radius:12px;background:#fff}
+.glass-location-facts strong{font-size:20px;color:#20375f}.glass-location-facts small{color:#667085}
+.glass-location-missing,.glass-location-ok{margin-top:10px;padding:12px 14px;border-radius:10px;font-size:13px}
+.glass-location-missing{background:#fff7ed;border:1px solid #fed7aa;color:#9a3412}.glass-location-missing span{display:block;margin-top:5px;word-break:break-word}
+.glass-location-ok{background:#f0fdf4;border:1px solid #bbf7d0;color:#166534}
+@media(max-width:850px){.daily-upload-simple{grid-template-columns:1fr}.glass-location-facts{grid-template-columns:repeat(2,1fr)}}
