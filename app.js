@@ -7,7 +7,7 @@ import { readAluminumPiecesWorkbook, summarizeAluminumPieces, classifyAluminumPi
 import { classifyPieceCodes } from "./src/services/piece-master-repository.js";
 import { readAccessoriesWorkbook, relateAccessories, prepareAccessoryPayload } from "./src/domain/accessories-importer.js";
 import { readGlassWorkbook, relateGlass, prepareGlassPayload } from "./src/domain/glass-importer.js";
-import { readGlassLocationWorkbook, filterGlassLocationRows } from "./src/domain/glass-location-importer.js";
+import { readGlassLocationWorkbook, filterGlassLocationRows } from "./src/domain/glass-location-importer.js?v=59";
 import { getSupabaseClient } from "./src/services/supabase-client.js";
 
 const mecanizado = createMecanizadoModule(trackingRows);
