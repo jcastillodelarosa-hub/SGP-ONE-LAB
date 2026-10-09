@@ -16,7 +16,7 @@ export async function readGlassLocationWorkbook(file){
   const rows=[];
   source.forEach((r,i)=>{
     const orden=normOve(pick(r,["Orden"]));
-    if(!orden)return;
+    if(!orden){invalid++;return;}
     const disponible=num(pick(r,["Disponible"]))??0;
     const ordenSap=clean(pick(r,["Orden Sap"]));
     const item=clean(pick(r,["Item"]));
@@ -33,7 +33,7 @@ export async function readGlassLocationWorkbook(file){
       mt2:num(pick(r,["MT2"])),linea_reporte:clean(pick(r,["LINEA","Linea"])),clave_origen:clave
     });
   });
-  return {rows,received:source.length,sheetName:wb.SheetNames.includes("ReporteConsumo")?"ReporteConsumo":wb.SheetNames[0]};
+  return {rows,received:source.length,validRows:rows.length,invalid,sheetName:wb.SheetNames.includes("ReporteConsumo")?"ReporteConsumo":wb.SheetNames[0]};
 }
 
 export function filterGlassLocationRows(rows,relations){
