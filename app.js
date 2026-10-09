@@ -864,3 +864,20 @@ async function applyNcAluminum(){
 }
 document.querySelector("#previewNcAl")?.addEventListener("click",previewNcAluminum);
 document.querySelector("#applyNcAl")?.addEventListener("click",applyNcAluminum);
+
+let ncViewRows=[],ncViewFilters={};
+const ncCols=[['semaforo',''],['consecutivo','Consecutivo'],['semana_nc','Sem. NC'],['linea','Línea'],['creacion','Creación'],['dias_abierta','Días'],['estado','Estado'],['reserva','Reserva'],['reserva_solucion','Reserva solución'],['produccion','Producción'],['sistema','Sistema'],['referencia','Referencia'],['perfil_mm','Perfil'],['acabado','Acabado'],['concepto','Concepto'],['causa','Causa'],['responsable','Responsable']];
+function ncFmt(v,k){if(v==null)return "";if(k==='creacion')return String(v).slice(0,10);return String(v)}
+function renderNcView(){
+ const head=document.querySelector("#ncViewHead"),body=document.querySelector("#ncViewBody");if(!head||!body)return;
+ head.innerHTML='<tr>'+ncCols.map(([k,l])=>'<th>'+l+'</th>').join('')+'</tr><tr class="filter-row">'+ncCols.map(([k])=>k==='semaforo'?'<th></th>':`<th><input data-ncf="${k}" value="${escapeHtml(ncViewFilters[k]||'')}" placeholder="Filtrar"></th>`).join('')+'</tr>';
+ const rows=ncViewRows.filter(r=>ncCols.every(([k])=>!ncViewFilters[k]||ncFmt(r[k],k).toLowerCase().includes(ncViewFilters[k].toLowerCase())));
+ body.innerHTML=rows.map(r=>`<tr class="${String(r.estado).toLowerCase()==='finalizada'?'nc-finalized':''}"><td><span class="nc-light ${String(r.semaforo).toLowerCase()}" title="${r.dias_abierta} días"></span></td>${ncCols.slice(1).map(([k])=>`<td>${escapeHtml(ncFmt(r[k],k))}</td>`).join('')}</tr>`).join('')||'<tr><td colspan="17" class="empty">Sin NC para los filtros seleccionados</td></tr>';
+ head.querySelectorAll('[data-ncf]').forEach(x=>x.addEventListener('input',e=>{ncViewFilters[e.target.dataset.ncf]=e.target.value;renderNcView();const n=document.querySelector(`[data-ncf="${e.target.dataset.ncf}"]`);n?.focus();n?.setSelectionRange(n.value.length,n.value.length)}));
+}
+async function loadNcOperational(){
+ const status=document.querySelector("#ncViewStatus");try{status.textContent="Consultando NC…";const client=await getSupabaseClient(),token=sessionStorage.getItem("sgp_one_session"),week=Number(document.querySelector("#ncViewWeek").value)||null;
+ const {data,error}=await client.rpc("sgp_consultar_nc_aluminio",{p_token:token,p_semana:week});if(error)throw error;ncViewRows=data.filas||[];ncViewFilters={};
+ document.querySelector("#ncMConsult").textContent=data.metricas.en_consulta;document.querySelector("#ncMAudit").textContent=data.metricas.sin_auditar;document.querySelector("#ncMOverdue").textContent=data.metricas.mas_2_dias;document.querySelector("#ncMNoSolution").textContent=data.metricas.sin_solucion;renderNcView();status.textContent=`Semana Maestra ${data.semana} · ${ncViewRows.length} NC`;
+ }catch(e){status.textContent="Consulta rechazada ✕ "+e.message}}
+document.querySelector("#loadNcView")?.addEventListener("click",loadNcOperational);
