@@ -163,6 +163,7 @@ function refreshWeeklyPackageGate() {
   if (status.ready) {
     els.importStatus.textContent = `Paquete semanal listo para carga: Programación + Piezas + Accesorios + Vidrio validados. La escritura requiere confirmación explícita.`;
   }
+  refreshWeeklyTabs();
 }
 
 
@@ -225,8 +226,35 @@ function renderMecanizado() {
   els.supply.textContent = rows.filter(r => r.estado === "PENDIENTE_ABASTECIMIENTO").length;
   els.tbody.innerHTML = mecanizado.renderTable(rows);
 }
+function weeklyStepValid(name){
+  if(name==="programming") return !!targetWeek && validatedProductions.length>0;
+  if(name==="pieces") return !!validatedPieces && !validatedPieces.errors?.length && !validatedPieces.unclassified && !validatedPieces.conflicts;
+  if(name==="accessories") return !!validatedAccessories && !validatedAccessories.errors?.length && !validatedAccessories.conflicts;
+  if(name==="glass") return !!validatedGlass && !validatedGlass.errors?.length && !validatedGlass.conflicts;
+  if(name==="final") return weeklyPackageStatus().ready;
+  return false;
+}
+const weeklySteps=["programming","pieces","accessories","glass","final"];
+function openWeeklyTab(name){
+  const idx=weeklySteps.indexOf(name);
+  const unlocked=idx===0 || weeklySteps.slice(0,idx).every(weeklyStepValid);
+  if(!unlocked)return;
+  document.querySelectorAll("[data-weekly-tab]").forEach(b=>b.classList.toggle("active",b.dataset.weeklyTab===name));
+  document.querySelectorAll("[data-weekly-panel]").forEach(p=>{p.hidden=p.dataset.weeklyPanel!==name;p.classList.toggle("active",p.dataset.weeklyPanel===name);});
+}
+function refreshWeeklyTabs(autoAdvanceFrom){
+  document.querySelectorAll("[data-weekly-tab]").forEach((b,i)=>{
+    const name=b.dataset.weeklyTab, unlocked=i===0||weeklySteps.slice(0,i).every(weeklyStepValid), valid=weeklyStepValid(name);
+    b.disabled=!unlocked;b.classList.toggle("validated",valid);b.classList.toggle("locked",!unlocked);
+    const badge=b.querySelector("span");if(badge)badge.textContent=valid?"✓":String(i+1);
+  });
+  document.querySelectorAll("[data-weekly-check]").forEach(x=>x.classList.toggle("ok",weeklyStepValid(x.dataset.weeklyCheck)));
+  if(autoAdvanceFrom&&weeklyStepValid(autoAdvanceFrom)){const next=weeklySteps[weeklySteps.indexOf(autoAdvanceFrom)+1];if(next)openWeeklyTab(next);}
+}
+
 function openDailyTab(name){
-  document.querySelectorAll("[data-daily-tab]").forEach(b=>b.classList.toggle("active",b.dataset.dailyTab===name));
+  document.querySelectorAll("[data-weekly-tab]").forEach(b=>b.addEventListener("click",()=>openWeeklyTab(b.dataset.weeklyTab)));
+document.querySelectorAll("[data-daily-tab]").forEach(b=>b.classList.toggle("active",b.dataset.dailyTab===name));
   document.querySelectorAll("[data-daily-panel]").forEach(p=>{p.hidden=p.dataset.dailyPanel!==name;p.classList.toggle("active",p.dataset.dailyPanel===name);});
 }
 
@@ -293,7 +321,7 @@ async function validateProgrammingFiles() {
     validatedProductions = [];
     targetWeek = null;
     els.importStatus.textContent = "Error: " + error.message;
-  } finally { els.validate.disabled = false; refreshWeeklyRelations(); refreshWeeklyPackageGate(); }
+  } finally { els.validate.disabled = false; refreshWeeklyRelations(); refreshWeeklyPackageGate(); refreshWeeklyTabs("programming"); }
 }
 async function validateAluminumFile() {
   const file = els.aluminumFile.files?.[0];
@@ -360,6 +388,7 @@ async function validatePiecesFile() {
   } finally {
     els.validatePieces.disabled = false;
     refreshWeeklyPackageGate();
+    refreshWeeklyTabs("pieces");
   }
 }
 
@@ -377,7 +406,7 @@ async function validateAccessoriesFile() {
     renderAccessoryNoMatches(validatedProductions.length ? relation : { noMatchRows: [] });
     validatedAccessories.conflicts = relation.conflicts;
     els.accessoriesStatus.textContent=result.errors.length?`Bloqueado: ${result.errors.length} error(es).`:validatedProductions.length?`Correcto: ${result.rows.length} filas · ${relation.sourceGroups} grupos Producción + Sistema · ${relation.related} relacionados · ${relation.noMatch} sin relación · ${relation.conflicts} conflictos.`:`Estructura correcta: ${result.rows.length} registros. Valida primero Programación para ejecutar el cruce Producción + Sistema.`;
-  }catch(error){validatedAccessories=null;els.accessoriesStatus.textContent="Error: "+error.message;}finally{els.validateAccessories.disabled=false;refreshWeeklyPackageGate();}
+  }catch(error){validatedAccessories=null;els.accessoriesStatus.textContent="Error: "+error.message;}finally{els.validateAccessories.disabled=false;refreshWeeklyPackageGate();refreshWeeklyTabs("accessories");}
 }
 async function validateGlassFile() {
   const file=els.glassFile.files?.[0];
@@ -393,7 +422,7 @@ async function validateGlassFile() {
     renderGlassNoMatches(validatedProductions.length ? relation : { noMatchRows: [] });
     validatedGlass.conflicts = relation.conflicts;
     els.glassStatus.textContent=validatedProductions.length?`Correcto: ${result.rows.length} registros útiles · ${relation.sourceGroups} IDs únicos · ${relation.related} relacionados con PANELES_2 · ${relation.noMatch} sin relación informativa · ${relation.conflicts} conflictos.`:`Estructura leída: ${result.rows.length} registros útiles. Valida primero Programación para ejecutar el cruce por ID.`;
-  }catch(error){validatedGlass=null;els.glassStatus.textContent="Error: "+error.message;}finally{els.validateGlass.disabled=false;refreshWeeklyPackageGate();}
+  }catch(error){validatedGlass=null;els.glassStatus.textContent="Error: "+error.message;}finally{els.validateGlass.disabled=false;refreshWeeklyPackageGate();refreshWeeklyTabs("glass");}
 }
 
 async function previewWeeklyLoad() {
@@ -686,6 +715,7 @@ els.queryHead?.addEventListener("change",e=>{if(e.target.matches("[data-filter]"
 
 els.commit.addEventListener("click", commitProgramming);
 
+refreshWeeklyTabs();
 openView("mecanizado");
 renderMecanizado();
 
