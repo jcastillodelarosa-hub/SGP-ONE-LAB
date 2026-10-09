@@ -534,3 +534,9 @@ tr.has-muntin{box-shadow:inset 5px 0 0 #f59e0b}.reservation-tone-1.has-muntin,.r
 .location-report-grid>.table-wrap:nth-child(2) th:nth-child(5){width:18%!important}
 .location-report-grid>.table-wrap:nth-child(2) td:nth-child(3){white-space:normal!important;overflow-wrap:anywhere}
 @media(max-width:900px){.location-report-grid{grid-template-columns:1fr}.location-report-grid>.table-wrap{overflow-x:auto!important}}
+
+/* NC Aluminio operational view v75 */
+.nc-summary{grid-template-columns:repeat(4,minmax(170px,1fr))}
+.nc-summary .nc-orange{background:#fff4df;border-color:#f2b24d}.nc-summary .nc-red{background:#fff0ef;border-color:#ef7b73}.nc-summary .nc-warning{background:#fff7e8;border-color:#e9a83f}
+.nc-operational-wrap{margin-top:12px;max-height:58vh;overflow:auto}.nc-operational-table{font-size:12px;white-space:nowrap}.nc-operational-table thead{position:sticky;top:0;z-index:3}.nc-operational-table th{background:#eef4ff;font-weight:800}.nc-operational-table .filter-row{top:34px}.nc-operational-table .filter-row th{padding:4px}.nc-operational-table .filter-row input{width:100%;min-width:72px;box-sizing:border-box;border:1px solid #cbd6e8;border-radius:5px;padding:5px 6px;font-size:11px;background:white}
+.nc-operational-table tr.nc-finalized td{background:#e8f7ec!important}.nc-light{display:inline-block;width:13px;height:13px;border-radius:50%;box-shadow:0 0 0 2px #fff,0 0 0 3px #cbd5e1}.nc-light.verde,.nc-light.finalizada{background:#20a85a}.nc-light.amarillo{background:#f3b51b}.nc-light.rojo{background:#df3e3e}.nc-toolbar input{width:70px}
