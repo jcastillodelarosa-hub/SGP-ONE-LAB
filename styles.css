@@ -493,3 +493,15 @@ tr.has-muntin{box-shadow:inset 5px 0 0 #f59e0b}.reservation-tone-1.has-muntin,.r
 .location-report-grid>.table-wrap:nth-child(2) th:nth-child(4){width:14%}
 .location-report-grid>.table-wrap:nth-child(2) th:nth-child(5){width:21%}
 .location-report-grid>.table-wrap:nth-child(2) td:nth-child(3){white-space:normal;overflow-wrap:anywhere}
+
+/* Final compact location columns v70 */
+.location-report-grid{grid-template-columns:minmax(360px,.62fr) minmax(820px,2.15fr)}
+.location-report-grid>.table-wrap:first-child th:first-child,.location-report-grid>.table-wrap:first-child td:first-child{width:30%}
+.location-report-grid>.table-wrap:first-child th:nth-child(2),.location-report-grid>.table-wrap:first-child td:nth-child(2){width:27%}
+.location-report-grid>.table-wrap:first-child th:nth-child(3),.location-report-grid>.table-wrap:first-child td:nth-child(3){width:43%}
+.location-report-grid>.table-wrap:nth-child(2) th:nth-child(1){width:14%}
+.location-report-grid>.table-wrap:nth-child(2) th:nth-child(2){width:15%}
+.location-report-grid>.table-wrap:nth-child(2) th:nth-child(3){width:25%}
+.location-report-grid>.table-wrap:nth-child(2) th:nth-child(4){width:18%}
+.location-report-grid>.table-wrap:nth-child(2) th:nth-child(5){width:28%}
+.location-report-grid table thead th{font-weight:800;color:#17233a}
