@@ -310,3 +310,13 @@ tr.has-muntin{box-shadow:inset 5px 0 0 #f59e0b}.reservation-tone-1.has-muntin,.r
 .piece-modal{position:fixed;inset:0;z-index:1000;background:rgba(15,23,42,.38);padding:4vh 4vw;overflow:auto}.piece-modal-card{max-width:1050px;margin:auto;background:#fff;border-radius:16px;padding:20px;box-shadow:0 24px 70px rgba(15,23,42,.24)}.piece-modal-head{display:flex;justify-content:space-between;align-items:flex-start}.piece-modal-head h2{margin:.2rem 0}.piece-modal-head>button{min-width:auto}.piece-modal-meta{padding:10px 0 14px;color:#475569}.piece-link{background:none;border:0;padding:0;color:#1d4ed8;text-align:left;text-decoration:underline;cursor:pointer;font:inherit}.profile-marks td{background:#f8fafc}.marks-table{width:100%;font-size:.82rem}.marks-table th{background:#eef2f7}
 
 .piece-view-tabs{display:flex;gap:8px;margin:0 0 12px}.piece-view-tabs button.active{font-weight:800;background:#e0e7ff;border-color:#818cf8}.piece-detail-options{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:10px 12px;margin-bottom:10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px}.piece-detail-options label{display:flex;gap:5px;align-items:center}.piece-detail-options span{color:#64748b;font-size:.8rem}.piece-modal-card{max-width:1200px}
+
+/* LAB v48 · centro de actualización diaria */
+.daily-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin:18px 0}
+.daily-card{display:flex;flex-direction:column;gap:12px;padding:18px;border:1px solid #dfe5ec;border-radius:16px;background:#fff;box-shadow:0 8px 24px rgba(15,23,42,.05)}
+.daily-card h3{margin:3px 0 6px;font-size:1.05rem}.daily-card p{margin:0;color:#667085;line-height:1.45}
+.daily-card label{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:.9rem;font-weight:700}
+.daily-card select,.daily-card input[type=file]{max-width:100%;min-height:38px}
+.daily-actions{display:flex;gap:8px;flex-wrap:wrap}.daily-actions button{flex:1;min-width:130px}
+.daily-metrics{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.daily-metrics span{padding:9px 10px;border-radius:10px;background:#f6f8fb;font-size:.78rem;color:#667085}.daily-metrics strong{display:block;margin-top:2px;font-size:1.05rem;color:#101828}
+.pending-source{background:linear-gradient(180deg,#fff,#fafbfc)}.pending-source>span{font-size:.82rem;color:#98a2b3}
