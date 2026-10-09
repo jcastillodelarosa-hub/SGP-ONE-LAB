@@ -322,3 +322,27 @@ tr.has-muntin{box-shadow:inset 5px 0 0 #f59e0b}.reservation-tone-1.has-muntin,.r
 .pending-source{background:linear-gradient(180deg,#fff,#fafbfc)}.pending-source>span{font-size:.82rem;color:#98a2b3}
 
 .daily-week-table{overflow:auto;margin-top:4px}.daily-week-table table{width:100%;border-collapse:collapse;font-size:.76rem}.daily-week-table th,.daily-week-table td{padding:7px 8px;border-bottom:1px solid #eaecf0;text-align:right;white-space:nowrap}.daily-week-table th:first-child,.daily-week-table td:first-child,.daily-week-table th:last-child,.daily-week-table td:last-child{text-align:left}.daily-week-table tbody tr:last-child td{border-bottom:0}
+
+/* LAB v50 · actualización diaria por pestañas */
+.daily-tabs{display:grid;grid-template-columns:repeat(5,minmax(150px,1fr));gap:0;margin:18px 0 0;padding:6px 6px 0;background:#dfe7f6;border-radius:15px 15px 0 0}
+.daily-tab{min-height:58px;border:0;border-right:1px solid #d5deec;background:#edf2fa;color:#344054;font-weight:800;font-size:.92rem;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer}
+.daily-tab:first-child{border-radius:11px 0 0 0}.daily-tab:last-child{border-radius:0 11px 0 0;border-right:0}
+.daily-tab.active{position:relative;background:#fff;color:#174ea6;box-shadow:inset 0 4px 0 #2563eb}
+.daily-tab-icon{font-size:1.35rem;line-height:1}
+.daily-tab-panel{background:#fff;border:1px solid #dfe5ec;border-top:0;border-radius:0 0 16px 16px;padding:24px;box-shadow:0 10px 28px rgba(15,23,42,.06);min-height:310px}
+.daily-panel-heading h3,.daily-empty-panel h3{margin:0 0 4px;font-size:1.25rem}.daily-panel-heading p,.daily-empty-panel p{margin:0;color:#667085}
+.daily-upload-row{display:grid;grid-template-columns:minmax(160px,.65fr) minmax(320px,1.6fr) minmax(170px,.7fr) minmax(170px,.7fr);gap:14px;align-items:end;margin:24px 0 12px}
+.daily-upload-row label{display:grid;gap:7px;font-size:.82rem;font-weight:800}.daily-upload-row select,.daily-upload-row input[type=file]{width:100%;min-height:42px;padding:8px 10px;border:1px solid #cfd7e6;border-radius:9px;background:#fff}
+.daily-upload-row button{min-height:42px;border-radius:9px;padding:8px 14px;font-weight:800;cursor:pointer}
+.daily-outline-action{border:1px solid #2563eb;background:#fff;color:#174ea6}.daily-primary-action{border:1px solid #2563eb;background:#2563eb;color:#fff}.daily-primary-action:disabled{opacity:.45;cursor:not-allowed}
+.daily-status{margin:4px 0 14px;color:#475467;font-size:.9rem}
+.daily-tab-panel .daily-metrics{grid-template-columns:repeat(4,1fr);gap:14px}.daily-tab-panel .daily-metrics span{padding:15px 16px;border:1px solid #edf0f5;border-radius:12px;background:#f7f9fc}.daily-tab-panel .daily-metrics small{display:block;color:#667085;font-size:.78rem}.daily-tab-panel .daily-metrics strong{font-size:1.45rem}
+.daily-detail-title{display:flex;align-items:baseline;gap:10px;margin:18px 0 8px}.daily-detail-title span{font-size:.8rem;color:#667085}
+.daily-tab-panel .daily-week-table{overflow:visible;border:1px solid #e1e7ef;border-radius:10px}.daily-tab-panel .daily-week-table table{font-size:.82rem}.daily-tab-panel .daily-week-table th,.daily-tab-panel .daily-week-table td{padding:10px 12px}
+.daily-info{display:flex;gap:12px;margin-top:14px;padding:12px 14px;border:1px solid #bfdbfe;border-radius:10px;background:#eff6ff;color:#334155;font-size:.82rem}.daily-info strong{color:#1d4ed8;white-space:nowrap}
+.daily-empty-panel{min-height:300px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:7px}.daily-empty-panel strong{margin-top:8px;color:#98a2b3;font-size:.85rem}.daily-empty-icon{font-size:2.4rem;color:#315ca8}
+.broken-glass-icon{display:inline-block;width:32px;height:32px;flex:0 0 32px;background:#ef4444;clip-path:polygon(4% 5%,34% 5%,45% 31%,58% 4%,96% 5%,74% 38%,98% 49%,69% 57%,96% 94%,62% 94%,52% 67%,39% 96%,5% 94%,28% 59%,3% 49%,33% 39%)}
+.broken-glass-large{width:64px;height:64px;flex-basis:64px;margin-bottom:8px}
+.daily-upload-simple{grid-template-columns:minmax(320px,1.5fr) minmax(180px,.5fr) minmax(240px,1fr)}
+@media(max-width:1100px){.daily-tabs{grid-template-columns:1fr 1fr 1fr}.daily-tab{border-bottom:1px solid #d5deec}.daily-upload-row{grid-template-columns:1fr 1fr}.daily-tab-panel .daily-metrics{grid-template-columns:1fr 1fr}}
+@media(max-width:700px){.daily-tabs{grid-template-columns:1fr}.daily-tab{justify-content:flex-start;padding-left:18px}.daily-upload-row,.daily-upload-simple{grid-template-columns:1fr}.daily-tab-panel .daily-metrics{grid-template-columns:1fr}.daily-detail-title,.daily-info{align-items:flex-start;flex-direction:column}.daily-tab-panel .daily-week-table{overflow:auto}}
