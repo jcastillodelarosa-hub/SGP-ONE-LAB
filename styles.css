@@ -346,3 +346,22 @@ tr.has-muntin{box-shadow:inset 5px 0 0 #f59e0b}.reservation-tone-1.has-muntin,.r
 .daily-upload-simple{grid-template-columns:minmax(320px,1.5fr) minmax(180px,.5fr) minmax(240px,1fr)}
 @media(max-width:1100px){.daily-tabs{grid-template-columns:1fr 1fr 1fr}.daily-tab{border-bottom:1px solid #d5deec}.daily-upload-row{grid-template-columns:1fr 1fr}.daily-tab-panel .daily-metrics{grid-template-columns:1fr 1fr}}
 @media(max-width:700px){.daily-tabs{grid-template-columns:1fr}.daily-tab{justify-content:flex-start;padding-left:18px}.daily-upload-row,.daily-upload-simple{grid-template-columns:1fr}.daily-tab-panel .daily-metrics{grid-template-columns:1fr}.daily-detail-title,.daily-info{align-items:flex-start;flex-direction:column}.daily-tab-panel .daily-week-table{overflow:auto}}
+
+/* LAB v51 · pestañas visuales por fuente */
+.daily-tabs{background:#263d78;padding:8px 8px 0;border-radius:16px 16px 0 0;gap:5px}
+.daily-tab{position:relative;min-height:68px;border:0!important;border-radius:11px 11px 0 0!important;background:#6680c1;color:#eef4ff;padding:8px 14px;transition:transform .15s ease,background .15s ease,color .15s ease}
+.daily-tab:nth-child(2){background:#7892cf}.daily-tab:nth-child(3){background:#8299d0}.daily-tab:nth-child(4){background:#6f88c7}.daily-tab:nth-child(5){background:#627cb9}
+.daily-tab:hover{transform:translateY(-2px);filter:brightness(1.04)}
+.daily-tab.active{background:#fff!important;color:#334f98;box-shadow:none}
+.daily-tab.active:after{content:"";position:absolute;left:0;right:0;bottom:-2px;height:4px;background:#fff}
+.daily-tab-icon,.broken-glass-icon{width:34px;height:34px;flex:0 0 34px;display:inline-grid;place-items:center;border-radius:9px;background:rgba(255,255,255,.18);font-size:1.45rem;color:#fff}
+.daily-tab.active .daily-tab-icon{background:#e9efff;color:#315cb4}
+.icon-export{font-size:1.25rem}.icon-glass-location{font-size:1.05rem}.icon-nc-al{font-size:1.15rem}.icon-al-track{font-size:1.2rem}
+
+/* Cristal roto: dibujo CSS inspirado en la referencia enviada por el usuario */
+.broken-glass-icon{position:relative;overflow:hidden;border-radius:7px;background:#fff!important;border:2px solid rgba(255,255,255,.8)}
+.broken-glass-icon:before{content:"";position:absolute;inset:2px;background:#1d2740;clip-path:polygon(0 0,30% 0,43% 38%,48% 0,100% 0,100% 28%,62% 46%,100% 43%,100% 70%,61% 58%,82% 100%,56% 100%,49% 65%,39% 100%,0 100%,0 72%,36% 58%,0 61%,0 35%,38% 47%)}
+.broken-glass-icon:after{content:"";position:absolute;left:43%;top:40%;width:17%;height:20%;background:#fff;clip-path:polygon(0 35%,45% 0,100% 40%,65% 100%,12% 80%)}
+.daily-tab.active .broken-glass-icon{border-color:#dbe4fb;background:#f8faff!important}.daily-tab.active .broken-glass-icon:before{background:#315cb4}
+.broken-glass-large{width:82px!important;height:82px!important;flex-basis:82px!important;border-color:#dbe4fb!important;background:#f8faff!important}.broken-glass-large:before{background:#315cb4!important}
+@media(max-width:1100px){.daily-tab{min-height:58px}}
