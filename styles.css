@@ -576,3 +576,14 @@ th.col-drop-right::after{right:-2px}
 #ncMetricModal .nc-state-pill{display:inline-block;padding:4px 8px;border-radius:999px;background:#eef3f8;font-weight:700;white-space:nowrap}
 #ncMetricModal .nc-days-cell{font-weight:800;text-align:center}
 #ncMetricModal th.col-drop-left::before,#ncMetricModal th.col-drop-right::after{width:5px;background:#1769e0;box-shadow:0 0 0 1px #fff}
+
+/* New NC load modal v82 */
+#ncNewModal.modal:not([hidden]){display:flex!important;position:fixed!important;inset:0!important;z-index:10010!important;align-items:center!important;justify-content:center!important;padding:24px;background:rgba(15,23,42,.45)}
+#ncNewModal .modal-head{padding:16px 18px 12px;border-bottom:1px solid #e3eaf4;background:#f8fafc;align-items:center}
+#ncNewModal .modal-head h3{font-size:21px;color:#17233a}
+#ncNewModal .modal-head button{border:1px solid #cbd5e1;border-radius:8px;background:white;padding:7px 14px;font-weight:700;cursor:pointer}
+#ncNewModal .table-wrap{padding:0 14px 14px;max-height:68vh;overflow:auto}
+#ncNewModal table{width:100%;border-collapse:separate;border-spacing:0;font-size:12px}
+#ncNewModal thead th{position:sticky;top:0;background:#edf3fb;color:#34445e;font-size:11px;font-weight:800;text-transform:uppercase;padding:11px 12px;border-bottom:2px solid #d6e0ef}
+#ncNewModal tbody td{padding:10px 12px;border-bottom:1px solid #e8edf5}
+#ncNewModal tbody tr:nth-child(even) td{background:#fafcff}#ncNewModal tbody tr:hover td{background:#f1f6fd}
