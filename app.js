@@ -15,6 +15,8 @@ let validatedAccessories = null;
 let validatedGlass = null;
 let validatedPieces = null;
 let targetWeek = null;
+let dailyExportPreview = null;
+let dailyExportRows = [];
 let queriedProductions = [];
 let queriedSystemSummary = [];
 let detailSort = { key: null, dir: 1 };
@@ -53,6 +55,12 @@ const els = {
   iKeys: document.querySelector("#iKeys"),
   iErrors: document.querySelector("#iErrors"),
   importBody: document.querySelector("#importSummaryBody"),
+  dailyExportLine: document.querySelector("#dailyExportLine"),
+  dailyExportFile: document.querySelector("#dailyExportFile"),
+  previewDailyExport: document.querySelector("#previewDailyExport"),
+  applyDailyExport: document.querySelector("#applyDailyExport"),
+  dailyExportStatus: document.querySelector("#dailyExportStatus"),
+  dailyExportMetrics: document.querySelector("#dailyExportMetrics"),
   aluminumFile: document.querySelector("#aluminumTrackingFile"),
   validateAluminum: document.querySelector("#validateAluminum"),
   aluminumStatus: document.querySelector("#aluminumStatus"),
@@ -526,6 +534,53 @@ async function queryWeeklyProgramming() {
   finally { els.queryProgramming.disabled=false; }
 }
 
+
+function resetDailyExport(){
+  dailyExportPreview=null;dailyExportRows=[];
+  if(els.applyDailyExport)els.applyDailyExport.disabled=true;
+  if(els.dailyExportMetrics)els.dailyExportMetrics.innerHTML='<span>Recibidos <strong>—</strong></span><span>Coinciden <strong>—</strong></span><span>Nuevos <strong>—</strong></span><span>Ya no aparecen <strong>—</strong></span>';
+}
+function renderDailyExportMetrics(p){
+  els.dailyExportMetrics.innerHTML=`<span>Recibidos <strong>${p.recibidos}</strong></span><span>Coinciden <strong>${p.coinciden}</strong></span><span>Nuevos <strong>${p.nuevos}</strong></span><span>Ya no aparecen <strong>${p.ausentes}</strong></span>`;
+}
+async function previewDailyExport(){
+  const token=sessionStorage.getItem(APP_SESSION_KEY),file=els.dailyExportFile?.files?.[0],line=els.dailyExportLine?.value;
+  resetDailyExport();
+  if(!token){els.dailyExportStatus.textContent='Inicia sesión para validar el Export.';return}
+  if(!file){els.dailyExportStatus.textContent='Selecciona el archivo Export XLSX.';return}
+  els.previewDailyExport.disabled=true;els.dailyExportStatus.textContent='Leyendo y comparando Export…';
+  try{
+    const parsed=await readProgrammingWorkbook(file);
+    if(parsed.errors.length)throw new Error(`El archivo tiene ${parsed.errors.length} registro(s) inválido(s).`);
+    const other=parsed.rows.filter(r=>r.id_linea!==line);
+    if(other.length)throw new Error(`Este archivo contiene ${other.length} registro(s) que no pertenecen a ${line}. Usa un Export exclusivo de la línea.`);
+    dailyExportRows=parsed.rows;
+    const client=await getSupabaseClient();
+    const {data,error}=await client.rpc('sgp_previsualizar_export_diario',{p_token:token,p_linea:line,p_datos:dailyExportRows});
+    if(error)throw error;
+    dailyExportPreview={...data,fileName:file.name,line};
+    renderDailyExportMetrics(data);
+    els.dailyExportStatus.textContent=`Comparación lista ✓ ${data.recibidos} registros. Revisa los cambios antes de aplicar.`;
+    els.applyDailyExport.disabled=false;
+  }catch(e){els.dailyExportStatus.textContent='Validación rechazada ✕ '+e.message}
+  finally{els.previewDailyExport.disabled=false}
+}
+async function applyDailyExport(){
+  if(!dailyExportPreview||!dailyExportRows.length)return;
+  const token=sessionStorage.getItem(APP_SESSION_KEY),p=dailyExportPreview;
+  const msg=`APLICAR EXPORT DIARIO\n\nLínea: ${p.line}\nArchivo: ${p.fileName}\nRecibidos: ${p.recibidos}\nCoinciden: ${p.coinciden}\nNuevos: ${p.nuevos}\nYa no aparecen: ${p.ausentes}\n\nLa programación base semanal no se elimina. ¿Aplicar actualización?`;
+  if(!window.confirm(msg))return;
+  els.applyDailyExport.disabled=true;els.dailyExportStatus.textContent='Aplicando actualización diaria…';
+  try{
+    const client=await getSupabaseClient();
+    const {data,error}=await client.rpc('sgp_aplicar_export_diario',{p_token:token,p_linea:p.line,p_nombre_archivo:p.fileName,p_datos:dailyExportRows});
+    if(error)throw error;
+    els.dailyExportStatus.textContent=`Actualización aplicada ✓ ${data.actualizados} actualizados · ${data.nuevos} nuevos · ${data.ausentes} ya no aparecen.`;
+    window.alert(`EXPORT ACTUALIZADO ✓\n\nLínea: ${p.line}\nActualizados: ${data.actualizados}\nNuevos: ${data.nuevos}\nYa no aparecen: ${data.ausentes}`);
+    dailyExportPreview=null;dailyExportRows=[];
+  }catch(e){els.dailyExportStatus.textContent='Actualización rechazada ✕ '+e.message;els.applyDailyExport.disabled=false}
+}
+
 async function commitProgramming() {
   const status = weeklyPackageStatus();
   if (!status.ready) { refreshWeeklyPackageGate(); return; }
@@ -597,6 +652,10 @@ els.files.addEventListener("change", () => { invalidateWeeklySource("programming
 els.piecesFile.addEventListener("change", () => { invalidateWeeklySource("pieces"); els.piecesStatus.textContent="Archivo modificado. Vuelve a validar el listado de piezas."; });
 els.accessoriesFile.addEventListener("change", () => { invalidateWeeklySource("accessories"); els.accessoriesStatus.textContent="Archivo modificado. Vuelve a validar Accesorios."; });
 els.glassFile.addEventListener("change", () => { invalidateWeeklySource("glass"); els.glassStatus.textContent="Archivo modificado. Vuelve a validar Vidrio."; });
+els.dailyExportFile?.addEventListener("change",()=>{resetDailyExport();els.dailyExportStatus.textContent="Archivo modificado. Vuelve a validar y comparar.";});
+els.dailyExportLine?.addEventListener("change",()=>{resetDailyExport();els.dailyExportStatus.textContent="Línea modificada. Selecciona y valida el Export correspondiente.";});
+els.previewDailyExport?.addEventListener("click",previewDailyExport);
+els.applyDailyExport?.addEventListener("click",applyDailyExport);
 els.validate.addEventListener("click", validateProgrammingFiles);
 els.validateAluminum.addEventListener("click", validateAluminumFile);
 els.validatePieces.addEventListener("click", validatePiecesFile);
