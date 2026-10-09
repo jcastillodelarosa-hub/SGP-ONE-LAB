@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SGP ONE LAB</title>
-  <link rel="stylesheet" href="styles.css?v=85" />
+  <link rel="stylesheet" href="styles.css?v=86" />
   <script src="config.js?v=20261008-1300"></script>
 </head>
 <body>
@@ -21,6 +21,7 @@
         <button data-view="programacion">Programación semanal</button>
         <button data-view="ensamble">Ensamble</button>
 <button data-view="nc-aluminio">NC Aluminio</button>
+        <button data-view="nc-vidrio">NC Vidrio</button>
         <button data-view="carga-semanal">Carga semanal</button>
         <button data-view="actualizacion">Actualización diaria</button>
       </nav>
@@ -44,7 +45,7 @@
           <input id="authPassword" type="password" placeholder="Contraseña" autocomplete="current-password" />
           <button id="authLogin">Ingresar</button>
           <button id="authLogout" hidden>Cerrar sesión</button>
-          <span class="status">LAB v85</span>
+          <span class="status">LAB v86</span>
         </div>
       </header>
 
@@ -248,6 +249,7 @@
           </section>
         </section>
 
+        <section class="view" data-view-panel="nc-vidrio" hidden><div class="page-heading"><span class="eyebrow">Calidad · Vidrio</span><h2>NC Vidrio</h2><p>No conformidades de todas las semanas abiertas.</p></div><section class="toolbar nc-toolbar"><label>Semana Maestro <select id="ncGlassWeek"><option value="">Todas las semanas abiertas</option></select></label><button id="loadNcGlassView">Actualizar</button><button id="ncGlassChooseColumns">Campos visibles</button></section><div id="ncGlassColumnPicker" class="nc-column-picker" hidden></div><div id="ncGlassViewStatus" class="daily-status">Cargando semanas abiertas…</div><div class="nc-glass-summary"><div class="daily-metric-card"><small>Total NC</small><strong id="ncgTotal">0</strong></div><div class="daily-metric-card"><small>Abiertas</small><strong id="ncgOpen">0</strong></div><div class="daily-metric-card"><small>Cerradas</small><strong id="ncgClosed">0</strong></div><div class="daily-metric-card"><small>Proveedor</small><strong id="ncgSupplier">0</strong></div><div class="daily-metric-card"><small>Proceso</small><strong id="ncgProcess">0</strong></div></div><div class="table-wrap"><table id="ncGlassTable" class="nc-operational-table"><thead id="ncGlassHead"></thead><tbody id="ncGlassBody"></tbody></table></div></section>
         <section class="view placeholder-view" data-view-panel="actualizacion" hidden>
           <div class="page-heading">
             <span class="eyebrow">Datos operativos</span>
@@ -344,6 +346,6 @@
     </section>
   </div>
 
-  <script type="module" src="app.js?v=85"></script>
+  <script type="module" src="app.js?v=86"></script>
 </body>
 </html>
