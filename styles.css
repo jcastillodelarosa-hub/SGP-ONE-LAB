@@ -587,3 +587,9 @@ th.col-drop-right::after{right:-2px}
 #ncNewModal thead th{position:sticky;top:0;background:#edf3fb;color:#34445e;font-size:11px;font-weight:800;text-transform:uppercase;padding:11px 12px;border-bottom:2px solid #d6e0ef}
 #ncNewModal tbody td{padding:10px 12px;border-bottom:1px solid #e8edf5}
 #ncNewModal tbody tr:nth-child(even) td{background:#fafcff}#ncNewModal tbody tr:hover td{background:#f1f6fd}
+
+/* NC visible field selector v83 */
+.nc-column-picker{margin:10px 0 14px;padding:14px 16px;border:1px solid #d6e1f1;border-radius:12px;background:#fff;box-shadow:0 8px 22px rgba(15,23,42,.07)}
+.nc-column-picker-head{display:flex;align-items:baseline;gap:12px;margin-bottom:10px}.nc-column-picker-head strong{font-size:14px}.nc-column-picker-head span{font-size:12px;color:#64748b}
+.nc-column-picker-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px 14px}.nc-column-picker-grid label{font-size:12px;font-weight:650;color:#334155;cursor:pointer}
+#ncChooseColumns{margin-left:8px}
