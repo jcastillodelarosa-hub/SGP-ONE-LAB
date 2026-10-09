@@ -400,7 +400,7 @@ tr.has-muntin{box-shadow:inset 5px 0 0 #f59e0b}.reservation-tone-1.has-muntin,.r
 .weekly-final-actions{display:flex;gap:12px;margin-bottom:14px}.weekly-final-actions button{flex:1}.weekly-final-actions #commitProgramming:not(:disabled){background:#2563eb;color:#fff}
 @media(max-width:900px){.weekly-tabs{grid-template-columns:1fr 1fr}.weekly-upload-row{grid-template-columns:1fr}.weekly-final-checks{grid-template-columns:1fr 1fr}}
 
-/* LAB v56 · cristal roto reconocible */
+/* LAB v57 · cristal roto reconocible */
 .broken-glass-svg{clip-path:none!important;overflow:visible!important;background:transparent!important;border:0!important}
 .broken-glass-svg:before,.broken-glass-svg:after{display:none!important}
 .broken-glass-svg svg{width:32px;height:32px;display:block;overflow:visible}
@@ -430,3 +430,6 @@ tr.has-muntin{box-shadow:inset 5px 0 0 #f59e0b}.reservation-tone-1.has-muntin,.r
 .assembly-state{display:inline-flex;padding:4px 8px;border-radius:999px;font-size:11px;font-weight:800}
 .state-abierta{background:#fff3cd;color:#8a5a00}.state-cerrada{background:#e8f0ff;color:#2452a4}.state-ensamblada{background:#dcfce7;color:#166534}.state-finalizada{background:#eef2f6;color:#475467}
 @media(max-width:1000px){.assembly-toolbar{grid-template-columns:1fr 1fr}.assembly-summary{grid-template-columns:repeat(2,1fr)}}
+
+/* v57 · glass context in Ensamble */
+.assembly-table-wrap table{min-width:1900px}.assembly-measures{max-width:360px;white-space:normal!important;line-height:1.35}.assembly-location{max-width:300px;white-space:normal!important;line-height:1.35}
