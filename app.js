@@ -610,7 +610,7 @@ async function loadLocationReport(){
  try{const client=await getSupabaseClient();const {data,error}=await client.rpc("sgp_reporte_ubicaciones_vidrio",{p_token:token});if(error)throw error;const m=data.metricas||{};
   els.lrPrepared.textContent=m.preparadas??0;els.lrNovelty.textContent=m.novedad??0;els.lrTransfer.textContent=m.traslado??0;els.lrOther.textContent=m.otros??0;els.lrRacks.textContent=m.burros??0;els.lrMixed.textContent=data.burros_mixtos??0;
   els.locationByReservation.innerHTML=(data.por_reserva||[]).map(r=>`<tr><td>${escapeHtml(r.reserva)}</td><td class="num"><strong>${r.burros}</strong></td><td class="num">${r.unidades}</td></tr>`).join("")||'<tr><td colspan="3" class="empty">Sin ubicaciones</td></tr>';
-  els.locationMixedRacks.innerHTML=(data.mixtos||[]).map(r=>`<tr><td><strong>${escapeHtml(r.posicion)}</strong></td><td>${escapeHtml(r.reservas)}</td><td class="num">${r.cantidad_reservas}</td><td class="num">${r.unidades}</td></tr>`).join("")||'<tr><td colspan="4" class="empty">No hay burros con reservas mezcladas</td></tr>';
+  const {data:racks,error:rackError}=await client.rpc("sgp_reporte_burros_estado",{p_token:token});if(rackError)throw rackError; els.locationMixedRacks.innerHTML=(racks||[]).map(r=>`<tr><td><strong>${escapeHtml(r.posicion)}</strong></td><td><span class="rack-status rack-${r.orden_estado}">${escapeHtml(r.estado)}</span></td><td>${escapeHtml(r.reservas)}</td><td class="num">${r.cantidad_reservas}</td><td class="num"><strong>${r.unidades}</strong></td></tr>`).join("")||'<tr><td colspan="5" class="empty">Sin burros activos</td></tr>';
   els.locationReportStatus.textContent="Reporte actualizado ✓ datos de ubicación activos.";
  }catch(e){els.locationReportStatus.textContent="Consulta rechazada ✕ "+e.message}
 }
