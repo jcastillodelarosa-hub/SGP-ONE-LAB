@@ -83,6 +83,7 @@ const els = {
   aReservations: document.querySelector("#aReservations"),
   aDelivered: document.querySelector("#aDelivered"),
   aErrors: document.querySelector("#aErrors"),
+  applyAluminumTracking: document.querySelector("#applyAluminumTracking"),
   piecesFile: document.querySelector("#aluminumPiecesFile"),
   validatePieces: document.querySelector("#validatePieces"),
   piecesStatus: document.querySelector("#piecesStatus"),
@@ -339,26 +340,15 @@ async function validateProgrammingFiles() {
     els.importStatus.textContent = "Error: " + error.message;
   } finally { els.validate.disabled = false; refreshWeeklyRelations(); refreshWeeklyPackageGate(); refreshWeeklyTabs("programming"); }
 }
+let aluminumTrackingRows=[],aluminumTrackingPreview=null;
 async function validateAluminumFile() {
-  const file = els.aluminumFile.files?.[0];
-  if (!file) { els.aluminumStatus.textContent = "Selecciona el archivo de seguimiento."; return; }
-  els.validateAluminum.disabled = true;
-  els.aluminumStatus.textContent = "Validando…";
-  try {
-    const result = await readAluminumTrackingWorkbook(file);
-    const summary = summarizeAluminumTracking(result.rows);
-    els.aTotal.textContent = summary.total;
-    els.aReservations.textContent = summary.reservations;
-    els.aDelivered.textContent = summary.states.ALUMINIO_ENTREGADO || 0;
-    els.aErrors.textContent = result.errors.length;
-    els.aluminumStatus.textContent = result.errors.length
-      ? `Validación bloqueada: ${result.errors.length} error(es).`
-      : `Correcto: ${summary.total} seguimientos, ${summary.reservations} reservas, ${result.skipped} filas de control omitidas.`;
-  } catch (error) {
-    els.aluminumStatus.textContent = "Error: " + error.message;
-  } finally {
-    els.validateAluminum.disabled = false;
-  }
+ const file=els.aluminumFile.files?.[0];if(!file){els.aluminumStatus.textContent="Selecciona el archivo de seguimiento.";return}
+ els.validateAluminum.disabled=true;els.applyAluminumTracking.disabled=true;els.aluminumStatus.textContent="Validando…";
+ try{const result=await readAluminumTrackingWorkbook(file);if(result.errors.length)throw new Error(result.errors.length+" error(es) en el archivo");aluminumTrackingRows=result.rows;const client=await getSupabaseClient(),token=sessionStorage.getItem("sgp_one_session");const {data,error}=await client.rpc("sgp_previsualizar_seguimiento_aluminio",{p_token:token,p_datos:aluminumTrackingRows});if(error)throw error;aluminumTrackingPreview={...data,file:file.name};els.aTotal.textContent=data.recibidos||0;els.aReservations.textContent=data.nuevos||0;els.aDelivered.textContent=data.existentes||0;els.aErrors.textContent="—";els.aluminumStatus.textContent="Validación completada. Semanas: "+Object.entries(data.por_semana||{}).map(([w,n])=>w+": "+n).join(" · ")+" · No se ha escrito información.";els.applyAluminumTracking.disabled=false}catch(error){els.aluminumStatus.textContent="Validación bloqueada: "+error.message}finally{els.validateAluminum.disabled=false}
+}
+async function applyAluminumTracking(){
+ if(!aluminumTrackingPreview)return;els.applyAluminumTracking.disabled=true;els.aluminumStatus.textContent="Aplicando seguimiento…";
+ try{const client=await getSupabaseClient(),token=sessionStorage.getItem("sgp_one_session");const {data,error}=await client.rpc("sgp_aplicar_seguimiento_aluminio",{p_token:token,p_nombre_archivo:aluminumTrackingPreview.file,p_datos:aluminumTrackingRows});if(error)throw error;els.aErrors.textContent=data.cambios||0;els.aluminumStatus.textContent=`Seguimiento actualizado ✓ · ${data.nuevos} nuevas reservas · ${data.actualizados} existentes · ${data.cambios} cambios de estado/semana`}catch(error){els.aluminumStatus.textContent="Aplicación rechazada ✕ "+error.message;els.applyAluminumTracking.disabled=false}
 }
 
 async function validatePiecesFile() {
@@ -814,6 +804,7 @@ els.previewDailyExport?.addEventListener("click",previewDailyExport);
 els.applyDailyExport?.addEventListener("click",applyDailyExport);
 els.validate.addEventListener("click", validateProgrammingFiles);
 els.validateAluminum.addEventListener("click", validateAluminumFile);
+els.applyAluminumTracking?.addEventListener("click",applyAluminumTracking);
 els.validatePieces.addEventListener("click", validatePiecesFile);
 els.validateAccessories.addEventListener("click", validateAccessoriesFile);
 els.validateGlass.addEventListener("click", validateGlassFile);
