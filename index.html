@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SGP ONE LAB</title>
-  <link rel="stylesheet" href="styles.css?v=51" />
+  <link rel="stylesheet" href="styles.css?v=52" />
   <script src="config.js?v=20261008-1300"></script>
 </head>
 <body>
@@ -42,7 +42,7 @@
           <input id="authPassword" type="password" placeholder="Contraseña" autocomplete="current-password" />
           <button id="authLogin">Ingresar</button>
           <button id="authLogout" hidden>Cerrar sesión</button>
-          <span class="status">LAB v51</span>
+          <span class="status">LAB v52</span>
         </div>
       </header>
 
@@ -266,7 +266,7 @@
           </div>
 
           <section class="daily-tab-panel active" data-daily-panel="export">
-            <div class="daily-panel-heading"><div><h3>Export diario</h3><p>Actualiza saldos, reserva, semana actual, % vidrio y presencia de producciones.</p></div></div>
+            <div class="daily-panel-heading daily-export-heading"><span class="daily-heading-icon icon-file" aria-hidden="true"></span><div><h3>Export diario</h3><p>Actualiza saldos, reserva, semana actual, % vidrio y presencia de producciones.</p></div></div>
             <div class="daily-upload-row">
               <label><span>Línea</span><select id="dailyExportLine"><option value="PANELES_2">PANELES_2</option><option value="FRAMES_2">FRAMES_2</option></select></label>
               <label class="daily-file-field"><span>Archivo</span><input id="dailyExportFile" type="file" accept=".xlsx" /></label>
@@ -275,7 +275,10 @@
             </div>
             <div id="dailyExportStatus" class="daily-status">Selecciona el Export de una sola línea.</div>
             <div id="dailyExportMetrics" class="daily-metrics">
-              <span><small>Registros recibidos</small><strong>—</strong></span><span><small>Coinciden con SGP</small><strong>—</strong></span><span><small>Fuera de base</small><strong>—</strong></span><span><small>Ausentes (sem. incluidas)</small><strong>—</strong></span>
+              <span class="daily-metric-card metric-received"><i class="metric-icon icon-file"></i><span><small>Registros recibidos</small><strong>—</strong></span></span>
+              <span class="daily-metric-card metric-match"><i class="metric-icon icon-check">✓</i><span><small>Coinciden con SGP</small><strong>—</strong></span></span>
+              <span class="daily-metric-card metric-out"><i class="metric-icon icon-warning">!</i><span><small>Fuera de base</small><strong>—</strong></span></span>
+              <span class="daily-metric-card metric-absent"><i class="metric-icon icon-minus">−</i><span><small>Ausentes (sem. incluidas)</small><strong>—</strong></span></span>
             </div>
             <div class="daily-detail-title"><strong>Detalle por semanas</strong><span>Solo se modifican semanas realmente incluidas en el Export.</span></div>
             <div id="dailyExportWeeks" class="daily-week-table"></div>
@@ -317,6 +320,6 @@
     </section>
   </div>
 
-  <script type="module" src="app.js?v=51"></script>
+  <script type="module" src="app.js?v=52"></script>
 </body>
 </html>
