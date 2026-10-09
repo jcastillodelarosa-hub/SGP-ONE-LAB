@@ -478,3 +478,18 @@ tr.has-muntin{box-shadow:inset 5px 0 0 #f59e0b}.reservation-tone-1.has-muntin,.r
 .location-report-grid>.table-wrap:nth-child(2) th:nth-child(3){width:auto}
 .location-report-grid>.table-wrap:nth-child(2) th:nth-child(4){width:78px}
 .location-report-grid>.table-wrap:nth-child(2) th:nth-child(5){width:82px}
+
+/* Correct column proportions v69: keep tables, narrow Reserva columns */
+.location-report-grid{grid-template-columns:minmax(420px,.8fr) minmax(760px,2fr);gap:14px}
+.location-report-grid>.table-wrap:first-child{width:auto;max-width:none}
+.location-report-grid>.table-wrap:first-child table{width:100%;table-layout:fixed}
+.location-report-grid>.table-wrap:first-child th:first-child,.location-report-grid>.table-wrap:first-child td:first-child{width:42%}
+.location-report-grid>.table-wrap:first-child th:nth-child(2),.location-report-grid>.table-wrap:first-child td:nth-child(2){width:22%}
+.location-report-grid>.table-wrap:first-child th:nth-child(3),.location-report-grid>.table-wrap:first-child td:nth-child(3){width:36%}
+.location-report-grid>.table-wrap:nth-child(2) table{width:100%;table-layout:fixed}
+.location-report-grid>.table-wrap:nth-child(2) th:nth-child(1){width:13%}
+.location-report-grid>.table-wrap:nth-child(2) th:nth-child(2){width:14%}
+.location-report-grid>.table-wrap:nth-child(2) th:nth-child(3){width:38%}
+.location-report-grid>.table-wrap:nth-child(2) th:nth-child(4){width:14%}
+.location-report-grid>.table-wrap:nth-child(2) th:nth-child(5){width:21%}
+.location-report-grid>.table-wrap:nth-child(2) td:nth-child(3){white-space:normal;overflow-wrap:anywhere}
