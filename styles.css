@@ -555,3 +555,10 @@ tr.has-muntin{box-shadow:inset 5px 0 0 #f59e0b}.reservation-tone-1.has-muntin,.r
 .nc-summary .nc-red{background:#ffe8e8!important;border-color:#ef4444!important}.nc-summary .nc-red span,.nc-summary .nc-red strong{color:#a51d1d!important}
 .nc-summary .nc-warning{background:#e9f2ff!important;border-color:#3b82f6!important}.nc-summary .nc-warning span,.nc-summary .nc-warning strong{color:#174ea6!important}
 .nc-summary .nc-metric-btn:first-child{background:#eef8f1!important;border-color:#4caf6a!important}.nc-summary .nc-metric-btn:first-child span,.nc-summary .nc-metric-btn:first-child strong{color:#176b35!important}
+
+/* Precise column drag placement v80 */
+th.draggable-th,th[data-nccol]{position:relative}
+th.col-dragging{opacity:.45}
+th.col-drop-left::before,th.col-drop-right::after{content:"";position:absolute;top:0;bottom:0;width:4px;background:#2563eb;z-index:20;border-radius:3px;pointer-events:none}
+th.col-drop-left::before{left:-2px}
+th.col-drop-right::after{right:-2px}
