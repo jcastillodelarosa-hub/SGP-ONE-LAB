@@ -7,7 +7,7 @@ import { readAluminumPiecesWorkbook, summarizeAluminumPieces, classifyAluminumPi
 import { classifyPieceCodes } from "./src/services/piece-master-repository.js";
 import { readAccessoriesWorkbook, relateAccessories, prepareAccessoryPayload } from "./src/domain/accessories-importer.js";
 import { readGlassWorkbook, relateGlass, prepareGlassPayload } from "./src/domain/glass-importer.js";
-import { readGlassLocationWorkbook, filterGlassLocationRows } from "./src/domain/glass-location-importer.js?v=59";
+import { readGlassLocationWorkbook, filterGlassLocationRows } from "./src/domain/glass-location-importer.js?v=60";
 import { getSupabaseClient } from "./src/services/supabase-client.js";
 
 const mecanizado = createMecanizadoModule(trackingRows);
@@ -674,9 +674,9 @@ async function previewGlassLocation(){
     if(error)throw error;
     const filtered=filterGlassLocationRows(parsed.rows,server.relaciones||[]);
     glassLocationRows=filtered.matched;
-    glassLocationPreview={fileName:file.name,received:parsed.received,filtered,server};
+    glassLocationPreview={fileName:file.name,received:parsed.received,validRows:parsed.validRows,invalid:parsed.invalid||0,filtered,server};
     renderGlassLocationPreview(parsed,filtered,server);
-    els.glassLocationStatus.textContent=`Validación lista ✓ ${parsed.received} filas leídas · ${filtered.matched.length} relacionadas · solo esas filas se enviarán al servidor.`;
+    els.glassLocationStatus.textContent=`Validación lista ✓ ${parsed.received} filas leídas · ${parsed.invalid||0} sin Orden · ${filtered.matched.length} relacionadas · solo esas filas se enviarán al servidor.`;
     els.applyGlassLocation.disabled=false;
   }catch(e){els.glassLocationStatus.textContent='Validación rechazada ✕ '+e.message}
   finally{els.previewGlassLocation.disabled=false}
@@ -684,7 +684,7 @@ async function previewGlassLocation(){
 async function applyGlassLocation(){
   const p=glassLocationPreview,token=sessionStorage.getItem(APP_SESSION_KEY);
   if(!p||!token)return;
-  const msg=`APLICAR UBICACIÓN DE VIDRIO\n\nArchivo: ${p.fileName}\nRecibidos: ${p.received}\nRegistros relacionados: ${p.filtered.matched.length}\nOVES activas: ${p.filtered.activeOves}\nOVES encontradas: ${p.filtered.foundOves}\nOVES sin ubicación: ${p.filtered.missingOves.length}\n\nEn esta etapa, hasta inicializar los saldos diarios, se consideran las OVES conocidas de PANELES_2. El criterio definitivo será Saldo Ensamble > 0. ¿Aplicar actualización?`;
+  const msg=`APLICAR UBICACIÓN DE VIDRIO\n\nArchivo: ${p.fileName}\nRecibidos: ${p.received}\nSin Orden / inválidos: ${p.invalid||0}\nRegistros relacionados: ${p.filtered.matched.length}\nOVES activas: ${p.filtered.activeOves}\nOVES encontradas: ${p.filtered.foundOves}\nOVES sin ubicación: ${p.filtered.missingOves.length}\n\nEn esta etapa, hasta inicializar los saldos diarios, se consideran las OVES conocidas de PANELES_2. El criterio definitivo será Saldo Ensamble > 0. ¿Aplicar actualización?`;
   if(!window.confirm(msg))return;
   els.applyGlassLocation.disabled=true; els.glassLocationStatus.textContent=`Aplicando ${glassLocationRows.length} registros depurados…`;
   try{
