@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SGP ONE LAB</title>
-  <link rel="stylesheet" href="styles.css?v=60" />
+  <link rel="stylesheet" href="styles.css?v=61" />
   <script src="config.js?v=20261008-1300"></script>
 </head>
 <body>
@@ -43,7 +43,7 @@
           <input id="authPassword" type="password" placeholder="Contraseña" autocomplete="current-password" />
           <button id="authLogin">Ingresar</button>
           <button id="authLogout" hidden>Cerrar sesión</button>
-          <span class="status">LAB v60</span>
+          <span class="status">LAB v61</span>
         </div>
       </header>
 
@@ -61,7 +61,7 @@
 
         <section class="view" data-view-panel="ensamble" hidden>
           <div class="page-heading"><span class="eyebrow">Operación</span><h2>Ensamble</h2><p>Vista provisional para seguimiento de las órdenes y sus cambios diarios.</p></div>
-          <section class="toolbar assembly-toolbar">
+          <div class="assembly-tabs"><button class="active" id="assemblySheetTab">Hoja de ensamble</button><button id="assemblyLocationReportTab">Reporte de ubicaciones</button></div><div id="assemblySheetPanel"><section class="toolbar assembly-toolbar">
             <select id="assemblyWeek"><option value="">Todas las semanas</option><option value="41">Semana 41</option><option value="42" selected>Semana 42</option></select>
             <select id="assemblyLine"><option value="PANELES_2">PANELES_2</option><option value="FRAMES_2">FRAMES_2</option></select>
             <select id="assemblyState"><option value="">Todos los estados</option><option value="ABIERTA">Abierta</option><option value="CERRADA">Cerrada</option><option value="ENSAMBLADA">Ensamblada</option><option value="FINALIZADA">Finalizada</option></select>
@@ -78,7 +78,27 @@
           <div id="assemblyStatus" class="daily-status">Selecciona una semana y pulsa Actualizar.</div>
           <section class="table-wrap assembly-table-wrap"><table><thead><tr>
             <th>Sem.</th><th>ID</th><th>Producción</th><th>Sistema</th><th>Cant.</th><th>Ensamblado</th><th>Saldo Ens.</th><th>Estado</th><th>% Vidrio</th><th>Tipo vidrio</th><th>Medidas</th><th>Ubicación vidrio</th><th>Reserva</th><th>Estado reserva</th><th>Acabado</th><th>OVES</th>
-          </tr></thead><tbody id="assemblyBody"><tr><td colspan="16" class="empty">Sin consulta</td></tr></tbody></table></section>
+          </tr></thead><tbody id="assemblyBody"><tr><td colspan="16" class="empty">Sin consulta</td></tr></tbody></table></section></div>
+<div id="assemblyLocationReportPanel" hidden>
+ <section class="summary location-report-summary">
+  <div class="metric"><span>Unidades preparadas</span><strong id="lrPrepared">—</strong></div>
+  <div class="metric"><span>Unidades novedad</span><strong id="lrNovelty">—</strong></div>
+  <div class="metric"><span>Unidades traslado (T)</span><strong id="lrTransfer">—</strong></div>
+  <div class="metric"><span>Unidades otros</span><strong id="lrOther">—</strong></div>
+  <div class="metric"><span>Burros totales</span><strong id="lrRacks">—</strong></div>
+  <div class="metric"><span>Burros con reservas mezcladas</span><strong id="lrMixed">—</strong></div>
+ </section>
+ <div id="locationReportStatus" class="daily-status">Abre esta pestaña para actualizar el reporte.</div>
+ <div class="location-report-grid">
+  <section class="table-wrap"><table><thead><tr><th>Reserva</th><th>Burros</th><th>Unidades</th></tr></thead><tbody id="locationByReservation"><tr><td colspan="3" class="empty">Sin consulta</td></tr></tbody></table></section>
+  <section class="table-wrap"><table><thead><tr><th>Burro</th><th>Reservas</th><th># Reservas</th><th>Unidades</th></tr></thead><tbody id="locationMixedRacks"><tr><td colspan="4" class="empty">Sin consulta</td></tr></tbody></table></section>
+ </div>
+</div>
+<div id="glassDetailModal" class="modal glass-detail-modal" hidden><div class="modal-card">
+ <div class="modal-head"><div><span class="eyebrow">Ubicación de vidrio</span><h3 id="glassDetailTitle">Detalle</h3><p id="glassDetailMeta"></p></div><button id="closeGlassDetail">Cerrar</button></div>
+ <div id="glassDetailSummary" class="glass-detail-summary"></div>
+ <div id="glassDetailBody" class="glass-detail-body"></div>
+</div></div>
         </section>
 
         <section class="view" data-view-panel="mecanizado">
@@ -312,6 +332,6 @@
     </section>
   </div>
 
-  <script type="module" src="app.js?v=60"></script>
+  <script type="module" src="app.js?v=61"></script>
 </body>
 </html>
