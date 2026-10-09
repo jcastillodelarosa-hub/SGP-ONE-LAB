@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SGP ONE LAB</title>
-  <link rel="stylesheet" href="styles.css?v=74" />
+  <link rel="stylesheet" href="styles.css?v=75" />
   <script src="config.js?v=20261008-1300"></script>
 </head>
 <body>
@@ -20,6 +20,7 @@
         <button class="active" data-view="mecanizado">Control de Mecanizado</button>
         <button data-view="programacion">Programación semanal</button>
         <button data-view="ensamble">Ensamble</button>
+<button data-view="nc-aluminio">NC Aluminio</button>
         <button data-view="carga-semanal">Carga semanal</button>
         <button data-view="actualizacion">Actualización diaria</button>
       </nav>
@@ -43,7 +44,7 @@
           <input id="authPassword" type="password" placeholder="Contraseña" autocomplete="current-password" />
           <button id="authLogin">Ingresar</button>
           <button id="authLogout" hidden>Cerrar sesión</button>
-          <span class="status">LAB v74</span>
+          <span class="status">LAB v75</span>
         </div>
       </header>
 
@@ -205,7 +206,7 @@
           </section>
         </section>
 
-        <section class="view placeholder-view" data-view-panel="carga-semanal" hidden>
+        <section class="view" data-view-panel="nc-aluminio" hidden><div class="page-heading"><span class="eyebrow">Calidad · Aluminio</span><h2>NC Aluminio</h2><p>Seguimiento operativo por Semana Maestra.</p></div><section class="toolbar nc-toolbar"><label>Semana Maestra <input id="ncViewWeek" type="number" min="1" max="53" value="41"></label><button id="loadNcView">Consultar</button></section><section class="summary nc-summary"><div class="metric"><span>NC en consulta</span><strong id="ncMConsult">—</strong></div><div class="metric nc-orange"><span>NC sin auditar</span><strong id="ncMAudit">—</strong></div><div class="metric nc-red"><span>Más de 2 días sin finalizar</span><strong id="ncMOverdue">—</strong></div><div class="metric nc-warning"><span>NC sin solución</span><strong id="ncMNoSolution">—</strong></div></section><div id="ncViewStatus" class="daily-status">Consulta la Semana Maestra.</div><section class="table-wrap nc-operational-wrap"><table class="nc-operational-table"><thead id="ncViewHead"></thead><tbody id="ncViewBody"></tbody></table></section></section><section class="view placeholder-view" data-view-panel="carga-semanal" hidden>
           <div class="page-heading"><span class="eyebrow">Programación</span><h2>Carga semanal</h2><p>Valida cada fuente en secuencia. Al completar el paquete se habilitan la previsualización final y la carga.</p></div>
           <div class="weekly-tabs" role="tablist">
             <button class="weekly-tab active" data-weekly-tab="programming"><span>1</span>Programación</button>
@@ -345,6 +346,6 @@
     </section>
   </div>
 
-  <script type="module" src="app.js?v=74"></script>
+  <script type="module" src="app.js?v=75"></script>
 </body>
 </html>
