@@ -237,14 +237,16 @@ function weeklyStepValid(name){
 const weeklySteps=["programming","pieces","accessories","glass","final"];
 function openWeeklyTab(name){
   const idx=weeklySteps.indexOf(name);
-  const unlocked=idx===0 || weeklySteps.slice(0,idx).every(weeklyStepValid);
+  const firstPending=weeklySteps.findIndex(step=>!weeklyStepValid(step));
+  const maxUnlocked=firstPending<0?weeklySteps.length-1:firstPending;
+  const unlocked=idx<=maxUnlocked || weeklyStepValid(name);
   if(!unlocked)return;
   document.querySelectorAll("[data-weekly-tab]").forEach(b=>b.classList.toggle("active",b.dataset.weeklyTab===name));
   document.querySelectorAll("[data-weekly-panel]").forEach(p=>{p.hidden=p.dataset.weeklyPanel!==name;p.classList.toggle("active",p.dataset.weeklyPanel===name);});
 }
 function refreshWeeklyTabs(autoAdvanceFrom){
   document.querySelectorAll("[data-weekly-tab]").forEach((b,i)=>{
-    const name=b.dataset.weeklyTab, unlocked=i===0||weeklySteps.slice(0,i).every(weeklyStepValid), valid=weeklyStepValid(name);
+    const name=b.dataset.weeklyTab, firstPending=weeklySteps.findIndex(step=>!weeklyStepValid(step)), maxUnlocked=firstPending<0?weeklySteps.length-1:firstPending, valid=weeklyStepValid(name), unlocked=i<=maxUnlocked||valid;
     b.disabled=!unlocked;b.classList.toggle("validated",valid);b.classList.toggle("locked",!unlocked);
     const badge=b.querySelector("span");if(badge)badge.textContent=valid?"✓":String(i+1);
   });
