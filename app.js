@@ -225,6 +225,11 @@ function renderMecanizado() {
   els.supply.textContent = rows.filter(r => r.estado === "PENDIENTE_ABASTECIMIENTO").length;
   els.tbody.innerHTML = mecanizado.renderTable(rows);
 }
+function openDailyTab(name){
+  document.querySelectorAll("[data-daily-tab]").forEach(b=>b.classList.toggle("active",b.dataset.dailyTab===name));
+  document.querySelectorAll("[data-daily-panel]").forEach(p=>{p.hidden=p.dataset.dailyPanel!==name;p.classList.toggle("active",p.dataset.dailyPanel===name);});
+}
+
 function openView(viewName) {
   els.views.forEach(view => { view.hidden = view.dataset.viewPanel !== viewName; });
   els.nav.forEach(button => button.classList.toggle("active", button.dataset.view === viewName));
@@ -655,6 +660,7 @@ els.files.addEventListener("change", () => { invalidateWeeklySource("programming
 els.piecesFile.addEventListener("change", () => { invalidateWeeklySource("pieces"); els.piecesStatus.textContent="Archivo modificado. Vuelve a validar el listado de piezas."; });
 els.accessoriesFile.addEventListener("change", () => { invalidateWeeklySource("accessories"); els.accessoriesStatus.textContent="Archivo modificado. Vuelve a validar Accesorios."; });
 els.glassFile.addEventListener("change", () => { invalidateWeeklySource("glass"); els.glassStatus.textContent="Archivo modificado. Vuelve a validar Vidrio."; });
+document.querySelectorAll("[data-daily-tab]").forEach(b=>b.addEventListener("click",()=>openDailyTab(b.dataset.dailyTab)));
 els.dailyExportFile?.addEventListener("change",()=>{resetDailyExport();els.dailyExportStatus.textContent="Archivo modificado. Vuelve a validar y comparar.";});
 els.dailyExportLine?.addEventListener("change",()=>{resetDailyExport();els.dailyExportStatus.textContent="Línea modificada. Selecciona y valida el Export correspondiente.";});
 els.previewDailyExport?.addEventListener("click",previewDailyExport);
