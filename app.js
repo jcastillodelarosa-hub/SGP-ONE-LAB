@@ -21,7 +21,7 @@ let dailyExportPreview = null;
 let dailyExportRows = [];
 let glassLocationPreview = null;
 let glassLocationRows = [];
-let ncAlRows=[]; let ncAlPreview=null;
+let ncAlRows=[]; let ncAlPreview=null; let ncAlNewRows=[];
 let queriedProductions = [];
 let assemblyRows = [];
 let queriedSystemSummary = [];
@@ -848,7 +848,7 @@ async function previewNcAluminum(){
   ncAlRows=await readNcAluminumWorkbook(file);
   const client=await getSupabaseClient(),token=sessionStorage.getItem("sgp_one_session");
   const {data,error}=await client.rpc("sgp_previsualizar_nc_aluminio",{p_token:token,p_datos:ncAlRows}); if(error)throw error;
-  ncAlPreview={...data,file:file.name};
+  const {data:newRows,error:newErr}=await client.rpc("sgp_previsualizar_nuevas_nc_aluminio",{p_token:token,p_datos:ncAlRows});if(newErr)throw newErr;ncAlNewRows=newRows||[];ncAlPreview={...data,file:file.name};
   document.querySelector("#ncAlReceived").textContent=data.recibidos||0;document.querySelector("#ncAlMatched").textContent=data.relacionados||0;
   document.querySelector("#ncAlMissing").textContent=data.sin_programacion||0;document.querySelector("#ncAlAmbiguous").textContent=data.ambiguos||0;
   const weeks=(data.por_semana||[]).map(x=>`Semana Maestra ${x.semana}: ${x.cantidad} NC`).join(" · "); document.querySelector("#ncAlWeekSummary").textContent=(weeks?weeks+" · ":"")+"Fuera de programación actual: "+(data.fuera_programacion??data.sin_programacion??0)+". Semana NC se conserva como fecha de creación.";
@@ -860,6 +860,7 @@ async function applyNcAluminum(){
  try{btn.disabled=true;status.textContent="Aplicando NC Aluminio…";const client=await getSupabaseClient(),token=sessionStorage.getItem("sgp_one_session");
  const {data,error}=await client.rpc("sgp_aplicar_nc_aluminio",{p_token:token,p_nombre_archivo:ncAlPreview.file,p_datos:ncAlRows});if(error)throw error;
  status.textContent=`NC Aluminio actualizado ✓ · ${data.nuevos} nuevas · ${data.actualizados} actualizadas · ${data.relacionados} con Semana Maestra`;
+ if(ncAlNewRows.length){const modal=document.querySelector("#ncNewModal"),table=modal.querySelector("table");document.querySelector("#ncNewTitle").textContent=`NC agregadas en esta carga · ${ncAlNewRows.length}`;document.querySelector("#ncNewBody").innerHTML=ncAlNewRows.map(r=>`<tr><td>${escapeHtml(r.consecutivo)}</td><td>${escapeHtml(r.linea||'')}</td><td>${escapeHtml(r.semana_nc||'')}</td><td>${escapeHtml(r.referencia||'')}</td><td>${escapeHtml(r.acabado||'')}</td><td><span class="nc-state-pill">${escapeHtml(r.estado||'')}</span></td><td>${escapeHtml(String(r.creacion||'').slice(0,10))}</td><td>${escapeHtml(r.reserva_solucion||'')}</td><td>${escapeHtml(ncInches(r.perfil_mm))}</td><td>${escapeHtml(r.no_cortes||'')}</td></tr>`).join('');modal.hidden=false;delete table.dataset.dragReady;enableDraggableColumns(modal)}
  }catch(e){status.textContent="Aplicación rechazada ✕ "+e.message;btn.disabled=false}
 }
 document.querySelector("#previewNcAl")?.addEventListener("click",previewNcAluminum);
@@ -911,3 +912,5 @@ function enableDraggableColumns(root=document){
  });
 }
 const tableDragObserver=new MutationObserver(()=>enableDraggableColumns());tableDragObserver.observe(document.body,{childList:true,subtree:true});enableDraggableColumns();
+
+document.querySelector("#closeNcNew")?.addEventListener("click",()=>document.querySelector("#ncNewModal").hidden=true);
