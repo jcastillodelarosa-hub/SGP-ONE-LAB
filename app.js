@@ -846,7 +846,7 @@ async function previewNcAluminum(){
  try{
   status.textContent="Leyendo y cruzando reservas con Programación…"; btn.disabled=true;
   ncAlRows=await readNcAluminumWorkbook(file);
-  const client=getSupabaseClient(),token=sessionStorage.getItem("sgp_one_session");
+  const client=await getSupabaseClient(),token=sessionStorage.getItem("sgp_one_session");
   const {data,error}=await client.rpc("sgp_previsualizar_nc_aluminio",{p_token:token,p_datos:ncAlRows}); if(error)throw error;
   ncAlPreview={...data,file:file.name};
   document.querySelector("#ncAlReceived").textContent=data.recibidos||0;document.querySelector("#ncAlMatched").textContent=data.relacionados||0;
@@ -857,7 +857,7 @@ async function previewNcAluminum(){
 }
 async function applyNcAluminum(){
  if(!ncAlPreview||!ncAlRows.length)return; const btn=document.querySelector("#applyNcAl"),status=document.querySelector("#ncAlStatus");
- try{btn.disabled=true;status.textContent="Aplicando NC Aluminio…";const client=getSupabaseClient(),token=sessionStorage.getItem("sgp_one_session");
+ try{btn.disabled=true;status.textContent="Aplicando NC Aluminio…";const client=await getSupabaseClient(),token=sessionStorage.getItem("sgp_one_session");
  const {data,error}=await client.rpc("sgp_aplicar_nc_aluminio",{p_token:token,p_nombre_archivo:ncAlPreview.file,p_datos:ncAlRows});if(error)throw error;
  status.textContent=`NC Aluminio actualizado ✓ · ${data.nuevos} nuevas · ${data.actualizados} actualizadas · ${data.relacionados} con Semana Maestra`;
  }catch(e){status.textContent="Aplicación rechazada ✕ "+e.message;btn.disabled=false}
