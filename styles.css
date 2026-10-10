@@ -635,3 +635,11 @@ th.col-drop-right::after{right:-2px}
 .priority-auto-actions{display:flex;align-items:center;gap:14px;margin:18px 0;padding:14px 16px;border:1px solid #dbe4f0;border-radius:12px;background:#f8fafc}
 .priority-auto-actions button{font-weight:750}
 .priority-auto-actions span{font-size:13px;color:#64748b}
+
+.nc-load-change-summary{display:grid;grid-template-columns:repeat(3,minmax(180px,1fr));gap:14px;margin-top:18px}
+.nc-load-change-summary[hidden]{display:none}
+.nc-load-change-summary button{min-height:94px;text-align:left;padding:16px 20px;border:1px solid #dbe4f0;border-radius:14px;background:#fff;box-shadow:0 5px 16px rgba(15,23,42,.06);cursor:pointer}
+.nc-load-change-summary button:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(15,23,42,.10)}
+.nc-load-change-summary small{display:block;font-size:13px;font-weight:750;color:#64748b;margin-bottom:5px}
+.nc-load-change-summary strong{font-size:30px;color:#17233a}
+.nc-load-change-summary button:nth-child(1){border-left:5px solid #2563eb}.nc-load-change-summary button:nth-child(2){border-left:5px solid #22c55e}.nc-load-change-summary button:nth-child(3){border-left:5px solid #f59e0b}
