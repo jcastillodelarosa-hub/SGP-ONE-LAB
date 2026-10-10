@@ -28,9 +28,9 @@ let assemblyRows = [];
 let queriedSystemSummary = [];
 let detailSort = { key: null, dir: 1 };
 let currentPieceRows=[];let currentPieceView='summary';let pieceDetailColumns=['perfil','descripcion','marca','fabricacion','longitud','cantidad'];
-let detailColumnFilters = {};
+let detailColumnFilters = {};\nlet detailHidden=new Set(JSON.parse(localStorage.getItem('sgp_program_hidden_cols')||'[]'));
 let detailColumns = [
- {key:'reserva_al',label:'Reserva'}, {key:'id_linea',label:'Línea'}, {key:'id',label:'ID'}, {key:'produccion',label:'Producción'}, {key:'sistema',label:'Sistema'}, {key:'acabado',label:'Acabado'}, {key:'proyecto',label:'Proyecto'}, {key:'cantidad',label:'Cantidad'}, {key:'muntin',label:'Muntin'}, {key:'porc_vidrio',label:'Vidrio'}
+ {key:'prioridad',label:'Prioridad'}, {key:'reserva_al',label:'Reserva'}, {key:'id_linea',label:'Línea'}, {key:'id',label:'ID'}, {key:'produccion',label:'Producción'}, {key:'tipo',label:'Tipo'}, {key:'sistema',label:'Sistema'}, {key:'acabado',label:'Acabado'}, {key:'proyecto',label:'Proyecto'}, {key:'cantidad',label:'Cantidad'}, {key:'muntin',label:'Muntin'}, {key:'porc_vidrio',label:'% Vidrio'}, {key:'tipo_vidrio',label:'Tipo vidrio'}, {key:'medidas',label:'Tamaños'}, {key:'cliente',label:'Cliente'}, {key:'mercado',label:'Mercado'}, {key:'estado_produccion',label:'Estado'}, {key:'grupo_vidrio',label:'Grupo vidrio'}, {key:'orden_oves',label:'OVES'}
 ];
 
 const els = {
@@ -480,7 +480,7 @@ function filteredProgrammingRows() {
 }
 function renderDetailHead(){
   if(!els.queryHead)return;
-  els.queryHead.innerHTML='<tr>'+detailColumns.map((c,i)=>`<th><div class="detail-head"><span data-sort="${c.key}">${escapeHtml(c.label)}${detailSort.key===c.key?(detailSort.dir>0?' ▲':' ▼'):''}</span><span><button type="button" data-move="${i}:-1" title="Mover a la izquierda">←</button><button type="button" data-move="${i}:1" title="Mover a la derecha">→</button></span></div><input class="column-filter" data-filter="${c.key}" value="${escapeHtml(detailColumnFilters[c.key]||'')}" placeholder="Filtrar…"></th>`).join('')+'</tr>';
+  els.queryHead.innerHTML='<tr>'+detailColumns.filter(c=>!detailHidden.has(c.key)).map((c,i)=>`<th><div class="detail-head"><span data-sort="${c.key}">${escapeHtml(c.label)}${detailSort.key===c.key?(detailSort.dir>0?' ▲':' ▼'):''}</span><span><button type="button" data-move="${i}:-1" title="Mover a la izquierda">←</button><button type="button" data-move="${i}:1" title="Mover a la derecha">→</button></span></div><input class="column-filter" data-filter="${c.key}" value="${escapeHtml(detailColumnFilters[c.key]||'')}" placeholder="Filtrar…"></th>`).join('')+'</tr>';
 }
 function detailValue(r,key){
   if(key==='muntin')return hasMuntin(r)?'SI':'NO';
@@ -512,13 +512,13 @@ function renderQueriedProgramming(){
   els.reservationSummaryBody.innerHTML=rr.map(g=>`<tr class="${g.prodMuntin?'has-muntin-summary':''}"><td><strong>${escapeHtml(g.sistema)}</strong></td><td>${escapeHtml(g.reserva)}</td><td>${escapeHtml(g.acabado)}</td><td>${g.producciones}</td><td><strong>${g.unidades}</strong></td><td>${g.prodMuntin}</td><td>${g.unidMuntin}</td></tr>`).join('');
   els.reservationSummaryFoot.innerHTML=`<tr><td>TOTAL</td><td></td><td></td><td>${baseRows.length}</td><td>${units}</td><td>${baseRows.filter(hasMuntin).length}</td><td>${baseRows.filter(hasMuntin).reduce((n,r)=>n+Number(r.cantidad||0),0)}</td></tr>`;
 
-  let rows=baseRows.filter(r=>detailColumns.every(c=>!detailColumnFilters[c.key]||String(detailValue(r,c.key)).toLowerCase().includes(detailColumnFilters[c.key].toLowerCase())));
+  let rows=baseRows.filter(r=>detailColumns.filter(c=>!detailHidden.has(c.key)).every(c=>!detailColumnFilters[c.key]||String(detailValue(r,c.key)).toLowerCase().includes(detailColumnFilters[c.key].toLowerCase())));
   if(detailSort.key)rows=[...rows].sort((x,y)=>String(detailValue(x,detailSort.key)).localeCompare(String(detailValue(y,detailSort.key)),undefined,{numeric:true})*detailSort.dir);
   els.qVisible.textContent=rows.length;renderDetailHead();
   let prev=null,idx=-1;
   els.queryBody.innerHTML=rows.length?rows.map(r=>{const reserva=String(r.reserva_al??'').trim()||'SIN RESERVA';if(reserva!==prev){idx++;prev=reserva}const hm=hasMuntin(r);
-    return `<tr class="${idx%2===0?'reservation-alt':''} ${hm?'has-muntin':''}">${detailColumns.map(c=>{let v=detailValue(r,c.key);if(c.key==='reserva_al')return `<td><button class="piece-link" data-piece-mode="reserva" data-piece-value="${escapeHtml(reserva)}">${escapeHtml(reserva)}</button></td>`;if(c.key==='produccion')return `<td><button class="piece-link" data-piece-mode="produccion" data-piece-value="${escapeHtml(r.produccion)}">${escapeHtml(r.produccion)}</button></td>`;if(c.key==='muntin')v=hm?'SÍ · '+(r.cantidad_muntin??r.cantidad??''):'—';return `<td>${escapeHtml(v||'—')}</td>`}).join('')}</tr>`;
-  }).join(''):`<tr><td colspan="${detailColumns.length}" class="empty">No hay registros con los filtros seleccionados.</td></tr>`;
+    return `<tr class="${idx%2===0?'reservation-alt':''} ${hm?'has-muntin':''}">${detailColumns.filter(c=>!detailHidden.has(c.key)).map(c=>{let v=detailValue(r,c.key);if(c.key==='reserva_al')return `<td><button class="piece-link" data-piece-mode="reserva" data-piece-value="${escapeHtml(reserva)}">${escapeHtml(reserva)}</button></td>`;if(c.key==='produccion')return `<td><button class="piece-link" data-piece-mode="produccion" data-piece-value="${escapeHtml(r.produccion)}">${escapeHtml(r.produccion)}</button></td>`;if(c.key==='muntin')v=hm?'SÍ · '+(r.cantidad_muntin??r.cantidad??''):'—';return `<td>${escapeHtml(v||'—')}</td>`}).join('')}</tr>`;
+  }).join(''):`<tr><td colspan="${detailColumns.filter(c=>!detailHidden.has(c.key)).length}" class="empty">No hay registros con los filtros seleccionados.</td></tr>`;
 }
 function basePieceDescription(s){
   return String(s||'').replace(/\s+[A-Z]$/i,'').trim();
@@ -983,3 +983,5 @@ async function autoGeneratePriorities(){
  finally{btn.disabled=false;btn.textContent="Generar prioridades restantes automáticamente"}
 }
 document.querySelector("#priorityAutoGenerate")?.addEventListener("click",autoGeneratePriorities);
+
+function renderProgramPicker(){const b=document.querySelector('#programColumnPicker');if(!b)return;b.innerHTML='<div class="nc-column-picker-grid">'+detailColumns.map(c=>'<label><input type="checkbox" data-pcol="'+c.key+'" '+(detailHidden.has(c.key)?'':'checked')+'> '+escapeHtml(c.label)+'</label>').join('')+'</div>';b.querySelectorAll('[data-pcol]').forEach(x=>x.onchange=()=>{x.checked?detailHidden.delete(x.dataset.pcol):detailHidden.add(x.dataset.pcol);localStorage.setItem('sgp_program_hidden_cols',JSON.stringify([...detailHidden]));renderQueriedProgramming()})}document.querySelector('#programChooseColumns')?.addEventListener('click',()=>{const b=document.querySelector('#programColumnPicker');b.hidden=!b.hidden;if(!b.hidden)renderProgramPicker()});
