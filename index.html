@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SGP ONE LAB</title>
-  <link rel="stylesheet" href="styles.css?v=93" />
+  <link rel="stylesheet" href="styles.css?v=94" />
   <script src="config.js?v=20261008-1300"></script>
 </head>
 <body>
@@ -46,7 +46,7 @@
           <input id="authPassword" type="password" placeholder="Contraseña" autocomplete="current-password" />
           <button id="authLogin">Ingresar</button>
           <button id="authLogout" hidden>Cerrar sesión</button>
-          <span class="status">LAB v93</span>
+          <span class="status">LAB v94</span>
         </div>
       </header>
 
@@ -174,7 +174,7 @@
             <input id="queryWeek" type="number" min="1" max="53" value="41" aria-label="Semana" />
             <select id="queryLine"><option value="">PANELES_2 + FRAMES_2</option><option value="PANELES_2">PANELES_2</option><option value="FRAMES_2">FRAMES_2</option></select>
             <input id="querySearch" type="search" placeholder="Buscar producción, sistema, proyecto o cliente…" />
-            <button id="queryProgramming">Consultar semana</button>
+            <button id="queryProgramming">Consultar semana</button><button id="openPriorityWizard">Asignación de prioridades</button>
           </section>
           <section class="summary">
             <div class="metric"><span>Semana</span><strong id="qWeek">—</strong></div>
@@ -337,7 +337,7 @@
         </section>
         </section>
       </main>
-    <div id="pieceModal" class="piece-modal" hidden>
+    <div id="priorityModal" class="piece-modal" hidden><div class="piece-modal-card priority-card" role="dialog" aria-modal="true"><div class="piece-modal-head"><div><span class="eyebrow">Programación semanal</span><h2>Asignación de prioridades</h2></div><button id="closePriorityModal">✕</button></div><div id="priorityStatus" class="piece-modal-meta"></div><div id="priorityReservationList"></div><div id="priorityWork" hidden><div id="priorityQuestion"></div><div id="priorityActions"></div><div id="priorityParts"></div><div class="table-wrap"><table class="nc-operational-table"><thead><tr><th>Prioridad</th><th>ID</th><th>Producción</th><th>Paneles</th><th>Tipo vidrio</th><th>Sistema</th><th>Acabado</th></tr></thead><tbody id="priorityProductionBody"></tbody></table></div><div class="priority-footer"><button id="priorityBack">Volver</button><button id="prioritySave">Guardar y siguiente</button></div></div></div></div><div id="pieceModal" class="piece-modal" hidden>
       <div class="piece-modal-card" role="dialog" aria-modal="true" aria-labelledby="pieceModalTitle">
         <div class="piece-modal-head"><div><span class="eyebrow">Detalle de piezas</span><h2 id="pieceModalTitle">Piezas</h2></div><button id="closePieceModal" type="button">✕</button></div>
         <div id="pieceModalMeta" class="piece-modal-meta"></div>
@@ -349,6 +349,6 @@
     </section>
   </div>
 
-  <script type="module" src="app.js?v=93"></script>
+  <script type="module" src="app.js?v=94"></script>
 </body>
 </html>
