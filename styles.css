@@ -622,3 +622,7 @@ th.col-drop-right::after{right:-2px}
 .priority-part-1-5,.priority-part-2-5,.priority-part-3-5,.priority-part-4-5{background:#ede9fe}
 .priority-done{opacity:.58}
 .priority-footer{display:flex;justify-content:space-between;gap:12px;margin-top:16px}
+
+#priorityModal>.piece-modal-card{width:100vw;max-width:none;height:100vh;max-height:none;border-radius:0;overflow:auto}
+.priority-work-card{width:min(1180px,94vw);max-height:90vh;overflow:auto}
+#priorityWorkModal{z-index:1200;background:rgba(15,23,42,.42)}
