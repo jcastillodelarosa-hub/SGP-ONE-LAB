@@ -824,6 +824,7 @@ renderMecanizado();
 
 els.authLogin.addEventListener("click", requestCredentialAccess);
 els.authLogout.addEventListener("click", logout);
+els.authPassword?.addEventListener("keydown",e=>{if(e.key==="Enter")requestCredentialAccess()});
 refreshAuthStatus();
 
 async function previewNcAluminum(){
