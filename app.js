@@ -28,7 +28,8 @@ let assemblyRows = [];
 let queriedSystemSummary = [];
 let detailSort = { key: null, dir: 1 };
 let currentPieceRows=[];let currentPieceView='summary';let pieceDetailColumns=['perfil','descripcion','marca','fabricacion','longitud','cantidad'];
-let detailColumnFilters = {};\nlet detailHidden=new Set(JSON.parse(localStorage.getItem('sgp_program_hidden_cols')||'[]'));
+let detailColumnFilters = {};
+let detailHidden=new Set(JSON.parse(localStorage.getItem('sgp_program_hidden_cols')||'[]'));
 let detailColumns = [
  {key:'prioridad',label:'Prioridad'}, {key:'reserva_al',label:'Reserva'}, {key:'id_linea',label:'Línea'}, {key:'id',label:'ID'}, {key:'produccion',label:'Producción'}, {key:'tipo',label:'Tipo'}, {key:'sistema',label:'Sistema'}, {key:'acabado',label:'Acabado'}, {key:'proyecto',label:'Proyecto'}, {key:'cantidad',label:'Cantidad'}, {key:'muntin',label:'Muntin'}, {key:'porc_vidrio',label:'% Vidrio'}, {key:'tipo_vidrio',label:'Tipo vidrio'}, {key:'medidas',label:'Tamaños'}, {key:'cliente',label:'Cliente'}, {key:'mercado',label:'Mercado'}, {key:'estado_produccion',label:'Estado'}, {key:'grupo_vidrio',label:'Grupo vidrio'}, {key:'orden_oves',label:'OVES'}
 ];
