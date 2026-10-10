@@ -608,3 +608,17 @@ th.col-drop-right::after{right:-2px}
 .nc-glass-summary .daily-metric-card small{font-size:12px;font-weight:750;color:#64748b;margin-bottom:4px}.nc-glass-summary .daily-metric-card strong{font-size:30px;line-height:1;font-weight:850;color:#17233a}
 .nc-glass-summary .daily-metric-card:nth-child(2):before{background:#ef4444}.nc-glass-summary .daily-metric-card:nth-child(3):before{background:#22c55e}.nc-glass-summary .daily-metric-card:nth-child(4):before{background:#2563eb}.nc-glass-summary .daily-metric-card:nth-child(5):before{background:#f59e0b}
 #ncGlassTable th[data-ncgcol]{cursor:grab;user-select:none}#ncGlassTable th[data-ncgcol]:active{cursor:grabbing}
+
+.priority-card{width:min(1380px,96vw);max-height:92vh;overflow:auto}
+#priorityReservationList table,#priorityProductionBody{font-size:13px}
+#priorityParts{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+#priorityParts button.active{outline:3px solid #2563eb;font-weight:800}
+#priorityProductionBody tr{cursor:pointer;transition:.12s}
+#priorityProductionBody tr:hover{filter:brightness(.96)}
+.priority-part-1-1,.priority-part-2-1,.priority-part-3-1,.priority-part-4-1{background:#dbeafe}
+.priority-part-1-2,.priority-part-2-2,.priority-part-3-2,.priority-part-4-2{background:#dcfce7}
+.priority-part-1-3,.priority-part-2-3,.priority-part-3-3,.priority-part-4-3{background:#fef3c7}
+.priority-part-1-4,.priority-part-2-4,.priority-part-3-4,.priority-part-4-4{background:#fce7f3}
+.priority-part-1-5,.priority-part-2-5,.priority-part-3-5,.priority-part-4-5{background:#ede9fe}
+.priority-done{opacity:.58}
+.priority-footer{display:flex;justify-content:space-between;gap:12px;margin-top:16px}
