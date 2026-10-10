@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SGP ONE LAB</title>
-  <link rel="stylesheet" href="styles.css?v=98" />
+  <link rel="stylesheet" href="styles.css?v=99" />
   <script src="config.js?v=20261008-1300"></script>
 </head>
 <body>
@@ -46,7 +46,7 @@
           <input id="authPassword" type="password" placeholder="Contraseña" autocomplete="current-password" />
           <button id="authLogin">Ingresar</button>
           <button id="authLogout" hidden>Cerrar sesión</button>
-          <span class="status">LAB v98</span>
+          <span class="status">LAB v99</span>
         </div>
       </header>
 
@@ -79,7 +79,7 @@
             <div class="metric"><span>Ensambladas</span><strong id="asAssembled">—</strong></div>
           </section>
           <div id="assemblyStatus" class="daily-status">Selecciona una semana y pulsa Actualizar.</div>
-          <section class="table-wrap assembly-table-wrap"><table><thead><tr>
+          <div class="assembly-column-tools"><button id="assemblyChooseColumns" type="button">Campos visibles</button><div id="assemblyColumnPicker" class="nc-column-picker" hidden></div></div><section class="table-wrap assembly-table-wrap"><table id="assemblyTable"><thead id="assemblyHead"><tr>
             <th>Sem.</th><th>ID</th><th>Producción</th><th>Sistema</th><th>Cant.</th><th>Ensamblado</th><th>Saldo Ens.</th><th>Estado</th><th>% Vidrio</th><th>Tipo vidrio</th><th>Medidas</th><th>Ubicación vidrio</th><th>Reserva</th><th>Estado reserva</th><th>Acabado</th><th>OVES</th>
           </tr></thead><tbody id="assemblyBody"><tr><td colspan="16" class="empty">Sin consulta</td></tr></tbody></table></section></div>
 <div id="assemblyLocationReportPanel" hidden>
@@ -349,6 +349,6 @@
     </section>
   </div>
 
-  <script type="module" src="app.js?v=98"></script>
+  <script type="module" src="app.js?v=99"></script>
 </body>
 </html>
