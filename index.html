@@ -46,7 +46,7 @@
           <input id="authPassword" type="password" placeholder="Contraseña" autocomplete="current-password" />
           <button id="authLogin">Ingresar</button>
           <button id="authLogout" hidden>Cerrar sesión</button>
-          <span class="status">LAB v128</span>
+          <span class="status">LAB v129</span>
         </div>
       </header>
 
@@ -118,7 +118,7 @@
 <section data-mach-panel="faltantes" hidden>
 <section class="summary missing-summary"><div class="metric"><span>Reservas con pendientes</span><strong id="missReservations">0</strong></div><div class="metric"><span>Pendientes por resolver</span><strong id="missOpen">0</strong></div><div class="metric"><span>Pendientes resueltos</span><strong id="missResolved">0</strong></div><div class="metric miss-light"><span>Semáforo</span><div class="traffic-summary"><b class="traffic green" id="missGreen">0</b><b class="traffic amber" id="missAmber">0</b><b class="traffic red" id="missRed">0</b></div></div></section>
 <div class="missing-section-head"><div><h3>Pendientes por resolver</h3><p>Ordenados desde la recepción más antigua. El semáforo se calcula desde la fecha de recepción de la reserva.</p></div><button id="generateMissingReport" class="report-button">Generar reporte a Bodega</button></div>
-<section class="table-wrap"><table><thead><tr><th>Reserva</th><th>Perfil</th><th>Cantidad</th><th>Longitud</th><th>Observación</th><th>Fecha recepción</th><th>Turno</th><th>Días</th><th>Semáforo</th><th>Acción</th></tr></thead><tbody id="missingBody"></tbody></table></section>
+<section class="table-wrap"><table><thead><tr><th>Reserva</th><th>Perfil</th><th>Cantidad</th><th>Longitud</th><th>Observación</th><th>Fecha recepción</th><th>Turno</th><th>Días</th><th>Estado</th><th>Acción</th></tr></thead><tbody id="missingBody"></tbody></table></section>
 <div class="missing-section-head resolved-head"><div><h3>Histórico de pendientes resueltos</h3><p>Material recibido y cerrado, conservando fecha, turno y usuarios.</p></div></div>
 <section class="table-wrap resolved-wrap"><table><thead><tr><th>Reserva</th><th>Perfil</th><th>Cantidad</th><th>Longitud</th><th>Reportado por</th><th>Recibido por</th><th>Fecha recibido</th><th>Turno</th><th>Estado</th></tr></thead><tbody id="missingResolvedBody"></tbody></table></section>
 <div id="missingReceiveModal" class="modal-backdrop rec-overlay" hidden><div class="modal-card missing-receive-card"><div class="modal-header"><div><strong>Registrar recepción del pendiente</strong><small id="missingReceiveTitle">Complete fecha y turno reales de recepción.</small></div><button id="missingReceiveClose" class="modal-close">✕</button></div><div class="rec-form"><div class="rec-grid"><label>Fecha de recepción<input id="missingReceiveDate" type="date"></label><label>Turno<select id="missingReceiveShift"><option value="">Seleccionar…</option><option value="TURNO 1">Turno 1</option><option value="TURNO 2">Turno 2</option></select></label></div><div class="missing-receive-note">Esta acción cerrará el pendiente como material recibido y guardará el usuario que realiza el cierre.</div></div><div class="modal-actions"><button id="missingReceiveCancel">Cancelar</button><button id="missingReceiveSave" class="primary">Confirmar recepción</button></div></div></div>
