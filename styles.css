@@ -643,3 +643,9 @@ th.col-drop-right::after{right:-2px}
 .nc-load-change-summary small{display:block;font-size:13px;font-weight:750;color:#64748b;margin-bottom:5px}
 .nc-load-change-summary strong{font-size:30px;color:#17233a}
 .nc-load-change-summary button:nth-child(1){border-left:5px solid #2563eb}.nc-load-change-summary button:nth-child(2){border-left:5px solid #22c55e}.nc-load-change-summary button:nth-child(3){border-left:5px solid #f59e0b}
+
+.sheet-filter-btn{width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;border:0;background:transparent;padding:7px 5px;font:inherit;font-weight:700;color:inherit;cursor:pointer;text-align:left}
+.sheet-filter-btn:hover{background:#eef4ff;border-radius:6px}
+.sheet-filter-menu{position:fixed;z-index:5000;width:290px;max-height:430px;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:8px;box-shadow:0 12px 30px rgba(15,23,42,.22);padding:8px}
+.sheet-filter-menu>button,.sheet-filter-values button{display:block;width:100%;border:0;background:#fff;text-align:left;padding:9px 10px;border-radius:5px;cursor:pointer}
+.sheet-filter-menu>button:hover,.sheet-filter-values button:hover{background:#eef4ff}.sheet-filter-sep{border-top:1px solid #d7dee9;margin:6px 0}.sheet-filter-menu strong{display:block;padding:7px 10px;font-size:12px}.sheet-filter-menu input{box-sizing:border-box;width:calc(100% - 12px);margin:3px 6px 7px;padding:8px;border:1px solid #cbd5e1;border-radius:6px}.sheet-filter-values{max-height:190px;overflow:auto;border-top:1px solid #edf0f5;border-bottom:1px solid #edf0f5}
