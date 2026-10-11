@@ -46,7 +46,7 @@
           <input id="authPassword" type="password" placeholder="Contraseña" autocomplete="current-password" />
           <button id="authLogin">Ingresar</button>
           <button id="authLogout" hidden>Cerrar sesión</button>
-          <span class="status">LAB v131</span>
+          <span class="status">LAB v132</span>
         </div>
       </header>
 
@@ -106,7 +106,7 @@
 
         <section class="view" data-view-panel="mecanizado">
 <div class="page-heading"><span class="eyebrow">Operación</span><h2>Módulo de Mecanizado</h2><p>Control del flujo de mecanizado desde la recepción física del aluminio.</p></div>
-<div class="daily-tabs"><button class="active" data-mach-tab="recepcion">Recepción</button><button data-mach-tab="faltantes">Pendientes de material</button><button data-mach-tab="proceso">Proceso siguiente</button></div>
+<div class="daily-tabs"><button class="active" data-mach-tab="recepcion">Recepción</button><button data-mach-tab="faltantes">Pendientes de material</button><button data-mach-tab="programacion">Programación</button><button data-mach-tab="proceso">Producción</button></div>
 <section data-mach-panel="recepcion">
 <section class="summary"><div class="metric"><span>Pendientes por recibir</span><strong id="recPending">0</strong></div><div class="metric"><span>Recibidas</span><strong id="recReceived">0</strong></div><div class="metric"><span>Incompletas</span><strong id="recIncomplete">0</strong></div><div class="metric"><span>Sin legalizar</span><strong id="recUnlegalized">0</strong></div><div class="metric"><span>Faltantes abiertos</span><strong id="recMissing">0</strong></div></section>
 <section class="toolbar"><input id="recSearch" type="search" placeholder="Buscar reserva…"><input id="recWeek" type="number" min="1" max="53" placeholder="Semana"><button id="recRefresh">Actualizar</button></section>
@@ -122,6 +122,13 @@
 <div class="missing-section-head resolved-head"><div><h3>Histórico de pendientes resueltos</h3><p>Material recibido y cerrado, conservando fecha, turno y usuarios.</p></div></div>
 <section class="table-wrap resolved-wrap"><table><thead><tr><th>Reserva</th><th>Perfil</th><th>Cantidad</th><th>Longitud</th><th>Reportado por</th><th>Recibido por</th><th>Fecha recibido</th><th>Turno</th><th>Estado</th></tr></thead><tbody id="missingResolvedBody"></tbody></table></section>
 <div id="missingReceiveModal" class="modal-backdrop rec-overlay" hidden><div class="modal-card missing-receive-card"><div class="modal-header"><div><strong>Registrar recepción del pendiente</strong><small id="missingReceiveTitle">Complete fecha y turno reales de recepción.</small></div><button id="missingReceiveClose" class="modal-close">✕</button></div><div class="rec-form"><div class="rec-grid"><label>Fecha de recepción<input id="missingReceiveDate" type="date"></label><label>Turno<select id="missingReceiveShift"><option value="">Seleccionar…</option><option value="TURNO 1">Turno 1</option><option value="TURNO 2">Turno 2</option></select></label></div><div class="missing-receive-note">Esta acción cerrará el pendiente como material recibido y guardará el usuario que realiza el cierre.</div></div><div class="modal-actions"><button id="missingReceiveCancel">Cancelar</button><button id="missingReceiveSave" class="primary">Confirmar recepción</button></div></div></div>
+</section>
+<section data-mach-panel="programacion" hidden>
+<section class="summary prog-summary"><div class="metric"><span>Disponibles</span><strong id="progAvailable">0</strong></div><div class="metric"><span>Programadas</span><strong id="progScheduled">0</strong></div><div class="metric"><span>Ventanas programadas</span><strong id="progWindows">0</strong></div><div class="metric"><span>Vidrio promedio</span><strong id="progGlassAvg">0%</strong></div></section>
+<section class="toolbar"><input id="progSearch" type="search" placeholder="Buscar reserva, sistema u orden…"><button id="progRefresh">Actualizar</button></section>
+<div class="prog-layout"><div><div class="missing-section-head"><div><h3>Reservas disponibles</h3><p>Ordenadas por condición operativa. Expanda una reserva para revisar órdenes y vidrio.</p></div></div><div id="progPool"></div></div>
+<div><div class="missing-section-head"><div><h3>Agenda de mecanizado</h3><p>Fecha, turno y prioridad definidos por Coordinación.</p></div></div><div id="progAgenda"></div></div></div>
+<div id="progModal" class="modal-backdrop rec-overlay" hidden><div class="modal-card prog-card"><div class="modal-header"><div><strong id="progModalTitle">Programar reserva</strong><small id="progModalMeta"></small></div><button id="progModalClose" class="modal-close">✕</button></div><div class="rec-form"><div class="rec-grid"><label>Fecha<input id="progDate" type="date"></label><label>Turno<select id="progShift"><option value="TURNO 1">Turno 1</option><option value="TURNO 2">Turno 2</option></select></label><label>Prioridad / orden<input id="progPriority" type="number" min="1" value="1"></label><label>Ventanas a mecanizar<input id="progQty" type="number" min="1"></label></div><label>Observación general<textarea id="progObs" rows="2"></textarea></label><label>Observación de la orden<textarea id="progOrderObs" rows="2"></textarea></label></div><div class="modal-actions"><button id="progCancel">Cancelar</button><button id="progSave" class="primary">Agregar a programación</button></div></div></div>
 </section>
 <section data-mach-panel="proceso" hidden><div class="empty-state"><strong>Próximo proceso</strong><p>Esta pestaña queda preparada para continuar el flujo de Mecanizado.</p></div></section>
 <div id="recModal" class="modal-backdrop rec-overlay" hidden><div class="modal-card rec-card">
