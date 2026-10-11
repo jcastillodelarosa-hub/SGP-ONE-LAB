@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SGP ONE LAB</title>
-  <link rel="stylesheet" href="styles.css?v=135" />
+  <link rel="stylesheet" href="styles.css?v=136" />
   <script src="config.js?v=20261008-1300"></script>
 </head>
 <body>
@@ -46,7 +46,7 @@
           <input id="authPassword" type="password" placeholder="Contraseña" autocomplete="current-password" />
           <button id="authLogin">Ingresar</button>
           <button id="authLogout" hidden>Cerrar sesión</button>
-          <span class="status">LAB v135</span>
+          <span class="status">LAB v136</span>
         </div>
       </header>
 
@@ -128,7 +128,7 @@
 <section class="toolbar"><select id="progWeek"><option value="">Todas las semanas</option></select><input id="progSearch" type="search" placeholder="Buscar reserva, sistema u orden…"><button id="progRefresh">Actualizar</button></section>
 <div class="prog-layout"><div><div class="missing-section-head"><div><h3>Reservas disponibles</h3><p>Ordenadas por condición operativa. Expanda una reserva para revisar órdenes y vidrio.</p></div></div><div id="progPool"></div></div>
 <div><div class="missing-section-head"><div><h3>Agenda de mecanizado</h3><p>Fecha, turno y prioridad definidos por Coordinación.</p></div></div><div id="progAgenda"></div></div></div>
-<div id="progModal" class="modal-backdrop rec-overlay" hidden><div class="modal-card prog-card"><div class="modal-header"><div><strong id="progModalTitle">Programar reserva</strong><small id="progModalMeta"></small></div><button id="progModalClose" class="modal-close">✕</button></div><div class="rec-form"><div class="rec-grid"><label>Fecha<input id="progDate" type="date"></label><label>Turno<select id="progShift"><option value="TURNO 1">Turno 1</option><option value="TURNO 2">Turno 2</option></select></label><label>Prioridad / orden<input id="progPriority" type="number" min="1" value="1"></label><label>Ventanas a mecanizar<input id="progQty" type="number" min="1"></label></div><label>Observación general<textarea id="progObs" rows="2"></textarea></label><label>Observación de la orden<textarea id="progOrderObs" rows="2"></textarea></label></div><div class="modal-actions"><button id="progCancel">Cancelar</button><button id="progSave" class="primary">Agregar a programación</button></div></div></div>
+<div id="progModal" class="modal-backdrop rec-overlay" hidden><div class="modal-card prog-card"><div class="modal-header"><div><strong id="progModalTitle">Programar reserva</strong><small id="progModalMeta"></small></div><button id="progModalClose" class="modal-close">✕</button></div><div class="rec-form"><div class="rec-grid"><label>Fecha<input id="progDate" type="date"></label><label>Turno<select id="progShift"><option value="TURNO 1">Turno 1</option><option value="TURNO 2">Turno 2</option></select></label><label>Prioridad / orden<input id="progPriority" type="number" min="0.1" step="0.1" value="1"></label><label>Ventanas a mecanizar<input id="progQty" type="number" min="1"></label></div><label>Observación general<textarea id="progObs" rows="2"></textarea></label><label>Observación de la orden<textarea id="progOrderObs" rows="2"></textarea></label></div><div class="modal-actions"><button id="progCancel">Cancelar</button><button id="progSave" class="primary">Agregar a programación</button></div></div></div>
 </section>
 <section data-mach-panel="proceso" hidden><div class="empty-state"><strong>Próximo proceso</strong><p>Esta pestaña queda preparada para continuar el flujo de Mecanizado.</p></div></section>
 <div id="recModal" class="modal-backdrop rec-overlay" hidden><div class="modal-card rec-card">
@@ -330,6 +330,6 @@
     </section>
   </div>
 
-  <script type="module" src="app.js?v=135"></script>
+  <script type="module" src="app.js?v=136"></script>
 </body>
 </html>
