@@ -864,7 +864,7 @@ document.querySelector("#previewNcAl")?.addEventListener("click",previewNcAlumin
 document.querySelector("#applyNcAl")?.addEventListener("click",applyNcAluminum);
 
 
-let ncViewRows=[],ncViewFilters={};
+let ncViewRows=[],ncViewFilters={},ncViewSort={key:null,dir:1};
 let ncHiddenCols=new Set(JSON.parse(localStorage.getItem("sgp_nc_hidden_cols")||"[]"));
 let ncCols=[['consecutivo','Consecutivo'],['semana_nc','Sem. NC'],['linea','Línea'],['creacion','Creación'],['dias_abierta','Días'],['semaforo',''],['estado','Estado'],['reserva','Reserva'],['reserva_solucion','Reserva solución'],['produccion','Producción'],['sistema','Sistema'],['referencia','Referencia'],['perfil_mm','Perfil mm'],['perfil_in','Perfil pulg.'],['no_cortes','# Cortes'],['acabado','Acabado'],['concepto','Concepto'],['causa','Causa'],['responsable','Responsable']];
 function ncInches(v){let n=Number(String(v??'').replace(',','.'));if(!Number.isFinite(n))return '';let x=n/25.4,w=Math.floor(x),q=Math.round((x-w)*16);if(q===16){w++;q=0}if(!q)return w+'″';const g=(a,b)=>b?g(b,a%b):a,d=g(q,16);return w+' '+(q/d)+'/'+(16/d)+'″'}
