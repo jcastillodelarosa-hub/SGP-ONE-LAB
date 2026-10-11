@@ -46,7 +46,7 @@
           <input id="authPassword" type="password" placeholder="Contraseña" autocomplete="current-password" />
           <button id="authLogin">Ingresar</button>
           <button id="authLogout" hidden>Cerrar sesión</button>
-          <span class="status">LAB v123</span>
+          <span class="status">LAB v124</span>
         </div>
       </header>
 
@@ -110,7 +110,10 @@
 <section data-mach-panel="recepcion">
 <section class="summary"><div class="metric"><span>Pendientes por recibir</span><strong id="recPending">0</strong></div><div class="metric"><span>Recibidas</span><strong id="recReceived">0</strong></div><div class="metric"><span>Incompletas</span><strong id="recIncomplete">0</strong></div><div class="metric"><span>Sin legalizar</span><strong id="recUnlegalized">0</strong></div><div class="metric"><span>Faltantes abiertos</span><strong id="recMissing">0</strong></div></section>
 <section class="toolbar"><input id="recSearch" type="search" placeholder="Buscar reserva…"><input id="recWeek" type="number" min="1" max="53" placeholder="Semana"><button id="recRefresh">Actualizar</button></section>
-<section class="table-wrap"><table id="recTable"><thead><tr><th>Semana</th><th>Reserva</th><th>Sistema</th><th>Acabado</th><th>Cantidad</th><th>Estado</th><th>Auditoría</th><th>Legalizada</th><th>Faltantes</th><th>Días pendiente</th><th>Acción</th></tr></thead><tbody id="recBody"></tbody></table></section>
+<div class="rec-list-heading"><div><h3>Pendientes por recibir</h3><p>Reservas que todavía no tienen recepción física registrada.</p></div><span id="recPendingLabel" class="rec-count-pill">0</span></div>
+<section class="table-wrap"><table id="recTable"><thead><tr><th>Semana</th><th>Reserva</th><th>Sistema</th><th>Acabado</th><th>Cantidad</th><th>Estado</th><th>Faltantes</th><th>Días pendiente</th><th>Acción</th></tr></thead><tbody id="recBody"></tbody></table></section>
+<div class="rec-list-heading received-heading"><div><h3>Reservas recibidas</h3><p>Histórico de reservas con recepción registrada y su estado de legalización.</p></div><span id="recReceivedLabel" class="rec-count-pill received">0</span></div>
+<section class="table-wrap received-reservations-wrap"><table><thead><tr><th>Semana</th><th>Reserva</th><th>Sistema</th><th>Acabado</th><th>Cantidad</th><th>Recepción</th><th>Legalización</th><th>Faltantes</th><th>Acción</th></tr></thead><tbody id="recReceivedBody"></tbody></table></section>
 </section>
 <section data-mach-panel="faltantes" hidden>
 <section class="summary missing-summary"><div class="metric"><span>Reservas con pendientes</span><strong id="missReservations">0</strong></div><div class="metric"><span>Pendientes por resolver</span><strong id="missOpen">0</strong></div><div class="metric"><span>Pendientes resueltos</span><strong id="missResolved">0</strong></div><div class="metric miss-light"><span>Semáforo</span><div class="traffic-summary"><b class="traffic green" id="missGreen">0</b><b class="traffic amber" id="missAmber">0</b><b class="traffic red" id="missRed">0</b></div></div></section>
