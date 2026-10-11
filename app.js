@@ -783,8 +783,8 @@ window.addEventListener("error", event => {
 window.addEventListener("unhandledrejection", event => {
   console.error("SGP ONE:", event.reason);
 });
-[els.search, els.state, els.line].forEach(el => el.addEventListener("input", renderMecanizado));
-els.simulate.addEventListener("click", () => { els.demoMessage.textContent = mecanizado.advanceDemoState(); renderMecanizado(); });
+[els.search, els.state, els.line].filter(Boolean).forEach(el => el.addEventListener("input", renderMecanizado));
+els.simulate?.addEventListener("click", () => { if(els.demoMessage) els.demoMessage.textContent = mecanizado.advanceDemoState(); renderMecanizado(); });
 els.targetWeek.addEventListener("input", () => { invalidateWeeklySource("programming"); els.commit.textContent="Carga final bloqueada"; els.commit.disabled=true; els.importStatus.textContent="Semana modificada. Vuelve a validar Programación y las fuentes relacionadas."; });
 els.files.addEventListener("change", () => { invalidateWeeklySource("programming"); els.importStatus.textContent="Archivos de Programación modificados. Vuelve a validar el paquete."; });
 els.piecesFile.addEventListener("change", () => { invalidateWeeklySource("pieces"); els.piecesStatus.textContent="Archivo modificado. Vuelve a validar el listado de piezas."; });
