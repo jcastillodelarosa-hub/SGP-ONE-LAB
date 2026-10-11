@@ -235,8 +235,9 @@ async function logout() {
   }
 }
 
-function currentFilters() { return { q: els.search.value, estado: els.state.value, linea: els.line.value }; }
+function currentFilters() { return { q: els.search?.value||"", estado: els.state?.value||"", linea: els.line?.value||"" }; }
 function renderMecanizado() {
+  if(!els.tbody||!els.total||!els.delivered||!els.warehouse||!els.supply)return;
   const rows = mecanizado.filterRows(currentFilters());
   els.total.textContent = rows.length;
   els.delivered.textContent = rows.filter(r => r.estado === "ALUMINIO_ENTREGADO").length;
