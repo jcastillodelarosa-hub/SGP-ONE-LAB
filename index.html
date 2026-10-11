@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SGP ONE LAB</title>
-  <link rel="stylesheet" href="styles.css?v=119" />
+  <link rel="stylesheet" href="styles.css?v=120" />
   <script src="config.js?v=20261008-1300"></script>
 </head>
 <body>
@@ -46,7 +46,7 @@
           <input id="authPassword" type="password" placeholder="Contraseña" autocomplete="current-password" />
           <button id="authLogin">Ingresar</button>
           <button id="authLogout" hidden>Cerrar sesión</button>
-          <span class="status">LAB v119</span>
+          <span class="status">LAB v120</span>
         </div>
       </header>
 
@@ -114,7 +114,16 @@
 </section>
 <section data-mach-panel="faltantes" hidden><section class="summary"><div class="metric"><span>Abiertos</span><strong id="missOpen">0</strong></div><div class="metric"><span>Sin reportar</span><strong id="missUnreported">0</strong></div><div class="metric"><span>Reportados a Bodega</span><strong id="missReported">0</strong></div><div class="metric"><span>Vencidos SLA</span><strong id="missLate">0</strong></div></section><section class="table-wrap"><table><thead><tr><th>Reserva</th><th>Perfil</th><th>Cantidad</th><th>Longitud</th><th>Observación</th><th>Estado</th><th>Días</th><th>Acción</th></tr></thead><tbody id="missingBody"></tbody></table></section></section>
 <section data-mach-panel="proceso" hidden><div class="empty-state"><strong>Próximo proceso</strong><p>Esta pestaña queda preparada para continuar el flujo de Mecanizado.</p></div></section>
-<div id="recModal" class="modal-backdrop" hidden><div class="modal-card rec-card"><div class="modal-header"><div><strong id="recModalTitle">Auditar recepción</strong><small>Registra la recepción física y sus faltantes.</small></div><button id="recClose">✕</button></div><div class="rec-form"><label><input id="recComplete" type="checkbox"> Reserva completa</label><label><input id="recLegalized" type="checkbox"> Recepción legalizada</label><textarea id="recObservation" placeholder="Observaciones generales"></textarea><div class="rec-evidence"><strong>Evidencias fotográficas</strong><input id="recPhotos" type="file" accept="image/*" capture="environment" multiple><small>Las fotos quedarán asociadas a esta recepción.</small></div><div class="daily-detail-title"><strong>Faltantes detectados</strong><button id="addMissing">+ Agregar faltante</button></div><div id="missingEditor"></div></div><div class="modal-actions"><button id="recCancel">Cancelar</button><button id="recSave" class="primary">Guardar recepción</button></div></div></div>
+<div id="recModal" class="modal-backdrop rec-overlay" hidden><div class="modal-card rec-card">
+<div class="modal-header"><div><strong id="recModalTitle">Auditar recepción</strong><small>Auditoría física de la reserva</small></div><button id="recClose" class="modal-close">✕</button></div>
+<div class="rec-form">
+<div class="rec-grid"><label>Fecha de recepción<input id="recDate" type="date" required></label><label>Turno<select id="recShift" required><option value="">Seleccionar…</option><option value="TURNO 1">Turno 1</option><option value="TURNO 2">Turno 2</option><option value="TURNO 3">Turno 3</option></select></label></div>
+<div class="rec-evidence"><strong>Fotos de la reserva</strong><input id="recPhotos" type="file" accept="image/*" capture="environment" multiple><small>Puede tomar o seleccionar varias fotografías como evidencia.</small></div>
+<fieldset class="rec-complete-box"><legend>¿La reserva está completa?</legend><label><input type="radio" name="recCompleteChoice" value="SI"> Sí</label><label><input type="radio" name="recCompleteChoice" value="NO"> No</label></fieldset>
+<div id="recMissingSection" hidden><div class="daily-detail-title"><div><strong>Perfiles pendientes</strong><small>Registre todos los faltantes antes de guardar.</small></div><button id="addMissing" type="button">+ Agregar faltante</button></div><div id="missingEditor"></div></div>
+<label>Observaciones generales<textarea id="recObservation" placeholder="Observaciones de la recepción"></textarea></label>
+<label class="rec-legalized"><input id="recLegalized" type="checkbox"> Recepción legalizada</label>
+</div><div class="modal-actions"><button id="recCancel">Cancelar</button><button id="recSave" class="primary">Guardar recepción</button></div></div></div>
 </section>
 
 <section class="view" data-view-panel="programacion" hidden>
@@ -304,6 +313,6 @@
     </section>
   </div>
 
-  <script type="module" src="app.js?v=119"></script>
+  <script type="module" src="app.js?v=120"></script>
 </body>
 </html>
