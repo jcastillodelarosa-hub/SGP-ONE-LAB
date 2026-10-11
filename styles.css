@@ -735,3 +735,13 @@ th.filter-active{background:#dbeafe!important;box-shadow:inset 0 -3px #2563eb}.f
 
 /* Automatic missing workflow + warehouse report v125 */
 .report-button{border:0;border-radius:9px;padding:10px 14px;background:#173f73;color:#fff;font-weight:800;cursor:pointer;box-shadow:0 2px 7px rgba(15,50,90,.16)}.report-button:hover{background:#0f315c}.traffic-label{display:inline-block;padding:5px 8px;border-radius:999px;color:#fff;font-size:9px;font-weight:900;letter-spacing:.03em}.traffic-label.green{background:#22c55e}.traffic-label.amber{background:#f59e0b}.traffic-label.red{background:#ef4444}
+
+/* Executive SLA indicators v129 */
+.traffic-label{display:inline-flex!important;align-items:center;gap:7px;padding:6px 11px!important;border-radius:999px!important;font-size:10px!important;font-weight:900!important;letter-spacing:.02em;white-space:nowrap}
+.traffic-label:before{content:"";width:10px;height:10px;border-radius:50%;display:inline-block;box-shadow:0 0 0 3px rgba(255,255,255,.55)}
+.traffic-label.green{background:#dcfce7!important;color:#166534!important}.traffic-label.green:before{background:#22c55e}
+.traffic-label.amber{background:#fef3c7!important;color:#92400e!important}.traffic-label.amber:before{background:#f59e0b}
+.traffic-label.red{background:#fee2e2!important;color:#b91c1c!important}.traffic-label.red:before{background:#ef4444}
+#missingBody .action-success{display:inline-flex;align-items:center;gap:6px;background:#dcfce7!important;color:#166534!important;padding:8px 12px!important;border-radius:8px!important;font-weight:800}
+#missingBody .action-success:before{content:"✓";display:inline-grid;place-items:center;width:16px;height:16px;border:1.5px solid #16a34a;border-radius:50%;font-size:10px}
+#missingBody tr{transition:background .15s ease}#missingBody tr:hover{background:#f8fbff}
