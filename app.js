@@ -245,11 +245,16 @@ document.querySelector('#mobileMenuToggle')?.addEventListener('click',toggleMobi
 const SGP_WINDOWS=[['inicio','Inicio'],['mecanizado','Módulo de Mecanizado'],['programacion','Programación semanal'],['ensamble','Ensamble'],['nc-aluminio','NC Aluminio'],['nc-vidrio','NC Vidrio'],['seguimiento-aluminio','Seguimiento de aluminio'],['carga-semanal','Carga semanal'],['actualizacion','Actualización diaria']];
 let currentAuth=null,userAdminRows=[],editingUserId=null;
 async function applyUserAccess(auth){
- currentAuth=auth||null;const token=sessionStorage.getItem(APP_SESSION_KEY);
- if(!token){document.querySelectorAll('.nav [data-view]').forEach(b=>b.hidden=true);return}
- let access=[];try{const c=await getSupabaseClient(),{data,error}=await c.rpc('sgp_mis_accesos',{p_token:token});if(!error)access=(data||[]).map(x=>x.ventana)}catch{}
- document.querySelectorAll('.nav [data-view]').forEach(b=>b.hidden=!access.includes(b.dataset.view));
- const active=document.querySelector('.nav [data-view].active');if(active?.hidden){const first=[...document.querySelectorAll('.nav [data-view]')].find(b=>!b.hidden);first?.click()}
+ currentAuth=auth||null;const token=sessionStorage.getItem(APP_SESSION_KEY),buttons=[...document.querySelectorAll('.nav [data-view]')];
+ if(!token){buttons.forEach(b=>b.hidden=false);return}
+ if(String(auth?.rol||'').toUpperCase()==='ADMINISTRADOR'){buttons.forEach(b=>b.hidden=false);return}
+ try{
+   const c=await getSupabaseClient(),{data,error}=await c.rpc('sgp_mis_accesos',{p_token:token});
+   if(error)throw error;
+   const access=(data||[]).map(x=>x.ventana);
+   buttons.forEach(b=>b.hidden=!access.includes(b.dataset.view));
+   const active=document.querySelector('.nav [data-view].active');if(active?.hidden){const first=buttons.find(b=>!b.hidden);first?.click()}
+ }catch(e){console.error('No se pudieron cargar permisos',e);buttons.forEach(b=>b.hidden=false)}
 }
 async function loadUserAdmin(){
  if(currentAuth?.rol!=='ADMINISTRADOR')return;const c=await getSupabaseClient(),{data,error}=await c.rpc('sgp_admin_usuarios_listar',{p_token:getAppToken()});if(error){alert(error.message);return}userAdminRows=data||[];
