@@ -877,3 +877,6 @@ th.filter-active{background:#dbeafe!important;box-shadow:inset 0 -3px #2563eb}.f
 #progDayModal .prog-day-head,#progDayModal .prog-day-systems{flex:0 0 auto!important}
 #progDayModal .prog-day-detail{flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;padding-bottom:28px!important}
 @media(max-width:760px){#progDayModal{padding:6px!important}#progDayModal .prog-day-card{max-height:calc(100dvh - 12px)!important}.prog-day-detail{padding-bottom:max(24px,env(safe-area-inset-bottom))!important}}
+
+/* LAB v170 · shift system summary */
+.prog-turn-title{display:flex;align-items:center;gap:14px;flex-wrap:wrap}.prog-turn-systems{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.prog-turn-systems span{display:inline-flex;align-items:center;gap:4px;padding:4px 9px;border:1px solid #cbd8e7;border-radius:999px;background:#fff;font-size:11px;color:#475569}.prog-turn-systems strong{color:#123b69}@media(max-width:760px){.prog-turn-head{align-items:flex-start!important}.prog-turn-title{gap:7px}.prog-turn-systems{width:100%;gap:5px}.prog-turn-systems span{font-size:10px;padding:3px 7px}}
