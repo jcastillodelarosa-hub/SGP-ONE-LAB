@@ -886,3 +886,6 @@ th.filter-active{background:#dbeafe!important;box-shadow:inset 0 -3px #2563eb}.f
 
 /* LAB v172 · system/finish beside reservation */
 .prog-row-main{display:flex;align-items:center;gap:4px;min-width:0;flex-wrap:wrap}.prog-row-main>small{white-space:nowrap}.prog-row-system{display:inline-flex;align-items:center;gap:7px;margin-left:14px;padding-left:14px;border-left:1px solid #d7e0ea;min-width:0}.prog-row-system strong{color:#174f87;font-size:12px;white-space:nowrap}.prog-row-system em{font-style:normal;color:#64748b;font-size:11px;font-weight:600;white-space:nowrap}@media(max-width:760px){.prog-row-system{width:100%;margin-left:0;padding-left:0;border-left:0;margin-top:3px}.prog-row-main{align-items:flex-start}}
+
+/* LAB v177 · weekly glass type in mecanizado programming */
+.glass-type-badge{display:inline-flex;max-width:260px;padding:4px 8px;border-radius:999px;background:#eef5ff;color:#174f87;font-size:11px;font-weight:700;white-space:normal}.glass-type-inline{color:#174f87;font-weight:700}.prog-part-orders>div>span{display:block;margin-top:3px}@media(max-width:760px){.glass-type-badge{max-width:180px}.prog-orders-table-wrap table{min-width:680px}}
