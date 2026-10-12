@@ -188,6 +188,14 @@ function refreshWeeklyPackageGate() {
 const APP_SESSION_KEY = "sgp_one_session";
 const APP_PERSIST_SESSION_KEY = "sgp_one_session_persist";
 function getAppToken(){return sessionStorage.getItem(APP_SESSION_KEY)||localStorage.getItem(APP_PERSIST_SESSION_KEY)||""}
+let sgpGeneralConfig={HORARIOS_TURNOS:{lunes_sabado:{turno1:{inicio:'07:00',fin:'19:00'},turno2:{inicio:'19:00',fin:'07:00'}},domingo:{turno1:{inicio:'07:00',fin:'18:00'},turno2:{inicio:'18:00',fin:'05:00'}}}};
+async function loadGeneralConfig(){
+ try{const c=await getSupabaseClient(),{data,error}=await c.rpc('sgp_configuracion_general_obtener',{p_token:getAppToken()});if(error)throw error;(data||[]).forEach(x=>sgpGeneralConfig[x.clave]=x.valor);const h=sgpGeneralConfig.HORARIOS_TURNOS||{};const w=h.lunes_sabado||{},s=h.domingo||{};[['#cfgWeekT1Start',w.turno1?.inicio],['#cfgWeekT1End',w.turno1?.fin],['#cfgWeekT2Start',w.turno2?.inicio],['#cfgWeekT2End',w.turno2?.fin],['#cfgSunT1Start',s.turno1?.inicio],['#cfgSunT1End',s.turno1?.fin],['#cfgSunT2Start',s.turno2?.inicio],['#cfgSunT2End',s.turno2?.fin]].forEach(([q,v])=>{const e=document.querySelector(q);if(e&&v)e.value=v})}catch(e){console.warn('Configuración general',e)}
+}
+function shiftScheduleForDate(date,turno){const d=new Date(date+'T12:00:00'),sun=d.getDay()===0,h=sgpGeneralConfig.HORARIOS_TURNOS||{},g=sun?h.domingo:h.lunes_sabado,t=String(turno||'').includes('2')?'turno2':'turno1';return g?.[t]||null}
+function fmtShiftTime(v){if(!v)return'';let [h,m]=v.split(':').map(Number),ap=h>=12?'pm':'am',hh=h%12||12;return hh+(m?':'+String(m).padStart(2,'0'):'')+' '+ap}
+function shiftLabelForDate(date,turno){const s=shiftScheduleForDate(date,turno);return s?fmtShiftTime(s.inicio)+' a '+fmtShiftTime(s.fin):''}
+
 function saveAppToken(token){sessionStorage.setItem(APP_SESSION_KEY,token);localStorage.setItem(APP_PERSIST_SESSION_KEY,token)}
 function clearAppToken(){sessionStorage.removeItem(APP_SESSION_KEY);localStorage.removeItem(APP_PERSIST_SESSION_KEY)}
 
@@ -228,7 +236,7 @@ async function requestCredentialAccess() {
     if (error) throw error;
     saveAppToken(data.token);
     els.authPassword.value = "";
-    await refreshAuthStatus();
+    await refreshAuthStatus(); await loadGeneralConfig();
   } catch {
     els.authPassword.value = "";
     els.authStatus.textContent = "Usuario o contraseña incorrectos.";
@@ -1144,3 +1152,5 @@ document.querySelector('#progRefresh')?.addEventListener('click',loadProgramming
 document.querySelectorAll('[data-mach-tab]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-mach-tab]').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('[data-mach-panel]').forEach(x=>x.hidden=x.dataset.machPanel!==b.dataset.machTab);if(b.dataset.machTab==='recepcion')loadReception();if(b.dataset.machTab==='faltantes')loadMissing();if(b.dataset.machTab==='programacion')loadProgramming()});
 document.querySelectorAll('input[name="recCompleteChoice"]').forEach(x=>x.addEventListener('change',()=>{const incomplete=x.checked&&x.value==='NO';document.querySelector('#recMissingSection').hidden=!incomplete;if(incomplete&&recMissingDraft.length===0){recMissingDraft.push({perfil:'',cantidad:1,longitud:'',observacion:''});renderMissingEditor()}if(!incomplete){recMissingDraft=[];renderMissingEditor()}}));
 document.querySelector('#recRefresh')?.addEventListener('click',loadReception);document.querySelector('#recSearch')?.addEventListener('input',renderReception);document.querySelector('#addMissing')?.addEventListener('click',()=>{recMissingDraft.push({perfil:'',cantidad:1,longitud:'',observacion:''});const no=document.querySelector('input[name="recCompleteChoice"][value="NO"]');if(no)no.checked=true;document.querySelector('#recMissingSection').hidden=false;renderMissingEditor()});document.querySelector('#recClose')?.addEventListener('click',()=>document.querySelector('#recModal').hidden=true);document.querySelector('#recCancel')?.addEventListener('click',()=>document.querySelector('#recModal').hidden=true);document.querySelector('#recSave')?.addEventListener('click',saveReception);
+
+document.querySelector('#saveShiftConfig')?.addEventListener('click',async()=>{const v={lunes_sabado:{turno1:{inicio:document.querySelector('#cfgWeekT1Start').value,fin:document.querySelector('#cfgWeekT1End').value},turno2:{inicio:document.querySelector('#cfgWeekT2Start').value,fin:document.querySelector('#cfgWeekT2End').value}},domingo:{turno1:{inicio:document.querySelector('#cfgSunT1Start').value,fin:document.querySelector('#cfgSunT1End').value},turno2:{inicio:document.querySelector('#cfgSunT2Start').value,fin:document.querySelector('#cfgSunT2End').value}}};try{const c=await getSupabaseClient(),{error}=await c.rpc('sgp_configuracion_general_guardar',{p_token:getAppToken(),p_clave:'HORARIOS_TURNOS',p_valor:v});if(error)throw error;sgpGeneralConfig.HORARIOS_TURNOS=v;alert('Horarios guardados correctamente')}catch(e){alert('No fue posible guardar los horarios: '+(e?.message||e))}});
