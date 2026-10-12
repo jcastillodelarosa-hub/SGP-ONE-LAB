@@ -268,6 +268,7 @@ async function saveUser(){
  const args={p_token:getAppToken(),p_id_usuario:editingUserId,p_usuario:document.querySelector('#userName').value,p_nombre:document.querySelector('#userFullName').value,p_rol:document.querySelector('#userRole').value,p_password:document.querySelector('#userPassword').value,p_activo:document.querySelector('#userActive').checked,p_accesos:[...document.querySelectorAll('#userAccessGrid input:checked')].map(x=>x.value)};
  const c=await getSupabaseClient(),{error}=await c.rpc('sgp_admin_usuario_guardar',args);if(error){alert(error.message);return}closeUserModal();await loadUserAdmin()
 }
+document.querySelectorAll('[data-config-tab]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-config-tab]').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('[data-config-panel]').forEach(p=>p.hidden=p.dataset.configPanel!==b.dataset.configTab);if(b.dataset.configTab==='usuarios')loadUserAdmin()}));
 document.querySelector('#newUserBtn')?.addEventListener('click',()=>openUserModal());document.querySelector('#userModalClose')?.addEventListener('click',closeUserModal);document.querySelector('#userCancel')?.addEventListener('click',closeUserModal);document.querySelector('#userSave')?.addEventListener('click',saveUser);
 function currentFilters() { return { q: els.search?.value||"", estado: els.state?.value||"", linea: els.line?.value||"" }; }
 function renderMecanizado() {
