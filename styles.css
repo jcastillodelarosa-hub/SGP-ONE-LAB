@@ -883,3 +883,6 @@ th.filter-active{background:#dbeafe!important;box-shadow:inset 0 -3px #2563eb}.f
 
 /* LAB v171 · system + finish + quantity in shift header */
 .prog-turn-systems span{gap:7px!important}.prog-turn-systems span em{font-style:normal;color:#64748b;font-weight:600;padding-left:7px;border-left:1px solid #d7e0ea}.prog-turn-systems span b{color:#0f172a;font-size:11px;white-space:nowrap}@media(max-width:760px){.prog-turn-systems span{display:grid!important;grid-template-columns:auto 1fr auto;width:100%;box-sizing:border-box}.prog-turn-systems span em{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}}
+
+/* LAB v172 · system/finish beside reservation */
+.prog-row-main{display:flex;align-items:center;gap:4px;min-width:0;flex-wrap:wrap}.prog-row-main>small{white-space:nowrap}.prog-row-system{display:inline-flex;align-items:center;gap:7px;margin-left:14px;padding-left:14px;border-left:1px solid #d7e0ea;min-width:0}.prog-row-system strong{color:#174f87;font-size:12px;white-space:nowrap}.prog-row-system em{font-style:normal;color:#64748b;font-size:11px;font-weight:600;white-space:nowrap}@media(max-width:760px){.prog-row-system{width:100%;margin-left:0;padding-left:0;border-left:0;margin-top:3px}.prog-row-main{align-items:flex-start}}
