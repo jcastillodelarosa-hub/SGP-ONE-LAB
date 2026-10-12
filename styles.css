@@ -870,3 +870,10 @@ th.filter-active{background:#dbeafe!important;box-shadow:inset 0 -3px #2563eb}.f
 .prog-orders-detail th{font-size:11px;text-transform:uppercase;color:#64748b;background:#fbfdff}
 .prog-orders-detail tbody tr:last-child td{border-bottom:0}
 @media(max-width:760px){.prog-day-card{width:100%!important;max-width:none!important}.prog-day-item[open] .prog-day-expanded{padding:12px!important}.prog-orders-detail th,.prog-orders-detail td{padding:9px 10px}}
+
+/* LAB v169 · daily programming modal vertical scroll */
+#progDayModal{overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch!important;padding:18px!important}
+#progDayModal .prog-day-card{max-height:calc(100dvh - 36px)!important;height:auto!important;display:flex!important;flex-direction:column!important;overflow:hidden!important}
+#progDayModal .prog-day-head,#progDayModal .prog-day-systems{flex:0 0 auto!important}
+#progDayModal .prog-day-detail{flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;padding-bottom:28px!important}
+@media(max-width:760px){#progDayModal{padding:6px!important}#progDayModal .prog-day-card{max-height:calc(100dvh - 12px)!important}.prog-day-detail{padding-bottom:max(24px,env(safe-area-inset-bottom))!important}}
