@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SGP ONE LAB</title>
-  <link rel="stylesheet" href="styles.css?v=159" />
+  <link rel="stylesheet" href="styles.css?v=160" />
   <script src="config.js?v=20261008-1300"></script>
 </head>
 <body>
@@ -48,7 +48,7 @@
           <input id="authPassword" type="password" placeholder="Contraseña" autocomplete="current-password" />
           <button id="authLogin">Ingresar</button>
           <button id="authLogout" hidden>Cerrar sesión</button>
-          <span class="status">LAB v159</span>
+          <span class="status">LAB v160</span>
         </div>
       </header>
 
@@ -319,9 +319,18 @@
           </section>
         </section>
         </section>
-      <section class="view" data-view-panel="configuracion" hidden>
- <div class="page-heading"><span class="eyebrow">ADMINISTRACIÓN</span><h2>Configuración</h2><p>Gestión de usuarios, roles y acceso a ventanas de SGP ONE.</p></div>
- <section class="user-admin-card"><div class="user-admin-head"><div><b>Gestión de usuarios</b><span>Define quién puede ingresar y qué módulos puede visualizar.</span></div><button id="newUserBtn" class="primary">+ Nuevo usuario</button></div><div class="user-table-wrap"><table class="user-table"><thead><tr><th>Usuario</th><th>Nombre</th><th>Rol</th><th>Accesos</th><th>Estado</th><th></th></tr></thead><tbody id="userAdminBody"></tbody></table></div></section>
+      <section class="view config-view" data-view-panel="configuracion" hidden>
+ <div class="page-heading"><span class="eyebrow">ADMINISTRACIÓN</span><h2>Configuración</h2><p>Administración general de SGP ONE, usuarios, roles y alertas.</p></div>
+ <div class="config-tabs">
+  <button class="active" data-config-tab="sgp">Configuración de SGP</button>
+  <button data-config-tab="usuarios">Gestión de usuarios</button>
+  <button data-config-tab="roles">Gestión de Roles</button>
+  <button data-config-tab="alertas">Gestión de alertas</button>
+ </div>
+ <div class="config-panel" data-config-panel="sgp"><div class="config-welcome"><b>Configuración de SGP ONE</b><p>Parámetros generales de operación de la plataforma. Iremos incorporando aquí las variables globales que requiera el sistema.</p><div class="config-info-grid"><div><span>Entorno</span><strong>SGP ONE LAB</strong></div><div><span>Administración</span><strong>Super Usuario</strong></div><div><span>Acceso</span><strong>Por usuario y rol</strong></div></div></div></div>
+ <div class="config-panel" data-config-panel="usuarios" hidden><section class="user-admin-card"><div class="user-admin-head"><div><b>Gestión de usuarios</b><span>Define quién puede ingresar y qué módulos puede visualizar.</span></div><button id="newUserBtn" class="primary">+ Nuevo usuario</button></div><div class="user-table-wrap"><table class="user-table"><thead><tr><th>Usuario</th><th>Nombre</th><th>Rol</th><th>Accesos</th><th>Estado</th><th></th></tr></thead><tbody id="userAdminBody"></tbody></table></div></section></div>
+ <div class="config-panel" data-config-panel="roles" hidden><div class="config-welcome"><b>Gestión de Roles</b><p>Roles operativos habilitados actualmente en SGP ONE.</p><div class="roles-grid"><div><span>1</span><strong>Coordinador</strong></div><div><span>2</span><strong>Líder Mecanizado</strong></div><div><span>3</span><strong>Líder Línea</strong></div><div><span>4</span><strong>Recepción</strong></div><div><span>5</span><strong>Patinador</strong></div><div><span>6</span><strong>Picking</strong></div><div><span>7</span><strong>Supervisor de Picking</strong></div><div><span>8</span><strong>Consulta</strong></div><div><span>9</span><strong>Administrador · Super Usuario</strong></div></div></div></div>
+ <div class="config-panel" data-config-panel="alertas" hidden><div class="config-welcome"><b>Gestión de alertas</b><p>Espacio preparado para parametrizar alertas operativas, vencimientos, faltantes y notificaciones por rol.</p><div class="empty-config">La parametrización de alertas se implementará sobre esta pestaña.</div></div></div>
 </section>
       </main>
     <div id="priorityModal" class="piece-modal" hidden><div class="piece-modal-card priority-card" role="dialog" aria-modal="true"><div class="piece-modal-head"><div><span class="eyebrow">Programación semanal</span><h2>Asignación de prioridades</h2></div><button id="closePriorityModal">✕</button></div><div id="priorityStatus" class="piece-modal-meta"></div><div id="priorityReservationList"></div><div id="priorityAssignedList"></div><div class="priority-auto-actions"><button id="priorityAutoGenerate" type="button">Generar prioridades restantes automáticamente</button><span id="priorityAutoHint">Asigna manualmente las reservas que necesites dividir y luego genera el resto.</span></div><div id="priorityWorkModal" class="piece-modal" hidden><div class="piece-modal-card priority-work-card"><div class="piece-modal-head"><div><span class="eyebrow">Asignación de prioridad</span><h2 id="priorityWorkTitle">Reserva</h2></div><button id="closePriorityWork">✕</button></div><div id="priorityWork"><div id="priorityQuestion"></div><div id="priorityActions"></div><div id="priorityParts"></div><div id="priorityPartSummary" class="priority-part-summary"></div><div class="table-wrap"><table class="nc-operational-table"><thead><tr><th>Prioridad</th><th>ID</th><th>Producción</th><th>Paneles</th><th>Tipo vidrio</th><th>Sistema</th><th>Acabado</th></tr></thead><tbody id="priorityProductionBody"></tbody></table></div><div class="priority-footer"><button id="priorityBack">Cancelar</button><button id="prioritySave">Guardar prioridad</button></div></div></div></div></div></div><div id="pieceModal" class="piece-modal" hidden>
@@ -336,7 +345,7 @@
     </section>
   </div>
 
-  <script type="module" src="app.js?v=159"></script>
+  <script type="module" src="app.js?v=160"></script>
 <div id="userModal" class="modal-backdrop rec-overlay" hidden><div class="modal-card user-modal-card"><div class="modal-header"><div><strong id="userModalTitle">Nuevo usuario</strong><small>Cuenta y permisos de acceso</small></div><button id="userModalClose" class="modal-close">×</button></div><div class="user-form"><div class="rec-grid"><label>Usuario<input id="userName" autocomplete="off"></label><label>Nombre completo<input id="userFullName"></label><label>Rol<select id="userRole"><option>COORDINADOR</option><option>LIDER MECANIZADO</option><option>LIDER LINEA</option><option>RECEPCION</option><option>PATINADOR</option><option>PICKING</option><option>SUPERVISOR DE PICKING</option><option>CONSULTA</option><option>ADMINISTRADOR</option></select></label><label>Contraseña<input id="userPassword" type="password" placeholder="Vacío = conservar contraseña"></label></div><label class="user-active"><input id="userActive" type="checkbox" checked> Usuario activo</label><div class="access-title"><b>Ventanas permitidas</b><span>El usuario solo verá las opciones seleccionadas.</span></div><div id="userAccessGrid" class="access-grid"></div></div><div class="modal-actions"><button id="userCancel">Cancelar</button><button id="userSave" class="primary">Guardar usuario</button></div></div></div>
 </body>
 </html>
