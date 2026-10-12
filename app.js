@@ -186,10 +186,14 @@ function refreshWeeklyPackageGate() {
 
 
 const APP_SESSION_KEY = "sgp_one_session";
+const APP_PERSIST_SESSION_KEY = "sgp_one_session_persist";
+function getAppToken(){return sessionStorage.getItem(APP_SESSION_KEY)||localStorage.getItem(APP_PERSIST_SESSION_KEY)||""}
+function saveAppToken(token){sessionStorage.setItem(APP_SESSION_KEY,token);localStorage.setItem(APP_PERSIST_SESSION_KEY,token)}
+function clearAppToken(){sessionStorage.removeItem(APP_SESSION_KEY);localStorage.removeItem(APP_PERSIST_SESSION_KEY)}
 
 async function refreshAuthStatus() {
   try {
-    const token = sessionStorage.getItem(APP_SESSION_KEY);
+    const token = getAppToken();
     if (!token) {
       els.authStatus.textContent = "Sin sesión";
       els.authUser.hidden = false; els.authPassword.hidden = false; els.authLogin.hidden = false; els.authLogout.hidden = true;
@@ -199,7 +203,7 @@ async function refreshAuthStatus() {
     const client = await getSupabaseClient();
     const { data, error } = await client.rpc("sgp_sesion_actual", { p_token: token });
     if (error || !data?.valida) {
-      sessionStorage.removeItem(APP_SESSION_KEY);
+      clearAppToken();
       els.authStatus.textContent = "Sesión vencida";
       els.authUser.hidden = false; els.authPassword.hidden = false; els.authLogin.hidden = false; els.authLogout.hidden = true;
       return null;
@@ -222,7 +226,7 @@ async function requestCredentialAccess() {
     const client = await getSupabaseClient();
     const { data, error } = await client.rpc("sgp_login", { p_usuario: usuario, p_password: password });
     if (error) throw error;
-    sessionStorage.setItem(APP_SESSION_KEY, data.token);
+    saveAppToken(data.token);
     els.authPassword.value = "";
     await refreshAuthStatus();
   } catch {
@@ -231,9 +235,9 @@ async function requestCredentialAccess() {
   } finally { els.authLogin.disabled = false; }
 }
 async function logout() {
-  const token=sessionStorage.getItem(APP_SESSION_KEY);
+  const token=getAppToken();
   try { if(token){ const client=await getSupabaseClient(); await client.rpc("sgp_logout",{p_token:token}); } } finally {
-    sessionStorage.removeItem(APP_SESSION_KEY); await refreshAuthStatus();
+    clearAppToken(); await refreshAuthStatus();
   }
 }
 
