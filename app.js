@@ -193,6 +193,7 @@ async function refreshAuthStatus() {
     if (!token) {
       els.authStatus.textContent = "Sin sesión";
       els.authUser.hidden = false; els.authPassword.hidden = false; els.authLogin.hidden = false; els.authLogout.hidden = true;
+      await applyUserAccess(null);
       return null;
     }
     const client = await getSupabaseClient();
@@ -205,6 +206,7 @@ async function refreshAuthStatus() {
     }
     els.authStatus.textContent = `${data.nombre} · ${data.rol}`;
     els.authUser.hidden = true; els.authPassword.hidden = true; els.authLogin.hidden = true; els.authLogout.hidden = false;
+    await applyUserAccess(data);
     return data;
   } catch {
     els.authStatus.textContent = "Auth no disponible";
@@ -235,6 +237,29 @@ async function logout() {
   }
 }
 
+
+const SGP_WINDOWS=[['inicio','Inicio'],['mecanizado','Módulo de Mecanizado'],['programacion','Programación semanal'],['ensamble','Ensamble'],['nc-aluminio','NC Aluminio'],['nc-vidrio','NC Vidrio'],['seguimiento-aluminio','Seguimiento de aluminio'],['carga-semanal','Carga semanal'],['actualizacion','Actualización diaria']];
+let currentAuth=null,userAdminRows=[],editingUserId=null;
+async function applyUserAccess(auth){
+ currentAuth=auth||null;const token=sessionStorage.getItem(APP_SESSION_KEY);
+ if(!token){document.querySelectorAll('.nav [data-view]').forEach(b=>b.hidden=true);return}
+ let access=[];try{const c=await getSupabaseClient(),{data,error}=await c.rpc('sgp_mis_accesos',{p_token:token});if(!error)access=(data||[]).map(x=>x.ventana)}catch{}
+ document.querySelectorAll('.nav [data-view]').forEach(b=>b.hidden=!access.includes(b.dataset.view));
+ const active=document.querySelector('.nav [data-view].active');if(active?.hidden){const first=[...document.querySelectorAll('.nav [data-view]')].find(b=>!b.hidden);first?.click()}
+}
+async function loadUserAdmin(){
+ if(currentAuth?.rol!=='ADMINISTRADOR')return;const c=await getSupabaseClient(),{data,error}=await c.rpc('sgp_admin_usuarios_listar',{p_token:getAppToken()});if(error){alert(error.message);return}userAdminRows=data||[];
+ const body=document.querySelector('#userAdminBody');if(body)body.innerHTML=userAdminRows.map(u=>'<tr><td><b>'+escapeHtml(u.usuario)+'</b></td><td>'+escapeHtml(u.nombre)+'</td><td><span class="role-chip">'+escapeHtml(u.rol)+'</span></td><td><span class="access-count">'+(u.accesos||[]).length+' ventanas</span></td><td><span class="user-state '+(u.activo?'on':'off')+'">'+(u.activo?'ACTIVO':'INACTIVO')+'</span></td><td><button class="user-edit" data-user-edit="'+u.id_usuario+'">Editar</button></td></tr>').join('');
+ body?.querySelectorAll('[data-user-edit]').forEach(b=>b.onclick=()=>openUserModal(userAdminRows.find(x=>x.id_usuario===b.dataset.userEdit)))
+}
+function renderAccessGrid(selected=[]){const h=document.querySelector('#userAccessGrid');if(h)h.innerHTML=SGP_WINDOWS.map(([k,l])=>'<label><input type="checkbox" value="'+k+'" '+(selected.includes(k)?'checked':'')+'><span><b>'+l+'</b><small>Permitir acceso</small></span></label>').join('')}
+function openUserModal(u=null){editingUserId=u?.id_usuario||null;document.querySelector('#userModalTitle').textContent=u?'Editar usuario':'Nuevo usuario';document.querySelector('#userName').value=u?.usuario||'';document.querySelector('#userFullName').value=u?.nombre||'';document.querySelector('#userRole').value=u?.rol||'RECEPCION';document.querySelector('#userPassword').value='';document.querySelector('#userActive').checked=u?.activo??true;renderAccessGrid(u?.accesos||['mecanizado']);document.querySelector('#userModal').hidden=false}
+function closeUserModal(){document.querySelector('#userModal').hidden=true;editingUserId=null}
+async function saveUser(){
+ const args={p_token:getAppToken(),p_id_usuario:editingUserId,p_usuario:document.querySelector('#userName').value,p_nombre:document.querySelector('#userFullName').value,p_rol:document.querySelector('#userRole').value,p_password:document.querySelector('#userPassword').value,p_activo:document.querySelector('#userActive').checked,p_accesos:[...document.querySelectorAll('#userAccessGrid input:checked')].map(x=>x.value)};
+ const c=await getSupabaseClient(),{error}=await c.rpc('sgp_admin_usuario_guardar',args);if(error){alert(error.message);return}closeUserModal();await loadUserAdmin()
+}
+document.querySelector('#newUserBtn')?.addEventListener('click',()=>openUserModal());document.querySelector('#userModalClose')?.addEventListener('click',closeUserModal);document.querySelector('#userCancel')?.addEventListener('click',closeUserModal);document.querySelector('#userSave')?.addEventListener('click',saveUser);
 function currentFilters() { return { q: els.search?.value||"", estado: els.state?.value||"", linea: els.line?.value||"" }; }
 function renderMecanizado() {
   if(!els.tbody||!els.total||!els.delivered||!els.warehouse||!els.supply)return;
@@ -776,7 +801,7 @@ async function commitProgramming() {
     refreshWeeklyPackageGate();
   }
 }
-els.nav.forEach(button => button.addEventListener("click", () => openView(button.dataset.view)));
+els.nav.forEach(button => button.addEventListener("click", () => {openView(button.dataset.view);if(button.dataset.view==='configuracion')loadUserAdmin()}));
 window.addEventListener("error", event => {
   console.error("SGP ONE:", event.error || event.message);
 });
