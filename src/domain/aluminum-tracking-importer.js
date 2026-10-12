@@ -63,7 +63,7 @@ export function transformAluminumTrackingRows(sourceRows, fileName = "") {
       reserva,
       peso_reserva_sap: number(src["Peso Reserva SAP"]),
       estado_entrega_corte: clean(src["Estado Entrega Corte"]),
-      estado: clean(src.Estado),
+      estado,
       estado_normalizado: estado,
       proyecto: clean(src.Proyecto),
       produccion: clean(src["Producción"]),
