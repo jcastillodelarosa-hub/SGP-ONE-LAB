@@ -850,7 +850,7 @@ th.filter-active{background:#dbeafe!important;box-shadow:inset 0 -3px #2563eb}.f
 /* Permission alignment v166 */
 .role-access-tree>.access-leaf{display:flex!important;align-items:center!important;justify-content:flex-start!important;text-align:left!important;width:100%!important;box-sizing:border-box!important}.role-access-tree>.access-leaf input{position:static!important;flex:0 0 16px!important;width:16px!important;height:16px!important;margin:0 10px 0 0!important}.role-access-tree>.access-leaf span{display:block!important;flex:1!important;text-align:left!important}.role-access-tree>.access-leaf b{display:block!important;text-align:left!important;margin:0!important}
 
-/* LAB v174 · Mobile reception audit scrolling */
+/* LAB v167 · Mobile reception audit scrolling */
 @media(max-width:760px){
  .rec-overlay{align-items:flex-start!important;overflow-y:auto!important;overflow-x:hidden!important;height:100dvh!important;max-height:100dvh!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior:contain;padding:8px 8px 88px!important}
  .rec-card{height:auto!important;max-height:none!important;overflow:visible!important;margin:0 auto!important}
