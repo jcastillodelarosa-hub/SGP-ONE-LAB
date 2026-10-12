@@ -238,6 +238,10 @@ async function logout() {
 }
 
 
+
+function closeMobileMenu(){document.body.classList.remove('mobile-menu-open');const t=document.querySelector('#mobileMenuToggle'),sh=document.querySelector('#mobileMenuShade');if(t)t.setAttribute('aria-expanded','false');if(sh)sh.hidden=true}
+function toggleMobileMenu(){const open=!document.body.classList.contains('mobile-menu-open');document.body.classList.toggle('mobile-menu-open',open);const t=document.querySelector('#mobileMenuToggle'),sh=document.querySelector('#mobileMenuShade');if(t)t.setAttribute('aria-expanded',String(open));if(sh)sh.hidden=!open}
+document.querySelector('#mobileMenuToggle')?.addEventListener('click',toggleMobileMenu);document.querySelector('#mobileMenuShade')?.addEventListener('click',closeMobileMenu);document.querySelectorAll('.nav [data-view]').forEach(b=>b.addEventListener('click',()=>{if(window.innerWidth<=760)closeMobileMenu()}));window.addEventListener('resize',()=>{if(window.innerWidth>760)closeMobileMenu()});
 const SGP_WINDOWS=[['inicio','Inicio'],['mecanizado','Módulo de Mecanizado'],['programacion','Programación semanal'],['ensamble','Ensamble'],['nc-aluminio','NC Aluminio'],['nc-vidrio','NC Vidrio'],['seguimiento-aluminio','Seguimiento de aluminio'],['carga-semanal','Carga semanal'],['actualizacion','Actualización diaria']];
 let currentAuth=null,userAdminRows=[],editingUserId=null;
 async function applyUserAccess(auth){
