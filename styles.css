@@ -1001,3 +1001,7 @@ button.primary,.primary-button,.modal-actions .primary,.prod-actions .primary{ba
 .piece-modal tbody td strong{color:#15263c}
 .piece-modal tfoot td{background:#f6f8fb;color:#26384f;font-weight:800}
 .piece-modal th button[data-piece-move]{background:#fff;color:#24415f;border:1px solid #9fb0c2;border-radius:5px}
+
+/* LAB v208 · Picking + contraste metadatos de despiece */
+.piece-modal-meta,.piece-modal-meta *{color:#26384f!important}.piece-modal-meta strong{color:#102f52!important;font-weight:900}
+.pick-toolbar{display:flex;justify-content:flex-end;gap:8px;margin:12px 0}.pick-toolbar input{min-width:260px}.pick-board{display:grid;gap:10px;margin-top:12px}.pick-card{background:#fff;border:1px solid #dce5ef;border-radius:12px;overflow:hidden}.pick-card>summary{display:grid;grid-template-columns:1.2fr 1.4fr 110px 80px;gap:12px;align-items:center;padding:12px 14px;cursor:pointer}.pick-card>summary>div{display:grid;gap:2px}.pick-card>summary span{font-size:10px;color:#667085}.pick-card>summary strong{text-align:right}.pick-detail{display:grid;grid-template-columns:1fr auto;gap:16px;padding:12px 14px;border-top:1px solid #e5eaf0;background:#f8fafc}.pick-notes{display:grid;gap:5px}.pick-notes p{margin:0;color:#475569}.pick-notes span{font-size:10px;color:#8a5b00}.pick-actions{display:flex;gap:8px;align-items:center}@media(max-width:760px){.pick-toolbar{flex-wrap:wrap}.pick-toolbar>*{flex:1;min-width:0}.pick-card>summary{grid-template-columns:1fr auto}.pick-detail{grid-template-columns:1fr}.pick-actions button{flex:1}}
