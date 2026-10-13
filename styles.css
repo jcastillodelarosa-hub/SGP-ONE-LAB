@@ -1021,3 +1021,9 @@ button.primary,.primary-button,.modal-actions .primary,.prod-actions .primary{ba
 .pick-card>summary .prod-state.state-mecanizado{background:#e5ecff!important;color:#234da6!important;border:1px solid #adc1fb!important}
 .pick-card>summary .prod-state.state-corte{background:#fff0cf!important;color:#8c5800!important;border:1px solid #edc66e!important}
 .pick-card>summary .prod-state.state-programada{background:#edf1f5!important;color:#344b66!important;border:1px solid #cbd5e1!important}
+
+/* LAB v211 · Picking usa exactamente la paleta de Producción */
+.pick-card .state-programada{background:#f3e81b!important;color:#202020!important;border-color:#d9cf16!important}
+.pick-card .state-corte{background:#0758a9!important;color:#fff!important;border-color:#0758a9!important}
+.pick-card .state-mecanizado{background:#258319!important;color:#fff!important;border-color:#258319!important}
+.pick-card .state-procesado{background:#df4ce7!important;color:#fff!important;border-color:#df4ce7!important}
