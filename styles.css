@@ -1005,3 +1005,11 @@ button.primary,.primary-button,.modal-actions .primary,.prod-actions .primary{ba
 /* LAB v208 · Picking + contraste metadatos de despiece */
 .piece-modal-meta,.piece-modal-meta *{color:#26384f!important}.piece-modal-meta strong{color:#102f52!important;font-weight:900}
 .pick-toolbar{display:flex;justify-content:flex-end;gap:8px;margin:12px 0}.pick-toolbar input{min-width:260px}.pick-board{display:grid;gap:10px;margin-top:12px}.pick-card{background:#fff;border:1px solid #dce5ef;border-radius:12px;overflow:hidden}.pick-card>summary{display:grid;grid-template-columns:1.2fr 1.4fr 110px 80px;gap:12px;align-items:center;padding:12px 14px;cursor:pointer}.pick-card>summary>div{display:grid;gap:2px}.pick-card>summary span{font-size:10px;color:#667085}.pick-card>summary strong{text-align:right}.pick-detail{display:grid;grid-template-columns:1fr auto;gap:16px;padding:12px 14px;border-top:1px solid #e5eaf0;background:#f8fafc}.pick-notes{display:grid;gap:5px}.pick-notes p{margin:0;color:#475569}.pick-notes span{font-size:10px;color:#8a5b00}.pick-actions{display:flex;gap:8px;align-items:center}@media(max-width:760px){.pick-toolbar{flex-wrap:wrap}.pick-toolbar>*{flex:1;min-width:0}.pick-card>summary{grid-template-columns:1fr auto}.pick-detail{grid-template-columns:1fr}.pick-actions button{flex:1}}
+
+/* LAB v210 · Picking hierarchy and actions */
+.pick-card>summary .prod-state{display:inline-flex!important;align-items:center;justify-content:center;width:max-content;min-width:92px;padding:5px 9px;border-radius:999px;font-size:9px;font-weight:900}
+.pick-card>summary .prod-state.procesado{background:#dff6e7;color:#176b38;border:1px solid #a8dfbb}
+.pick-card>summary .prod-state.mecanizado{background:#e8efff;color:#244fa5;border:1px solid #b9cafa}
+.pick-card>summary .prod-state.corte{background:#fff1d6;color:#8b5a00;border:1px solid #efd08d}
+.pick-card>summary .prod-state.programada{background:#eef1f5;color:#465568;border:1px solid #d4dbe4}
+.pick-actions button{appearance:none;border:1px solid #9fb6cf;background:#f4f8fc;color:#173f69;border-radius:9px;padding:8px 13px;font-weight:800;cursor:pointer}.pick-actions button:hover{background:#e6f0fa;border-color:#6f94bb}.pick-actions button.primary{background:#174f86;color:#fff;border-color:#174f86}
