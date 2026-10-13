@@ -920,3 +920,14 @@ button.primary,.primary-button,.modal-actions .primary,.prod-actions .primary{ba
 .modal-actions button:not(.primary),.prod-actions button:not(.primary){background:#fff!important;color:#26384c!important;border:1px solid #c3d2e2!important;border-radius:9px!important;min-height:38px!important;padding:0 16px!important;font-weight:800!important}
 .modal-actions{gap:9px!important;padding:13px 16px!important;background:#f8fbff!important;border-top:1px solid #dce5ef!important}
 #prodNoveltyProfile{min-height:38px;border:1px solid #c8d7e7;border-radius:8px;background:#fff;padding:0 10px}
+
+/* LAB v188 · detalle operativo por orden */
+.prod-order-table-head,.prod-order-exec-row{display:grid!important;grid-template-columns:minmax(220px,2fr) 90px minmax(250px,1.4fr) 150px;gap:12px;align-items:center}
+.prod-order-table-head{padding:9px 12px;background:#eef4fa;color:#50647c;font-size:11px;font-weight:800;text-transform:uppercase}
+.prod-order-exec-row{padding:10px 12px;border-top:1px solid #dce6f0}
+.prod-glass-counts{display:flex;gap:6px;flex-wrap:wrap}
+.prod-glass-counts span{border-radius:999px;padding:4px 8px;font-size:11px;font-weight:700;white-space:nowrap}
+.glass-prep{background:#dcf7e7;color:#08743a}.glass-nov{background:#fff0dc;color:#a24c00}.glass-move{background:#e7efff;color:#2458a5}
+.prod-order-state{height:34px;border:0;border-radius:8px;padding:0 8px;font-weight:800}
+@media(max-width:760px){.prod-order-table-head{display:none!important}.prod-order-exec-row{grid-template-columns:1fr auto!important;gap:8px}.prod-glass-counts{grid-column:1/-1}.prod-order-state{grid-column:1/-1;width:100%}}
+#prodNoveltyProfile{min-height:38px;border:1px solid #c8d7e7;border-radius:8px;background:#fff;padding:0 10px;width:100%;box-sizing:border-box}
