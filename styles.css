@@ -1013,3 +1013,11 @@ button.primary,.primary-button,.modal-actions .primary,.prod-actions .primary{ba
 .pick-card>summary .prod-state.corte{background:#fff1d6;color:#8b5a00;border:1px solid #efd08d}
 .pick-card>summary .prod-state.programada{background:#eef1f5;color:#465568;border:1px solid #d4dbe4}
 .pick-actions button{appearance:none;border:1px solid #9fb6cf;background:#f4f8fc;color:#173f69;border-radius:9px;padding:8px 13px;font-weight:800;cursor:pointer}.pick-actions button:hover{background:#e6f0fa;border-color:#6f94bb}.pick-actions button.primary{background:#174f86;color:#fff;border-color:#174f86}
+
+/* LAB v211 · jerarquía visual Picking */
+.pick-res>b{font-size:13px}.pick-res>span{font-size:10px!important;color:#566b83!important}.pick-res>span strong{font-size:10px;color:#173f69}
+.pick-product>b{font-size:13px;color:#173f69}.pick-product>span{font-size:11px!important;color:#334155!important;font-weight:700}.pick-product>small{font-size:9px;color:#6b7f96}
+.pick-card>summary .prod-state.state-procesado{background:#dcf7e5!important;color:#116b35!important;border:1px solid #9fddb5!important}
+.pick-card>summary .prod-state.state-mecanizado{background:#e5ecff!important;color:#234da6!important;border:1px solid #adc1fb!important}
+.pick-card>summary .prod-state.state-corte{background:#fff0cf!important;color:#8c5800!important;border:1px solid #edc66e!important}
+.pick-card>summary .prod-state.state-programada{background:#edf1f5!important;color:#344b66!important;border:1px solid #cbd5e1!important}
