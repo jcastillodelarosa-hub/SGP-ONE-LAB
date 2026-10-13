@@ -981,3 +981,23 @@ button.primary,.primary-button,.modal-actions .primary,.prod-actions .primary{ba
 
 /* LAB v204 · detalle y actualización de novedades */
 .nov-row{cursor:pointer}.nov-row:hover{background:#f4f8fd!important}.nov-detail-card{width:min(760px,94vw)}.nov-detail-info{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:14px}.nov-detail-info>div{display:grid;gap:3px;padding:9px 10px;border:1px solid #dce5ef;border-radius:9px;background:#f8fafc}.nov-detail-info span{font-size:9px;color:#6b7280;text-transform:uppercase}.nov-detail-info b{font-size:11px;word-break:break-word}@media(max-width:760px){.nov-detail-info{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* LAB v207 · legibilidad del despiece (base para Picking) */
+.piece-modal-card{background:#fff;color:#172033}
+.piece-modal-head{background:#174f86;margin:-20px -20px 12px;padding:14px 16px;border-radius:16px 16px 0 0;color:#fff}
+.piece-modal-head .eyebrow,.piece-modal-head h2{color:#fff!important}
+.piece-modal-head>button{background:#fff;color:#173f69;border:1px solid #c9d9e8;border-radius:8px;font-weight:800}
+.piece-modal-meta{color:#334155;font-weight:600}
+.piece-modal-meta strong{color:#173f69}
+.piece-view-tabs button{background:#fff;color:#25364d;border:1px solid #aebed0;border-radius:7px}
+.piece-view-tabs button.active{background:#e8f1ff;color:#0d47a1;border-color:#4f7fe8;box-shadow:inset 0 -2px 0 #2563eb}
+.piece-detail-options{background:#f3f7fc;border-color:#cbd8e6;color:#26384f}
+.piece-detail-options strong,.piece-detail-options label{color:#26384f}
+.piece-detail-options span{color:#526b89}
+.piece-modal .table-wrap{border:1px solid #d7e0ea;border-radius:12px;overflow:auto}
+.piece-modal table{background:#fff;color:#253247}
+.piece-modal thead th{background:#eef3f8!important;color:#26384f!important}
+.piece-modal tbody td{color:#334155;border-bottom-color:#e1e7ef}
+.piece-modal tbody td strong{color:#15263c}
+.piece-modal tfoot td{background:#f6f8fb;color:#26384f;font-weight:800}
+.piece-modal th button[data-piece-move]{background:#fff;color:#24415f;border:1px solid #9fb0c2;border-radius:5px}
