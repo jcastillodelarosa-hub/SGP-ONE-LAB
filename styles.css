@@ -978,3 +978,6 @@ button.primary,.primary-button,.modal-actions .primary,.prod-actions .primary{ba
 
 /* LAB v203 · vista consolidada de novedades */
 .novelty-table-wrap{margin-top:12px}.novelty-table-wrap td{vertical-align:top}.novelty-table-wrap td small{display:block;margin-top:3px;color:#718096;font-size:9px}.nov-attention{background:#fff7e8!important}.nov-attention td:first-child{border-left:4px solid #e49a16}.nov-state{display:inline-block;padding:4px 7px;border-radius:999px;font-size:8px;font-weight:900;white-space:nowrap}.nov-state.pending,.nov-ref-pending{background:#fff0cf;color:#965b00}.nov-state.reported{background:#e7f7ed;color:#17713a}.nov-kpi-attention{background:#fff8e7!important;border-color:#f1d28b!important}.nov-kpi-attention b{color:#a86600!important}
+
+/* LAB v204 · detalle y actualización de novedades */
+.nov-row{cursor:pointer}.nov-row:hover{background:#f4f8fd!important}.nov-detail-card{width:min(760px,94vw)}.nov-detail-info{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:14px}.nov-detail-info>div{display:grid;gap:3px;padding:9px 10px;border:1px solid #dce5ef;border-radius:9px;background:#f8fafc}.nov-detail-info span{font-size:9px;color:#6b7280;text-transform:uppercase}.nov-detail-info b{font-size:11px;word-break:break-word}@media(max-width:760px){.nov-detail-info{grid-template-columns:repeat(2,minmax(0,1fr))}}
