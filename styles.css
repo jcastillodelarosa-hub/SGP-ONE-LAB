@@ -1032,3 +1032,10 @@ button.primary,.primary-button,.modal-actions .primary,.prod-actions .primary{ba
 .prod-carry-done{background:#f1fbf4!important;border-left:4px solid #258319!important}
 .prod-carry-done .prod-job-id>span{color:#19733a!important;font-weight:800}
 .prod-prev-title span{font-weight:700}
+
+/* LAB v213 · Picking: misma paleta real de Producción + parte legible */
+.pick-card .prod-state.state-programada{background:#f3e81b!important;color:#202020!important;border-color:#d9cf16!important}
+.pick-card .prod-state.state-corte{background:#0758a9!important;color:#fff!important;border-color:#0758a9!important}
+.pick-card .prod-state.state-mecanizado{background:#258319!important;color:#fff!important;border-color:#258319!important}
+.pick-card .prod-state.state-procesado{background:#df4ce7!important;color:#fff!important;border-color:#df4ce7!important}
+.pick-res>span{font-size:11px!important;line-height:1.35}.pick-res>span strong{font-size:11px!important}.pick-product>b{font-size:13px!important}.pick-product>span{font-size:11px!important}
