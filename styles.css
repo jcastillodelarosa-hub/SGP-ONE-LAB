@@ -934,3 +934,12 @@ button.primary,.primary-button,.modal-actions .primary,.prod-actions .primary{ba
 
 /* Per-order production controls */
 .prod-order-followup{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:end;padding-top:8px}.prod-order-followup textarea{width:100%;min-height:58px;resize:vertical;border:1px solid #c9d8e8;border-radius:10px;padding:10px 12px;font:inherit;background:#fff;color:#17243a}.prod-order-followup>div{display:flex;gap:8px;flex-wrap:wrap}.prod-order-followup button{min-height:40px;border-radius:9px;padding:8px 14px;font-weight:700;border:1px solid #bfd0e3;background:#fff;color:#18324f}.prod-order-followup button.primary{background:#1473e6;color:#fff;border-color:#1473e6}@media(max-width:700px){.prod-order-followup{grid-template-columns:1fr}.prod-order-followup>div{display:grid;grid-template-columns:1fr 1fr}.prod-order-followup button{width:100%}}
+
+/* Mobile novelty modal scroll fix */
+#prodNoveltyModal{position:fixed!important;inset:0!important;z-index:12000!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:16px!important;overflow:hidden!important;background:rgba(15,23,42,.68)!important}
+#prodNoveltyModal[hidden]{display:none!important}
+#prodNoveltyModal .prod-novelty-card{width:min(720px,96vw)!important;max-height:calc(100dvh - 32px)!important;display:flex!important;flex-direction:column!important;overflow:hidden!important;margin:0!important}
+#prodNoveltyModal .modal-header{flex:0 0 auto!important}
+#prodNoveltyModal .rec-form{flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding-bottom:28px!important}
+#prodNoveltyModal .modal-actions{flex:0 0 auto!important;position:relative!important;z-index:2!important;background:#fff!important;border-top:1px solid #dbe4f0!important}
+@media(max-width:700px){#prodNoveltyModal{padding:8px!important;align-items:stretch!important}#prodNoveltyModal .prod-novelty-card{width:100%!important;max-height:calc(100dvh - 16px)!important;height:calc(100dvh - 16px)!important;border-radius:14px!important}#prodNoveltyModal .rec-form{padding:16px!important;padding-bottom:32px!important}#prodNoveltyModal .modal-actions{display:grid!important;grid-template-columns:1fr 1.25fr!important;gap:10px!important;padding:12px 14px calc(12px + env(safe-area-inset-bottom))!important}#prodNoveltyModal .modal-actions button{width:100%!important;min-height:46px!important}}
