@@ -237,9 +237,10 @@ async function requestCredentialAccess() {
     saveAppToken(data.token);
     els.authPassword.value = "";
     await refreshAuthStatus(); await loadGeneralConfig();
-  } catch {
+  } catch (error) {
+    console.error("Error de inicio de sesión SGP:", error);
     els.authPassword.value = "";
-    els.authStatus.textContent = "Usuario o contraseña incorrectos.";
+    els.authStatus.textContent = error?.message ? "Error de acceso: " + error.message : "No se pudo validar el acceso.";
   } finally { els.authLogin.disabled = false; }
 }
 async function logout() {
@@ -894,14 +895,16 @@ els.queryHead?.addEventListener("change",e=>{if(e.target.matches("[data-filter]"
 
 els.commit.addEventListener("click", commitProgramming);
 
-refreshWeeklyTabs();
-openView("mecanizado");
-renderMecanizado();
-
 els.authLogin.addEventListener("click", requestCredentialAccess);
 els.authPassword?.addEventListener("keydown",e=>{if(e.key==="Enter")requestCredentialAccess()});
 els.authLogout.addEventListener("click", logout);
 refreshAuthStatus();
+
+refreshWeeklyTabs();
+try { openView("mecanizado"); renderMecanizado(); }
+catch (error) { console.error("Error al iniciar Módulo de Mecanizado:", error); }
+
+
 
 async function previewNcAluminum(){
  const file=document.querySelector("#ncAlFile")?.files?.[0], status=document.querySelector("#ncAlStatus"), btn=document.querySelector("#applyNcAl");
