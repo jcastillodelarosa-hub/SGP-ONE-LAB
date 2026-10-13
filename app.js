@@ -843,7 +843,7 @@ async function commitProgramming() {
     refreshWeeklyPackageGate();
   }
 }
-els.nav.forEach(button => button.addEventListener("click", () => {openView(button.dataset.view);if(button.dataset.view==='configuracion')loadUserAdmin()}));
+els.nav.forEach(button => button.addEventListener("click", () => {openView(button.dataset.view);if(button.dataset.view==='configuracion')loadUserAdmin();if(button.dataset.view==='picking')loadPicking()}));
 window.addEventListener("error", event => {
   console.error("SGP ONE:", event.error || event.message);
 });
