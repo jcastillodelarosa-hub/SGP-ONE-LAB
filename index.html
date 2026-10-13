@@ -19,7 +19,7 @@
       <nav class="nav">
         <button data-view="inicio">Inicio</button>
         <button class="active" data-view="mecanizado">Módulo de Mecanizado</button>
-        <button data-view="programacion">Programación semanal</button>
+        <button data-view="picking">Picking</button><button data-view="programacion">Programación semanal</button>
         <button data-view="ensamble">Ensamble</button>
 <button data-view="nc-aluminio">NC Aluminio</button>
         <button data-view="nc-vidrio">NC Vidrio</button>
@@ -53,7 +53,7 @@
       </header>
 
       <main>
-        <section class="view placeholder-view" data-view-panel="inicio" hidden>
+        <section class="view" data-view-panel="picking" hidden><div class="page-heading"><span class="eyebrow">OPERACIÓN</span><h2>Picking · Entrega de Producciones</h2><p>Preparación, entrega y validación de producciones hacia Línea.</p></div><div class="pick-toolbar"><input id="pickSearch" type="search" placeholder="Buscar reserva u orden"><select id="pickState"><option value="">Todos los estados</option><option>PROCESADO</option><option>MECANIZADO</option><option>CORTE</option><option>PROGRAMADA</option></select><button id="pickRefresh">Actualizar</button></div><div id="pickSummary" class="prod-summary"></div><div id="pickBoard" class="pick-board"><div class="empty-state">Cargando cola de Picking…</div></div></section><section class="view placeholder-view" data-view-panel="inicio" hidden>
           <div class="page-heading">
             <span class="eyebrow">Inicio</span>
             <h2>Panel general</h2>
