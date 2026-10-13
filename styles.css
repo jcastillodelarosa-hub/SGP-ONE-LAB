@@ -1027,3 +1027,8 @@ button.primary,.primary-button,.modal-actions .primary,.prod-actions .primary{ba
 .pick-card .state-corte{background:#0758a9!important;color:#fff!important;border-color:#0758a9!important}
 .pick-card .state-mecanizado{background:#258319!important;color:#fff!important;border-color:#258319!important}
 .pick-card .state-procesado{background:#df4ce7!important;color:#fff!important;border-color:#df4ce7!important}
+
+/* LAB v212 · trazabilidad del arrastre */
+.prod-carry-done{background:#f1fbf4!important;border-left:4px solid #258319!important}
+.prod-carry-done .prod-job-id>span{color:#19733a!important;font-weight:800}
+.prod-prev-title span{font-weight:700}
