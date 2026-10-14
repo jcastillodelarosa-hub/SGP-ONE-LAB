@@ -1107,3 +1107,6 @@ button.primary,.primary-button,.modal-actions .primary,.prod-actions .primary{ba
 .toolbar>button:active,.prod-filters>button:active,.pick-toolbar>button:active,.nc-toolbar>button:active,button[data-receive]:active{transform:translateY(1px)}
 button[data-receive]{background:#1763ad;color:#fff;border-color:#1763ad;min-height:28px;padding:5px 11px}
 button[data-receive]:hover{background:#104f8d;color:#fff}
+
+/* Programming day header navigation */
+.prog-day-title{display:grid;gap:4px}.prog-day-date-nav{display:flex!important;align-items:center;gap:7px}.prog-day-date-nav button{width:34px;height:34px;border:1px solid rgba(255,255,255,.35);border-radius:8px;background:rgba(255,255,255,.12);color:#fff;font-size:22px;font-weight:800;cursor:pointer}.prog-day-date-nav button:hover{background:rgba(255,255,255,.22)}.prog-day-date-nav input[type="date"]{height:34px;padding:0 9px;border:1px solid rgba(255,255,255,.35);border-radius:8px;background:#fff;color:#153253;font:inherit;font-weight:800;cursor:pointer}.prog-day-date-nav input[type="date"]::-webkit-calendar-picker-indicator{cursor:pointer}.prog-day-head .prog-day-title>span{color:#dbeafe}@media(max-width:620px){.prog-day-head{align-items:flex-start;gap:10px}.prog-day-date-nav{gap:4px}.prog-day-date-nav input[type="date"]{max-width:145px;padding:0 5px}.prog-report-actions{gap:4px}}
