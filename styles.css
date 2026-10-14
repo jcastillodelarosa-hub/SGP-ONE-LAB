@@ -1100,3 +1100,10 @@ button.primary,.primary-button,.modal-actions .primary,.prod-actions .primary{ba
 .modal-header>.modal-close{position:absolute!important;right:14px!important;left:auto!important;top:50%!important;transform:translateY(-50%)!important;margin:0!important}
 #novDetailModal .modal-header,#prodNoveltyModal .modal-header{padding-right:58px!important}
 .prog-day-actions{display:flex;justify-content:flex-end;padding:10px 14px 12px;border-top:1px solid #e1e8f0}.prog-day-actions [data-day-reprogram]{appearance:none;border:1px solid #1c64ad;background:#1763ad;color:#fff;border-radius:8px;padding:8px 13px;font-weight:800;cursor:pointer;box-shadow:0 2px 5px #0f315c22}.prog-day-actions [data-day-reprogram]:hover{background:#104f8d}
+
+/* LAB v228 - scoped operational action buttons (do not affect sidebar) */
+.toolbar>button,.prod-filters>button,.pick-toolbar>button,.nc-toolbar>button,button[data-receive]{appearance:none;border:1px solid #9eb9d6;background:#f7fbff;color:#0c4f91;border-radius:8px;min-height:34px;padding:7px 14px;font-family:inherit;font-weight:800;line-height:1;cursor:pointer;transition:background .15s,border-color .15s,box-shadow .15s,transform .05s}
+.toolbar>button:hover,.prod-filters>button:hover,.pick-toolbar>button:hover,.nc-toolbar>button:hover,button[data-receive]:hover{background:#e8f2ff;border-color:#5d94c9;box-shadow:0 2px 5px #143a6420}
+.toolbar>button:active,.prod-filters>button:active,.pick-toolbar>button:active,.nc-toolbar>button:active,button[data-receive]:active{transform:translateY(1px)}
+button[data-receive]{background:#1763ad;color:#fff;border-color:#1763ad;min-height:28px;padding:5px 11px}
+button[data-receive]:hover{background:#104f8d;color:#fff}
