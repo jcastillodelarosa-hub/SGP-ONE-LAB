@@ -1100,9 +1100,3 @@ button.primary,.primary-button,.modal-actions .primary,.prod-actions .primary{ba
 .modal-header>.modal-close{position:absolute!important;right:14px!important;left:auto!important;top:50%!important;transform:translateY(-50%)!important;margin:0!important}
 #novDetailModal .modal-header,#prodNoveltyModal .modal-header{padding-right:58px!important}
 .prog-day-actions{display:flex;justify-content:flex-end;padding:10px 14px 12px;border-top:1px solid #e1e8f0}.prog-day-actions [data-day-reprogram]{appearance:none;border:1px solid #1c64ad;background:#1763ad;color:#fff;border-radius:8px;padding:8px 13px;font-weight:800;cursor:pointer;box-shadow:0 2px 5px #0f315c22}.prog-day-actions [data-day-reprogram]:hover{background:#104f8d}
-
-/* LAB v228 unified native controls */
-button:not(.prod-state):not(.status-pill):not(.state-pill){font-family:inherit;border-radius:8px;border:1px solid #b8c9dc;background:#fff;color:#173a61;font-weight:700;min-height:34px;padding:7px 13px;cursor:pointer;transition:background .15s,border-color .15s,box-shadow .15s}
-button:not(.prod-state):not(.status-pill):not(.state-pill):hover{background:#edf5ff;border-color:#7fa9d4}
-button.primary,.primary-button,.modal-actions .primary,[data-day-reprogram],[data-program-reserve]{background:#1763ad!important;color:#fff!important;border-color:#1763ad!important;box-shadow:0 2px 5px #0f315c22}
-button.primary:hover,.primary-button:hover,[data-day-reprogram]:hover,[data-program-reserve]:hover{background:#104f8d!important}
