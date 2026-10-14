@@ -1046,3 +1046,7 @@ button.primary,.primary-button,.modal-actions .primary,.prod-actions .primary{ba
 #pickBoard .pick-card>summary .prod-state.state-mecanizado{background:#258319!important;color:#fff!important;border-color:#258319!important}
 #pickBoard .pick-card>summary .prod-state.state-procesado{background:#df4ce7!important;color:#fff!important;border-color:#df4ce7!important}
 .pick-orders{grid-column:1/-1;padding:9px 0;border-bottom:1px solid #dce6f1}.pick-orders>b{display:block;margin-bottom:6px;color:#173f69}.pick-orders>div{display:flex;flex-wrap:wrap;gap:6px}.pick-orders span{display:inline-flex;gap:7px;align-items:center;padding:5px 8px;border:1px solid #cbd9e8;border-radius:7px;background:#f7faff}.pick-orders span small{color:#64748b}.pick-orders em{color:#64748b}
+
+
+/* LAB v215 · Picking: listado por parte/OP y piezas PANEL */
+.pick-part-actions{grid-column:1/-1;display:flex;justify-content:flex-end}.pick-part-actions button,.pick-order-row button{border:1px solid #9fb6cf;background:#f4f8fc;color:#173f69;border-radius:8px;padding:7px 11px;font-weight:800;cursor:pointer}.pick-order-list{display:grid!important;gap:6px!important}.pick-order-row{display:grid!important;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;padding:7px 9px;border:1px solid #cbd9e8;border-radius:8px;background:#f7faff}.pick-order-row>div{display:flex;align-items:center;gap:8px}.pick-order-row small{color:#64748b}.pick-orders>div.pick-order-list{display:grid;flex-wrap:initial}.pick-orders .pick-order-row{width:auto}
