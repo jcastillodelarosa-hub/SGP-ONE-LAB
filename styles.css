@@ -1200,3 +1200,30 @@ button[data-receive]:hover{background:#104f8d;color:#fff}
 }
 .prog-mini-calendar .mini-cal-grid button{font-size:9px!important}
 @media(max-width:620px){.prog-mini-calendar{width:224px!important}}
+
+
+/* LAB v232 · Prueba de mayor aprovechamiento de escritorio y legibilidad */
+@media(min-width:1200px){
+  .workspace>main{max-width:1680px!important;padding-left:18px!important;padding-right:18px!important}
+  .workspace>main>.view{font-size:1.055rem}
+  .workspace>main>.view .eyebrow{font-size:11.5px}
+  .workspace>main>.view .page-heading h2{font-size:28px}
+  .workspace>main>.view .page-heading p{font-size:15px}
+  .workspace>main>.view button,
+  .workspace>main>.view input,
+  .workspace>main>.view select{font-size:13px}
+  .workspace>main>.view table{font-size:13px}
+  .workspace>main>.view th{font-size:11px}
+  .workspace>main>.view .prog-res summary span,
+  .workspace>main>.view .prog-order span,
+  .workspace>main>.view .pick-card>summary span{font-size:11.5px}
+}
+.prog-mini-calendar{width:286px!important;padding:12px!important}
+.prog-mini-calendar .mini-cal-head{grid-template-columns:30px 1fr 30px!important;margin-bottom:8px!important}
+.prog-mini-calendar .mini-cal-head b{font-size:12px!important}
+.prog-mini-calendar .mini-cal-head button{width:30px!important;height:30px!important;min-width:30px!important;font-size:18px!important}
+.prog-mini-calendar .mini-cal-week span{height:22px!important;font-size:9px!important}
+.prog-mini-calendar .mini-cal-grid button,
+.prog-mini-calendar .mini-cal-grid .empty{height:30px!important;min-height:30px!important}
+.prog-mini-calendar .mini-cal-grid button{font-size:11px!important}
+@media(max-width:620px){.prog-mini-calendar{width:248px!important;padding:9px!important}}
