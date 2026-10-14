@@ -1110,3 +1110,33 @@ button[data-receive]:hover{background:#104f8d;color:#fff}
 
 /* Programming day header navigation */
 .prog-day-title{display:grid;gap:4px}.prog-day-date-nav{display:flex!important;align-items:center;gap:7px}.prog-day-date-nav button{width:34px;height:34px;border:1px solid rgba(255,255,255,.35);border-radius:8px;background:rgba(255,255,255,.12);color:#fff;font-size:22px;font-weight:800;cursor:pointer}.prog-day-date-nav button:hover{background:rgba(255,255,255,.22)}.prog-day-date-nav input[type="date"]{height:34px;padding:0 9px;border:1px solid rgba(255,255,255,.35);border-radius:8px;background:#fff;color:#153253;font:inherit;font-weight:800;cursor:pointer}.prog-day-date-nav input[type="date"]::-webkit-calendar-picker-indicator{cursor:pointer}.prog-day-head .prog-day-title>span{color:#dbeafe}@media(max-width:620px){.prog-day-head{align-items:flex-start;gap:10px}.prog-day-date-nav{gap:4px}.prog-day-date-nav input[type="date"]{max-width:145px;padding:0 5px}.prog-report-actions{gap:4px}}
+
+
+/* LAB v229 · Programación diaria: posición estable, calendario compacto y reprogramación */
+#progDayModal.prog-day-overlay{align-items:flex-start!important;overflow:hidden!important;padding-top:10px!important}
+#progDayModal .prog-day-card{margin:0 auto!important;max-height:calc(100dvh - 20px)!important}
+#progDayModal .prog-day-head{position:relative;overflow:visible!important}
+#progDayModal .prog-day-title{position:relative}
+.prog-day-date-nav{position:relative}
+.prog-day-date-button{height:34px!important;min-width:145px!important;padding:0 9px!important;border:1px solid rgba(255,255,255,.35)!important;border-radius:8px!important;background:#fff!important;color:#153253!important;font-size:14px!important;font-weight:800!important;display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important}
+.prog-day-date-button:hover{background:#f8fbff!important;color:#153253!important}
+.prog-cal-icon{font-size:15px;color:#153253!important}
+.prog-mini-calendar{position:absolute;z-index:10080;left:41px;top:39px;width:220px;padding:10px;background:#0f4b80;color:#fff;border:1px solid rgba(255,255,255,.28);border-radius:10px;box-shadow:0 12px 28px rgba(2,6,23,.35)}
+.prog-mini-calendar[hidden]{display:none!important}
+.mini-cal-head{display:grid;grid-template-columns:28px 1fr 28px;align-items:center;gap:4px;margin-bottom:8px}
+.mini-cal-head b{text-align:center;font-size:12px;letter-spacing:.3px;color:#fff}
+.mini-cal-head button{width:28px!important;height:28px!important;padding:0!important;border:0!important;background:rgba(255,255,255,.1)!important;color:#fff!important;border-radius:6px!important;font-size:18px!important}
+.mini-cal-week,.mini-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.mini-cal-week span{text-align:center;font-size:9px;font-weight:800;color:#cfe1f6;padding:2px 0}
+.mini-cal-grid button,.mini-cal-grid .empty{height:25px}
+.mini-cal-grid button{border:0!important;background:transparent!important;color:#fff!important;border-radius:5px!important;font-size:10px!important;font-weight:700!important;padding:0!important}
+.mini-cal-grid button:hover{background:rgba(255,255,255,.18)!important}
+.mini-cal-grid button.selected{background:#fff!important;color:#174f87!important}
+#mecReprogramModal{z-index:10150!important}
+#mecReprogramModal[hidden]{display:none!important}
+@media(max-width:620px){
+ #progDayModal.prog-day-overlay{padding:4px!important;align-items:flex-start!important}
+ #progDayModal .prog-day-card{max-height:calc(100dvh - 8px)!important}
+ .prog-mini-calendar{left:0;top:39px;width:210px}
+ .prog-day-date-button{min-width:132px!important}
+}
