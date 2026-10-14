@@ -48,12 +48,12 @@
           <input id="authPassword" type="password" placeholder="Contraseña" autocomplete="current-password" />
           <button id="authLogin">Ingresar</button>
           <button id="authLogout" hidden>Cerrar sesión</button>
-          <span class="status">LAB v234</span>
+          <span class="status">LAB v235</span>
         </div>
       </header>
 
       <main>
-        <section class="view" data-view-panel="picking" hidden><div class="page-heading"><span class="eyebrow">OPERACIÓN</span><h2>Picking · Entrega de Producciones</h2><p>Preparación, entrega y validación de producciones hacia Línea.</p></div><div class="pick-toolbar"><input id="pickSearch" type="search" placeholder="Buscar reserva u orden"><select id="pickWeek"><option value="">Todas las semanas</option></select><select id="pickState"><option value="">Todos los estados</option><option>PROCESADO</option><option>MECANIZADO</option><option>CORTE</option><option>PROGRAMADA</option></select><button id="pickRefresh">Actualizar</button></div><div id="pickSummary" class="prod-summary"></div><div id="pickBoard" class="pick-board"><div class="empty-state">Cargando cola de Picking…</div></div></section><section class="view placeholder-view" data-view-panel="inicio" hidden>
+        <section class="view" data-view-panel="picking" hidden><div class="page-heading"><span class="eyebrow">OPERACIÓN</span><h2>Picking · Entrega de Producciones</h2><p>Preparación, entrega y validación de producciones hacia Línea.</p></div><div class="pick-toolbar"><input id="pickSearch" type="search" placeholder="Buscar reserva u orden"><select id="pickWeek"><option value="">Todas las semanas</option></select><select id="pickState"><option value="">Todos los estados</option><option>PROCESADO</option><option>MECANIZADO</option><option>CORTE</option><option>PROGRAMADA</option></select><button id="pickRefresh">Actualizar</button></div><div id="pickSummary" class="prod-summary"></div><section id="pickOpenDeliveries" class="pick-open-section"><div class="pick-open-title"><div><h3>Partidas abiertas de entrega</h3><p>Reservas o partes con entregas iniciadas que todavía tienen producciones pendientes.</p></div><span id="pickOpenCount" class="pick-open-count">0</span></div><div id="pickOpenBoard"><div class="empty-state">Sin partidas abiertas de entrega.</div></div></section><div id="pickBoard" class="pick-board"><div class="empty-state">Cargando cola de Picking…</div></div></section><section class="view placeholder-view" data-view-panel="inicio" hidden>
           <div class="page-heading">
             <span class="eyebrow">Inicio</span>
             <h2>Panel general</h2>
