@@ -1080,3 +1080,11 @@ button.primary,.primary-button,.modal-actions .primary,.prod-actions .primary{ba
 
 /* LAB v227 · vínculo NC */
 .nc-linked{display:inline-flex;align-items:center;padding:4px 7px;border-radius:999px;background:#dcfce7;color:#15803d;border:1px solid #86efac;font-size:11px;font-weight:900;white-space:nowrap}.nc-unlinked{display:inline-flex;padding:4px 7px;border-radius:999px;background:#f1f5f9;color:#64748b;border:1px solid #cbd5e1;font-size:11px;font-weight:800;white-space:nowrap}.nc-status{display:inline-flex;padding:4px 7px;border-radius:6px;font-weight:800;white-space:nowrap;background:#eef2ff;color:#334155}.nc-status.nc-finalizada{background:#dcfce7;color:#15803d}.nc-status.nc-consultada{background:#fff7ed;color:#b45309}
+
+#mecReprogramModal{position:fixed;inset:0;z-index:10020;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(12,30,55,.68);overflow-y:auto}
+#mecReprogramModal[hidden]{display:none!important}
+.mec-reprogram-card{background:white;color:#153253;width:min(100%,480px);max-height:calc(100vh - 36px);overflow-y:auto;border-radius:16px;padding:24px;box-shadow:0 16px 48px #0003}
+.mec-reprogram-card h3{margin:0 0 10px}.mec-reprogram-card p{font-size:13px;color:#53657d;line-height:1.5}
+.mec-reprogram-card label{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700;margin:12px 0}
+.mec-reprogram-card input,.mec-reprogram-card select,.mec-reprogram-card textarea{width:100%;padding:10px;border:1px solid #c9d7e7;border-radius:8px;font:inherit;background:white;color:#153253}
+.mec-reprogram-actions{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;margin-top:16px}.mec-reprogram-actions button{padding:10px 14px;border-radius:8px;border:1px solid #aebfd3;cursor:pointer}.mec-reprogram-actions .primary{background:#18518c;color:white;border-color:#18518c}
