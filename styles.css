@@ -1227,3 +1227,18 @@ button[data-receive]:hover{background:#104f8d;color:#fff}
 .prog-mini-calendar .mini-cal-grid .empty{height:30px!important;min-height:30px!important}
 .prog-mini-calendar .mini-cal-grid button{font-size:11px!important}
 @media(max-width:620px){.prog-mini-calendar{width:248px!important;padding:9px!important}}
+
+/* LAB v233 · Tamaño de visualización configurable por usuario/dispositivo */
+:root{--sgp-ui-scale:1}
+.workspace>main>.view{zoom:var(--sgp-ui-scale)}
+@supports not (zoom:1){.workspace>main>.view{transform:scale(var(--sgp-ui-scale));transform-origin:top left;width:calc(100% / var(--sgp-ui-scale))}}
+.ui-scale-config{margin-top:16px}
+.ui-scale-options{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;padding:16px 18px 8px}
+.ui-scale-options button{appearance:none;border:1px solid #c7d5e5;border-radius:10px;background:#fff;color:#173f69;padding:12px 10px;font:inherit;font-weight:800;cursor:pointer;display:grid;gap:3px}
+.ui-scale-options button small{font-size:10px;color:#64748b}
+.ui-scale-options button:hover{background:#eef6ff;border-color:#77a5d5}
+.ui-scale-options button.active{background:#1769d2;color:#fff;border-color:#1769d2;box-shadow:0 3px 9px rgba(23,105,210,.2)}
+.ui-scale-options button.active small{color:#e7f1ff}
+.ui-scale-preview{margin:4px 18px 16px;padding:12px 14px;border:1px solid #dbe4ef;border-radius:10px;background:#f8fafc;display:grid;gap:4px}
+.ui-scale-preview span,.ui-scale-preview small{color:#64748b;font-size:11px}
+@media(max-width:760px){.ui-scale-options{grid-template-columns:1fr 1fr}}
