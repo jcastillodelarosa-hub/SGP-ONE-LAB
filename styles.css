@@ -1056,3 +1056,6 @@ button.primary,.primary-button,.modal-actions .primary,.prod-actions .primary{ba
 
 /* LAB v218 · encabezados órdenes Picking */
 .pick-order-head{display:grid;grid-template-columns:minmax(260px,2fr) 80px minmax(220px,2fr) 90px auto auto;gap:10px;align-items:center;padding:7px 9px;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.03em;color:#52677e;background:#eaf1f8;border:1px solid #cbd9e8;border-radius:8px}.pick-order-head span:nth-child(2),.pick-order-head span:nth-child(4),.pick-order-head span:nth-child(5),.pick-order-head span:nth-child(6){text-align:center}@media(max-width:800px){.pick-order-head{display:none}}
+
+/* LAB v219 · flujo entrega Picking */
+.pick-delivery-card{width:min(1100px,96vw);max-height:92vh;overflow:auto}.pick-complete-question{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px;border:1px solid #cbd9e8;border-radius:10px;background:#f7faff}.pick-complete-question>div{display:flex;gap:8px}.pick-complete-question button.active{background:#1769d2;color:#fff;border-color:#1769d2}.pick-delivery-help{margin:12px 0 8px;color:#52677e}.pick-missing-qty{width:85px}.pick-delivery-card table td,.pick-delivery-card table th{white-space:nowrap}
