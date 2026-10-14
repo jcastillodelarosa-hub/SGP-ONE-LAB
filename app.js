@@ -1283,3 +1283,18 @@ document.querySelector('#prodNoveltyOrigin')?.addEventListener('change',e=>{cons
 document.querySelector('#prodNoveltySave')?.addEventListener('click',async()=>{const o=document.querySelector('#prodNoveltyOrigin').value,t=document.querySelector('#prodNoveltyType').value,ref=document.querySelector('#prodNoveltyRef').value.trim();if(!o||!t)return alert('Selecciona origen y tipo de novedad.');if((o==='MECANIZADO_PERSONAL'||o==='MECANIZADO_MAQUINA'||o==='INGENIERIA'||o==='CALIDAD')&&!ref)return alert('Debes suministrar '+(o==='MECANIZADO_MAQUINA'?'el ticket de mantenimiento':o==='MECANIZADO_PERSONAL'?'el número de NC':'el número de novedad')+'.');const payload={id_programacion:prodNoveltyTarget,produccion:prodNoveltyProduction||null,origen:o,tipo:t,perfil:document.querySelector('#prodNoveltyProfile').value,longitud:Number(document.querySelector('#prodNoveltyLength').value)||null,cantidad:Number(document.querySelector('#prodNoveltyQty').value)||null,cortes_afectados:document.querySelector('#prodNoveltyCuts').value,observacion:document.querySelector('#prodNoveltyObs').value,usuario:currentAuth?.usuario||'',estado:ref?'REPORTADA':'PENDIENTE_RESOLVER'};if(o==='MECANIZADO_MAQUINA')payload.ticket_mtto=ref;else if(['INGENIERIA','CALIDAD'].includes(o))payload.numero_novedad=ref;else payload.numero_nc=ref;try{const db=await getSupabaseClient(),{error}=await db.from('sgp_mecanizado_novedades').insert(payload);if(error)throw error;const perfil=payload.perfil?.trim(),qty=Number(payload.cantidad||0);if(perfil&&qty>0){const ap=await db.rpc('sgp_aluminio_pendiente_crear',{p_token:getAppToken(),p_reserva:(prodRows.find(x=>x.id_programacion===prodNoveltyTarget)||{}).reserva||null,p_produccion:prodNoveltyProduction||null,p_perfil:perfil,p_cantidad:qty,p_longitud:payload.longitud,p_origen:'PRODUCCION',p_causa:o+' · '+t,p_observacion:payload.observacion||null});if(ap.error)console.error('No se pudo crear pendiente de aluminio',ap.error)}document.querySelector('#prodNoveltyModal').hidden=true;await loadProductionBoard()}catch(e){alert('No fue posible guardar la novedad: '+e.message)}});
 document.querySelector('#prodRefresh')?.addEventListener('click',loadProductionBoard);document.querySelector('#prodNoveltyClose')?.addEventListener('click',()=>document.querySelector('#prodNoveltyModal').hidden=true);document.querySelector('#prodNoveltyCancel')?.addEventListener('click',()=>document.querySelector('#prodNoveltyModal').hidden=true);
 if(document.querySelector('#prodDate'))document.querySelector('#prodDate').value=new Date().toISOString().slice(0,10);
+
+// UI scale preference v233
+const UI_SCALE_KEY='sgp_ui_scale';
+function applyUiScale(value){
+ const allowed=['0.90','1','1.10','1.20'];
+ const scale=allowed.includes(String(value))?String(value):'1';
+ document.documentElement.style.setProperty('--sgp-ui-scale',scale);
+ document.documentElement.dataset.uiScale=scale;
+ document.querySelectorAll('[data-ui-scale]').forEach(b=>b.classList.toggle('active',b.dataset.uiScale===scale));
+}
+applyUiScale(localStorage.getItem(UI_SCALE_KEY)||'1');
+document.querySelectorAll('[data-ui-scale]').forEach(b=>b.addEventListener('click',()=>{
+ localStorage.setItem(UI_SCALE_KEY,b.dataset.uiScale);
+ applyUiScale(b.dataset.uiScale);
+}));
