@@ -1094,3 +1094,9 @@ button.primary,.primary-button,.modal-actions .primary,.prod-actions .primary{ba
 /* LAB v228: contraste consistente en encabezados azules de ventanas y modales */
 .piece-modal-head,.modal-head,.nc-modal-head,.prod-modal-head,.mec-modal-head,.daily-modal-head,[class*="modal"] [class*="head"]{color:#fff}
 .piece-modal-head h1,.piece-modal-head h2,.piece-modal-head h3,.piece-modal-head p,.piece-modal-head span,.piece-modal-head small,.modal-head h1,.modal-head h2,.modal-head h3,.modal-head p,.modal-head span,.modal-head small,.nc-modal-head h1,.nc-modal-head h2,.nc-modal-head h3,.nc-modal-head p,.nc-modal-head span,.nc-modal-head small,[class*="modal"] [class*="head"] h1,[class*="modal"] [class*="head"] h2,[class*="modal"] [class*="head"] h3,[class*="modal"] [class*="head"] p,[class*="modal"] [class*="head"] span,[class*="modal"] [class*="head"] small{color:#fff!important}
+
+/* LAB v228 modal header alignment + reprogram action */
+.modal-header{position:relative!important;display:flex!important;align-items:center!important;justify-content:space-between!important;padding-right:58px!important}
+.modal-header>.modal-close{position:absolute!important;right:14px!important;left:auto!important;top:50%!important;transform:translateY(-50%)!important;margin:0!important}
+#novDetailModal .modal-header,#prodNoveltyModal .modal-header{padding-right:58px!important}
+.prog-day-actions{display:flex;justify-content:flex-end;padding:10px 14px 12px;border-top:1px solid #e1e8f0}.prog-day-actions [data-day-reprogram]{appearance:none;border:1px solid #1c64ad;background:#1763ad;color:#fff;border-radius:8px;padding:8px 13px;font-weight:800;cursor:pointer;box-shadow:0 2px 5px #0f315c22}.prog-day-actions [data-day-reprogram]:hover{background:#104f8d}
