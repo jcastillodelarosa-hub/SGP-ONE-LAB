@@ -1161,3 +1161,42 @@ button[data-receive]:hover{background:#104f8d;color:#fff}
  .prog-day-date-button{width:120px!important;min-width:120px!important}
  .prog-mini-calendar{left:34px!important;top:36px!important;width:190px!important}
 }
+
+
+/* LAB v231 · Calendario 7 columnas reales */
+.prog-mini-calendar{width:238px!important;padding:9px!important;box-sizing:border-box!important}
+.prog-mini-calendar .mini-cal-week,
+.prog-mini-calendar .mini-cal-grid{
+  display:grid!important;
+  grid-template-columns:repeat(7,minmax(0,1fr))!important;
+  grid-auto-flow:row!important;
+  width:100%!important;
+  gap:2px!important;
+  box-sizing:border-box!important;
+}
+.prog-mini-calendar .mini-cal-week span,
+.prog-mini-calendar .mini-cal-grid button,
+.prog-mini-calendar .mini-cal-grid .empty{
+  width:auto!important;
+  min-width:0!important;
+  max-width:none!important;
+  margin:0!important;
+  box-sizing:border-box!important;
+}
+.prog-mini-calendar .mini-cal-week span{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  height:18px!important;
+  font-size:8px!important;
+}
+.prog-mini-calendar .mini-cal-grid button,
+.prog-mini-calendar .mini-cal-grid .empty{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  height:25px!important;
+  min-height:25px!important;
+}
+.prog-mini-calendar .mini-cal-grid button{font-size:9px!important}
+@media(max-width:620px){.prog-mini-calendar{width:224px!important}}
