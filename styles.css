@@ -1140,3 +1140,24 @@ button[data-receive]:hover{background:#104f8d;color:#fff}
  .prog-mini-calendar{left:0;top:39px;width:210px}
  .prog-day-date-button{min-width:132px!important}
 }
+
+
+/* LAB v230 · Ajuste visual del selector de fecha del modal diario */
+.prog-day-date-nav{display:grid!important;grid-template-columns:32px 128px 32px!important;gap:6px!important;align-items:center!important;width:max-content!important}
+.prog-day-date-nav>button[data-day-prev],.prog-day-date-nav>button[data-day-next]{width:32px!important;height:32px!important;min-width:32px!important;padding:0!important;display:grid!important;place-items:center!important;font-size:20px!important;line-height:1!important}
+.prog-day-date-button{width:128px!important;min-width:128px!important;height:32px!important;padding:0 9px!important;font-size:12px!important;line-height:1!important;white-space:nowrap!important}
+.prog-day-date-button [data-day-date-label]{color:#153253!important;font-size:12px!important;font-weight:800!important}
+.prog-day-date-button .prog-cal-icon{color:#153253!important;font-size:12px!important}
+.prog-mini-calendar{left:38px!important;top:38px!important;width:196px!important;padding:8px!important;border-radius:9px!important;background:#0f4b80!important}
+.mini-cal-head{grid-template-columns:25px 1fr 25px!important;margin-bottom:5px!important}
+.mini-cal-head b{font-size:10px!important;white-space:nowrap!important}
+.mini-cal-head button{width:25px!important;height:25px!important;min-width:25px!important;font-size:16px!important}
+.mini-cal-week,.mini-cal-grid{gap:1px!important}
+.mini-cal-week span{font-size:7px!important;padding:2px 0!important}
+.mini-cal-grid button,.mini-cal-grid .empty{height:22px!important;min-height:22px!important}
+.mini-cal-grid button{font-size:9px!important}
+@media(max-width:620px){
+ .prog-day-date-nav{grid-template-columns:30px 120px 30px!important;gap:4px!important}
+ .prog-day-date-button{width:120px!important;min-width:120px!important}
+ .prog-mini-calendar{left:34px!important;top:36px!important;width:190px!important}
+}
