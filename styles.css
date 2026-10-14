@@ -1242,3 +1242,8 @@ button[data-receive]:hover{background:#104f8d;color:#fff}
 .ui-scale-preview{margin:4px 18px 16px;padding:12px 14px;border:1px solid #dbe4ef;border-radius:10px;background:#f8fafc;display:grid;gap:4px}
 .ui-scale-preview span,.ui-scale-preview small{color:#64748b;font-size:11px}
 @media(max-width:760px){.ui-scale-options{grid-template-columns:1fr 1fr}}
+
+/* LAB v234 · Picking: visibilidad de entregas parciales */
+.pick-card.pick-partial-delivery{border:2px solid #e8a317;box-shadow:0 0 0 3px rgba(232,163,23,.08)}
+.pick-delivery-alert{display:inline-flex;width:max-content;margin-top:5px;padding:4px 8px;border-radius:999px;background:#fff3cd;color:#8a5300;border:1px solid #f0c36a;font-size:10px;font-weight:900;letter-spacing:.02em}
+.pick-order-name small{display:block;margin-top:3px;color:#64748b;font-size:10px;font-weight:600}
