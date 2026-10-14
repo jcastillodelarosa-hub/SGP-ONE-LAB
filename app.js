@@ -210,7 +210,12 @@ async function refreshAuthStatus() {
     }
     const client = await getSupabaseClient();
     const { data, error } = await client.rpc("sgp_sesion_actual", { p_token: token });
-    if (error) {\n      console.warn("Error temporal validando sesión SGP:", error);\n      els.authStatus.textContent = "Reintentando sesión…";\n      return null;\n    }\n    if (!data?.valida) {
+    if (error) {
+      console.warn("Error temporal validando sesión SGP:", error);
+      els.authStatus.textContent = "Reintentando sesión…";
+      return null;
+    }
+    if (!data?.valida) {
       clearAppToken();
       els.authStatus.textContent = "Sesión vencida";
       els.authUser.hidden = false; els.authPassword.hidden = false; els.authLogin.hidden = false; els.authLogout.hidden = true;
