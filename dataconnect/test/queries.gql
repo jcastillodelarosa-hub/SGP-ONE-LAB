@@ -1,0 +1,7 @@
+query ConnectivityTestRead @auth(level: PUBLIC, insecureReason: "Temporary read-only connectivity diagnostic containing no sensitive data.") {
+  connectivityTests {
+    id
+    message
+    createdAt
+  }
+}
