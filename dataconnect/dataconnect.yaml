@@ -1,0 +1,13 @@
+specVersion: "v1beta"
+serviceId: sgp-one-test-service
+location: us-east4
+schema:
+  source: ./schema
+  datasource:
+    postgresql:
+      database: sgp-one-connect-test
+      cloudSql:
+        instanceId: sgp-one-lab-test
+        schemaValidation: COMPATIBLE
+connectorDirs:
+  - ./test
