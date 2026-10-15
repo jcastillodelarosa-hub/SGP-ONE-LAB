@@ -1258,3 +1258,6 @@ button[data-receive]:hover{background:#104f8d;color:#fff}
 
 /* Picking · faltantes contraíbles */
 .pick-missing-card-head{display:flex;align-items:center;gap:10px}.pick-missing-card-head .pick-missing-summary{flex:1;color:#52647a;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pick-missing-toggle{border:1px solid #b9cbe0;background:#fff;border-radius:7px;padding:4px 8px;font-size:10px;font-weight:800;color:#174a7e;cursor:pointer}.pick-missing-card.pick-missing-collapsed .pick-missing-body{display:none}.pick-missing-card.pick-missing-collapsed .pick-missing-summary{display:block}.pick-missing-card:not(.pick-missing-collapsed) .pick-missing-summary{display:none}
+
+/* Picking · resumen visible de faltante contraído */
+.pick-missing-card.pick-missing-collapsed .pick-missing-card-head{display:grid;grid-template-columns:auto 1fr auto auto;align-items:center}.pick-missing-card.pick-missing-collapsed .pick-missing-summary{display:block!important;visibility:visible!important;opacity:1!important;color:#24415f!important;font-size:11px!important;font-weight:600;white-space:normal;overflow:visible;text-overflow:clip}.pick-missing-card.pick-missing-collapsed .pick-missing-card-head>b{color:#17324d!important}.pick-missing-card.pick-missing-collapsed{padding-top:8px;padding-bottom:8px}
