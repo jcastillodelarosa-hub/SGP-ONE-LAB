@@ -1261,3 +1261,6 @@ button[data-receive]:hover{background:#104f8d;color:#fff}
 
 /* Picking · resumen visible de faltante contraído */
 .pick-missing-card.pick-missing-collapsed .pick-missing-card-head{display:grid;grid-template-columns:auto 1fr auto auto;align-items:center}.pick-missing-card.pick-missing-collapsed .pick-missing-summary{display:block!important;visibility:visible!important;opacity:1!important;color:#24415f!important;font-size:11px!important;font-weight:600;white-space:normal;overflow:visible;text-overflow:clip}.pick-missing-card.pick-missing-collapsed .pick-missing-card-head>b{color:#17324d!important}.pick-missing-card.pick-missing-collapsed{padding-top:8px;padding-bottom:8px}
+
+/* Picking · legibilidad de observaciones de entrega */
+#pickDeliveryObs,[data-mf="obs"]{font-size:14px!important;line-height:1.45!important;font-weight:500!important;color:#102a43!important;padding:10px 12px!important}#pickDeliveryObs::placeholder,[data-mf="obs"]::placeholder{font-size:13px!important;color:#718096!important;font-weight:400!important}
