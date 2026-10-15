@@ -1,3 +1,5 @@
+import "/vendor/firebase-auth.js";
+import "/vendor/firebase-app-check.js";
 import { initializeApp } from "/vendor/firebase-app.js";
 import { getDataConnect, executeQuery, queryRef } from "/vendor/firebase-data-connect.js";
 const state=document.querySelector("#state"), detail=document.querySelector("#detail");
