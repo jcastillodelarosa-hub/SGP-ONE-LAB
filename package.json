@@ -5,9 +5,11 @@
   "type": "module",
   "scripts": {
     "test": "node --test",
-    "build:vendor": "node scripts/build-vendor.mjs"
+    "build:vendor": "node scripts/build-vendor.mjs",
+    "build:sql-test": "firebase dataconnect:sdk:generate"
   },
   "dependencies": {
-    "@supabase/supabase-js": "2.76.1"
+    "@supabase/supabase-js": "2.76.1",
+    "firebase": "^12.4.0"
   }
 }
