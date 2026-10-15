@@ -34,12 +34,6 @@ jobs:
       - name: Run tests
         run: npm test
 
-      - name: Deploy SQL Connect test operation
-        env:
-          GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/firebase-service-account.json
-        run: |
-          printf '%s' '${{ secrets.FIREBASE_SERVICE_ACCOUNT_SGP_ONE_LAB }}' > "$GOOGLE_APPLICATION_CREDENTIALS"
-          npx firebase-tools@latest deploy --only dataconnect --project sgp-one-lab --non-interactive
 
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
