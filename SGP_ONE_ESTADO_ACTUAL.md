@@ -5,11 +5,34 @@
 - Objetivo: Sistema de gestión de producción de ventanería en aluminio y vidrio.
 - Repositorio: GitHub
 - Hosting: Firebase
-- Versión actual: Pendiente de verificar
-- Última actualización: Pendiente
+- Versión de package.json: 0.1.0 (no equivale necesariamente a la versión publicada)
+- Última revisión documental: 2026-10-14
 
 ## 2. ARQUITECTURA
-Documentar:
+### Estructura comprobada en GitHub (rama main)
+- Interfaz: `index.html`, `styles.css`.
+- Aplicación: `app.js`.
+- Código organizado: `src/modules`, `src/services`, `src/domain`, `src/data`, `src/config`.
+- Módulo identificado: `src/modules/mecanizado.js`.
+- Servicios: seguimiento de aluminio, maestro de piezas, importación de producciones y cliente Supabase.
+- Dominio: importadores de aluminio, vidrio, accesorios, NC y producciones.
+- Hosting configurado: `firebase.json`.
+- Persistencia: existen cliente Supabase y migraciones SQL; verificar esquema y despliegue real.
+- Documentación: `docs/architecture.md`, `docs/migration-plan.md`, `docs/supabase-setup.md`.
+- Pruebas: archivos en `tests/`, ejecutables potencialmente con `npm test`; no ejecutadas en esta revisión.
+
+### Reglas documentadas en `docs/architecture.md`
+- Jerarquía: SGP ONE → línea de producción → sublínea física → proceso.
+- Identidad de producción: `ID + ID_LINEA`.
+- Logística de reserva: `PENDIENTE_ABASTECIMIENTO → PENDIENTE_BODEGA → ALUMINIO_ENTREGADO`.
+- Proceso productivo: `CORTE → MECANIZADO → PROCESADO → PICKING`.
+- `PROCESADO` significa mecanizado terminado; `PICKING` significa material entregado a línea.
+- El patinador reporta lo entregado y pendiente; la línea confirma independientemente la recepción.
+- La clasificación de piezas PANEL / FRAME / COVER / REFUERZO / MUNTIN aplica únicamente a `PANELES_2` y `FRAMES_2`.
+- Seguimiento Aluminio usa clave `ID|RESERVA`; relación con producción por `ID`.
+- Apps Script permanece operativo durante la migración y validación de módulos.
+
+### Información aún por documentar:
 - Estructura del código.
 - Tecnologías y servicios.
 - Base de datos.
@@ -74,6 +97,8 @@ Para cada incidencia registrar:
 - Resultado de pruebas.
 
 ## 8. CONTROL DE VERSIONES
+- Revisión documental inicial: 2026-10-14. No se han modificado archivos funcionales.
+- Estado de despliegue: no verificado.
 - Rama activa:
 - Último commit verificado:
 - Versión publicada:
@@ -81,7 +106,7 @@ Para cada incidencia registrar:
 - Pruebas realizadas:
 
 ## 9. PRÓXIMAS ACTIVIDADES
-1. Verificar el estado real del código en GitHub.
+1. Inspeccionar `app.js`, `src/modules/mecanizado.js` y las migraciones para verificar implementaciones y transiciones de estado.
 2. Reconstruir las reglas de negocio aprobadas.
 3. Actualizar el estado de cada módulo.
 4. Priorizar los desarrollos pendientes.
