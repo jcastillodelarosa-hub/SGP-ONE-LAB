@@ -27,5 +27,8 @@
         ]
       }
     ]
+  },
+  "dataconnect": {
+    "source": "dataconnect"
   }
 }
