@@ -26,6 +26,19 @@
           }
         ]
       }
+    ],
+    "rewrites": [
+      {
+        "source": "/sgp-gateway/**",
+        "function": {
+          "functionId": "sgpGateway",
+          "region": "us-east1"
+        }
+      }
     ]
+  },
+  "functions": {
+    "source": "functions",
+    "runtime": "nodejs22"
   }
 }
