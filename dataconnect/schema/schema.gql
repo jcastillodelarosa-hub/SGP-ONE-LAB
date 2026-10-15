@@ -1,0 +1,4 @@
+type ConnectivityTest @table {
+  message: String!
+  createdAt: Timestamp! @default(expr: "request.time")
+}
