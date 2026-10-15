@@ -30,13 +30,16 @@ jobs:
       - name: Build local browser dependencies
         run: npm run build:vendor
 
+      - name: Install Firebase Functions dependencies
+        run: npm install --prefix functions --no-audit --no-fund
+
       - name: Run tests
         run: npm test
 
-      - name: Deploy to Firebase Hosting
-        uses: FirebaseExtended/action-hosting-deploy@v0
+      - name: Authenticate Google Cloud
+        uses: google-github-actions/auth@v2
         with:
-          repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SGP_ONE_LAB }}
-          projectId: sgp-one-lab
-          channelId: live
+          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SGP_ONE_LAB }}
+
+      - name: Deploy Firebase Functions and Hosting
+        run: npx firebase-tools@latest deploy --only functions,hosting --project sgp-one-lab --non-interactive
