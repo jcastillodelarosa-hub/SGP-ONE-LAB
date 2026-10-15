@@ -1,1 +1,5 @@
-connectorId: test
+connectorId: default
+generate:
+  javascriptSdk:
+    outputDir: ../../generated/sql-connect
+    package: "@sgp/sql-connect-generated"
