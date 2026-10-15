@@ -34,6 +34,9 @@ jobs:
       - name: Run tests
         run: npm test
 
+      - name: Deploy SQL Connect test operation
+        run: npx firebase-tools@latest deploy --only dataconnect --project sgp-one-lab --non-interactive
+
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
