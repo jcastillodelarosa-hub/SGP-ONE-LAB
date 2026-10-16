@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SGP ONE LAB</title>
-  <link rel="stylesheet" href="styles.css?v=252" />
+  <link rel="stylesheet" href="styles.css?v=254" />
   <script src="config.js?v=20261008-1300"></script>
 </head>
 <body>
@@ -48,7 +48,7 @@
           <input id="authPassword" type="password" placeholder="Contraseña" autocomplete="current-password" />
           <button id="authLogin">Ingresar</button>
           <button id="authLogout" hidden>Cerrar sesión</button>
-          <span class="status">LAB v253</span>
+          <span class="status">LAB v254</span>
         </div>
       </header>
 
@@ -71,7 +71,7 @@
             <button type="button" data-home-view="picking"><b>⬡</b><strong>Picking</strong><span>Entrega de órdenes y auditoría de recepción.</span><em>→</em></button>
             <button type="button" data-home-view="pendientes-aluminio"><b>▤</b><strong>Pendientes de aluminio</strong><span>Seguimiento de pendientes, reservas y NC.</span><em>→</em></button>
           </section>
-          <section class="home-balance" id="homeBalance"><div class="home-balance-head"><div><span class="eyebrow">SALDOS DE PRODUCCIÓN</span><h3>Ensamble y empaque por semana</h3><p>Semanas vencidas primero y luego la semana en curso.</p></div><button type="button" id="homeBalanceRefresh">Actualizar</button></div><div class="home-balance-grid"><div class="home-overdue"><h4>Semanas vencidas <span id="homeOverdueCount">0</span></h4><div class="home-week-cards" id="homeOverdueCards"><div class="home-balance-empty">Cargando saldos…</div></div></div><div class="home-current-balance"><h4>Semana actual</h4><div id="homeCurrentBalance"><div class="home-balance-empty">Cargando saldo…</div></div></div></div></section>
+          <section class="home-balance" id="homeBalance"><div class="home-balance-head"><div><span class="eyebrow">SALDOS DE PRODUCCIÓN</span><h3>Ensamble y empaque</h3></div></div><div class="home-balance-grid"><div class="home-overdue"><h4>Semanas vencidas <span id="homeOverdueCount">0</span></h4><div class="home-week-cards" id="homeOverdueCards"><div class="home-balance-empty">Cargando saldos…</div></div></div><div class="home-current-balance"><h4>Semana actual</h4><div id="homeCurrentBalance"><div class="home-balance-empty">Cargando saldo…</div></div></div></div></section>
         </section>
 
         <section class="view" data-view-panel="ensamble" hidden>
@@ -365,7 +365,7 @@
     </div>
   </div>
 
-  <script type="module" src="app.js?v=253"></script>
+  <script type="module" src="app.js?v=254"></script>
 <div id="userModal" class="modal-backdrop rec-overlay" hidden><div class="modal-card user-modal-card"><div class="modal-header"><div><strong id="userModalTitle">Nuevo usuario</strong><small>Cuenta y permisos de acceso</small></div><button id="userModalClose" class="modal-close">×</button></div><div class="user-form"><div class="rec-grid"><label>Usuario<input id="userName" autocomplete="off"></label><label>Nombre completo<input id="userFullName"></label><label>Rol<select id="userRole"><option>COORDINADOR</option><option>LIDER MECANIZADO</option><option>LIDER LINEA</option><option>RECEPCION</option><option>PATINADOR</option><option>PICKING</option><option>SUPERVISOR DE PICKING</option><option>CONSULTA</option><option>ADMINISTRADOR</option></select></label><label>Contraseña<input id="userPassword" type="password" placeholder="Vacío = conservar contraseña"></label><div class="password-reset-wrap"><button id="resetPasswordBtn" type="button" hidden>↻ Restablecer contraseña</button><small>Asigna una nueva contraseña temporal al usuario.</small></div></div><label class="user-active"><input id="userActive" type="checkbox" checked> Usuario activo</label><div class="access-title"><b>Ventanas permitidas</b><span>El usuario solo verá las opciones seleccionadas.</span></div><div id="userAccessGrid" class="access-grid"></div></div><div class="modal-actions"><button id="userCancel">Cancelar</button><button id="userSave" class="primary">Guardar usuario</button></div></div></div>
 </body>
 </html>
