@@ -891,9 +891,9 @@ async function loadHomeBalances(){
  if(!overdue||!current||!getAppToken())return;
  try{
   const db=await getSupabaseClient();
-  const res=await db.from('sgp_producciones').select('semana_actual,produccion,sistema,acabado,saldo_ensamble,saldo_empaque');
+  const res=await db.rpc('sgp_resumen_saldos_portada',{p_token:getAppToken()});
   if(res.error)throw res.error;
-  homeBalanceRows=res.data||[];const week=getISOWeekNumber(),sums=new Map();
+  homeBalanceRows=res.data?.filas||[];const week=getISOWeekNumber(),sums=new Map();
   homeBalanceRows.forEach(r=>{const w=Number(r.semana_actual);if(!Number.isFinite(w))return;const x=sums.get(w)||{week:w,ens:0,pack:0};x.ens+=Number(r.saldo_ensamble||0);x.pack+=Number(r.saldo_empaque||0);sums.set(w,x)});
   const past=[...sums.values()].filter(x=>x.week<week&&(x.ens>0||x.pack>0)).sort((x,y)=>x.week-y.week),now=sums.get(week)||{week,ens:0,pack:0};
   count.textContent=String(past.length);
@@ -905,7 +905,7 @@ function openHomeBalanceDetail(week){
  const rows=homeBalanceRows.filter(r=>Number(r.semana_actual)===week&&(Number(r.saldo_ensamble||0)>0||Number(r.saldo_empaque||0)>0)),ens=rows.reduce((n,r)=>n+Number(r.saldo_ensamble||0),0),pack=rows.reduce((n,r)=>n+Number(r.saldo_empaque||0),0);
  document.querySelector('#homeBalanceModalTitle').textContent='Semana '+week;document.querySelector('#homeBalanceModalMeta').textContent=(week<getISOWeekNumber()?'Semana vencida':'Semana actual')+' · '+rows.length+' producciones con saldo';
  document.querySelector('#homeBalanceModalSummary').innerHTML='<div><span>Saldo Ensamble</span><strong>'+ens.toLocaleString('es-CO')+' und</strong></div><div><span>Saldo Empaque</span><strong>'+pack.toLocaleString('es-CO')+' und</strong></div>';
- document.querySelector('#homeBalanceModalBody').innerHTML=rows.length?rows.map(r=>'<tr><td><b>'+escapeHtml(r.produccion||'—')+'</b></td><td>'+escapeHtml(r.sistema||'—')+'</td><td>'+escapeHtml(r.acabado||'—')+'</td><td>'+Number(r.saldo_ensamble||0).toLocaleString('es-CO')+'</td><td>'+Number(r.saldo_empaque||0).toLocaleString('es-CO')+'</td></tr>').join(''):'<tr><td colspan="5" class="empty">Sin saldos pendientes.</td></tr>';
+ document.querySelector('#homeBalanceModalBody').innerHTML=rows.length?rows.map(r=>'<tr><td>'+escapeHtml(r.tipo||'—')+'</td><td><b>'+escapeHtml(r.produccion||'—')+'</b></td><td>'+escapeHtml(r.sistema||'—')+'</td><td>'+escapeHtml(r.acabado||'—')+'</td><td>'+Number(r.saldo_ensamble||0).toLocaleString('es-CO')+'</td><td>'+Number(r.saldo_empaque||0).toLocaleString('es-CO')+'</td></tr>').join(''):'<tr><td colspan="6" class="empty">Sin saldos pendientes.</td></tr>';
  document.querySelector('#homeBalanceModal').hidden=false;
 }
 document.querySelector('#homeBalance')?.addEventListener('click',e=>{const b=e.target.closest('[data-home-balance-week]');if(b)openHomeBalanceDetail(Number(b.dataset.homeBalanceWeek))});
