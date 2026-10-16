@@ -897,8 +897,8 @@ async function loadHomeBalances(){
   homeBalanceRows.forEach(r=>{const w=Number(r.semana_actual);if(!Number.isFinite(w))return;const x=sums.get(w)||{week:w,ens:0,pack:0};x.ens+=Number(r.saldo_ensamble||0);x.pack+=Number(r.saldo_empaque||0);sums.set(w,x)});
   const past=[...sums.values()].filter(x=>x.week<week&&(x.ens>0||x.pack>0)).sort((x,y)=>x.week-y.week),now=sums.get(week)||{week,ens:0,pack:0};
   count.textContent=String(past.length);
-  overdue.innerHTML=past.length?past.map(x=>'<button type="button" class="home-balance-week overdue" data-home-balance-week="'+x.week+'"><strong>Semana '+x.week+'</strong><span><i>Ensamble</i><b>'+x.ens.toLocaleString('es-CO')+' <small>und</small></b></span><span><i>Empaque</i><b>'+x.pack.toLocaleString('es-CO')+' <small>und</small></b></span></button>').join(''):'<div class="home-balance-empty ok">Sin saldos de semanas vencidas.</div>';
-  current.innerHTML='<button type="button" class="home-balance-week current" data-home-balance-week="'+week+'"><strong>Semana '+week+'</strong><span><i>Ensamble</i><b>'+now.ens.toLocaleString('es-CO')+' <small>und</small></b></span><span><i>Empaque</i><b>'+now.pack.toLocaleString('es-CO')+' <small>und</small></b></span></button>';
+  overdue.innerHTML=past.length?past.map(x=>'<button type="button" class="home-balance-week overdue" data-home-balance-week="'+x.week+'"><strong>Semana '+x.week+'</strong><span class="home-balance-area" data-home-area="ensamble"><i>Ensamble</i><b>'+x.ens.toLocaleString('es-CO')+' <small>und</small></b></span><span class="home-balance-area" data-home-area="empaque"><i>Empaque</i><b>'+x.pack.toLocaleString('es-CO')+' <small>und</small></b></span></button>').join(''):'<div class="home-balance-empty ok">Sin saldos de semanas vencidas.</div>';
+  current.innerHTML='<button type="button" class="home-balance-week current" data-home-balance-week="'+week+'"><strong>Semana '+week+'</strong><span class="home-balance-area" data-home-area="ensamble"><i>Ensamble</i><b>'+now.ens.toLocaleString('es-CO')+' <small>und</small></b></span><span class="home-balance-area" data-home-area="empaque"><i>Empaque</i><b>'+now.pack.toLocaleString('es-CO')+' <small>und</small></b></span></button>';
  }catch(e){console.error('Saldos portada',e);overdue.innerHTML='<div class="home-balance-empty">No fue posible cargar los saldos.</div>';current.innerHTML='';}
 }
 function openHomeBalanceDetail(week,area=null){
@@ -916,7 +916,7 @@ function openHomeBalanceDetail(week,area=null){
  document.querySelector('#homeBalanceModal').dataset.week=String(week);
  document.querySelector('#homeBalanceModal').hidden=false;
 }
-document.querySelector('#homeBalance')?.addEventListener('click',e=>{const b=e.target.closest('[data-home-balance-week]');if(b)openHomeBalanceDetail(Number(b.dataset.homeBalanceWeek))});
+document.querySelector('#homeBalance')?.addEventListener('click',e=>{const card=e.target.closest('[data-home-balance-week]');if(!card)return;const area=e.target.closest('[data-home-area]');if(area){e.preventDefault();e.stopPropagation();openHomeBalanceDetail(Number(card.dataset.homeBalanceWeek),area.dataset.homeArea);}});
 document.querySelector('#homeBalanceModalSummary')?.addEventListener('click',e=>{const b=e.target.closest('[data-home-area]');if(!b)return;const m=document.querySelector('#homeBalanceModal'),week=Number(m.dataset.week);if(week)openHomeBalanceDetail(week,b.dataset.homeArea);});
 document.querySelector('#closeHomeBalanceModal')?.addEventListener('click',()=>document.querySelector('#homeBalanceModal').hidden=true);
 document.querySelectorAll("[data-home-view]").forEach(button => button.addEventListener("click", () => {
