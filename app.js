@@ -262,15 +262,35 @@ function toggleMobileMenu(){const open=!document.body.classList.contains('mobile
 document.querySelector('#mobileMenuToggle')?.addEventListener('click',toggleMobileMenu);document.querySelector('#mobileMenuShade')?.addEventListener('click',closeMobileMenu);document.querySelectorAll('.nav [data-view]').forEach(b=>b.addEventListener('click',()=>{if(window.innerWidth<=760)closeMobileMenu()}));window.addEventListener('resize',()=>{if(window.innerWidth>760)closeMobileMenu()});
 const SGP_ACCESS_TREE=[
  {key:'inicio',label:'Inicio'},
- {key:'mecanizado',label:'Módulo de Mecanizado',children:[['mecanizado.recepcion','Recepción'],['mecanizado.faltantes','Pendientes de material'],['mecanizado.programacion','Programación'],['mecanizado.produccion','Producción']]},
+ {key:'mecanizado',label:'Módulo de Mecanizado',children:[
+   ['mecanizado.recepcion','Recepción'],
+   ['mecanizado.faltantes','Pendientes de material'],
+   ['mecanizado.programacion','Programación'],
+   ['mecanizado.proceso','Producción'],
+   ['mecanizado.novedades','Novedades']
+ ]},
+ {key:'picking',label:'Picking',children:[
+   ['picking.entrega','Entrega de órdenes'],
+   ['picking.recepcion','Recepción / Auditoría']
+ ]},
  {key:'programacion',label:'Programación semanal'},
- {key:'ensamble',label:'Ensamble'},
+ {key:'ensamble',label:'Ensamble',children:[
+   ['ensamble.hoja','Hoja de ensamble'],
+   ['ensamble.ubicaciones','Reporte de ubicaciones']
+ ]},
  {key:'nc-aluminio',label:'NC Aluminio'},
  {key:'nc-vidrio',label:'NC Vidrio'},
  {key:'seguimiento-aluminio',label:'Seguimiento de aluminio'},
  {key:'pendientes-aluminio',label:'Pendientes de aluminio'},
  {key:'carga-semanal',label:'Carga semanal'},
- {key:'actualizacion',label:'Actualización diaria',children:[['actualizacion.export','Export diario'],['actualizacion.glass-location','Ubicación de vidrio'],['actualizacion.nc-al','NC Aluminio'],['actualizacion.nc-glass','NC Vidrio'],['actualizacion.al-track','Seguimiento de aluminio']]},
+ {key:'informes',label:'Informes'},
+ {key:'actualizacion',label:'Actualización diaria',children:[
+   ['actualizacion.export','Export diario'],
+   ['actualizacion.glass-location','Ubicación de vidrio'],
+   ['actualizacion.nc-al','NC Aluminio'],
+   ['actualizacion.nc-glass','NC Vidrio'],
+   ['actualizacion.al-track','Seguimiento de aluminio']
+ ]},
  {key:'configuracion',label:'Configuración'}
 ];
 const SGP_WINDOWS=SGP_ACCESS_TREE.flatMap(x=>[[x.key,x.label],...(x.children||[])]);
@@ -285,8 +305,14 @@ async function applyUserAccess(auth){
    if(error)throw error;
    const access=(data||[]).map(x=>x.ventana);
    buttons.forEach(b=>{const v=b.dataset.view;b.hidden=!(access.includes(v)||access.some(x=>x.startsWith(v+'.')))});
-   document.querySelectorAll('[data-mach-tab]').forEach(b=>{const key='mecanizado.'+({recepcion:'recepcion',faltantes:'faltantes',programacion:'programacion',produccion:'produccion',novedades:'novedades'}[b.dataset.machTab]||b.dataset.machTab);b.hidden=!(access.includes('mecanizado')||access.includes(key))});
+   document.querySelectorAll('[data-mach-tab]').forEach(b=>{const key='mecanizado.'+b.dataset.machTab;const legacy=b.dataset.machTab==='proceso'&&access.includes('mecanizado.produccion');b.hidden=!(access.includes('mecanizado')||access.includes(key)||legacy)});
    document.querySelectorAll('[data-daily-tab]').forEach(b=>{const key='actualizacion.'+b.dataset.dailyTab;b.hidden=!(access.includes('actualizacion')||access.includes(key))});
+   const pickDelivery=document.querySelector('#pickDeliveryTab'),pickReception=document.querySelector('#pickReceptionTab');
+   if(pickDelivery)pickDelivery.hidden=!(access.includes('picking')||access.includes('picking.entrega'));
+   if(pickReception)pickReception.hidden=!(access.includes('picking')||access.includes('picking.recepcion'));
+   const assemblySheet=document.querySelector('#assemblySheetTab'),assemblyLocations=document.querySelector('#assemblyLocationReportTab');
+   if(assemblySheet)assemblySheet.hidden=!(access.includes('ensamble')||access.includes('ensamble.hoja'));
+   if(assemblyLocations)assemblyLocations.hidden=!(access.includes('ensamble')||access.includes('ensamble.ubicaciones'));
    const activeDaily=document.querySelector('[data-daily-tab].active');if(activeDaily?.hidden){document.querySelector('[data-daily-tab]:not([hidden])')?.click()}
    const active=document.querySelector('.nav [data-view].active');if(active?.hidden){const first=buttons.find(b=>!b.hidden);first?.click()}
  }catch(e){console.error('No se pudieron cargar permisos',e);buttons.forEach(b=>b.hidden=false)}
