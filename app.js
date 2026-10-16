@@ -850,6 +850,15 @@ async function commitProgramming() {
   }
 }
 els.nav.forEach(button => button.addEventListener("click", () => {openView(button.dataset.view);if(button.dataset.view==='configuracion')loadUserAdmin();if(button.dataset.view==='picking')loadPicking()}));
+function getISOWeekNumber(date=new Date()){
+  const d=new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate()));
+  const day=d.getUTCDay()||7;
+  d.setUTCDate(d.getUTCDate()+4-day);
+  const yearStart=new Date(Date.UTC(d.getUTCFullYear(),0,1));
+  return Math.ceil((((d-yearStart)/86400000)+1)/7);
+}
+const homeWeekEl=document.querySelector("#homeCurrentWeek");
+if(homeWeekEl) homeWeekEl.textContent=String(getISOWeekNumber());
 document.querySelectorAll("[data-home-view]").forEach(button => button.addEventListener("click", () => {
   const viewName=button.dataset.homeView;
   const navButton=document.querySelector('.nav [data-view="'+viewName+'"]');
