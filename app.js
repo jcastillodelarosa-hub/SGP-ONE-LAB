@@ -909,7 +909,6 @@ function openHomeBalanceDetail(week){
  document.querySelector('#homeBalanceModal').hidden=false;
 }
 document.querySelector('#homeBalance')?.addEventListener('click',e=>{const b=e.target.closest('[data-home-balance-week]');if(b)openHomeBalanceDetail(Number(b.dataset.homeBalanceWeek))});
-document.querySelector('#homeBalanceRefresh')?.addEventListener('click',loadHomeBalances);
 document.querySelector('#closeHomeBalanceModal')?.addEventListener('click',()=>document.querySelector('#homeBalanceModal').hidden=true);
 document.querySelectorAll("[data-home-view]").forEach(button => button.addEventListener("click", () => {
   const viewName=button.dataset.homeView;
