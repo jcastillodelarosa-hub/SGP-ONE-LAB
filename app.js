@@ -923,8 +923,10 @@ els.authLogout.addEventListener("click", logout);
 refreshAuthStatus();
 
 refreshWeeklyTabs();
-try { openView("mecanizado"); renderMecanizado(); }
-catch (error) { console.error("Error al iniciar Módulo de Mecanizado:", error); }
+try {
+  openView("inicio");
+  renderMecanizado();
+} catch (error) { console.error("Error al iniciar SGP ONE:", error); }
 
 
 
