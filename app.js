@@ -850,6 +850,13 @@ async function commitProgramming() {
   }
 }
 els.nav.forEach(button => button.addEventListener("click", () => {openView(button.dataset.view);if(button.dataset.view==='configuracion')loadUserAdmin();if(button.dataset.view==='picking')loadPicking()}));
+document.querySelectorAll("[data-home-view]").forEach(button => button.addEventListener("click", () => {
+  const viewName=button.dataset.homeView;
+  const navButton=document.querySelector('.nav [data-view="'+viewName+'"]');
+  if(navButton && !navButton.hidden){navButton.click();return;}
+  openView(viewName);
+  if(viewName==='picking')loadPicking();
+}));
 window.addEventListener("error", event => {
   console.error("SGP ONE:", event.error || event.message);
 });
