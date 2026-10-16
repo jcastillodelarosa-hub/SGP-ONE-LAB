@@ -1402,3 +1402,79 @@ th{background:#f5f8fd;color:#536b88}tbody tr:hover{background:#f8fbff}
   .priority-part-summary .daily-metric-card small,
   .priority-part-summary .daily-metric-card span{white-space:normal}
 }
+
+
+/* SGP ONE · botones globales y scroll robusto de modales */
+button{
+  appearance:none;
+  -webkit-appearance:none;
+  border:1px solid #c8d9f2;
+  border-radius:9px;
+  background:#fff;
+  color:#173b6b;
+  min-height:34px;
+  padding:7px 12px;
+  font-family:inherit;
+  font-size:inherit;
+  font-weight:750;
+  line-height:1.15;
+  cursor:pointer;
+  transition:background .15s ease,border-color .15s ease,color .15s ease,box-shadow .15s ease,transform .15s ease;
+}
+button:hover:not(:disabled){background:#f0f6ff;border-color:#79aef2;color:#0756c7;box-shadow:0 3px 9px rgba(8,101,237,.10)}
+button:active:not(:disabled){transform:translateY(1px)}
+button:focus-visible{outline:3px solid rgba(8,101,237,.18);outline-offset:2px}
+button:disabled{opacity:.48;cursor:not-allowed;box-shadow:none}
+button.primary,.primary-action,.daily-primary-action,#prioritySave,#authLogin{
+  background:#0865ed!important;border-color:#0865ed!important;color:#fff!important;
+}
+button.primary:hover:not(:disabled),.primary-action:hover:not(:disabled),.daily-primary-action:hover:not(:disabled),#prioritySave:hover:not(:disabled),#authLogin:hover:not(:disabled){
+  background:#0758d1!important;border-color:#0758d1!important;color:#fff!important;
+}
+button.active,[aria-pressed="true"]{border-color:#0865ed}
+
+/* El asistente de prioridades debe desplazarse sin mover/perder controles */
+#priorityWorkModal{
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  overscroll-behavior:contain;
+  padding:2vh 2vw!important;
+}
+#priorityWorkModal>.priority-work-card{
+  margin:0 auto!important;
+  height:auto!important;
+  min-height:0!important;
+  max-height:96vh!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  scrollbar-gutter:stable;
+}
+#priorityWork{min-height:0}
+#priorityWork .table-wrap{
+  max-height:52vh;
+  overflow:auto!important;
+  overscroll-behavior:contain;
+}
+#priorityWork .table-wrap thead th{position:sticky;top:0;z-index:2}
+#priorityModal>.piece-modal-card{
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  overscroll-behavior:contain;
+}
+#priorityReservationList .table-wrap,#priorityAssignedList .table-wrap{overflow:auto!important}
+
+/* Botones de tablas que antes heredaban apariencia del navegador */
+#priorityReservationList button[data-prres]{
+  min-width:94px;
+  background:#eaf3ff;
+  border-color:#b7d4fb;
+  color:#0756c7;
+  font-weight:800;
+}
+#priorityReservationList button[data-prres]:hover{background:#0865ed;color:#fff;border-color:#0865ed}
+
+@media(max-width:700px){
+  #priorityWorkModal{padding:0!important}
+  #priorityWorkModal>.priority-work-card{width:100vw!important;max-height:100dvh!important;border-radius:0!important}
+  #priorityWork .table-wrap{max-height:55dvh}
+}
