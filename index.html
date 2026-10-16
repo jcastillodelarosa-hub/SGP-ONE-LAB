@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SGP ONE LAB</title>
-  <link rel="stylesheet" href="styles.css?v=245" />
+  <link rel="stylesheet" href="styles.css?v=252" />
   <script src="config.js?v=20261008-1300"></script>
 </head>
 <body>
@@ -48,20 +48,29 @@
           <input id="authPassword" type="password" placeholder="Contraseña" autocomplete="current-password" />
           <button id="authLogin">Ingresar</button>
           <button id="authLogout" hidden>Cerrar sesión</button>
-          <span class="status">LAB v251</span>
+          <span class="status">LAB v252</span>
         </div>
       </header>
 
       <main>
-        <section class="view" data-view-panel="picking" hidden><div class="pick-main-tabs"><button id="pickDeliveryTab" class="active">Entrega de órdenes</button><button id="pickReceptionTab">Recepción / Auditoría <span id="pickReceptionCount">0</span></button></div><div class="page-heading"><span class="eyebrow">OPERACIÓN</span><h2>Picking · Entrega de Producciones</h2><p>Preparación, entrega y validación de producciones hacia Línea.</p></div><div id="pickDeliveryPanel"><div class="pick-toolbar"><input id="pickSearch" type="search" placeholder="Buscar reserva u orden"><select id="pickWeek"><option value="">Todas las semanas</option></select><select id="pickState"><option value="">Todos los estados</option><option>PROCESADO</option><option>MECANIZADO</option><option>CORTE</option><option>PROGRAMADA</option></select><button id="pickRefresh">Actualizar</button></div><div id="pickSummary" class="prod-summary"></div><section id="pickOpenDeliveries" class="pick-open-section"><div class="pick-open-title"><div><h3>Partidas abiertas de entrega</h3><p>Reservas o partes con entregas iniciadas que todavía tienen producciones pendientes.</p></div><span id="pickOpenCount" class="pick-open-count">0</span></div><div id="pickOpenBoard"><div class="empty-state">Sin partidas abiertas de entrega.</div></div></section><div id="pickBoard" class="pick-board"><div class="empty-state">Cargando cola de Picking…</div></div></div><div id="pickReceptionPanel" hidden><div class="pick-toolbar"><input id="pickReceptionSearch" type="search" placeholder="Buscar orden, reserva, proyecto…"><button id="pickReceptionRefresh">Actualizar recepción</button></div><div id="pickReceptionBoard" class="pick-board"><div class="empty-state">Cargando órdenes por auditar…</div></div></div></section><section class="view placeholder-view" data-view-panel="inicio" hidden>
-          <div class="page-heading">
-            <span class="eyebrow">Inicio</span>
-            <h2>Panel general</h2>
-            <p>Esta vista será el resumen operativo de SGP ONE.</p>
-          </div>
-          <div class="placeholder-card">
-            Próximo paso: indicadores de producción, carga semanal y alertas.
-          </div>
+        <section class="view" data-view-panel="picking" hidden><div class="pick-main-tabs"><button id="pickDeliveryTab" class="active">Entrega de órdenes</button><button id="pickReceptionTab">Recepción / Auditoría <span id="pickReceptionCount">0</span></button></div><div class="page-heading"><span class="eyebrow">OPERACIÓN</span><h2>Picking · Entrega de Producciones</h2><p>Preparación, entrega y validación de producciones hacia Línea.</p></div><div id="pickDeliveryPanel"><div class="pick-toolbar"><input id="pickSearch" type="search" placeholder="Buscar reserva u orden"><select id="pickWeek"><option value="">Todas las semanas</option></select><select id="pickState"><option value="">Todos los estados</option><option>PROCESADO</option><option>MECANIZADO</option><option>CORTE</option><option>PROGRAMADA</option></select><button id="pickRefresh">Actualizar</button></div><div id="pickSummary" class="prod-summary"></div><section id="pickOpenDeliveries" class="pick-open-section"><div class="pick-open-title"><div><h3>Partidas abiertas de entrega</h3><p>Reservas o partes con entregas iniciadas que todavía tienen producciones pendientes.</p></div><span id="pickOpenCount" class="pick-open-count">0</span></div><div id="pickOpenBoard"><div class="empty-state">Sin partidas abiertas de entrega.</div></div></section><div id="pickBoard" class="pick-board"><div class="empty-state">Cargando cola de Picking…</div></div></div><div id="pickReceptionPanel" hidden><div class="pick-toolbar"><input id="pickReceptionSearch" type="search" placeholder="Buscar orden, reserva, proyecto…"><button id="pickReceptionRefresh">Actualizar recepción</button></div><div id="pickReceptionBoard" class="pick-board"><div class="empty-state">Cargando órdenes por auditar…</div></div></div></section><section class="view sgp-home" data-view-panel="inicio" hidden>
+          <section class="home-hero" aria-label="Portada SGP ONE">
+            <div class="home-hero-copy">
+              <span class="home-kicker">SGP ONE · CENTRO DE OPERACIONES</span>
+              <h2>Control total<br>de tu <span>producción</span></h2>
+              <p>Programación, mecanizado, picking y más.<br>Todo en un solo lugar.</p>
+              <button type="button" class="home-primary" data-home-view="programacion">Ver programación <span>→</span></button>
+            </div>
+            <div class="home-scene" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+            <div class="home-week"><small>SGP ONE</small><strong>LAB</strong><span>Gestión de producción</span></div>
+            <svg class="home-wave" viewBox="0 0 1000 260" preserveAspectRatio="none" aria-hidden="true"><path d="M0 245 C150 215 180 90 340 168 S570 245 700 104 S900 15 1000 80" fill="none" stroke="white" stroke-width="2" opacity=".72"/></svg>
+          </section>
+          <section class="home-links" aria-label="Accesos rápidos">
+            <button type="button" data-home-view="programacion"><b>▦</b><strong>Programación</strong><span>Consulta y gestiona la programación semanal.</span><em>→</em></button>
+            <button type="button" data-home-view="mecanizado"><b>⚙</b><strong>Mecanizado</strong><span>Recepción, programación y control del proceso.</span><em>→</em></button>
+            <button type="button" data-home-view="picking"><b>⬡</b><strong>Picking</strong><span>Entrega de órdenes y auditoría de recepción.</span><em>→</em></button>
+            <button type="button" data-home-view="pendientes-aluminio"><b>▤</b><strong>Pendientes de aluminio</strong><span>Seguimiento de pendientes, reservas y NC.</span><em>→</em></button>
+          </section>
         </section>
 
         <section class="view" data-view-panel="ensamble" hidden>
