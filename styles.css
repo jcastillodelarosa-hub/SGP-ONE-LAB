@@ -1493,3 +1493,9 @@ button.active,[aria-pressed="true"]{border-color:#0865ed}
 .home-balance-area{padding:7px 9px;border-radius:9px;cursor:pointer;transition:background .15s ease,transform .15s ease}
 .home-balance-area:hover{background:#edf5ff;transform:translateY(-1px)}
 .home-balance-area:nth-of-type(2):hover{background:#fff2e9}
+
+.repo-section-title{margin:22px 0 8px;color:#082a5b;font-size:18px}
+.repo-resolved-title{margin-top:30px}
+.repo-section-help{margin:-2px 0 12px;color:#6d819f;font-size:13px}
+.repo-resolved-table tbody tr{background:#f7fbff}
+.repo-resolved-badge{display:inline-flex;align-items:center;padding:7px 12px;border-radius:999px;background:#e5f7ec;color:#08783d;font-weight:800;font-size:12px}
