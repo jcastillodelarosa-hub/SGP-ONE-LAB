@@ -875,7 +875,7 @@ async function commitProgramming() {
     refreshWeeklyPackageGate();
   }
 }
-els.nav.forEach(button => button.addEventListener("click", () => {openView(button.dataset.view);if(button.dataset.view==='configuracion')loadUserAdmin();if(button.dataset.view==='picking')loadPicking()}));
+els.nav.forEach(button => button.addEventListener("click", () => {openView(button.dataset.view);if(button.dataset.view==='inicio')loadHomeBalances();if(button.dataset.view==='configuracion')loadUserAdmin();if(button.dataset.view==='picking')loadPicking()}));
 function getISOWeekNumber(date=new Date()){
   const d=new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate()));
   const day=d.getUTCDay()||7;
@@ -885,6 +885,32 @@ function getISOWeekNumber(date=new Date()){
 }
 const homeWeekEl=document.querySelector("#homeCurrentWeek");
 if(homeWeekEl) homeWeekEl.textContent=String(getISOWeekNumber());
+let homeBalanceRows=[];
+async function loadHomeBalances(){
+ const overdue=document.querySelector('#homeOverdueCards'),current=document.querySelector('#homeCurrentBalance'),count=document.querySelector('#homeOverdueCount');
+ if(!overdue||!current||!getAppToken())return;
+ try{
+  const db=await getSupabaseClient();
+  const res=await db.from('sgp_producciones').select('semana_actual,produccion,sistema,acabado,saldo_ensamble,saldo_empaque');
+  if(res.error)throw res.error;
+  homeBalanceRows=res.data||[];const week=getISOWeekNumber(),sums=new Map();
+  homeBalanceRows.forEach(r=>{const w=Number(r.semana_actual);if(!Number.isFinite(w))return;const x=sums.get(w)||{week:w,ens:0,pack:0};x.ens+=Number(r.saldo_ensamble||0);x.pack+=Number(r.saldo_empaque||0);sums.set(w,x)});
+  const past=[...sums.values()].filter(x=>x.week<week&&(x.ens>0||x.pack>0)).sort((x,y)=>x.week-y.week),now=sums.get(week)||{week,ens:0,pack:0};
+  count.textContent=String(past.length);
+  overdue.innerHTML=past.length?past.map(x=>'<button type="button" class="home-balance-week overdue" data-home-balance-week="'+x.week+'"><strong>Semana '+x.week+'</strong><span><i>Ensamble</i><b>'+x.ens.toLocaleString('es-CO')+' <small>und</small></b></span><span><i>Empaque</i><b>'+x.pack.toLocaleString('es-CO')+' <small>und</small></b></span></button>').join(''):'<div class="home-balance-empty ok">Sin saldos de semanas vencidas.</div>';
+  current.innerHTML='<button type="button" class="home-balance-week current" data-home-balance-week="'+week+'"><strong>Semana '+week+'</strong><span><i>Ensamble</i><b>'+now.ens.toLocaleString('es-CO')+' <small>und</small></b></span><span><i>Empaque</i><b>'+now.pack.toLocaleString('es-CO')+' <small>und</small></b></span></button>';
+ }catch(e){console.error('Saldos portada',e);overdue.innerHTML='<div class="home-balance-empty">No fue posible cargar los saldos.</div>';current.innerHTML='';}
+}
+function openHomeBalanceDetail(week){
+ const rows=homeBalanceRows.filter(r=>Number(r.semana_actual)===week&&(Number(r.saldo_ensamble||0)>0||Number(r.saldo_empaque||0)>0)),ens=rows.reduce((n,r)=>n+Number(r.saldo_ensamble||0),0),pack=rows.reduce((n,r)=>n+Number(r.saldo_empaque||0),0);
+ document.querySelector('#homeBalanceModalTitle').textContent='Semana '+week;document.querySelector('#homeBalanceModalMeta').textContent=(week<getISOWeekNumber()?'Semana vencida':'Semana actual')+' · '+rows.length+' producciones con saldo';
+ document.querySelector('#homeBalanceModalSummary').innerHTML='<div><span>Saldo Ensamble</span><strong>'+ens.toLocaleString('es-CO')+' und</strong></div><div><span>Saldo Empaque</span><strong>'+pack.toLocaleString('es-CO')+' und</strong></div>';
+ document.querySelector('#homeBalanceModalBody').innerHTML=rows.length?rows.map(r=>'<tr><td><b>'+escapeHtml(r.produccion||'—')+'</b></td><td>'+escapeHtml(r.sistema||'—')+'</td><td>'+escapeHtml(r.acabado||'—')+'</td><td>'+Number(r.saldo_ensamble||0).toLocaleString('es-CO')+'</td><td>'+Number(r.saldo_empaque||0).toLocaleString('es-CO')+'</td></tr>').join(''):'<tr><td colspan="5" class="empty">Sin saldos pendientes.</td></tr>';
+ document.querySelector('#homeBalanceModal').hidden=false;
+}
+document.querySelector('#homeBalance')?.addEventListener('click',e=>{const b=e.target.closest('[data-home-balance-week]');if(b)openHomeBalanceDetail(Number(b.dataset.homeBalanceWeek))});
+document.querySelector('#homeBalanceRefresh')?.addEventListener('click',loadHomeBalances);
+document.querySelector('#closeHomeBalanceModal')?.addEventListener('click',()=>document.querySelector('#homeBalanceModal').hidden=true);
 document.querySelectorAll("[data-home-view]").forEach(button => button.addEventListener("click", () => {
   const viewName=button.dataset.homeView;
   const navButton=document.querySelector('.nav [data-view="'+viewName+'"]');
@@ -951,6 +977,7 @@ refreshAuthStatus();
 refreshWeeklyTabs();
 try {
   openView("inicio");
+  loadHomeBalances();
   renderMecanizado();
 } catch (error) { console.error("Error al iniciar SGP ONE:", error); }
 
