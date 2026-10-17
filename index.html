@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SGP ONE LAB</title>
-  <link rel="stylesheet" href="styles.css?v=263" />
+  <link rel="stylesheet" href="styles.css?v=264" />
   <script src="config.js?v=20261008-1300"></script>
 </head>
 <body>
@@ -48,7 +48,7 @@
           <input id="authPassword" type="password" placeholder="Contraseña" autocomplete="current-password" />
           <button id="authLogin">Ingresar</button>
           <button id="authLogout" hidden>Cerrar sesión</button>
-          <span class="status">LAB v263</span>
+          <span class="status">LAB v264</span>
         </div>
       </header>
 
@@ -143,7 +143,7 @@
 <div id="progModal" class="modal-backdrop rec-overlay" hidden><div class="modal-card prog-card"><div class="modal-header"><div><strong id="progModalTitle">Programar reserva</strong><small id="progModalMeta"></small></div><button id="progModalClose" class="modal-close">✕</button></div><div class="rec-form"><div class="rec-grid"><label>Fecha<input id="progDate" type="date"></label><label>Turno<select id="progShift"><option value="TURNO 1">Turno 1</option><option value="TURNO 2">Turno 2</option></select></label><label>Prioridad / orden<input id="progPriority" type="number" min="0.1" step="0.1" value="1"></label><label>Ventanas a mecanizar<input id="progQty" type="number" min="1"></label></div><div id="progPartsBox" class="prog-parts-box" hidden></div><label>Observación general<textarea id="progObs" rows="2"></textarea></label><label>Observación de la orden<textarea id="progOrderObs" rows="2"></textarea></label></div><div class="modal-actions"><button id="progCancel">Cancelar</button><button id="progSave" class="primary">Agregar a programación</button></div></div></div>
 </section>
 <section data-mach-panel="proceso" hidden>
-<div class="prod-toolbar"><div><strong>Producción de Mecanizado</strong><span>Ejecución y novedades del programa diario</span></div><div class="prod-filters"><input id="prodDate" type="date"><select id="prodShift"><option value="">Todos los turnos</option><option value="TURNO 1">Turno 1</option><option value="TURNO 2">Turno 2</option></select><button id="prodRefresh" type="button">Actualizar</button></div></div>
+<div class="prod-toolbar"><div><strong>Producción de Mecanizado</strong><span>Ejecución y novedades del programa diario</span></div><div class="prod-filters"><input id="prodDate" type="date"><select id="prodShift"><option value="">Todos los turnos</option><option value="TURNO 1">Turno 1</option><option value="TURNO 2">Turno 2</option></select><button id="prodRefresh" type="button">Actualizar</button><button id="prodShiftReport" class="primary prod-shift-report-btn" type="button">▣ Generar reporte de turno</button></div></div>
 <div id="prodWeekCalendar"></div><div id="prodAluminumPending" class="prod-aluminum-pending"></div><div id="prodSummary" class="prod-summary"></div><div id="prodBoard" class="prod-board"><div class="empty-state"><strong>Producción</strong><p>Selecciona fecha y turno para cargar la programación.</p></div></div>
 </section>
 <section data-mach-panel="novedades" hidden>
