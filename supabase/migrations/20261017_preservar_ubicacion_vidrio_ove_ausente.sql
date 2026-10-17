@@ -1,0 +1,19 @@
+-- SGP_ONE: preservar la última ubicación conocida cuando una OVE no aparece en un reporte puntual.
+-- Regla: solo se retiran filas anteriores si la misma OVE está presente en el nuevo reporte.
+-- Preparado/Novedad/Traslado no se redefinen aquí; continúan calculándose en sgp_mecanizado_detalle_reserva.
+-- Migración aplicada en Supabase el 2026-10-17.
+--
+-- La definición desplegada de public.sgp_aplicar_ubicacion_vidrio incorpora:
+-- 1) tmp_glass_oves con las OVEs presentes en p_datos.
+-- 2) El bloque RETIRADO exige que u.orden_oves exista en tmp_glass_oves.
+-- 3) Si una OVE no está en el reporte, conserva su último estado conocido.
+--
+-- SQL de la condición crítica:
+-- and exists (
+--   select 1 from tmp_glass_oves o
+--   where o.ove = upper(trim(u.orden_oves))
+-- )
+--
+-- Recuperación ejecutada durante el despliegue:
+-- se reactivaron únicamente OVEs retiradas por el último lote que no tenían
+-- ningún registro activo refrescado por ese mismo lote.
