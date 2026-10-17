@@ -127,3 +127,15 @@ Después de desarrollar:
 6. Dejar identificado el siguiente paso.
 
 Nunca declarar una funcionalidad como implementada o publicada sin verificarlo.
+
+
+## 11. CONTINUIDAD 2026-10-17 — REPORTE DE TURNO MECANIZADO (LAB v264)
+- Implementado control **Generar reporte de turno** en Producción de Mecanizado.
+- Fuente del reporte: programación del día/turno + ejecución de reserva/orden + novedades existentes. No altera estados ni programación.
+- Reporte incluye: Programado, Ejecutado, Pendiente, % avance, avance compacto por sistema (Programadas/Completas/En proceso), Programación vs Ejecución con Parte, pendientes del siguiente turno, novedades y comentario general.
+- Se agregó persistencia del comentario general por fecha + turno en tabla `sgp_mecanizado_reportes_turno`.
+- Salidas implementadas: vista previa, PNG y PDF horizontal.
+- Archivos modificados: `app.js`, `index.html`, `styles.css`.
+- Versión visual incrementada: LAB v264.
+- Pendiente de verificación funcional: validar en Firebase con datos reales que los totales ejecutados por orden coincidan con la operación y que la exportación PDF/PNG funcione en PC y móvil.
+- Observación de seguridad detectada durante revisión: existen tablas operativas con RLS deshabilitado. No se modificó RLS en esta sesión para evitar bloquear el sistema sin diseñar previamente sus políticas.
