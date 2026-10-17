@@ -1403,7 +1403,7 @@ async function buildShiftReportData(date,turno){
   const programmed=Number(x.cantidad_programada||0);
   let executed=0,state=re?.estado||'PROGRAMADA';
   if(orders.length){
-   executed=orders.reduce((n,o)=>{const os=oe.find(e=>String(e.produccion)===String(o.produccion));return n+(String(os?.estado||state)==='PROCESADO'?Number(o.cantidad||0):0)},0);
+   executed=orders.reduce((n,o)=>{const os=oe.find(e=>String(e.produccion)===String(o.produccion));return n+(String(os?.estado||'PROGRAMADA')==='PROCESADO'?Number(o.cantidad||0):0)},0);
    if(oe.length){state=oe.every(e=>e.estado==='PROCESADO')?'PROCESADO':oe.some(e=>e.estado==='MECANIZADO')?'MECANIZADO':oe.some(e=>e.estado==='CORTE')?'CORTE':state}
   }else executed=shiftReportExecuted({...x,ejecucion:re});
   detailed.push({...x,ejecucion:re,novedades:nov.filter(n=>n.id_programacion===x.id_programacion),_orders:orders,_orderStates:oe,_executed:Math.min(programmed,executed),_state:state});
