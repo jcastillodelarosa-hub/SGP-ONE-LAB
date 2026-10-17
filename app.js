@@ -713,8 +713,14 @@ function openAssemblyTab(tab){
  const report=tab==="report";els.assemblySheetPanel.hidden=report;els.assemblyLocationReportPanel.hidden=!report;els.assemblySheetTab.classList.toggle("active",!report);els.assemblyLocationReportTab.classList.toggle("active",report);if(report)loadLocationReport();
 }
 
+async function refreshAssemblyWeeks(selectLatest=false){
+ const token=getAppToken();if(!token||!els.assemblyWeek)return;
+ const current=els.assemblyWeek.value;
+ try{const client=await getSupabaseClient();const {data,error}=await client.rpc("sgp_picking_semanas",{p_token:token});if(error)throw error;const weeks=(data||[]).map(Number).filter(Number.isFinite).sort((a,b)=>b-a);els.assemblyWeek.innerHTML='<option value="">Todas las semanas</option>'+weeks.map(w=>'<option value="'+w+'">Semana '+w+'</option>').join('');if(!selectLatest&&current&&weeks.includes(Number(current)))els.assemblyWeek.value=current;else if(weeks.length)els.assemblyWeek.value=String(weeks[0]);}
+ catch(e){console.warn("No fue posible actualizar semanas de Ensamble",e)}
+}
 async function loadAssembly(){
- const token=sessionStorage.getItem(APP_SESSION_KEY);if(!token){els.assemblyStatus.textContent="Inicia sesión para consultar.";return}
+ const token=getAppToken();if(!token){els.assemblyStatus.textContent="Inicia sesión para consultar.";return}
  els.loadAssembly.disabled=true;els.assemblyStatus.textContent="Consultando estado actual…";
  try{const client=await getSupabaseClient();const week=els.assemblyWeek.value?Number(els.assemblyWeek.value):null;const {data,error}=await client.rpc("sgp_consultar_ensamble",{p_token:token,p_semana:week,p_linea:els.assemblyLine.value});if(error)throw error;assemblyRows=data.filas||[];renderAssembly();els.assemblyStatus.textContent=`Actualizado ✓ ${assemblyRows.length} órdenes · datos actuales de SGP.`;}
  catch(e){els.assemblyStatus.textContent="Consulta rechazada ✕ "+e.message}finally{els.loadAssembly.disabled=false}
@@ -875,7 +881,7 @@ async function commitProgramming() {
     refreshWeeklyPackageGate();
   }
 }
-els.nav.forEach(button => button.addEventListener("click", () => {openView(button.dataset.view);if(button.dataset.view==='inicio')loadHomeBalances();if(button.dataset.view==='configuracion')loadUserAdmin();if(button.dataset.view==='picking')loadPicking()}));
+els.nav.forEach(button => button.addEventListener("click", async () => {openView(button.dataset.view);if(button.dataset.view==='inicio')loadHomeBalances();if(button.dataset.view==='configuracion')loadUserAdmin();if(button.dataset.view==='picking')loadPicking();if(button.dataset.view==='ensamble'){await refreshAssemblyWeeks(true);loadAssembly()}}));
 function getISOWeekNumber(date=new Date()){
   const d=new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate()));
   const day=d.getUTCDay()||7;
