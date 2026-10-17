@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SGP ONE LAB</title>
-  <link rel="stylesheet" href="styles.css?v=261" />
+  <link rel="stylesheet" href="styles.css?v=262" />
   <script src="config.js?v=20261008-1300"></script>
 </head>
 <body>
@@ -48,7 +48,7 @@
           <input id="authPassword" type="password" placeholder="Contraseña" autocomplete="current-password" />
           <button id="authLogin">Ingresar</button>
           <button id="authLogout" hidden>Cerrar sesión</button>
-          <span class="status">LAB v261</span>
+          <span class="status">LAB v262</span>
         </div>
       </header>
 
@@ -77,7 +77,7 @@
         <section class="view" data-view-panel="ensamble" hidden>
           <div class="page-heading"><span class="eyebrow">Operación</span><h2>Ensamble</h2><p>Vista provisional para seguimiento de las órdenes y sus cambios diarios.</p></div>
           <div class="assembly-tabs"><button class="active" id="assemblySheetTab">Hoja de ensamble</button><button id="assemblyLocationReportTab">Reporte de ubicaciones</button></div><div id="assemblySheetPanel"><section class="toolbar assembly-toolbar">
-            <select id="assemblyWeek"><option value="">Todas las semanas</option><option value="41">Semana 41</option><option value="42" selected>Semana 42</option></select>
+            <select id="assemblyWeek"><option value="">Cargando semanas…</option></select>
             <select id="assemblyLine"><option value="PANELES_2">PANELES_2</option><option value="FRAMES_2">FRAMES_2</option></select>
             <select id="assemblyState"><option value="">Todos los estados</option><option value="ABIERTA">Abierta</option><option value="CERRADA">Cerrada</option><option value="ENSAMBLADA">Ensamblada</option><option value="FINALIZADA">Finalizada</option></select>
             <input id="assemblySearch" type="search" placeholder="Buscar ID, producción, sistema, reserva, proyecto…" />
@@ -365,7 +365,7 @@
     </div>
   </div>
 
-  <script type="module" src="app.js?v=261"></script>
+  <script type="module" src="app.js?v=262"></script>
 <div id="userModal" class="modal-backdrop rec-overlay" hidden><div class="modal-card user-modal-card"><div class="modal-header"><div><strong id="userModalTitle">Nuevo usuario</strong><small>Cuenta y permisos de acceso</small></div><button id="userModalClose" class="modal-close">×</button></div><div class="user-form"><div class="rec-grid"><label>Usuario<input id="userName" autocomplete="off"></label><label>Nombre completo<input id="userFullName"></label><label>Rol<select id="userRole"><option>COORDINADOR</option><option>LIDER MECANIZADO</option><option>LIDER LINEA</option><option>RECEPCION</option><option>PATINADOR</option><option>PICKING</option><option>SUPERVISOR DE PICKING</option><option>CONSULTA</option><option>ADMINISTRADOR</option></select></label><label>Contraseña<input id="userPassword" type="password" placeholder="Vacío = conservar contraseña"></label><div class="password-reset-wrap"><button id="resetPasswordBtn" type="button" hidden>↻ Restablecer contraseña</button><small>Asigna una nueva contraseña temporal al usuario.</small></div></div><label class="user-active"><input id="userActive" type="checkbox" checked> Usuario activo</label><div class="access-title"><b>Ventanas permitidas</b><span>El usuario solo verá las opciones seleccionadas.</span></div><div id="userAccessGrid" class="access-grid"></div></div><div class="modal-actions"><button id="userCancel">Cancelar</button><button id="userSave" class="primary">Guardar usuario</button></div></div></div>
 </body>
 </html>
