@@ -1503,3 +1503,12 @@ button.active,[aria-pressed="true"]{border-color:#0865ed}
 /* Semana de programación en pendientes de aluminio */
 .pending-week-badge{display:inline-flex;align-items:center;white-space:nowrap;margin-left:6px;padding:2px 7px;border:1px solid #b9d5ff;border-radius:999px;background:#edf5ff;color:#0756b8;font-size:10px;font-weight:800;letter-spacing:.03em;vertical-align:middle}
 .repo-table .pending-week-badge{margin-left:0;font-size:11px}
+
+/* Orden y primera columna de semana en pendientes de Producción */
+.al-pending-sort{display:flex;align-items:center;gap:10px;padding:7px 14px;border-bottom:1px solid #f0cf82;background:#fffaf0}
+.al-pending-sort button{border:1px solid #a9c8ef;background:#fff;color:#123a68;border-radius:8px;padding:5px 10px;font-weight:800;cursor:pointer}
+.al-pending-sort span{font-size:11px;color:#65758a}
+.al-pending-row{grid-template-columns:76px minmax(0,1fr) minmax(150px,.48fr) minmax(180px,.3fr)!important}
+.al-pending-week{display:flex;align-items:flex-start;justify-content:center;padding-top:2px}
+.al-pending-week b{display:inline-flex;white-space:nowrap;padding:5px 8px;border-radius:8px;background:#e9f3ff;color:#0756b8;font-size:11px}
+@media(max-width:700px){.al-pending-row{grid-template-columns:62px minmax(0,1fr)!important}.al-pending-row>.repo-actions,.al-pending-row>div:nth-child(3){grid-column:2}.al-pending-sort{flex-wrap:wrap}}
