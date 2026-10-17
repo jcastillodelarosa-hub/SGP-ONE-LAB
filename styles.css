@@ -1499,3 +1499,7 @@ button.active,[aria-pressed="true"]{border-color:#0865ed}
 .repo-section-help{margin:-2px 0 12px;color:#6d819f;font-size:13px}
 .repo-resolved-table tbody tr{background:#f7fbff}
 .repo-resolved-badge{display:inline-flex;align-items:center;padding:7px 12px;border-radius:999px;background:#e5f7ec;color:#08783d;font-weight:800;font-size:12px}
+
+/* Semana de programación en pendientes de aluminio */
+.pending-week-badge{display:inline-flex;align-items:center;white-space:nowrap;margin-left:6px;padding:2px 7px;border:1px solid #b9d5ff;border-radius:999px;background:#edf5ff;color:#0756b8;font-size:10px;font-weight:800;letter-spacing:.03em;vertical-align:middle}
+.repo-table .pending-week-badge{margin-left:0;font-size:11px}
