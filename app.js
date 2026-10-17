@@ -1368,6 +1368,93 @@ async function loadAluminumPending(){
   host.querySelectorAll('[data-repo-state]').forEach(sel=>sel.onchange=async()=>{const {error}=await db.rpc('sgp_aluminio_pendiente_estado',{p_token:getAppToken(),p_id:sel.dataset.repoState,p_estado:sel.value,p_observacion:null});if(error){alert(error.message);return}await loadAluminumPending()})
  }catch(e){console.error('Pendientes aluminio:',e)}
 }
+
+// Reporte de entrega de turno de mecanizado
+function shiftReportState(row){return String(row?.ejecucion?.estado||'PROGRAMADA').toUpperCase()}
+function shiftReportExecuted(row){
+ const qty=Number(row?.cantidad_programada||0),st=shiftReportState(row);
+ const saved=Number(row?.ejecucion?.cantidad_procesada||0);
+ if(st==='PROCESADO')return qty;
+ return Math.max(0,Math.min(qty,saved));
+}
+function shiftReportWeek(date){const d=new Date(date+'T12:00:00'),jan4=new Date(d.getFullYear(),0,4,12),start=new Date(jan4);start.setDate(jan4.getDate()-((jan4.getDay()+6)%7));return Math.floor((d-start)/604800000)+1}
+async function buildShiftReportData(date,turno){
+ const db=await getSupabaseClient();
+ let q=db.from('sgp_mecanizado_programacion').select('*').eq('fecha_programacion',date).neq('estado','CANCELADA').order('prioridad');
+ if(turno)q=q.eq('turno',turno);
+ const {data:program,error}=await q;if(error)throw error;
+ const rows=program||[],ids=rows.map(x=>x.id_programacion);
+ let exec=[],orderStates=[],nov=[];
+ if(ids.length){
+  const [er,or,nr]=await Promise.all([
+   db.from('sgp_mecanizado_ejecucion').select('*').in('id_programacion',ids),
+   db.from('sgp_mecanizado_ejecucion_orden').select('*').in('id_programacion',ids),
+   db.from('sgp_mecanizado_novedades').select('*').in('id_programacion',ids)
+  ]);
+  if(er.error)throw er.error;if(or.error)throw or.error;if(nr.error)throw nr.error;
+  exec=er.data||[];orderStates=or.data||[];nov=nr.data||[];
+ }
+ const detailed=[];
+ for(const x of rows){
+  const oe=orderStates.filter(e=>e.id_programacion===x.id_programacion);
+  const re=exec.find(e=>e.id_programacion===x.id_programacion);
+  let orders=[];
+  try{const dr=await db.rpc('sgp_mecanizado_ordenes_programacion',{p_token:getAppToken(),p_id_programacion:x.id_programacion});if(!dr.error)orders=dr.data||[]}catch(_){}
+  const programmed=Number(x.cantidad_programada||0);
+  let executed=0,state=re?.estado||'PROGRAMADA';
+  if(orders.length){
+   executed=orders.reduce((n,o)=>{const os=oe.find(e=>String(e.produccion)===String(o.produccion));return n+(String(os?.estado||state)==='PROCESADO'?Number(o.cantidad||0):0)},0);
+   if(oe.length){state=oe.every(e=>e.estado==='PROCESADO')?'PROCESADO':oe.some(e=>e.estado==='MECANIZADO')?'MECANIZADO':oe.some(e=>e.estado==='CORTE')?'CORTE':state}
+  }else executed=shiftReportExecuted({...x,ejecucion:re});
+  detailed.push({...x,ejecucion:re,novedades:nov.filter(n=>n.id_programacion===x.id_programacion),_orders:orders,_orderStates:oe,_executed:Math.min(programmed,executed),_state:state});
+ }
+ let cq=db.from('sgp_mecanizado_reportes_turno').select('comentario_general').eq('fecha',date);
+ if(turno)cq=cq.eq('turno',turno);else cq=cq.eq('turno','TODOS');
+ const cr=await cq.maybeSingle();
+ return {date,turno:turno||'',rows:detailed,comment:cr.data?.comentario_general||''};
+}
+function shiftReportSummary(d){
+ const programmed=d.rows.reduce((n,x)=>n+Number(x.cantidad_programada||0),0);
+ const executed=d.rows.reduce((n,x)=>n+Number(x._executed||0),0);
+ const pending=Math.max(0,programmed-executed),pct=programmed?Math.round(executed/programmed*100):0;
+ const systems={};d.rows.forEach(x=>{const k=x.sistema||'SIN SISTEMA',g=systems[k]||(systems[k]={system:k,programmed:0,complete:0});g.programmed+=Number(x.cantidad_programada||0);g.complete+=Number(x._executed||0)});
+ return {programmed,executed,pending,pct,systems:Object.values(systems).map(x=>({...x,inProcess:Math.max(0,x.programmed-x.complete)}))};
+}
+function shiftReportEsc(v){return escapeHtml(v==null?'—':String(v))}
+function shiftReportPreviewHtml(d){
+ const s=shiftReportSummary(d),week=shiftReportWeek(d.date),pending=d.rows.filter(x=>Number(x._executed||0)<Number(x.cantidad_programada||0));
+ const nov=d.rows.flatMap(x=>(x.novedades||[]).map(n=>({...n,reserva:x.reserva})));
+ const fmtDate=new Date(d.date+'T12:00:00').toLocaleDateString('es-CO',{day:'numeric',month:'long',year:'numeric'});
+ const stateBadge=st=>'<span class="shift-r-state '+prodStateClass(st)+'">'+shiftReportEsc(st)+'</span>';
+ return '<div class="shift-report-sheet">'+
+ '<header class="shift-r-head"><div><b>SGP ONE</b><span>PLATAFORMA DE PRODUCCIÓN</span><strong>MECANIZADO</strong></div><div><h2>REPORTE DE TURNO</h2><p>'+shiftReportEsc(fmtDate)+' · '+shiftReportEsc(d.turno||'Todos los turnos')+'</p></div><div><small>Usuario</small><b>'+shiftReportEsc(currentAuth?.nombre||currentAuth?.usuario||'SGP ONE')+'</b></div></header>'+
+ '<section><h3>RESUMEN DEL TURNO</h3><div class="shift-r-kpis"><article><span>Programado</span><b>'+s.programmed+'</b><small>unidades</small></article><article class="ok"><span>Ejecutado</span><b>'+s.executed+'</b><small>unidades</small></article><article class="warn"><span>Pendiente</span><b>'+s.pending+'</b><small>unidades</small></article><article><span>Avance del turno</span><b>'+s.pct+'%</b><small>'+s.executed+' / '+s.programmed+'</small></article></div><div class="shift-r-progress"><i style="width:'+s.pct+'%"></i></div></section>'+
+ '<div class="shift-r-topgrid"><section><h3>AVANCE POR SISTEMA</h3><table><thead><tr><th>Sistema</th><th>Programadas</th><th>Completas</th><th>En proceso</th></tr></thead><tbody>'+s.systems.map(x=>'<tr><th>'+shiftReportEsc(x.system)+'</th><td>'+x.programmed+'</td><td><b class="shift-r-complete">'+x.complete+'</b></td><td><b class="shift-r-process">'+x.inProcess+'</b></td></tr>').join('')+'</tbody></table></section><section><h3>COMENTARIO GENERAL DEL TURNO</h3><div class="shift-r-comment">'+shiftReportEsc(d.comment||'Sin comentario general registrado.').replaceAll('\n','<br>')+'</div></section></div>'+
+ '<section><h3>PROGRAMACIÓN VS EJECUCIÓN (POR RESERVA)</h3><div class="shift-r-tablewrap"><table><thead><tr><th>SEM.</th><th>PARTE</th><th>RESERVA</th><th>ORDEN / PROYECTO</th><th>SISTEMA</th><th>PROGRAMADO</th><th>EJECUTADO</th><th>SALDO</th><th>ESTADO</th></tr></thead><tbody>'+d.rows.map(x=>{const saldo=Math.max(0,Number(x.cantidad_programada||0)-Number(x._executed||0)),part=x.prioridad_semanal||'—',order=x._orders?.length?x._orders.map(o=>o.produccion||o.proyecto).filter(Boolean).slice(0,2).join(' / '):(x.produccion||'—');return '<tr><td>'+week+'</td><td>'+shiftReportEsc(part)+'</td><td>'+shiftReportEsc(x.reserva)+'</td><td>'+shiftReportEsc(order)+'</td><td>'+shiftReportEsc(x.sistema)+'</td><td>'+Number(x.cantidad_programada||0)+'</td><td>'+Number(x._executed||0)+'</td><td>'+saldo+'</td><td>'+stateBadge(x._state)+'</td></tr>'}).join('')+'</tbody></table></div></section>'+
+ '<div class="shift-r-bottomgrid"><section><h3>PENDIENTES PARA EL SIGUIENTE TURNO</h3><table><thead><tr><th>Reserva</th><th>Sistema</th><th>Saldo</th><th>Estado</th><th>Observación</th></tr></thead><tbody>'+(pending.length?pending.map(x=>'<tr><td>'+shiftReportEsc(x.reserva)+'</td><td>'+shiftReportEsc(x.sistema)+'</td><td>'+Math.max(0,Number(x.cantidad_programada||0)-Number(x._executed||0))+'</td><td>'+stateBadge(x._state)+'</td><td>'+shiftReportEsc(x.ejecucion?.observacion||x.observacion||'—')+'</td></tr>').join(''):'<tr><td colspan="5">Sin pendientes.</td></tr>')+'</tbody></table></section><section><h3>NOVEDADES DEL TURNO</h3><table><thead><tr><th>Reserva</th><th>Orden</th><th>Novedad</th><th>Estado</th></tr></thead><tbody>'+(nov.length?nov.map(n=>'<tr><td>'+shiftReportEsc(n.reserva)+'</td><td>'+shiftReportEsc(n.produccion||'—')+'</td><td>'+shiftReportEsc((n.tipo||'')+(n.observacion?' · '+n.observacion:''))+'</td><td>'+shiftReportEsc(n.estado||'ABIERTA')+'</td></tr>').join(''):'<tr><td colspan="4">Sin novedades registradas.</td></tr>')+'</tbody></table></section></div>'+
+ '<footer><b>SGP ONE</b><span>Plataforma de Producción · Reporte de Turno · Mecanizado</span></footer></div>';
+}
+async function saveShiftReportComment(d,comment){
+ const db=await getSupabaseClient(),turno=d.turno||'TODOS';
+ const {error}=await db.from('sgp_mecanizado_reportes_turno').upsert({fecha:d.date,turno,comentario_general:comment,usuario:currentAuth?.usuario||'',actualizado_en:new Date().toISOString()},{onConflict:'fecha,turno'});if(error)throw error;d.comment=comment;
+}
+async function openShiftReport(){
+ const date=document.querySelector('#prodDate')?.value,turno=document.querySelector('#prodShift')?.value||'';
+ if(!date)return alert('Selecciona la fecha del reporte.');
+ try{
+  const d=await buildShiftReportData(date,turno);let m=document.querySelector('#shiftReportModal');
+  if(!m){m=document.createElement('div');m.id='shiftReportModal';m.className='rec-overlay shift-report-overlay';document.body.appendChild(m)}
+  m.innerHTML='<div class="shift-report-modal"><div class="shift-report-modal-head"><div><small>REPORTE DE TURNO</small><h3>Generar reporte de turno</h3></div><button type="button" class="modal-close" data-shift-report-close>×</button></div><div class="shift-report-work"><aside><label>Fecha<input type="date" data-shift-report-date value="'+shiftReportEsc(date)+'" disabled></label><label>Turno<input value="'+shiftReportEsc(turno||'Todos los turnos')+'" disabled></label><div class="shift-report-mini">'+(()=>{const z=shiftReportSummary(d);return '<span>Programado <b>'+z.programmed+'</b></span><span>Ejecutado <b>'+z.executed+'</b></span><span>Pendiente <b>'+z.pending+'</b></span><span>Avance <b>'+z.pct+'%</b></span>'})()+'</div><label>Comentario general del turno<textarea data-shift-report-comment rows="8" maxlength="1200" placeholder="Resumen para el líder del siguiente turno y coordinación...">'+shiftReportEsc(d.comment)+'</textarea></label><p class="shift-report-help">El comentario se guarda por fecha y turno y se incluye en PDF e imagen.</p><div class="shift-report-actions"><button type="button" data-shift-preview>Vista previa</button><button type="button" class="primary" data-shift-pdf>Generar PDF</button><button type="button" data-shift-image>Generar imagen</button></div></aside><main data-shift-report-preview>'+shiftReportPreviewHtml(d)+'</main></div></div>';
+  m.hidden=false;m.scrollTop=0;
+  const comment=m.querySelector('[data-shift-report-comment]'),preview=m.querySelector('[data-shift-report-preview]');
+  const refresh=async()=>{await saveShiftReportComment(d,comment.value.trim());preview.innerHTML=shiftReportPreviewHtml(d)};
+  m.querySelector('[data-shift-report-close]').onclick=()=>m.hidden=true;
+  m.querySelector('[data-shift-preview]').onclick=refresh;
+  m.querySelector('[data-shift-image]').onclick=async()=>{try{await refresh();await ensureReportExportLibs();const el=preview.querySelector('.shift-report-sheet'),c=await html2canvas(el,{scale:2,useCORS:true,backgroundColor:'#fff',windowWidth:el.scrollWidth,windowHeight:el.scrollHeight}),a=document.createElement('a');a.download='SGP_Reporte_Turno_'+date+'_'+(turno||'TODOS').replaceAll(' ','_')+'.png';a.href=c.toDataURL('image/png');a.click()}catch(e){alert('No fue posible generar la imagen: '+e.message)}};
+  m.querySelector('[data-shift-pdf]').onclick=async()=>{try{await refresh();await ensureReportExportLibs();const el=preview.querySelector('.shift-report-sheet'),c=await html2canvas(el,{scale:2,useCORS:true,backgroundColor:'#fff',windowWidth:el.scrollWidth,windowHeight:el.scrollHeight}),{jsPDF}=window.jspdf,pdf=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'}),pw=297,ph=210,margin=6,w=pw-margin*2,h=c.height*w/c.width,img=c.toDataURL('image/jpeg',.95);let y=margin,left=h;pdf.addImage(img,'JPEG',margin,y,w,h);left-=ph-margin*2;while(left>0){y=-(h-left)+margin;pdf.addPage();pdf.addImage(img,'JPEG',margin,y,w,h);left-=ph-margin*2}pdf.save('SGP_Reporte_Turno_'+date+'_'+(turno||'TODOS').replaceAll(' ','_')+'.pdf')}catch(e){alert('No fue posible generar el PDF: '+e.message)}};
+ }catch(e){alert('No fue posible preparar el reporte: '+e.message)}
+}
+
 async function loadProductionBoard(){
  loadAluminumPending();
  const date=document.querySelector('#prodDate')?.value,shift=document.querySelector('#prodShift')?.value;if(!date)return;
@@ -1419,7 +1506,7 @@ async function saveProductionExecution(id){const row=prodRows.find(x=>x.id_progr
 async function openProductionNovelty(id,production=null){prodNoveltyTarget=id;prodNoveltyProduction=production;const r=prodRows.find(x=>x.id_programacion===id);document.querySelector('#prodNoveltyContext').textContent=(r?.reserva||'')+' · Parte '+(r?.prioridad_semanal||'—')+(production?' · Orden '+production:'');document.querySelector('#prodNoveltyModal').hidden=false;document.querySelector('#prodNoveltyOrigin').value='';document.querySelector('#prodNoveltyOrigin').dispatchEvent(new Event('change'));const inp=document.querySelector('#prodNoveltyProfile'),dl=document.querySelector('#prodProfileCatalog'),len=document.querySelector('#prodNoveltyLength');inp.value='';len.value='';let timer;const search=async()=>{try{const db=await getSupabaseClient(),{data,error}=await db.rpc('sgp_mecanizado_perfiles_reserva',{p_token:getAppToken(),p_reserva:String(r?.reserva||''),p_buscar:inp.value.trim()});if(error)throw error;dl.innerHTML=(data||[]).map(p=>'<option value="'+escapeHtml(p.perfil)+'" data-length="'+escapeHtml(p.longitud??'')+'">'+escapeHtml(p.descripcion||'')+' · '+escapeHtml(p.longitud??'—')+' pulg</option>').join('')}catch(e){dl.innerHTML=''}};inp.oninput=()=>{clearTimeout(timer);timer=setTimeout(search,180)};inp.onchange=()=>{const opt=[...dl.options].find(o=>o.value===inp.value);if(opt?.dataset.length)len.value=opt.dataset.length};await search()}
 document.querySelector('#prodNoveltyOrigin')?.addEventListener('change',e=>{const o=e.target.value,t=document.querySelector('#prodNoveltyType'),lab=document.querySelector('#prodNoveltyRefLabel');t.innerHTML='<option value="">Seleccionar…</option>'+((noveltyTypes[o]||[]).map(x=>'<option>'+x+'</option>').join(''));lab.firstChild.textContent=o==='MECANIZADO_MAQUINA'?'Ticket mantenimiento ':['INGENIERIA','CALIDAD'].includes(o)?'Número de novedad ':'Número de NC ';});
 document.querySelector('#prodNoveltySave')?.addEventListener('click',async()=>{const o=document.querySelector('#prodNoveltyOrigin').value,t=document.querySelector('#prodNoveltyType').value,ref=document.querySelector('#prodNoveltyRef').value.trim();if(!o||!t)return alert('Selecciona origen y tipo de novedad.');if((o==='MECANIZADO_PERSONAL'||o==='MECANIZADO_MAQUINA'||o==='INGENIERIA'||o==='CALIDAD')&&!ref)return alert('Debes suministrar '+(o==='MECANIZADO_MAQUINA'?'el ticket de mantenimiento':o==='MECANIZADO_PERSONAL'?'el número de NC':'el número de novedad')+'.');const payload={id_programacion:prodNoveltyTarget,produccion:prodNoveltyProduction||null,origen:o,tipo:t,perfil:document.querySelector('#prodNoveltyProfile').value,longitud:Number(document.querySelector('#prodNoveltyLength').value)||null,cantidad:Number(document.querySelector('#prodNoveltyQty').value)||null,cortes_afectados:document.querySelector('#prodNoveltyCuts').value,observacion:document.querySelector('#prodNoveltyObs').value,usuario:currentAuth?.usuario||'',estado:ref?'REPORTADA':'PENDIENTE_RESOLVER'};if(o==='MECANIZADO_MAQUINA')payload.ticket_mtto=ref;else if(['INGENIERIA','CALIDAD'].includes(o))payload.numero_novedad=ref;else payload.numero_nc=ref;try{const db=await getSupabaseClient(),{error}=await db.from('sgp_mecanizado_novedades').insert(payload);if(error)throw error;const perfil=payload.perfil?.trim(),qty=Number(payload.cantidad||0);if(perfil&&qty>0){const ap=await db.rpc('sgp_aluminio_pendiente_crear',{p_token:getAppToken(),p_reserva:(prodRows.find(x=>x.id_programacion===prodNoveltyTarget)||{}).reserva||null,p_produccion:prodNoveltyProduction||null,p_perfil:perfil,p_cantidad:qty,p_longitud:payload.longitud,p_origen:'PRODUCCION',p_causa:o+' · '+t,p_observacion:payload.observacion||null});if(ap.error)console.error('No se pudo crear pendiente de aluminio',ap.error)}document.querySelector('#prodNoveltyModal').hidden=true;await loadProductionBoard()}catch(e){alert('No fue posible guardar la novedad: '+e.message)}});
-document.querySelector('#prodRefresh')?.addEventListener('click',loadProductionBoard);document.querySelector('#prodNoveltyClose')?.addEventListener('click',()=>document.querySelector('#prodNoveltyModal').hidden=true);document.querySelector('#prodNoveltyCancel')?.addEventListener('click',()=>document.querySelector('#prodNoveltyModal').hidden=true);
+document.querySelector('#prodShiftReport')?.addEventListener('click',openShiftReport);document.querySelector('#prodRefresh')?.addEventListener('click',loadProductionBoard);document.querySelector('#prodNoveltyClose')?.addEventListener('click',()=>document.querySelector('#prodNoveltyModal').hidden=true);document.querySelector('#prodNoveltyCancel')?.addEventListener('click',()=>document.querySelector('#prodNoveltyModal').hidden=true);
 if(document.querySelector('#prodDate'))document.querySelector('#prodDate').value=new Date().toISOString().slice(0,10);
 
 // UI scale preference v233
