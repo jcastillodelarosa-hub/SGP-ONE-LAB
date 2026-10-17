@@ -1524,3 +1524,13 @@ button.active,[aria-pressed="true"]{border-color:#0865ed}
 .shift-report-sheet section>h3{margin:14px 0 7px;color:#0756b8;font-size:12px}.shift-r-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.shift-r-kpis article{border:1px solid #d3e2f5;border-radius:10px;padding:10px;text-align:center;background:#fbfdff}.shift-r-kpis span,.shift-r-kpis small{display:block;font-size:9px}.shift-r-kpis b{display:block;color:#075fd7;font-size:24px}.shift-r-kpis .ok b{color:#139451}.shift-r-kpis .warn b{color:#ec7915}.shift-r-progress{height:7px;margin:8px 0;border-radius:999px;background:#e3edf8;overflow:hidden}.shift-r-progress i{display:block;height:100%;background:#0865ed;border-radius:999px}
 .shift-r-topgrid{display:grid;grid-template-columns:1.15fr .85fr;gap:10px}.shift-r-bottomgrid{display:grid;grid-template-columns:1.25fr .75fr;gap:10px}.shift-report-sheet section{min-width:0}.shift-report-sheet table{width:100%;border-collapse:collapse;font-size:8px}.shift-report-sheet th,.shift-report-sheet td{padding:6px;border:1px solid #d7e3f1;text-align:left;vertical-align:middle}.shift-report-sheet thead th{background:#edf5ff;color:#143b68;font-size:7px}.shift-r-complete,.shift-r-process{display:inline-flex;min-width:25px;justify-content:center;padding:3px 6px;border-radius:999px}.shift-r-complete{background:#dcf7e5;color:#087b3e}.shift-r-process{background:#fff0d8;color:#c85d00}.shift-r-comment{min-height:90px;padding:10px;border:1px solid #d5e3f4;border-radius:9px;background:#fbfdff;font-size:10px;line-height:1.45}.shift-r-tablewrap{overflow:hidden}.shift-r-state{display:inline-flex;justify-content:center;min-width:65px;padding:4px 6px;border-radius:7px;font-size:7px;font-weight:900}.shift-report-sheet footer{display:flex;justify-content:space-between;margin-top:14px;padding-top:8px;border-top:2px solid #0b70f5;font-size:8px;color:#71849b}.shift-report-sheet footer b{color:#0865ed}
 @media(max-width:900px){.shift-report-work{grid-template-columns:1fr}.shift-report-work>aside{position:static}.shift-report-work>main{overflow:auto}.prod-filters{flex-wrap:wrap}.prod-shift-report-btn{width:100%}}
+
+
+/* Reporte turno v265 */
+.shift-r-topgrid,.shift-r-bottomgrid{align-items:start}
+.shift-r-topgrid>section,.shift-r-bottomgrid>section{min-width:0;overflow:hidden}
+.shift-r-comment{box-sizing:border-box;width:100%;min-height:104px;overflow-wrap:anywhere}
+.shift-r-topgrid table,.shift-r-bottomgrid table{table-layout:fixed}
+.shift-r-topgrid th,.shift-r-topgrid td,.shift-r-bottomgrid th,.shift-r-bottomgrid td{overflow-wrap:anywhere}
+.shift-r-topgrid{grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr)}
+.shift-r-bottomgrid{grid-template-columns:minmax(0,1.25fr) minmax(0,.75fr)}
