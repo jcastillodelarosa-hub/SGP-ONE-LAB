@@ -899,8 +899,10 @@ async function loadHomeBalances(){
   const db=await getSupabaseClient();
   const res=await db.rpc('sgp_resumen_saldos_portada',{p_token:getAppToken()});
   if(res.error)throw res.error;
-  homeBalanceRows=res.data?.filas||[];const week=getISOWeekNumber(),sums=new Map();
+  homeBalanceRows=res.data?.filas||[];const sums=new Map();
   homeBalanceRows.forEach(r=>{const w=Number(r.semana_actual);if(!Number.isFinite(w))return;const x=sums.get(w)||{week:w,ens:0,pack:0};x.ens+=Number(r.saldo_ensamble||0);x.pack+=Number(r.saldo_empaque||0);sums.set(w,x)});
+  const loadedWeeks=[...sums.keys()].filter(Number.isFinite),week=loadedWeeks.length?Math.max(...loadedWeeks):getISOWeekNumber();
+  const homeWeek=document.querySelector("#homeCurrentWeek");if(homeWeek)homeWeek.textContent=String(week);
   const past=[...sums.values()].filter(x=>x.week<week&&(x.ens>0||x.pack>0)).sort((x,y)=>x.week-y.week),now=sums.get(week)||{week,ens:0,pack:0};
   count.textContent=String(past.length);
   overdue.innerHTML=past.length?past.map(x=>'<button type="button" class="home-balance-week overdue" data-home-balance-week="'+x.week+'"><strong>Semana '+x.week+'</strong><span class="home-balance-area" data-home-area="ensamble"><i>Ensamble</i><b>'+x.ens.toLocaleString('es-CO')+' <small>und</small></b></span><span class="home-balance-area" data-home-area="empaque"><i>Empaque</i><b>'+x.pack.toLocaleString('es-CO')+' <small>und</small></b></span></button>').join(''):'<div class="home-balance-empty ok">Sin saldos de semanas vencidas.</div>';
@@ -986,13 +988,11 @@ els.commit.addEventListener("click", commitProgramming);
 els.authLogin.addEventListener("click", requestCredentialAccess);
 els.authPassword?.addEventListener("keydown",e=>{if(e.key==="Enter")requestCredentialAccess()});
 els.authLogout.addEventListener("click", logout);
-refreshAuthStatus();
-
 refreshWeeklyTabs();
 try {
   openView("inicio");
-  loadHomeBalances();
   renderMecanizado();
+  refreshAuthStatus().then(()=>loadHomeBalances()).catch(error=>console.error("Error al validar sesión SGP ONE:",error));
 } catch (error) { console.error("Error al iniciar SGP ONE:", error); }
 
 
