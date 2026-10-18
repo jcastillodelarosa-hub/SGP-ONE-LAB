@@ -264,8 +264,8 @@ Nunca declarar una funcionalidad como implementada o publicada sin verificarlo.
 
 ### Definición
 - Una producción/orden puede tener más de una reserva de aluminio asociada en `reserva_al` (ej.: `A,B`).
-- La **reserva principal** es la reserva bajo la cual aparece/programa normalmente la orden. Las demás son **reservas compartidas/secundarias**.
-- Cada reserva compartida puede corresponder a un acabado diferente y puede, a su vez, ser una reserva principal de la semana para otras producciones.
+- La **reserva principal** es la reserva bajo la cual aparece/programa normalmente la orden. Las demás son **reservas asociadas/secundarias**. Tener varias reservas asociadas no implica por sí solo que exista una reserva compartida.
+- Cada reserva asociada puede corresponder a un acabado diferente. Solo se considera **reserva compartida** cuando una reserva asociada tiene identidad propia como reserva principal: posee prioridad asignada o aparece como primera/reserva principal de otra producción o grupo de producciones.
 - La orden puede requerir unidades/material de más de una reserva/acabado, aunque la orden solo sea visible operativamente bajo la reserva principal.
 - SGP_ONE **no debe inferir ni repartir cantidades de ventanas por reserva compartida** si la fuente no proporciona esa distribución. El objetivo es alertar y mantener trazabilidad, no inventar cantidades.
 
@@ -275,8 +275,8 @@ Nunca declarar una funcionalidad como implementada o publicada sin verificarlo.
 - La semana pertenece a la programación de la producción/reserva; no se calcula por fecha de mecanizado, entrega o reporte.
 
 ### Comportamiento funcional requerido
-- Toda orden con 2 o más reservas debe quedar identificada como **RESERVA COMPARTIDA**.
-- Debe mostrarse una alerta visible en **Programación Semanal, Mecanizado/Producción, Picking y Ensamble**.
+- Una orden con 2 o más reservas se considera **MULTI-RESERVA**, pero solo queda identificada como **RESERVA COMPARTIDA** si al menos una reserva asociada posee prioridad propia o actúa como primera/reserva principal de otra producción o grupo de producciones.
+- La alerta `⚠ RESERVA COMPARTIDA` debe mostrarse en **Programación Semanal, Mecanizado/Producción, Picking y Ensamble** únicamente cuando se cumpla la regla anterior. Las órdenes multi-reserva no compartidas conservan sus relaciones reserva/acabado sin recibir esa alerta.
 - La alerta debe indicar como mínimo: reserva principal, reserva(s) compartida(s) y acabado asociado a cada reserva cuando sea posible resolverlo.
 - Cuando se programe o procese la reserva secundaria, el sistema debe advertir que esa reserva contiene material requerido por una producción que aparece bajo otra reserva principal.
 - La advertencia debe acompañar la orden durante mecanizado y Picking y permanecer visible en Ensamble para evitar que material de la reserva secundaria sea omitido.
@@ -287,13 +287,13 @@ Modelar la relación producción↔reservas como relación explícita 1:N. El ca
 
 
 ### Regla adicional — Pendientes de aluminio en órdenes con reserva compartida
-- Cuando una orden tenga reservas compartidas, al **reportar un pendiente de aluminio** el usuario debe seleccionar explícitamente a qué **reserva/acabado** corresponde el pendiente.
+- Cuando una orden tenga múltiples reservas asociadas, sea o no `RESERVA COMPARTIDA`, al **reportar un pendiente de aluminio** el usuario debe seleccionar explícitamente a qué **reserva/acabado** corresponde el pendiente.
 - Las opciones válidas deben provenir únicamente de las reservas asociadas a esa producción y de los acabados resueltos para cada reserva. Ejemplo: `Reserva A · Acabado X` / `Reserva B · Acabado Y`.
 - No inferir el acabado del pendiente solo desde el acabado principal de la producción.
 - El pendiente debe conservar la relación con la **reserva específica** seleccionada y su **acabado específico**, aunque la orden aparezca operativamente bajo otra reserva principal.
 - Esta regla aplica a pendientes creados desde Mecanizado/Producción, Picking/Auditoría y cualquier flujo futuro que cree `sgp_aluminio_pendientes`.
 - Si la producción tiene una sola reserva, el sistema puede autoseleccionarla y mostrar su acabado sin pedir una elección adicional.
-- Si no es posible resolver el acabado de una reserva compartida, no inventarlo: mostrar la reserva y exigir aclaración antes de guardar el pendiente, o permitir `Acabado por confirmar` solo si la regla de negocio lo autoriza explícitamente.
+- Si no es posible resolver el acabado de una reserva asociada, no inventarlo: mostrar la reserva como `ACABADO POR CONFIRMAR` y exigir aclaración antes de guardar el pendiente.
 - El histórico del pendiente debe conservar el acabado elegido al momento del reporte; no depender únicamente de volver a calcularlo desde `sgp_producciones` en consultas posteriores.
 
 
@@ -360,3 +360,45 @@ Modelar la relación producción↔reservas como relación explícita 1:N. El ca
   - `1311960|PANELES_2`: principal `8684860 / CLEAR ANOD` + dos reservas secundarias cuyos acabados siguen sin fuente inequívoca; se mantienen sin inventar acabado y el formulario exige indicarlo antes de guardar un pendiente.
 - Permisos PostgREST validados para listado de reservas compartidas, creación de pendientes y despiece PANEL.
 - Estado final de esta etapa: **implementado y publicado**. Verificación visual/operativa en navegador queda pendiente de prueba del usuario.
+
+
+## 24. CONTINUIDAD 2026-10-18 — LAB v277 · MULTI-RESERVA ≠ RESERVA COMPARTIDA
+
+### Corrección de regla de negocio
+- Se corrige la interpretación introducida en v276: **tener 2 o más reservas asociadas no convierte automáticamente una producción en RESERVA COMPARTIDA**.
+- `MULTI-RESERVA` significa que la producción tiene más de una relación reserva↔acabado.
+- `RESERVA COMPARTIDA` solo aplica cuando al menos una reserva asociada posee prioridad asignada o funciona como primera/reserva principal de otra producción o grupo de producciones.
+- La clasificación se centraliza en Supabase mediante `sgp_reserva_es_principal` y `sgp_es_reserva_compartida`.
+
+### Relaciones reserva / acabado
+- `sgp_produccion_reservas_v` conserva todas las reservas asociadas y distingue `PRINCIPAL` / `ASOCIADA`.
+- Cada reserva asociada indica si además actúa como principal compartida mediante `es_principal_compartida`.
+- `sgp_reservas_por_produccion_json` sigue entregando todas las relaciones reserva/acabado, aunque la producción no sea RESERVA COMPARTIDA.
+- Se agrega `sgp_reservas_asociadas_listar` para que el frontend pueda consultar órdenes multi-reserva sin confundirlas con las realmente compartidas.
+- Cuando el acabado está resuelto, los selectores de pendientes muestran la combinación reserva + acabado y autocompletan el acabado. Si no existe fuente inequívoca, se muestra `ACABADO POR CONFIRMAR` y debe aclararse antes de guardar.
+
+### Dependencias actualizadas
+- Programación Semanal, Ensamble, detalle de Mecanizado, arrastre, Picking y recepción/auditoría usan `sgp_es_reserva_compartida` para el indicador real.
+- Picking conserva la apertura de piezas PANEL por múltiples acabados para cualquier orden **multi-reserva**, independientemente de que sea o no RESERVA COMPARTIDA.
+- Entrega y Auditoría validan que la reserva seleccionada pertenezca realmente a la producción siempre que exista `key_produccion`.
+- Los pendientes continúan guardando `reserva`, `reserva_principal`, `key_produccion`, `acabado_pendiente` y el indicador real `es_reserva_compartida`.
+
+### Frontend
+- El badge `⚠ RESERVA COMPARTIDA` solo aparece si se cumple la nueva regla.
+- Las órdenes multi-reserva no compartidas pueden abrir `Ver reservas y acabados` sin recibir el badge de compartida.
+- En Programación Semanal, el aviso global de una reserva compartida se muestra una sola vez en la primera fila visible de esa reserva, evitando repetirlo en todas sus producciones.
+- Los formularios de pendientes de Producción, Picking y Auditoría muestran las opciones reserva/acabado asociadas a la orden.
+
+### Validaciones realizadas
+- Caso `1307191|PANELES_2`: principal `8672143 / 2604 BERMUDA BRONZE` + asociada `8673372 / 2604 BONE WHITE`; `8673372` es principal propia → **RESERVA COMPARTIDA = SÍ**.
+- Casos `1307827|PANELES_2` y `1309381|PANELES_2`: asociada `8716291` sin prioridad ni uso como principal → **RESERVA COMPARTIDA = NO**.
+- Caso `1311960|PANELES_2`: tres reservas asociadas pero ninguna secundaria es principal propia → **MULTI-RESERVA = SÍ / RESERVA COMPARTIDA = NO**.
+- Diagnóstico actual PANELES_2: 35 producciones multi-reserva y 1 producción que cumple la regla de reserva compartida.
+- JavaScript syntax check del `app.js` publicado en `main`: **OK**.
+
+### Estado
+- Migración Supabase v277: **APLICADA**.
+- Frontend LAB v277 en GitHub `main`: **IMPLEMENTADO**.
+- Identificador/cache-bust `LAB v277`: **IMPLEMENTADO**.
+- Firebase Hosting: **pendiente de confirmación del workflow automático**.
+- Verificación visual/operativa: **PENDIENTE**.
