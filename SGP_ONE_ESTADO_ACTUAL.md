@@ -563,3 +563,53 @@ Modelar la relación producción↔reservas como relación explícita 1:N. El ca
 - Pruebas automáticas: **SUPERADAS**.
 - Firebase Hosting: **PUBLICADO**.
 - Validación visual por roles: **PENDIENTE**.
+
+
+## 28. CONTINUIDAD 2026-10-18 — LAB v281 · CORRECCIÓN REGRESIÓN VISUAL PDT
+
+### Evidencia de usuario
+- La prueba visual de LAB v280 detectó dos regresiones:
+  1. se sustituyó indebidamente el orden histórico de columnas y desapareció la columna Semana;
+  2. el botón `Acciones` se veía, pero su menú no se abría de forma visible/operativa en el navegador.
+- La captura de validación mostró además que OP/Producción podía invadir visualmente la columna Referencia por falta de ancho.
+
+### Diagnóstico
+- v280 reemplazó la tabla v279 en vez de conservar su estructura y añadir `Acciones`.
+- La tabla v279 aprobada usaba el orden:
+  `SEM. | OP | Reserva | Referencia | Acabado | Marca | Fabricación | Longitud | Cant. | NC | Enlace NC | Estado NC | Validación | Observación | Estado PDT`.
+- El menú v280 estaba renderizado dentro del árbol de la tabla/scroll. Aunque se intentó posicionarlo como fixed, seguía dependiendo del contenedor y del comportamiento del navegador.
+
+### Corrección LAB v281
+- Se restaura exactamente el orden histórico v279 y se agrega `Acciones` únicamente como columna final.
+- `Semana` vuelve a ser la primera columna con badge `SEM n`.
+- El encabezado Semana permite alternar orden ascendente/descendente con `Sem. ↑ / Sem. ↓`.
+- Se restaura `Estado PDT` con el comportamiento previo:
+  - roles sin permiso: estado visible;
+  - PDT POR VALIDAR: estado bloqueado para avance;
+  - PDT VALIDADO + rol autorizado: selector de estado físico.
+- `Acciones` conserva `Modificar`, `Validar`, `Ver detalle` e `Historial` según rol/estado.
+- El menú ya no vive dentro del scroll de la tabla: al pulsar el botón se crea `#repoActionPortal` directamente en `document.body`, con posición fixed y z-index superior. Se elimina al cerrar, hacer scroll o redimensionar.
+- La columna Acciones queda sticky a la derecha para mantener acceso aun con desplazamiento horizontal.
+- Se amplía el ancho mínimo de la tabla y el ancho de OP/Referencia/Acabado para evitar superposición de textos.
+
+### Regresión protegida
+- Los tests v281 verifican:
+  - versión/cache-bust v281;
+  - dos encabezados de Semana;
+  - orden completo de columnas;
+  - columna Acciones;
+  - portal montado en `document.body`;
+  - `Estado PDT` y `data-repo-window-state`;
+  - 16 columnas totales.
+- Se mantienen los tests v279/v280 de permisos, piezas PANEL reales, NC, reserva solución, historial y bloqueo de Mecanizado.
+
+### Publicación y pruebas
+- Commit funcional con columnas/portal + tests: pipeline con JavaScript syntax check **SUCCESS**, SGP ONE Tests **SUCCESS**, Verify LAB release package **SUCCESS** y Firebase Hosting **SUCCESS**.
+- La corrección no requiere cambios adicionales en Supabase.
+- Validación visual final de Semana + orden de columnas + apertura de Acciones en navegador del usuario: **PENDIENTE**.
+
+### Estado
+- LAB v281: **IMPLEMENTADA**.
+- Pruebas automáticas: **SUPERADAS**.
+- Firebase Hosting: **PUBLICADO**.
+- Validación visual: **PENDIENTE**.
