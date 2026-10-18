@@ -429,5 +429,6 @@ Modelar la relación producción↔reservas como relación explícita 1:N. El ca
 - Identificador/cache-bust `LAB v278`: **IMPLEMENTADO**.
 - JavaScript syntax check: **OK**.
 - Supabase: **sin cambio adicional en v278**; la clasificación de datos de v277 fue verificada como correcta para los casos anteriores.
-- Firebase Hosting: **pendiente de confirmación del workflow automático**.
-- Verificación visual final en navegador: **PENDIENTE**.
+- Firebase Hosting: **PUBLICADO**. El primer intento de v278 fue bloqueado por `scripts/verify-release.mjs`, que todavía exigía literalmente `LAB v276`; se corrigió el verificador para detectar dinámicamente la versión LAB y exigir que coincida con los cache-bust de `app.js` y `styles.css`.
+- Workflows posteriores a la corrección: **JavaScript syntax check = SUCCESS; SGP ONE Tests = SUCCESS; pages build and deployment = SUCCESS; Deploy SGP ONE to Firebase Hosting = SUCCESS**.
+- Verificación visual final en navegador: **PENDIENTE DE CONFIRMACIÓN DEL USUARIO**.
