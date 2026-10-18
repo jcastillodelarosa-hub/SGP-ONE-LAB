@@ -169,3 +169,14 @@ Nunca declarar una funcionalidad como implementada o publicada sin verificarlo.
 - Firebase Hosting queda como entorno operativo del LAB; GitHub Pages deja de considerarse publicación operativa.
 - No se modifican RPC, tablas, datos, estados ni reglas funcionales.
 - Verificación requerida después del deploy: abrir Firebase Hosting, confirmar LAB v266, ausencia de 404 de `vendor/supabase.js`, estado “Sin sesión”, realizar login y confirmar navegación/permisos.
+
+
+## 15. CONTINUIDAD 2026-10-18 — LAB v267 · ARRASTRE DE PENDIENTES ENTRE TURNOS
+- Regla aplicada: el arrastre se habilita **5 minutos después del inicio del turno entrante**: 07:05 para TURNO 1 y 19:05 para TURNO 2 (zona America/Bogota).
+- Las órdenes/producciones no culminadas permanecen en su programación original y se muestran adicionalmente arriba del turno entrante en “Pendientes del turno anterior”.
+- El arrastre reutiliza el `id_programacion` de origen; no crea una programación nueva ni elimina la original.
+- La culminación desde el turno entrante continúa guardándose sobre la ejecución/orden original, conservando historial de cambios.
+- La vista del turno original conserva la marca **NO CULMINADO** cuando el PROCESADO ocurrió después del corte del turno + 5 minutos.
+- Si el pendiente sigue sin PROCESADO, el RPC puede seguir mostrándolo en turnos posteriores; no se pierde por no haber culminado en el primer arrastre.
+- Se modificó `sgp_mecanizado_pendientes_turno` en Supabase y `app.js`; no se modificaron tablas ni otros módulos.
+- Estado: implementación aplicada en Supabase y GitHub. Publicación Firebase y prueba visual pendientes de confirmar.
