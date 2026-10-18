@@ -158,3 +158,14 @@ Nunca declarar una funcionalidad como implementada o publicada sin verificarlo.
 - Se conserva Supabase directa como backend; no se modifican tablas, RPC, estados ni reglas de negocio.
 - Versión visible incrementada a **LAB v266** y cache-busting de `styles.css` / `app.js` actualizado a 266.
 - Estado al registrar: implementado en código; publicación y verificación en navegador pendientes del workflow.
+
+
+## 14. CONTINUIDAD 2026-10-18 — ESTABILIZACIÓN LAB v266
+- Decisión: **v266 se estabiliza sin incrementar versión**, porque no se agrega funcionalidad; se corrige su paquete de publicación para recuperar acceso estable.
+- Supabase permanece como backend. El Gateway se desarrolla exclusivamente en `SGP_ONE_GOOGLE`; no se incorpora Gateway, SQL Connect ni Data Connect al LAB. Esta separación sigue el acuerdo del proyecto paralelo: Supabase permanece y el Gateway se valida aparte antes de integrarlo.
+- Se elimina del workflow del LAB la generación y bundle de SQL/Data Connect y se retira Firebase SDK como dependencia runtime del LAB.
+- El navegador utiliza exclusivamente el SDK Supabase local `./vendor/supabase.js`, generado antes del deploy. Se eliminan fallbacks CDN para que la operación no dependa de dominios externos bloqueables.
+- Se agrega `scripts/verify-release.mjs`: bloquea el despliegue si faltan archivos críticos, si falta `vendor/supabase.js`, si reaparecen Gateway/CDN/SQL Connect/Data Connect en el cliente o workflow, o si la versión deja de ser LAB v266.
+- Firebase Hosting queda como entorno operativo del LAB; GitHub Pages deja de considerarse publicación operativa.
+- No se modifican RPC, tablas, datos, estados ni reglas funcionales.
+- Verificación requerida después del deploy: abrir Firebase Hosting, confirmar LAB v266, ausencia de 404 de `vendor/supabase.js`, estado “Sin sesión”, realizar login y confirmar navegación/permisos.
