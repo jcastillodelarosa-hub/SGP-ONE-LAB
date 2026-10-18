@@ -180,3 +180,12 @@ Nunca declarar una funcionalidad como implementada o publicada sin verificarlo.
 - Si el pendiente sigue sin PROCESADO, el RPC puede seguir mostrándolo en turnos posteriores; no se pierde por no haber culminado en el primer arrastre.
 - Se modificó `sgp_mecanizado_pendientes_turno` en Supabase y `app.js`; no se modificaron tablas ni otros módulos.
 - Estado: implementación aplicada en Supabase y GitHub. Publicación Firebase y prueba visual pendientes de confirmar.
+
+
+### Corrección v267 — permiso RPC de arrastre
+- Durante la prueba real del 2026-10-18 se confirmó que el frontend no mostraba ningún arrastre aunque existían órdenes de TURNO 2 del 2026-10-17 en estado PROGRAMADA/CORTE.
+- Causa raíz: `sgp_mecanizado_pendientes_turno(text,date,text)` no tenía permiso EXECUTE para el rol PostgREST `anon`. El SGP usa sesión propia mediante `p_token`, por lo que las RPC operativas equivalentes sí están expuestas a `anon` y validan internamente el token/rol.
+- Se aplicó migración `grant_anon_mecanizado_pendientes_turno` concediendo únicamente EXECUTE a `anon`. La función mantiene `SECURITY DEFINER` y continúa validando `p_token` con `sgp_validar_sesion_rol`.
+- Verificación SQL: `has_function_privilege('anon', ..., 'EXECUTE') = true`.
+- No requiere nuevo despliegue Firebase: la corrección es inmediata en Supabase.
+- Pendiente: refrescar Producción del 2026-10-18 y verificar visualmente el bloque “Pendientes del turno anterior”.
