@@ -226,3 +226,14 @@ Nunca declarar una funcionalidad como implementada o publicada sin verificarlo.
 - Se conserva `SEM xx` al lado de la reserva tanto en filas normales como en arrastres.
 - No se modificaron estados, RPC de arrastre, Picking ni datos.
 - Estado: hotfix implementado en GitHub como LAB v271; publicación Firebase y verificación visual pendientes.
+
+
+## 20. CONTINUIDAD 2026-10-18 — LAB v272 · FUENTE CORRECTA DE SEMANA EN PRODUCCIÓN
+- Diagnóstico: LAB v270/v271 calculaba la semana a partir de `fecha_programacion`. Eso es incorrecto funcionalmente: la semana solicitada es la **semana de la producción cargada en Programación Semanal**, no la semana calendario del día en que mecanizado fue programado.
+- Fuente corregida: `sgp_producciones.semana_actual` con fallback `semana_base`. Para el arrastre el RPC ya devuelve esa semana; para programación normal deja de calcularse desde la fecha.
+- Validación de datos: reserva 8690338 tiene semana_actual/base 43 y prioridades 2.1/2.2; reserva 8672237 tiene semana 42 y prioridades 5.1/5.2; reserva 8690349 tiene semana 43 y prioridad 14.
+- El encabezado visual queda en una sola línea y mismo tamaño: `RESERVA · SEM xx · SISTEMA · ACABADO`.
+- Segunda línea: `Parte / Prioridad x.x` y, cuando corresponda, `NO CULMINADO`.
+- El RPC de arrastre usa `coalesce(mp.prioridad_semanal, pr.prioridad)` para no mostrar “—” cuando la programación tiene prioridad nula pero Programación Semanal sí tiene prioridad.
+- No se modifican estados ni cantidades.
+- Estado: RPC aplicado en Supabase; frontend implementado como LAB v272; publicación Firebase y verificación visual pendientes.
