@@ -348,3 +348,15 @@ Modelar la relación producción↔reservas como relación explícita 1:N. El ca
 - Frontend: **implementado en GitHub como LAB v276**.
 - Publicación Firebase: pendiente de confirmar por workflow.
 - Verificación visual/operativa: pendiente con casos reales; caso recomendado SEM 42: producción `1146210 - AG Windows - 4940 - VE`, principal `8672143 / 2604 BERMUDA BRONZE`, compartida `8673372 / 2604 BONE WHITE`.
+
+
+### Verificación CI / publicación v276
+- JavaScript syntax check: **OK**.
+- SGP ONE Tests: **OK**.
+- Firebase Hosting workflow: **OK** para la publicación LAB v276.
+- Validación SQL de relación compartida:
+  - `1307191|PANELES_2`: principal `8672143 / 2604 BERMUDA BRONZE` + compartida `8673372 / 2604 BONE WHITE`.
+  - `1311436|PANELES_2`: la repetición `8689919,8689919` se deduplica y **no** se clasifica como compartida.
+  - `1311960|PANELES_2`: principal `8684860 / CLEAR ANOD` + dos reservas secundarias cuyos acabados siguen sin fuente inequívoca; se mantienen sin inventar acabado y el formulario exige indicarlo antes de guardar un pendiente.
+- Permisos PostgREST validados para listado de reservas compartidas, creación de pendientes y despiece PANEL.
+- Estado final de esta etapa: **implementado y publicado**. Verificación visual/operativa en navegador queda pendiente de prueba del usuario.
