@@ -1733,3 +1733,25 @@ button.active,[aria-pressed="true"]{border-color:#0865ed}
  .repo-detail-grid.compact{grid-template-columns:1fr 1fr}
  .repo-section-head{align-items:center}
 }
+
+
+/* LAB v281 · restauración de columnas PDT + menú Acciones en portal */
+.repo-table{min-width:1880px}
+.repo-table th,.repo-table td{white-space:nowrap}
+.repo-table th:nth-child(2),.repo-table td:nth-child(2){min-width:320px;max-width:420px}
+.repo-table td:nth-child(2){white-space:normal;line-height:1.25}
+.repo-table th:nth-child(4),.repo-table td:nth-child(4){min-width:135px;max-width:180px}
+.repo-table th:nth-child(5),.repo-table td:nth-child(5){min-width:150px;max-width:210px}
+.repo-table th:nth-child(14),.repo-table td:nth-child(14){min-width:190px;max-width:280px;white-space:normal}
+.repo-table th:last-child,.repo-table td:last-child{position:sticky;right:0;z-index:5;background:#f8fbfe;box-shadow:-5px 0 9px rgba(26,63,92,.07)}
+.repo-table thead th:last-child{z-index:8;background:#eaf2fb}
+.repo-row.repo-repo_ok td:last-child{background:#f0fdf4}
+.repo-row.repo-pendiente td:last-child{background:#f8fafc}
+.repo-row.repo-corte td:last-child{background:#eff6ff}
+.repo-row.repo-mecanizado td:last-child{background:#f0fdf4}
+.repo-row.repo-procesado td:last-child{background:#fdf4ff}
+.repo-row.repo-picking td:last-child{background:#f0fdfa}
+.repo-week-sort{appearance:none;border:0;background:transparent;color:inherit;font:inherit;font-weight:900;text-transform:uppercase;cursor:pointer;padding:0;white-space:nowrap}
+.repo-week-sort:hover{text-decoration:underline}
+.repo-action-portal{position:fixed!important;right:auto!important;z-index:12050!important;display:block!important;min-width:180px}
+.repo-action-portal[hidden]{display:none!important}
