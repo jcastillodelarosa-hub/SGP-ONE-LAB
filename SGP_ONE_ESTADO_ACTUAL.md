@@ -189,3 +189,13 @@ Nunca declarar una funcionalidad como implementada o publicada sin verificarlo.
 - Verificación SQL: `has_function_privilege('anon', ..., 'EXECUTE') = true`.
 - No requiere nuevo despliegue Firebase: la corrección es inmediata en Supabase.
 - Pendiente: refrescar Producción del 2026-10-18 y verificar visualmente el bloque “Pendientes del turno anterior”.
+
+
+## 16. CONTINUIDAD 2026-10-18 — LAB v268 · PICKING SEMANA + FILTROS MÓVILES
+- Se agrega indicador grande `SEM xx` en cada tarjeta normal de Picking.
+- Se agrega el mismo indicador de semana en cada “Partida abierta de entrega”, tomando la semana de la reserva/parte cargada por `sgp_picking_cola`.
+- No se cambia la lógica de entregas, auditoría, piezas PANEL, estados ni partidas abiertas; el cambio es de presentación sobre los datos ya existentes.
+- En móvil, la barra de filtros de Picking pasa a una cuadrícula de 2 columnas: búsqueda ocupa el ancho completo, semana y estado quedan visibles lado a lado, y Actualizar ocupa el ancho completo.
+- Se eliminan en móvil las restricciones de ancho que estaban comprimiendo los selectores hasta hacerlos prácticamente invisibles.
+- Versión visible: LAB v268.
+- Estado: implementado en GitHub; publicación Firebase y verificación visual pendientes.
