@@ -127,7 +127,7 @@ function isSharedMeta(meta){return Boolean(meta?.es_reserva_compartida)||sharedR
 function reserveRelationLabel(r){return r?.tipo==='PRINCIPAL'?'Principal':r?.es_principal_compartida?'Compartida':'Asociada'}
 function sharedBadgeHtml(meta){return meta&&isSharedMeta(meta)?'<span class="shared-reserve-badge">⚠ RESERVA COMPARTIDA</span>':''}
 function sharedDetailsHtml(meta){
- const rr=sharedRowsFromMeta(meta);if(rr.length<=1)return '';
+ const rr=sharedRowsFromMeta(meta);if(!isSharedMeta(meta)||rr.length<=1)return '';
  return '<details class="shared-reserve-details"><summary>Ver reservas y acabados</summary><div>'+rr.map(r=>'<span class="shared-reserve-chip '+(r.tipo==='PRINCIPAL'?'principal':'secondary')+'"><b>'+escapeHtml(r.reserva||'—')+'</b><em>'+escapeHtml(reserveRelationLabel(r))+'</em><small>'+escapeHtml(r.acabado||'ACABADO POR CONFIRMAR')+(r.semana?' · SEM '+escapeHtml(r.semana):'')+'</small></span>').join('')+'</div></details>'
 }
 function sharedIncomingForReserve(reserva){
@@ -667,8 +667,8 @@ function renderQueriedProgramming(){
   if(detailSort.key)rows=[...rows].sort((x,y)=>String(detailValue(x,detailSort.key)).localeCompare(String(detailValue(y,detailSort.key)),undefined,{numeric:true})*detailSort.dir);
   els.qVisible.textContent=rows.length;renderDetailHead();
   let prev=null,idx=-1;
-  els.queryBody.innerHTML=rows.length?rows.map(r=>{const reserva=String(r.reserva_principal??r.reserva_al??'').trim()||'SIN RESERVA',meta=sharedMetaFromEmbedded(r,reserva),firstReserva=reserva!==prev;if(firstReserva){idx++;prev=reserva}const hm=hasMuntin(r);
-    return `<tr class="${idx%2===0?'reservation-alt':''} ${hm?'has-muntin':''} ${isSharedMeta(meta)?'shared-row':''}">${detailColumns.filter(c=>!detailHidden.has(c.key)).map(c=>{let v=detailValue(r,c.key);if(c.key==='reserva_al')return `<td><button class="piece-link" data-piece-mode="reserva" data-piece-value="${escapeHtml(reserva)}">${escapeHtml(reserva)}</button>${meta?'<div class="shared-cell-note">'+sharedBadgeHtml(meta)+sharedDetailsHtml(meta)+'</div>':''}${firstReserva?sharedReserveNoticeHtml(reserva):''}</td>`;if(c.key==='produccion')return `<td><button class="piece-link" data-piece-mode="produccion" data-piece-value="${escapeHtml(r.produccion)}">${escapeHtml(r.produccion)}</button>${meta?'<div class="shared-cell-note">'+sharedBadgeHtml(meta)+'</div>':''}</td>`;if(c.key==='muntin')v=hm?'SÍ · '+(r.cantidad_muntin??r.cantidad??''):'—';return `<td>${escapeHtml(v||'—')}</td>`}).join('')}</tr>`;
+  els.queryBody.innerHTML=rows.length?rows.map(r=>{const reserva=String(r.reserva_principal??r.reserva_al??'').trim()||'SIN RESERVA',meta=sharedMetaFromEmbedded(r,reserva),firstReserva=reserva!==prev;if(firstReserva){idx++;prev=reserva}const hm=hasMuntin(r),shared=isSharedMeta(meta);
+    return `<tr class="${idx%2===0?'reservation-alt':''} ${hm?'has-muntin':''} ${shared?'shared-row':''}">${detailColumns.filter(c=>!detailHidden.has(c.key)).map(c=>{let v=detailValue(r,c.key);if(c.key==='reserva_al')return `<td><button class="piece-link" data-piece-mode="reserva" data-piece-value="${escapeHtml(reserva)}">${escapeHtml(reserva)}</button>${shared?'<div class="shared-cell-note">'+sharedBadgeHtml(meta)+sharedDetailsHtml(meta)+'</div>':''}</td>`;if(c.key==='produccion')return `<td><button class="piece-link" data-piece-mode="produccion" data-piece-value="${escapeHtml(r.produccion)}">${escapeHtml(r.produccion)}</button></td>`;if(c.key==='muntin')v=hm?'SÍ · '+(r.cantidad_muntin??r.cantidad??''):'—';return `<td>${escapeHtml(v||'—')}</td>`}).join('')}</tr>`;
   }).join(''):`<tr><td colspan="${detailColumns.filter(c=>!detailHidden.has(c.key)).length}" class="empty">No hay registros con los filtros seleccionados.</td></tr>`;
 }
 function basePieceDescription(s){
