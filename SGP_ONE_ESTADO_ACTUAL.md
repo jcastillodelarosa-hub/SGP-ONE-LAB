@@ -139,3 +139,13 @@ Nunca declarar una funcionalidad como implementada o publicada sin verificarlo.
 - Versión visual incrementada: LAB v264.
 - Pendiente de verificación funcional: validar en Firebase con datos reales que los totales ejecutados por orden coincidan con la operación y que la exportación PDF/PNG funcione en PC y móvil.
 - Observación de seguridad detectada durante revisión: existen tablas operativas con RLS deshabilitado. No se modificó RLS en esta sesión para evitar bloquear el sistema sin diseñar previamente sus políticas.
+
+
+## 12. CONTINUIDAD 2026-10-18 — ESTABILIZACIÓN DE CONEXIÓN (LAB v265)
+- Incidencia: la consola del navegador mostraba 404 recurrente para `/sgp-gateway/` y podía mostrar 404 para `/vendor/supabase.js`.
+- Causa comprobada: `src/services/supabase-client.js` intentaba detectar un gateway Firebase no configurado en `firebase.json`.
+- Corrección: se eliminó la detección/uso de `/sgp-gateway/` y se dejó Supabase directa como única ruta de datos, respetando el backend actual del LAB.
+- `/vendor/supabase.js` se mantiene como dependencia local del navegador y el workflow la genera mediante `npm run build:vendor` antes del despliegue.
+- Versión visible actualizada a **LAB v265** y cache-busting de `styles.css` / `app.js` actualizado a 265.
+- Dependencias funcionales preservadas: autenticación de aplicación, RPC, RLS, tablas Supabase y módulos consumidores del cliente.
+- Estado: implementado en `main`; publicación Firebase depende del workflow automático; verificación final en navegador pendiente.
