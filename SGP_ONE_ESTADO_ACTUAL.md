@@ -258,3 +258,29 @@ Nunca declarar una funcionalidad como implementada o publicada sin verificarlo.
 - “Pendientes resueltos” incluye ahora tanto `estado='RESUELTO'` como `estado_repo='PICKING'`, preservando compatibilidad con registros antiguos.
 - Diagnóstico actual de datos: 10 históricos RESUELTO/PICKING + 2 registros antiguos PENDIENTE/PICKING; activos: 9 PENDIENTE y 1 CORTE.
 - Estado: migración Supabase aplicada; frontend implementado como LAB v275; publicación Firebase y verificación visual pendientes.
+
+
+## REGLA FUNCIONAL — ÓRDENES CON RESERVA COMPARTIDA (aprobada 2026-10-18)
+
+### Definición
+- Una producción/orden puede tener más de una reserva de aluminio asociada en `reserva_al` (ej.: `A,B`).
+- La **reserva principal** es la reserva bajo la cual aparece/programa normalmente la orden. Las demás son **reservas compartidas/secundarias**.
+- Cada reserva compartida puede corresponder a un acabado diferente y puede, a su vez, ser una reserva principal de la semana para otras producciones.
+- La orden puede requerir unidades/material de más de una reserva/acabado, aunque la orden solo sea visible operativamente bajo la reserva principal.
+- SGP_ONE **no debe inferir ni repartir cantidades de ventanas por reserva compartida** si la fuente no proporciona esa distribución. El objetivo es alertar y mantener trazabilidad, no inventar cantidades.
+
+### Regla de identificación
+- `reserva_al` debe tratarse como una **lista de reservas**, no como un identificador escalar. Nunca asumir igualdad exacta cuando pueda contener valores separados por coma.
+- Para semana, acabado y relaciones operativas, resolver cada reserva individual contra Programación Semanal/seguimiento y las fuentes maestras correspondientes.
+- La semana pertenece a la programación de la producción/reserva; no se calcula por fecha de mecanizado, entrega o reporte.
+
+### Comportamiento funcional requerido
+- Toda orden con 2 o más reservas debe quedar identificada como **RESERVA COMPARTIDA**.
+- Debe mostrarse una alerta visible en **Programación Semanal, Mecanizado/Producción, Picking y Ensamble**.
+- La alerta debe indicar como mínimo: reserva principal, reserva(s) compartida(s) y acabado asociado a cada reserva cuando sea posible resolverlo.
+- Cuando se programe o procese la reserva secundaria, el sistema debe advertir que esa reserva contiene material requerido por una producción que aparece bajo otra reserva principal.
+- La advertencia debe acompañar la orden durante mecanizado y Picking y permanecer visible en Ensamble para evitar que material de la reserva secundaria sea omitido.
+- No crear una segunda orden ficticia, no duplicar las unidades de la producción y no modificar automáticamente cantidades por reserva.
+
+### Principio de diseño
+Modelar la relación producción↔reservas como relación explícita 1:N. El campo legado `sgp_producciones.reserva_al` puede seguir siendo fuente de importación, pero las funcionalidades nuevas no deben depender de comparaciones de texto exactas contra ese campo multivalor.
