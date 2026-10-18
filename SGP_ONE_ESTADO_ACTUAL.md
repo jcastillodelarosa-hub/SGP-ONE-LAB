@@ -493,3 +493,73 @@ Modelar la relación producción↔reservas como relación explícita 1:N. El ca
 - Firebase Hosting: **PUBLICADO**.
 - Pruebas automáticas: **SUPERADAS**.
 - Verificación visual y operativa por rol en navegador: **PENDIENTE**.
+
+
+## 27. CONTINUIDAD 2026-10-18 — LAB v280 · PENDIENTES COMPACTOS / ACCIONES / PIEZAS DE ORDEN
+
+### Decisión UX aprobada
+- Se reemplaza el detalle v279 con tres formularios apilados por un flujo compacto basado en el boceto aprobado.
+- El listado de Pendientes de aluminio muestra: Estado, Validación, Reserva, Producción, Referencia, Fabricación, Longitud, Cantidad, NC, Reserva solución, Reportado por, Fecha y Acciones.
+- Cada PDT dispone de botón `Acciones`. Las opciones se habilitan según rol y estado: `Modificar`, `Validar`, `Actualizar estado`, `Ver detalle`, `Historial`.
+- `Actualizar estado` conserva la funcionalidad operativa previa de Mecanizado, pero se mueve al menú para no volver a extender la tabla.
+- El menú se posiciona fuera del scroll de la tabla para evitar recortes.
+
+### Modificar PDT
+- Reutiliza la fuente real de piezas PANEL de la orden en `sgp_aluminio`, siguiendo el patrón funcional de Picking → Reportar faltantes.
+- Para la referencia del pendiente se muestran las combinaciones existentes de Fabricación, Longitud, Acabado y Cantidad; combinaciones repetidas se agrupan.
+- La combinación actualmente registrada se preselecciona cuando existe en la fuente.
+- Patinador puede modificar NC, fabricación y longitud únicamente antes de VALIDADO.
+- En RESERVA COMPARTIDA se conserva el selector Reserva + Acabado y la validación de la pareja aprobada.
+- Si existen piezas fuente para la referencia, backend rechaza una fabricación/longitud que no pertenezca a la orden.
+- Para históricos sin fuente de piezas se mantiene fallback manual para no bloquear registros antiguos.
+- Se incorpora `Buscar NC`: consulta la carga actual de NC y muestra estado y reserva solución cuando exista.
+- Una NC no encontrada puede guardarse, pero queda SIN ENLACE hasta que exista en la fuente NC.
+- Coordinación puede registrar Reserva solución manual solo cuando el PDT no tiene NC.
+- Si existe NC, la reserva solución de la NC conserva prioridad y no puede ser sustituida manualmente desde Pendientes.
+- La observación de corrección queda registrada en el historial.
+
+### Validar PDT
+- Disponible para COORDINADOR, LIDER LINEA, SUPERVISOR DE PICKING y ADMINISTRADOR.
+- Presenta NC, estado NC, reserva solución y referencia antes de validar.
+- Muestra las piezas reales de la orden para seleccionar/confirmar Fabricación, Longitud y Acabado.
+- Si la orden es RESERVA COMPARTIDA, la pareja Reserva + Acabado debe ser coherente con la pieza elegida.
+- Backend valida que los datos confirmados correspondan a una pieza real cuando existe fuente.
+- La validación sigue siendo independiente del estado físico: VALIDADO habilita Mecanizado, pero no cambia automáticamente a REPO_OK.
+
+### Detalle e historial
+- `Ver detalle` es solo lectura y presenta la información completa del PDT en formato compacto.
+- Incluye los últimos movimientos de trazabilidad.
+- `Historial` abre la trazabilidad completa con Fecha, Usuario, Acción y Detalle.
+- Se sintetiza el evento inicial de Creación a partir del reporte original y se conservan EDICION_PDT, RESERVA_SOLUCION, VALIDACION_PDT y ESTADO_REPO.
+
+### Supabase
+- Nueva RPC `sgp_aluminio_pendiente_piezas`: devuelve las opciones PANEL de la referencia dentro de la orden.
+- Nueva RPC `sgp_aluminio_nc_buscar`: verifica NC y devuelve estado/reserva solución.
+- Nueva RPC `sgp_aluminio_pendiente_historial`: devuelve trazabilidad completa.
+- Nueva RPC compatible `sgp_aluminio_pendiente_editar_v2`: conserva reglas v279 y añade observación de corrección.
+- `sgp_aluminio_pendiente_editar` y `sgp_aluminio_pendiente_validar` fueron reforzadas para rechazar combinaciones que no pertenecen a la orden cuando existe fuente.
+- Migración versionada: `supabase/migrations/20261018_pdt_compact_actions.sql`.
+
+### Validaciones ejecutadas
+- Prueba transaccional: una combinación inexistente fue rechazada y una combinación real fue aceptada; rollback aplicado.
+- Caso real de fuente: PDT de GIANNIS / `ES-SGD2020-084A` devuelve `E78A · 118.125 · D.BRM BRONZE · cantidad 4`.
+- Caso real NC `1004390`: encontrada, estado `Finalizada`, reserva `8673439`, referencia `ES-SGD2020-084A`, reserva solución `8712867`.
+- JavaScript syntax check: **SUCCESS**.
+- SGP ONE Tests: **SUCCESS**.
+- Verify LAB release package: **SUCCESS**.
+- Firebase Hosting deploy del código v280: **SUCCESS**.
+- Verificación visual/operativa por cada rol en navegador: **PENDIENTE DE PRUEBA DE USUARIO**.
+
+### Seguridad / estabilidad
+- Se ejecutó Supabase Security Advisor después del cambio. Persisten advertencias estructurales ya conocidas del proyecto por RLS y por el patrón histórico SECURITY DEFINER + token propio.
+- Las nuevas RPC validan siempre el token/rol SGP antes de devolver o modificar información.
+- No se habilitó RLS global ni se cambió el modelo de autenticación durante v280 para evitar una regresión transversal.
+- No se modificaron Picking, Auditoría de Picking, clasificación de RESERVA COMPARTIDA, NC Aluminio ni la regla de bloqueo de Mecanizado de v279.
+
+### Estado
+- Supabase v280: **IMPLEMENTADO / VERIFICADO**.
+- Frontend LAB v280: **IMPLEMENTADO**.
+- Migración GitHub: **VERSIONADA**.
+- Pruebas automáticas: **SUPERADAS**.
+- Firebase Hosting: **PUBLICADO**.
+- Validación visual por roles: **PENDIENTE**.
