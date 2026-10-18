@@ -4,38 +4,58 @@ import { readFileSync } from "node:fs";
 
 const app = readFileSync(new URL("../app.js", import.meta.url), "utf8");
 const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
-const migration = readFileSync(new URL("../supabase/migrations/20261018_pdt_validation_workflow.sql", import.meta.url), "utf8");
+const migration279 = readFileSync(new URL("../supabase/migrations/20261018_pdt_validation_workflow.sql", import.meta.url), "utf8");
+const migration280 = readFileSync(new URL("../supabase/migrations/20261018_pdt_compact_actions.sql", import.meta.url), "utf8");
 
-test("LAB v279 expone validación PDT en interfaz", () => {
-  assert.match(html, /LAB v279/);
-  assert.match(html, /app\.js\?v=279/);
-  assert.match(html, /styles\.css\?v=279/);
-  assert.equal((html.match(/<th>Validación<\/th>/g) || []).length, 2);
-  assert.match(app, /sgp_aluminio_pendiente_editar/);
-  assert.match(app, /sgp_aluminio_pendiente_validar/);
-  assert.match(app, /BLOQUEADO PARA MECANIZADO/);
-  assert.match(app, /pdt_por_validar/);
+test("LAB v280 publica listado compacto y menú Acciones", () => {
+  assert.match(html, /LAB v280/);
+  assert.match(html, /app\.js\?v=280/);
+  assert.match(html, /styles\.css\?v=280/);
+  assert.equal((html.match(/<th>Acciones<\/th>/g) || []).length, 2);
+  assert.equal((html.match(/<th>Reserva solución<\/th>/g) || []).length, 2);
+  assert.match(app, /data-repo-action="modify"/);
+  assert.match(app, /data-repo-action="validate"/);
+  assert.match(app, /data-repo-action="detail"/);
+  assert.match(app, /data-repo-action="history"/);
 });
 
-test("Patinador queda limitado a edición previa y acabado compartido", () => {
-  assert.match(migration, /array\['ADMINISTRADOR', 'PATINADOR'\]|array\['ADMINISTRADOR','PATINADOR'\]/);
-  assert.match(migration, /ya fue validado y no puede ser modificado por Patinador/);
-  assert.match(migration, /solo puede modificar el acabado cuando la orden es RESERVA COMPARTIDA/);
-  assert.match(app, /Acabado · reserva compartida/);
-  assert.match(app, /Solo editable por Patinador cuando es RESERVA COMPARTIDA/);
+test("Modificar PDT reutiliza piezas PANEL reales de la orden", () => {
+  assert.match(app, /sgp_aluminio_pendiente_piezas/);
+  assert.match(app, /Piezas de la orden/);
+  assert.match(app, /Fabricación/);
+  assert.match(app, /Longitud \(in\)/);
+  assert.match(migration280, /from public\.sgp_aluminio a/i);
+  assert.match(migration280, /a\.tipo_pieza='PANEL'/);
+  assert.match(migration280, /La fabricación\/longitud seleccionada no corresponde/);
+});
+
+test("Patinador mantiene alcance previo y acabado solo compartido", () => {
+  assert.match(migration280, /array\['ADMINISTRADOR','PATINADOR'\]/);
+  assert.match(migration280, /ya fue validado y no puede ser modificado por Patinador/);
+  assert.match(migration280, /solo puede modificar el acabado cuando la orden es RESERVA COMPARTIDA/);
+  assert.match(app, /Reserva \+ acabado · RESERVA COMPARTIDA/);
+  assert.match(app, /sgp_aluminio_pendiente_editar_v2/);
+});
+
+test("NC, reserva solución e historial permanecen trazables", () => {
+  assert.match(app, /sgp_aluminio_nc_buscar/);
+  assert.match(app, /sgp_aluminio_pendiente_historial/);
+  assert.match(app, /Reserva solución · Coordinación/);
+  assert.match(migration280, /reserva_solucion_manual/);
+  assert.match(migration280, /tipo_evento='EDICION_PDT'/);
+  assert.match(migration280, /'CREACION'::text tipo_evento/);
 });
 
 test("Validación y estado físico permanecen separados", () => {
-  assert.match(migration, /validacion_estado='VALIDADO'/);
-  assert.match(migration, /PDT POR VALIDAR: debe ser validado antes de avanzar/);
-  assert.match(migration, /'PENDIENTE','REPO_OK','CORTE','MECANIZADO','PROCESADO','PICKING'/);
-  assert.doesNotMatch(migration, /update public\.sgp_aluminio_pendientes p set estado_repo='REPO_OK'/i);
-  assert.match(app, /La validación no cambia automáticamente el estado a REPO OK/);
+  assert.match(migration279, /validacion_estado='VALIDADO'/);
+  assert.match(migration279, /PDT POR VALIDAR: debe ser validado antes de avanzar/);
+  assert.match(migration279, /'PENDIENTE','REPO_OK','CORTE','MECANIZADO','PROCESADO','PICKING'/);
+  assert.doesNotMatch(migration279, /update public\.sgp_aluminio_pendientes p set estado_repo='REPO_OK'/i);
+  assert.match(app, /Actualizar estado/);
+  assert.match(app, /Confirma la pieza correcta antes de mecanizado/);
 });
 
-test("Reserva solución de NC y manual conservan fuentes separadas", () => {
-  assert.match(migration, /reserva_solucion_nc/);
-  assert.match(migration, /reserva_solucion_manual/);
-  assert.match(migration, /origen_reserva_solucion/);
-  assert.match(migration, /La reserva solución proviene de la NC enlazada/);
+test("Producción sigue mostrando bloqueo de mecanizado mientras el PDT no está validado", () => {
+  assert.match(app, /BLOQUEADO PARA MECANIZADO/);
+  assert.match(app, /pdt_por_validar/);
 });
