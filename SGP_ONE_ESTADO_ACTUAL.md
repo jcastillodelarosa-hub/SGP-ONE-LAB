@@ -386,7 +386,7 @@ Modelar la relación producción↔reservas como relación explícita 1:N. El ca
 ### Frontend
 - El badge `⚠ RESERVA COMPARTIDA` solo aparece si se cumple la nueva regla.
 - Las órdenes multi-reserva no compartidas conservan internamente sus relaciones reserva/acabado para Picking y pendientes, pero **no muestran** el control visual `Ver reservas y acabados`; ese control queda reservado a la orden realmente `RESERVA COMPARTIDA`.
-- En Programación Semanal, el aviso global de una reserva compartida se muestra una sola vez en la primera fila visible de esa reserva, evitando repetirlo en todas sus producciones.
+- [HISTÓRICO v277 · SUPERADO POR v278] En Programación Semanal se intentó mostrar el aviso global en la primera fila visible de la reserva. La prueba visual demostró que podía asignarlo a la producción equivocada; v278 eliminó esta lógica.
 - Los formularios de pendientes de Producción, Picking y Auditoría muestran las opciones reserva/acabado asociadas a la orden.
 
 ### Validaciones realizadas
@@ -431,4 +431,5 @@ Modelar la relación producción↔reservas como relación explícita 1:N. El ca
 - Supabase: **sin cambio adicional en v278**; la clasificación de datos de v277 fue verificada como correcta para los casos anteriores.
 - Firebase Hosting: **PUBLICADO**. El primer intento de v278 fue bloqueado por `scripts/verify-release.mjs`, que todavía exigía literalmente `LAB v276`; se corrigió el verificador para detectar dinámicamente la versión LAB y exigir que coincida con los cache-bust de `app.js` y `styles.css`.
 - Workflows posteriores a la corrección: **JavaScript syntax check = SUCCESS; SGP ONE Tests = SUCCESS; pages build and deployment = SUCCESS; Deploy SGP ONE to Firebase Hosting = SUCCESS**.
-- Verificación visual final en navegador: **PENDIENTE DE CONFIRMACIÓN DEL USUARIO**.
+- Verificación visual final en navegador: **VERIFICADA POR EL USUARIO** con evidencia de SEM 42. La fila `1307191 · 1146210 - AG Windows - 4940 - VE` muestra conjuntamente `⚠ RESERVA COMPARTIDA` + `Ver reservas y acabados`, detallando `8672143 / 2604 BERMUDA BRONZE` como PRINCIPAL y `8673372 / 2604 BONE WHITE` como COMPARTIDA; la producción siguiente de la misma reserva principal ya no hereda el indicador.
+- Estado funcional de esta corrección: **IMPLEMENTADA → PUBLICADA → PROBADA → VERIFICADA**.
