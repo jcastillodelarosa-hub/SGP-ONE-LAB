@@ -163,10 +163,8 @@ CREATE OR REPLACE FUNCTION public.sgp_aluminio_pendiente_piezas(p_token text, p_
  SET search_path TO ''
 AS $function$
 declare
- u text;
- v public.sgp_aluminio_pendientes%rowtype;
- v_prod_num text;
- v_exact boolean:=false;
+ u text; v public.sgp_aluminio_pendientes%rowtype;
+ v_prod_num text; v_exact boolean:=false;
 begin
  u:=public.sgp_validar_sesion_rol(p_token,array['ADMINISTRADOR','COORDINADOR','LIDER MECANIZADO','LIDER','LIDER LINEA','SUPERVISOR DE PICKING','PATINADOR','CONSULTA']);
  select * into v from public.sgp_aluminio_pendientes where id_pendiente=p_id;
@@ -185,9 +183,10 @@ begin
        lower(trim(coalesce(x.fabricacion,'')))=lower(trim(coalesce(v.fabricacion,'')))
        and x.longitud is not distinct from v.longitud
        and (v.acabado_pendiente is null or upper(trim(coalesce(x.acabado,'')))=upper(trim(v.acabado_pendiente)))
-   ) order by x.fabricacion,x.longitud,x.marca)
+   ) order by x.fabricacion,x.longitud,x.acabado)
    from (
-     select a.marca,a.fabricacion,a.longitud,a.acabado,sum(coalesce(a.cantidad,0)) cantidad
+     select string_agg(distinct nullif(trim(a.marca),''),' / ' order by nullif(trim(a.marca),'')) marca,
+            a.fabricacion,a.longitud,a.acabado,sum(coalesce(a.cantidad,0)) cantidad
      from public.sgp_aluminio a
      where a.activo='SI' and a.tipo_pieza='PANEL'
        and trim(coalesce(a.codigo_sap,''))=trim(coalesce(v.perfil,''))
@@ -196,7 +195,7 @@ begin
          or a.produccion=v.produccion
          or (not v_exact and v_prod_num is not null and substring(coalesce(a.produccion,'') from '^[[:space:]]*([0-9]+)')=v_prod_num)
        )
-     group by a.marca,a.fabricacion,a.longitud,a.acabado
+     group by a.fabricacion,a.longitud,a.acabado
    )x
  ),'[]'::jsonb);
 end $function$;
