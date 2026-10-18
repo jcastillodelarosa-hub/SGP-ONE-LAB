@@ -246,3 +246,15 @@ Nunca declarar una funcionalidad como implementada o publicada sin verificarlo.
 - No se calcula semana por fecha.
 - Versión visible/cache-bust actualizado directamente a LAB v274 para evitar confusión de despliegue.
 - Estado: implementado en GitHub; despliegue y verificación visual pendientes.
+
+
+## 22. CONTINUIDAD 2026-10-18 — LAB v275 · PENDIENTES DE ALUMINIO POR SEMANA E HISTÓRICO
+- Se auditó el módulo antes del cambio. Dependencias: `sgp_aluminio_pendientes_listar`, `sgp_aluminio_pendiente_estado`, `sgp_producciones`, `sgp_nc_aluminio` y UI de Pendientes.
+- Causa de que solo aparecieran 2 resueltos: el RPC `sgp_aluminio_pendientes_listar(..., false)` tenía `where p.estado='PENDIENTE'`; por ello excluía 10 registros históricos con `estado='RESUELTO' / estado_repo='PICKING'`. Los 2 visibles eran registros todavía `estado='PENDIENTE'` pero con `estado_repo='PICKING'`.
+- RPC corregido para devolver activos y resueltos cuando `p_solo_abiertos=false`; no se alteraron ni reabrieron registros.
+- Fuente de semana: `sgp_producciones.semana_actual`, fallback `semana_base`, enlazada primero por producción+reserva y luego por reserva.
+- Se agrega filtro Semana con opciones obtenidas de los registros cargados.
+- Orden de columnas: `SEM. | OP | RESERVA | REFERENCIA | ACABADO | ...`.
+- “Pendientes resueltos” incluye ahora tanto `estado='RESUELTO'` como `estado_repo='PICKING'`, preservando compatibilidad con registros antiguos.
+- Diagnóstico actual de datos: 10 históricos RESUELTO/PICKING + 2 registros antiguos PENDIENTE/PICKING; activos: 9 PENDIENTE y 1 CORTE.
+- Estado: migración Supabase aplicada; frontend implementado como LAB v275; publicación Firebase y verificación visual pendientes.
