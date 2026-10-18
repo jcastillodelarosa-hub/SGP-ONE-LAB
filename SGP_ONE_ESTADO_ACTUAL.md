@@ -433,3 +433,63 @@ Modelar la relación producción↔reservas como relación explícita 1:N. El ca
 - Workflows posteriores a la corrección: **JavaScript syntax check = SUCCESS; SGP ONE Tests = SUCCESS; pages build and deployment = SUCCESS; Deploy SGP ONE to Firebase Hosting = SUCCESS**.
 - Verificación visual final en navegador: **VERIFICADA POR EL USUARIO** con evidencia de SEM 42. La fila `1307191 · 1146210 - AG Windows - 4940 - VE` muestra conjuntamente `⚠ RESERVA COMPARTIDA` + `Ver reservas y acabados`, detallando `8672143 / 2604 BERMUDA BRONZE` como PRINCIPAL y `8673372 / 2604 BONE WHITE` como COMPARTIDA; la producción siguiente de la misma reserva principal ya no hereda el indicador.
 - Estado funcional de esta corrección: **IMPLEMENTADA → PUBLICADA → PROBADA → VERIFICADA**.
+
+
+## 26. CONTINUIDAD 2026-10-18 — LAB v279 · VALIDACIÓN OPERATIVA DE PENDIENTES DE ALUMINIO
+
+### Regla funcional definitiva
+- Se separan tres conceptos: estado de NC, validación del PDT y estado físico de reposición.
+- La validación del PDT usa únicamente `POR_VALIDAR` / `VALIDADO`; no reutiliza el campo histórico `auditado` de Picking.
+- Una NC `Finalizada` **no** cambia automáticamente el PDT a `REPO_OK`.
+- Validar un PDT **no** cambia automáticamente `estado_repo`; únicamente habilita el flujo físico posterior.
+- Flujo físico conservado: `PENDIENTE → REPO_OK → CORTE → MECANIZADO → PROCESADO → PICKING`.
+- El Líder de Mecanizado conserva la actualización del estado físico, pero el backend bloquea cualquier avance distinto de `PENDIENTE` mientras el PDT esté `POR_VALIDAR`.
+
+### Permisos aprobados
+- `PATINADOR`: antes de validar puede modificar **NC, fabricación y longitud**. Puede modificar **acabado únicamente cuando la orden es RESERVA COMPARTIDA**. Para mantener coherencia v278, la corrección de acabado usa una combinación válida reserva + acabado de la producción.
+- Después de `VALIDADO`, el Patinador no puede modificar esos datos.
+- `COORDINADOR`: puede asignar reserva solución manual únicamente cuando el PDT no tiene NC y puede validar.
+- `LIDER LINEA`, `SUPERVISOR DE PICKING` y `COORDINADOR`: pueden validar fabricación, longitud y acabado antes de autorizar mecanizado.
+- `ADMINISTRADOR` conserva capacidad de superusuario.
+- `LIDER MECANIZADO`: no valida; continúa gestionando el estado físico una vez validado.
+
+### Supabase
+- Nuevos campos en `sgp_aluminio_pendientes`: `validacion_estado`, `validado_por`, `fecha_validacion`, `observacion_validacion`, `reserva_solucion_manual`.
+- `sgp_aluminio_pendientes_historial` amplía trazabilidad con `tipo_evento`, `datos_anteriores` y `datos_nuevos`.
+- Nuevas RPC: `sgp_aluminio_pendiente_editar`, `sgp_aluminio_pendiente_reserva_solucion`, `sgp_aluminio_pendiente_validar`.
+- `sgp_aluminio_pendientes_listar` ya no modifica datos durante una consulta; devuelve validación y reserva solución efectiva.
+- Reserva solución efectiva: la de NC tiene prioridad; la manual solo aplica cuando no existe NC.
+- `sgp_aluminio_pendiente_estado` acepta nuevamente `PENDIENTE` y bloquea REPO_OK/CORTE/MECANIZADO/PROCESADO/PICKING mientras no esté VALIDADO.
+- `sgp_consultar_ensamble` diferencia PDT por validar de PDT realmente listo (`VALIDADO + REPO_OK`).
+- Migración versionada: `supabase/migrations/20261018_pdt_validation_workflow.sql`.
+
+### Frontend
+- Pendientes de aluminio incorpora columna y badge `⚠ POR VALIDAR` / `✓ VALIDADO`.
+- El detalle del PDT se convierte en ventana operativa según rol.
+- Patinador dispone de edición previa a validación; el acabado solo se habilita en RESERVA COMPARTIDA.
+- Coordinación dispone de reserva solución manual cuando no existe NC.
+- Validadores disponen de formulario de confirmación y observación.
+- Producción/Mecanizado muestra `🔒 BLOQUEADO PARA MECANIZADO` mientras esté POR VALIDAR.
+- Ensamble muestra `POR VALIDAR` y solo considera Repo OK cuando el PDT está VALIDADO.
+- Los registros históricos ya en PICKING no se bloquean retroactivamente y se muestran como históricos cuando no tuvieron la nueva validación.
+
+### Regresión y estabilidad
+- La migración no reinició estados existentes: se conservaron 9 PDT en PENDIENTE, 1 en CORTE y 2 registros legacy en PICKING.
+- Los registros activos existentes comienzan POR VALIDAR; el PDT que ya estaba en CORTE conserva CORTE y debe validarse antes de un siguiente avance.
+- Picking original, `auditado`, NC Aluminio y la clasificación de RESERVA COMPARTIDA de LAB v278 no fueron modificados.
+- JavaScript syntax check: **SUCCESS**.
+- SGP ONE Tests: **SUCCESS**.
+- Firebase Hosting: **SUCCESS** para el commit final v279.
+- GitHub Pages build/deployment: **SUCCESS**.
+
+### Seguridad
+- Se ejecutó Supabase Security Advisor después del DDL. Persisten hallazgos estructurales previos del proyecto sobre RLS, vistas SECURITY DEFINER y RPC SECURITY DEFINER expuestas por el modelo actual de token propio.
+- No se modificó globalmente RLS ni el modelo de autenticación en v279 para evitar una regresión transversal; debe tratarse como proyecto de endurecimiento separado.
+
+### Estado
+- Supabase v279: **IMPLEMENTADO / APLICADO**.
+- Frontend LAB v279: **IMPLEMENTADO**.
+- Migración GitHub: **VERSIONADA**.
+- Firebase Hosting: **PUBLICADO**.
+- Pruebas automáticas: **SUPERADAS**.
+- Verificación visual y operativa por rol en navegador: **PENDIENTE**.
