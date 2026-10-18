@@ -217,3 +217,12 @@ Nunca declarar una funcionalidad como implementada o publicada sin verificarlo.
 - Para filas normales se calcula desde `fecha_programacion`, preservando los datos y la lógica existente.
 - No se modifican estados, arrastre, programación ni cantidades.
 - Estado: implementado en GitHub; publicación Firebase y verificación visual pendientes.
+
+
+## 19. CONTINUIDAD 2026-10-18 — LAB v271 · HOTFIX NAVEGACIÓN PRODUCCIÓN
+- Incidencia introducida en LAB v270: se llamó `weekNumber(...)` al cargar Producción, pero esa función no existe en `app.js`.
+- El error JavaScript interrumpía `loadProductionBoard()`, dejando “weekNumber is not defined” y evitando completar el calendario/navegación diaria.
+- Corrección: cálculo ISO de semana encapsulado localmente, sin nueva dependencia global.
+- Se conserva `SEM xx` al lado de la reserva tanto en filas normales como en arrastres.
+- No se modificaron estados, RPC de arrastre, Picking ni datos.
+- Estado: hotfix implementado en GitHub como LAB v271; publicación Firebase y verificación visual pendientes.
