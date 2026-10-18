@@ -1568,3 +1568,47 @@ button.active,[aria-pressed="true"]{border-color:#0865ed}
 
 /* LAB v272 · cabecera de reserva en Producción */
 .prod-res-line{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;font-size:16px;font-weight:900;line-height:1.15}.prod-res-line b{font-size:inherit}.prod-week-text{color:#075ca8}.prod-job-id>span{display:block;margin-top:3px}
+
+
+/* LAB v276 · Reservas compartidas */
+.shared-reserve-badge{
+ display:inline-flex;align-items:center;gap:5px;margin:4px 6px 2px 0;padding:4px 8px;
+ border:1px solid #f2a824;border-radius:999px;background:#fff3d6;color:#9a4d00;
+ font-size:11px;font-weight:950;line-height:1;white-space:nowrap
+}
+.shared-reserve-details{display:inline-block;margin:3px 0 2px 4px;vertical-align:middle}
+.shared-reserve-details>summary{
+ cursor:pointer;list-style:none;display:inline-flex;align-items:center;padding:4px 8px;border:1px solid #bfd5ed;
+ border-radius:8px;background:#f5f9fe;color:#174f87;font-size:11px;font-weight:800
+}
+.shared-reserve-details>summary::-webkit-details-marker{display:none}
+.shared-reserve-details>div{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.shared-reserve-chip{
+ display:grid;grid-template-columns:auto auto;gap:1px 6px;min-width:165px;padding:7px 9px;
+ border:1px solid #c8d9eb;border-radius:9px;background:#fff;color:#193653
+}
+.shared-reserve-chip b{font-size:12px}.shared-reserve-chip em{font-size:9px;font-style:normal;font-weight:900;text-transform:uppercase}
+.shared-reserve-chip small{grid-column:1/-1;font-size:10px;color:#60758c}
+.shared-reserve-chip.principal em{color:#1264b1}.shared-reserve-chip.secondary{border-color:#efc066;background:#fff9eb}.shared-reserve-chip.secondary em{color:#a45a00}
+.shared-reserve-notice{
+ display:grid;gap:2px;margin:5px 0;padding:7px 9px;border-left:4px solid #f0a000;border-radius:0 8px 8px 0;
+ background:#fff7e5;color:#713d00;font-size:10px
+}
+.shared-reserve-notice b{font-size:10px;color:#8d4b00}.shared-reserve-notice span,.shared-reserve-notice small{display:block}
+.shared-row{box-shadow:inset 4px 0 0 #f0a000}
+.shared-cell-note{display:block;margin-top:3px}
+.shared-pending-choice{display:grid;grid-template-columns:minmax(180px,1.4fr) minmax(160px,1fr);gap:10px;margin:8px 0 10px;padding:10px;border:1px solid #f0c36d;border-radius:10px;background:#fffaf0}
+.shared-pending-choice label{display:grid;gap:5px;font-size:11px;font-weight:800;color:#40556d}
+.shared-pending-choice select,.shared-pending-choice input{width:100%;min-width:0}
+.assembly-shared-cell{min-width:210px}
+.pick-order-name .shared-reserve-details,.pick-open-order .shared-reserve-details,.prod-order-exec-row .shared-reserve-details{display:block;margin-left:0}
+#prodNoveltyReserveHelp{display:block;margin-top:4px;color:#6a7e92;font-size:10px}
+
+@media(max-width:760px){
+ .shared-pending-choice{grid-template-columns:1fr}
+ .shared-reserve-badge{white-space:normal;line-height:1.15}
+ .shared-reserve-details{display:block;margin-left:0}
+ .shared-reserve-details>div{display:grid;grid-template-columns:1fr}
+ .shared-reserve-chip{min-width:0;width:100%}
+ .shared-reserve-notice{font-size:10px}
+}
