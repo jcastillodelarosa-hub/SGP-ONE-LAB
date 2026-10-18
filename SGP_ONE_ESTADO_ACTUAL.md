@@ -149,3 +149,12 @@ Nunca declarar una funcionalidad como implementada o publicada sin verificarlo.
 - Versión visible actualizada a **LAB v265** y cache-busting de `styles.css` / `app.js` actualizado a 265.
 - Dependencias funcionales preservadas: autenticación de aplicación, RPC, RLS, tablas Supabase y módulos consumidores del cliente.
 - Estado: implementado en `main`; publicación Firebase depende del workflow automático; verificación final en navegador pendiente.
+
+
+## 13. CONTINUIDAD 2026-10-18 — CARGA MULTIHOST DEL SDK SUPABASE (LAB v266)
+- Incidencia verificada: en GitHub Pages la aplicación solicitaba `/vendor/supabase.js` desde la raíz del dominio y recibía 404; el archivo `vendor/supabase.js` se genera durante el workflow de Firebase y no existe como archivo versionado en `main`.
+- Dependencia afectada: inicialización del cliente Supabase; por ello autenticación y módulos que consultan datos podían quedar en “Validando…” / “Cargando…”.
+- Corrección: `src/services/supabase-client.js` intenta primero `vendor/supabase.js` con ruta relativa (compatible con Firebase y con el subdirectorio de GitHub Pages) y, si no existe, usa fuentes CDN de respaldo fijadas a Supabase JS 2.76.1.
+- Se conserva Supabase directa como backend; no se modifican tablas, RPC, estados ni reglas de negocio.
+- Versión visible incrementada a **LAB v266** y cache-busting de `styles.css` / `app.js` actualizado a 266.
+- Estado al registrar: implementado en código; publicación y verificación en navegador pendientes del workflow.
