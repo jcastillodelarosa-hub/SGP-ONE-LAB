@@ -1562,3 +1562,6 @@ button.active,[aria-pressed="true"]{border-color:#0865ed}
  .pick-open-main{align-items:flex-start}
  .pick-open-card>summary{grid-template-columns:1fr!important}
 }
+
+/* LAB v269 */
+.prod-week-inline{display:inline-flex;align-items:center;margin-left:8px;padding:3px 7px;border-radius:8px;background:#dbeeff;color:#075ca8;font-size:12px;font-weight:950;white-space:nowrap}
