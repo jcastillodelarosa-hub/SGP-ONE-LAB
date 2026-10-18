@@ -237,3 +237,12 @@ Nunca declarar una funcionalidad como implementada o publicada sin verificarlo.
 - El RPC de arrastre usa `coalesce(mp.prioridad_semanal, pr.prioridad)` para no mostrar “—” cuando la programación tiene prioridad nula pero Programación Semanal sí tiene prioridad.
 - No se modifican estados ni cantidades.
 - Estado: RPC aplicado en Supabase; frontend implementado como LAB v272; publicación Firebase y verificación visual pendientes.
+
+
+## 21. CONTINUIDAD 2026-10-18 — LAB v274 · CORRECCIÓN MAPEO SEMANA EN FILAS NORMALES
+- Se confirmó en base de datos que 8690338/2.2, 8690348/3.1 y 8689919/13 pertenecen a SEM 43; `semana_actual=43` y `semana_base=43`.
+- El “SEM —” era de frontend: el mapa de semana se indexaba únicamente con `prioridad_semanal`; algunas filas normales requieren fallback a `prioridad`.
+- Se corrige resolución a `prioridad_semanal ?? prioridad`, manteniendo como fuente de semana exclusivamente Programación Semanal (`semana_actual`, fallback `semana_base`).
+- No se calcula semana por fecha.
+- Versión visible/cache-bust actualizado directamente a LAB v274 para evitar confusión de despliegue.
+- Estado: implementado en GitHub; despliegue y verificación visual pendientes.
