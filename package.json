@@ -6,14 +6,9 @@
   "scripts": {
     "test": "node --test \"tests/*.test.mjs\"",
     "build:vendor": "node scripts/build-vendor.mjs",
-    "build:sql-test": "npx --yes firebase-tools@latest dataconnect:sdk:generate",
-    "build:sql-browser": "esbuild sql-test-source.mjs --bundle --format=esm --platform=browser --outfile=sql-test.bundle.js"
+    "verify:release": "node scripts/verify-release.mjs"
   },
   "dependencies": {
-    "@supabase/supabase-js": "2.76.1",
-    "firebase": "^12.4.0"
-  },
-  "devDependencies": {
-    "esbuild": "^0.25.0"
+    "@supabase/supabase-js": "2.76.1"
   }
 }
