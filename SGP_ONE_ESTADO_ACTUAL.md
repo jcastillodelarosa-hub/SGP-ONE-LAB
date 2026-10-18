@@ -199,3 +199,13 @@ Nunca declarar una funcionalidad como implementada o publicada sin verificarlo.
 - Se eliminan en móvil las restricciones de ancho que estaban comprimiendo los selectores hasta hacerlos prácticamente invisibles.
 - Versión visible: LAB v268.
 - Estado: implementado en GitHub; publicación Firebase y verificación visual pendientes.
+
+
+## 17. CONTINUIDAD 2026-10-18 — LAB v269 · ARRASTRE SOLO DE ÓRDENES NO PROCESADAS
+- Se corrigió `sgp_mecanizado_pendientes_turno`: una orden con estado actual `PROCESADO` ya no puede aparecer en “Pendientes del turno anterior”.
+- El arrastre se evalúa por producción/orden, no por el estado agregado de la reserva. Si una reserva tiene órdenes procesadas y otras en CORTE/MECANIZADO/PROGRAMADA, solo se arrastran las no procesadas.
+- Se conserva la regla de habilitación 5 minutos después del inicio del turno.
+- Se agregó `semana` a la respuesta del RPC desde `sgp_producciones.semana_actual/semana_base`.
+- Producción muestra ahora `SEM xx` junto a la reserva dentro del bloque de arrastre.
+- No se modificaron Picking, programación original ni estados históricos.
+- Estado: RPC aplicado en Supabase; frontend implementado en GitHub como LAB v269; publicación Firebase y verificación visual pendientes.
