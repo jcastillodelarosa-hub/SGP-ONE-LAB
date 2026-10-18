@@ -9,9 +9,9 @@ const workflow=await readFile(".github/workflows/firebase-hosting.yml","utf8");
 const pkg=JSON.parse(await readFile("package.json","utf8"));
 
 const fail=(message)=>{throw new Error("Release bloqueado: "+message)};
-if(!index.includes("LAB v269"))fail("index.html no identifica LAB v269");
+if(!index.includes("LAB v270"))fail("index.html no identifica LAB v270");
 if(!client.includes("./vendor/supabase.js"))fail("el cliente no usa el SDK local empaquetado");
 if(/cdn\.jsdelivr\.net|unpkg\.com|sgp-gateway|dataconnect|sql-connect/i.test(client))fail("supabase-client.js contiene rutas experimentales o CDN");
 if(/build:sql|SQL Connect|Data Connect/i.test(workflow))fail("el deploy LAB contiene pasos experimentales de SQL/Data Connect");
 if(Object.keys(pkg.dependencies||{}).includes("firebase"))fail("Firebase SDK no debe ser dependencia runtime del LAB");
-console.log("release: LAB v269 autocontenido y listo para Firebase Hosting");
+console.log("release: LAB v270 autocontenido y listo para Firebase Hosting");
