@@ -209,3 +209,11 @@ Nunca declarar una funcionalidad como implementada o publicada sin verificarlo.
 - Producción muestra ahora `SEM xx` junto a la reserva dentro del bloque de arrastre.
 - No se modificaron Picking, programación original ni estados históricos.
 - Estado: RPC aplicado en Supabase; frontend implementado en GitHub como LAB v269; publicación Firebase y verificación visual pendientes.
+
+
+## 18. CONTINUIDAD 2026-10-18 — LAB v270 · SEMANA EN TODAS LAS FILAS DE PRODUCCIÓN
+- Se extiende el indicador `SEM xx` a las filas normales de Producción, no solo a “Pendientes del turno anterior”.
+- La semana queda visualmente al lado del número de reserva, antes de la etiqueta `NO CULMINADO`.
+- Para filas normales se calcula desde `fecha_programacion`, preservando los datos y la lógica existente.
+- No se modifican estados, arrastre, programación ni cantidades.
+- Estado: implementado en GitHub; publicación Firebase y verificación visual pendientes.
