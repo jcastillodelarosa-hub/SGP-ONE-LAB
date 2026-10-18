@@ -295,3 +295,56 @@ Modelar la relación producción↔reservas como relación explícita 1:N. El ca
 - Si la producción tiene una sola reserva, el sistema puede autoseleccionarla y mostrar su acabado sin pedir una elección adicional.
 - Si no es posible resolver el acabado de una reserva compartida, no inventarlo: mostrar la reserva y exigir aclaración antes de guardar el pendiente, o permitir `Acabado por confirmar` solo si la regla de negocio lo autoriza explícitamente.
 - El histórico del pendiente debe conservar el acabado elegido al momento del reporte; no depender únicamente de volver a calcularlo desde `sgp_producciones` en consultas posteriores.
+
+
+## 23. CONTINUIDAD 2026-10-18 — LAB v276 · ÓRDENES CON RESERVA COMPARTIDA
+
+### Decisión funcional implementada
+- Una producción puede usar más de una reserva de aluminio. La orden se mantiene operativamente bajo una **reserva principal** y las demás se modelan como **reservas compartidas**.
+- No se dividen ni se inventan cantidades por reserva. La cantidad de la producción se conserva intacta.
+- `RESERVA COMPARTIDA` es una característica/alerta transversal, no un estado de producción.
+- `reserva_al` deja de tratarse como valor escalar para las funcionalidades nuevas; se normaliza como relación 1:N.
+
+### Capa de datos
+- Se crea la vista `sgp_produccion_reservas_v` y los helpers `sgp_reservas_por_produccion_json` / `sgp_reservas_compartidas_listar`.
+- La reserva principal se resuelve desde `sgp_prioridades` para la semana de la producción; las reservas secundarias se obtienen del listado legado `reserva_al`.
+- Cada relación conserva: producción, reserva principal, reserva específica, tipo PRINCIPAL/COMPARTIDA, semana y acabado cuando puede resolverse sin ambigüedad.
+- Si el acabado de una reserva secundaria no se puede determinar con certeza, permanece sin resolver; el sistema no lo inventa.
+
+### Programación Semanal
+- Las órdenes compartidas muestran distintivo `⚠ RESERVA COMPARTIDA` y detalle expandible de reservas/acabados.
+- La producción se presenta bajo su reserva principal.
+- Una reserva que actúa como secundaria de otra orden muestra advertencia inversa indicando qué producción externa requiere material de ella.
+
+### Mecanizado / Producción
+- Programación de mecanizado, agenda diaria, ejecución y arrastres usan la relación principal en lugar de igualdad exacta contra `reserva_al`.
+- El detalle por orden muestra reservas y acabados asociados.
+- Una reserva secundaria programada por sus propias órdenes muestra alerta de que también contiene material requerido por otra producción.
+- El RPC de arrastre `sgp_mecanizado_pendientes_turno` fue corregido para resolver órdenes mediante `sgp_prioridades -> sgp_producciones` y devuelve metadatos de reserva compartida.
+
+### Reporte de pendientes
+- `sgp_aluminio_pendientes` conserva ahora `key_produccion`, `reserva_principal`, `acabado_pendiente` y `es_reserva_compartida`.
+- Al crear un pendiente desde Mecanizado el usuario selecciona la reserva específica y el acabado. Si el acabado está resuelto se autocompleta; si no, debe indicarse antes de guardar.
+- `sgp_aluminio_pendientes_listar` prioriza los valores históricos guardados y mantiene fallback a relaciones maestras para registros anteriores.
+
+### Picking / Auditoría
+- La cola y las partidas abiertas muestran distintivo y detalle de reservas compartidas por orden.
+- Cuando una entrega tiene faltantes se exige **reserva + acabado** para cada faltante y ambos se guardan también en `sgp_picking_faltantes`.
+- Las diferencias encontradas durante Auditoría aplican la misma selección y se guardan en `sgp_picking_auditoria_diferencias`.
+- `sgp_picking_piezas_panel` sigue filtrando exclusivamente `tipo_pieza=PANEL`, pero para órdenes compartidas deja de excluir piezas PANEL por no coincidir con el acabado principal.
+
+### Ensamble
+- Se añade indicador/columna de reserva compartida y detalle de reservas/acabados.
+- No se altera estado de ensamble ni cantidades.
+
+### Compatibilidad y seguridad
+- No se modificaron estados `CORTE/MECANIZADO/PROCESADO/PICKING`.
+- No se crean órdenes duplicadas ni cantidades ficticias.
+- Las RPC continúan validando sesión y rol SGP.
+- Supabase permanece como backend; no se introduce Gateway/Data Connect/SQL Connect en el LAB.
+
+### Estado
+- Base de datos: **implementada**.
+- Frontend: **implementado en GitHub como LAB v276**.
+- Publicación Firebase: pendiente de confirmar por workflow.
+- Verificación visual/operativa: pendiente con casos reales; caso recomendado SEM 42: producción `1146210 - AG Windows - 4940 - VE`, principal `8672143 / 2604 BERMUDA BRONZE`, compartida `8673372 / 2604 BONE WHITE`.
