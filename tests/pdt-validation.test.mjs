@@ -17,6 +17,9 @@ test("LAB v281 restaura columnas históricas y conserva menú Acciones", () => {
   assert.match(app, /repoWeekSort='asc'/);
   assert.match(app, /repoOpenActionPortal/);
   assert.match(app, /document\.body\.appendChild\(portal\)/);
+  assert.match(app, /function repoStateControlHtml/);
+  assert.match(app, /data-repo-window-state/);
+  assert.match(app, /colspan="16"/);
   assert.match(app, /data-repo-action="modify"/);
   assert.match(app, /data-repo-action="validate"/);
   assert.match(app, /data-repo-action="detail"/);
