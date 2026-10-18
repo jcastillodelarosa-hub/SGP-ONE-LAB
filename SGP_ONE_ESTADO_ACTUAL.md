@@ -385,7 +385,7 @@ Modelar la relación producción↔reservas como relación explícita 1:N. El ca
 
 ### Frontend
 - El badge `⚠ RESERVA COMPARTIDA` solo aparece si se cumple la nueva regla.
-- Las órdenes multi-reserva no compartidas pueden abrir `Ver reservas y acabados` sin recibir el badge de compartida.
+- Las órdenes multi-reserva no compartidas conservan internamente sus relaciones reserva/acabado para Picking y pendientes, pero **no muestran** el control visual `Ver reservas y acabados`; ese control queda reservado a la orden realmente `RESERVA COMPARTIDA`.
 - En Programación Semanal, el aviso global de una reserva compartida se muestra una sola vez en la primera fila visible de esa reserva, evitando repetirlo en todas sus producciones.
 - Los formularios de pendientes de Producción, Picking y Auditoría muestran las opciones reserva/acabado asociadas a la orden.
 
@@ -402,3 +402,32 @@ Modelar la relación producción↔reservas como relación explícita 1:N. El ca
 - Identificador/cache-bust `LAB v277`: **IMPLEMENTADO**.
 - Firebase Hosting: **pendiente de confirmación del workflow automático**.
 - Verificación visual/operativa: **PENDIENTE**.
+
+
+## 25. CONTINUIDAD 2026-10-18 — LAB v278 · CORRECCIÓN VISUAL POR ORDEN COMPARTIDA
+
+### Error detectado en prueba visual
+- En Programación Semanal, `Ver reservas y acabados` se mostraba en órdenes multi-reserva que **no** cumplían la regla de RESERVA COMPARTIDA.
+- La advertencia global de la reserva se insertaba en la primera fila visible de la reserva principal; por eso podía aparecer sobre una producción distinta de la producción realmente compartida.
+
+### Corrección
+- `sharedDetailsHtml(meta)` exige ahora `isSharedMeta(meta)`: el botón `Ver reservas y acabados` solo se genera para una orden realmente compartida.
+- Programación Semanal ya no inserta `sharedReserveNoticeHtml(reserva)` en la primera fila de toda la reserva.
+- En la tabla semanal, la producción exacta que cumple la regla recibe conjuntamente `⚠ RESERVA COMPARTIDA` + `Ver reservas y acabados` en su celda de reserva.
+- Se eliminó el badge duplicado de la celda Producción de esa misma fila.
+- Las órdenes multi-reserva no compartidas siguen conservando sus relaciones reserva/acabado para selectores de pendientes, Picking y Auditoría; solo se elimina el indicador visual incorrecto.
+
+### Validación del caso SEM 42 / reserva 8672143
+- `1308213 · 1055240 - 1725 SW 14 CT MARIO PW`: **NO compartida**; no debe mostrar alerta ni `Ver reservas y acabados`.
+- `1307827 · 1066425 - DON ALVARO YANGUAS - GLOBAL`: **NO compartida**; no debe mostrar `Ver reservas y acabados`.
+- `1309381 · 1101558 - Tyler & Briana Bentz Residence`: **NO compartida**; no debe mostrar `Ver reservas y acabados`.
+- `1307191 · 1146210 - AG Windows - 4940 - VE`: **SÍ compartida**; debe mostrar `⚠ RESERVA COMPARTIDA` + `Ver reservas y acabados`.
+- Para `1307191`, la relación validada es `8672143 / 2604 BERMUDA BRONZE` + `8673372 / 2604 BONE WHITE`. La reserva `8673372` tiene prioridad propia en SEM 42 y actúa como reserva principal de múltiples producciones.
+
+### Estado
+- Frontend LAB v278 en GitHub `main`: **IMPLEMENTADO**.
+- Identificador/cache-bust `LAB v278`: **IMPLEMENTADO**.
+- JavaScript syntax check: **OK**.
+- Supabase: **sin cambio adicional en v278**; la clasificación de datos de v277 fue verificada como correcta para los casos anteriores.
+- Firebase Hosting: **pendiente de confirmación del workflow automático**.
+- Verificación visual final en navegador: **PENDIENTE**.
