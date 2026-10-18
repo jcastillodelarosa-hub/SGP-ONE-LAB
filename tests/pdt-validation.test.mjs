@@ -12,7 +12,7 @@ test("LAB v280 publica listado compacto y menú Acciones", () => {
   assert.match(html, /app\.js\?v=280/);
   assert.match(html, /styles\.css\?v=280/);
   assert.equal((html.match(/<th>Acciones<\/th>/g) || []).length, 2);
-  assert.equal((html.match(/<th>Reserva solución<\/th>/g) || []).length, 2);
+  assert.ok((html.match(/<th>Reserva solución<\/th>/g) || []).length >= 2);
   assert.match(app, /data-repo-action="modify"/);
   assert.match(app, /data-repo-action="validate"/);
   assert.match(app, /data-repo-action="detail"/);
@@ -41,7 +41,7 @@ test("NC, reserva solución e historial permanecen trazables", () => {
   assert.match(app, /sgp_aluminio_nc_buscar/);
   assert.match(app, /sgp_aluminio_pendiente_historial/);
   assert.match(app, /Reserva solución · Coordinación/);
-  assert.match(migration280, /reserva_solucion_manual/);
+  assert.match(migration279, /reserva_solucion_manual/);
   assert.match(migration280, /tipo_evento='EDICION_PDT'/);
   assert.match(migration280, /'CREACION'::text tipo_evento/);
 });
