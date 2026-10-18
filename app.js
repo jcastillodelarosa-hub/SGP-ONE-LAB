@@ -107,6 +107,52 @@ const els = {
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, char => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[char]));
 }
+
+let sharedReservationRows=[],sharedReservationLoadedAt=0;
+function setSharedReservationRows(rows){sharedReservationRows=Array.isArray(rows)?rows:[];sharedReservationLoadedAt=Date.now()}
+async function ensureSharedReservations(force=false){
+ if(!force&&sharedReservationRows.length&&Date.now()-sharedReservationLoadedAt<60000)return sharedReservationRows;
+ const token=getAppToken?.()||sessionStorage.getItem(APP_SESSION_KEY);if(!token)return [];
+ try{const db=await getSupabaseClient(),{data,error}=await db.rpc('sgp_reservas_compartidas_listar',{p_token:token,p_semana:null,p_linea:'PANELES_2'});if(error)throw error;setSharedReservationRows(data||[])}catch(e){console.warn('Reservas compartidas:',e)}
+ return sharedReservationRows
+}
+function sharedMetaForOrder(order,principal=null){
+ const key=order?.key_produccion||order?.key||null,prod=String(order?.produccion||'');
+ if(key){const m=sharedReservationRows.find(x=>String(x.key_produccion)===String(key));if(m)return m}
+ const exact=sharedReservationRows.filter(x=>String(x.produccion||'')===prod&&(!principal||String(x.reserva_principal||'')===String(principal)));
+ return exact.length===1?exact[0]:exact.find(x=>String(x.reserva_principal||'')===String(principal||''))||null
+}
+function sharedRowsFromMeta(meta){return Array.isArray(meta?.reservas)?meta.reservas:[]}
+function sharedBadgeHtml(meta){return meta&&sharedRowsFromMeta(meta).length>1?'<span class="shared-reserve-badge">⚠ RESERVA COMPARTIDA</span>':''}
+function sharedDetailsHtml(meta){
+ const rr=sharedRowsFromMeta(meta);if(rr.length<=1)return '';
+ return '<details class="shared-reserve-details"><summary>Ver reservas asociadas</summary><div>'+rr.map(r=>'<span class="shared-reserve-chip '+(r.tipo==='PRINCIPAL'?'principal':'secondary')+'"><b>'+escapeHtml(r.reserva||'—')+'</b><em>'+(r.tipo==='PRINCIPAL'?'Principal':'Compartida')+'</em><small>'+escapeHtml(r.acabado||'ACABADO POR CONFIRMAR')+(r.semana?' · SEM '+escapeHtml(r.semana):'')+'</small></span>').join('')+'</div></details>'
+}
+function sharedIncomingForReserve(reserva){
+ const r=String(reserva||'');if(!r)return [];
+ return sharedReservationRows.filter(x=>sharedRowsFromMeta(x).some(z=>z.tipo==='COMPARTIDA'&&String(z.reserva)===r))
+}
+function sharedPrimaryForReserve(reserva){
+ const r=String(reserva||'');if(!r)return [];
+ return sharedReservationRows.filter(x=>String(x.reserva_principal||'')===r)
+}
+function sharedReserveNoticeHtml(reserva){
+ const primary=sharedPrimaryForReserve(reserva),incoming=sharedIncomingForReserve(reserva);
+ if(!primary.length&&!incoming.length)return '';
+ const bits=[];if(primary.length)bits.push(primary.length+' orden'+(primary.length===1?'':'es')+' de esta reserva usa'+(primary.length===1?'':'n')+' material compartido');
+ if(incoming.length)bits.push(incoming.length+' orden'+(incoming.length===1?'':'es')+' de otra reserva requiere'+(incoming.length===1?'':'n')+' material de esta reserva');
+ return '<div class="shared-reserve-notice"><b>⚠ RESERVA COMPARTIDA</b><span>'+escapeHtml(bits.join(' · '))+'</span>'+incoming.slice(0,4).map(x=>'<small>Para '+escapeHtml(x.produccion||'—')+' · principal '+escapeHtml(x.reserva_principal||'—')+'</small>').join('')+'</div>'
+}
+function sharedMetaFromEmbedded(row,principal=null){
+ const rr=Array.isArray(row?.reservas_compartidas)?row.reservas_compartidas:[];
+ if(rr.length>1)return {key_produccion:row?.key_produccion||row?.key||null,produccion:row?.produccion||'',reserva_principal:principal||rr.find(x=>x.tipo==='PRINCIPAL')?.reserva||'',reservas:rr};
+ return sharedMetaForOrder(row,principal)
+}
+function sharedReserveOptions(meta,fallbackReserva='',fallbackAcabado=''){
+ const rr=sharedRowsFromMeta(meta);
+ const list=rr.length?rr:[{reserva:fallbackReserva,tipo:'PRINCIPAL',acabado:fallbackAcabado||null}];
+ return list.map(r=>({reserva:String(r.reserva||''),acabado:String(r.acabado||''),tipo:r.tipo||'PRINCIPAL'})).filter(x=>x.reserva)
+}
 function renderPiecesNoMatches(relation) {
   if (!els.piecesNoMatchWrap || !els.piecesNoMatchBody) return;
   const rows = relation?.noMatchRows || [];
