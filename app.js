@@ -623,7 +623,7 @@ function hasMuntin(r) {
 function filteredProgrammingRows() {
   const line=els.queryLine.value;
   const term=els.querySearch.value.trim().toLowerCase();
-  return queriedProductions.filter(r=>(!line||r.id_linea===line)&&(!term||[r.id,r.reserva_al,r.produccion,r.sistema,r.proyecto,r.cliente,r.acabado].some(v=>String(v??"").toLowerCase().includes(term))));
+  return queriedProductions.filter(r=>(!line||r.id_linea===line)&&(!term||[r.id,r.reserva_principal,r.reserva_al,r.produccion,r.sistema,r.proyecto,r.cliente,r.acabado,JSON.stringify(r.reservas_compartidas||[])].some(v=>String(v??"").toLowerCase().includes(term))));
 }
 function renderDetailHead(){
   if(!els.queryHead)return;
@@ -642,7 +642,7 @@ function renderQueriedProgramming(){
   els.qTotal.textContent=baseRows.length;els.qUnits.textContent=units;els.qVisible.textContent=baseRows.length;
   const systems=new Map(),types=new Map(),reservations=new Map();
   baseRows.forEach(r=>{
-    const system=r.sistema||'SIN SISTEMA',reserva=String(r.reserva_al??'').trim()||'SIN RESERVA',acabado=r.acabado||'SIN ACABADO',qty=Number(r.cantidad||0),hm=hasMuntin(r);
+    const system=r.sistema||'SIN SISTEMA',reserva=String(r.reserva_principal??r.reserva_al??'').trim()||'SIN RESERVA',acabado=r.acabado||'SIN ACABADO',qty=Number(r.cantidad||0),hm=hasMuntin(r);
     if(!systems.has(system))systems.set(system,{sistema:system,reservas:new Set(),producciones:0,unidades:0,prodMuntin:0,unidMuntin:0});
     const sg=systems.get(system);sg.reservas.add(reserva);sg.producciones++;sg.unidades+=qty;if(hm){sg.prodMuntin++;sg.unidMuntin+=qty}
     if(!types.has(system))types.set(system,{sistema:system,proyecto:0,retail:0});
@@ -652,7 +652,7 @@ function renderQueriedProgramming(){
   });
   const summary=[...systems.values()].sort((x,y)=>y.unidades-x.unidades);
   els.systemSummaryBody.innerHTML=summary.map(g=>`<tr class="${g.prodMuntin?'has-muntin-summary':''}"><td><strong>${escapeHtml(g.sistema)}</strong></td><td>${g.reservas.size}</td><td>${g.producciones}</td><td><strong>${g.unidades}</strong></td><td>${g.prodMuntin}</td><td>${g.unidMuntin}</td></tr>`).join('');
-  els.systemSummaryFoot.innerHTML=`<tr><td>TOTAL</td><td>${new Set(baseRows.map(r=>String(r.reserva_al??'').trim()||'SIN RESERVA')).size}</td><td>${baseRows.length}</td><td>${units}</td><td>${baseRows.filter(hasMuntin).length}</td><td>${baseRows.filter(hasMuntin).reduce((n,r)=>n+Number(r.cantidad||0),0)}</td></tr>`;
+  els.systemSummaryFoot.innerHTML=`<tr><td>TOTAL</td><td>${new Set(baseRows.map(r=>String(r.reserva_principal??r.reserva_al??'').trim()||'SIN RESERVA')).size}</td><td>${baseRows.length}</td><td>${units}</td><td>${baseRows.filter(hasMuntin).length}</td><td>${baseRows.filter(hasMuntin).reduce((n,r)=>n+Number(r.cantidad||0),0)}</td></tr>`;
   const typeRows=[...types.values()].sort((x,y)=>(y.proyecto+y.retail)-(x.proyecto+x.retail));
   els.typeSummaryBody.innerHTML=typeRows.map(g=>`<tr><td><strong>${escapeHtml(g.sistema)}</strong></td><td>${g.proyecto}</td><td>${g.retail}</td><td><strong>${g.proyecto+g.retail}</strong></td></tr>`).join('');
   const projectTotal=typeRows.reduce((n,g)=>n+g.proyecto,0),retailTotal=typeRows.reduce((n,g)=>n+g.retail,0);
@@ -665,8 +665,8 @@ function renderQueriedProgramming(){
   if(detailSort.key)rows=[...rows].sort((x,y)=>String(detailValue(x,detailSort.key)).localeCompare(String(detailValue(y,detailSort.key)),undefined,{numeric:true})*detailSort.dir);
   els.qVisible.textContent=rows.length;renderDetailHead();
   let prev=null,idx=-1;
-  els.queryBody.innerHTML=rows.length?rows.map(r=>{const reserva=String(r.reserva_al??'').trim()||'SIN RESERVA';if(reserva!==prev){idx++;prev=reserva}const hm=hasMuntin(r);
-    return `<tr class="${idx%2===0?'reservation-alt':''} ${hm?'has-muntin':''}">${detailColumns.filter(c=>!detailHidden.has(c.key)).map(c=>{let v=detailValue(r,c.key);if(c.key==='reserva_al')return `<td><button class="piece-link" data-piece-mode="reserva" data-piece-value="${escapeHtml(reserva)}">${escapeHtml(reserva)}</button></td>`;if(c.key==='produccion')return `<td><button class="piece-link" data-piece-mode="produccion" data-piece-value="${escapeHtml(r.produccion)}">${escapeHtml(r.produccion)}</button></td>`;if(c.key==='muntin')v=hm?'SÍ · '+(r.cantidad_muntin??r.cantidad??''):'—';return `<td>${escapeHtml(v||'—')}</td>`}).join('')}</tr>`;
+  els.queryBody.innerHTML=rows.length?rows.map(r=>{const reserva=String(r.reserva_principal??r.reserva_al??'').trim()||'SIN RESERVA',meta=sharedMetaFromEmbedded(r,reserva);if(reserva!==prev){idx++;prev=reserva}const hm=hasMuntin(r);
+    return `<tr class="${idx%2===0?'reservation-alt':''} ${hm?'has-muntin':''} ${meta?'shared-row':''}">${detailColumns.filter(c=>!detailHidden.has(c.key)).map(c=>{let v=detailValue(r,c.key);if(c.key==='reserva_al')return `<td><button class="piece-link" data-piece-mode="reserva" data-piece-value="${escapeHtml(reserva)}">${escapeHtml(reserva)}</button>${meta?'<div class="shared-cell-note">'+sharedBadgeHtml(meta)+sharedDetailsHtml(meta)+'</div>':''}${sharedReserveNoticeHtml(reserva)}</td>`;if(c.key==='produccion')return `<td><button class="piece-link" data-piece-mode="produccion" data-piece-value="${escapeHtml(r.produccion)}">${escapeHtml(r.produccion)}</button>${meta?'<div class="shared-cell-note">'+sharedBadgeHtml(meta)+'</div>':''}</td>`;if(c.key==='muntin')v=hm?'SÍ · '+(r.cantidad_muntin??r.cantidad??''):'—';return `<td>${escapeHtml(v||'—')}</td>`}).join('')}</tr>`;
   }).join(''):`<tr><td colspan="${detailColumns.filter(c=>!detailHidden.has(c.key)).length}" class="empty">No hay registros con los filtros seleccionados.</td></tr>`;
 }
 function basePieceDescription(s){
@@ -718,7 +718,7 @@ async function queryWeeklyProgramming() {
     const client=await getSupabaseClient();
     const {data,error}=await client.rpc("sgp_consultar_programacion_semana",{p_token:token,p_anio:year,p_semana:week});
     if(error) throw error;
-    queriedProductions=data?.producciones || []; queriedSystemSummary=data?.resumen_sistemas || [];
+    queriedProductions=data?.producciones || []; queriedSystemSummary=data?.resumen_sistemas || [];await ensureSharedReservations();
     els.qWeek.textContent=`${week} / ${year}`;
     els.queryStatus.textContent=queriedProductions.length ? `Semana ${week} cargada desde Supabase ✓ · ${queriedProductions.length} producciones.` : `No hay programación almacenada para la semana ${week} / ${year}.`;
     renderQueriedProgramming();
