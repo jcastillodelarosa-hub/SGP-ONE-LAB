@@ -284,3 +284,14 @@ Nunca declarar una funcionalidad como implementada o publicada sin verificarlo.
 
 ### Principio de diseño
 Modelar la relación producción↔reservas como relación explícita 1:N. El campo legado `sgp_producciones.reserva_al` puede seguir siendo fuente de importación, pero las funcionalidades nuevas no deben depender de comparaciones de texto exactas contra ese campo multivalor.
+
+
+### Regla adicional — Pendientes de aluminio en órdenes con reserva compartida
+- Cuando una orden tenga reservas compartidas, al **reportar un pendiente de aluminio** el usuario debe seleccionar explícitamente a qué **reserva/acabado** corresponde el pendiente.
+- Las opciones válidas deben provenir únicamente de las reservas asociadas a esa producción y de los acabados resueltos para cada reserva. Ejemplo: `Reserva A · Acabado X` / `Reserva B · Acabado Y`.
+- No inferir el acabado del pendiente solo desde el acabado principal de la producción.
+- El pendiente debe conservar la relación con la **reserva específica** seleccionada y su **acabado específico**, aunque la orden aparezca operativamente bajo otra reserva principal.
+- Esta regla aplica a pendientes creados desde Mecanizado/Producción, Picking/Auditoría y cualquier flujo futuro que cree `sgp_aluminio_pendientes`.
+- Si la producción tiene una sola reserva, el sistema puede autoseleccionarla y mostrar su acabado sin pedir una elección adicional.
+- Si no es posible resolver el acabado de una reserva compartida, no inventarlo: mostrar la reserva y exigir aclaración antes de guardar el pendiente, o permitir `Acabado por confirmar` solo si la regla de negocio lo autoriza explícitamente.
+- El histórico del pendiente debe conservar el acabado elegido al momento del reporte; no depender únicamente de volver a calcularlo desde `sgp_producciones` en consultas posteriores.
