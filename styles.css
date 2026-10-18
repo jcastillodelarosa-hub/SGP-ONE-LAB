@@ -1545,3 +1545,20 @@ button.active,[aria-pressed="true"]{border-color:#0865ed}
 .shift-r-bottomgrid>section:first-child th:nth-child(4),.shift-r-bottomgrid>section:first-child td:nth-child(4){width:16%;white-space:nowrap;overflow:visible}
 .shift-r-bottomgrid>section:first-child th:nth-child(5),.shift-r-bottomgrid>section:first-child td:nth-child(5){width:37%}
 .shift-r-bottomgrid>section:first-child .shift-r-state{box-sizing:border-box;min-width:0;width:100%;max-width:92px;white-space:nowrap;padding-left:4px;padding-right:4px}
+
+
+/* LAB v268 · Picking: semana visible y filtros móviles */
+.pick-week-badge{display:flex;align-items:center;justify-content:center;min-width:68px;min-height:48px;padding:7px 10px;border-radius:10px;background:#e7f2ff;color:#0c5ca8;font-size:15px;font-weight:950;line-height:1;white-space:nowrap}
+.pick-res{display:flex!important;grid-template-columns:none!important;align-items:center;gap:12px!important}.pick-res-copy{display:grid;gap:2px;min-width:0}
+.pick-open-main{display:flex;align-items:center;gap:12px;min-width:0}.pick-open-main>div:last-child{min-width:0}
+@media(max-width:760px){
+ .pick-toolbar{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(112px,.72fr)!important;gap:8px!important;width:100%!important;margin:10px 0 12px!important;overflow:visible!important}
+ .pick-toolbar input,.pick-toolbar select,.pick-toolbar button{display:block!important;width:100%!important;min-width:0!important;max-width:none!important;height:40px!important;margin:0!important}
+ #pickSearch{grid-column:1/-1!important}
+ #pickRefresh{grid-column:1/-1!important}
+ .pick-week-badge{min-width:58px;min-height:42px;font-size:13px;padding:6px 8px}
+ .pick-card>summary{grid-template-columns:1fr auto!important;gap:8px!important}
+ .pick-card>summary .pick-res,.pick-card>summary .pick-product{grid-column:1/-1}
+ .pick-open-main{align-items:flex-start}
+ .pick-open-card>summary{grid-template-columns:1fr!important}
+}
