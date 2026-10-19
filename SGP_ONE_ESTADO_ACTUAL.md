@@ -673,3 +673,66 @@ Estado al documentar:
 
 ### Riesgo residual
 Los registros `LEGACY_REVISAR` mantienen compatibilidad histórica y no reciben composición inventada. Deben revisarse caso por caso si se desea reconstruir exactamente qué nuevas producciones pertenecen a una programación histórica.
+
+
+---
+
+## 31. CONTINUIDAD 2026-10-19 — v284 · COBERTURA DE PROGRAMACIÓN POR ORDEN
+
+### Problema confirmado
+v283 corrigió la cantidad canónica, pero un histórico con snapshot distinto a la composición actual podía mostrar una diferencia numérica como “sin programar” sin saber qué órdenes estaban realmente pendientes.
+
+Ejemplo auditado:
+- 8689722 / 1.1: snapshot 55, cantidad actual 58; las 14 órdenes actuales tienen evidencia de ejecución ligada al mismo id_programacion y están PROCESADAS. La diferencia de 3 no representa una orden nueva.
+- 8689919 / 13 y 8690338 / 2.1: existe diferencia histórica pero no evidencia suficiente para inferir automáticamente cuáles órdenes quedaron fuera.
+
+### Regla v284
+La cobertura se determina por `key_produccion`, no por resta de cantidades.
+- PROGRAMADA: key_produccion cubierta por una programación activa.
+- PENDIENTE: key_produccion no cubierta cuando la composición ya es conocida.
+- REVISAR HISTÓRICO: existe programación legacy pero no hay evidencia suficiente para reconstruir su composición.
+- Nunca elegir órdenes por subset de cantidades ni por coincidencia numérica.
+
+### Backend
+Aplicado en Supabase:
+- `lab_v284_cobertura_ordenes_base`
+- `lab_v284_reconciliar_programacion_legacy`
+- `lab_v284_backfill_evidencia_ejecucion`
+- `lab_v284_revoke_public_cobertura`
+
+RPC:
+- `sgp_mecanizado_cobertura_ordenes(token, semana)`
+- `sgp_mecanizado_reconciliar_programacion_legacy(token, id_programacion, keys[])`
+
+La reconciliación manual está limitada a ADMINISTRADOR/COORDINADOR. Los RPC conservan SECURITY DEFINER, validación SGP y EXECUTE para anon/authenticated/service_role; PUBLIC quedó revocado.
+
+Backfill seguro confirmado:
+- 8689722 / 1.1 → 14 key_produccion, cantidad canónica actual 58, origen RECONSTRUIDA_EJECUCION.
+- 8689722 / 1.2 y 1.3 permanecen CANONICA.
+- 8690338 / 2.2 permanece CANONICA.
+- 8690348 / 3.1 permanece CANONICA.
+- 8689919 / 13 y 8690338 / 2.1 permanecen sin composición inventada y requieren reconciliación.
+
+### Frontend
+LAB v284:
+- carga cobertura por orden;
+- muestra PROGRAMADA / PENDIENTE por orden dentro de cada parte;
+- bloquea programación de un histórico ambiguo hasta reconciliarlo;
+- muestra “REVISAR HISTÓRICO” y permite al Coordinador seleccionar explícitamente las órdenes que ya pertenecían a la programación anterior;
+- después de reconciliar, las no seleccionadas quedan pendientes y pueden programarse con el flujo normal.
+
+### Pruebas y publicación
+- JavaScript syntax check: SUPERADO.
+- SGP ONE Tests: SUPERADO.
+- Deploy Firebase workflow run 39298089120: SUPERADO.
+- Verificación backend de privilegios: SUPERADA.
+- Verificación visual/operativa en navegador: PENDIENTE.
+
+### Estado
+ANALIZADO: COMPLETADO.
+IMPLEMENTADO: COMPLETADO.
+APLICADO EN SUPABASE: COMPLETADO.
+VERSIONADO EN GITHUB main: COMPLETADO.
+PROBADO AUTOMÁTICAMENTE: COMPLETADO.
+PUBLICADO EN FIREBASE: COMPLETADO.
+VERIFICADO EN NAVEGADOR: PENDIENTE.
