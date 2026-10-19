@@ -7,10 +7,10 @@ const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
 const migration279 = readFileSync(new URL("../supabase/migrations/20261018_pdt_validation_workflow.sql", import.meta.url), "utf8");
 const migration280 = readFileSync(new URL("../supabase/migrations/20261018_pdt_compact_actions.sql", import.meta.url), "utf8");
 
-test("LAB v281 restaura columnas históricas y conserva menú Acciones", () => {
-  assert.match(html, /LAB v281/);
-  assert.match(html, /app\.js\?v=281/);
-  assert.match(html, /styles\.css\?v=281/);
+test("regresión v281 conserva columnas históricas y menú Acciones en versiones posteriores", () => {
+  assert.match(html, /LAB v\d+/);
+  assert.match(html, /app\.js\?v=\d+/);
+  assert.match(html, /styles\.css\?v=\d+/);
   assert.equal((html.match(/<th>Acciones<\/th>/g) || []).length, 2);
   assert.equal((html.match(/data-repo-week-sort/g) || []).length, 2);
   assert.match(html, /data-repo-week-sort>Sem\. ↑<\/button><\/th><th>OP<\/th><th>Reserva<\/th><th>Referencia<\/th><th>Acabado<\/th><th>Marca<\/th><th>Fabricación<\/th><th>Longitud<\/th><th>Cant\.<\/th><th>NC<\/th><th>Enlace NC<\/th><th>Estado NC<\/th><th>Validación<\/th><th>Observación<\/th><th>Estado PDT<\/th><th>Acciones<\/th>/);
