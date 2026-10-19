@@ -26,3 +26,6 @@ Changes must be explicitly scoped and approved. Preserve existing behavior. Do n
 
 ## Handoff
 Report: project; module; objective; baseline; sources and commit; findings; dependencies; roles; business rules; proposed changes; executed changes; tests and environments; risks; pending decisions; final evidence status.
+
+## Mandatory read-only and duplication controls
+An audit, continuity check, diagnostic or documentary test is read-only by default. Inspect `main` code, current files, relevant historical merged PRs and open PRs before concluding that an implementation is missing. Compare actual file contents and behavior; do not infer absence from a divergent feature branch, non-empty branch diff or an apparently mergeable PR, especially after squash merges. Record evidence, commit/ref, proven findings versus hypotheses, and any remaining delta. No write action is authorized by the audit itself.
