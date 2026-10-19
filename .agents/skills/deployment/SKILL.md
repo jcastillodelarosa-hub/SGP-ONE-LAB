@@ -26,3 +26,6 @@ Changes must be explicitly scoped and approved. Preserve existing behavior. Do n
 
 ## Handoff
 Report: project; module; objective; baseline; sources and commit; findings; dependencies; roles; business rules; proposed changes; executed changes; tests and environments; risks; pending decisions; final evidence status.
+
+## Mandatory deployment/PR preflight
+Before creating a branch, PR, merge or deployment, verify the user has explicitly authorized that specific class of change. Inspect `main`, existing open and merged PRs, target file contents and the deployment workflow. Check for equivalent work already merged (including squash merges), and for pending PRs addressing the same objective. If the requested result already exists, do not create a duplicate PR or deploy; report the evidence. Do not equate a mergeable PR or non-empty branch diff with missing changes. Documentary-only tests must never trigger writes. Keep application, Supabase and Firebase unchanged unless separately approved.
