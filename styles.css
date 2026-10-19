@@ -1902,3 +1902,8 @@ button.active,[aria-pressed="true"]{border-color:#0865ed}
 .glass-explorer-link strong{overflow-wrap:anywhere}
 .glass-explorer-link button{justify-self:start;background:#edf5ff;border:1px solid #c9dcf6;border-radius:8px;padding:5px 10px;cursor:pointer;color:#075fce}
 @media(max-width:720px){.glass-explorer-overlay{padding:4px}.glass-explorer-dialog{width:100vw;height:98vh}.glass-explorer-content{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(240px,1fr) 180px}.glass-explorer-details{border-left:0;border-top:1px solid #dce7f4}.glass-explorer-dialog header{padding:12px}.glass-explorer-dialog header h2{font-size:17px}.glass-explorer-dialog footer{padding:8px 12px;font-size:11px}}
+
+/* LAB v298: apertura contextual de relaciones */
+.glass-open-relations{border:1px solid #bfd5f2;border-radius:9px;background:#fff;color:#0862cc;font-size:12px;font-weight:850;padding:7px 10px;cursor:pointer;white-space:nowrap}
+.glass-open-relations:hover{background:#e3f0ff}
+.glass-efficiency-reservation>summary,.glass-efficiency-part>summary,.glass-efficiency-order>summary{flex-wrap:wrap}
