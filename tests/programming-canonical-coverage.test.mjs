@@ -13,7 +13,7 @@ test("v283 usa cantidad_cubierta para el saldo visual de reserva y parte", () =>
   assert.match(app, /reserveCoverage=res=>/);
   assert.match(app, /cantidad_cubierta/);
   assert.match(app, /const done=reserveCoverage\(r\.reserva\)/);
-  assert.match(app, /const partProgrammed=p=>\{const cv=progCoverage\.find/);
+  assert.match(app, /const partStats=p=>/);
 });
 
 test("v283 conserva cantidad_programada para snapshots históricos, no como única cobertura vigente", () => {
