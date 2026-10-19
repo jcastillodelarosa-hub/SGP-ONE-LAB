@@ -602,3 +602,73 @@ El error de Producción `permission denied for function sgp_mecanizado_guardar_e
 La portada mantiene todavía el cálculo histórico que suma `saldo_ensamble` y `saldo_empaque` de PANELES_2 y FRAMES_2. Se comprobó que esto puede duplicar conceptualmente producciones presentes en ambas líneas. El rediseño para mostrar saldos separados de semanas vencidas y semana actual está **pendiente de definición final e implementación**.
 
 **Siguiente punto de continuidad recomendado:** cerrar prueba v282 y luego definir/implementar la nueva portada de saldos por línea.
+
+
+---
+
+## 30. CONTINUIDAD 2026-10-19 — v283 · CANTIDAD CANÓNICA DE PROGRAMACIÓN
+
+### Objetivo
+Evitar que Programación considere `sgp_mecanizado_programacion.cantidad_programada` como verdad vigente cuando la composición/cantidad real de una parte cambió posteriormente.
+
+### Regla aprobada
+- Fuente canónica vigente: `sgp_producciones.key_produccion + sgp_producciones.cantidad`.
+- `cantidad_programada` se conserva como snapshot histórico y continúa siendo válida para reportes/calendario histórico.
+- Una programación nueva debe persistir las `key_produccion` exactas que cubre.
+- Los históricos ambiguos no se reconstruyen por inferencia.
+
+### Implementación Supabase
+Aplicadas:
+- `lab_v283_cantidad_canonica_programacion`.
+- `lab_v283_programacion_composicion_consumidores`.
+
+Versionado en:
+- `supabase/migrations/20261019_programacion_cantidad_canonica_v283.sql`.
+
+Se agregó:
+- `sgp_mecanizado_programacion_detalle`: composición persistida por `id_programacion + key_produccion`.
+- `sgp_mecanizado_cobertura_programacion(token, semana)`: devuelve cantidad canónica, cubierta, pendiente y estado de cobertura.
+- `sgp_mecanizado_programar`: valida contra saldo canónico y persiste composición exacta.
+- `sgp_mecanizado_ordenes_programacion`: usa composición persistida cuando existe; conserva fallback legacy.
+- `sgp_mecanizado_pendientes_turno`: arrastre usa composición persistida cuando existe; conserva fallback legacy.
+
+Seguridad:
+- tabla detalle con RLS habilitado;
+- sin acceso directo para `public/anon/authenticated`;
+- RPCs invocadas por navegador conservan `SECURITY DEFINER`, validación interna SGP y EXECUTE para `anon/authenticated/service_role`.
+
+### Reconciliación histórica
+Backfill automático únicamente cuando la composición actual era inequívoca y la suma canónica coincidía exactamente con el snapshot histórico.
+
+Casos auditados SEM 43:
+- 8689722 / 1.1: canónica 58, histórica 55 → `LEGACY_REVISAR`.
+- 8689722 / 1.2: 54 = 54 → `PROGRAMADA`, detalle persistido.
+- 8689722 / 1.3: 55 = 55 → `PROGRAMADA`, detalle persistido.
+- 8689919 / 13: 35 vs 29 → `LEGACY_REVISAR`.
+- 8690338 / 2.1: 55 vs 46 → `LEGACY_REVISAR`.
+- 8690338 / 2.2: 65 = 65 → `PROGRAMADA`, detalle persistido.
+- 8690348 / 3.1: 37 = 37 → `PROGRAMADA`, detalle persistido.
+- 8690348 / 3.2: 38, sin programación → `SIN_PROGRAMAR`.
+- 8690348 / 3.3: 39, sin programación → `SIN_PROGRAMAR`.
+
+### Frontend
+`app.js` carga `sgp_mecanizado_cobertura_programacion` junto con disponibles/programación y usa `cantidad_cubierta` para:
+- saldo por reserva;
+- saldo por parte/prioridad semanal;
+- clasificación programada/parcial/pendiente.
+
+La versión visible se actualizó a **LAB v283**.
+
+### Pruebas
+Se agregó `tests/programming-canonical-coverage.test.mjs` para impedir regresión al cálculo basado únicamente en `cantidad_programada`.
+
+Estado al documentar:
+- ANALIZADO: **COMPLETADO**.
+- IMPLEMENTADO: **COMPLETADO**.
+- APLICADO EN SUPABASE: **COMPLETADO**.
+- VERSIONADO EN GITHUB main: **COMPLETADO**.
+- PRUEBAS AUTOMÁTICAS / PUBLICACIÓN FIREBASE: **EN VERIFICACIÓN DE PIPELINE**.
+- VERIFICACIÓN VISUAL/OPERATIVA: **PENDIENTE**.
+
+### Riesgo residual
+Los registros `LEGACY_REVISAR` mantienen compatibilidad histórica y no reciben composición inventada. Deben revisarse caso por caso si se desea reconstruir exactamente qué nuevas producciones pertenecen a una programación histórica.
