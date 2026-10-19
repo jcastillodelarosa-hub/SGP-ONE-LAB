@@ -1382,6 +1382,94 @@ function renderProgParts(parts,produccion){
  const partStats=p=>{const rows=covFor(p),review=rows.some(x=>x.estado_orden==='REVISAR'),done=(p.ordenes||[]).reduce((n,o)=>n+(orderCov(p,o)?.estado_orden==='PROGRAMADA'?Number(o.cantidad||0):0),0);return {rows,review,done,left:review?null:Math.max(0,Number(p.cantidad)-done)}};
  const legacyTarget=p=>Number(progCoverage.find(x=>String(x.reserva)===String(progSelection?.reserva)&&String(x.prioridad_semanal||'')===String(p.prioridad))?.cantidad_cubierta||0);
  host.hidden=false;host.innerHTML='<label>Parte / prioridad semanal</label><div class="prog-part-list">'+parts.map(p=>{const st=partStats(p),left=st.left,legacy=st.review,legacyId=st.rows.find(x=>x.id_programacion_legacy)?.id_programacion_legacy||'',target=legacyTarget(p);return '<details class="prog-part '+(!legacy&&left<=0?'prog-part-done':!legacy&&st.done>0?'prog-part-partial':'')+'" '+(legacy?'open':'')+'><summary><label class="prog-part-choice"><input type="radio" name="progPartChoice" value="'+escapeHtml(p.prioridad)+'" '+(legacy||left<=0?'disabled':'')+'><span class="part-radio-ui"></span><span class="part-main"><b>Parte '+escapeHtml(p.prioridad)+'</b>'+(legacy?'<em class="part-status-badge partial">REVISAR HISTÓRICO</em>':left<=0?'<em class="part-status-badge">✓ PROGRAMADA</em>':st.done>0?'<em class="part-status-badge partial">PARCIAL</em>':'')+'<span>'+p.cantidad+' ventanas · '+(legacy?'<strong class="pending-text">identificar '+target+' ventanas ya programadas</strong>':'<strong class="'+(left===0?'done-text':'pending-text')+'">'+st.done+' programadas · '+left+' pendientes</strong>')+' · Vidrio '+Number(p.vidrio_pct||0).toFixed(0)+'%</span><span class="part-glass-summary">'+glassSummary(p)+'</span></span></label></summary><div class="prog-part-orders">'+(p.ordenes||[]).map(o=>{const oc=orderCov(p,o),state=oc?.estado_orden||'PENDIENTE';return '<div class="prog-order-coverage" data-order-row="'+escapeHtml(o.key_produccion||o.produccion||'')+'" data-order-qty="'+Number(o.cantidad||0)+'"><div><b>'+escapeHtml(o.produccion||'Orden')+'</b><span>'+o.cantidad+' ventanas · <strong class="glass-type-inline">Vidrio: '+escapeHtml(o.tipo_vidrio||'—')+'</strong></span></div>'+(legacy?'<label class="legacy-cover-check"><input type="checkbox" data-legacy-key="'+escapeHtml(o.key_produccion||'')+'" data-legacy-part="'+escapeHtml(p.prioridad)+'" data-legacy-qty="'+Number(o.cantidad||0)+'"> Ya estaba programada</label><em class="legacy-live-state">POR DEFINIR</em>':'<div class="prog-order-actions"><em class="part-status-badge '+(state==='PROGRAMADA'?'':'partial')+'">'+(state==='PROGRAMADA'?'✓ PROGRAMADA':'PENDIENTE')+'</em>'+(state==='PENDIENTE'?'<button type="button" class="program-pending-order" data-program-order="'+escapeHtml(o.produccion||'')+'" data-program-part="'+escapeHtml(p.prioridad)+'" data-program-qty="'+Number(o.cantidad||0)+'">Programar esta orden</button>':'')+'</div>')+'<textarea data-part-order="'+escapeHtml(o.produccion||'')+'" placeholder="Comentario específico de esta orden (opcional)"></textarea></div>'}).join('')+(legacy?'<div class="legacy-reconcile-box" data-legacy-summary="'+escapeHtml(p.prioridad)+'" data-legacy-target="'+target+'"><strong>Histórico identificado: <span data-legacy-selected>0</span> / '+target+' ventanas</strong><small data-legacy-help>Marca las órdenes que componen las '+target+' ventanas ya programadas. Al completar exactamente esa cantidad, las restantes se identificarán como pendientes.</small><button type="button" data-reconcile-part="'+escapeHtml(p.prioridad)+'" data-legacy-id="'+escapeHtml(legacyId)+'" disabled>Confirmar y mostrar faltantes</button></div>':'')+'</div></details>'}).join('')+'</div>';
+ // Presenta las órdenes por estado sin alterar la reconciliación histórica.
+ host.querySelectorAll('.prog-part').forEach(section=>{
+  const rows=[...section.querySelectorAll('.prog-order-coverage')];
+  if(!rows.length)return;
+  const legacy=!!section.querySelector('[data-legacy-summary]');
+  const parent=rows[0].parentElement;
+  const heading=document.createElement('div');
+  heading.className='prog-order-section-title';
+  heading.style.cssText='font-weight:800;margin:12px 0 8px;color:#103b70';
+  heading.textContent=legacy?'Identificar órdenes ya programadas (histórico)':'Órdenes pendientes por programar';
+  parent.insertBefore(heading,rows[0]);
+  if(legacy){
+   const note=document.createElement('p');
+   note.textContent='Marca primero las órdenes históricamente programadas. Al confirmar, el sistema identificará las pendientes.';
+   note.style.cssText='font-size:12px;margin:0 0 12px';
+   heading.after(note);
+   return;
+  }
+  const done=rows.filter(row=>row.querySelector('.part-status-badge')?.textContent.includes('PROGRAMADA'));
+  const pending=rows.filter(row=>!done.includes(row));
+  heading.textContent='Órdenes pendientes por programar · '+pending.length;
+  if(pending.length){
+   const controls=document.createElement('div');
+   controls.className='prog-batch-controls';
+   controls.style.cssText='padding:10px 0 14px;display:flex;flex-wrap:wrap;align-items:center;gap:12px';
+   const count=document.createElement('strong');
+   count.textContent='0 ventanas seleccionadas';
+   const btn=document.createElement('button');
+   btn.type='button';btn.className='primary';btn.textContent='Programar órdenes seleccionadas';btn.disabled=true;
+   const choices=[];
+   pending.forEach(row=>{
+    const action=row.querySelector('[data-program-order]');
+    if(!action)return;
+    const qty=Number(action.dataset.programQty||0);
+    if(qty<=0)return;
+    const check=document.createElement('input');check.type='checkbox';check.className='prog-batch-check';
+    check.setAttribute('aria-label','Seleccionar '+action.dataset.programOrder);
+    check.style.cssText='width:19px;height:19px;margin-right:10px;vertical-align:middle';
+    row.firstElementChild?.prepend(check);
+    choices.push({check,order:action.dataset.programOrder,qty,part:action.dataset.programPart,row});
+   });
+   const update=()=>{const selected=choices.filter(x=>x.check.checked),total=selected.reduce((n,x)=>n+x.qty,0);count.textContent=total+' ventanas seleccionadas ('+selected.length+' órdenes)';btn.disabled=!selected.length};
+   choices.forEach(x=>x.check.addEventListener('change',update));
+   let saving=false;
+   btn.onclick=async()=>{
+    if(saving)return;
+    const selected=choices.filter(x=>x.check.checked);
+    if(!selected.length)return;
+    const total=selected.reduce((n,x)=>n+x.qty,0);
+    const date=document.querySelector('#progDate').value,shift=document.querySelector('#progShift').value;
+    const priority=Number(document.querySelector('#progPriority').value);
+    const reserva=progSelection?.reserva;
+    if(!reserva||!date||!shift||!Number.isFinite(priority)||priority<0){alert('Complete fecha, turno y prioridad válida.');return}
+    if(selected.some(x=>!x.order||!x.part||!Number.isInteger(x.qty)||x.qty<=0)){alert('Hay órdenes sin identidad, parte o cantidad válida.');return}
+    if(new Set(selected.map(x=>x.part+'|'+x.order)).size!==selected.length){alert('Hay órdenes repetidas en la selección.');return}
+    if(!confirm('¿Programar '+selected.length+' órdenes con '+total+' ventanas para '+date+' / '+shift+'?'))return;
+    saving=true;btn.disabled=true;btn.textContent='Guardando programación…';
+    let completed=0,failed=null;
+    try{
+     const c=await getSupabaseClient(),token=getAppToken();
+     for(const item of selected){
+      const args={p_token:token,p_reserva:reserva,p_produccion:item.order,p_cantidad:item.qty,p_fecha:date,p_turno:shift,p_prioridad:priority+completed,p_prioridad_semanal:String(item.part),p_observacion:document.querySelector('#progObs').value,p_observacion_orden:item.row.querySelector('textarea')?.value||''};
+      const {error}=await c.rpc('sgp_mecanizado_programar',args);
+      if(error){failed={order:item.order,message:error.message};break}
+      completed++;
+     }
+    }catch(error){failed={order:selected[completed]?.order||'desconocida',message:error?.message||String(error)}}
+    finally{
+     saving=false;
+     if(completed){closeProgModal();try{await loadProgramming()}catch(error){alert('Se guardaron '+completed+' órdenes, pero falló la actualización del listado: '+(error?.message||error))}}
+     else{btn.textContent='Programar órdenes seleccionadas';update()}
+    }
+    if(failed)alert('Se guardaron '+completed+' de '+selected.length+' órdenes. Se detuvo en '+failed.order+': '+failed.message+'. Verifique el listado antes de reintentar.');
+    else alert('Se programaron '+completed+' órdenes correctamente.');
+   };
+   controls.append(count,btn);heading.after(controls);
+  }
+  const details=document.createElement('details');
+  details.className='prog-completed-orders';
+  details.style.cssText='margin:12px 0;border-top:1px solid #d7e2f0;padding-top:12px';
+  const summary=document.createElement('summary');
+  summary.textContent='Órdenes ya programadas · '+done.length+' (consultar)';
+  summary.style.cssText='font-weight:700;cursor:pointer;color:#176345';
+  details.appendChild(summary);
+  done.forEach(row=>{row.querySelectorAll('textarea').forEach(el=>el.remove());details.appendChild(row)});
+  parent.appendChild(details);
+  if(!pending.length)heading.textContent='Sin órdenes pendientes por programar';
+ });
  host.querySelectorAll('input[name="progPartChoice"]').forEach(r=>r.onchange=()=>{const p=parts.find(x=>String(x.prioridad)===r.value);if(!p)return;const st=partStats(p);if(st.review)return;progSelection.part=p;progSelection.maxQty=st.left;document.querySelector('#progQty').value=st.left;document.querySelector('#progQty').readOnly=true});
  const refreshLegacy=part=>{const box=host.querySelector('[data-legacy-summary="'+CSS.escape(part)+'"]');if(!box)return;const target=Number(box.dataset.legacyTarget||0),checks=[...host.querySelectorAll('input[data-legacy-part="'+CSS.escape(part)+'"]')],selected=checks.filter(x=>x.checked).reduce((n,x)=>n+Number(x.dataset.legacyQty||0),0),exact=target>0&&selected===target;box.querySelector('[data-legacy-selected]').textContent=selected;const help=box.querySelector('[data-legacy-help]');help.textContent=selected>target?'La selección supera el histórico por '+(selected-target)+' ventanas. Desmarca órdenes.':selected<target?'Faltan '+(target-selected)+' ventanas por identificar del histórico.':'Cobertura histórica completa. Las órdenes no marcadas son las pendientes por programar.';const btn=box.querySelector('[data-reconcile-part]');btn.disabled=!exact||!btn.dataset.legacyId;checks.forEach(x=>{const row=x.closest('.prog-order-coverage'),badge=row?.querySelector('.legacy-live-state');if(!badge)return;badge.textContent=x.checked?'✓ PROGRAMADA':exact?'PENDIENTE':'POR DEFINIR';badge.className='legacy-live-state '+(x.checked?'is-programmed':exact?'is-pending':'')});};
  host.querySelectorAll('input[data-legacy-part]').forEach(x=>x.onchange=()=>refreshLegacy(x.dataset.legacyPart));
