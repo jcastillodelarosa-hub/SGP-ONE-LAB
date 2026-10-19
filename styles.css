@@ -1817,3 +1817,16 @@ button.active,[aria-pressed="true"]{border-color:#0865ed}
 .prod-order-exec-row .prod-glass-counts>span{min-width:64px;min-height:64px;padding:9px 11px;font-size:13px!important;font-weight:800;line-height:1.25}
 .prod-order-exec-row .prod-glass-counts>span>b{display:block;font-size:20px!important;font-weight:900;line-height:1.2;margin-top:3px;font-variant-numeric:tabular-nums}
 @media(max-width:760px){.prod-order-exec-row>strong{font-size:19px!important;min-height:42px}.prod-order-exec-row .prod-glass-counts>span{min-width:58px;min-height:58px;padding:7px 9px;font-size:12px!important}.prod-order-exec-row .prod-glass-counts>span>b{font-size:19px!important}}
+
+/* LAB v293: opción 1, tarjetas semanales con Paneles y Frames separados */
+#homeBalance .home-week-cards{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+#homeBalance .home-balance-week{display:block!important;min-height:0!important;padding:13px!important}
+#homeBalance .home-balance-week>strong{display:block;margin-bottom:10px;font-size:15px}
+#homeBalance .home-balance-lines{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+#homeBalance .home-balance-line{display:grid;grid-template-columns:1fr 1fr;gap:7px;min-width:0;padding:11px 9px;border:1px solid #dce8f5;border-radius:11px;background:#fff}
+#homeBalance .home-balance-line-name{grid-column:1/-1;font-size:12px;font-weight:900;color:#174577;letter-spacing:.02em}
+#homeBalance .home-balance-line .home-balance-area{display:flex!important;flex-direction:column;align-items:flex-start;gap:5px;width:100%;min-width:0;padding:4px!important;border:0!important;background:transparent!important;box-shadow:none!important;text-align:left;cursor:pointer}
+#homeBalance .home-balance-line .home-balance-area i{font-size:11px;font-weight:700}
+#homeBalance .home-balance-line .home-balance-area b{font-size:24px;white-space:nowrap}
+#homeBalance .home-balance-line .home-balance-area:focus-visible{outline:2px solid #1265d6;outline-offset:2px}
+@media(max-width:650px){#homeBalance .home-balance-lines{grid-template-columns:1fr}#homeBalance .home-balance-line .home-balance-area b{font-size:23px}}
