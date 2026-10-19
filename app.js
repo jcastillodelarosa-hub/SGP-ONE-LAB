@@ -788,6 +788,13 @@ function renderGlassEfficiency(){
   html.push('<details class="glass-efficiency-reservation"><summary><span class="glass-efficiency-reservation-title"><strong>'+heading+'</strong><small>'+priorityLabel+'</small></span><span>'+selected.length+' órdenes · '+windows+' ventanas · '+reserveRacks+' burros · '+sum.toLocaleString('es-CO')+' vidrios preparados</span></summary><div class="glass-efficiency-parts">'+partsHtml+'</div></details>');
  });
  target.innerHTML=html.join('')||'<p class="empty">No hay órdenes para los filtros seleccionados.</p>';
+ target.querySelectorAll('.glass-efficiency-reservation,.glass-efficiency-part,.glass-efficiency-order').forEach(el=>{
+  const summary=el.querySelector(':scope > summary');if(!summary||summary.querySelector('.glass-open-relations'))return;
+  const button=document.createElement('button');button.type='button';button.className='glass-open-relations';button.textContent='Ver relaciones';
+  button.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();openGlassExplorer();const title=summary.querySelector('strong,.glass-efficiency-order-name')?.textContent||'';document.querySelector('#glassExplorerSearch').value=title.replace(/^Reserva |^Parte /,'').split(' · ')[0].trim();renderGlassExplorer()});
+  summary.appendChild(button);
+ });
+
 }
 
 /* LAB v298: explorador de relaciones; sólo lectura, basado en la misma RPC autenticada. */
