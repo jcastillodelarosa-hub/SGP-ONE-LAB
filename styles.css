@@ -1803,3 +1803,9 @@ button.active,[aria-pressed="true"]{border-color:#0865ed}
 #progModal .legacy-reconcile-box button{justify-self:start}
 #progModal .legacy-reconcile-box button:disabled{opacity:.45;cursor:not-allowed}
 @media(max-width:650px){#progModal .prog-order-coverage{grid-template-columns:1fr!important}#progModal .prog-order-actions{justify-content:flex-start}}
+
+/* LAB v291: indicadores de vidrio legibles en escritorio y móvil */
+.prod-glass-counts{gap:9px;align-items:center}
+.prod-glass-counts span{min-width:52px;min-height:48px;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;padding:7px 10px;font-size:13px;font-weight:850;line-height:1.3;text-align:center}
+.prod-week-text{font-size:13px;font-weight:900;white-space:nowrap}
+@media(max-width:760px){.prod-glass-counts span{min-width:47px;min-height:44px;padding:6px 8px;font-size:12px}}
