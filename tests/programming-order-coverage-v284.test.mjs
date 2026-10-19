@@ -20,5 +20,13 @@ test('v286 identifica histórico exacto y permite programar la orden pendiente',
  assert.match(app,/Programar esta orden/);
  assert.match(app,/function openProgModal\(reserva,produccion,qty,partPriority=null\)/);
  assert.match(app,/part:selectedPart\|\|null/);
- assert.match(html,/LAB v286/);
+ assert.match(html,/LAB v28[6-9]|LAB v2[9-9][0-9]|LAB v[3-9][0-9]{2,}/);
+});
+
+test('v287 distingue confirmación operativa de programación por orden',()=>{
+ assert.match(app,/sgp_mecanizado_conciliaciones_listar/);
+ assert.match(app,/Confirmada por operación/);
+ assert.match(app,/cobertura por orden pendiente de conciliar/);
+ assert.match(app,/const done=reserveCoverage\(r.reserva\),left=Math.max\(0,Number\(r.cantidad\)-done\)/);
+ assert.match(html,/LAB v287/);
 });
