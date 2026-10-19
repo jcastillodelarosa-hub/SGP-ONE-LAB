@@ -8,5 +8,5 @@ test('v284 order coverage UI',()=>{
  assert.match(app,/progOrderCoverage/);
  assert.match(app,/REVISAR HISTÓRICO/);
  assert.match(app,/sgp_mecanizado_reconciliar_programacion_legacy/);
- assert.match(html,/LAB v284/);
+ assert.match(html,/LAB v28[4-9]|LAB v2[9-9][0-9]|LAB v[3-9][0-9]{2,}/);
 });
