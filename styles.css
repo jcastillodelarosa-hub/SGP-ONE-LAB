@@ -1755,3 +1755,36 @@ button.active,[aria-pressed="true"]{border-color:#0865ed}
 .repo-week-sort:hover{text-decoration:underline}
 .repo-action-portal{position:fixed!important;right:auto!important;z-index:12050!important;display:block!important;min-width:180px}
 .repo-action-portal[hidden]{display:none!important}
+
+
+/* LAB v285 · Programación: restaurar scroll vertical del modal v284
+   La regla global v155 .modal-card{overflow:hidden!important} anulaba el overflow:auto de .prog-card. */
+#progModal.rec-overlay{overflow:hidden!important}
+#progModal .modal-card.prog-card{
+  display:flex!important;
+  flex-direction:column!important;
+  max-height:calc(100vh - 48px)!important;
+  overflow:hidden!important;
+}
+#progModal .modal-header{
+  flex:0 0 auto!important;
+  position:relative!important;
+  z-index:3!important;
+}
+#progModal .rec-form{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  overflow-y:auto!important;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+}
+#progModal .modal-actions{
+  flex:0 0 auto!important;
+  position:relative!important;
+  z-index:3!important;
+}
+@media(max-width:650px){
+  #progModal.rec-overlay{padding:10px!important}
+  #progModal .modal-card.prog-card{max-height:calc(100vh - 20px)!important}
+  #progModal .rec-form{padding:16px!important}
+}
