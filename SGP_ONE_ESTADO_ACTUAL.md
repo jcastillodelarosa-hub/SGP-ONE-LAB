@@ -667,7 +667,8 @@ Estado al documentar:
 - IMPLEMENTADO: **COMPLETADO**.
 - APLICADO EN SUPABASE: **COMPLETADO**.
 - VERSIONADO EN GITHUB main: **COMPLETADO**.
-- PRUEBAS AUTOMÁTICAS / PUBLICACIÓN FIREBASE: **EN VERIFICACIÓN DE PIPELINE**.
+- PRUEBAS AUTOMÁTICAS: **SUPERADAS** en GitHub Actions tras corregir un test histórico acoplado literalmente a v281.
+- PUBLICADO EN FIREBASE: **SÍ**. Workflow `Deploy SGP ONE to Firebase Hosting` run `39293869162`, pasos de release, tests y deploy completados con éxito.
 - VERIFICACIÓN VISUAL/OPERATIVA: **PENDIENTE**.
 
 ### Riesgo residual
