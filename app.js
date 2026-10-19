@@ -759,7 +759,7 @@ function renderGlassEfficiency(){
   const key=String(r.key_produccion||''),res=String(r.reserva||'SIN RESERVA').split(',')[0].trim(),pos=String(r.posicion||'SIN UBICACIÓN'),part=String(r.parte||'SIN PARTE');
   if(!reservations.has(res))reservations.set(res,new Map());
   const orders=reservations.get(res);
-  if(!orders.has(key))orders.set(key,{key,name:String(r.produccion||key),line:String(r.id_linea||''),system:String(r.sistema||''),finish:String(r.acabado||''),part,source:String(r.reservas_origen||res),locations:[]});
+  if(!orders.has(key))orders.set(key,{key,name:String(r.produccion||key),line:String(r.id_linea||''),system:String(r.sistema||''),finish:String(r.acabado||''),part,windows:Number(r.ventanas||0),source:String(r.reservas_origen||res),locations:[]});
   orders.get(key).locations.push({pos,total:Number(r.unidades||0),prepared:Number(r.preparadas||0),novelty:Number(r.novedad||0),transfer:Number(r.traslado||0)});
  });
  let totalOrders=0,multi=0,three=0;
@@ -769,22 +769,23 @@ function renderGlassEfficiency(){
  [...reservations.entries()].sort((a,b)=>a[0].localeCompare(b[0],undefined,{numeric:true})).forEach(([res,orders])=>{
   const selected=[...orders.values()].map(o=>({...o,racks:o.locations.filter(l=>l.prepared>0&&l.pos!=='SIN UBICACIÓN').length,prepared:o.locations.reduce((n,l)=>n+l.prepared,0)})).filter(o=>(filter==='all'||o.racks>=(filter==='three'?3:2))&&(!query||[res,o.name,o.key,o.part,o.system,o.finish,o.source,...o.locations.map(l=>l.pos)].join(' ').toLowerCase().includes(query))).sort((a,b)=>a.part.localeCompare(b.part,undefined,{numeric:true})||b.racks-a.racks||a.name.localeCompare(b.name));
   if(!selected.length)return;
-  const sum=selected.reduce((n,o)=>n+o.prepared,0),parts=new Map();
+  const sum=selected.reduce((n,o)=>n+o.prepared,0),windows=selected.reduce((n,o)=>n+o.windows,0),reserveRacks=new Set(selected.flatMap(o=>o.locations.filter(l=>l.prepared>0).map(l=>l.pos))).size,parts=new Map();
   selected.forEach(o=>{if(!parts.has(o.part))parts.set(o.part,[]);parts.get(o.part).push(o)});
   const partsHtml=[...parts.entries()].map(([part,partOrders])=>{
+   const partWindows=partOrders.reduce((n,o)=>n+o.windows,0),partPrepared=partOrders.reduce((n,o)=>n+o.prepared,0),partRacks=new Set(partOrders.flatMap(o=>o.locations.filter(l=>l.prepared>0).map(l=>l.pos))).size;
    const ordersHtml=partOrders.map(o=>{
     const status=o.racks>=3?'high':o.racks===2?'medium':'low';
     const locs=o.locations.sort((a,b)=>b.prepared-a.prepared||a.pos.localeCompare(b.pos)).map(l=>'<tr><td><strong>'+escapeHtml(l.pos)+'</strong></td><td class="num">'+l.prepared.toLocaleString('es-CO')+'</td><td class="num">'+l.novelty.toLocaleString('es-CO')+'</td><td class="num">'+l.transfer.toLocaleString('es-CO')+'</td><td class="num">'+l.total.toLocaleString('es-CO')+'</td></tr>').join('');
-    return '<details class="glass-efficiency-order"><summary><span class="glass-efficiency-order-name">'+escapeHtml(o.name)+'<small>'+escapeHtml(o.system)+' · '+escapeHtml(o.finish)+' · '+escapeHtml(o.line)+(o.source!==res?' · Reservas de origen: '+escapeHtml(o.source):'')+'</small></span><span class="glass-efficiency-pill '+status+'">'+o.racks+' burro'+(o.racks===1?'':'s')+' preparado'+(o.racks===1?'':'s')+'</span><b>'+o.prepared.toLocaleString('es-CO')+' vidrios preparados</b></summary><div class="table-wrap"><table><thead><tr><th>Ubicación / burro</th><th>Preparados</th><th>Novedad</th><th>Traslado</th><th>Total</th></tr></thead><tbody>'+locs+'</tbody></table></div></details>';
+    return '<details class="glass-efficiency-order"><summary><span class="glass-efficiency-order-name">'+escapeHtml(o.name)+'<small>'+escapeHtml(o.system)+' · '+escapeHtml(o.finish)+' · '+escapeHtml(o.line)+(o.source!==res?' · Reservas de origen: '+escapeHtml(o.source):'')+'</small></span><span class="glass-efficiency-pill '+status+'">'+o.racks+' burro'+(o.racks===1?'':'s')+' preparado'+(o.racks===1?'':'s')+'</span><b>'+o.windows.toLocaleString('es-CO')+' ventanas · '+o.prepared.toLocaleString('es-CO')+' vidrios preparados</b></summary><div class="table-wrap"><table><thead><tr><th>Ubicación / burro</th><th>Preparados</th><th>Novedad</th><th>Traslado</th><th>Total</th></tr></thead><tbody>'+locs+'</tbody></table></div></details>';
    }).join('');
-   return '<details class="glass-efficiency-part" open><summary><strong>'+(part==='SIN PARTE'?'Sin parte asignada':'Parte '+escapeHtml(part))+'</strong><span>'+partOrders.length+' órdenes</span></summary><div class="glass-efficiency-orders">'+ordersHtml+'</div></details>';
+   return '<details class="glass-efficiency-part" open><summary><strong>'+(part==='SIN PARTE'?'Sin parte asignada':'Parte '+escapeHtml(part))+'</strong><span>'+partOrders.length+' órdenes · '+partWindows+' ventanas · '+partRacks+' burros · '+partPrepared+' vidrios preparados</span></summary><div class="glass-efficiency-orders">'+ordersHtml+'</div></details>';
   }).join('');
   const systems=[...new Set(selected.map(o=>o.system).filter(Boolean))];
   const finishes=[...new Set(selected.map(o=>o.finish).filter(Boolean))];
   const priorities=[...new Set(selected.flatMap(o=>o.part.split(',').map(p=>p.trim())).filter(p=>p&&p!=='SIN PARTE'))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
   const heading='Reserva '+escapeHtml(res)+(systems.length?' · '+escapeHtml(systems.join(' / ')):'')+(finishes.length?' · '+escapeHtml(finishes.join(' / ')):'');
   const priorityLabel=priorities.length?'Prioridad'+(priorities.length>1?'es':'')+': '+escapeHtml(priorities.join(', ')):'Prioridad sin asignar';
-  html.push('<details class="glass-efficiency-reservation"><summary><span class="glass-efficiency-reservation-title"><strong>'+heading+'</strong><small>'+priorityLabel+'</small></span><span>'+selected.length+' órdenes · '+sum.toLocaleString('es-CO')+' preparados</span></summary><div class="glass-efficiency-parts">'+partsHtml+'</div></details>');
+  html.push('<details class="glass-efficiency-reservation"><summary><span class="glass-efficiency-reservation-title"><strong>'+heading+'</strong><small>'+priorityLabel+'</small></span><span>'+selected.length+' órdenes · '+windows+' ventanas · '+reserveRacks+' burros · '+sum.toLocaleString('es-CO')+' vidrios preparados</span></summary><div class="glass-efficiency-parts">'+partsHtml+'</div></details>');
  });
  target.innerHTML=html.join('')||'<p class="empty">No hay órdenes para los filtros seleccionados.</p>';
 }
