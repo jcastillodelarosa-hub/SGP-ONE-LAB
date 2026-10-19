@@ -1425,27 +1425,36 @@ function renderProgParts(parts,produccion){
    });
    const update=()=>{const selected=choices.filter(x=>x.check.checked),total=selected.reduce((n,x)=>n+x.qty,0);count.textContent=total+' ventanas seleccionadas ('+selected.length+' órdenes)';btn.disabled=!selected.length};
    choices.forEach(x=>x.check.addEventListener('change',update));
+   let saving=false;
    btn.onclick=async()=>{
+    if(saving)return;
     const selected=choices.filter(x=>x.check.checked);
     if(!selected.length)return;
     const total=selected.reduce((n,x)=>n+x.qty,0);
-    if(!confirm('¿Programar '+selected.length+' órdenes con '+total+' ventanas para la fecha y turno indicados?'))return;
     const date=document.querySelector('#progDate').value,shift=document.querySelector('#progShift').value;
     const priority=Number(document.querySelector('#progPriority').value);
-    if(!date||!shift||!Number.isFinite(priority)){alert('Complete fecha, turno y prioridad.');return}
-    const c=await getSupabaseClient(),token=getAppToken(),reserva=progSelection?.reserva;
-    if(!reserva)return;
-    btn.disabled=true;
+    const reserva=progSelection?.reserva;
+    if(!reserva||!date||!shift||!Number.isFinite(priority)||priority<0){alert('Complete fecha, turno y prioridad válida.');return}
+    if(selected.some(x=>!x.order||!x.part||!Number.isInteger(x.qty)||x.qty<=0)){alert('Hay órdenes sin identidad, parte o cantidad válida.');return}
+    if(new Set(selected.map(x=>x.part+'|'+x.order)).size!==selected.length){alert('Hay órdenes repetidas en la selección.');return}
+    if(!confirm('¿Programar '+selected.length+' órdenes con '+total+' ventanas para '+date+' / '+shift+'?'))return;
+    saving=true;btn.disabled=true;btn.textContent='Guardando programación…';
     let completed=0,failed=null;
-    for(const item of selected){
-     const args={p_token:token,p_reserva:reserva,p_produccion:item.order,p_cantidad:item.qty,p_fecha:date,p_turno:shift,p_prioridad:priority+completed,p_prioridad_semanal:String(item.part),p_observacion:document.querySelector('#progObs').value,p_observacion_orden:item.row.querySelector('textarea')?.value||''};
-     const {error}=await c.rpc('sgp_mecanizado_programar',args);
-     if(error){failed={order:item.order,message:error.message};break}
-     completed++;
+    try{
+     const c=await getSupabaseClient(),token=getAppToken();
+     for(const item of selected){
+      const args={p_token:token,p_reserva:reserva,p_produccion:item.order,p_cantidad:item.qty,p_fecha:date,p_turno:shift,p_prioridad:priority+completed,p_prioridad_semanal:String(item.part),p_observacion:document.querySelector('#progObs').value,p_observacion_orden:item.row.querySelector('textarea')?.value||''};
+      const {error}=await c.rpc('sgp_mecanizado_programar',args);
+      if(error){failed={order:item.order,message:error.message};break}
+      completed++;
+     }
+    }catch(error){failed={order:selected[completed]?.order||'desconocida',message:error?.message||String(error)}}
+    finally{
+     saving=false;
+     if(completed){closeProgModal();try{await loadProgramming()}catch(error){alert('Se guardaron '+completed+' órdenes, pero falló la actualización del listado: '+(error?.message||error))}}
+     else{btn.textContent='Programar órdenes seleccionadas';update()}
     }
-    closeProgModal();
-    await loadProgramming();
-    if(failed)alert('Se guardaron '+completed+' órdenes. Se detuvo en '+failed.order+': '+failed.message+'. Revise el listado actualizado antes de reintentar.');
+    if(failed)alert('Se guardaron '+completed+' de '+selected.length+' órdenes. Se detuvo en '+failed.order+': '+failed.message+'. Verifique el listado antes de reintentar.');
     else alert('Se programaron '+completed+' órdenes correctamente.');
    };
    controls.append(count,btn);heading.after(controls);
