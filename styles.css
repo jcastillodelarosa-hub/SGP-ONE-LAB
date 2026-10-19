@@ -1860,3 +1860,11 @@ button.active,[aria-pressed="true"]{border-color:#0865ed}
 .glass-efficiency-order table{width:100%;min-width:470px}
 .glass-efficiency-order th,.glass-efficiency-order td{padding:10px 12px;font-size:13px}
 @media(max-width:700px){.glass-efficiency{padding:12px}.glass-efficiency-controls,.glass-efficiency-controls input,.glass-efficiency-controls select{width:100%}.glass-efficiency-reservation>summary,.glass-efficiency-order>summary{align-items:flex-start}}
+
+/* LAB v295: subdivisión por parte y atributos de la orden */
+.glass-efficiency-parts{padding:10px;display:grid;gap:9px}
+.glass-efficiency-part{border:1px solid #cbdcf0;border-radius:10px;overflow:hidden;background:#f7faff}
+.glass-efficiency-part>summary{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 13px;cursor:pointer;color:#154b91;background:#edf5ff;font-size:13px}
+.glass-efficiency-part>summary strong{font-size:14px}
+.glass-efficiency-part .glass-efficiency-orders{padding:9px}
+.glass-efficiency-order-name small{line-height:1.45}
