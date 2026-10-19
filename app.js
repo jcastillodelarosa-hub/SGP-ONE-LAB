@@ -863,7 +863,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.querySele
 document.querySelector('#glassEfficiencySearch')?.addEventListener('input',renderGlassEfficiency);
 document.querySelector('#glassEfficiencyFilter')?.addEventListener('change',renderGlassEfficiency);
 async function loadLocationReport(){
- const token=sessionStorage.getItem(APP_SESSION_KEY);if(!token){els.locationReportStatus.textContent="Inicia sesión para consultar.";return}
+ const token=getAppToken();if(!token){els.locationReportStatus.textContent="Inicia sesión para consultar.";return}
  els.locationReportStatus.textContent="Actualizando reporte de ubicaciones…";
  try{const client=await getSupabaseClient();const {data,error}=await client.rpc("sgp_reporte_ubicaciones_vidrio",{p_token:token});if(error)throw error;const m=data.metricas||{};
   els.lrPrepared.textContent=m.preparadas??0;els.lrNovelty.textContent=m.novedad??0;els.lrTransfer.textContent=m.traslado??0;els.lrOther.textContent=m.otros??0;els.lrRacks.textContent=m.burros??0;els.lrMixed.textContent=data.burros_mixtos??0;
