@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SGP ONE LAB</title>
-  <link rel="stylesheet" href="styles.css?v=297" />
+  <link rel="stylesheet" href="styles.css?v=298" />
   <script src="config.js?v=20261008-1300"></script>
 </head>
 <body>
@@ -48,7 +48,7 @@
           <input id="authPassword" type="password" placeholder="Contraseña" autocomplete="current-password" />
           <button id="authLogin">Ingresar</button>
           <button id="authLogout" hidden>Cerrar sesión</button>
-          <span class="status">LAB v297</span>
+          <span class="status">LAB v298</span>
         </div>
       </header>
 
@@ -107,6 +107,7 @@
  <section class="glass-efficiency" id="glassEfficiency">
   <div class="glass-efficiency-head"><div><span class="eyebrow">Eficiencia de preparación</span><h3>Distribución de vidrio por reserva y orden</h3><p>Identifica órdenes dispersas entre varios burros. Despliega una reserva para consultar sus órdenes y ubicaciones.</p></div><div class="glass-efficiency-controls"><input id="glassEfficiencySearch" type="search" placeholder="Buscar reserva, orden o burro…" aria-label="Buscar reserva, orden o burro"><select id="glassEfficiencyFilter" aria-label="Filtrar distribución"><option value="all">Todas las órdenes</option><option value="multiple">2 o más burros preparados</option><option value="three">3 o más burros preparados</option></select></div></div>
   <div class="glass-efficiency-stats" id="glassEfficiencyStats"></div>
+  <div class="glass-explorer-toolbar"><button type="button" id="glassExploreButton" class="primary">Explorar relaciones entre burros, órdenes y reservas</button></div>
   <div id="glassEfficiencyList" class="glass-efficiency-list"><p class="empty">Abre el reporte para cargar la distribución.</p></div>
  </section>
  <div class="location-report-grid">
@@ -370,7 +371,9 @@
     </div>
   </div>
 
-  <script type="module" src="app.js?v=297"></script>
+  <script type="module" src="app.js?v=298"></script>
 <div id="userModal" class="modal-backdrop rec-overlay" hidden><div class="modal-card user-modal-card"><div class="modal-header"><div><strong id="userModalTitle">Nuevo usuario</strong><small>Cuenta y permisos de acceso</small></div><button id="userModalClose" class="modal-close">×</button></div><div class="user-form"><div class="rec-grid"><label>Usuario<input id="userName" autocomplete="off"></label><label>Nombre completo<input id="userFullName"></label><label>Rol<select id="userRole"><option>COORDINADOR</option><option>LIDER MECANIZADO</option><option>LIDER LINEA</option><option>RECEPCION</option><option>PATINADOR</option><option>PICKING</option><option>SUPERVISOR DE PICKING</option><option>CONSULTA</option><option>ADMINISTRADOR</option></select></label><label>Contraseña<input id="userPassword" type="password" placeholder="Vacío = conservar contraseña"></label><div class="password-reset-wrap"><button id="resetPasswordBtn" type="button" hidden>↻ Restablecer contraseña</button><small>Asigna una nueva contraseña temporal al usuario.</small></div></div><label class="user-active"><input id="userActive" type="checkbox" checked> Usuario activo</label><div class="access-title"><b>Ventanas permitidas</b><span>El usuario solo verá las opciones seleccionadas.</span></div><div id="userAccessGrid" class="access-grid"></div></div><div class="modal-actions"><button id="userCancel">Cancelar</button><button id="userSave" class="primary">Guardar usuario</button></div></div></div>
+
+<div id="glassExplorerModal" class="glass-explorer-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="glassExplorerTitle"><div class="glass-explorer-dialog"><header><div><h2 id="glassExplorerTitle">Explorador de relaciones de vidrio</h2><p>Selecciona un nodo para descubrir sus relaciones y cantidades.</p></div><button type="button" id="glassExplorerClose" aria-label="Cerrar explorador">✕</button></header><div class="glass-explorer-controls"><input id="glassExplorerSearch" type="search" placeholder="Buscar reserva, orden o burro" aria-label="Buscar nodo"><select id="glassExplorerStatus" aria-label="Estado de vidrio"><option value="prepared">Preparados</option><option value="all">Todos los estados</option></select><button type="button" id="glassExplorerReset">Restablecer</button></div><div id="glassExplorerSummary" class="glass-explorer-summary"></div><div class="glass-explorer-content"><div id="glassExplorerGraph" class="glass-explorer-graph"></div><aside id="glassExplorerDetails" class="glass-explorer-details">Selecciona un nodo de la red.</aside></div><footer><span>Azul: burro · Verde: orden · Naranja: parte · Violeta: reserva</span><button type="button" id="glassExplorerCloseBottom">Cerrar</button></footer></div></div>
 </body>
 </html>
