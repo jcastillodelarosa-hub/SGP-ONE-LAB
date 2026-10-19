@@ -613,3 +613,42 @@ Modelar la relación producción↔reservas como relación explícita 1:N. El ca
 - Pruebas automáticas: **SUPERADAS**.
 - Firebase Hosting: **PUBLICADO**.
 - Validación visual: **PENDIENTE**.
+
+
+## 29. CONTINUIDAD 2026-10-19 — HOTFIX PRODUCCIÓN · PERMISO RPC DE ARRASTRE
+
+### Error reportado
+- Al intentar cambiar el estado de una reserva de arrastre en Producción aparecía:
+  `permission denied for function sgp_mecanizado_guardar_estado_arrastre`.
+
+### Diagnóstico verificado
+- El frontend invoca `sgp_mecanizado_guardar_estado_arrastre` desde el cliente Supabase del navegador.
+- SGP utiliza el rol PostgreSQL `anon` para el transporte y aplica la autorización real mediante `p_token` + `sgp_validar_sesion_rol` dentro de las RPC SECURITY DEFINER.
+- La función `sgp_mecanizado_guardar_estado_arrastre` tenía EXECUTE únicamente para `authenticated` y `service_role`; faltaba `anon`.
+- La causa histórica fue localizada en la migración live `mecanizado_arrastre_estado_reservas_sin_parte` del 2026-10-14, que ejecutó explícitamente:
+  `revoke execute ... from public,anon` y luego concedió solo a `authenticated`.
+- Esto era incoherente con `sgp_mecanizado_ordenes_programacion` y `sgp_mecanizado_guardar_estado_orden`, que sí son accesibles desde el transporte usado por el navegador.
+
+### Corrección aplicada
+- Se mantuvo revocado `PUBLIC`.
+- Se concedió EXECUTE de la RPC de arrastre a `anon, authenticated, service_role`.
+- No se cambió el cuerpo de la función, la lógica de arrastre, los estados ni los roles SGP autorizados.
+- La función continúa validando internamente:
+  `ADMINISTRADOR, COORDINADOR, LIDER MECANIZADO, LIDER, LIDER LINEA`.
+- Migración aplicada en Supabase: `lab_v282_fix_execute_arrastre_anon`.
+- Migración versionada en GitHub:
+  `supabase/migrations/20261019_fix_mecanizado_arrastre_anon.sql`.
+
+### Pruebas
+- Prueba con rol PostgreSQL `anon` + sesión SGP ADMINISTRADOR + UUID inexistente: RPC ejecutó correctamente y retornó 0.
+- Prueba integral con rol PostgreSQL `anon` + sesión SGP ADMINISTRADOR sobre programación real `749fe6a5-d42a-4e64-8bab-e83bcf31db75`: la RPC recorrió 14 órdenes correctamente. La prueba se ejecutó dentro de transacción y terminó con ROLLBACK; no alteró producción.
+- Prueba de seguridad con rol PostgreSQL `anon` + sesión SGP CONSULTA: la RPC siguió bloqueando la operación con `PERMISO_DENEGADO`.
+- Por tanto se corrigió el permiso de transporte sin ampliar los roles funcionales autorizados.
+
+### Impacto
+- Producción / arrastre: **CORREGIDO EN SUPABASE**.
+- Programación: sin cambios.
+- Picking: sin cambios.
+- Pendientes de aluminio: sin cambios.
+- Frontend: sin cambio funcional requerido; la corrección es de permisos de la RPC.
+- Validación final desde navegador del usuario cambiando un estado real: **PENDIENTE**.
