@@ -820,11 +820,14 @@ function renderGlassExplorer(){
  const model=glassExplorerModel(),query=(document.querySelector('#glassExplorerSearch')?.value||'').toLowerCase().trim();
  const matching=[...model.nodes.values()].filter(n=>!query||n.label.toLowerCase().includes(query));
  const selected=glassExplorer.selected;
- let allowed=new Set(matching.map(n=>n.id));
- if(selected&&model.nodes.has(selected)){
-  allowed=new Set([selected]);
-  for(const [id] of model.edges){const [a,b]=id.split('|');if(a===selected)allowed.add(b);if(b===selected)allowed.add(a);}
- }
+ // LAB v299: recorrer la jerarquía completa desde la selección, no sólo un salto.
+ const adjacency=new Map();
+ for(const [id] of model.edges){const [a,b]=id.split('|');if(!adjacency.has(a))adjacency.set(a,new Set());if(!adjacency.has(b))adjacency.set(b,new Set());adjacency.get(a).add(b);adjacency.get(b).add(a)}
+ let seeds=selected&&model.nodes.has(selected)?[selected]:query?matching.map(n=>n.id):[];
+ let allowed=new Set();
+ if(seeds.length){let queue=seeds.map(id=>({id,depth:0}));for(const id of seeds)allowed.add(id);
+  for(let i=0;i<queue.length;i++){const {id,depth}=queue[i];if(depth>=3)continue;for(const next of adjacency.get(id)||[]){if(!allowed.has(next)){allowed.add(next);queue.push({id:next,depth:depth+1})}}}
+ }else if(!query){allowed=new Set(model.nodes.keys())}
  const visible=[...model.nodes.values()].filter(n=>allowed.has(n.id));
  const columns=['reserva','parte','orden','burro'];
  const groups=columns.map(type=>visible.filter(n=>n.type===type).sort((a,b)=>a.label.localeCompare(b.label,undefined,{numeric:true})).slice(0,70));
