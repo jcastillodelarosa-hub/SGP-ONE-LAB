@@ -1403,6 +1403,53 @@ function renderProgParts(parts,produccion){
   const done=rows.filter(row=>row.querySelector('.part-status-badge')?.textContent.includes('PROGRAMADA'));
   const pending=rows.filter(row=>!done.includes(row));
   heading.textContent='Órdenes pendientes por programar · '+pending.length;
+  if(pending.length){
+   const controls=document.createElement('div');
+   controls.className='prog-batch-controls';
+   controls.style.cssText='padding:10px 0 14px;display:flex;flex-wrap:wrap;align-items:center;gap:12px';
+   const count=document.createElement('strong');
+   count.textContent='0 ventanas seleccionadas';
+   const btn=document.createElement('button');
+   btn.type='button';btn.className='primary';btn.textContent='Programar órdenes seleccionadas';btn.disabled=true;
+   const choices=[];
+   pending.forEach(row=>{
+    const action=row.querySelector('[data-program-order]');
+    if(!action)return;
+    const qty=Number(action.dataset.programQty||0);
+    if(qty<=0)return;
+    const check=document.createElement('input');check.type='checkbox';check.className='prog-batch-check';
+    check.setAttribute('aria-label','Seleccionar '+action.dataset.programOrder);
+    check.style.cssText='width:19px;height:19px;margin-right:10px;vertical-align:middle';
+    row.firstElementChild?.prepend(check);
+    choices.push({check,order:action.dataset.programOrder,qty,part:action.dataset.programPart,row});
+   });
+   const update=()=>{const selected=choices.filter(x=>x.check.checked),total=selected.reduce((n,x)=>n+x.qty,0);count.textContent=total+' ventanas seleccionadas ('+selected.length+' órdenes)';btn.disabled=!selected.length};
+   choices.forEach(x=>x.check.addEventListener('change',update));
+   btn.onclick=async()=>{
+    const selected=choices.filter(x=>x.check.checked);
+    if(!selected.length)return;
+    const total=selected.reduce((n,x)=>n+x.qty,0);
+    if(!confirm('¿Programar '+selected.length+' órdenes con '+total+' ventanas para la fecha y turno indicados?'))return;
+    const date=document.querySelector('#progDate').value,shift=document.querySelector('#progShift').value;
+    const priority=Number(document.querySelector('#progPriority').value);
+    if(!date||!shift||!Number.isFinite(priority)){alert('Complete fecha, turno y prioridad.');return}
+    const c=await getSupabaseClient(),token=getAppToken(),reserva=progSelection?.reserva;
+    if(!reserva)return;
+    btn.disabled=true;
+    let completed=0,failed=null;
+    for(const item of selected){
+     const args={p_token:token,p_reserva:reserva,p_produccion:item.order,p_cantidad:item.qty,p_fecha:date,p_turno:shift,p_prioridad:priority+completed,p_prioridad_semanal:String(item.part),p_observacion:document.querySelector('#progObs').value,p_observacion_orden:item.row.querySelector('textarea')?.value||''};
+     const {error}=await c.rpc('sgp_mecanizado_programar',args);
+     if(error){failed={order:item.order,message:error.message};break}
+     completed++;
+    }
+    closeProgModal();
+    await loadProgramming();
+    if(failed)alert('Se guardaron '+completed+' órdenes. Se detuvo en '+failed.order+': '+failed.message+'. Revise el listado actualizado antes de reintentar.');
+    else alert('Se programaron '+completed+' órdenes correctamente.');
+   };
+   controls.append(count,btn);heading.after(controls);
+  }
   const details=document.createElement('details');
   details.className='prog-completed-orders';
   details.style.cssText='margin:12px 0;border-top:1px solid #d7e2f0;padding-top:12px';
