@@ -747,6 +747,40 @@ async function openGlassDetail(key,id){
   els.glassDetailBody.innerHTML=groups.map(g=>{const rows=(data.detalle||[]).filter(x=>x.categoria===g);if(!rows.length)return"";return `<section class="glass-detail-group group-${g.toLowerCase()}"><h4><i>${icons[g]}</i> ${g}</h4>${rows.map(x=>`<div class="glass-detail-row"><div><strong>(${x.unidades}) ${escapeHtml(x.posicion||"Sin ubicación")}</strong><span>${escapeHtml(x.estado||g)}</span></div><p>${escapeHtml(x.composiciones||"—")}</p></div>`).join("")}</section>`}).join("");
  }catch(e){els.glassDetailMeta.textContent="No se pudo consultar: "+e.message}
 }
+// LAB v294: análisis de dispersión de vidrio, exclusivamente lectura.
+let glassEfficiencyRows=[];
+function renderGlassEfficiency(){
+ const target=document.querySelector('#glassEfficiencyList'),stats=document.querySelector('#glassEfficiencyStats');
+ if(!target||!stats)return;
+ const query=(document.querySelector('#glassEfficiencySearch')?.value||'').trim().toLowerCase();
+ const filter=document.querySelector('#glassEfficiencyFilter')?.value||'all';
+ const reservations=new Map();
+ glassEfficiencyRows.forEach(r=>{
+  const key=String(r.key_produccion||''),res=String(r.reserva||'SIN RESERVA'),pos=String(r.posicion||'SIN UBICACIÓN');
+  if(!reservations.has(res))reservations.set(res,new Map());
+  const orders=reservations.get(res);
+  if(!orders.has(key))orders.set(key,{key,name:String(r.produccion||key),line:String(r.id_linea||''),locations:[]});
+  orders.get(key).locations.push({pos,total:Number(r.unidades||0),prepared:Number(r.preparadas||0),novelty:Number(r.novedad||0),transfer:Number(r.traslado||0)});
+ });
+ let totalOrders=0,multi=0,three=0;
+ reservations.forEach(orders=>orders.forEach(o=>{const n=o.locations.filter(l=>l.prepared>0&&l.pos!=='SIN UBICACIÓN').length;totalOrders++;if(n>=2)multi++;if(n>=3)three++}));
+ stats.innerHTML='<span><b>'+totalOrders+'</b> órdenes con ubicación</span><span><b>'+multi+'</b> órdenes en 2+ burros preparados</span><span><b>'+three+'</b> órdenes en 3+ burros preparados</span>';
+ const html=[];
+ [...reservations.entries()].sort((a,b)=>a[0].localeCompare(b[0],undefined,{numeric:true})).forEach(([res,orders])=>{
+  const selected=[...orders.values()].map(o=>({...o,racks:o.locations.filter(l=>l.prepared>0&&l.pos!=='SIN UBICACIÓN').length,prepared:o.locations.reduce((n,l)=>n+l.prepared,0)})).filter(o=>(filter==='all'||o.racks>=(filter==='three'?3:2))&&(!query||[res,o.name,o.key,...o.locations.map(l=>l.pos)].join(' ').toLowerCase().includes(query))).sort((a,b)=>b.racks-a.racks||a.name.localeCompare(b.name));
+  if(!selected.length)return;
+  const sum=selected.reduce((n,o)=>n+o.prepared,0);
+  const ordersHtml=selected.map(o=>{
+   const status=o.racks>=3?'high':o.racks===2?'medium':'low';
+   const locs=o.locations.sort((a,b)=>b.prepared-a.prepared||a.pos.localeCompare(b.pos)).map(l=>'<tr><td><strong>'+escapeHtml(l.pos)+'</strong></td><td class="num">'+l.prepared.toLocaleString('es-CO')+'</td><td class="num">'+l.novelty.toLocaleString('es-CO')+'</td><td class="num">'+l.transfer.toLocaleString('es-CO')+'</td><td class="num">'+l.total.toLocaleString('es-CO')+'</td></tr>').join('');
+   return '<details class="glass-efficiency-order"><summary><span class="glass-efficiency-order-name">'+escapeHtml(o.name)+' <small>'+escapeHtml(o.line)+'</small></span><span class="glass-efficiency-pill '+status+'">'+o.racks+' burro'+(o.racks===1?'':'s')+' preparado'+(o.racks===1?'':'s')+'</span><b>'+o.prepared.toLocaleString('es-CO')+' vidrios preparados</b></summary><div class="table-wrap"><table><thead><tr><th>Ubicación / burro</th><th>Preparados</th><th>Novedad</th><th>Traslado</th><th>Total</th></tr></thead><tbody>'+locs+'</tbody></table></div></details>';
+  }).join('');
+  html.push('<details class="glass-efficiency-reservation"><summary><strong>Reserva '+escapeHtml(res)+'</strong><span>'+selected.length+' órdenes · '+sum.toLocaleString('es-CO')+' preparados</span></summary><div class="glass-efficiency-orders">'+ordersHtml+'</div></details>');
+ });
+ target.innerHTML=html.join('')||'<p class="empty">No hay órdenes para los filtros seleccionados.</p>';
+}
+document.querySelector('#glassEfficiencySearch')?.addEventListener('input',renderGlassEfficiency);
+document.querySelector('#glassEfficiencyFilter')?.addEventListener('change',renderGlassEfficiency);
 async function loadLocationReport(){
  const token=sessionStorage.getItem(APP_SESSION_KEY);if(!token){els.locationReportStatus.textContent="Inicia sesión para consultar.";return}
  els.locationReportStatus.textContent="Actualizando reporte de ubicaciones…";
@@ -754,6 +788,9 @@ async function loadLocationReport(){
   els.lrPrepared.textContent=m.preparadas??0;els.lrNovelty.textContent=m.novedad??0;els.lrTransfer.textContent=m.traslado??0;els.lrOther.textContent=m.otros??0;els.lrRacks.textContent=m.burros??0;els.lrMixed.textContent=data.burros_mixtos??0;
   els.locationByReservation.innerHTML=(data.por_reserva||[]).map(r=>`<tr><td>${escapeHtml(r.reserva)}</td><td class="num"><strong>${r.burros}</strong></td><td class="num">${r.unidades}</td></tr>`).join("")||'<tr><td colspan="3" class="empty">Sin ubicaciones</td></tr>';
   const {data:racks,error:rackError}=await client.rpc("sgp_reporte_burros_estado",{p_token:token});if(rackError)throw rackError; els.locationMixedRacks.innerHTML=(racks||[]).map(r=>`<tr><td><strong>${escapeHtml(r.posicion)}</strong></td><td><span class="rack-status rack-${r.orden_estado}">${escapeHtml(r.estado)}</span></td><td>${escapeHtml(r.reservas)}</td><td class="num">${r.cantidad_reservas}</td><td class="num"><strong>${r.unidades}</strong></td></tr>`).join("")||'<tr><td colspan="5" class="empty">Sin burros activos</td></tr>';
+  const {data:efficiency,error:efficiencyError}=await client.rpc("sgp_reporte_dispersion_vidrio",{p_token:token});
+  if(efficiencyError){glassEfficiencyRows=[];document.querySelector('#glassEfficiencyList').textContent='No se pudo cargar la distribución: '+efficiencyError.message;}
+  else{glassEfficiencyRows=efficiency||[];renderGlassEfficiency();}
   els.locationReportStatus.textContent="Reporte actualizado ✓ datos de ubicación activos.";
  }catch(e){els.locationReportStatus.textContent="Consulta rechazada ✕ "+e.message}
 }
