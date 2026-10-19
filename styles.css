@@ -1788,3 +1788,18 @@ button.active,[aria-pressed="true"]{border-color:#0865ed}
   #progModal .modal-card.prog-card{max-height:calc(100vh - 20px)!important}
   #progModal .rec-form{padding:16px!important}
 }
+
+
+/* LAB v286 · Programación: cobertura histórica y acceso directo a órdenes pendientes */
+#progModal .prog-order-coverage{grid-template-columns:minmax(0,1fr) auto!important;align-items:start!important}
+#progModal .prog-order-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+#progModal .program-pending-order{min-width:0!important;padding:7px 10px!important;border:1px solid #2563eb!important;border-radius:8px!important;background:#2563eb!important;color:#fff!important;font-size:10px!important;font-weight:900!important;cursor:pointer}
+#progModal .legacy-live-state{display:inline-flex;align-items:center;justify-content:center;padding:5px 8px;border-radius:999px;background:#f1f5f9;color:#64748b;font-size:9px;font-weight:900}
+#progModal .legacy-live-state.is-programmed{background:#dcfce7;color:#166534}
+#progModal .legacy-live-state.is-pending{background:#fee2e2;color:#b91c1c}
+#progModal .legacy-reconcile-box{display:grid;gap:8px;padding:12px;margin-top:8px;border:1px solid #bfdbfe;border-radius:10px;background:#eff6ff}
+#progModal .legacy-reconcile-box strong{color:#173f73;font-size:11px}
+#progModal .legacy-reconcile-box small{color:#52657d;line-height:1.4}
+#progModal .legacy-reconcile-box button{justify-self:start}
+#progModal .legacy-reconcile-box button:disabled{opacity:.45;cursor:not-allowed}
+@media(max-width:650px){#progModal .prog-order-coverage{grid-template-columns:1fr!important}#progModal .prog-order-actions{justify-content:flex-start}}
