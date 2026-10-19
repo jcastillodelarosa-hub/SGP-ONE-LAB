@@ -1,0 +1,4 @@
+-- LAB v293: incluir id_linea en el contrato de saldos por producción.
+-- Mantener intacta la validación de sesión, agrupación de semanas y sumas.
+-- La RPC sgp_resumen_saldos_portada debe añadir p.id_linea al SELECT,
+-- GROUP BY y ORDER BY del JSON devuelto.
