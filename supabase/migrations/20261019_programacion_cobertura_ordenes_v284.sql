@@ -53,5 +53,17 @@ end $$;
 revoke all on function public.sgp_mecanizado_reconciliar_programacion_legacy(text,uuid,text[]) from public;
 grant execute on function public.sgp_mecanizado_reconciliar_programacion_legacy(text,uuid,text[]) to anon,authenticated,service_role;
 
--- El backfill aplicado en vivo solo incorporó programaciones donde TODAS las órdenes
--- actuales tenían evidencia inequívoca en ejecución/historial para el mismo id_programacion.
+-- Backfill seguro: solo cuando TODAS las órdenes actuales tienen evidencia ligada al mismo id_programacion.
+with l as (
+ select mp.id_programacion,mp.reserva,mp.prioridad_semanal from public.sgp_mecanizado_programacion mp
+ where mp.estado<>'CANCELADA' and not exists(select 1 from public.sgp_mecanizado_programacion_detalle d where d.id_programacion=mp.id_programacion)
+), s as (
+ select l.*,sp.key_produccion,sp.produccion,sp.cantidad,
+ (exists(select 1 from public.sgp_mecanizado_ejecucion_orden e where e.id_programacion=l.id_programacion and e.produccion=sp.produccion)
+  or exists(select 1 from public.sgp_mecanizado_historial_orden h where h.id_programacion=l.id_programacion and h.produccion=sp.produccion)) evidencia
+ from l join public.sgp_prioridades pr on pr.reserva=l.reserva and pr.id_linea='PANELES_2' and pr.prioridad is not distinct from l.prioridad_semanal
+ join public.sgp_producciones sp on sp.key_produccion=pr.key_produccion and sp.id_linea='PANELES_2'
+), safe as (select id_programacion from s group by id_programacion having count(*)>0 and bool_and(evidencia))
+insert into public.sgp_mecanizado_programacion_detalle(id_programacion,key_produccion,cantidad_snapshot,reserva_snapshot,prioridad_semanal_snapshot,produccion_snapshot,origen)
+select s.id_programacion,s.key_produccion,s.cantidad,s.reserva,s.prioridad_semanal,s.produccion,'RECONSTRUIDA_EJECUCION'
+from s join safe using(id_programacion) on conflict do nothing;
