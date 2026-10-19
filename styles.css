@@ -1868,3 +1868,10 @@ button.active,[aria-pressed="true"]{border-color:#0865ed}
 .glass-efficiency-part>summary strong{font-size:14px}
 .glass-efficiency-part .glass-efficiency-orders{padding:9px}
 .glass-efficiency-order-name small{line-height:1.45}
+
+/* LAB v296: sistema, acabado y prioridad en cabecera de reserva */
+.glass-efficiency-reservation-title{display:flex;flex-direction:column;align-items:flex-start;gap:5px;min-width:0;flex:1}
+.glass-efficiency-reservation-title strong{font-size:16px;line-height:1.35;overflow-wrap:anywhere}
+.glass-efficiency-reservation-title small{font-size:13px;font-weight:800;color:#175da9;line-height:1.35}
+.glass-efficiency-reservation>summary>span:last-child{white-space:nowrap}
+@media(max-width:700px){.glass-efficiency-reservation>summary{flex-wrap:wrap}.glass-efficiency-reservation>summary>span:last-child{white-space:normal}}
