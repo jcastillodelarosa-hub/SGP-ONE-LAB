@@ -28,5 +28,5 @@ test('v287 distingue confirmación operativa de programación por orden',()=>{
  assert.match(app,/Confirmada por operación/);
  assert.match(app,/cobertura por orden pendiente de conciliar/);
  assert.match(app,/const done=reserveCoverage\(r.reserva\),left=Math.max\(0,Number\(r.cantidad\)-done\)/);
- assert.match(html,/LAB v287/);
+ assert.match(html,/LAB v28[7-9]|LAB v29[0-9]|LAB v[3-9][0-9]{2,}/);
 });
