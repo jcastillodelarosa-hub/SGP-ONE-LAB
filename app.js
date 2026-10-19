@@ -779,7 +779,12 @@ function renderGlassEfficiency(){
    }).join('');
    return '<details class="glass-efficiency-part" open><summary><strong>'+(part==='SIN PARTE'?'Sin parte asignada':'Parte '+escapeHtml(part))+'</strong><span>'+partOrders.length+' órdenes</span></summary><div class="glass-efficiency-orders">'+ordersHtml+'</div></details>';
   }).join('');
-  html.push('<details class="glass-efficiency-reservation"><summary><strong>Reserva '+escapeHtml(res)+'</strong><span>'+selected.length+' órdenes · '+sum.toLocaleString('es-CO')+' preparados</span></summary><div class="glass-efficiency-parts">'+partsHtml+'</div></details>');
+  const systems=[...new Set(selected.map(o=>o.system).filter(Boolean))];
+  const finishes=[...new Set(selected.map(o=>o.finish).filter(Boolean))];
+  const priorities=[...new Set(selected.flatMap(o=>o.part.split(',').map(p=>p.trim())).filter(p=>p&&p!=='SIN PARTE'))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
+  const heading='Reserva '+escapeHtml(res)+(systems.length?' · '+escapeHtml(systems.join(' / ')):'')+(finishes.length?' · '+escapeHtml(finishes.join(' / ')):'');
+  const priorityLabel=priorities.length?'Prioridad'+(priorities.length>1?'es':'')+': '+escapeHtml(priorities.join(', ')):'Prioridad sin asignar';
+  html.push('<details class="glass-efficiency-reservation"><summary><span class="glass-efficiency-reservation-title"><strong>'+heading+'</strong><small>'+priorityLabel+'</small></span><span>'+selected.length+' órdenes · '+sum.toLocaleString('es-CO')+' preparados</span></summary><div class="glass-efficiency-parts">'+partsHtml+'</div></details>');
  });
  target.innerHTML=html.join('')||'<p class="empty">No hay órdenes para los filtros seleccionados.</p>';
 }
