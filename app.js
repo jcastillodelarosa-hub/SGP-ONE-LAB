@@ -823,7 +823,7 @@ function renderGlassExplorer(){
  // LAB v299: recorrer la jerarquía completa desde la selección, no sólo un salto.
  const adjacency=new Map();
  for(const [id] of model.edges){const [a,b]=id.split('|');if(!adjacency.has(a))adjacency.set(a,new Set());if(!adjacency.has(b))adjacency.set(b,new Set());adjacency.get(a).add(b);adjacency.get(b).add(a)}
- let seeds=selected&&model.nodes.has(selected)?[selected]:query?matching.map(n=>n.id):[];
+ let seeds=query?matching.map(n=>n.id):selected&&model.nodes.has(selected)?[selected]:[];
  let allowed=new Set();
  if(seeds.length){let queue=seeds.map(id=>({id,depth:0}));for(const id of seeds)allowed.add(id);
   for(let i=0;i<queue.length;i++){const {id,depth}=queue[i];if(depth>=3)continue;for(const next of adjacency.get(id)||[]){if(!allowed.has(next)){allowed.add(next);queue.push({id:next,depth:depth+1})}}}
