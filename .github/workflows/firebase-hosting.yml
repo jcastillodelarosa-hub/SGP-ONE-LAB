@@ -3,6 +3,8 @@ name: Deploy SGP ONE to Firebase Hosting
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - '.agents/skills/**'
   workflow_dispatch:
 
 permissions:
