@@ -1694,6 +1694,7 @@ function enhancePrRows(){
 document.querySelector("#openPriorityWizard")?.addEventListener("click",openPriorityWizard);document.querySelector("#closePriorityModal")?.addEventListener("click",()=>document.querySelector("#priorityModal").hidden=true);document.querySelector("#priorityBack")?.addEventListener("click",()=>document.querySelector("#priorityWorkModal").hidden=true);document.querySelector("#closePriorityWork")?.addEventListener("click",()=>document.querySelector("#priorityWorkModal").hidden=true);document.querySelector("#prioritySave")?.addEventListener("click",savePr);
 
 async function autoGeneratePriorities(){
+ if(prReservations.some(x=>x.rows.some(r=>priorityDepth(r.prioridad)===3))){alert("Por seguridad, la generación automática queda bloqueada cuando existen subniveles de tercer nivel. Puedes asignar las reservas pendientes manualmente hasta actualizar la RPC de generación.");return}
  const pending=prReservations.filter(x=>!x.assigned);
  if(!pending.length){alert("No hay reservas pendientes.");return}
  const used=[...new Set(prReservations.flatMap(x=>x.rows.map(r=>r.prioridad).filter(Boolean)).map(p=>String(p).split(".")[0]))].sort((a,b)=>Number(a)-Number(b));
