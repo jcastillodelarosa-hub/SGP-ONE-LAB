@@ -2084,3 +2084,46 @@ button.active,[aria-pressed="true"]{border-color:#0865ed}
     overflow-wrap:anywhere;
   }
 }
+
+
+/* LAB v310 — jerarquía de prioridades, limitada a los módulos existentes. */
+#priorityAssignedList .priority-subdivide-button,
+#priorityParts .priority-subdivide-button{
+  display:inline-flex;align-items:center;gap:5px;
+  margin:3px 5px 3px 0;padding:7px 10px;border-radius:8px;
+  background:#e8f1ff;border:1px solid #80b2fa;color:#164b91;
+  font-size:12px;font-weight:750;white-space:nowrap;cursor:pointer;
+}
+#priorityAssignedList .priority-subdivide-button:hover,
+#priorityParts .priority-subdivide-button:hover{background:#d6e8ff}
+#priorityParts button[data-prsubpart]{
+  margin:3px;padding:9px 14px;border:1px solid #6a98d5;
+  border-radius:9px;background:#f0f6ff;color:#174576;font-weight:750;
+}
+#priorityParts button[data-prsubpart].active{
+  background:#1754a4;color:#fff;outline:2px solid #a5caff;
+}
+#priorityParts button[data-prpart][hidden]{display:none!important}
+#priorityProductionBody tr.priority-row-level3{
+  background:#eff6ff;border-left:4px solid #3b82f6;
+}
+#priorityProductionBody tr.priority-row-locked{
+  background:#f1f5f9;color:#64748b;cursor:not-allowed;opacity:.72;
+}
+#priorityProductionBody tr.priority-row-locked:hover{filter:none}
+#priorityAssignedList .priority-help,
+#priorityWork .priority-help{font-size:13px;color:#4a607c;line-height:1.5}
+.priority-part-summary .daily-metric-card small{font-weight:800;color:#184477}
+.priority-level3-chip{
+  display:inline-block;border:1px solid #b4d1ff;border-radius:6px;
+  background:#edf5ff;color:#1556a1;padding:2px 6px;font-weight:800;
+  white-space:nowrap;
+}
+@media(max-width:700px){
+ #priorityParts{gap:5px;max-width:100%;overflow-x:auto}
+ #priorityParts button{font-size:12px;min-height:36px}
+ #priorityAssignedList .table-wrap{overflow-x:auto}
+ #priorityWorkModal .priority-work-card{width:100%;max-width:100%;height:100dvh;max-height:100dvh}
+ #priorityWorkModal .table-wrap{overflow:auto;max-height:50dvh;-webkit-overflow-scrolling:touch}
+ #priorityWorkModal .priority-footer{position:sticky;bottom:0;background:#fff;padding:10px 0;z-index:2}
+}
