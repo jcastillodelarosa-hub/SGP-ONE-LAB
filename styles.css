@@ -1979,3 +1979,70 @@ button.active,[aria-pressed="true"]{border-color:#0865ed}
  .glass-burro-reservas{padding:0 10px 12px}
  .glass-burro-reserve{flex:1 1 135px}
 }
+
+
+/* LAB v308 — detalle de piezas: cabecera fija, tabla desplazable y pestañas adaptables.
+   Alcance deliberadamente limitado a #pieceModal, sin afectar los demás modales. */
+#pieceModal[hidden]{display:none!important}
+#pieceModal:not([hidden]){
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  overflow:hidden;
+  padding:clamp(8px,2vh,20px) clamp(8px,2vw,30px);
+  overscroll-behavior:contain;
+}
+#pieceModal>.piece-modal-card{
+  display:flex;
+  flex-direction:column;
+  width:min(1160px,100%);
+  max-width:1160px;
+  min-width:0;
+  max-height:calc(100dvh - 24px);
+  margin:0;
+  overflow:hidden!important;
+}
+#pieceModal .piece-modal-head,
+#pieceModal .piece-modal-meta,
+#pieceModal .piece-view-tabs,
+#pieceModal .piece-detail-options{flex-shrink:0}
+#pieceModal .piece-view-tabs{
+  overflow-x:auto;
+  overflow-y:hidden;
+  white-space:nowrap;
+  -webkit-overflow-scrolling:touch;
+  padding-bottom:4px;
+}
+#pieceModal .piece-view-tabs button{flex:0 0 auto}
+#pieceModal .piece-view-tabs button[hidden]{display:none!important}
+#pieceModal .table-wrap{
+  flex:1 1 auto;
+  min-height:0;
+  max-height:min(64dvh,700px);
+  overflow-x:auto!important;
+  overflow-y:auto!important;
+  overscroll-behavior:contain;
+  scrollbar-gutter:stable;
+  -webkit-overflow-scrolling:touch;
+}
+#pieceModal .table-wrap thead th{position:sticky;top:0;z-index:2}
+#pieceModal .table-wrap tfoot td{position:sticky;bottom:0;z-index:1}
+#pieceModal .table-wrap td.num{text-align:right;font-variant-numeric:tabular-nums}
+#pieceModal .table-wrap table{width:100%}
+@media(max-width:700px){
+  #pieceModal:not([hidden]){padding:0;align-items:stretch}
+  #pieceModal>.piece-modal-card{
+    width:100%;
+    max-width:none;
+    height:100dvh;
+    max-height:100dvh;
+    border-radius:0;
+    padding:14px;
+  }
+  #pieceModal .piece-modal-head{
+    margin:-14px -14px 12px;
+    border-radius:0;
+  }
+  #pieceModal .piece-modal-meta{padding:8px 0 12px}
+  #pieceModal .table-wrap{max-height:none;flex:1 1 auto}
+}

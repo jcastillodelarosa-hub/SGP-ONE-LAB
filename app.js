@@ -12,6 +12,7 @@ import { getSupabaseClient } from "./src/services/supabase-client.js";
 import { filterGlassRowsByWeek, indexGlassProductionWeeks, weeksWithGlass } from "./src/domain/glass-week-filter.js";
 import { buildGlassRelationGraph, traceGlassRelations, summarizeGlassBurro } from "./src/domain/glass-relations-graph.js";
 import { buildGlassNodeInsights, glassCoverage, glassRackBreakdown } from "./src/domain/glass-explorer-insights.js";
+import { consolidatePieceReferences } from "./src/domain/piece-detail-views.js";
 import { readNcAluminumWorkbook } from "./src/domain/nc-aluminum-importer.js?v=73";
 import { readNcGlassWorkbook } from "./src/domain/nc-glass-importer.js?v=84";
 
@@ -30,7 +31,7 @@ let queriedProductions = [];
 let assemblyRows = [];
 let queriedSystemSummary = [];
 let detailSort = { key: null, dir: 1 };
-let currentPieceRows=[];let currentPieceView='summary';let pieceDetailColumns=['perfil','descripcion','marca','fabricacion','longitud','cantidad'];
+let currentPieceRows=[];let currentPieceView='summary';let currentPieceContext='order';let pieceDetailColumns=['perfil','marca','fabricacion','longitud','cantidad','descripcion'];
 let detailColumnFilters = {};
 let detailHidden=new Set(JSON.parse(localStorage.getItem('sgp_program_hidden_cols')||'[]'));
 let detailColumns = [
@@ -679,21 +680,35 @@ function basePieceDescription(s){
 }
 function renderPieceModal(){
   const src=currentPieceRows;
-  document.querySelectorAll('[data-piece-view]').forEach(b=>b.classList.toggle('active',b.dataset.pieceView===currentPieceView));
+  document.querySelectorAll('[data-piece-view]').forEach(b=>{
+    const view=b.dataset.pieceView;
+    b.hidden=(view==='pickorders'&&currentPieceContext!=='picking-part')
+      ||(view==='references'&&!['picking-part','query-reserva'].includes(currentPieceContext));
+    b.classList.toggle('active',b.dataset.pieceView===currentPieceView);
+    b.setAttribute('aria-pressed',String(b.dataset.pieceView===currentPieceView));
+  });
   els.pieceDetailedOptions.hidden=currentPieceView!=='detailed';
+  if(currentPieceView==='pickorders'){renderPickingPartPieces();return;}
+  if(currentPieceView==='references'){
+    const rows=consolidatePieceReferences(src);
+    els.pieceProfileHead.innerHTML='<tr><th>Referencia</th><th>Cantidad</th></tr>';
+    els.pieceProfileBody.innerHTML=rows.length?rows.map(x=>`<tr><td><strong>${escapeHtml(x.perfil)}</strong></td><td class="num"><strong>${escapeHtml(x.cantidad)}</strong></td></tr>`).join(''):'<tr><td colspan="2" class="empty">Sin referencias disponibles.</td></tr>';
+    els.pieceProfileFoot.innerHTML=`<tr><td><strong>TOTAL</strong></td><td class="num"><strong>${escapeHtml(rows.reduce((n,x)=>n+x.cantidad,0))}</strong></td></tr>`;
+    return;
+  }
   if(currentPieceView==='summary'){
     const map=new Map();src.forEach(r=>{const k=r.codigo_sap;if(!map.has(k))map.set(k,{perfil:k,descripcion:basePieceDescription(r.descripcion),cantidad:0});map.get(k).cantidad+=Number(r.cantidad||0)});
     const rows=[...map.values()].sort((x,y)=>String(x.perfil).localeCompare(String(y.perfil),undefined,{numeric:true}));
-    els.pieceProfileHead.innerHTML='<tr><th>Perfil</th><th>Descripción</th><th>Cantidad</th></tr>';
-    els.pieceProfileBody.innerHTML=rows.map(x=>`<tr><td><strong>${escapeHtml(x.perfil)}</strong></td><td>${escapeHtml(x.descripcion)}</td><td><strong>${x.cantidad}</strong></td></tr>`).join('');
-    els.pieceProfileFoot.innerHTML=`<tr><td>TOTAL</td><td></td><td>${rows.reduce((n,x)=>n+x.cantidad,0)}</td></tr>`;return;
+    els.pieceProfileHead.innerHTML='<tr><th>Perfil</th><th>Cantidad</th><th>Descripción</th></tr>';
+    els.pieceProfileBody.innerHTML=rows.map(x=>`<tr><td><strong>${escapeHtml(x.perfil)}</strong></td><td class="num"><strong>${x.cantidad}</strong></td><td>${escapeHtml(x.descripcion)}</td></tr>`).join('');
+    els.pieceProfileFoot.innerHTML=`<tr><td>TOTAL</td><td class="num">${rows.reduce((n,x)=>n+x.cantidad,0)}</td><td></td></tr>`;return;
   }
   if(currentPieceView==='expanded'){
     const map=new Map();src.forEach(r=>{const k=[r.codigo_sap,r.marca].join('|');if(!map.has(k))map.set(k,{perfil:r.codigo_sap,descripcion:basePieceDescription(r.descripcion),marca:r.marca||'—',cantidad:0});map.get(k).cantidad+=Number(r.cantidad||0)});
     const rows=[...map.values()].sort((x,y)=>String(x.perfil).localeCompare(String(y.perfil),undefined,{numeric:true})||String(x.marca).localeCompare(String(y.marca),undefined,{numeric:true}));
-    els.pieceProfileHead.innerHTML='<tr><th>Perfil</th><th>Descripción</th><th>Marca</th><th>Cantidad</th></tr>';
-    els.pieceProfileBody.innerHTML=rows.map(x=>`<tr><td><strong>${escapeHtml(x.perfil)}</strong></td><td>${escapeHtml(x.descripcion)}</td><td>${escapeHtml(x.marca)}</td><td><strong>${x.cantidad}</strong></td></tr>`).join('');
-    els.pieceProfileFoot.innerHTML=`<tr><td>TOTAL</td><td></td><td></td><td>${rows.reduce((n,x)=>n+x.cantidad,0)}</td></tr>`;return;
+    els.pieceProfileHead.innerHTML='<tr><th>Perfil</th><th>Marca</th><th>Cantidad</th><th>Descripción</th></tr>';
+    els.pieceProfileBody.innerHTML=rows.map(x=>`<tr><td><strong>${escapeHtml(x.perfil)}</strong></td><td>${escapeHtml(x.marca)}</td><td class="num"><strong>${x.cantidad}</strong></td><td>${escapeHtml(x.descripcion)}</td></tr>`).join('');
+    els.pieceProfileFoot.innerHTML=`<tr><td>TOTAL</td><td></td><td class="num">${rows.reduce((n,x)=>n+x.cantidad,0)}</td><td></td></tr>`;return;
   }
   const selected=[...els.pieceDetailedOptions.querySelectorAll('input:checked')].map(x=>x.value);
   const fixed=['perfil','descripcion'],cols=[...pieceDetailColumns].filter(c=>fixed.includes(c)||selected.includes(c)||c==='cantidad');
@@ -707,6 +722,7 @@ function renderPieceModal(){
 async function openPieceModal(mode,value){
   const line=els.queryLine.value;if(!line){alert('Selecciona primero PANELES_2 o FRAMES_2.');return}
   const token=sessionStorage.getItem(APP_SESSION_KEY),year=Number(els.queryYear.value),week=Number(els.queryWeek.value),type=line==='PANELES_2'?'PANEL':'FRAME';
+  currentPieceContext=mode==='reserva'?'query-reserva':'order';currentPieceRows=[];currentPieceView='summary';
   els.pieceModal.hidden=false;els.pieceModalTitle.textContent=(mode==='reserva'?'Reserva ':'Producción ')+value;els.pieceModalMeta.textContent='Consultando piezas '+type+'…';
   try{const client=await getSupabaseClient();const {data,error}=await client.rpc('sgp_consultar_piezas_semana',{p_token:token,p_anio:year,p_semana:week});if(error)throw error;
     currentPieceRows=(data?.piezas||[]).filter(r=>String(r.tipo_pieza).toUpperCase()===type&&(mode==='reserva'?String(r.reserva)===String(value):String(r.produccion)===String(value)));
@@ -1908,7 +1924,7 @@ function renderPicking(){
  host.querySelectorAll('[data-pick-order-delivery]').forEach(b=>b.onclick=e=>{e.preventDefault();e.stopPropagation();deliverPickingOrder(b.dataset.pickOrderDelivery,b.dataset.production)});
  host.querySelectorAll('[data-pick-delivery]').forEach(b=>b.onclick=()=>alert('La entrega ahora se realiza por cada orden.'))
 }
-async function openPickingPieces(id,production=null){const x=pickingRows.find(r=>r.id_programacion===id);if(!x)return;try{const db=await getSupabaseClient(),{data,error}=await db.rpc('sgp_picking_piezas_panel',{p_token:getAppToken(),p_id_programacion:id,p_produccion:production||null});if(error)throw error;currentPieceRows=(data||[]).map(p=>({...p,codigo_sap:p.codigo_sap||p.perfil,perfil:p.perfil||p.codigo_sap}));currentPieceView=production?'summary':'pickorders';els.pieceModalTitle.textContent=production?'Orden '+production:'Reserva '+(x.reserva||'—')+' · Parte '+(x.parte||'—');const ord=production?(x.ordenes||[]).find(o=>String(o.produccion||'')===String(production||'')):null;els.pieceModalMeta.innerHTML='<strong>Línea:</strong> PANEL &nbsp; <strong>Sistema:</strong> '+escapeHtml(x.sistema||'—')+' &nbsp; <strong>Acabado:</strong> '+escapeHtml(x.acabado||'—')+(production?' &nbsp; <strong>Ventanas:</strong> '+escapeHtml(ord?.cantidad??'—'):'');els.pieceModal.hidden=false;if(production)renderPieceModal();else renderPickingPartPieces()}catch(e){console.error('Picking despiece:',e);alert('No fue posible cargar el despiece: '+(e?.message||e))}}
+async function openPickingPieces(id,production=null){const x=pickingRows.find(r=>r.id_programacion===id);if(!x)return;try{const db=await getSupabaseClient(),{data,error}=await db.rpc('sgp_picking_piezas_panel',{p_token:getAppToken(),p_id_programacion:id,p_produccion:production||null});if(error)throw error;currentPieceRows=(data||[]).map(p=>({...p,codigo_sap:p.codigo_sap||p.perfil,perfil:p.perfil||p.codigo_sap}));currentPieceContext=production?'order':'picking-part';currentPieceView=production?'summary':'pickorders';els.pieceModalTitle.textContent=production?'Orden '+production:'Reserva '+(x.reserva||'—')+' · Parte '+(x.parte||'—');const ord=production?(x.ordenes||[]).find(o=>String(o.produccion||'')===String(production||'')):null;els.pieceModalMeta.innerHTML='<strong>Línea:</strong> PANEL &nbsp; <strong>Sistema:</strong> '+escapeHtml(x.sistema||'—')+' &nbsp; <strong>Acabado:</strong> '+escapeHtml(x.acabado||'—')+(production?' &nbsp; <strong>Ventanas:</strong> '+escapeHtml(ord?.cantidad??'—'):'');els.pieceModal.hidden=false;renderPieceModal()}catch(e){console.error('Picking despiece:',e);alert('No fue posible cargar el despiece: '+(e?.message||e))}}
 function renderPickingPartPieces(){const rows=currentPieceRows||[],body=els.pieceProfileBody,head=els.pieceProfileHead,foot=els.pieceProfileFoot;if(!body)return;const grouped=new Map();rows.forEach(r=>{const op=String(r.produccion||'—'),key=op+'|'+String(r.perfil||r.codigo_sap||'—');if(!grouped.has(key))grouped.set(key,{op,perfil:r.perfil||r.codigo_sap||'—',cantidad:0});grouped.get(key).cantidad+=Number(r.cantidad||0)});const out=[...grouped.values()].sort((a,b)=>a.op.localeCompare(b.op,undefined,{numeric:true})||a.perfil.localeCompare(b.perfil,undefined,{numeric:true}));if(els.pieceDetailedOptions)els.pieceDetailedOptions.hidden=true;head.innerHTML='<tr><th>OP</th><th>Referencia</th><th>Cantidad</th></tr>';let last='',block=-1;body.innerHTML=out.length?out.map(r=>{const first=r.op!==last;if(first){last=r.op;block++}return '<tr class="pick-piece-block-'+(block%2)+'"><td>'+(first?'<strong>'+escapeHtml(r.op)+'</strong>':'')+'</td><td><strong>'+escapeHtml(r.perfil)+'</strong></td><td><strong>'+escapeHtml(r.cantidad)+'</strong></td></tr>'}).join(''):'<tr><td colspan="3" class="empty">Sin piezas tipo PANEL para esta parte.</td></tr>';foot.innerHTML='<tr><td colspan="2"><strong>Total general</strong></td><td><strong>'+out.reduce((n,r)=>n+r.cantidad,0)+'</strong></td></tr>'}
 async function openPickingOrderNovelties(id,production){try{if(!noveltyRows.length)await loadNovelties();const rows=noveltyRows.filter(n=>n.id_programacion===id&&n.produccion===production&&n.estado!=='RESUELTA');if(!rows.length){alert('No hay novedades abiertas para esta orden.');return}if(rows.length===1){openNoveltyDetail(rows[0].id_novedad);return}const choice=rows.map((n,i)=>(i+1)+'. '+(n.tipo||'Novedad')+' · '+(n.perfil||'—')+' · '+(n.observacion||'Sin observación')).join('\n');alert('Novedades de '+production+'\n\n'+choice)}catch(e){alert('No fue posible consultar novedades: '+e.message)}}
 let pickDeliveryTarget=null,pickDeliveryPieces=[],pickDeliveryComplete=null,pickMissingCount=0;
