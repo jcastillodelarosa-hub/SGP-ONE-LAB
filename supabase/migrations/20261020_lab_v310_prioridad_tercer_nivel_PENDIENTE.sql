@@ -1,12 +1,9 @@
--- LAB v310 — PROPUESTA NO APLICADA: requiere autorización expresa para Supabase.
--- Origen: definiciones actuales consultadas en SGP-ONE-LAB el 2026-10-20.
--- Objetivo: ordenar 3.1.1 en Mecanizado y Picking, validar jerarquía y
--- bloquear la reasignación de reservas con programación activa.
--- NO ALTERA tablas, RLS, GRANT, sesiones ni identidades de programación.
--- PRECONDICIÓN: ejecutar pruebas en transacción con ROLLBACK y verificar
--- roles autorizados/no autorizados antes de aplicar en producción.
--- Rollback: restaurar las definiciones previas conservadas en el historial de Supabase.
--- El ejecutor de migraciones gestiona la transacción; no incluir BEGIN/COMMIT explícitos.
+-- LAB v310 — AUTORIZADO: tres RPC, sin alteraciones de tablas, RLS, grants o datos.
+
+-- Ejecutar solo tras preflight; transacción gestionada por Supabase apply_migration.
+
+-- Las firmas, permisos, roles y estructuras JSON originales se conservan.
+
 CREATE OR REPLACE FUNCTION public.sgp_mecanizado_disponibles(p_token text, p_semana integer DEFAULT NULL::integer)
  RETURNS TABLE(reserva text, semana integer, sistema text, acabado text, cantidad integer, vidrio_cant numeric, vidrio_pct numeric, ordenes jsonb, prioridades_semanales jsonb, partes jsonb, grupo integer)
  LANGUAGE plpgsql
@@ -67,7 +64,7 @@ begin
       'prioridad_semanal',z.prioridad_semanal,
       'reserva_compartida',public.sgp_es_reserva_compartida(z.key_produccion),
       'reservas_compartidas',z.reservas_compartidas
-   ) order by z.prioridad_semanal,z.produccion) ordenes,
+   ) order by split_part(z.prioridad_semanal,'.',1)::numeric,coalesce(nullif(split_part(z.prioridad_semanal,'.',2),''),'0')::numeric,coalesce(nullif(split_part(z.prioridad_semanal,'.',3),''),'0')::numeric,z.produccion) ordenes,
    coalesce(jsonb_agg(distinct z.prioridad_semanal) filter(where z.prioridad_semanal is not null),'[]'::jsonb) prioridades,
    coalesce((select jsonb_agg(jsonb_build_object('prioridad',x.prioridad_semanal,'cantidad',x.cantidad,'vidrio_cant',x.vidrio_cant,'vidrio_pct',x.vidrio_pct,'ordenes',x.ordenes)
                order by split_part(x.prioridad_semanal,'.',1)::numeric,coalesce(nullif(split_part(x.prioridad_semanal,'.',2),''),'0')::numeric,coalesce(nullif(split_part(x.prioridad_semanal,'.',3),''),'0')::numeric)
@@ -80,8 +77,8 @@ begin
   from f z group by z.reserva_principal
  )
  select a.reserva_principal,a.semana,a.sistema,a.acabado,a.cantidad,a.vidrio_cant,a.vidrio_pct,a.ordenes,a.prioridades,a.partes,a.grupo from agg a;
-end $function$
-;
+end $function$;
+
 CREATE OR REPLACE FUNCTION public.sgp_picking_cola(p_token text)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -112,7 +109,7 @@ begin
           (select count(*) from public.sgp_mecanizado_novedades n where n.id_programacion=p.id_programacion and n.estado<>'RESUELTA') novedades,
           (select pe.estado from public.sgp_picking_entregas pe where pe.id_programacion=p.id_programacion order by pe.fecha_entrega desc limit 1) estado_entrega,
           case coalesce(p.estado_ejecucion,'PROGRAMADA') when 'PROCESADO' then 0 when 'MECANIZADO' then 1 when 'CORTE' then 2 when 'PROGRAMADA' then 3 else 4 end orden_estado,
-          p.semana,(lpad(coalesce(nullif(split_part(p.parte,'.',1),''),'999999'),9,'0')||'.'||lpad(coalesce(nullif(split_part(p.parte,'.',2),''),'0'),9,'0')||'.'||lpad(coalesce(nullif(split_part(p.parte,'.',3),''),'0'),9,'0')) parte_num,
+          p.semana,case when p.parte ~ '^[0-9]+([.][0-9]+)?$' then p.parte::numeric when p.parte ~ '^[0-9]+([.][0-9]+){2}$' then (split_part(p.parte,'.',1)||'.'||split_part(p.parte,'.',2))::numeric else 999999::numeric end parte_num,
           coalesce((select jsonb_agg(jsonb_build_object(
              'key_produccion',z.key_produccion,'produccion',z.produccion,'proyecto',z.proyecto,'cantidad',z.cantidad,
              'observacion_mecanizado',z.observacion_mecanizado,'novedades',z.novedades,'entrega_estado',z.entrega_estado,
@@ -133,9 +130,9 @@ begin
            ) z),'[]'::jsonb) ordenes
    from partes p
  )
- select jsonb_agg(f order by f.orden_estado,f.reserva,f.parte_num,f.fecha_programacion,f.prioridad) from filas f),'[]'::jsonb);
-end $function$
-;
+ select jsonb_agg(f order by f.orden_estado,f.reserva,lpad(coalesce(nullif(split_part(f.parte,'.',1),''),'999999'),12,'0'),lpad(coalesce(nullif(split_part(f.parte,'.',2),''),'0'),12,'0'),lpad(coalesce(nullif(split_part(f.parte,'.',3),''),'0'),12,'0'),f.fecha_programacion,f.prioridad) from filas f),'[]'::jsonb);
+end $function$;
+
 CREATE OR REPLACE FUNCTION public.sgp_guardar_prioridad(p_token text, p_anio integer, p_semana integer, p_linea text, p_reserva text, p_asignaciones jsonb)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -143,35 +140,30 @@ CREATE OR REPLACE FUNCTION public.sgp_guardar_prioridad(p_token text, p_anio int
  SET search_path TO 'public'
 AS $function$
 declare u text;t text;bad int;begin u:=sgp_validar_sesion_rol(p_token,array['ADMINISTRADOR','COORDINADOR']);
+if coalesce(jsonb_typeof(p_asignaciones),'')<>'array' or jsonb_array_length(p_asignaciones)=0 then raise exception 'Listado de producciones inválido';end if;
+if exists(select 1 from jsonb_array_elements(p_asignaciones) a where coalesce(a->>'prioridad','') !~ '^[1-9][0-9]*([.][1-9][0-9]*){0,2}$') then raise exception 'Prioridad inválida: máximo tres niveles';end if;
+if p_linea<>'PANELES_2' and exists(select 1 from jsonb_array_elements(p_asignaciones) a where a->>'prioridad' ~ '^[1-9][0-9]*([.][1-9][0-9]*){2}$') then raise exception 'El tercer nivel solo está habilitado en PANELES_2';end if;
 select max(upper(coalesce(tipo,''))) into t from sgp_producciones where anio=p_anio and semana_actual=p_semana and id_linea=p_linea and trim(split_part(coalesce(reserva_al,''),',',1))=p_reserva;
 if t like '%PROYECTO%' and exists(select 1 from jsonb_array_elements(p_asignaciones)a where a->>'prioridad' like '%.%') then raise exception 'Las reservas de Proyecto no pueden dividirse';end if;
 select count(*) into bad from jsonb_array_elements(p_asignaciones)a where not exists(select 1 from sgp_producciones p where p.key_produccion=a->>'key_produccion' and p.anio=p_anio and p.semana_actual=p_semana and p.id_linea=p_linea and trim(split_part(coalesce(p.reserva_al,''),',',1))=p_reserva);
 if bad>0 then raise exception 'Hay producciones que no pertenecen a la reserva principal seleccionada';end if;
--- LAB v310: validación jerárquica y protección transaccional de programaciones.
+-- Impedir cambio u omisión de claves de una parte con programación activa.
+if exists(select 1 from public.sgp_prioridades pr
+ join public.sgp_mecanizado_programacion mp on mp.reserva=pr.reserva and mp.estado<>'CANCELADA' and (mp.prioridad_semanal is null or mp.prioridad_semanal=pr.prioridad)
+ left join jsonb_array_elements(p_asignaciones) a on a->>'key_produccion'=pr.key_produccion
+ where pr.anio=p_anio and pr.semana=p_semana and pr.id_linea=p_linea and pr.reserva=p_reserva and a->>'prioridad' is distinct from pr.prioridad)
+then raise exception 'No se puede modificar una parte con programación activa';end if;
+-- Impedir agregar nuevas claves a una parte programada.
 if exists(select 1 from jsonb_array_elements(p_asignaciones) a
-          where coalesce(a->>'prioridad','') !~ '^[1-9][0-9]*([.][1-9][0-9]*){0,2}
+ left join public.sgp_prioridades pr on pr.anio=p_anio and pr.semana=p_semana and pr.id_linea=p_linea and pr.reserva=p_reserva and pr.key_produccion=a->>'key_produccion'
+ join public.sgp_mecanizado_programacion mp on mp.reserva=p_reserva and mp.estado<>'CANCELADA' and (mp.prioridad_semanal is null or mp.prioridad_semanal=a->>'prioridad')
+ where pr.key_produccion is null)
+then raise exception 'No se puede agregar una producción a una parte programada';end if;
+-- Preservar UUIDs y fechas de prioridades existentes; eliminar únicamente claves omitidas.
+delete from public.sgp_prioridades pr where pr.anio=p_anio and pr.semana=p_semana and pr.id_linea=p_linea and pr.reserva=p_reserva
+ and not exists(select 1 from jsonb_array_elements(p_asignaciones) a where a->>'key_produccion'=pr.key_produccion);
 insert into sgp_prioridades(anio,semana,id_linea,reserva,key_produccion,prioridad,usuario)
 select p_anio,p_semana,p_linea,p_reserva,a->>'key_produccion',a->>'prioridad',u from jsonb_array_elements(p_asignaciones)a
-on conflict(anio,semana,id_linea,key_produccion) do update set reserva=excluded.reserva,prioridad=excluded.prioridad,usuario=excluded.usuario,fecha_actualizacion=now();
-return jsonb_build_object('ok',true,'guardadas',jsonb_array_length(p_asignaciones));end $function$
-)
-then raise exception 'Prioridad inválida: se permiten máximo tres niveles'; end if;
-if exists(select 1 from public.sgp_mecanizado_programacion mp
-          where mp.reserva=p_reserva and mp.estado<>'CANCELADA'
-            and exists(select 1 from jsonb_array_elements(p_asignaciones) a
-                       left join public.sgp_prioridades pr
-                         on pr.anio=p_anio and pr.semana=p_semana and pr.id_linea=p_linea
-                        and pr.reserva=p_reserva and pr.key_produccion=a->>'key_produccion'
-                       where pr.prioridad is distinct from a->>'prioridad'
-                         and (mp.prioridad_semanal is null or mp.prioridad_semanal=pr.prioridad)))
-then raise exception 'No se puede modificar una parte con programación activa'; end if;
--- Conservar id_prioridad de producciones existentes y sus relaciones:
-delete from sgp_prioridades pr
-where pr.anio=p_anio and pr.semana=p_semana and pr.id_linea=p_linea and pr.reserva=p_reserva
-  and not exists(select 1 from jsonb_array_elements(p_asignaciones) a
-                 where a->>'key_produccion'=pr.key_produccion);
-insert into sgp_prioridades(anio,semana,id_linea,reserva,key_produccion,prioridad,usuario)
-select p_anio,p_semana,p_linea,p_reserva,a->>'key_produccion',a->>'prioridad',u from jsonb_array_elements(p_asignaciones)a
-on conflict(anio,semana,id_linea,key_produccion) do update set reserva=excluded.reserva,prioridad=excluded.prioridad,usuario=excluded.usuario,fecha_actualizacion=now();
-return jsonb_build_object('ok',true,'guardadas',jsonb_array_length(p_asignaciones));end $function$
-;
+on conflict(anio,semana,id_linea,key_produccion) do update set reserva=excluded.reserva,prioridad=excluded.prioridad,usuario=excluded.usuario,fecha_actualizacion=now() where sgp_prioridades.reserva is distinct from excluded.reserva or sgp_prioridades.prioridad is distinct from excluded.prioridad;
+return jsonb_build_object('ok',true,'guardadas',jsonb_array_length(p_asignaciones));end $function$;
+
