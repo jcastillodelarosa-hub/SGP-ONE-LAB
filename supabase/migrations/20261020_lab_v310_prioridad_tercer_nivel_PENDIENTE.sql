@@ -165,7 +165,11 @@ if exists(select 1 from public.sgp_mecanizado_programacion mp
                        where pr.prioridad is distinct from a->>'prioridad'
                          and (mp.prioridad_semanal is null or mp.prioridad_semanal=pr.prioridad)))
 then raise exception 'No se puede modificar una parte con programación activa'; end if;
-delete from sgp_prioridades where anio=p_anio and semana=p_semana and id_linea=p_linea and reserva=p_reserva;
+-- Conservar id_prioridad de producciones existentes y sus relaciones:
+delete from sgp_prioridades pr
+where pr.anio=p_anio and pr.semana=p_semana and pr.id_linea=p_linea and pr.reserva=p_reserva
+  and not exists(select 1 from jsonb_array_elements(p_asignaciones) a
+                 where a->>'key_produccion'=pr.key_produccion);
 insert into sgp_prioridades(anio,semana,id_linea,reserva,key_produccion,prioridad,usuario)
 select p_anio,p_semana,p_linea,p_reserva,a->>'key_produccion',a->>'prioridad',u from jsonb_array_elements(p_asignaciones)a
 on conflict(anio,semana,id_linea,key_produccion) do update set reserva=excluded.reserva,prioridad=excluded.prioridad,usuario=excluded.usuario,fecha_actualizacion=now();
