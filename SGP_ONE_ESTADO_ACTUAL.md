@@ -819,7 +819,7 @@ Estado: **IMPLEMENTADO EN RAMA**, pruebas automáticas/PR/publicación pendiente
 - Asistente: en reservas Retail asignadas, acción **Subdividir 3.1** cuando hay al menos dos producciones y no tiene programación activa; en nuevas asignaciones, botón **Crear subniveles** dentro de una parte. Por seguridad, la edición de tercer nivel se limita inicialmente a la línea PANELES_2; FRAMES_2 queda sin cambios hasta validar cobertura propia. Las órdenes se siguen asignando haciendo clic en la parte elegida.
 - Proyecto no se divide; otras partes permanecen bloqueadas; el guardado revalida programación y recarga datos desde RPC.
 - Picking y Ensamble muestran la prioridad de tres niveles y ordenan sin tratarla como decimal; cambios CSS localizados y adaptables a móvil.
-- SQL **PROPUESTO, NO APLICADO**: \`supabase/migrations/20261020_lab_v310_prioridad_tercer_nivel_PENDIENTE.sql\`. Incluye compatibilidad de \`sgp_mecanizado_disponibles\`, \`sgp_picking_cola\` y \`sgp_guardar_prioridad\`. No cambia tablas, datos, RLS, permisos ni identidades de programación.
+- SQL **PROPUESTO, NO APLICADO**: \`supabase/migrations/20261020_lab_v310_prioridad_tercer_nivel_PENDIENTE.sql\`. Conserva `id_prioridad` de filas existentes mediante upsert, evitando borrar y recrear indiscriminadamente las prioridades de una reserva. Incluye compatibilidad de \`sgp_mecanizado_disponibles\`, \`sgp_picking_cola\` y \`sgp_guardar_prioridad\`. No cambia tablas, datos, RLS, permisos ni identidades de programación.
 - Pruebas: \`tests/priority-third-level-v310.test.mjs\` y regresión existente.
 
 ### Límites y decisiones pendientes
