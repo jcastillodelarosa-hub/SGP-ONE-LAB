@@ -780,3 +780,19 @@ No se modificaron tablas, RPC, políticas RLS ni permisos. No afecta SGP_ONE_GOO
 Consulta en modo lectura: orden 1066618, reserva 8690348, tiene 9 ventanas y 8 vidrios preparados en el snapshot consultado; debe ser Parcial 8/9.
 Riesgos pendientes: verificar hover y panel lateral en móvil, estados `Preparado - Sin Movimiento`, burros compartidos en otras semanas, y comportamiento con roles Consulta.
 Estado: **IMPLEMENTADO EN RAMA**, pruebas automáticas/PR/publicación pendientes de cierre. No se ha declarado VERIFICADO.
+
+---
+
+## Actualización 2026-10-20 — LAB v308: detalle de piezas
+
+**Proyecto/módulos:** SGP_ONE / consulta de programación y Picking / modal de detalle de piezas. **Alcance:** frontend, documentación y tests. Código preparado en `feat/lab-v308-piece-detail-layout`, a integrar mediante PR tras pruebas y autorización independiente de fusión/publicación.
+
+- **Orden de columnas:** `Resumen` pasa a Perfil, Cantidad, Descripción; `Ampliado` a Perfil, Marca, Cantidad, Descripción. `Detallado` inicia con Descripción al final, conservando el movimiento manual de columnas.
+- **Parte de Picking:** `Por órdenes` preserva el desglose original; `Solo referencias` agrupa `perfil/codigo_sap` y suma cantidades sin separación por producción. Se conservan además `Resumen`, `Ampliado` y `Detallado`.
+- **Reserva consultada:** añade `Solo referencias` sobre las piezas ya filtradas de la reserva, sin modificar consultas o permisos.
+- **Orden individual:** mantiene las vistas existentes, con columnas reordenadas.
+- **Scroll:** `#pieceModal` usa desplazamiento interno de tabla y pestañas desplazables, dejando título y controles visibles, tanto escritorio como móvil. CSS exclusivamente bajo `#pieceModal`, para no afectar otros modales.
+- **Fuente de datos sin cambios:** RPC `sgp_picking_piezas_panel` (PANEL exclusivamente), y `sgp_consultar_piezas_semana` bajo sesión existente. Sin escrituras, RLS ni cambios en Supabase.
+- **Pruebas:** `tests/piece-detail-views-v308.test.mjs` comprueba agrupación y sumas, preservación de fuente, contextos de las vistas, columnas y scroll. Verificación funcional móvil aún pendiente de publicación.
+
+**Estado provisional:** IMPLEMENTADO en rama; PROBADO/PUBLICADO/VERIFICADO pendientes de resultado de CI y fusión autorizada. No modifica SGP_ONE_GOOGLE.
