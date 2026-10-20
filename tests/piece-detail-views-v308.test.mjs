@@ -28,7 +28,7 @@ test('la agrupación acepta perfil o codigo_sap y conserva la fuente',()=>{
  consolidatePieceReferences(pieces);
  assert.deepEqual(pieces,original);
  assert.deepEqual(consolidatePieceReferences([{perfil:'ES-EL400-010',cantidad:'4'}, {codigo_sap:'ES-EL400-010',cantidad:'3'}]),[{perfil:'ES-EL400-010',cantidad:7}]);
- assert.deepEqual(consolidatePieceReferences([{cantidad:3},{perfil:'P-1',cantidad:'invalid'},{perfil:'P-2',cantidad:2}]),[{perfil:'P-1',cantidad:0},{perfil:'P-2',cantidad:2}]);
+ assert.deepEqual(consolidatePieceReferences([{cantidad:3},{perfil:'P-1',cantidad:'invalid'},{perfil:'P-2',cantidad:2}]),[{perfil:'P-2',cantidad:2}]);
 });
 
 test('vista de parte mantiene Por órdenes y añade Solo referencias; orden mantiene resumen',()=>{
