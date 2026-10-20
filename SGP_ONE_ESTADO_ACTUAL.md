@@ -796,3 +796,38 @@ Estado: **IMPLEMENTADO EN RAMA**, pruebas automáticas/PR/publicación pendiente
 - **Pruebas:** `tests/piece-detail-views-v308.test.mjs` comprueba agrupación y sumas, preservación de fuente, contextos de las vistas, columnas y scroll. Verificación funcional móvil aún pendiente de publicación.
 
 **Estado provisional:** IMPLEMENTADO en rama; PROBADO/PUBLICADO/VERIFICADO pendientes de resultado de CI y fusión autorizada. No modifica SGP_ONE_GOOGLE.
+
+
+---
+
+## 2026-10-20 — LAB v310: tercer subnivel de prioridades (rama de preparación)
+
+**Alcance:** SGP_ONE / Programación semanal → Mecanizado → Picking → Ensamble. **Rama:** \`feat/lab-v310-priority-third-level\`. **No publicado.**
+
+### Diagnóstico verificado con Supabase (solo lectura)
+
+- \`sgp_prioridades.prioridad\`, \`sgp_producciones.prioridad_programacion\`, \`sgp_mecanizado_programacion.prioridad_semanal\` son TEXT; \`sgp_mecanizado_programacion.prioridad\` es NUMERIC, pero representa prioridad de turno y no debe convertirse en identificador semanal de tercer nivel.
+- \`sgp_guardar_prioridad\` ya recibe valores de prioridad como TEXT y restringe divisiones de Proyecto. Debe agregar validación de tres niveles y protección transaccional frente a reagrupación de órdenes programadas.
+- \`sgp_mecanizado_disponibles(p_token,p_semana)\` ordenaba solo los dos primeros segmentos.
+- \`sgp_picking_cola(p_token)\` convertía el texto de parte a NUMERIC, incompatible con \`3.1.1\`.
+- \`sgp_consultar_ensamble\` devuelve el identificador de prioridad como texto; no necesita cambio de tabla.
+- \`sgp_mecanizado_cobertura_programacion\` ofrece consulta de solo lectura para impedir subdividir una parte programada; el backend debe reforzar el bloqueo ante concurrencia.
+
+### Implementado exclusivamente en rama GitHub
+
+- Dominio puro \`src/domain/priority-hierarchy.js\`: validación de 1–3 niveles, ordenamiento natural, agrupación de cantidades, asignación por producción, preservación de las partes ajenas y comprobación de cobertura.
+- Asistente: en reservas Retail asignadas, acción **Subdividir 3.1** cuando hay al menos dos producciones y no tiene programación activa; en nuevas asignaciones, botón **Crear subniveles** dentro de una parte. Las órdenes se siguen asignando haciendo clic en la parte elegida.
+- Proyecto no se divide; otras partes permanecen bloqueadas; el guardado revalida programación y recarga datos desde RPC.
+- Picking y Ensamble muestran la prioridad de tres niveles y ordenan sin tratarla como decimal; cambios CSS localizados y adaptables a móvil.
+- SQL **PROPUESTO, NO APLICADO**: \`supabase/migrations/20261020_lab_v310_prioridad_tercer_nivel_PENDIENTE.sql\`. Incluye compatibilidad de \`sgp_mecanizado_disponibles\`, \`sgp_picking_cola\` y \`sgp_guardar_prioridad\`. No cambia tablas, datos, RLS, permisos ni identidades de programación.
+- Pruebas: \`tests/priority-third-level-v310.test.mjs\` y regresión existente.
+
+### Límites y decisiones pendientes
+
+1. **NO aplicar migración SQL** sin autorización explícita del usuario para modificar estas tres RPC de Supabase SGP-ONE-LAB.
+2. **NO fusionar ni publicar frontend v310** antes de aplicar y validar las RPC: Picking fallaría con \`3.1.1\` si se habilita antes.
+3. Validar sobre una transacción con rollback: Retail, Proyecto, parte con/sin programación, arrastre, Picking PANEL, reserva compartida/múltiple, Ensamble y roles no autorizados.
+4. Verificación visual real en móvil y planta tras publicación autorizada; los tests CI no la sustituyen.
+5. Mantener sin cambios SGP_ONE_GOOGLE.
+
+**Estado:** IMPLEMENTADO EN RAMA (pendiente CI), SQL PREPARADO NO APLICADO, NO PUBLICADO, NO VERIFICADO FUNCIONALMENTE.
