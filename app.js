@@ -835,9 +835,26 @@ function renderGlassExplorer(){
  const coords=new Map();groups.forEach((g,i)=>g.forEach((n,j)=>coords.set(n.id,{x:125+i*250,y:52+j*rowHeight})));
  const esc=v=>escapeHtml(String(v));
  // LAB v303: selección visual de nodos y enlaces directos, sin alterar datos ni navegación.
- const related=new Set(selected&&model.nodes.has(selected)?[selected,...(adjacency.get(selected)||[])]:[]);
+ const distances=new Map();
+ if(selected&&model.nodes.has(selected)){
+  const queue=[selected];distances.set(selected,0);
+  const selectedType=model.nodes.get(selected).type;
+  const maxDepth=selectedType==='burro'?3:selectedType==='orden'?2:selectedType==='parte'?1:3;
+  const rank={reserva:0,parte:1,orden:2,burro:3};
+  for(let i=0;i<queue.length;i++){
+   const id=queue[i],depth=distances.get(id),node=model.nodes.get(id);
+   if(depth>=maxDepth)continue;
+   for(const next of adjacency.get(id)||[]){
+    const target=model.nodes.get(next);
+    if(!target||rank[target.type]!==rank[node.type]+(selectedType==='reserva'?1:-1)||distances.has(next))continue;
+    distances.set(next,depth+1);queue.push(next);
+   }
+  }
+ }
+ const related=new Set(distances.keys());
  const hasFocus=related.size>0;
- const paths=[...model.edges.values()].filter(({a,b})=>coords.has(a)&&coords.has(b)).map(({a,b,qty})=>{const p=coords.get(a),q=coords.get(b);return '<path d="M'+p.x+' '+p.y+' C'+(p.x+120)+' '+p.y+','+(q.x-120)+' '+q.y+','+q.x+' '+q.y+'" stroke="'+(hasFocus&&(a===selected||b===selected)?'#f97316':'#9cb5d2')+'" stroke-width="'+(hasFocus&&(a===selected||b===selected)?Math.min(12,4+Math.sqrt(qty)):Math.min(7,1+Math.sqrt(qty)))+'" fill="none" opacity="'+(!hasFocus||a===selected||b===selected?'.95':'.13')+'"><title>'+qty+' vidrios</title></path>'}).join('');
+ const edgeDepth=(a,b)=>{const da=distances.get(a),db=distances.get(b);return da!==undefined&&db!==undefined&&Math.abs(da-db)===1?Math.min(da,db):-1};
+ const paths=[...model.edges.values()].filter(({a,b})=>coords.has(a)&&coords.has(b)).map(({a,b,qty})=>{const p=coords.get(a),q=coords.get(b);return '<path d="M'+p.x+' '+p.y+' C'+(p.x+120)+' '+p.y+','+(q.x-120)+' '+q.y+','+q.x+' '+q.y+'" stroke="'+(hasFocus&&edgeDepth(a,b)>=0?(edgeDepth(a,b)===0?'#f97316':'#fb923c'):'#9cb5d2')+'" stroke-width="'+(hasFocus&&edgeDepth(a,b)>=0?Math.min(12,(edgeDepth(a,b)===0?5:3)+Math.sqrt(qty)):Math.min(7,1+Math.sqrt(qty)))+'" fill="none" opacity="'+(!hasFocus||edgeDepth(a,b)>=0?'.95':'.10')+'"><title>'+qty+' vidrios</title></path>'}).join('');
  const palette={reserva:'#7756d6',parte:'#e89b35',orden:'#10a37f',burro:'#1674ed'};
  const shapes=visible.filter(n=>coords.has(n.id)).map(n=>{const p=coords.get(n.id),label=n.label.length>23?n.label.slice(0,22)+'…':n.label;return '<g data-node="'+esc(n.id)+'" role="button" tabindex="0" aria-label="'+esc(n.label)+'" class="glass-explorer-node"><rect x="'+(p.x-106)+'" y="'+(p.y-19)+'" width="212" height="38" rx="12" fill="'+palette[n.type]+'" stroke="'+(selected===n.id?'#10264e':hasFocus&&related.has(n.id)?'#f97316':'white')+'" stroke-width="'+(selected===n.id?5:hasFocus&&related.has(n.id)?4:1)+'" opacity="'+(!hasFocus||related.has(n.id)?1:.3)+'"/><text x="'+p.x+'" y="'+(p.y+5)+'" fill="white" text-anchor="middle" font-size="13" font-weight="700">'+esc(label)+'</text><title>'+esc(n.label)+'</title></g>'}).join('');
  graph.innerHTML='<svg viewBox="0 0 '+width+' '+height+'" width="'+width+'" height="'+height+'" aria-label="Red de reservas, partes, órdenes y burros"><g>'+paths+shapes+'</g></svg>';
