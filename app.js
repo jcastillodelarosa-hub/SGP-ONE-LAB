@@ -802,7 +802,7 @@ const glassExplorer={selected:null};
 function glassExplorerModel(){
  const nodes=new Map(),edges=new Map();
  const addNode=(id,type,label)=>{if(!nodes.has(id))nodes.set(id,{id,type,label});};
- const addEdge=(a,b,qty)=>{const id=a+'|'+b;edges.set(id,(edges.get(id)||0)+qty);};
+ const addEdge=(a,b,qty)=>{const id=JSON.stringify([a,b]);const previous=edges.get(id);edges.set(id,{a,b,qty:(previous?.qty||0)+qty});};
  glassEfficiencyRows.forEach(r=>{
   const res=String(r.reserva||'SIN RESERVA').split(',')[0].trim(),part=String(r.parte||'SIN PARTE'),key=String(r.key_produccion||''),pos=String(r.posicion||'SIN UBICACIÓN');
   const prepared=Number(r.preparadas||0),total=Number(r.unidades||0);
@@ -822,7 +822,7 @@ function renderGlassExplorer(){
  const selected=glassExplorer.selected;
  // LAB v299: recorrer la jerarquía completa desde la selección, no sólo un salto.
  const adjacency=new Map();
- for(const [id] of model.edges){const [a,b]=id.split('|');if(!adjacency.has(a))adjacency.set(a,new Set());if(!adjacency.has(b))adjacency.set(b,new Set());adjacency.get(a).add(b);adjacency.get(b).add(a)}
+ for(const edge of model.edges.values()){const {a,b}=edge;if(!adjacency.has(a))adjacency.set(a,new Set());if(!adjacency.has(b))adjacency.set(b,new Set());adjacency.get(a).add(b);adjacency.get(b).add(a)}
  let seeds=query?matching.map(n=>n.id):selected&&model.nodes.has(selected)?[selected]:[];
  let allowed=new Set();
  if(seeds.length){let queue=seeds.map(id=>({id,depth:0}));for(const id of seeds)allowed.add(id);
@@ -834,7 +834,7 @@ function renderGlassExplorer(){
  const width=1000,rowHeight=52,height=Math.max(350,...groups.map(g=>g.length*rowHeight+65));
  const coords=new Map();groups.forEach((g,i)=>g.forEach((n,j)=>coords.set(n.id,{x:125+i*250,y:52+j*rowHeight})));
  const esc=v=>escapeHtml(String(v));
- const paths=[...model.edges.entries()].filter(([id])=>{const [a,b]=id.split('|');return coords.has(a)&&coords.has(b)}).map(([id,qty])=>{const [a,b]=id.split('|'),p=coords.get(a),q=coords.get(b);return '<path d="M'+p.x+' '+p.y+' C'+(p.x+120)+' '+p.y+','+(q.x-120)+' '+q.y+','+q.x+' '+q.y+'" stroke="#9cb5d2" stroke-width="'+Math.min(7,1+Math.sqrt(qty))+'" fill="none" opacity=".65"><title>'+qty+' vidrios</title></path>'}).join('');
+ const paths=[...model.edges.values()].filter(({a,b})=>coords.has(a)&&coords.has(b)).map(({a,b,qty})=>{const p=coords.get(a),q=coords.get(b);return '<path d="M'+p.x+' '+p.y+' C'+(p.x+120)+' '+p.y+','+(q.x-120)+' '+q.y+','+q.x+' '+q.y+'" stroke="#9cb5d2" stroke-width="'+Math.min(7,1+Math.sqrt(qty))+'" fill="none" opacity=".65"><title>'+qty+' vidrios</title></path>'}).join('');
  const palette={reserva:'#7756d6',parte:'#e89b35',orden:'#10a37f',burro:'#1674ed'};
  const shapes=visible.filter(n=>coords.has(n.id)).map(n=>{const p=coords.get(n.id),label=n.label.length>23?n.label.slice(0,22)+'…':n.label;return '<g data-node="'+esc(n.id)+'" role="button" tabindex="0" aria-label="'+esc(n.label)+'" class="glass-explorer-node"><rect x="'+(p.x-106)+'" y="'+(p.y-19)+'" width="212" height="38" rx="12" fill="'+palette[n.type]+'" stroke="'+(selected===n.id?'#10264e':'white')+'" stroke-width="'+(selected===n.id?4:1)+'"/><text x="'+p.x+'" y="'+(p.y+5)+'" fill="white" text-anchor="middle" font-size="13" font-weight="700">'+esc(label)+'</text><title>'+esc(n.label)+'</title></g>'}).join('');
  graph.innerHTML='<svg viewBox="0 0 '+width+' '+height+'" width="'+width+'" height="'+height+'" aria-label="Red de reservas, partes, órdenes y burros"><g>'+paths+shapes+'</g></svg>';
@@ -842,7 +842,7 @@ function renderGlassExplorer(){
  const count=type=>[...model.nodes.values()].filter(n=>n.type===type).length;
  summary.textContent=count('reserva')+' reservas · '+count('parte')+' partes · '+count('orden')+' órdenes · '+count('burro')+' ubicaciones con vidrio';
  if(!selected||!model.nodes.has(selected)){details.textContent='Selecciona un nodo para consultar sus conexiones. Puedes buscar por reserva, orden o burro.';return}
- const node=model.nodes.get(selected),linked=[...model.edges.entries()].filter(([id])=>id.split('|').includes(selected)).map(([id,qty])=>({node:model.nodes.get(id.split('|').find(x=>x!==selected)),qty})).filter(x=>x.node).sort((a,b)=>b.qty-a.qty);
+ const node=model.nodes.get(selected),linked=[...model.edges.values()].filter(({a,b})=>a===selected||b===selected).map(({a,b,qty})=>({node:model.nodes.get(a===selected?b:a),qty})).filter(x=>x.node).sort((a,b)=>b.qty-a.qty);
  details.innerHTML='<h3>'+esc(node.label)+'</h3><p>'+linked.length+' relaciones directas</p>'+linked.map(x=>'<div class="glass-explorer-link"><strong>'+esc(x.node.label)+'</strong><span>'+x.qty+' vidrios</span><button type="button" data-related="'+esc(x.node.id)+'">Explorar</button></div>').join('');
  details.querySelectorAll('[data-related]').forEach(el=>el.addEventListener('click',()=>{glassExplorer.selected=el.getAttribute('data-related');renderGlassExplorer()}));
 }
