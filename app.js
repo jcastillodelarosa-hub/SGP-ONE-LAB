@@ -1602,6 +1602,93 @@ async function savePr(){
  }catch(e){alert("No fue posible guardar: "+e.message)}
  finally{button.disabled=false}
 }
+
+/* LAB v310: la misma selección de producciones, con un tercer nivel opcional.
+   Nunca se modifican otras partes de una reserva ya asignada. */
+function enhancePrAssignedList(){
+ const table=document.querySelector("#priorityAssignedList table");if(!table)return;
+ const head=table.querySelector("thead tr");if(head&&!head.querySelector("[data-pr-action-head]")){const th=document.createElement("th");th.dataset.prActionHead="";th.textContent="Subdividir";head.appendChild(th)}
+ table.querySelectorAll("tbody tr").forEach(tr=>{
+  const reserve=tr.cells[2]?.textContent?.trim();
+  const index=prReservations.findIndex(r=>r.reserva===reserve),r=prReservations[index];
+  const cell=document.createElement("td");
+  if(r&&!/proyecto/i.test(r.tipo)){
+   const priorities=[...new Set(r.rows.map(x=>x.prioridad).filter(Boolean))].sort(comparePriority);
+   priorities.filter(p=>priorityDepth(p)===2&&r.rows.filter(x=>String(x.prioridad)===String(p)).length>=2).forEach(p=>{
+    const btn=document.createElement("button");btn.type="button";btn.className="priority-subdivide-button";btn.textContent="Subdividir "+p;btn.onclick=()=>startPrSplit(index,p);cell.appendChild(btn);
+   });
+  }
+  if(!cell.childNodes.length)cell.textContent="—";
+  tr.appendChild(cell);
+ });
+}
+async function startPrSplit(i,parent){
+ const reserve=prReservations[i];
+ if(!reserve||/proyecto/i.test(reserve.tipo)||priorityDepth(parent)!==2)return;
+ if(reserve.rows.filter(r=>String(r.prioridad)===parent).length<2)return;
+ try{
+  const db=await getSupabaseClient(),token=sessionStorage.getItem("sgp_one_session"),week=Number(document.querySelector("#queryWeek").value);
+  const {data,error}=await db.rpc("sgp_mecanizado_cobertura_programacion",{p_token:token,p_semana:week});
+  if(error)throw error;
+  if(hasScheduledPriority(data,reserve.reserva,[parent])){alert("La parte "+parent+" ya está programada. No se puede subdividir sin afectar la trazabilidad.");return}
+  startPr(i);
+  prEditParent=parent;prChildren=[];prOriginal=Object.fromEntries(reserve.rows.map(r=>[r.key_produccion,String(r.prioridad||"")]));
+  prAssign={...prOriginal};prParts=2;prActivePart=parent;
+  document.querySelector("#priorityWorkTitle").textContent="Subdividir "+parent+" · Reserva "+reserve.reserva;
+  document.querySelector("#priorityQuestion").innerHTML="<h3>Subdividir "+prE(parent)+"</h3><p>Solo se modificarán las producciones de esta parte. Las demás permanecerán bloqueadas.</p><p class='priority-help'>La programación activa se verifica antes de abrir y antes de guardar. El control transaccional definitivo está pendiente de aplicar en Supabase.</p>";
+  document.querySelector("#priorityActions").innerHTML="";
+  renderPrParts();renderPrProductions();askPrSubparts(parent);
+ }catch(e){alert("No se pudo comprobar la programación; se impide modificar la parte: "+e.message)}
+}
+function askPrSubparts(parent){
+ const n=Number(prompt("¿En cuántos subniveles dividir "+parent+"? (2 a 20)","2"));
+ if(!Number.isInteger(n)||n<2||n>20)return;
+ try{
+  const plan=splitPriorityPart(prCurrent.rows,prAssign,parent,n);
+  prAssign=plan.assignments;prChildren=plan.children;prActivePart=prChildren[0];
+  renderPrParts();renderPrProductions();
+ }catch(e){alert(e.message)}
+}
+function enhancePrParts(){
+ const host=document.querySelector("#priorityParts");if(!host||!prCurrent)return;
+ const existing=[...host.querySelectorAll("[data-prpart]")];
+ const splitParent=prChildren[0]?.split(".").slice(0,2).join(".");
+ if(prEditParent)existing.forEach(b=>b.hidden=true);
+ else if(splitParent)existing.forEach(b=>{if(b.dataset.prpart===splitParent)b.hidden=true});
+ const options=prEditParent?(prChildren.length?prChildren:[prEditParent]):prChildren;
+ for(const p of options){
+  const b=document.createElement("button");b.type="button";b.dataset.prsubpart=p;b.textContent=p;b.className=prActivePart===p?"active":"";
+  b.onclick=()=>{prActivePart=p;renderPrParts();renderPrProductions()};host.appendChild(b);
+ }
+ const active=prActivePart;
+ const eligible=priorityDepth(active)===2&&!prChildren.length&&!/proyecto/i.test(prCurrent.tipo)&&prCurrent.rows.filter(r=>prAssign[r.key_produccion]===active).length>=2;
+ if(eligible){
+  const b=document.createElement("button");b.type="button";b.className="priority-subdivide-button";
+  b.textContent="↳ Crear subniveles de "+active;b.onclick=()=>askPrSubparts(active);host.appendChild(b);
+ }
+}
+function enhancePrSummary(){
+ const host=document.querySelector("#priorityPartSummary");if(!host||!prCurrent)return;
+ const groups=groupPriorityRows(prCurrent.rows,prAssign).filter(x=>x.priority);
+ host.replaceChildren();
+ for(const g of groups){
+  const card=document.createElement("div");card.className="daily-metric-card";
+  const small=document.createElement("small");small.textContent="Prioridad "+g.priority;
+  const strong=document.createElement("strong");strong.textContent=String(g.cantidad);
+  const caption=document.createElement("span");caption.textContent="ventanas · "+g.rows.length+" producciones";
+  card.append(small,strong,caption);host.appendChild(card);
+ }
+}
+function enhancePrRows(){
+ const body=document.querySelector("#priorityProductionBody");if(!body)return;
+ body.querySelectorAll("[data-prprod]").forEach(tr=>{
+  const key=tr.dataset.prprod,priority=String(prAssign[key]||"");
+  tr.dataset.priority=priority;
+  if(priorityDepth(priority)===3)tr.classList.add("priority-row-level3");
+  if(prEditParent&&prOriginal[key]!==prEditParent){tr.classList.add("priority-row-locked");tr.title="Otra parte: no se puede modificar";tr.setAttribute("aria-disabled","true")}
+ });
+}
+
 document.querySelector("#openPriorityWizard")?.addEventListener("click",openPriorityWizard);document.querySelector("#closePriorityModal")?.addEventListener("click",()=>document.querySelector("#priorityModal").hidden=true);document.querySelector("#priorityBack")?.addEventListener("click",()=>document.querySelector("#priorityWorkModal").hidden=true);document.querySelector("#closePriorityWork")?.addEventListener("click",()=>document.querySelector("#priorityWorkModal").hidden=true);document.querySelector("#prioritySave")?.addEventListener("click",savePr);
 
 async function autoGeneratePriorities(){
