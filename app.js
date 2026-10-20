@@ -680,6 +680,8 @@ function basePieceDescription(s){
 }
 function renderPieceModal(){
   const src=currentPieceRows;
+  const pieceTable=els.pieceProfileHead?.closest('table');
+  if(pieceTable)pieceTable.dataset.pieceView=currentPieceView;
   document.querySelectorAll('[data-piece-view]').forEach(b=>{
     const view=b.dataset.pieceView;
     b.hidden=(view==='pickorders'&&currentPieceContext!=='picking-part')
