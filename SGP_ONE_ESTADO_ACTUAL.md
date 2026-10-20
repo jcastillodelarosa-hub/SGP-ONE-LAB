@@ -736,3 +736,26 @@ VERSIONADO EN GITHUB main: COMPLETADO.
 PROBADO AUTOMÁTICAMENTE: COMPLETADO.
 PUBLICADO EN FIREBASE: COMPLETADO.
 VERIFICADO EN NAVEGADOR: PENDIENTE.
+
+---
+
+## Actualización 2026-10-20 — LAB v306: eficiencia y relaciones de vidrio
+
+**Alcance:** SGP_ONE / Ensamble / Reporte de ubicaciones / Explorador de relaciones.
+**Fuente operativa:** GitHub `main`, PR #11 de la rama `feat/lab-v306-glass-week-filter`; actualización preparada para `main`.
+**Condición inicial:** historial del documento refleja LAB v281; para el estado presente debe consultarse el código `main` y la versión visible del frontend. 
+
+### Implementación de v306
+
+- Filtro por año/semana de producción, indexado exclusivamente por `key_produccion`, `semana_actual` (alternativamente `semana_base`) y `anio`. Usa las RPC autorizadas `sgp_picking_semanas` y `sgp_consultar_programacion_semana`.
+- No altera los indicadores generales ni tablas de Ubicaciones: el filtro se aplica a la sección Eficiencia y a la red de relaciones.
+- En la red: reserva, parte y orden muestran **ventanas**, deduplicadas por `key_produccion`; burro muestra **vidrios** según estado seleccionado.
+- Seleccionar reserva, parte, orden o burro resalta las conexiones de su cadena completa. La exploración desde parte/orden sigue tanto hacia la reserva como hacia los burros, sin confundir un burro compartido con pertenencia de otras órdenes a la misma parte.
+- Doble clic (o dos pulsaciones seguidas) sobre un burro abre detalle de reservas, partes, órdenes y estado de los vidrios; botón accesible desde panel lateral para móvil.
+- La nueva pantalla usa datos de la RPC vigente `sgp_reporte_dispersion_vidrio` sin escrituras a Supabase.
+- Pruebas: `tests/glass-week-filter-v306.test.mjs` y `tests/glass-relations-v306.test.mjs` con agrupación, semanas y relaciones compartidas.
+
+### Estado de entrega
+
+Código **IMPLEMENTADO** en el PR #11; pruebas automáticas de rama deben verificarse en GitHub Actions; **PUBLICADO y VERIFICADO funcionalmente en Firebase pendientes de evidencia**.
+No se modificaron tablas, RPC, políticas RLS ni permisos. No afecta SGP_ONE_GOOGLE.
