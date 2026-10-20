@@ -63,6 +63,6 @@ test('HTML y JS tienen pop-up, estados de nodo, detalle por reserva, versión nu
  assert.match(app,/glassBurroReservas/);
  assert.match(html,/id="glassExplorerTooltip"/);
  assert.match(html,/id="glassBurroReservas"/);
- assert.match(html,/LAB v307/);
+ assert.ok(Number(html.match(/LAB v(\d+)/)?.[1])>=307,'el explorador debe conservar LAB v307 o superior');
  assert.match(css,/\.glass-explorer-tooltip/);
 });
