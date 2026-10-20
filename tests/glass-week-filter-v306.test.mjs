@@ -41,7 +41,7 @@ test('frontend keeps filter scoped to efficiency list and graph without changing
  const app=fs.readFileSync(new URL('../app.js',import.meta.url),'utf8');
  const html=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
  assert.match(html,/id="glassEfficiencyWeek"/);
- assert.match(html,/LAB v306/);
+ assert.ok(Number(html.match(/LAB v(\d+)/)?.[1])>=306,'la versión LAB visible debe ser 306 o posterior');
  assert.match(app,/function visibleGlassEfficiencyRows\(/);
  assert.match(app,/visibleGlassEfficiencyRows\(\)\.forEach\(r=>\{/);
  assert.match(app,/sgp_consultar_programacion_semana/);
