@@ -813,7 +813,7 @@ Estado: **IMPLEMENTADO EN RAMA**, pruebas automáticas/PR/publicación pendiente
 - **Seguridad:** mismas firmas, SECURITY DEFINER, search_path, roles funcionales y EXECUTE anon/authenticated. Sin ALTER TABLE, RLS, GRANT, cambios de datos persistentes ni despliegues.
 - **Integridad:** `sgp_prioridades.id_prioridad` se conserva al editar una parte (upsert sin borrado indiscriminado); bloquea cambio u omisión de claves programadas, agregado a parte programada, Proyecto dividido, prioridad de cuatro niveles, y tercer nivel fuera de PANELES_2.
 - **Contrato Picking:** `parte_num` sigue siendo numérico en JSON; la clasificación de tres niveles usa segmentos ordenados sin convertir `3.1.1` directamente a NUMERIC.
-- **Limitación detectada:** `sgp_generar_prioridades_restantes` todavía calcula el siguiente número con regex de 1–2 niveles; si el mayor nivel principal tiene solo prioridades de tercer nivel, puede repetirlo. **No se modificó** esta cuarta RPC porque la autorización fue solo para tres. Como mitigación, frontend v310 bloquea temporalmente la generación automática cuando ya hay niveles 3; se requiere aprobación adicional para corregir la cuarta RPC y levantar el bloqueo.
+- **Cuarta RPC aplicada con autorización adicional:** `sgp_generar_prioridades_restantes(text,integer,integer,text)` admite 1, 2 y 3 niveles en el cálculo de `next_prio`. Migración Supabase `20261020210649_lab_v310_generar_prioridades_tercer_nivel`; SQL `supabase/migrations/20261020_lab_v310_generar_prioridades_restantes.sql`; rollback exacto `supabase/rollback/20261020_lab_v310_generar_prioridades_restantes_rollback.sql` (no ejecutado). Se retiró el bloqueo temporal del frontend de la rama. Conserva SECURITY DEFINER, search_path, EXECUTE, autorización funcional y JSON original.
 - **Concurrencia:** validación SQL transaccional de programación activa, sin bloquear inserciones simultáneas de programación por otras RPC. Requiere prueba de concurrencia antes de declarar verificación operativa completa.
 
 ### Evidencia de pruebas backend (transacciones con ROLLBACK)
@@ -827,12 +827,22 @@ Estado: **IMPLEMENTADO EN RAMA**, pruebas automáticas/PR/publicación pendiente
 7. Tras ROLLBACK: `sgp_prioridades` mantiene **305 registros / 305 UUID únicos / 0 prioridades de tercer nivel persistidas**; `sgp_mecanizado_programacion` mantiene **47 registros / 0 registros LAB_TEST_ROLLBACK**; no quedaron sesiones sintéticas.
 8. Permisos `anon` y `authenticated` siguen en EXECUTE; SECURITY DEFINER y search_path intactos.
 9. GitHub Actions: ejecutar/regresar a comprobar CI del último commit de la rama. No confundir tests con verificación móvil/planta.
+10. Generación automática: prueba transaccional con prioridad simulada `99.1.1` y seis reservas pendientes, `siguiente_prioridad = 100 + reservas_generadas`; PATINADOR rechazado, sesión y asignaciones revertidas. Privilegios anon/authenticated, firma, SECURITY DEFINER y search_path comprobados. GitHub Actions de rama verde antes de aplicar cuarta RPC.
 
 ### Pendientes y autorización
 
-1. Solicitar autorización independiente para corregir `sgp_generar_prioridades_restantes` o mantener mitigación de generación automática.
+1. Cuarta RPC ya autorizada, aplicada y probada con ROLLBACK; falta verificación en navegador cuando se autorice la publicación del frontend.
 2. Revisar y aprobar explícitamente fusión del PR #16; **no fusionar ni desplegar** por la sola autorización de las tres RPC.
 3. Tras publicación autorizada: validar flujo completo en navegador y móvil, con reservas reales y sin alterar datos de producción; verificar arrastre, Picking PANEL, reserva compartida/múltiple, permisos y concurrencia.
 4. No modificar SGP_ONE_GOOGLE.
 
 **Estado final:** BACKEND APLICADO Y PROBADO CON ROLLBACK; FRONTEND IMPLEMENTADO EN RAMA, NO FUSIONADO, NO PUBLICADO, NO VERIFICADO EN NAVEGADOR.
+
+
+### 2026-10-20 — Diagnóstico de vidrios en arrastre de turno (solo lectura, NO corregido)
+
+- Captura del usuario: orden **871039**, reserva **8689746**, SEM 43, arrastrada desde turno anterior; muestra Prep. 0 / Nov. 0 / Trasl. 0.
+- **Causa verificada en `app.js` main `dbba4a12572c5fc2055182112e81e8c44aec4333`:** `renderProductionBoard`, rama `if(x?._carry)`, crea manualmente las órdenes arrastradas con `vidrio_preparado:0,vidrio_novedad:0,vidrio_traslado:0`, sin consultar la fuente del vidrio.
+- **Fuente real verificada en Supabase:** programación original `38a9f4c6-5346-4d92-8f55-e0a1b608978d`, producción `1308927|PANELES_2`, orden 871039: `sgp_vidrio_resumen_produccion` registra **4 preparadas, 0 novedad, 0 traslado**. La RPC vigente `sgp_mecanizado_ordenes_programacion(token,id_original)` también devuelve el registro y `vidrio_preparado=4` (sesión temporal + ROLLBACK).
+- **Solución propuesta, NO IMPLEMENTADA:** reutilizar la RPC `sgp_mecanizado_ordenes_programacion` del `id_programacion_origen`, unir solo las órdenes arrastradas por `key_produccion` (no por nombre de orden), y mostrar contadores reales, manteniendo estados/observaciones del arrastre, reservas compartidas y sin duplicar programaciones. No inventar 0 si no hay datos; diferenciar indisponibilidad de cero real. No cambiar la RPC de arrastre ni la fuente del vidrio.
+- **Alcance de la solicitud:** el usuario pidió revisar este defecto; no se ha autorizado explícitamente la modificación del frontend por ese motivo, ni su fusión o despliegue. Requiere aprobación separada.
