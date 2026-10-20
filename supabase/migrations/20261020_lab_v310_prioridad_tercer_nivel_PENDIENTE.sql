@@ -157,13 +157,14 @@ return jsonb_build_object('ok',true,'guardadas',jsonb_array_length(p_asignacione
 )
 then raise exception 'Prioridad inválida: se permiten máximo tres niveles'; end if;
 if exists(select 1 from public.sgp_mecanizado_programacion mp
-          where mp.reserva=p_reserva and mp.estado<>'CANCELADA')
-   and exists(select 1 from jsonb_array_elements(p_asignaciones) a
-              left join public.sgp_prioridades pr
-                on pr.anio=p_anio and pr.semana=p_semana and pr.id_linea=p_linea
-               and pr.reserva=p_reserva and pr.key_produccion=a->>'key_produccion'
-              where pr.prioridad is distinct from a->>'prioridad')
-then raise exception 'No se puede modificar una prioridad con programación activa'; end if;
+          where mp.reserva=p_reserva and mp.estado<>'CANCELADA'
+            and exists(select 1 from jsonb_array_elements(p_asignaciones) a
+                       left join public.sgp_prioridades pr
+                         on pr.anio=p_anio and pr.semana=p_semana and pr.id_linea=p_linea
+                        and pr.reserva=p_reserva and pr.key_produccion=a->>'key_produccion'
+                       where pr.prioridad is distinct from a->>'prioridad'
+                         and (mp.prioridad_semanal is null or mp.prioridad_semanal=pr.prioridad)))
+then raise exception 'No se puede modificar una parte con programación activa'; end if;
 delete from sgp_prioridades where anio=p_anio and semana=p_semana and id_linea=p_linea and reserva=p_reserva;
 insert into sgp_prioridades(anio,semana,id_linea,reserva,key_produccion,prioridad,usuario)
 select p_anio,p_semana,p_linea,p_reserva,a->>'key_produccion',a->>'prioridad',u from jsonb_array_elements(p_asignaciones)a
