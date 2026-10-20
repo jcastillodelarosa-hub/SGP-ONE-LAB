@@ -68,6 +68,7 @@ test('módulos preservan subnivel y Picking/Ensamble usan orden jerárquico',()=
  const html=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
  assert.match(app,/function enhancePrAssignedList\(/);
  assert.match(app,/async function startPrSplit\(/);
+ assert.match(app,/prReservations\.some\(x=>x\.rows\.some\(r=>priorityDepth\(r\.prioridad\)===3\)\)/);
  assert.match(app,/function askPrSubparts\(/);
  assert.match(app,/splitPriorityPart\(prCurrent.rows,prAssign,parent,n\)/);
  assert.match(app,/validatePriorityAssignments\(prCurrent.rows,prAssign/);
@@ -82,8 +83,8 @@ test('módulos preservan subnivel y Picking/Ensamble usan orden jerárquico',()=
  assert.match(html,/app\.js\?v=310/);
 });
 
-test('migración preparada sin aplicar protege programación y corrige ordenamiento SQL',()=>{
- const sql=fs.readFileSync(new URL('../supabase/migrations/20261020_lab_v310_prioridad_tercer_nivel_PENDIENTE.sql',import.meta.url),'utf8');
+test('migración aplicada preserva contratos y protege programación',()=>{
+ const sql=fs.readFileSync(new URL('../supabase/migrations/20261020_lab_v310_prioridad_tercer_nivel.sql',import.meta.url),'utf8');
  assert.match(sql,/AUTORIZADO: tres RPC/);
  assert.match(sql,/CREATE OR REPLACE FUNCTION public\.sgp_mecanizado_disponibles/);
  assert.match(sql,/CREATE OR REPLACE FUNCTION public\.sgp_picking_cola/);
