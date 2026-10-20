@@ -11,6 +11,7 @@ import { readGlassLocationWorkbook, filterGlassLocationRows } from "./src/domain
 import { getSupabaseClient } from "./src/services/supabase-client.js";
 import { filterGlassRowsByWeek, indexGlassProductionWeeks, weeksWithGlass } from "./src/domain/glass-week-filter.js";
 import { buildGlassRelationGraph, traceGlassRelations, summarizeGlassBurro } from "./src/domain/glass-relations-graph.js";
+import { buildGlassNodeInsights, glassCoverage, glassRackBreakdown } from "./src/domain/glass-explorer-insights.js";
 import { readNcAluminumWorkbook } from "./src/domain/nc-aluminum-importer.js?v=73";
 import { readNcGlassWorkbook } from "./src/domain/nc-glass-importer.js?v=84";
 
@@ -858,10 +859,52 @@ const glassExplorer={selected:null,lastClickId:null,lastClickAt:0};
 function glassExplorerModel(){
  return buildGlassRelationGraph(visibleGlassEfficiencyRows(),document.querySelector('#glassExplorerStatus')?.value||'prepared');
 }
+// LAB v307: pop-ups contextuales. Cálculos locales sobre la RPC de ubicaciones (sin nuevas solicitudes).
+function glassExplorerInsightHTML(node,insight,mode='prepared'){
+ const esc=v=>escapeHtml(String(v));
+ if(!node||!insight)return '<p>Sin información disponible.</p>';
+ const label='<strong class="glass-tooltip-heading">'+esc(node.label)+'</strong>';
+ const row=(cls,title,qty)=>'<div class="glass-tooltip-row"><span class="glass-tooltip-dot '+cls+'"></span><span>'+title+'</span><b>'+Number(qty||0).toLocaleString('es-CO')+'</b></div>';
+ if(node.type==='burro'){
+  const reserv=glassRackBreakdown(insight,mode),shared=reserv.length>1;
+  const byReserve=reserv.map(r=>'<div class="glass-tooltip-reserve"><strong>'+esc(r.reserva)+'</strong><span>'+Number(mode==='all'?r.total:r.prepared).toLocaleString('es-CO')+' vidrios · '+r.orders+' órdenes</span></div>').join('');
+  return '<section class="glass-tooltip-inner">'+label+
+   '<p class="glass-tooltip-subtitle">'+(shared?'<span class="glass-tooltip-warning">Compartido: '+reserv.length+' reservas principales</span>':reserv.length+' reserva principal')+'</p>'+
+   '<div class="glass-tooltip-summary">'+row('prepared','Preparados',insight.prepared)+row('novelty','Novedad',insight.novelty)+row('transfer','Traslado',insight.transfer)+row('others','Otros',insight.others)+'</div>'+
+   '<div class="glass-tooltip-total">Total en ubicación <b>'+Number(insight.total).toLocaleString('es-CO')+'</b></div>'+
+   '<div class="glass-tooltip-reserves"><span class="glass-tooltip-caption">Por reserva · '+(mode==='prepared'?'preparados':'todos los estados')+'</span>'+byReserve+'</div></section>';
+ }
+ const coverage=glassCoverage(insight),percent=coverage.percentage;
+ const completion=node.type==='orden'?(coverage.complete?'<span class="glass-tooltip-complete">✓ Completa por cantidad</span>':'<span class="glass-tooltip-partial">◔ Parcial por cantidad</span>'):'';
+ return '<section class="glass-tooltip-inner">'+label+
+  '<div class="glass-tooltip-subtitle">'+Number(coverage.windows).toLocaleString('es-CO')+' ventanas '+completion+'</div>'+
+  '<div class="glass-tooltip-summary">'+row('prepared','Vidrios preparados',insight.prepared)+row('novelty','Novedad',insight.novelty)+row('transfer','Traslado',insight.transfer)+row('others','Otros',insight.others)+'</div>'+
+  '<div class="glass-tooltip-total">Total vidrios <b>'+Number(insight.total).toLocaleString('es-CO')+'</b></div>'+
+  '<div class="glass-tooltip-progress"><span style="width:'+percent+'%"></span></div>'+
+  '<div class="glass-tooltip-coverage">Cobertura por cantidad: <b>'+percent+'%</b></div>'+
+  '<small class="glass-tooltip-footnote">Cobertura numérica; no certifica asignación por ventana.</small></section>';
+}
+function showGlassExplorerTooltip(el,node,insight,mode){
+ const tooltip=document.querySelector('#glassExplorerTooltip');
+ if(!tooltip||!el||!node||!insight)return;
+ tooltip.innerHTML=glassExplorerInsightHTML(node,insight,mode);
+ tooltip.hidden=false;
+ const rect=el.getBoundingClientRect(),box=tooltip.getBoundingClientRect();
+ const vw=window.innerWidth,vh=window.innerHeight;
+ let x=rect.right+12;
+ if(x+box.width>vw-8)x=rect.left-box.width-12;
+ x=Math.max(8,Math.min(x,vw-box.width-8));
+ const y=Math.max(8,Math.min(rect.top+rect.height/2-box.height/2,vh-box.height-8));
+ tooltip.style.left=x+'px';tooltip.style.top=y+'px';
+}
+function hideGlassExplorerTooltip(){const tooltip=document.querySelector('#glassExplorerTooltip');if(tooltip)tooltip.hidden=true;}
 function renderGlassExplorer(){
  const graph=document.querySelector('#glassExplorerGraph'),details=document.querySelector('#glassExplorerDetails'),summary=document.querySelector('#glassExplorerSummary');
  if(!graph||!details||!summary)return;
  const model=glassExplorerModel(),query=(document.querySelector('#glassExplorerSearch')?.value||'').toLowerCase().trim();
+ hideGlassExplorerTooltip();
+ const insights=buildGlassNodeInsights(visibleGlassEfficiencyRows());
+ const mode=document.querySelector('#glassExplorerStatus')?.value||'prepared';
  const matching=[...model.nodes.values()].filter(n=>!query||n.label.toLowerCase().includes(query));
  const selected=glassExplorer.selected;
  // LAB v299: recorrer la jerarquía completa desde la selección, no sólo un salto.
@@ -875,7 +918,7 @@ function renderGlassExplorer(){
  const visible=[...model.nodes.values()].filter(n=>allowed.has(n.id));
  const columns=['reserva','parte','orden','burro'];
  const groups=columns.map(type=>visible.filter(n=>n.type===type).sort((a,b)=>a.label.localeCompare(b.label,undefined,{numeric:true})).slice(0,70));
- const width=1000,rowHeight=62,height=Math.max(350,...groups.map(g=>g.length*rowHeight+65));
+ const width=1000,rowHeight=74,height=Math.max(350,...groups.map(g=>g.length*rowHeight+65));
  const coords=new Map();groups.forEach((g,i)=>g.forEach((n,j)=>coords.set(n.id,{x:125+i*250,y:52+j*rowHeight})));
  const esc=v=>escapeHtml(String(v));
  // LAB v306: destacar el alcance completo de la selección en ambas direcciones.
@@ -893,9 +936,22 @@ function renderGlassExplorer(){
  }).join('');
  const palette={reserva:'#7756d6',parte:'#e89b35',orden:'#10a37f',burro:'#1674ed'};
  const shapes=visible.filter(n=>coords.has(n.id)).map(n=>{
-  const p=coords.get(n.id),label=n.label.length>24?n.label.slice(0,23)+'…':n.label;
+  const p=coords.get(n.id),metric=insights.get(n.id);
+  const label=n.label.length>24?n.label.slice(0,23)+'…':n.label;
   const count=n.type==='burro'?n.glass+' vidrios':n.windows+' ventanas';
-  return '<g data-node="'+esc(n.id)+'" role="button" tabindex="0" aria-label="'+esc(n.label+' · '+count+(n.type==='burro'?' · doble clic para detalle':''))+'" class="glass-explorer-node"><rect x="'+(p.x-106)+'" y="'+(p.y-24)+'" width="212" height="48" rx="12" fill="'+palette[n.type]+'" stroke="'+(selected===n.id?'#10264e':hasFocus&&related.has(n.id)?'#f97316':'white')+'" stroke-width="'+(selected===n.id?5:hasFocus&&related.has(n.id)?4:1)+'" opacity="'+(!hasFocus||related.has(n.id)?1:.3)+'"/><text x="'+p.x+'" y="'+(p.y-3)+'" fill="white" text-anchor="middle" font-size="12" font-weight="700">'+esc(label)+'</text><text x="'+p.x+'" y="'+(p.y+14)+'" fill="white" text-anchor="middle" font-size="11" font-weight="800">'+esc(count)+'</text><title>'+esc(n.label)+' · '+esc(count)+'</title></g>';
+  const reservations=n.type==='burro'?glassRackBreakdown(metric,mode):[];
+  const shared=n.type==='burro'&&reservations.length>1;
+  const coverage=n.type==='orden'?glassCoverage(metric):null;
+  const badge=shared?'⚠ '+reservations.length+' reservas':coverage?(coverage.complete?'✓ Completa':'◔ Parcial'):'';
+  const focusStroke=selected===n.id?'#10264e':hasFocus&&related.has(n.id)?'#f97316':shared?'#d84432':'white';
+  const focusWidth=selected===n.id?5:hasFocus&&related.has(n.id)?4:shared?3:1;
+  const opacity=!hasFocus||related.has(n.id)?1:.3;
+  return '<g data-node="'+esc(n.id)+'" role="button" tabindex="0" aria-label="'+esc(n.label+' · '+count+(badge?' · '+badge:'')+(n.type==='burro'?' · doble clic para detalle':''))+'" class="glass-explorer-node">'+
+   '<rect x="'+(p.x-106)+'" y="'+(p.y-30)+'" width="212" height="60" rx="12" fill="'+palette[n.type]+'" stroke="'+focusStroke+'" stroke-width="'+focusWidth+'" opacity="'+opacity+'"/>'+
+   '<text x="'+p.x+'" y="'+(p.y-14)+'" fill="white" text-anchor="middle" font-size="12" font-weight="700" opacity="'+opacity+'">'+esc(label)+'</text>'+
+   '<text x="'+p.x+'" y="'+(p.y+3)+'" fill="white" text-anchor="middle" font-size="11" font-weight="800" opacity="'+opacity+'">'+esc(count)+'</text>'+
+   (badge?'<text x="'+p.x+'" y="'+(p.y+21)+'" fill="white" text-anchor="middle" font-size="11" font-weight="800" opacity="'+opacity+'">'+esc(badge)+'</text>':'')+
+   '<title>'+esc(n.label)+' · '+esc(count)+(badge?' · '+esc(badge):'')+'</title></g>';
  }).join('');
  graph.innerHTML='<svg viewBox="0 0 '+width+' '+height+'" width="'+width+'" height="'+height+'" aria-label="Red de reservas, partes, órdenes y burros"><g>'+paths+shapes+'</g></svg>';
  graph.querySelectorAll('[data-node]').forEach(el=>{
