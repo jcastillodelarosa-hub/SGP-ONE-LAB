@@ -800,34 +800,39 @@ Estado: **IMPLEMENTADO EN RAMA**, pruebas automáticas/PR/publicación pendiente
 
 ---
 
-## 2026-10-20 — LAB v310: tercer subnivel de prioridades (rama de preparación)
+## 2026-10-20 — LAB v310: tercer subnivel de prioridades
 
-**Alcance:** SGP_ONE / Programación semanal → Mecanizado → Picking → Ensamble. **Rama:** \`feat/lab-v310-priority-third-level\`. **No publicado.**
+**Proyecto:** SGP_ONE (NO SGP_ONE_GOOGLE). **Módulos:** Programación semanal, Mecanizado, Picking, Ensamble. **Rama:** `feat/lab-v310-priority-third-level`. **PR:** https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/pull/16 (DRAFT, no fusionado). **Main base:** `dbba4a12572c5fc2055182112e81e8c44aec4333`.
 
-### Diagnóstico verificado con Supabase (solo lectura)
+### Estado real
 
-- \`sgp_prioridades.prioridad\`, \`sgp_producciones.prioridad_programacion\`, \`sgp_mecanizado_programacion.prioridad_semanal\` son TEXT; \`sgp_mecanizado_programacion.prioridad\` es NUMERIC, pero representa prioridad de turno y no debe convertirse en identificador semanal de tercer nivel.
-- \`sgp_guardar_prioridad\` ya recibe valores de prioridad como TEXT y restringe divisiones de Proyecto. Debe agregar validación de tres niveles y protección transaccional frente a reagrupación de órdenes programadas.
-- \`sgp_mecanizado_disponibles(p_token,p_semana)\` ordenaba solo los dos primeros segmentos.
-- \`sgp_picking_cola(p_token)\` convertía el texto de parte a NUMERIC, incompatible con \`3.1.1\`.
-- \`sgp_consultar_ensamble\` devuelve el identificador de prioridad como texto; no necesita cambio de tabla.
-- \`sgp_mecanizado_cobertura_programacion\` ofrece consulta de solo lectura para impedir subdividir una parte programada; el backend debe reforzar el bloqueo ante concurrencia.
+- **FRONTEND:** IMPLEMENTADO EN RAMA LAB v310, NO PUBLICADO, NO VERIFICADO VISUALMENTE. Conserva asignación por producción; Retail permite 3.1.1/3.1.2; Proyecto indivisible; otras partes bloqueadas; inicial PANELES_2. Picking y Ensamble ordenan y muestran nivel 3.
+- **BACKEND:** APLICADO EN SUPABASE SGP-ONE-LAB el 2026-10-20, proyecto `ocvxbwzqxbrfndkvjmfx`. Migración live `20261020204906_lab_v310_prioridad_tercer_nivel`. **Autorización expresa del usuario recibida el 2026-10-20.**
+- **RPC modificadas exactamente:** `sgp_mecanizado_disponibles(text,integer)`, `sgp_picking_cola(text)`, `sgp_guardar_prioridad(text,integer,integer,text,text,jsonb)`. Sobrecarga `sgp_mecanizado_disponibles(text)` intacta.
+- **SQL versionado:** `supabase/migrations/20261020_lab_v310_prioridad_tercer_nivel.sql`. **Rollback de definiciones originales:** `supabase/rollback/20261020_lab_v310_prioridad_tercer_nivel_rollback.sql` (NO ejecutado).
+- **Seguridad:** mismas firmas, SECURITY DEFINER, search_path, roles funcionales y EXECUTE anon/authenticated. Sin ALTER TABLE, RLS, GRANT, cambios de datos persistentes ni despliegues.
+- **Integridad:** `sgp_prioridades.id_prioridad` se conserva al editar una parte (upsert sin borrado indiscriminado); bloquea cambio u omisión de claves programadas, agregado a parte programada, Proyecto dividido, prioridad de cuatro niveles, y tercer nivel fuera de PANELES_2.
+- **Contrato Picking:** `parte_num` sigue siendo numérico en JSON; la clasificación de tres niveles usa segmentos ordenados sin convertir `3.1.1` directamente a NUMERIC.
+- **Limitación detectada:** `sgp_generar_prioridades_restantes` todavía calcula el siguiente número con regex de 1–2 niveles; si el mayor nivel principal tiene solo prioridades de tercer nivel, puede repetirlo. **No se modificó** esta cuarta RPC porque la autorización fue solo para tres. Como mitigación, frontend v310 bloquea temporalmente la generación automática cuando ya hay niveles 3; se requiere aprobación adicional para corregir la cuarta RPC y levantar el bloqueo.
+- **Concurrencia:** validación SQL transaccional de programación activa, sin bloquear inserciones simultáneas de programación por otras RPC. Requiere prueba de concurrencia antes de declarar verificación operativa completa.
 
-### Implementado exclusivamente en rama GitHub
+### Evidencia de pruebas backend (transacciones con ROLLBACK)
 
-- Dominio puro \`src/domain/priority-hierarchy.js\`: validación de 1–3 niveles, ordenamiento natural, agrupación de cantidades, asignación por producción, preservación de las partes ajenas y comprobación de cobertura.
-- Asistente: en reservas Retail asignadas, acción **Subdividir 3.1** cuando hay al menos dos producciones y no tiene programación activa; en nuevas asignaciones, botón **Crear subniveles** dentro de una parte. Por seguridad, la edición de tercer nivel se limita inicialmente a la línea PANELES_2; FRAMES_2 queda sin cambios hasta validar cobertura propia. Las órdenes se siguen asignando haciendo clic en la parte elegida.
-- Proyecto no se divide; otras partes permanecen bloqueadas; el guardado revalida programación y recarga datos desde RPC.
-- Picking y Ensamble muestran la prioridad de tres niveles y ordenan sin tratarla como decimal; cambios CSS localizados y adaptables a móvil.
-- SQL **PROPUESTO, NO APLICADO**: \`supabase/migrations/20261020_lab_v310_prioridad_tercer_nivel_PENDIENTE.sql\`. Conserva `id_prioridad` de filas existentes mediante upsert, evitando borrar y recrear indiscriminadamente las prioridades de una reserva. Incluye compatibilidad de \`sgp_mecanizado_disponibles\`, \`sgp_picking_cola\` y \`sgp_guardar_prioridad\`. No cambia tablas, datos, RLS, permisos ni identidades de programación.
-- Pruebas: \`tests/priority-third-level-v310.test.mjs\` y regresión existente.
+1. Usuario sintético ADMINISTRADOR con sesión temporal y transporte PostgreSQL `anon`: `sgp_mecanizado_disponibles(token,43)` y `sgp_picking_cola(token)` devuelven datos válidos. Sesión temporal revertida.
+2. Reserva Retail 8690341 (semana 43, cuatro producciones, sin programación): asignación simulada `10.1.1`, `10.1.2`, `10.2`, conservando todos los UUID; Mecanizado ordena partes correctamente.
+3. Programación temporal de `10.1.1` en la misma transacción: Picking devuelve la parte y mantiene `parte_num` numérico; intento de cambiar la parte programada rechazado.
+4. Reserva 8690348 con partes programadas: reagrupación rechazada.
+5. Prioridad `10.1.1.1` rechazada; Proyecto 8566601 no divisible; rol PATINADOR sin autorización para guardar.
+6. Con `10.1.1` programada, otra parte `10.2` puede subdividirse sin alterar programación ni UUID.
+7. Tras ROLLBACK: `sgp_prioridades` mantiene **305 registros / 305 UUID únicos / 0 prioridades de tercer nivel persistidas**; `sgp_mecanizado_programacion` mantiene **47 registros / 0 registros LAB_TEST_ROLLBACK**; no quedaron sesiones sintéticas.
+8. Permisos `anon` y `authenticated` siguen en EXECUTE; SECURITY DEFINER y search_path intactos.
+9. GitHub Actions: ejecutar/regresar a comprobar CI del último commit de la rama. No confundir tests con verificación móvil/planta.
 
-### Límites y decisiones pendientes
+### Pendientes y autorización
 
-1. **NO aplicar migración SQL** sin autorización explícita del usuario para modificar estas tres RPC de Supabase SGP-ONE-LAB.
-2. **NO fusionar ni publicar frontend v310** antes de aplicar y validar las RPC: Picking fallaría con \`3.1.1\` si se habilita antes.
-3. Validar sobre una transacción con rollback: Retail, Proyecto, parte con/sin programación, arrastre, Picking PANEL, reserva compartida/múltiple, Ensamble y roles no autorizados.
-4. Verificación visual real en móvil y planta tras publicación autorizada; los tests CI no la sustituyen.
-5. Mantener sin cambios SGP_ONE_GOOGLE.
+1. Solicitar autorización independiente para corregir `sgp_generar_prioridades_restantes` o mantener mitigación de generación automática.
+2. Revisar y aprobar explícitamente fusión del PR #16; **no fusionar ni desplegar** por la sola autorización de las tres RPC.
+3. Tras publicación autorizada: validar flujo completo en navegador y móvil, con reservas reales y sin alterar datos de producción; verificar arrastre, Picking PANEL, reserva compartida/múltiple, permisos y concurrencia.
+4. No modificar SGP_ONE_GOOGLE.
 
-**Estado:** IMPLEMENTADO EN RAMA (pendiente CI), SQL PREPARADO NO APLICADO, NO PUBLICADO, NO VERIFICADO FUNCIONALMENTE.
+**Estado final:** BACKEND APLICADO Y PROBADO CON ROLLBACK; FRONTEND IMPLEMENTADO EN RAMA, NO FUSIONADO, NO PUBLICADO, NO VERIFICADO EN NAVEGADOR.
