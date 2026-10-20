@@ -46,6 +46,6 @@ test('frontend keeps filter scoped to efficiency list and graph without changing
  assert.match(app,/visibleGlassEfficiencyRows\(\)\.forEach\(r=>\{/);
  assert.match(app,/sgp_consultar_programacion_semana/);
  assert.match(app,/sgp_picking_semanas/);
- assert.match(app,/function loadLocationReport\(/);
+ assert.match(app,/async function loadLocationReport\(/);
  assert.match(app,/glassEfficiencyWeek.*addEventListener\('change'/);
 });
