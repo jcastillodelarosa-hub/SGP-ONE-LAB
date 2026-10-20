@@ -15,7 +15,7 @@ AS $function$
 declare u text; next_prio int; rec record; generated int:=0;begin
 u:=sgp_validar_sesion_rol(p_token,array['ADMINISTRADOR','COORDINADOR']);
 select coalesce(max(split_part(prioridad,'.',1)::int),0)+1 into next_prio
-from sgp_prioridades where anio=p_anio and semana=p_semana and id_linea=p_linea and prioridad ~ '^[0-9]+(\.[0-9]+){0,2};
+from sgp_prioridades where anio=p_anio and semana=p_semana and id_linea=p_linea and prioridad ~ '^[0-9]+(\.[0-9]+){0,2}$';
 for rec in
  with prod_res as(
   select p.key_produccion,p.id,p.reserva_al,
