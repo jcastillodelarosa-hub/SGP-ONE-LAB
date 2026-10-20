@@ -62,9 +62,9 @@ test('scroll se limita al modal de piezas y no altera otros modales',()=>{
  assert.match(css,/#pieceModal \.table-wrap\s*\{[^}]*overflow-x:auto!important;[^}]*overflow-y:auto!important;/s);
  assert.match(css,/#pieceModal \.table-wrap thead th\{position:sticky;top:0/);
  assert.match(css,/@media\(max-width:700px\)/);
- assert.match(html,/LAB v309/);
- assert.match(html,/app\.js\?v=309/);
- assert.match(html,/styles\.css\?v=309/);
+ assert.ok(Number(html.match(/LAB v(\d+)/)?.[1])>=309);
+ assert.match(html,/app\.js\?v=310/);
+ assert.match(html,/styles\.css\?v=310/);
 });
 
 test('v309 compacta Cantidad en cada vista sin alterar Detallado ni el scroll',()=>{
