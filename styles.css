@@ -2046,3 +2046,17 @@ button.active,[aria-pressed="true"]{border-color:#0865ed}
   #pieceModal .piece-modal-meta{padding:8px 0 12px}
   #pieceModal .table-wrap{max-height:none;flex:1 1 auto}
 }
+
+/* LAB v309 — compactar Cantidad en despiece móvil (Resumen / Ampliado).
+   Se limita a tablas de 3 o 4 columnas; Detallado conserva sus columnas configurables. */
+@media(max-width:700px){
+  #pieceModal .table-wrap table:has(thead th:nth-child(3):last-child),
+  #pieceModal .table-wrap table:has(thead th:nth-child(4):last-child){table-layout:fixed;min-width:0;width:100%}
+  #pieceModal .table-wrap table:has(thead th:nth-child(3):last-child) :is(th,td):nth-child(2),
+  #pieceModal .table-wrap table:has(thead th:nth-child(4):last-child) :is(th,td):nth-child(3){width:76px;min-width:76px;max-width:76px;text-align:center!important;padding-inline:3px;white-space:nowrap}
+  #pieceModal .table-wrap table:has(thead th:nth-child(3):last-child) :is(th,td):first-child{width:34%}
+  #pieceModal .table-wrap table:has(thead th:nth-child(4):last-child) :is(th,td):first-child{width:28%}
+  #pieceModal .table-wrap table:has(thead th:nth-child(4):last-child) :is(th,td):nth-child(2){width:19%}
+  #pieceModal .table-wrap table:has(thead th:nth-child(3):last-child) :is(th,td):last-child,
+  #pieceModal .table-wrap table:has(thead th:nth-child(4):last-child) :is(th,td):last-child{overflow-wrap:anywhere;white-space:normal}
+}
