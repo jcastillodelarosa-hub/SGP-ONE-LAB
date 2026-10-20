@@ -72,7 +72,7 @@ test('módulos preservan subnivel y Picking/Ensamble usan orden jerárquico',()=
  assert.match(app,/splitPriorityPart\(prCurrent.rows,prAssign,parent,n\)/);
  assert.match(app,/validatePriorityAssignments\(prCurrent.rows,prAssign/);
  assert.match(app,/hasScheduledPriority\(coverage,prCurrent.reserva/);
- assert.match(app,/comparePriority\(a.parte,b.parte\)/);
+ assert.match(app,/partCompare\(a.parte,b.parte\)/);
  assert.match(app,/assemblySort.key==="prioridad"\?comparePriority/);
  assert.match(app,/priorityDepth\(x.parte\)===3/);
  assert.match(css,/#priorityProductionBody tr\.priority-row-locked/);
