@@ -759,3 +759,24 @@ VERIFICADO EN NAVEGADOR: PENDIENTE.
 
 Código **IMPLEMENTADO** en el PR #11; pruebas automáticas de rama deben verificarse en GitHub Actions; **PUBLICADO y VERIFICADO funcionalmente en Firebase pendientes de evidencia**.
 No se modificaron tablas, RPC, políticas RLS ni permisos. No afecta SGP_ONE_GOOGLE.
+
+---
+
+## Actualización 2026-10-20 — LAB v307: indicadores y pop-ups en explorador de vidrio
+
+**Alcance:** SGP_ONE / Ensamble / Reporte de ubicaciones / Explorador de relaciones. Cambios solo de frontend y pruebas; Supabase sin alteraciones.
+
+### Objetivo autorizado
+- Pop-up en reserva, parte, orden y burro al pasar el cursor o enfocar. Contiene cantidades de preparados, novedades, traslados, otros y cobertura por cantidad.
+- Orden con distintivo visual **Completa** cuando `ventanas>0 && preparados>=ventanas`; **Parcial** en caso contrario. Es una comparación numérica, NO una certificación de vidrio individual por ventana.
+- Burro con distintivo **Compartido** cuando dos o más reservas principales tienen vidrios dentro del estado visible, respetando el filtro semanal y la distinción entre reserva principal y reserva múltiple.
+- Desglose por reserva principal en los pop-ups y el detalle de burro; distingue el preparado de los otros estados.
+- UI compatible con mouse, teclado y pulsación táctil; popup informativo y panel lateral accesible, sin alterar la interacción de selección / doble clic.
+
+### Fuentes y contratos
+`sgp_reporte_dispersion_vidrio(p_token)` entrega `key_produccion`, `reserva`, `parte`, `posicion`, `ventanas`, `preparadas`, `novedad`, `traslado`, `unidades` para generar información exclusivamente local. Se preserva el filtro por semana `key_produccion` de LAB v306 y el contrato de roles de la RPC.
+
+### Evidencia / riesgo
+Consulta en modo lectura: orden 1066618, reserva 8690348, tiene 9 ventanas y 8 vidrios preparados en el snapshot consultado; debe ser Parcial 8/9.
+Riesgos pendientes: verificar hover y panel lateral en móvil, estados `Preparado - Sin Movimiento`, burros compartidos en otras semanas, y comportamiento con roles Consulta.
+Estado: **IMPLEMENTADO EN RAMA**, pruebas automáticas/PR/publicación pendientes de cierre. No se ha declarado VERIFICADO.
