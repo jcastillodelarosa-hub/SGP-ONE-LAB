@@ -62,7 +62,19 @@ test('scroll se limita al modal de piezas y no altera otros modales',()=>{
  assert.match(css,/#pieceModal \.table-wrap\s*\{[^}]*overflow-x:auto!important;[^}]*overflow-y:auto!important;/s);
  assert.match(css,/#pieceModal \.table-wrap thead th\{position:sticky;top:0/);
  assert.match(css,/@media\(max-width:700px\)/);
- assert.match(html,/LAB v308/);
- assert.match(html,/app\.js\?v=308/);
- assert.match(html,/styles\.css\?v=308/);
+ assert.match(html,/LAB v309/);
+ assert.match(html,/app\.js\?v=309/);
+ assert.match(html,/styles\.css\?v=309/);
+});
+
+test('v309 compacta Cantidad en cada vista sin alterar Detallado ni el scroll',()=>{
+ const css=fs.readFileSync(new URL('../styles.css',import.meta.url),'utf8');
+ const app=fs.readFileSync(new URL('../app.js',import.meta.url),'utf8');
+ assert.match(app,/pieceTable\.dataset\.pieceView=currentPieceView/);
+ for(const view of ['summary','expanded','references','pickorders']){
+   assert.ok(css.includes('table[data-piece-view="'+view+'"]'));
+ }
+ assert.match(css,/width:68px/);
+ assert.match(css,/table:not\(\[data-piece-view="detailed"\]\)/);
+ assert.match(css,/#pieceModal \.table-wrap/);
 });
