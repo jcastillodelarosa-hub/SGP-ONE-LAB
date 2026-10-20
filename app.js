@@ -862,18 +862,39 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.querySele
 
 document.querySelector('#glassEfficiencySearch')?.addEventListener('input',renderGlassEfficiency);
 document.querySelector('#glassEfficiencyFilter')?.addEventListener('change',renderGlassEfficiency);
+// LAB v302: consultas independientes, reintento manual y datos previos conservados.
+let locationReportRequest=0;
 async function loadLocationReport(){
- const token=getAppToken();if(!token){els.locationReportStatus.textContent="Inicia sesión para consultar.";return}
- els.locationReportStatus.textContent="Actualizando reporte de ubicaciones…";
- try{const client=await getSupabaseClient();const {data,error}=await client.rpc("sgp_reporte_ubicaciones_vidrio",{p_token:token});if(error)throw error;const m=data.metricas||{};
-  els.lrPrepared.textContent=m.preparadas??0;els.lrNovelty.textContent=m.novedad??0;els.lrTransfer.textContent=m.traslado??0;els.lrOther.textContent=m.otros??0;els.lrRacks.textContent=m.burros??0;els.lrMixed.textContent=data.burros_mixtos??0;
-  els.locationByReservation.innerHTML=(data.por_reserva||[]).map(r=>`<tr><td>${escapeHtml(String(r.reserva).split(',')[0].trim())}</td><td class="num"><strong>${r.burros}</strong></td><td class="num">${r.unidades}</td></tr>`).join("")||'<tr><td colspan="3" class="empty">Sin ubicaciones</td></tr>';
-  const {data:racks,error:rackError}=await client.rpc("sgp_reporte_burros_estado",{p_token:token});if(rackError)throw rackError; els.locationMixedRacks.innerHTML=(racks||[]).map(r=>`<tr><td><strong>${escapeHtml(r.posicion)}</strong></td><td><span class="rack-status rack-${r.orden_estado}">${escapeHtml(r.estado)}</span></td><td>${escapeHtml([...new Set(String(r.reservas||'').split(',').map(v=>v.trim()).filter(Boolean))].join(', '))}</td><td class="num">${r.cantidad_reservas}</td><td class="num"><strong>${r.unidades}</strong></td></tr>`).join("")||'<tr><td colspan="5" class="empty">Sin burros activos</td></tr>';
-  const {data:efficiency,error:efficiencyError}=await client.rpc("sgp_reporte_dispersion_vidrio",{p_token:token});
-  if(efficiencyError){glassEfficiencyRows=[];document.querySelector('#glassEfficiencyList').textContent='No se pudo cargar la distribución: '+efficiencyError.message;}
-  else{glassEfficiencyRows=efficiency||[];renderGlassEfficiency();}
-  els.locationReportStatus.textContent="Reporte actualizado ✓ datos de ubicación activos.";
- }catch(e){els.locationReportStatus.textContent="Consulta rechazada ✕ "+e.message}
+ const request=++locationReportRequest,token=getAppToken();
+ const status=els.locationReportStatus;
+ if(!token){status.textContent="Inicia sesión para consultar.";return}
+ status.textContent="Actualizando ubicaciones…";
+ const failures=[];let success=0;
+ const errorLabel=(name,e)=>{const message=String(e?.message||e||'Error desconocido');
+  const offline=typeof navigator!=='undefined'&&navigator.onLine===false;
+  return name+': '+(offline?'sin conexión a Internet':/failed to fetch|networkerror|fetch failed|load failed/i.test(message)?'falló la conexión con Supabase':message);
+ };
+ try{
+  const client=await getSupabaseClient();
+  const calls=[['Resumen', 'sgp_reporte_ubicaciones_vidrio'],['Burros','sgp_reporte_burros_estado'],['Distribución','sgp_reporte_dispersion_vidrio']];
+  const results=await Promise.allSettled(calls.map(async ([name,rpc])=>{
+   const {data,error}=await client.rpc(rpc,{p_token:token});if(error)throw error;return data;
+  }));
+  if(request!==locationReportRequest)return;
+  results.forEach((result,i)=>{
+   const name=calls[i][0];if(result.status==='rejected'){failures.push(errorLabel(name,result.reason));return}
+   const data=result.value;success++;
+   if(i===0){const m=data?.metricas||{};
+    els.lrPrepared.textContent=m.preparadas??0;els.lrNovelty.textContent=m.novedad??0;els.lrTransfer.textContent=m.traslado??0;els.lrOther.textContent=m.otros??0;els.lrRacks.textContent=m.burros??0;els.lrMixed.textContent=data?.burros_mixtos??0;
+    els.locationByReservation.innerHTML=(data?.por_reserva||[]).map(r=>`<tr><td>${escapeHtml(String(r.reserva).split(',')[0].trim())}</td><td class="num"><strong>${r.burros}</strong></td><td class="num">${r.unidades}</td></tr>`).join("")||'<tr><td colspan="3" class="empty">Sin ubicaciones</td></tr>';
+   }else if(i===1){els.locationMixedRacks.innerHTML=(data||[]).map(r=>`<tr><td><strong>${escapeHtml(r.posicion)}</strong></td><td><span class="rack-status rack-${escapeHtml(r.orden_estado)}">${escapeHtml(r.estado)}</span></td><td>${escapeHtml([...new Set(String(r.reservas||'').split(',').map(v=>v.trim()).filter(Boolean))].join(', '))}</td><td class="num">${r.cantidad_reservas}</td><td class="num"><strong>${r.unidades}</strong></td></tr>`).join("")||'<tr><td colspan="5" class="empty">Sin burros activos</td></tr>';
+   }else{glassEfficiencyRows=data||[];renderGlassEfficiency();}
+  });
+ }catch(e){if(request!==locationReportRequest)return;failures.push(errorLabel('Conexión',e))}
+ if(request!==locationReportRequest)return;
+ status.textContent=failures.length?(success?'Reporte parcial ('+success+'/3). ':'No se pudieron actualizar los datos. ')+failures.join(' · ')+' · Se conservan los últimos datos cargados.':'Reporte actualizado ✓ datos de ubicación activos.';
+ // No mostrar datos antiguos como si fueran actuales.
+ if(failures.length)status.textContent+=' Pulsa Reporte de ubicaciones para reintentar.';
 }
 function openAssemblyTab(tab){
  const report=tab==="report";els.assemblySheetPanel.hidden=report;els.assemblyLocationReportPanel.hidden=!report;els.assemblySheetTab.classList.toggle("active",!report);els.assemblyLocationReportTab.classList.toggle("active",report);if(report)loadLocationReport();
