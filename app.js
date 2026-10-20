@@ -10,6 +10,7 @@ import { readGlassWorkbook, relateGlass, prepareGlassPayload } from "./src/domai
 import { readGlassLocationWorkbook, filterGlassLocationRows } from "./src/domain/glass-location-importer.js?v=62";
 import { getSupabaseClient } from "./src/services/supabase-client.js";
 import { filterGlassRowsByWeek, indexGlassProductionWeeks, weeksWithGlass } from "./src/domain/glass-week-filter.js";
+import { buildGlassRelationGraph, traceGlassRelations, summarizeGlassBurro } from "./src/domain/glass-relations-graph.js";
 import { readNcAluminumWorkbook } from "./src/domain/nc-aluminum-importer.js?v=73";
 import { readNcGlassWorkbook } from "./src/domain/nc-glass-importer.js?v=84";
 
@@ -853,21 +854,9 @@ function renderGlassEfficiency(){
 }
 
 /* LAB v298: explorador de relaciones; sólo lectura, basado en la misma RPC autenticada. */
-const glassExplorer={selected:null};
+const glassExplorer={selected:null,lastClickId:null,lastClickAt:0};
 function glassExplorerModel(){
- const nodes=new Map(),edges=new Map();
- const addNode=(id,type,label)=>{if(!nodes.has(id))nodes.set(id,{id,type,label});};
- const addEdge=(a,b,qty)=>{const id=JSON.stringify([a,b]);const previous=edges.get(id);edges.set(id,{a,b,qty:(previous?.qty||0)+qty});};
- visibleGlassEfficiencyRows().forEach(r=>{
-  const res=String(r.reserva||'SIN RESERVA').split(',')[0].trim(),part=String(r.parte||'SIN PARTE'),key=String(r.key_produccion||''),pos=String(r.posicion||'SIN UBICACIÓN');
-  const prepared=Number(r.preparadas||0),total=Number(r.unidades||0);
-  const qty=document.querySelector('#glassExplorerStatus')?.value==='all'?total:prepared;
-  if(qty<=0)return;
-  const ri='r:'+res,pi='p:'+res+':'+part,oi='o:'+key,bi='b:'+pos;
-  addNode(ri,'reserva','Reserva '+res);addNode(pi,'parte','Parte '+part);addNode(oi,'orden',String(r.produccion||key));addNode(bi,'burro',pos);
-  addEdge(ri,pi,qty);addEdge(pi,oi,qty);addEdge(oi,bi,qty);
- });
- return {nodes,edges};
+ return buildGlassRelationGraph(visibleGlassEfficiencyRows(),document.querySelector('#glassExplorerStatus')?.value||'prepared');
 }
 function renderGlassExplorer(){
  const graph=document.querySelector('#glassExplorerGraph'),details=document.querySelector('#glassExplorerDetails'),summary=document.querySelector('#glassExplorerSummary');
@@ -886,41 +875,70 @@ function renderGlassExplorer(){
  const visible=[...model.nodes.values()].filter(n=>allowed.has(n.id));
  const columns=['reserva','parte','orden','burro'];
  const groups=columns.map(type=>visible.filter(n=>n.type===type).sort((a,b)=>a.label.localeCompare(b.label,undefined,{numeric:true})).slice(0,70));
- const width=1000,rowHeight=52,height=Math.max(350,...groups.map(g=>g.length*rowHeight+65));
+ const width=1000,rowHeight=62,height=Math.max(350,...groups.map(g=>g.length*rowHeight+65));
  const coords=new Map();groups.forEach((g,i)=>g.forEach((n,j)=>coords.set(n.id,{x:125+i*250,y:52+j*rowHeight})));
  const esc=v=>escapeHtml(String(v));
- // LAB v303: selección visual de nodos y enlaces directos, sin alterar datos ni navegación.
- const distances=new Map();
- if(selected&&model.nodes.has(selected)){
-  const queue=[selected];distances.set(selected,0);
-  const selectedType=model.nodes.get(selected).type;
-  const maxDepth=selectedType==='burro'?3:selectedType==='orden'?2:selectedType==='parte'?1:3;
-  const rank={reserva:0,parte:1,orden:2,burro:3};
-  for(let i=0;i<queue.length;i++){
-   const id=queue[i],depth=distances.get(id),node=model.nodes.get(id);
-   if(depth>=maxDepth)continue;
-   for(const next of adjacency.get(id)||[]){
-    const target=model.nodes.get(next);
-    if(!target||rank[target.type]!==rank[node.type]+(selectedType==='reserva'?1:-1)||distances.has(next))continue;
-    distances.set(next,depth+1);queue.push(next);
-   }
-  }
- }
- const related=new Set(distances.keys());
+ // LAB v306: destacar el alcance completo de la selección en ambas direcciones.
+ // Burro -> orden -> parte -> reserva, y reserva -> parte -> orden -> burro.
+ // Desde parte u orden se siguen ambas direcciones sin saltar a ramas ajenas.
+ const trace=traceGlassRelations(model,selected);
+ const related=trace.nodes;
  const hasFocus=related.size>0;
- const edgeDepth=(a,b)=>{const da=distances.get(a),db=distances.get(b);return da!==undefined&&db!==undefined&&Math.abs(da-db)===1?Math.min(da,db):-1};
- const paths=[...model.edges.values()].filter(({a,b})=>coords.has(a)&&coords.has(b)).map(({a,b,qty})=>{const p=coords.get(a),q=coords.get(b);return '<path d="M'+p.x+' '+p.y+' C'+(p.x+120)+' '+p.y+','+(q.x-120)+' '+q.y+','+q.x+' '+q.y+'" stroke="'+(hasFocus&&edgeDepth(a,b)>=0?(edgeDepth(a,b)===0?'#f97316':'#fb923c'):'#9cb5d2')+'" stroke-width="'+(hasFocus&&edgeDepth(a,b)>=0?Math.min(12,(edgeDepth(a,b)===0?5:3)+Math.sqrt(qty)):Math.min(7,1+Math.sqrt(qty)))+'" fill="none" opacity="'+(!hasFocus||edgeDepth(a,b)>=0?'.95':'.10')+'"><title>'+qty+' vidrios</title></path>'}).join('');
+ const paths=[...model.edges.entries()].filter(([,edge])=>coords.has(edge.a)&&coords.has(edge.b)).map(([id,{a,b,qty}])=>{
+  const p=coords.get(a),q=coords.get(b),active=trace.edges.has(id),direct=a===selected||b===selected;
+  const stroke=hasFocus&&active?(direct?'#f97316':'#fb923c'):'#9cb5d2';
+  const thickness=hasFocus&&active?Math.min(12,(direct?5:3)+Math.sqrt(qty)):Math.min(7,1+Math.sqrt(qty));
+  const opacity=!hasFocus||active?'.95':'.10';
+  return '<path d="M'+p.x+' '+p.y+' C'+(p.x+120)+' '+p.y+','+(q.x-120)+' '+q.y+','+q.x+' '+q.y+'" stroke="'+stroke+'" stroke-width="'+thickness+'" fill="none" opacity="'+opacity+'"><title>'+qty+' vidrios</title></path>';
+ }).join('');
  const palette={reserva:'#7756d6',parte:'#e89b35',orden:'#10a37f',burro:'#1674ed'};
- const shapes=visible.filter(n=>coords.has(n.id)).map(n=>{const p=coords.get(n.id),label=n.label.length>23?n.label.slice(0,22)+'…':n.label;return '<g data-node="'+esc(n.id)+'" role="button" tabindex="0" aria-label="'+esc(n.label)+'" class="glass-explorer-node"><rect x="'+(p.x-106)+'" y="'+(p.y-19)+'" width="212" height="38" rx="12" fill="'+palette[n.type]+'" stroke="'+(selected===n.id?'#10264e':hasFocus&&related.has(n.id)?'#f97316':'white')+'" stroke-width="'+(selected===n.id?5:hasFocus&&related.has(n.id)?4:1)+'" opacity="'+(!hasFocus||related.has(n.id)?1:.3)+'"/><text x="'+p.x+'" y="'+(p.y+5)+'" fill="white" text-anchor="middle" font-size="13" font-weight="700">'+esc(label)+'</text><title>'+esc(n.label)+'</title></g>'}).join('');
+ const shapes=visible.filter(n=>coords.has(n.id)).map(n=>{
+  const p=coords.get(n.id),label=n.label.length>24?n.label.slice(0,23)+'…':n.label;
+  const count=n.type==='burro'?n.glass+' vidrios':n.windows+' ventanas';
+  return '<g data-node="'+esc(n.id)+'" role="button" tabindex="0" aria-label="'+esc(n.label+' · '+count+(n.type==='burro'?' · doble clic para detalle':''))+'" class="glass-explorer-node"><rect x="'+(p.x-106)+'" y="'+(p.y-24)+'" width="212" height="48" rx="12" fill="'+palette[n.type]+'" stroke="'+(selected===n.id?'#10264e':hasFocus&&related.has(n.id)?'#f97316':'white')+'" stroke-width="'+(selected===n.id?5:hasFocus&&related.has(n.id)?4:1)+'" opacity="'+(!hasFocus||related.has(n.id)?1:.3)+'"/><text x="'+p.x+'" y="'+(p.y-3)+'" fill="white" text-anchor="middle" font-size="12" font-weight="700">'+esc(label)+'</text><text x="'+p.x+'" y="'+(p.y+14)+'" fill="white" text-anchor="middle" font-size="11" font-weight="800">'+esc(count)+'</text><title>'+esc(n.label)+' · '+esc(count)+'</title></g>';
+ }).join('');
  graph.innerHTML='<svg viewBox="0 0 '+width+' '+height+'" width="'+width+'" height="'+height+'" aria-label="Red de reservas, partes, órdenes y burros"><g>'+paths+shapes+'</g></svg>';
- graph.querySelectorAll('[data-node]').forEach(el=>{const activate=()=>{glassExplorer.selected=el.getAttribute('data-node');renderGlassExplorer()};el.addEventListener('click',activate);el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();activate()}})});
+ graph.querySelectorAll('[data-node]').forEach(el=>{
+  const activate=()=>{
+   const id=el.getAttribute('data-node'),n=model.nodes.get(id),now=Date.now();
+   if(n?.type==='burro'&&glassExplorer.lastClickId===id&&now-glassExplorer.lastClickAt<600){
+    glassExplorer.lastClickId=null;openGlassBurroDetail(n.label);return;
+   }
+   glassExplorer.lastClickId=id;glassExplorer.lastClickAt=now;
+   glassExplorer.selected=id;renderGlassExplorer();
+  };
+  el.addEventListener('click',activate);
+  el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();glassExplorer.lastClickId=null;glassExplorer.selected=el.getAttribute('data-node');renderGlassExplorer()}});
+ });
  const count=type=>[...model.nodes.values()].filter(n=>n.type===type).length;
  summary.textContent=count('reserva')+' reservas · '+count('parte')+' partes · '+count('orden')+' órdenes · '+count('burro')+' ubicaciones con vidrio';
  if(!selected||!model.nodes.has(selected)){details.textContent='Selecciona un nodo para consultar sus conexiones. Puedes buscar por reserva, orden o burro.';return}
  const node=model.nodes.get(selected),linked=[...model.edges.values()].filter(({a,b})=>a===selected||b===selected).map(({a,b,qty})=>({node:model.nodes.get(a===selected?b:a),qty})).filter(x=>x.node).sort((a,b)=>b.qty-a.qty);
- details.innerHTML='<h3>'+esc(node.label)+'</h3><p>'+linked.length+' relaciones directas</p>'+linked.map(x=>'<div class="glass-explorer-link"><strong>'+esc(x.node.label)+'</strong><span>'+x.qty+' vidrios</span><button type="button" data-related="'+esc(x.node.id)+'">Explorar</button></div>').join('');
+ const nodeCount=node.type==='burro'?node.glass+' vidrios':node.windows+' ventanas';
+ const context=node.type==='burro'?'<button type="button" class="glass-burro-detail-action" id="glassBurroDetailsButton">Ver detalle del burro</button>':'';
+ details.innerHTML='<h3>'+esc(node.label)+'</h3><p>'+esc(nodeCount)+' · '+linked.length+' relaciones directas</p>'+context+linked.map(x=>'<div class="glass-explorer-link"><strong>'+esc(x.node.label)+'</strong><span>'+x.qty+' vidrios</span><button type="button" data-related="'+esc(x.node.id)+'">Explorar</button></div>').join('');
+ details.querySelector('#glassBurroDetailsButton')?.addEventListener('click',()=>openGlassBurroDetail(node.label));
  details.querySelectorAll('[data-related]').forEach(el=>el.addEventListener('click',()=>{glassExplorer.selected=el.getAttribute('data-related');renderGlassExplorer()}));
 }
+function openGlassBurroDetail(position){
+ const modal=document.querySelector('#glassBurroModal');
+ if(!modal)return;
+ const info=summarizeGlassBurro(visibleGlassEfficiencyRows(),position);
+ const esc=v=>escapeHtml(String(v));
+ modal.querySelector('#glassBurroTitle').textContent='Burro '+info.position;
+ const week=document.querySelector('#glassEfficiencyWeek')?.selectedOptions?.[0]?.textContent||'Todas las semanas';
+ modal.querySelector('#glassBurroContext').textContent=week+' · Ubicación actual · todos los estados';
+ modal.querySelector('#glassBurroMetrics').innerHTML='<span><b>'+info.reservations+'</b> reservas</span><span><b>'+info.parts+'</b> partes</span><span><b>'+info.orders+'</b> órdenes</span><span><b>'+info.totals.preparados+'</b> preparados</span><span><b>'+info.totals.novedad+'</b> novedad</span><span><b>'+info.totals.traslado+'</b> traslado</span><span><b>'+info.totals.otros+'</b> otros</span>';
+ const body=modal.querySelector('#glassBurroBody');
+ body.innerHTML=info.items.length?info.items.map(x=>
+  '<tr><td>'+esc(x.reserva)+'</td><td>'+esc(x.parte)+'</td><td><strong>'+esc(x.orden)+'</strong></td><td class="num">'+x.ventanas+'</td><td class="num">'+x.preparados+'</td><td class="num">'+x.novedad+'</td><td class="num">'+x.traslado+'</td><td class="num">'+x.otros+'</td><td class="num"><strong>'+x.total+'</strong></td></tr>'
+ ).join(''):'<tr><td colspan="9">No hay vidrios asociados con la semana seleccionada.</td></tr>';
+ modal.hidden=false;
+ modal.querySelector('#glassBurroClose')?.focus();
+}
+function closeGlassBurroDetail(){const modal=document.querySelector('#glassBurroModal');if(modal)modal.hidden=true;}
+document.querySelector('#glassBurroClose')?.addEventListener('click',closeGlassBurroDetail);
+document.querySelector('#glassBurroModal')?.addEventListener('click',e=>{if(e.target.id==='glassBurroModal')closeGlassBurroDetail()});
 function openGlassExplorer(){
  const modal=document.querySelector('#glassExplorerModal');if(!modal)return;
  glassExplorer.selected=null;modal.hidden=false;document.body.classList.add('glass-explorer-open');renderGlassExplorer();document.querySelector('#glassExplorerSearch')?.focus();
@@ -933,7 +951,11 @@ document.querySelector('#glassExplorerReset')?.addEventListener('click',()=>{gla
 document.querySelector('#glassExplorerSearch')?.addEventListener('input',()=>{glassExplorer.selected=null;renderGlassExplorer()});
 document.querySelector('#glassExplorerStatus')?.addEventListener('change',()=>{glassExplorer.selected=null;renderGlassExplorer()});
 document.querySelector('#glassExplorerModal')?.addEventListener('click',e=>{if(e.target.id==='glassExplorerModal')closeGlassExplorer()});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.querySelector('#glassExplorerModal')?.hidden)closeGlassExplorer()});
+document.addEventListener('keydown',e=>{
+ if(e.key!=='Escape')return;
+ if(!document.querySelector('#glassBurroModal')?.hidden){closeGlassBurroDetail();return}
+ if(!document.querySelector('#glassExplorerModal')?.hidden)closeGlassExplorer();
+});
 
 document.querySelector('#glassEfficiencySearch')?.addEventListener('input',renderGlassEfficiency);
 document.querySelector('#glassEfficiencyFilter')?.addEventListener('change',renderGlassEfficiency);
