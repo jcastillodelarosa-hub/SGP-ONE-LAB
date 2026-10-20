@@ -9,6 +9,7 @@ import { readAccessoriesWorkbook, relateAccessories, prepareAccessoryPayload } f
 import { readGlassWorkbook, relateGlass, prepareGlassPayload } from "./src/domain/glass-importer.js";
 import { readGlassLocationWorkbook, filterGlassLocationRows } from "./src/domain/glass-location-importer.js?v=62";
 import { getSupabaseClient } from "./src/services/supabase-client.js";
+import { filterGlassRowsByWeek, indexGlassProductionWeeks, weeksWithGlass } from "./src/domain/glass-week-filter.js";
 import { readNcAluminumWorkbook } from "./src/domain/nc-aluminum-importer.js?v=73";
 import { readNcGlassWorkbook } from "./src/domain/nc-glass-importer.js?v=84";
 
@@ -749,13 +750,68 @@ async function openGlassDetail(key,id){
 }
 // LAB v294: análisis de dispersión de vidrio, exclusivamente lectura.
 let glassEfficiencyRows=[];
+let glassWeekByProduction=new Map();
+// LAB v306: semana efectiva de la producción. Los datos operativos de vidrio no se alteran.
+function visibleGlassEfficiencyRows(){
+ const week=document.querySelector('#glassEfficiencyWeek')?.value||'all';
+ return filterGlassRowsByWeek(glassEfficiencyRows,glassWeekByProduction,week);
+}
+async function loadGlassEfficiencyWeeks(client,token,request){
+ const picker=document.querySelector('#glassEfficiencyWeek');
+ const status=document.querySelector('#glassEfficiencyWeekStatus');
+ if(!picker||!status)return;
+ const previous=picker.value;
+ picker.disabled=true;
+ status.textContent='Identificando semanas de programación…';
+ try{
+  // Reutilizar RPC autorizadas. No se leen tablas con RLS desde el navegador.
+  const {data:available,error:weekError}=await client.rpc('sgp_picking_semanas',{p_token:token});
+  if(weekError)throw weekError;
+  const weeks=[...new Set((available||[]).map(Number).filter(w=>Number.isInteger(w)&&w>=1&&w<=53))];
+  if(!weeks.length)throw new Error('No se encontraron semanas de programación');
+  const year=new Date().getFullYear();
+  const weekly=[];
+  for(let i=0;i<weeks.length;i+=3){
+   const results=await Promise.all(weeks.slice(i,i+3).map(async w=>{
+    const {data,error}=await client.rpc('sgp_consultar_programacion_semana',{p_token:token,p_anio:year,p_semana:w});
+    if(error)throw error;
+    return data?.producciones||[];
+   }));
+   weekly.push(...results.flat());
+  }
+  if(request!==locationReportRequest)return;
+  const indexed=indexGlassProductionWeeks(weekly);
+  const missing=[...new Set(glassEfficiencyRows.map(r=>String(r.key_produccion)))].filter(k=>!indexed.has(k));
+  if(missing.length)throw new Error(missing.length+' órdenes sin correspondencia semanal');
+  const options=weeksWithGlass(glassEfficiencyRows,indexed);
+  if(!options.length)throw new Error('No existen semanas identificadas para estas órdenes');
+  glassWeekByProduction=indexed;
+  picker.innerHTML='<option value="all">Todas las semanas</option>'+options.map(value=>{
+   const [y,w]=value.split('-');
+   return '<option value="'+value+'">Semana '+Number(w)+' · '+Number(y)+'</option>';
+  }).join('');
+  picker.value=options.includes(previous)?previous:'all';
+  picker.disabled=false;
+  status.textContent=options.length+' semanas disponibles';
+  renderGlassEfficiency();
+  if(!document.querySelector('#glassExplorerModal')?.hidden)renderGlassExplorer();
+ }catch(e){
+  if(request!==locationReportRequest)return;
+  glassWeekByProduction=new Map();
+  picker.innerHTML='<option value="all">Todas las semanas</option>';
+  picker.disabled=true;
+  status.textContent='Filtro semanal no disponible: '+String(e?.message||e)+'. El reporte general continúa operativo.';
+  renderGlassEfficiency();
+ }
+}
+
 function renderGlassEfficiency(){
  const target=document.querySelector('#glassEfficiencyList'),stats=document.querySelector('#glassEfficiencyStats');
  if(!target||!stats)return;
  const query=(document.querySelector('#glassEfficiencySearch')?.value||'').trim().toLowerCase();
  const filter=document.querySelector('#glassEfficiencyFilter')?.value||'all';
  const reservations=new Map();
- glassEfficiencyRows.forEach(r=>{
+ visibleGlassEfficiencyRows().forEach(r=>{
   const key=String(r.key_produccion||''),res=String(r.reserva||'SIN RESERVA').split(',')[0].trim(),pos=String(r.posicion||'SIN UBICACIÓN'),part=String(r.parte||'SIN PARTE');
   if(!reservations.has(res))reservations.set(res,new Map());
   const orders=reservations.get(res);
@@ -803,7 +859,7 @@ function glassExplorerModel(){
  const nodes=new Map(),edges=new Map();
  const addNode=(id,type,label)=>{if(!nodes.has(id))nodes.set(id,{id,type,label});};
  const addEdge=(a,b,qty)=>{const id=JSON.stringify([a,b]);const previous=edges.get(id);edges.set(id,{a,b,qty:(previous?.qty||0)+qty});};
- glassEfficiencyRows.forEach(r=>{
+ visibleGlassEfficiencyRows().forEach(r=>{
   const res=String(r.reserva||'SIN RESERVA').split(',')[0].trim(),part=String(r.parte||'SIN PARTE'),key=String(r.key_produccion||''),pos=String(r.posicion||'SIN UBICACIÓN');
   const prepared=Number(r.preparadas||0),total=Number(r.unidades||0);
   const qty=document.querySelector('#glassExplorerStatus')?.value==='all'?total:prepared;
@@ -882,6 +938,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.querySele
 
 document.querySelector('#glassEfficiencySearch')?.addEventListener('input',renderGlassEfficiency);
 document.querySelector('#glassEfficiencyFilter')?.addEventListener('change',renderGlassEfficiency);
+document.querySelector('#glassEfficiencyWeek')?.addEventListener('change',()=>{renderGlassEfficiency();glassExplorer.selected=null;if(!document.querySelector('#glassExplorerModal')?.hidden)renderGlassExplorer();});
 // LAB v302: consultas independientes, reintento manual y datos previos conservados.
 let locationReportRequest=0;
 async function loadLocationReport(){
@@ -908,7 +965,7 @@ async function loadLocationReport(){
     els.lrPrepared.textContent=m.preparadas??0;els.lrNovelty.textContent=m.novedad??0;els.lrTransfer.textContent=m.traslado??0;els.lrOther.textContent=m.otros??0;els.lrRacks.textContent=m.burros??0;els.lrMixed.textContent=data?.burros_mixtos??0;
     els.locationByReservation.innerHTML=(data?.por_reserva||[]).map(r=>`<tr><td>${escapeHtml(String(r.reserva).split(',')[0].trim())}</td><td class="num"><strong>${r.burros}</strong></td><td class="num">${r.unidades}</td></tr>`).join("")||'<tr><td colspan="3" class="empty">Sin ubicaciones</td></tr>';
    }else if(i===1){els.locationMixedRacks.innerHTML=(data||[]).map(r=>`<tr><td><strong>${escapeHtml(r.posicion)}</strong></td><td><span class="rack-status rack-${escapeHtml(r.orden_estado)}">${escapeHtml(r.estado)}</span></td><td>${escapeHtml([...new Set(String(r.reservas||'').split(',').map(v=>v.trim()).filter(Boolean))].join(', '))}</td><td class="num">${r.cantidad_reservas}</td><td class="num"><strong>${r.unidades}</strong></td></tr>`).join("")||'<tr><td colspan="5" class="empty">Sin burros activos</td></tr>';
-   }else{glassEfficiencyRows=data||[];renderGlassEfficiency();}
+   }else{glassEfficiencyRows=data||[];glassWeekByProduction=new Map();const weekPicker=document.querySelector('#glassEfficiencyWeek');if(weekPicker){weekPicker.disabled=true;weekPicker.value='all';}renderGlassEfficiency();void loadGlassEfficiencyWeeks(client,token,request);}
   });
  }catch(e){if(request!==locationReportRequest)return;failures.push(errorLabel('Conexión',e))}
  if(request!==locationReportRequest)return;
