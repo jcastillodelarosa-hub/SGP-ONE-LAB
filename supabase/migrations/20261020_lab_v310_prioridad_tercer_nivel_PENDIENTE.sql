@@ -6,7 +6,7 @@
 -- PRECONDICIÓN: ejecutar pruebas en transacción con ROLLBACK y verificar
 -- roles autorizados/no autorizados antes de aplicar en producción.
 -- Rollback: restaurar las definiciones previas conservadas en el historial de Supabase.
-BEGIN;
+-- El ejecutor de migraciones gestiona la transacción; no incluir BEGIN/COMMIT explícitos.
 CREATE OR REPLACE FUNCTION public.sgp_mecanizado_disponibles(p_token text, p_semana integer DEFAULT NULL::integer)
  RETURNS TABLE(reserva text, semana integer, sistema text, acabado text, cantidad integer, vidrio_cant numeric, vidrio_pct numeric, ordenes jsonb, prioridades_semanales jsonb, partes jsonb, grupo integer)
  LANGUAGE plpgsql
@@ -175,4 +175,3 @@ select p_anio,p_semana,p_linea,p_reserva,a->>'key_produccion',a->>'prioridad',u 
 on conflict(anio,semana,id_linea,key_produccion) do update set reserva=excluded.reserva,prioridad=excluded.prioridad,usuario=excluded.usuario,fecha_actualizacion=now();
 return jsonb_build_object('ok',true,'guardadas',jsonb_array_length(p_asignaciones));end $function$
 ;
-COMMIT;
