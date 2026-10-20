@@ -68,7 +68,7 @@ test('módulos preservan subnivel y Picking/Ensamble usan orden jerárquico',()=
  const html=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
  assert.match(app,/function enhancePrAssignedList\(/);
  assert.match(app,/async function startPrSplit\(/);
- assert.match(app,/prReservations\.some\(x=>x\.rows\.some\(r=>priorityDepth\(r\.prioridad\)===3\)\)/);
+ assert.doesNotMatch(app,/generación automática queda bloqueada/);
  assert.match(app,/function askPrSubparts\(/);
  assert.match(app,/splitPriorityPart\(prCurrent.rows,prAssign,parent,n\)/);
  assert.match(app,/validatePriorityAssignments\(prCurrent.rows,prAssign/);
@@ -95,4 +95,18 @@ test('migración aplicada preserva contratos y protege programación',()=>{
  assert.match(sql,/end parte_num/);
  assert.match(sql,/mp\.prioridad_semanal=pr\.prioridad/);
  assert.doesNotMatch(sql,/::numeric parte_num/);
+});
+
+
+test('generación automática admite prioridades jerárquicas sin alterar firma, roles ni contrato',()=>{
+ const sql=fs.readFileSync(new URL('../supabase/migrations/20261020_lab_v310_generar_prioridades_restantes.sql',import.meta.url),'utf8');
+ const rollback=fs.readFileSync(new URL('../supabase/rollback/20261020_lab_v310_generar_prioridades_restantes_rollback.sql',import.meta.url),'utf8');
+ assert.match(sql,/CREATE OR REPLACE FUNCTION public\.sgp_generar_prioridades_restantes\(p_token text, p_anio integer, p_semana integer, p_linea text\)/);
+ assert.match(sql,/SECURITY DEFINER/);
+ assert.match(sql,/SET search_path TO 'public'/);
+ assert.match(sql,/sgp_validar_sesion_rol\(p_token,array\['ADMINISTRADOR','COORDINADOR'\]\)/);
+ assert.match(sql,/prioridad ~ '\^\[0-9\]\+\(\\\\\.\[0-9\]\+\)\{0,2\}\$'/);
+ assert.match(sql,/return jsonb_build_object\('ok',true,'reservas_generadas',generated,'siguiente_prioridad',next_prio\)/);
+ assert.match(rollback,/prioridad ~ '\^\[0-9\]\+\(\\\\\.\[0-9\]\+\)\?\$'/);
+ assert.doesNotMatch(sql,/DROP FUNCTION|ALTER TABLE|REVOKE|GRANT/);
 });
