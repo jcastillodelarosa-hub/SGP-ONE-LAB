@@ -955,16 +955,24 @@ function renderGlassExplorer(){
  }).join('');
  graph.innerHTML='<svg viewBox="0 0 '+width+' '+height+'" width="'+width+'" height="'+height+'" aria-label="Red de reservas, partes, órdenes y burros"><g>'+paths+shapes+'</g></svg>';
  graph.querySelectorAll('[data-node]').forEach(el=>{
+  const id=el.getAttribute('data-node'),node=model.nodes.get(id),insight=insights.get(id);
+  const tooltip=()=>showGlassExplorerTooltip(el,node,insight,mode);
   const activate=()=>{
-   const id=el.getAttribute('data-node'),n=model.nodes.get(id),now=Date.now();
-   if(n?.type==='burro'&&glassExplorer.lastClickId===id&&now-glassExplorer.lastClickAt<600){
-    glassExplorer.lastClickId=null;openGlassBurroDetail(n.label);return;
+   const now=Date.now();
+   if(node?.type==='burro'&&glassExplorer.lastClickId===id&&now-glassExplorer.lastClickAt<600){
+    glassExplorer.lastClickId=null;hideGlassExplorerTooltip();openGlassBurroDetail(node.label);return;
    }
    glassExplorer.lastClickId=id;glassExplorer.lastClickAt=now;
    glassExplorer.selected=id;renderGlassExplorer();
+   const fresh=[...graph.querySelectorAll('[data-node]')].find(item=>item.getAttribute('data-node')===id);
+   showGlassExplorerTooltip(fresh,node,insight,mode);
   };
+  el.addEventListener('mouseenter',tooltip);
+  el.addEventListener('mouseleave',hideGlassExplorerTooltip);
+  el.addEventListener('focus',tooltip);
+  el.addEventListener('blur',hideGlassExplorerTooltip);
   el.addEventListener('click',activate);
-  el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();glassExplorer.lastClickId=null;glassExplorer.selected=el.getAttribute('data-node');renderGlassExplorer()}});
+  el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();activate()}});
  });
  const count=type=>[...model.nodes.values()].filter(n=>n.type===type).length;
  summary.textContent=count('reserva')+' reservas · '+count('parte')+' partes · '+count('orden')+' órdenes · '+count('burro')+' ubicaciones con vidrio';
@@ -972,7 +980,7 @@ function renderGlassExplorer(){
  const node=model.nodes.get(selected),linked=[...model.edges.values()].filter(({a,b})=>a===selected||b===selected).map(({a,b,qty})=>({node:model.nodes.get(a===selected?b:a),qty})).filter(x=>x.node).sort((a,b)=>b.qty-a.qty);
  const nodeCount=node.type==='burro'?node.glass+' vidrios':node.windows+' ventanas';
  const context=node.type==='burro'?'<button type="button" class="glass-burro-detail-action" id="glassBurroDetailsButton">Ver detalle del burro</button>':'';
- details.innerHTML='<h3>'+esc(node.label)+'</h3><p>'+esc(nodeCount)+' · '+linked.length+' relaciones directas</p>'+context+linked.map(x=>'<div class="glass-explorer-link"><strong>'+esc(x.node.label)+'</strong><span>'+x.qty+' vidrios</span><button type="button" data-related="'+esc(x.node.id)+'">Explorar</button></div>').join('');
+ details.innerHTML='<h3>'+esc(node.label)+'</h3><p>'+esc(nodeCount)+' · '+linked.length+' relaciones directas</p>'+glassExplorerInsightHTML(node,insights.get(selected),mode)+context+linked.map(x=>'<div class="glass-explorer-link"><strong>'+esc(x.node.label)+'</strong><span>'+x.qty+' vidrios</span><button type="button" data-related="'+esc(x.node.id)+'">Explorar</button></div>').join('');
  details.querySelector('#glassBurroDetailsButton')?.addEventListener('click',()=>openGlassBurroDetail(node.label));
  details.querySelectorAll('[data-related]').forEach(el=>el.addEventListener('click',()=>{glassExplorer.selected=el.getAttribute('data-related');renderGlassExplorer()}));
 }
@@ -985,6 +993,12 @@ function openGlassBurroDetail(position){
  const week=document.querySelector('#glassEfficiencyWeek')?.selectedOptions?.[0]?.textContent||'Todas las semanas';
  modal.querySelector('#glassBurroContext').textContent=week+' · Ubicación actual · todos los estados';
  modal.querySelector('#glassBurroMetrics').innerHTML='<span><b>'+info.reservations+'</b> reservas</span><span><b>'+info.parts+'</b> partes</span><span><b>'+info.orders+'</b> órdenes</span><span><b>'+info.totals.preparados+'</b> preparados</span><span><b>'+info.totals.novedad+'</b> novedad</span><span><b>'+info.totals.traslado+'</b> traslado</span><span><b>'+info.totals.otros+'</b> otros</span>';
+ const insight=buildGlassNodeInsights(visibleGlassEfficiencyRows()).get('b:'+position);
+ const reservations=glassRackBreakdown(insight,'all');
+ const byReserve=modal.querySelector('#glassBurroReservas');
+ if(byReserve)byReserve.innerHTML=reservations.length>1?'<strong class="glass-burro-sharing">⚠ Burro compartido por '+reservations.length+' reservas principales</strong>':''+
+  reservations.map(item=>'<div class="glass-burro-reserve"><strong>'+esc(item.reserva)+'</strong><span>'+item.prepared+' preparados · '+item.novelty+' novedad · '+item.transfer+' traslado · '+item.others+' otros</span></div>').join('');
+
  const body=modal.querySelector('#glassBurroBody');
  body.innerHTML=info.items.length?info.items.map(x=>
   '<tr><td>'+esc(x.reserva)+'</td><td>'+esc(x.parte)+'</td><td><strong>'+esc(x.orden)+'</strong></td><td class="num">'+x.ventanas+'</td><td class="num">'+x.preparados+'</td><td class="num">'+x.novedad+'</td><td class="num">'+x.traslado+'</td><td class="num">'+x.otros+'</td><td class="num"><strong>'+x.total+'</strong></td></tr>'
@@ -999,13 +1013,14 @@ function openGlassExplorer(){
  const modal=document.querySelector('#glassExplorerModal');if(!modal)return;
  glassExplorer.selected=null;modal.hidden=false;document.body.classList.add('glass-explorer-open');renderGlassExplorer();document.querySelector('#glassExplorerSearch')?.focus();
 }
-function closeGlassExplorer(){const modal=document.querySelector('#glassExplorerModal');if(modal)modal.hidden=true;document.body.classList.remove('glass-explorer-open');}
+function closeGlassExplorer(){const modal=document.querySelector('#glassExplorerModal');if(modal)modal.hidden=true;hideGlassExplorerTooltip();document.body.classList.remove('glass-explorer-open');}
 document.querySelector('#glassExploreButton')?.addEventListener('click',openGlassExplorer);
 document.querySelector('#glassExplorerClose')?.addEventListener('click',closeGlassExplorer);
 document.querySelector('#glassExplorerCloseBottom')?.addEventListener('click',closeGlassExplorer);
 document.querySelector('#glassExplorerReset')?.addEventListener('click',()=>{glassExplorer.selected=null;document.querySelector('#glassExplorerSearch').value='';renderGlassExplorer()});
 document.querySelector('#glassExplorerSearch')?.addEventListener('input',()=>{glassExplorer.selected=null;renderGlassExplorer()});
 document.querySelector('#glassExplorerStatus')?.addEventListener('change',()=>{glassExplorer.selected=null;renderGlassExplorer()});
+document.querySelector('#glassExplorerGraph')?.addEventListener('scroll',hideGlassExplorerTooltip,{passive:true});
 document.querySelector('#glassExplorerModal')?.addEventListener('click',e=>{if(e.target.id==='glassExplorerModal')closeGlassExplorer()});
 document.addEventListener('keydown',e=>{
  if(e.key!=='Escape')return;
