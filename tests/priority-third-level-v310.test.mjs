@@ -89,7 +89,9 @@ test('migración preparada sin aplicar protege programación y corrige ordenamie
  assert.match(sql,/CREATE OR REPLACE FUNCTION public\.sgp_picking_cola/);
  assert.match(sql,/CREATE OR REPLACE FUNCTION public\.sgp_guardar_prioridad/);
  assert.match(sql,/split_part\(x\.prioridad_semanal,'\.',3\)/);
- assert.match(sql,/split_part\(p\.parte,'\.',3\)/);
+ assert.match(sql,/split_part\(f\.parte,'\.',3\)/);
+ assert.match(sql,/case when p\.parte/);
+ assert.match(sql,/end parte_num/);
  assert.match(sql,/mp\.prioridad_semanal=pr\.prioridad/);
  assert.doesNotMatch(sql,/::numeric parte_num/);
 });
