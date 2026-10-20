@@ -65,7 +65,7 @@ test('frontend contiene ventana, doble clic táctil y contadores de nodos',()=>{
  assert.match(app,/traceGlassRelations\(model,selected\)/);
  assert.match(app,/n\.windows\+' ventanas'/);
  assert.match(app,/n\.glass\+' vidrios'/);
- assert.match(app,/openGlassBurroDetail\(n\.label\)/);
+ assert.match(app,/openGlassBurroDetail\((?:n|node)\.label\)/);
  assert.match(app,/glassExplorer\.lastClickAt<600/);
  assert.match(html,/id="glassBurroModal"/);
  assert.match(html,/id="glassBurroBody"/);
