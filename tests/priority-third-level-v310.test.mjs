@@ -84,7 +84,7 @@ test('módulos preservan subnivel y Picking/Ensamble usan orden jerárquico',()=
 
 test('migración preparada sin aplicar protege programación y corrige ordenamiento SQL',()=>{
  const sql=fs.readFileSync(new URL('../supabase/migrations/20261020_lab_v310_prioridad_tercer_nivel_PENDIENTE.sql',import.meta.url),'utf8');
- assert.match(sql,/PROPUESTA NO APLICADA/);
+ assert.match(sql,/AUTORIZADO: tres RPC/);
  assert.match(sql,/CREATE OR REPLACE FUNCTION public\.sgp_mecanizado_disponibles/);
  assert.match(sql,/CREATE OR REPLACE FUNCTION public\.sgp_picking_cola/);
  assert.match(sql,/CREATE OR REPLACE FUNCTION public\.sgp_guardar_prioridad/);
