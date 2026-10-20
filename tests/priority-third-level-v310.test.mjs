@@ -105,8 +105,8 @@ test('generación automática admite prioridades jerárquicas sin alterar firma,
  assert.match(sql,/SECURITY DEFINER/);
  assert.match(sql,/SET search_path TO 'public'/);
  assert.match(sql,/sgp_validar_sesion_rol\(p_token,array\['ADMINISTRADOR','COORDINADOR'\]\)/);
- assert.match(sql,/prioridad ~ '\^\[0-9\]\+\(\\\\\.\[0-9\]\+\)\{0,2\}\$'/);
+ assert.ok(sql.includes("prioridad ~ '^[0-9]+(\\.[0-9]+){0,2}$'"));
  assert.match(sql,/return jsonb_build_object\('ok',true,'reservas_generadas',generated,'siguiente_prioridad',next_prio\)/);
- assert.match(rollback,/prioridad ~ '\^\[0-9\]\+\(\\\\\.\[0-9\]\+\)\?\$'/);
+ assert.ok(rollback.includes("prioridad ~ '^[0-9]+(\\.[0-9]+)?$'"));
  assert.doesNotMatch(sql,/DROP FUNCTION|ALTER TABLE|REVOKE|GRANT/);
 });
