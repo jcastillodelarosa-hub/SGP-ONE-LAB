@@ -756,11 +756,10 @@ function visibleGlassEfficiencyRows(){
  const week=document.querySelector('#glassEfficiencyWeek')?.value||'all';
  return filterGlassRowsByWeek(glassEfficiencyRows,glassWeekByProduction,week);
 }
-async function loadGlassEfficiencyWeeks(client,token,request){
+async function loadGlassEfficiencyWeeks(client,token,request,previous='all'){
  const picker=document.querySelector('#glassEfficiencyWeek');
  const status=document.querySelector('#glassEfficiencyWeekStatus');
  if(!picker||!status)return;
- const previous=picker.value;
  picker.disabled=true;
  status.textContent='Identificando semanas de programación…';
  try{
@@ -965,7 +964,7 @@ async function loadLocationReport(){
     els.lrPrepared.textContent=m.preparadas??0;els.lrNovelty.textContent=m.novedad??0;els.lrTransfer.textContent=m.traslado??0;els.lrOther.textContent=m.otros??0;els.lrRacks.textContent=m.burros??0;els.lrMixed.textContent=data?.burros_mixtos??0;
     els.locationByReservation.innerHTML=(data?.por_reserva||[]).map(r=>`<tr><td>${escapeHtml(String(r.reserva).split(',')[0].trim())}</td><td class="num"><strong>${r.burros}</strong></td><td class="num">${r.unidades}</td></tr>`).join("")||'<tr><td colspan="3" class="empty">Sin ubicaciones</td></tr>';
    }else if(i===1){els.locationMixedRacks.innerHTML=(data||[]).map(r=>`<tr><td><strong>${escapeHtml(r.posicion)}</strong></td><td><span class="rack-status rack-${escapeHtml(r.orden_estado)}">${escapeHtml(r.estado)}</span></td><td>${escapeHtml([...new Set(String(r.reservas||'').split(',').map(v=>v.trim()).filter(Boolean))].join(', '))}</td><td class="num">${r.cantidad_reservas}</td><td class="num"><strong>${r.unidades}</strong></td></tr>`).join("")||'<tr><td colspan="5" class="empty">Sin burros activos</td></tr>';
-   }else{glassEfficiencyRows=data||[];glassWeekByProduction=new Map();const weekPicker=document.querySelector('#glassEfficiencyWeek');if(weekPicker){weekPicker.disabled=true;weekPicker.value='all';}renderGlassEfficiency();void loadGlassEfficiencyWeeks(client,token,request);}
+   }else{const weekPicker=document.querySelector('#glassEfficiencyWeek'),priorWeek=weekPicker?.value||'all';glassEfficiencyRows=data||[];glassWeekByProduction=new Map();if(weekPicker){weekPicker.disabled=true;weekPicker.value='all';}renderGlassEfficiency();void loadGlassEfficiencyWeeks(client,token,request,priorWeek);}
   });
  }catch(e){if(request!==locationReportRequest)return;failures.push(errorLabel('Conexión',e))}
  if(request!==locationReportRequest)return;
