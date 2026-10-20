@@ -938,11 +938,13 @@ function renderGlassExplorer(){
  const shapes=visible.filter(n=>coords.has(n.id)).map(n=>{
   const p=coords.get(n.id),metric=insights.get(n.id);
   const label=n.label.length>24?n.label.slice(0,23)+'…':n.label;
-  const count=n.type==='burro'?n.glass+' vidrios':n.windows+' ventanas';
+  const count=n.type==='burro'?n.glass+' vidrios':(metric?.windows??n.windows)+' ventanas';
   const reservations=n.type==='burro'?glassRackBreakdown(metric,mode):[];
   const shared=n.type==='burro'&&reservations.length>1;
   const coverage=n.type==='orden'?glassCoverage(metric):null;
   const badge=shared?'⚠ '+reservations.length+' reservas':coverage?(coverage.complete?'✓ Completa':'◔ Parcial'):'';
+  const badgeBg=shared?'#fee5dc':coverage?(coverage.complete?'#dcf9e9':'#ffedca'):'transparent';
+  const badgeFg=shared?'#9e2811':coverage?(coverage.complete?'#087552':'#83500b'):'white';
   const focusStroke=selected===n.id?'#10264e':hasFocus&&related.has(n.id)?'#f97316':shared?'#d84432':'white';
   const focusWidth=selected===n.id?5:hasFocus&&related.has(n.id)?4:shared?3:1;
   const opacity=!hasFocus||related.has(n.id)?1:.3;
@@ -950,7 +952,7 @@ function renderGlassExplorer(){
    '<rect x="'+(p.x-106)+'" y="'+(p.y-30)+'" width="212" height="60" rx="12" fill="'+palette[n.type]+'" stroke="'+focusStroke+'" stroke-width="'+focusWidth+'" opacity="'+opacity+'"/>'+
    '<text x="'+p.x+'" y="'+(p.y-14)+'" fill="white" text-anchor="middle" font-size="12" font-weight="700" opacity="'+opacity+'">'+esc(label)+'</text>'+
    '<text x="'+p.x+'" y="'+(p.y+3)+'" fill="white" text-anchor="middle" font-size="11" font-weight="800" opacity="'+opacity+'">'+esc(count)+'</text>'+
-   (badge?'<text x="'+p.x+'" y="'+(p.y+21)+'" fill="white" text-anchor="middle" font-size="11" font-weight="800" opacity="'+opacity+'">'+esc(badge)+'</text>':'')+
+   (badge?'<rect x="'+(p.x-77)+'" y="'+(p.y+7)+'" width="154" height="19" rx="9" fill="'+badgeBg+'" opacity="'+opacity+'"/><text x="'+p.x+'" y="'+(p.y+21)+'" fill="'+badgeFg+'" text-anchor="middle" font-size="11" font-weight="800" opacity="'+opacity+'">'+esc(badge)+'</text>':'')+
    '<title>'+esc(n.label)+' · '+esc(count)+(badge?' · '+esc(badge):'')+'</title></g>';
  }).join('');
  graph.innerHTML='<svg viewBox="0 0 '+width+' '+height+'" width="'+width+'" height="'+height+'" aria-label="Red de reservas, partes, órdenes y burros"><g>'+paths+shapes+'</g></svg>';
