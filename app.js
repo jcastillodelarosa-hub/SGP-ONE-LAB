@@ -996,7 +996,7 @@ function openGlassBurroDetail(position){
  const insight=buildGlassNodeInsights(visibleGlassEfficiencyRows()).get('b:'+position);
  const reservations=glassRackBreakdown(insight,'all');
  const byReserve=modal.querySelector('#glassBurroReservas');
- if(byReserve)byReserve.innerHTML=reservations.length>1?'<strong class="glass-burro-sharing">⚠ Burro compartido por '+reservations.length+' reservas principales</strong>':''+
+ if(byReserve)byReserve.innerHTML=(reservations.length>1?'<strong class="glass-burro-sharing">⚠ Burro compartido por '+reservations.length+' reservas principales</strong>':'')+
   reservations.map(item=>'<div class="glass-burro-reserve"><strong>'+esc(item.reserva)+'</strong><span>'+item.prepared+' preparados · '+item.novelty+' novedad · '+item.transfer+' traslado · '+item.others+' otros</span></div>').join('');
 
  const body=modal.querySelector('#glassBurroBody');
