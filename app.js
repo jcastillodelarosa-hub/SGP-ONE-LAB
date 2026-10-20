@@ -938,7 +938,7 @@ function renderGlassExplorer(){
  const shapes=visible.filter(n=>coords.has(n.id)).map(n=>{
   const p=coords.get(n.id),metric=insights.get(n.id);
   const label=n.label.length>24?n.label.slice(0,23)+'…':n.label;
-  const count=n.type==='burro'?n.glass+' vidrios':(metric?.windows??n.windows)+' ventanas';
+  const count=n.type==='burro'?n.glass+' vidrios':n.windows+' ventanas';
   const reservations=n.type==='burro'?glassRackBreakdown(metric,mode):[];
   const shared=n.type==='burro'&&reservations.length>1;
   const coverage=n.type==='orden'?glassCoverage(metric):null;
