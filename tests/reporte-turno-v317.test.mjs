@@ -36,3 +36,12 @@ test('LAB v317 identifica los recursos de la misma versión',()=>{
  assert.match(html,/app\.js\?v=317/);
  assert.match(html,/styles\.css\?v=317/);
 });
+
+test('imagen no requiere biblioteca PDF y errores de CDN son explicativos',()=>{
+ assert.match(report,/ensureReportExportLibs\(false\)/);
+ assert.match(report,/No se pudo cargar la biblioteca de imágenes/);
+ assert.match(report,/ensureReportExportLibs\(true\)/);
+ assert.match(app,/async function ensureReportExportLibs\(needPdf=true\)/);
+ assert.match(app,/if\(needPdf&&!window\.jspdf\)/);
+ assert.match(app,/No se pudo cargar jsPDF desde cdn\.jsdelivr\.net/);
+});
