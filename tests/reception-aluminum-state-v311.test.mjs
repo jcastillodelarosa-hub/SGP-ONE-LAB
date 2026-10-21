@@ -52,8 +52,8 @@ test('Recepción conserva auditoría y consulta la misma RPC de seguimiento que 
  assert.match(app,/client\.rpc\('sgp_consultar_seguimiento_aluminio'/);
  assert.match(app,/indexReceptionAluminumStates\(/);
  assert.match(app,/receptionAluminumBadge\(r\.reserva\)/);
- assert.match(app,/const pending=rows\.filter\(r=>r\.estado!=='RECIBIDA'\)/);
- assert.match(app,/const received=rows\.filter\(r=>r\.estado==='RECIBIDA'\)/);
+ assert.match(app,/pending=rows\.filter\(r=>r\.estado!=='RECIBIDA'\)/);
+ assert.match(app,/received=rows\.filter\(r=>r\.estado==='RECIBIDA'\)/);
  assert.match(app,/openReception\(b\.dataset\.receive\)/);
  assert.match(html,/id="recTable"/);
  assert.match(html,/id="recReceivedBody"/);
