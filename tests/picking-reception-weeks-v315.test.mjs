@@ -99,7 +99,7 @@ test('estilo proporcional y móvil, sin modificar selectores de Entrega de órde
 });
 
 test('versión y archivos de publicación sincronizados',()=>{
- assert.match(html,/LAB v322/);
- assert.match(html,/app\.js\?v=322/);
- assert.match(html,/styles\.css\?v=322/);
+ assert.match(html,/LAB v323/);
+ assert.match(html,/app\.js\?v=323/);
+ assert.match(html,/styles\.css\?v=323/);
 });

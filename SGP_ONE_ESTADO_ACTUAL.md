@@ -1,3 +1,7 @@
+## LAB v323 — Diseño del reporte de Picking (PROPUESTO EN RAMA)
+
+Se implementó la estética aprobada del reporte de entregas: encabezado corporativo azul con marca SGP tipográfica, subtítulo de Picking, indicadores de colores, tablas con cabeceras azules, resumen por sistema con total y porcentaje de parciales, filtros y diseño responsive. Se conservan los valores reales, la consulta RPC, PDF e imagen PNG; no se modifica Supabase ni reglas de negocio. Rama `feat/lab-v323-picking-report-visual`. Pendiente de revisión de PR, validación visual en navegador y autorización independiente de fusión y despliegue.
+
 ## LAB v322 — Reporte de Picking accesible desde Entrega de órdenes (en rama, NO publicado)
 
 Cambio solicitado 2026-10-21: botón «Generar reporte de entregas» dentro de la pestaña «Entrega de órdenes», como el reporte de Producción. Abre modal de reporte con filtros por fecha operativa, turno y sistema, resumen por sistemas, detalle de entregas y faltantes. Sustituye exportación Excel por imagen PNG, conserva PDF y la pestaña de reporte existente. Usa la RPC de solo lectura ya autorizada; no modifica Supabase. Rama `feat/lab-v322-picking-report-direct-image`. Pendiente pruebas de integración navegador, validación de sesión real y autorización explícita de merge/despliegue.
