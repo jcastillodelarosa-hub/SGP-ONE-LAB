@@ -45,3 +45,7 @@
 @keyframes sgpFade{from{opacity:0}to{opacity:1}}
 @keyframes sgpSlide{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:translateX(0)}}
 @keyframes sgpZoom{from{opacity:0;transform:scale(.985)}to{opacity:1;transform:scale(1)}}
+
+.sgp-nav-desktop-trigger{display:none;border:1px solid #cbdcf1;border-radius:9px;background:#eaf3ff;color:#165dbd;padding:7px 11px;cursor:pointer}
+@media(min-width:761px){.app-shell[data-sgp-nav-mode="floating"] .sgp-nav-desktop-trigger{display:inline-flex}.app-shell[data-sgp-nav-mode="floating"] .workspace>.topbar:before{display:none}}
+@media(max-width:760px){.sgp-nav-desktop-trigger{display:none!important}}
