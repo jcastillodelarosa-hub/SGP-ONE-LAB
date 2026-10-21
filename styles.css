@@ -2149,3 +2149,40 @@ button.active,[aria-pressed="true"]{border-color:#0865ed}
 @media(max-width:700px){
  #recTable .rec-aluminum-badge,.received-reservations-wrap .rec-aluminum-badge{font-size:10px;max-width:145px}
 }
+
+/* LAB v312 · selector de archivos uniforme con la evidencia de Recepción */
+.weekly-upload-row .weekly-file-field,.daily-upload-row .daily-file-field{min-width:0}
+.sgp-file-picker{
+ position:relative;display:grid;grid-template-columns:minmax(0,1fr);gap:10px;
+ box-sizing:border-box;width:100%;min-width:0;padding:12px 14px;
+ border:1px dashed #9db6d8;border-radius:12px;background:#fbfdff;cursor:pointer;
+}
+.sgp-file-button{
+ display:flex;align-items:center;justify-content:center;gap:6px;
+ box-sizing:border-box;min-height:44px;width:100%;padding:10px 14px;
+ border:1px solid #8db9ff;border-radius:10px;
+ background:#eaf3ff;color:#1556a5;
+ box-shadow:0 2px 6px rgba(37,99,235,.08);
+ font-size:13px;font-weight:850;line-height:1.3;text-align:center;
+ pointer-events:none;
+}
+.sgp-file-icon{font-size:13px}
+.sgp-file-selection{display:block;min-width:0;color:#65778b;font-size:12px;font-weight:500;line-height:1.5;overflow-wrap:anywhere}
+.sgp-file-hint{display:block;min-width:0;color:#65778b;font-size:12px;font-weight:400;line-height:1.5;overflow-wrap:anywhere}
+.weekly-upload-row .sgp-file-picker input[type="file"],
+.daily-upload-row .sgp-file-picker input[type="file"]{
+ position:absolute!important;top:12px!important;left:14px!important;right:auto!important;
+ width:calc(100% - 28px)!important;height:44px!important;min-height:44px!important;
+ margin:0!important;padding:0!important;border:0!important;border-radius:10px!important;
+ background:transparent!important;opacity:0!important;z-index:2;cursor:pointer;
+}
+.sgp-file-picker:hover .sgp-file-button{background:#dfedff;border-color:#609bfa}
+.sgp-file-picker:focus-within .sgp-file-button{outline:3px solid #93c5fd;outline-offset:2px}
+@media(max-width:700px){
+ .sgp-file-picker{padding:12px}
+ .weekly-upload-row .sgp-file-picker input[type="file"],
+ .daily-upload-row .sgp-file-picker input[type="file"]{left:12px!important;width:calc(100% - 24px)!important}
+ .sgp-file-button{min-height:48px;font-size:14px}
+ .weekly-upload-row .sgp-file-picker input[type="file"],
+ .daily-upload-row .sgp-file-picker input[type="file"]{height:48px!important;min-height:48px!important}
+}
