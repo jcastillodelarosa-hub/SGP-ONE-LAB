@@ -37,13 +37,14 @@ test('LAB v317 identifica los recursos de la misma versión',()=>{
  assert.match(html,/styles\.css\?v=317/);
 });
 
-test('imagen no requiere biblioteca PDF y errores de CDN son explicativos',()=>{
+test('imagen no requiere biblioteca PDF y los scripts son locales',()=>{
  assert.match(report,/ensureReportExportLibs\(false\)/);
  assert.match(report,/No se pudo cargar la biblioteca de imágenes/);
  assert.match(report,/ensureReportExportLibs\(true\)/);
  assert.match(app,/async function ensureReportExportLibs\(needPdf=true\)/);
- assert.match(app,/if\(needPdf&&!window\.jspdf\)/);
- assert.match(app,/No se pudo cargar jsPDF desde cdn\.jsdelivr\.net/);
+ assert.match(app,/\.\/vendor\/html2canvas\.min\.js/);
+ assert.match(app,/\.\/vendor\/jspdf\.umd\.min\.js/);
+ assert.doesNotMatch(app,/cdn\.jsdelivr\.net\/npm\/(html2canvas|jspdf)/);
 });
 
 test('el PDF o imagen puede generarse aunque falle guardar comentario, sin marcarlo guardado',()=>{
