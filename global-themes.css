@@ -55,3 +55,24 @@
 .app-shell[data-sgp-theme-mode="dark"] .workspace input:not([type="checkbox"]):not([type="radio"]),
 .app-shell[data-sgp-theme-mode="dark"] .workspace select,
 .app-shell[data-sgp-theme-mode="dark"] .workspace textarea{background:var(--sgp-surface);color:var(--sgp-ink);border-color:var(--sgp-border)}
+
+/* LAB v320: neutral content panels and tab surfaces share the selected palette. */
+.app-shell[data-sgp-theme] .workspace .metric:not(.nc-orange):not(.nc-red):not(.nc-warning):not(.miss-light),
+.app-shell[data-sgp-theme] .workspace .prod-summary,
+.app-shell[data-sgp-theme] .workspace .programming-summary-grid,
+.app-shell[data-sgp-theme] .workspace .modal-card,
+.app-shell[data-sgp-theme] .workspace .daily-tabs,
+.app-shell[data-sgp-theme] .workspace .pick-main-tabs,
+.app-shell[data-sgp-theme] .workspace .assembly-tabs{
+ border-color:var(--sgp-border);
+}
+.app-shell[data-sgp-theme] .workspace .daily-tabs,
+.app-shell[data-sgp-theme] .workspace .pick-main-tabs,
+.app-shell[data-sgp-theme] .workspace .assembly-tabs{background:var(--sgp-soft)}
+.app-shell[data-sgp-theme] .workspace .daily-tabs button.active,
+.app-shell[data-sgp-theme] .workspace .pick-main-tabs button.active,
+.app-shell[data-sgp-theme] .workspace .assembly-tabs button.active{
+ background:var(--sgp-primary)!important;color:#fff!important;
+}
+.app-shell[data-sgp-theme-mode="dark"] .workspace .eyebrow{color:var(--sgp-muted)}
+/* Keep semantic warning, error, success, NC and reserve-status classes under their original rules. */
