@@ -20,7 +20,7 @@
 .app-shell[data-sgp-theme] .workspace .eyebrow{color:var(--sgp-primary)}
 .app-shell[data-sgp-theme] .workspace .primary,
 .app-shell[data-sgp-theme] .workspace button.primary,
-.app-shell[data-sgp-theme] .workspace .weekly-tab.active{background:var(--sgp-accent)!important;color:var(--sgp-on-accent)!important;border-color:transparent!important}
+.app-shell[data-sgp-theme] .workspace .weekly-tab.active{background:var(--sgp-primary)!important;color:var(--sgp-on-accent)!important;border-color:transparent!important}
 .app-shell[data-sgp-theme] .workspace .weekly-tabs,
 .app-shell[data-sgp-theme] .workspace .toolbar,
 .app-shell[data-sgp-theme] .workspace .summary,
@@ -37,7 +37,21 @@
 /* Theme-specific navigation; preserves hover/selected contrast rules. */
 .app-shell[data-sgp-theme]>.sidebar{background:linear-gradient(135deg,var(--sgp-primary),var(--sgp-accent))!important}
 .app-shell[data-sgp-theme]:not(.sgp-nav-expanded):not([data-sgp-nav-mode="floating"])>.sidebar{background:linear-gradient(90deg,var(--sgp-primary) 0%,var(--sgp-accent) 88%,color-mix(in srgb,var(--sgp-accent) 65%,transparent))!important}
-.app-shell[data-sgp-theme]>.sidebar .nav button:not([hidden]).active{background:color-mix(in srgb,var(--sgp-accent) 70%,white 12%)!important;color:#fff!important}
+.app-shell[data-sgp-theme]>.sidebar .nav button:not([hidden]).active{background:var(--sgp-primary)!important;color:#fff!important}
 .app-shell[data-sgp-theme]>.sidebar .nav button:not([hidden]):hover:not(.active){background:var(--sgp-soft)!important;color:var(--sgp-primary)!important}
 .app-shell[data-sgp-theme]>.sidebar .nav button:not([hidden]):hover:not(.active) .sgp-nav-name{color:var(--sgp-primary)!important}
 @media(prefers-reduced-motion:no-preference){.app-shell[data-sgp-theme] .workspace{transition:background-color .2s ease,color .2s ease}}
+
+/* LAB v320 QA: dark-mode coverage for generic neutral containers, not semantic status badges. */
+.app-shell[data-sgp-theme-mode="dark"] .workspace .metric,
+.app-shell[data-sgp-theme-mode="dark"] .workspace .modal-card,
+.app-shell[data-sgp-theme-mode="dark"] .workspace .prod-summary,
+.app-shell[data-sgp-theme-mode="dark"] .workspace .programming-summary-grid,
+.app-shell[data-sgp-theme-mode="dark"] .workspace .home-week-cards,
+.app-shell[data-sgp-theme-mode="dark"] .workspace .weekly-upload-row{background:var(--sgp-surface);border-color:var(--sgp-border);color:var(--sgp-ink)}
+.app-shell[data-sgp-theme-mode="dark"] .workspace .metric strong,
+.app-shell[data-sgp-theme-mode="dark"] .workspace .metric b,
+.app-shell[data-sgp-theme-mode="dark"] .workspace .prod-summary strong{color:var(--sgp-ink)}
+.app-shell[data-sgp-theme-mode="dark"] .workspace input:not([type="checkbox"]):not([type="radio"]),
+.app-shell[data-sgp-theme-mode="dark"] .workspace select,
+.app-shell[data-sgp-theme-mode="dark"] .workspace textarea{background:var(--sgp-surface);color:var(--sgp-ink);border-color:var(--sgp-border)}
