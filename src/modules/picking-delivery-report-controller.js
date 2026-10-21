@@ -13,8 +13,38 @@ export function initPickingDeliveryReport({getSupabaseClient,getAppToken}){
  const report=$('pickReportPanel');if(!report)return;
  let state=null;
  const status=$('pickReportStatus');
+ const direct=$('pickDirectReport');
+ const reportHome=report.parentNode;
+ const reportNext=report.nextSibling;
+ let modal=null;
+ const closeDirect=()=>{
+  if(!modal)return;
+  if(reportNext&&reportNext.parentNode===reportHome)reportHome.insertBefore(report,reportNext);
+  else reportHome.appendChild(report);
+  report.hidden=true;
+  modal.remove();modal=null;
+  document.body.classList.remove('pick-report-modal-open');
+  direct?.focus();
+ };
+ direct?.addEventListener('click',()=>{
+  if(modal)return;
+  // Preserve the existing report DOM and RPC/export handlers: no duplicated report implementation.
+  modal=document.createElement('div');modal.className='pick-direct-report-overlay';modal.setAttribute('role','presentation');
+  modal.innerHTML='<section class="pick-direct-report-dialog" role="dialog" aria-modal="true" aria-labelledby="pickDirectReportTitle"><header class="pick-direct-report-header"><div><small>SGP ONE · PICKING</small><h2 id="pickDirectReportTitle">Reporte de entregas</h2></div><button type="button" class="pick-direct-report-close" aria-label="Cerrar reporte">×</button></header><div class="pick-direct-report-content"></div></section>';
+  modal.querySelector('.pick-direct-report-content').appendChild(report);
+  document.body.appendChild(modal);
+  document.body.classList.add('pick-report-modal-open');
+  report.hidden=false;
+  if(!$('pickReportFrom').value)$('pickReportFrom').value=dates();
+  if(!$('pickReportTo').value)$('pickReportTo').value=dates();
+  modal.querySelector('.pick-direct-report-close').addEventListener('click',closeDirect);
+  modal.addEventListener('click',event=>{if(event.target===modal)closeDirect()});
+  modal.querySelector('.pick-direct-report-close').focus();
+ });
+ document.addEventListener('keydown',event=>{if(modal&&event.key==='Escape'){event.preventDefault();closeDirect()}});
+
  const selectTab=tab=>{for(const name of ['Delivery','Reception','Report']){const active=name===tab;const b=$('pick'+name+'Tab'),p=$('pick'+name+'Panel');if(b)b.classList.toggle('active',active);if(p)p.hidden=!active}}
- $('pickReportTab')?.addEventListener('click',()=>{selectTab('Report');if(!state){$('pickReportFrom').value=dates();$('pickReportTo').value=dates()}});
+ $('pickReportTab')?.addEventListener('click',()=>{closeDirect();selectTab('Report');if(!state){$('pickReportFrom').value=dates();$('pickReportTo').value=dates()}});
  $('pickDeliveryTab')?.addEventListener('click',()=>selectTab('Delivery'));
  $('pickReceptionTab')?.addEventListener('click',()=>selectTab('Reception'));
  const show=()=>{if(!state)return;const {summary,por_sistema,rows,total_rows,filters}=state;
