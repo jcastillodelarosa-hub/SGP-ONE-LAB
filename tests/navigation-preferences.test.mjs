@@ -58,3 +58,12 @@ test('nine themes and light dark modes are selectable and scoped',()=>{
  assert.match(themeCss,/data-sgp-theme-mode="dark"/);
  assert.doesNotMatch(themeCss,/\.state-abierta|\.rec-al-supply|\.rec-al-warehouse|\.rec-al-delivered/);
 });
+
+test('global theme reaches module tabs while preserving semantic colors',()=>{
+ const css=readFileSync('global-themes.css','utf8');
+ for(const selector of ['.daily-tabs','.pick-main-tabs','.assembly-tabs']) assert.ok(css.includes(selector),selector+' not themed');
+ assert.match(css,/\.workspace \.daily-tabs button\.active/);
+ assert.match(css,/background:var\(--sgp-primary\)!important;color:#fff!important/);
+ assert.doesNotMatch(css,/\.nc-red\s*\{/);
+ assert.doesNotMatch(css,/\.nc-warning\s*\{/);
+});
