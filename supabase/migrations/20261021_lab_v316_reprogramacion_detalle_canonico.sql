@@ -18,12 +18,18 @@ begin
  if (v_origen.fecha_programacion,v_origen.turno)=(p_fecha,p_turno) then raise exception 'Selecciona una fecha o turno diferente'; end if;
  if exists(select 1 from public.sgp_mecanizado_reprogramaciones where id_origen=p_id_programacion and produccion=p_produccion) then raise exception 'La orden ya fue reprogramada'; end if;
  if v_origen.produccion is not null and v_origen.produccion<>p_produccion then raise exception 'Orden no pertenece a esta programación'; end if;
- select pr.prioridad,round(sp.cantidad)::int into v_parte,v_cantidad
- from public.sgp_producciones sp
- left join public.sgp_prioridades pr on pr.key_produccion=sp.key_produccion and pr.id_linea='PANELES_2'
- where sp.reserva_al=v_origen.reserva and sp.id_linea='PANELES_2' and sp.produccion=p_produccion
- and (v_origen.prioridad_semanal is null or pr.prioridad=v_origen.prioridad_semanal)
- limit 1;
+ -- La composición canónica determina la producción, no un nombre potencialmente repetido.
+ -- El join por key_produccion impide tomar cantidad/prioridad de otra reserva o sistema.
+ select min(pr.prioridad),round(sum(d.cantidad_snapshot))::int into v_parte,v_cantidad
+ from public.sgp_mecanizado_programacion_detalle d
+ join public.sgp_producciones sp on sp.key_produccion=d.key_produccion
+ left join public.sgp_prioridades pr on pr.key_produccion=d.key_produccion and pr.id_linea='PANELES_2'
+ where d.id_programacion=p_id_programacion
+   and d.reserva_snapshot=v_origen.reserva
+   and d.produccion_snapshot=p_produccion
+   and sp.reserva_al=v_origen.reserva and sp.id_linea='PANELES_2'
+   and sp.produccion=p_produccion
+   and (v_origen.prioridad_semanal is null or d.prioridad_semanal_snapshot=v_origen.prioridad_semanal);
  if v_cantidad is null then raise exception 'Orden no pertenece a la reserva / parte'; end if;
  if v_cantidad>v_origen.cantidad_programada then raise exception 'La orden tiene % ventanas pero solo % programadas en el origen; no se permite mover parcialmente',v_cantidad,v_origen.cantidad_programada; end if;
  select eo.estado into v_estado from public.sgp_mecanizado_ejecucion_orden eo where eo.id_programacion=p_id_programacion and eo.produccion=p_produccion;
