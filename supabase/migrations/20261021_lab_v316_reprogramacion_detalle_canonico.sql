@@ -20,10 +20,9 @@ begin
  if v_origen.produccion is not null and v_origen.produccion<>p_produccion then raise exception 'Orden no pertenece a esta programación'; end if;
  -- La composición canónica determina la producción, no un nombre potencialmente repetido.
  -- El join por key_produccion impide tomar cantidad/prioridad de otra reserva o sistema.
- select min(pr.prioridad),round(sum(d.cantidad_snapshot))::int into v_parte,v_cantidad
+ select min(d.prioridad_semanal_snapshot),round(sum(d.cantidad_snapshot))::int into v_parte,v_cantidad
  from public.sgp_mecanizado_programacion_detalle d
  join public.sgp_producciones sp on sp.key_produccion=d.key_produccion
- left join public.sgp_prioridades pr on pr.key_produccion=d.key_produccion and pr.id_linea='PANELES_2'
  where d.id_programacion=p_id_programacion
    and d.reserva_snapshot=v_origen.reserva
    and d.produccion_snapshot=p_produccion
@@ -63,5 +62,4 @@ begin
  fecha_actualizacion=now() where id_programacion=p_id_programacion;
  perform public.sgp_mecanizado_guardar_estado_orden(p_token,p_id_programacion,p_produccion,'REPROGRAMADO','Reprogramada a '||p_fecha||' '||p_turno||'. '||trim(p_motivo));
  return v_destino;
-end $function$
-
+end $function$;
