@@ -16,6 +16,7 @@ function setOpen(v){
  opened=!!v;
  shell.classList.toggle('sgp-nav-expanded',opened);
  shell.classList.toggle('sgp-nav-overlay-open',opened&&overlay());
+ if(compact())document.body.classList.toggle('mobile-menu-open',opened);
  const toggle=document.querySelector('#sgpNavToggle');
  if(toggle)toggle.setAttribute('aria-expanded',String(opened));
 }
@@ -49,7 +50,8 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&overlay())setOpen(f
 const shade=document.querySelector('#mobileMenuShade');
 if(shade)shade.addEventListener('click',()=>setOpen(false));
 const mobileToggle=document.querySelector('#mobileMenuToggle');
-if(mobileToggle)mobileToggle.addEventListener('click',()=>{if(compact())setOpen(!opened)});
+/* The existing app.js mobile menu handler owns mobile toggle clicks. */
+if(mobileToggle)mobileToggle.addEventListener('click',()=>{if(compact())queueMicrotask(()=>setOpen(document.body.classList.contains('mobile-menu-open')))});
 matchMedia('(max-width:760px)').addEventListener('change',apply);
 function animate(panel){
  if(!panel||settings.effect==='none'||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
