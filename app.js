@@ -2315,21 +2315,70 @@ async function saveShiftReportComment(d,comment){
  const db=await getSupabaseClient(),turno=d.turno||'TODOS';
  const {error}=await db.from('sgp_mecanizado_reportes_turno').upsert({fecha:d.date,turno,comentario_general:comment,usuario:currentAuth?.usuario||'',actualizado_en:new Date().toISOString()},{onConflict:'fecha,turno'});if(error)throw error;d.comment=comment;
 }
+function shiftReportError(error){
+ const detail=String(error?.message||error?.details||error?.hint||error||'Error desconocido');
+ return detail==='undefined'||detail==='[object Object]'?'No se pudo completar la operación. Comprueba la conexión y vuelve a intentarlo.':detail;
+}
+function shiftReportDownloadName(d,extension){
+ return 'SGP_Reporte_Turno_'+d.date+'_'+(d.turno||'TODOS').replaceAll(' ','_')+'.'+extension;
+}
+async function shiftReportCapture(preview){
+ await ensureReportExportLibs();
+ if(typeof window.html2canvas!=='function')throw new Error('No se pudo cargar la biblioteca de imágenes. Comprueba el acceso a los recursos de exportación.');
+ const sheet=preview.querySelector('.shift-report-sheet');
+ if(!sheet)throw new Error('No hay una vista previa disponible para exportar.');
+ const canvas=await window.html2canvas(sheet,{scale:2,useCORS:true,backgroundColor:'#fff',windowWidth:sheet.scrollWidth,windowHeight:sheet.scrollHeight});
+ if(!canvas?.width||!canvas?.height)throw new Error('La captura del reporte está vacía.');
+ return canvas;
+}
 async function openShiftReport(){
- const date=document.querySelector('#prodDate')?.value,turno=document.querySelector('#prodShift')?.value||'';
- if(!date)return alert('Selecciona la fecha del reporte.');
+ const initialDate=document.querySelector('#prodDate')?.value,initialTurno=document.querySelector('#prodShift')?.value||'';
+ if(!initialDate)return alert('Selecciona la fecha del reporte.');
  try{
-  const d=await buildShiftReportData(date,turno);let m=document.querySelector('#shiftReportModal');
+  let d=await buildShiftReportData(initialDate,initialTurno),busy=false;
+  let m=document.querySelector('#shiftReportModal');
   if(!m){m=document.createElement('div');m.id='shiftReportModal';m.className='rec-overlay shift-report-overlay';document.body.appendChild(m)}
-  m.innerHTML='<div class="shift-report-modal"><div class="shift-report-modal-head"><div><small>REPORTE DE TURNO</small><h3>Generar reporte de turno</h3></div><button type="button" class="modal-close" data-shift-report-close>×</button></div><div class="shift-report-work"><aside><label>Fecha<input type="date" data-shift-report-date value="'+shiftReportEsc(date)+'" disabled></label><label>Turno<input value="'+shiftReportEsc(turno||'Todos los turnos')+'" disabled></label><div class="shift-report-mini">'+(()=>{const z=shiftReportSummary(d);return '<span>Programado <b>'+z.programmed+'</b></span><span>Ejecutado <b>'+z.executed+'</b></span><span>Pendiente <b>'+z.pending+'</b></span><span>Avance <b>'+z.pct+'%</b></span>'})()+'</div><label>Comentario general del turno<textarea data-shift-report-comment rows="8" maxlength="1200" placeholder="Resumen para el líder del siguiente turno y coordinación...">'+shiftReportEsc(d.comment)+'</textarea></label><p class="shift-report-help">El comentario se guarda por fecha y turno y se incluye en PDF e imagen.</p><div class="shift-report-actions"><button type="button" data-shift-preview>Vista previa</button><button type="button" class="primary" data-shift-pdf>Generar PDF</button><button type="button" data-shift-image>Generar imagen</button></div></aside><main data-shift-report-preview>'+shiftReportPreviewHtml(d)+'</main></div></div>';
+  m.innerHTML='<div class="shift-report-modal"><div class="shift-report-modal-head"><div><small>REPORTE DE TURNO</small><h3>Generar reporte de turno</h3></div><button type="button" class="modal-close" data-shift-report-close>×</button></div><div class="shift-report-work"><aside><label>Fecha<input type="date" data-shift-report-date value="'+shiftReportEsc(initialDate)+'"></label><label>Turno<select data-shift-report-turno><option value="">Todos los turnos</option><option value="TURNO 1">Turno 1</option><option value="TURNO 2">Turno 2</option></select></label><div class="shift-report-mini" data-shift-report-summary></div><label>Comentario general del turno<textarea data-shift-report-comment rows="8" maxlength="1200" placeholder="Resumen para el líder del siguiente turno y coordinación..."></textarea></label><p class="shift-report-help">El comentario se guarda por fecha y turno y se incluye en PDF e imagen.</p><p class="shift-report-error" data-shift-report-error role="alert" hidden></p><div class="shift-report-actions"><button type="button" data-shift-preview>Vista previa</button><button type="button" class="primary" data-shift-pdf>Generar PDF</button><button type="button" data-shift-image>Generar imagen</button></div></aside><main data-shift-report-preview></main></div></div>';
   m.hidden=false;m.scrollTop=0;
-  const comment=m.querySelector('[data-shift-report-comment]'),preview=m.querySelector('[data-shift-report-preview]');
-  const refresh=async()=>{await saveShiftReportComment(d,comment.value.trim());preview.innerHTML=shiftReportPreviewHtml(d)};
-  m.querySelector('[data-shift-report-close]').onclick=()=>m.hidden=true;
-  m.querySelector('[data-shift-preview]').onclick=refresh;
-  m.querySelector('[data-shift-image]').onclick=async()=>{try{await refresh();await ensureReportExportLibs();const el=preview.querySelector('.shift-report-sheet'),c=await html2canvas(el,{scale:2,useCORS:true,backgroundColor:'#fff',windowWidth:el.scrollWidth,windowHeight:el.scrollHeight}),a=document.createElement('a');a.download='SGP_Reporte_Turno_'+date+'_'+(turno||'TODOS').replaceAll(' ','_')+'.png';a.href=c.toDataURL('image/png');a.click()}catch(e){alert('No fue posible generar la imagen: '+e.message)}};
-  m.querySelector('[data-shift-pdf]').onclick=async()=>{try{await refresh();await ensureReportExportLibs();const el=preview.querySelector('.shift-report-sheet'),c=await html2canvas(el,{scale:2,useCORS:true,backgroundColor:'#fff',windowWidth:el.scrollWidth,windowHeight:el.scrollHeight}),{jsPDF}=window.jspdf,pdf=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'}),pw=297,ph=210,margin=6,w=pw-margin*2,h=c.height*w/c.width,img=c.toDataURL('image/jpeg',.95);let y=margin,left=h;pdf.addImage(img,'JPEG',margin,y,w,h);left-=ph-margin*2;while(left>0){y=-(h-left)+margin;pdf.addPage();pdf.addImage(img,'JPEG',margin,y,w,h);left-=ph-margin*2}pdf.save('SGP_Reporte_Turno_'+date+'_'+(turno||'TODOS').replaceAll(' ','_')+'.pdf')}catch(e){alert('No fue posible generar el PDF: '+e.message)}};
- }catch(e){alert('No fue posible preparar el reporte: '+e.message)}
+  const dateInput=m.querySelector('[data-shift-report-date]'),turnoInput=m.querySelector('[data-shift-report-turno]'),comment=m.querySelector('[data-shift-report-comment]'),preview=m.querySelector('[data-shift-report-preview]'),summary=m.querySelector('[data-shift-report-summary]'),errorBox=m.querySelector('[data-shift-report-error]'),buttons=[...m.querySelectorAll('.shift-report-actions button')];
+  turnoInput.value=initialTurno;
+  const showError=e=>{errorBox.textContent=shiftReportError(e);errorBox.hidden=false;console.error('Reporte de turno:',e)};
+  const clearError=()=>{errorBox.textContent='';errorBox.hidden=true};
+  const render=()=>{const z=shiftReportSummary(d);summary.innerHTML='<span>Programado <b>'+z.programmed+'</b></span><span>Ejecutado <b>'+z.executed+'</b></span><span>Pendiente <b>'+z.pending+'</b></span><span>Avance <b>'+z.pct+'%</b></span>';comment.value=d.comment||'';preview.innerHTML=shiftReportPreviewHtml(d)};
+  const setBusy=value=>{busy=value;buttons.forEach(button=>button.disabled=value);dateInput.disabled=value;turnoInput.disabled=value};
+  const run=async fn=>{if(busy)return;setBusy(true);clearError();try{await fn()}catch(e){showError(e)}finally{setBusy(false)}};
+  const saveComment=async()=>{const value=comment.value.trim();if(value===d.comment)return;await saveShiftReportComment(d,value)};
+  const updateFilters=async()=>{
+   const nextDate=dateInput.value,nextTurno=turnoInput.value;
+   if(!nextDate)throw new Error('Selecciona una fecha válida.');
+   if(nextDate===d.date&&nextTurno===d.turno)return;
+   // Nunca guardar el comentario de un turno bajo la fecha o turno siguiente.
+   await saveComment();
+   d=await buildShiftReportData(nextDate,nextTurno);
+   render();
+  };
+  const refresh=async()=>{await saveComment();preview.innerHTML=shiftReportPreviewHtml(d)};
+  m.querySelector('[data-shift-report-close]').onclick=()=>{if(!busy)m.hidden=true};
+  dateInput.onchange=()=>run(updateFilters);
+  turnoInput.onchange=()=>run(updateFilters);
+  m.querySelector('[data-shift-preview]').onclick=()=>run(refresh);
+  m.querySelector('[data-shift-image]').onclick=()=>run(async()=>{
+   await refresh();
+   const canvas=await shiftReportCapture(preview),a=document.createElement('a');
+   a.download=shiftReportDownloadName(d,'png');a.href=canvas.toDataURL('image/png');a.click();
+  });
+  m.querySelector('[data-shift-pdf]').onclick=()=>run(async()=>{
+   await refresh();
+   const canvas=await shiftReportCapture(preview);
+   const Pdf=window.jspdf?.jsPDF;
+   if(typeof Pdf!=='function')throw new Error('No se pudo cargar la biblioteca PDF. Comprueba el acceso a los recursos de exportación.');
+   const pdf=new Pdf({orientation:'landscape',unit:'mm',format:'a4'}),pw=297,ph=210,margin=6,w=pw-margin*2,h=canvas.height*w/canvas.width,img=canvas.toDataURL('image/jpeg',.95);
+   let y=margin,left=h;pdf.addImage(img,'JPEG',margin,y,w,h);left-=ph-margin*2;
+   while(left>0){y=-(h-left)+margin;pdf.addPage();pdf.addImage(img,'JPEG',margin,y,w,h);left-=ph-margin*2}
+   pdf.save(shiftReportDownloadName(d,'pdf'));
+  });
+  render();
+ }catch(e){console.error('Reporte de turno:',e);alert('No fue posible preparar el reporte: '+shiftReportError(e))}
 }
 
 async function loadProductionBoard(){
