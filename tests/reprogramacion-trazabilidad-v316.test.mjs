@@ -49,7 +49,12 @@ test('identidad y cantidad se resuelven por key_produccion, no por nombre con LI
  assert.doesNotMatch(migration,/limit 1;/i);
 });
 test('una reserva con varios registros de composición se suma, no toma una fila arbitraria',()=>{
- assert.match(migration,/select min\(pr\.prioridad\),round\(sum\(d\.cantidad_snapshot\)\)::int/);
+ assert.match(migration,/select min\(d\.prioridad_semanal_snapshot\),round\(sum\(d\.cantidad_snapshot\)\)::int/);
  assert.match(migration,/v_detalle_count=0 or v_detalle_cantidad<>v_cantidad/);
  assert.match(migration,/v_inserted<>v_detalle_count/);
+});
+
+test('SQL migración y rollback terminan en sentencia completa y no duplican prioridades',()=>{
+ for(const script of [migration,rollback])assert.match(script,/end \\$function\\$;\\s*$/);
+ assert.doesNotMatch(migration,/join public\\.sgp_prioridades pr on pr\\.key_produccion=d\\.key_produccion/);
 });
