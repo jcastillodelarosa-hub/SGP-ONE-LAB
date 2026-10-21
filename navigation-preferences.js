@@ -16,7 +16,13 @@ function setOpen(v){
  opened=!!v;
  shell.classList.toggle('sgp-nav-expanded',opened);
  shell.classList.toggle('sgp-nav-overlay-open',opened&&overlay());
- if(compact())document.body.classList.toggle('mobile-menu-open',opened);
+ if(compact()){
+  document.body.classList.toggle('mobile-menu-open',opened);
+  const mobileButton=document.querySelector('#mobileMenuToggle');
+  if(mobileButton)mobileButton.setAttribute('aria-expanded',String(opened));
+  const mobileShade=document.querySelector('#mobileMenuShade');
+  if(mobileShade)mobileShade.hidden=!opened;
+ }
  const toggle=document.querySelector('#sgpNavToggle');
  if(toggle)toggle.setAttribute('aria-expanded',String(opened));
 }
@@ -49,9 +55,9 @@ nav.addEventListener('click',e=>{if(e.target.closest('button[data-view]')&&overl
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&overlay())setOpen(false)});
 const shade=document.querySelector('#mobileMenuShade');
 if(shade)shade.addEventListener('click',()=>setOpen(false));
+/* Existing app.js remains the sole owner of the mobile toggle. Synchronize its state after clicks. */
 const mobileToggle=document.querySelector('#mobileMenuToggle');
-/* The existing app.js mobile menu handler owns mobile toggle clicks. */
-if(mobileToggle)mobileToggle.addEventListener('click',()=>{if(compact())queueMicrotask(()=>setOpen(document.body.classList.contains('mobile-menu-open')))});
+if(mobileToggle)mobileToggle.addEventListener('click',()=>{if(compact())queueMicrotask(()=>{opened=document.body.classList.contains('mobile-menu-open');shell.classList.toggle('sgp-nav-expanded',opened);shell.classList.toggle('sgp-nav-overlay-open',opened);})});
 matchMedia('(max-width:760px)').addEventListener('change',apply);
 function animate(panel){
  if(!panel||settings.effect==='none'||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
