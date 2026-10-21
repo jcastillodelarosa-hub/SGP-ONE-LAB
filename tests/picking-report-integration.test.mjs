@@ -15,6 +15,6 @@ test('historical report consumes authorized read-only RPC and complete paginatio
  assert.match(controller,/p_token:token/);
  assert.match(controller,/rows\.length!==total/);
  assert.match(controller,/fecha_operativa/);
- assert.match(controller,/TURNO 1/);
+ assert.match(html,/value="TURNO 1"/);
  assert.doesNotMatch(controller,/service_role/);
 });
