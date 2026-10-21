@@ -6,6 +6,18 @@
 
 ---
 
+## Actualización 2026-10-21 — LAB v318 (regularización de versión)
+
+**Alcance:** regularización del número visible después de fusionar el PR #25 (commit de integración `a045398624aebb9a070abdd1e09a0472e51f9375`). La interfaz seguía mostrando LAB v317 aunque el menú contraíble, el logo textual SGP ONE, la paleta azul intenso y las opciones de apariencia ya estaban integrados en `main`.
+
+**Cambio de release v318:** `index.html` muestra `LAB v318` y usa `styles.css?v=318` y `app.js?v=318` para invalidación de caché. Los assets de navegación mantienen `?v=2`, que es su revisión independiente ya integrada. No se modifica lógica funcional, autenticación, Supabase ni SGP_ONE_GOOGLE.
+
+**Regla obligatoria de continuidad:** cada nueva entrega de cambios funcionales, visuales o correcciones debe incrementar el identificador LAB en una unidad desde la versión realmente vigente en `main`, mantener las referencias de caché coherentes y actualizar la documentación de estado. Los incrementos deben validarse en CI y confirmarse en Firebase y navegador antes de declarar VERIFICADO.
+
+**Estado:** PROPUESTO/IMPLEMENTADO EN RAMA hasta confirmar CI, fusión y despliegue; no equivale a publicación ni verificación visual.
+
+---
+
 ## 1. ESTADO EJECUTIVO
 
 **Proyecto:** SGP_ONE  
