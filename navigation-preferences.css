@@ -58,3 +58,19 @@
 .app-shell[data-sgp-nav-mode="floating"].sgp-nav-overlay-open:before{content:"";position:fixed;inset:0;background:#071b3666;z-index:9999}
 .app-shell[data-sgp-nav-mode="floating"]>.sidebar{z-index:10000}
 }
+
+/* Fix v2: override legacy desktop !important layout and nav display rules. */
+.sgp-nav-logo{display:inline-flex;align-items:center;justify-content:flex-start;gap:0;width:auto;min-width:0;height:auto;padding:0;background:none!important;border-radius:0;color:#fff!important;font-size:16px;font-weight:900;letter-spacing:.6px;white-space:nowrap}
+.sgp-nav-logo-one{color:#85bdff}
+@media(min-width:761px){
+ .app-shell[data-sgp-nav-mode]{grid-template-columns:72px minmax(0,1fr)!important}
+ .app-shell[data-sgp-nav-mode].sgp-nav-expanded{grid-template-columns:290px minmax(0,1fr)!important}
+ .app-shell[data-sgp-nav-mode="floating"],.app-shell[data-sgp-nav-mode="floating"].sgp-nav-expanded{grid-template-columns:minmax(0,1fr)!important}
+ .app-shell[data-sgp-nav-mode]>.sidebar .nav{display:flex!important;flex-direction:column!important}
+ .app-shell[data-sgp-nav-mode]>.sidebar .nav button:not([hidden]){display:flex!important;align-items:center!important;gap:14px!important;flex:0 0 45px;min-height:45px}
+ .app-shell[data-sgp-nav-mode]>.sidebar .brand{justify-content:flex-start;min-height:34px}
+ .app-shell[data-sgp-nav-mode]:not(.sgp-nav-expanded)>.sidebar .sgp-nav-logo-one{display:none}
+ .app-shell[data-sgp-nav-mode]:not(.sgp-nav-expanded)>.sidebar .sgp-nav-logo{font-size:13px;letter-spacing:0}
+ .app-shell[data-sgp-nav-mode="floating"]>.sidebar .sgp-nav-logo-one{display:inline}
+ .app-shell[data-sgp-nav-mode]>.sidebar .brand strong,.app-shell[data-sgp-nav-mode]>.sidebar .brand>span:not(.sgp-nav-logo){display:none!important}
+}
