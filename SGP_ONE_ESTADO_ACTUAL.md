@@ -6,6 +6,16 @@
 
 ---
 
+## LAB v319 — Navegación: correcciones visuales y retorno automático (2026-10-21)
+
+**Origen:** verificación visual del usuario en LAB v318 tras el despliegue Firebase #386. El logotipo se veía como dos cápsulas, el texto del menú perdía contraste en hover y el botón ☰ convertía de manera persistente el modo automático en modo manual.
+
+**Implementado en rama:** estilos de wordmark SGP (cian) ONE (blanco), sin fondos heredados y con subrayado cian; contraste explícito en hover, foco y seleccionado; el botón ☰ fija temporalmente el menú en modo automático y al segundo clic vuelve a expandir/contraer por cursor, sin alterar la preferencia guardada. Actualizados LAB v319, recursos cacheados y pruebas de regresión. No cambia roles, sesión, datos, Supabase, Firebase ni SGP_ONE_GOOGLE.
+
+**Estado de publicación:** pendiente de CI, revisión, fusión autorizada y prueba real en navegador. La rama no equivale a publicación.
+
+---
+
 ## Actualización 2026-10-21 — LAB v318 (regularización de versión)
 
 **Alcance:** regularización del número visible después de fusionar el PR #25 (commit de integración `a045398624aebb9a070abdd1e09a0472e51f9375`). La interfaz seguía mostrando LAB v317 aunque el menú contraíble, el logo textual SGP ONE, la paleta azul intenso y las opciones de apariencia ya estaban integrados en `main`.

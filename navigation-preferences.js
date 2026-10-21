@@ -12,6 +12,7 @@ if(!shell||!side||!nav)return;
 const compact=()=>matchMedia('(max-width:760px)').matches;
 const overlay=()=>compact()||settings.menu==='floating';
 let opened=false;
+let pinned=false;
 function setOpen(v){
  opened=!!v;
  shell.classList.toggle('sgp-nav-expanded',opened);
@@ -32,6 +33,7 @@ function apply(){
  shell.dataset.sgpNavTheme=settings.theme;
  shell.dataset.sgpNavEdge=settings.edge;
  shell.style.setProperty('--sgp-nav-speed',settings.speed+'ms');
+ pinned=false;
  setOpen(!overlay()&&settings.menu==='fixed');
 }
 function save(){try{localStorage.setItem(KEY,JSON.stringify(settings))}catch{}apply()}
@@ -50,9 +52,9 @@ nav.querySelectorAll('button[data-view]').forEach(btn=>{
 });
 const desktopTrigger=document.createElement('button');desktopTrigger.type='button';desktopTrigger.className='sgp-nav-desktop-trigger';desktopTrigger.textContent='☰';desktopTrigger.setAttribute('aria-label','Abrir módulos');const topbar=document.querySelector('.workspace .topbar');if(topbar)topbar.prepend(desktopTrigger);desktopTrigger.addEventListener('click',()=>setOpen(!opened));
 const toggle=document.createElement('button');toggle.type='button';toggle.id='sgpNavToggle';toggle.className='sgp-nav-toggle';toggle.textContent='☰';toggle.setAttribute('aria-label','Expandir o contraer módulos');side.insertBefore(toggle,nav);
-toggle.addEventListener('click',()=>{if(!overlay()&&settings.menu==='hover'){settings.menu='toggle';save();syncInputs()}setOpen(!opened)});
-side.addEventListener('mouseenter',()=>{if(!overlay()&&settings.menu==='hover')setOpen(true)});
-side.addEventListener('mouseleave',()=>{if(!overlay()&&settings.menu==='hover')setOpen(false)});
+toggle.addEventListener('click',()=>{if(!overlay()&&settings.menu==='hover'){pinned=!pinned;setOpen(pinned);return}setOpen(!opened)});
+side.addEventListener('mouseenter',()=>{if(!overlay()&&settings.menu==='hover'&&!pinned)setOpen(true)});
+side.addEventListener('mouseleave',()=>{if(!overlay()&&settings.menu==='hover'&&!pinned)setOpen(false)});
 nav.addEventListener('click',e=>{if(e.target.closest('button[data-view]')&&overlay())setOpen(false)});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&overlay())setOpen(false)});
 document.addEventListener('click',e=>{if(settings.menu==='floating'&&!compact()&&opened&&!side.contains(e.target)&&!desktopTrigger.contains(e.target))setOpen(false)});

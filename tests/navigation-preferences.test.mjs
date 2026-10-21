@@ -5,8 +5,8 @@ const html=readFileSync('index.html','utf8');
 const js=readFileSync('navigation-preferences.js','utf8');
 const css=readFileSync('navigation-preferences.css','utf8');
 test('navigation assets are loaded by SGP shell',()=>{
- assert.match(html,/navigation-preferences\.css\?v=2/);
- assert.match(html,/navigation-preferences\.js\?v=2/);
+ assert.match(html,/navigation-preferences\.css\?v=3/);
+ assert.match(html,/navigation-preferences\.js\?v=3/);
 });
 test('navigation preferences are isolated from business and auth layers',()=>{
  assert.match(js,/localStorage\.setItem\(KEY/);
@@ -31,4 +31,17 @@ test('appearance exposes selectable palettes and collapsed edge fade',()=>{
  assert.match(css,/data-sgp-nav-theme="corporate"/);
  assert.match(css,/data-sgp-nav-theme="modern"/);
  assert.match(css,/data-sgp-nav-edge="solid"/);
+});
+
+test('hamburger pin returns to automatic hover without changing stored menu preference',()=>{
+ assert.match(js,/let pinned=false/);
+ assert.match(js,/pinned=!pinned/);
+ assert.match(js,/setOpen\(pinned\)/);
+ assert.doesNotMatch(js,/settings\.menu='toggle';save\(\)/);
+ assert.match(js,/settings\.menu==='hover'&&!pinned/);
+});
+test('wordmark is plain text with cyan underline and hover contrast',()=>{
+ assert.match(css,/\.sgp-nav-logo:after/);
+ assert.match(css,/\.sgp-nav-logo>span:first-child/);
+ assert.match(css,/button:not\(\[hidden\]\):hover/);
 });
