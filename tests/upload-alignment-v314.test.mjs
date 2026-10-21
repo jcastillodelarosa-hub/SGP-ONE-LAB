@@ -40,7 +40,7 @@ test('alineación común: etiquetas y botones comienzan a la misma altura',()=>{
  assert.match(fix,/\.daily-upload-row > button,\s*\.weekly-upload-row > button,\s*\.weekly-upload-row > \.weekly-status\{\s*align-self:start;\s*margin-top:23px;/);
  // El nuevo override debe ganar a las reglas heredadas de v50 y v55.
  assert.ok(css.lastIndexOf('.daily-upload-row.daily-upload-simple,')>css.lastIndexOf('.daily-upload-simple{grid-template-columns:'));
- assert.ok(css.lastIndexOf('.weekly-upload-row{align-items:start}')>=0);
+ assert.ok(fix.indexOf('.weekly-upload-row{align-items:start}')>=0);
 });
 
 test('breakpoints: sin separación artificial cuando los botones se apilan',()=>{
