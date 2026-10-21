@@ -839,10 +839,15 @@ Estado: **IMPLEMENTADO EN RAMA**, pruebas automáticas/PR/publicación pendiente
 **Estado final:** BACKEND APLICADO Y PROBADO CON ROLLBACK; FRONTEND IMPLEMENTADO EN RAMA, NO FUSIONADO, NO PUBLICADO, NO VERIFICADO EN NAVEGADOR.
 
 
-### 2026-10-20 — Diagnóstico de vidrios en arrastre de turno (solo lectura, NO corregido)
+### 2026-10-20 — Corrección de vidrio en arrastre de turno (solo rama, autorizada)
 
-- Captura del usuario: orden **871039**, reserva **8689746**, SEM 43, arrastrada desde turno anterior; muestra Prep. 0 / Nov. 0 / Trasl. 0.
-- **Causa verificada en `app.js` main `dbba4a12572c5fc2055182112e81e8c44aec4333`:** `renderProductionBoard`, rama `if(x?._carry)`, crea manualmente las órdenes arrastradas con `vidrio_preparado:0,vidrio_novedad:0,vidrio_traslado:0`, sin consultar la fuente del vidrio.
-- **Fuente real verificada en Supabase:** programación original `38a9f4c6-5346-4d92-8f55-e0a1b608978d`, producción `1308927|PANELES_2`, orden 871039: `sgp_vidrio_resumen_produccion` registra **4 preparadas, 0 novedad, 0 traslado**. La RPC vigente `sgp_mecanizado_ordenes_programacion(token,id_original)` también devuelve el registro y `vidrio_preparado=4` (sesión temporal + ROLLBACK).
-- **Solución propuesta, NO IMPLEMENTADA:** reutilizar la RPC `sgp_mecanizado_ordenes_programacion` del `id_programacion_origen`, unir solo las órdenes arrastradas por `key_produccion` (no por nombre de orden), y mostrar contadores reales, manteniendo estados/observaciones del arrastre, reservas compartidas y sin duplicar programaciones. No inventar 0 si no hay datos; diferenciar indisponibilidad de cero real. No cambiar la RPC de arrastre ni la fuente del vidrio.
-- **Alcance de la solicitud:** el usuario pidió revisar este defecto; no se ha autorizado explícitamente la modificación del frontend por ese motivo, ni su fusión o despliegue. Requiere aprobación separada.
+**Objetivo:** que los indicadores Prep./Nov./Trasl. de órdenes pendientes de turno anterior reflejen el vidrio real de su programación original, sin alterar su estado productivo ni crear programaciones.
+
+- **Autorización:** usuario aprobó expresamente implementar en la rama del PR #16, **sin fusionar ni publicar**.
+- **Causa en `main` `dbba4a12572c5fc2055182112e81e8c44aec4333`:** `renderProductionBoard` asignaba ceros fijos a todas las órdenes `_carry`.
+- **Evidencia Supabase:** reserva 8689746, orden 871039, `key_produccion=1308927|PANELES_2`, programación original `38a9f4c6-5346-4d92-8f55-e0a1b608978d`: **4 preparados, 0 novedad, 0 traslados** en vista y RPC original. Los ceros mostrados en la captura eran falsos.
+- **IMPLEMENTADO en rama:** `app.js` consulta `sgp_mecanizado_ordenes_programacion(p_token,id_programacion_origen)` reutilizando RPC existente y caché de solicitudes por ID original. `src/domain/carry-glass.js` relaciona resultados **solo por `key_produccion`**; conserva cantidad, identidad, estado, observación y reservas compartidas de la fila arrastrada; no usa nombre de orden para emparejar. La edición de estados sigue apuntando al `id_programacion_origen` original.
+- **Sin dato:** un error de lectura, ausencia de orden o conteo inválido muestra **—**, con aclaración visible, no 0. El valor 0 solo se presenta cuando está registrado explícitamente. Una falla de vidrio no oculta el listado de órdenes ni sus acciones.
+- **Archivos:** `app.js`, `src/domain/carry-glass.js`, `styles.css`, `tests/carry-glass-v310.test.mjs` y esta documentación. Sin cambios en tablas, RLS, permisos, RPC, programación ni SGP_ONE_GOOGLE.
+- **Pruebas automatizadas:** unión por clave, caso real 871039, órdenes con nombres duplicados pero distintas líneas, conservación de estados y observaciones, errores/ausencias y ausencia de ceros artificiales. Confirmar resultado final del CI de rama antes de dar por PROBADO.
+- **Estado:** IMPLEMENTADO EN RAMA, NO FUSIONADO, NO PUBLICADO, NO VERIFICADO EN NAVEGADOR/PLANTA. Se requiere autorización específica posterior para fusionar/publicar.
