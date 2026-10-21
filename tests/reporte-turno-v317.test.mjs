@@ -14,7 +14,7 @@ test('reporte permite seleccionar fecha y turno, sin campos bloqueados',()=>{
  assert.doesNotMatch(report,/data-shift-report-date[^>]*disabled/);
 });
 test('al cambiar de turno primero guarda el comentario de la selección anterior',()=>{
- assert.match(report,/await saveComment\(\);\s*d=await buildShiftReportData\(nextDate,nextTurno\)/);
+ assert.match(report,/await saveComment\(\);\s*const next=await buildShiftReportData\(nextDate,nextTurno\)/);
  assert.match(report,/if\(value===d\.comment\)return/);
  assert.match(report,/render\(\);/);
 });
@@ -44,4 +44,10 @@ test('imagen no requiere biblioteca PDF y errores de CDN son explicativos',()=>{
  assert.match(app,/async function ensureReportExportLibs\(needPdf=true\)/);
  assert.match(app,/if\(needPdf&&!window\.jspdf\)/);
  assert.match(app,/No se pudo cargar jsPDF desde cdn\.jsdelivr\.net/);
+});
+
+test('el PDF o imagen puede generarse aunque falle guardar comentario, sin marcarlo guardado',()=>{
+ assert.match(report,/catch\(error\)\{showError\(new Error\('No se pudo guardar el comentario/);
+ assert.match(report,/shiftReportPreviewHtml\(\{\.\.\.d,comment:draft\}\)/);
+ assert.match(report,/dateInput\.value=d\.date;turnoInput\.value=d\.turno/);
 });
