@@ -2350,14 +2350,20 @@ async function openShiftReport(){
   const saveComment=async()=>{const value=comment.value.trim();if(value===d.comment)return;await saveShiftReportComment(d,value)};
   const updateFilters=async()=>{
    const nextDate=dateInput.value,nextTurno=turnoInput.value;
-   if(!nextDate)throw new Error('Selecciona una fecha válida.');
-   if(nextDate===d.date&&nextTurno===d.turno)return;
-   // Nunca guardar el comentario de un turno bajo la fecha o turno siguiente.
-   await saveComment();
-   d=await buildShiftReportData(nextDate,nextTurno);
-   render();
+   try{
+    if(!nextDate)throw new Error('Selecciona una fecha válida.');
+    if(nextDate===d.date&&nextTurno===d.turno)return;
+    // Nunca guardar el comentario de un turno bajo la fecha o turno siguiente.
+    await saveComment();
+    const next=await buildShiftReportData(nextDate,nextTurno);
+    d=next;render();
+   }catch(error){dateInput.value=d.date;turnoInput.value=d.turno;throw error}
   };
-  const refresh=async()=>{await saveComment();preview.innerHTML=shiftReportPreviewHtml(d)};
+  const refresh=async()=>{
+   const draft=comment.value.trim();
+   if(draft!==d.comment){try{await saveShiftReportComment(d,draft)}catch(error){showError(new Error('No se pudo guardar el comentario. El archivo incluirá el texto escrito, pero quedará pendiente de guardar: '+shiftReportError(error),{cause:error}))}}
+   preview.innerHTML=shiftReportPreviewHtml({...d,comment:draft});
+  };
   m.querySelector('[data-shift-report-close]').onclick=()=>{if(!busy)m.hidden=true};
   dateInput.onchange=()=>run(updateFilters);
   turnoInput.onchange=()=>run(updateFilters);
