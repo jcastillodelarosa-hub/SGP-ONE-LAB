@@ -49,3 +49,6 @@
 .sgp-nav-desktop-trigger{display:none;border:1px solid #cbdcf1;border-radius:9px;background:#eaf3ff;color:#165dbd;padding:7px 11px;cursor:pointer}
 @media(min-width:761px){.app-shell[data-sgp-nav-mode="floating"] .sgp-nav-desktop-trigger{display:inline-flex}.app-shell[data-sgp-nav-mode="floating"] .workspace>.topbar:before{display:none}}
 @media(max-width:760px){.sgp-nav-desktop-trigger{display:none!important}}
+
+/* Preserve authorization-based hidden navigation entries. */
+.app-shell .sidebar .nav button[hidden]{display:none!important}
