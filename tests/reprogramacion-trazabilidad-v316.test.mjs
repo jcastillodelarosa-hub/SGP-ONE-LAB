@@ -55,6 +55,6 @@ test('una reserva con varios registros de composición se suma, no toma una fila
 });
 
 test('SQL migración y rollback terminan en sentencia completa y no duplican prioridades',()=>{
- for(const script of [migration,rollback])assert.match(script,/end \\$function\\$;\\s*$/);
- assert.doesNotMatch(migration,/join public\\.sgp_prioridades pr on pr\\.key_produccion=d\\.key_produccion/);
+ for(const script of [migration,rollback])assert.ok(script.trimEnd().endsWith('end $function$;'));
+ assert.ok(!migration.includes('join public.sgp_prioridades pr on pr.key_produccion=d.key_produccion'));
 });
