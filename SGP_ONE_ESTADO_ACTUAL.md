@@ -907,3 +907,19 @@ Estado: **IMPLEMENTADO EN RAMA**, pruebas automáticas/PR/publicación pendiente
 **Alcance y seguridad:** no se modifica Supabase, tablas, RPC, RLS, permisos, roles, datos, Firebase, Gateway ni SGP_ONE_GOOGLE. No se cambia el proceso de recepción de fotos. No se alteran las reglas de importación ni los archivos permitidos.
 
 **Estado:** IMPLEMENTADO EN RAMA; pruebas de CI y PR pendientes. **NO FUSIONADO, NO PUBLICADO y NO VERIFICADO funcionalmente.** La integración y el despliegue requieren autorización adicional; se necesita prueba real de selector nativo en escritorio y móvil.
+
+---
+
+## 2026-10-21 — LAB v314: alineación transversal de carga (propuesta en rama)
+
+**Proyecto:** SGP_ONE, `jcastillodelarosa-hub/SGP-ONE-LAB`. **Rama de implementación:** `fix/lab-v314-upload-alignment-all-tabs`. **Base de `main`:** LAB v313, commit `6bd5be8ec237f4d9acfd8111cd2d033aaf04a7d2`.
+
+**Hallazgo comprobado:** el CSS anterior empleaba `align-items:end` en `.daily-upload-row`, `.weekly-upload-row` y una regla específica posterior para `.daily-upload-simple`. La nueva estructura v313 incluye una ayuda textual debajo del selector; al alinear por el extremo inferior se desplaza el botón XLSX hacia arriba con respecto al campo Línea y a los botones Validar/Aplicar. Se reproduce conceptualmente en las cinco pestañas de Actualización diaria y cuatro etapas de Carga semanal. NC Aluminio y NC Vidrio mantenían un layout de cuatro columnas para tres controles, distinto de las otras tres pestañas de actualización.
+
+**Corrección implementada en rama:** en `styles.css` se agrega una regla específica y tardía de alineación superior de las nueve filas, con altura de etiqueta de 16 px, separación de 7 px y desplazamiento de 23 px para acciones directas y estados semanales. Esto mantiene el borde superior de botones, selectores y tarjetas XLSX en una misma línea, incluso al seleccionar archivos. Los breakpoints de 1100/900/850/700 px eliminan ese margen cuando los botones pasan a la fila siguiente o a una sola columna. En `index.html` se asigna `daily-upload-simple` a NC Aluminio y NC Vidrio para usar el mismo layout de tres controles que Ubicación de vidrio y Seguimiento de aluminio. La versión visible pasa a LAB v314 y se sincronizan los parámetros de caché de `app.js` y `styles.css`.
+
+**Dependencias preservadas:** no se modifica el JavaScript funcional ni los inputs, validadores, lógica de importación, selecciones múltiples, tarjetas Excel, recepción de fotografías, Supabase, Firebase, Gateway, roles o SGP_ONE_GOOGLE. Las reglas de negocio no cambian.
+
+**Pruebas:** `tests/upload-alignment-v314.test.mjs` verifica nueve filas, cinco pestañas diarias, cuatro etapas semanales, layout simple en cuatro pestañas, CSS de alineación y breakpoints, y preservación de selección múltiple/fotografías. Se sincronizan cuatro pruebas existentes que verifican el número de versión. **CI del PR #20:** 90/90 pruebas automáticas superadas (GitHub Actions run 39585741589); comprobación de sintaxis JavaScript superada (run 39585741602). Se realizó además una simulación local aislada de geometría CSS con Chromium a 1366, 1024, 800 y 390 px: los controles de una misma fila mostraron desviación vertical de 0 px en los anchos de varias columnas; en anchos menores se apilan sin margen adicional. Esta simulación no sustituye una prueba visual del sistema completo en navegador real. **Pendientes:** revisión visual funcional en navegador y móvil, fusión y publicación.
+
+**Estado:** IMPLEMENTADO EN RAMA, NO FUSIONADO, NO PUBLICADO, NO VERIFICADO FUNCIONALMENTE. Se requiere autorización independiente para fusionar a `main` y desplegar.
