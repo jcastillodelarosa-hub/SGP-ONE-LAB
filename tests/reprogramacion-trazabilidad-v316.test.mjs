@@ -40,3 +40,16 @@ test('reparación histórica está separada y restringida a tres destinos verifi
  assert.match(repairRollback,/origen='REPARACION_REPROGRAMACION'/);
  assert.doesNotMatch(repairRollback,/DELETE FROM public\.sgp_mecanizado_programacion\s/);
 });
+
+test('identidad y cantidad se resuelven por key_produccion, no por nombre con LIMIT 1',()=>{
+ assert.match(migration,/join public\.sgp_producciones sp on sp\.key_produccion=d\.key_produccion/);
+ assert.match(migration,/sp\.reserva_al=v_origen\.reserva and sp\.id_linea='PANELES_2'/);
+ assert.match(migration,/d\.produccion_snapshot=p_produccion/);
+ assert.match(migration,/round\(sum\(d\.cantidad_snapshot\)\)::int/);
+ assert.doesNotMatch(migration,/limit 1;/i);
+});
+test('una reserva con varios registros de composición se suma, no toma una fila arbitraria',()=>{
+ assert.match(migration,/select min\(pr\.prioridad\),round\(sum\(d\.cantidad_snapshot\)\)::int/);
+ assert.match(migration,/v_detalle_count=0 or v_detalle_cantidad<>v_cantidad/);
+ assert.match(migration,/v_inserted<>v_detalle_count/);
+});
