@@ -5,8 +5,8 @@ const html=readFileSync('index.html','utf8');
 const js=readFileSync('navigation-preferences.js','utf8');
 const css=readFileSync('navigation-preferences.css','utf8');
 test('navigation assets are loaded by SGP shell',()=>{
- assert.match(html,/navigation-preferences\.css\?v=3/);
- assert.match(html,/navigation-preferences\.js\?v=3/);
+ assert.match(html,/navigation-preferences\.css\?v=4/);
+ assert.match(html,/navigation-preferences\.js\?v=4/);
 });
 test('navigation preferences are isolated from business and auth layers',()=>{
  assert.match(js,/localStorage\.setItem\(KEY/);
@@ -44,4 +44,17 @@ test('wordmark is plain text with cyan underline and hover contrast',()=>{
  assert.match(css,/\.sgp-nav-logo:after/);
  assert.match(css,/\.sgp-nav-logo>span:first-child/);
  assert.match(css,/button:not\(\[hidden\]\):hover/);
+});
+
+test('nine themes and light dark modes are selectable and scoped',()=>{
+ const themeCss=readFileSync('global-themes.css','utf8');
+ assert.match(html,/global-themes\.css\?v=1/);
+ for(const id of ['intense','corporate','modern','lilac','orange','emerald','teal','rose','graphite']){
+  assert.ok(js.includes("'"+id+"'"),id+' preference missing');
+  assert.ok(themeCss.includes('data-sgp-theme="'+id+'"'),id+' stylesheet missing');
+ }
+ assert.ok(js.includes('data-sgp-setting="mode"'));
+ assert.match(js,/shell\.dataset\.sgpThemeMode=settings\.mode/);
+ assert.match(themeCss,/data-sgp-theme-mode="dark"/);
+ assert.doesNotMatch(themeCss,/\.state-abierta|\.rec-al-supply|\.rec-al-warehouse|\.rec-al-delivered/);
 });
