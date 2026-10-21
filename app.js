@@ -14,6 +14,7 @@ import { buildGlassRelationGraph, traceGlassRelations, summarizeGlassBurro } fro
 import { buildGlassNodeInsights, glassCoverage, glassRackBreakdown } from "./src/domain/glass-explorer-insights.js";
 import { consolidatePieceReferences } from "./src/domain/piece-detail-views.js";
 import { mergeCarryOrdersWithGlass, glassCountLabel } from "./src/domain/carry-glass.js";
+import { indexReceptionAluminumStates, receptionAluminumStateMeta } from "./src/domain/reception-aluminum-state.js";
 import { comparePriority, priorityDepth, groupPriorityRows, splitPriorityPart, validatePriorityAssignments, hasScheduledPriority } from "./src/domain/priority-hierarchy.js";
 import { readNcAluminumWorkbook } from "./src/domain/nc-aluminum-importer.js?v=73";
 import { readNcGlassWorkbook } from "./src/domain/nc-glass-importer.js?v=84";
@@ -1720,9 +1721,54 @@ function showOpsChangeDetail(rows,title){rows=rows||[];document.querySelector('#
 
 // Persistent getAppToken already defined above.
 function getAppUser(){try{const t=getAppToken();return t?{username:(currentAuth?.usuario||document.querySelector("#authUser")?.value||"")} : null}catch{return null}}
-let recRows=[],recCurrent=null,recMissingDraft=[];
-async function loadReception(){const token=getAppToken();if(!token)return;const client=await getSupabaseClient(),w=Number(document.querySelector('#recWeek')?.value)||null,{data,error}=await client.rpc('sgp_recepcion_listar',{p_token:token,p_semana:w});if(error)throw error;recRows=data||[];renderReception()}
-function renderReception(){const q=(document.querySelector('#recSearch')?.value||'').toLowerCase(),rows=recRows.filter(r=>!q||String(r.reserva).toLowerCase().includes(q)),pending=rows.filter(r=>r.estado!=='RECIBIDA'),received=rows.filter(r=>r.estado==='RECIBIDA');document.querySelector('#recPending').textContent=pending.length;document.querySelector('#recReceived').textContent=received.length;document.querySelector('#recIncomplete').textContent=received.filter(r=>r.completa===false).length;document.querySelector('#recUnlegalized').textContent=received.filter(r=>!r.legalizada).length;document.querySelector('#recMissing').textContent=rows.reduce((a,r)=>a+Number(r.faltantes_abiertos||0),0);document.querySelector('#recPendingLabel').textContent=pending.length;document.querySelector('#recReceivedLabel').textContent=received.length;document.querySelector('#recBody').innerHTML=pending.length?pending.map(r=>'<tr><td>'+escapeHtml(r.semana_prog??'')+'</td><td>'+escapeHtml(r.reserva)+'</td><td>'+escapeHtml(r.sistema||'')+'</td><td>'+escapeHtml(r.acabado||'')+'</td><td>'+escapeHtml(r.cantidad??'')+'</td><td><span class="state-badge state-warn">PENDIENTE POR RECIBIR</span></td><td>'+Number(r.faltantes_abiertos||0)+'</td><td>'+Number(r.dias_pendiente||0).toFixed(1)+'</td><td><button data-receive="'+escapeHtml(r.reserva)+'">Auditar</button></td></tr>').join(''):'<tr><td colspan="9" class="empty-state">No hay reservas pendientes por recibir.</td></tr>';document.querySelector('#recReceivedBody').innerHTML=received.length?received.map(r=>'<tr><td>'+escapeHtml(r.semana_prog??'')+'</td><td>'+escapeHtml(r.reserva)+'</td><td>'+escapeHtml(r.sistema||'')+'</td><td>'+escapeHtml(r.acabado||'')+'</td><td>'+escapeHtml(r.cantidad??'')+'</td><td><span class="state-badge state-ok">RECIBIDA</span></td><td><span class="legal-badge '+(r.legalizada?'legal-ok':'legal-pending')+'">'+(r.legalizada?'LEGALIZADA':'RECIBIDA SIN LEGALIZAR')+'</span></td><td>'+Number(r.faltantes_abiertos||0)+'</td><td><button data-receive="'+escapeHtml(r.reserva)+'">Revisar</button></td></tr>').join(''):'<tr><td colspan="9" class="empty-state">Aún no hay reservas recibidas.</td></tr>';document.querySelectorAll('[data-receive]').forEach(b=>b.onclick=()=>openReception(b.dataset.receive))}
+let recRows=[],recCurrent=null,recMissingDraft=[],recAluminumStateIndex=new Map(),recLoadSequence=0;
+async function loadReception(){
+ const token=getAppToken();if(!token)return;
+ const sequence=++recLoadSequence;
+ const client=await getSupabaseClient(),week=Number(document.querySelector('#recWeek')?.value)||null;
+ // El tablero y Recepción consultan la misma fuente, con la misma semana.
+ // Un fallo de Seguimiento no debe impedir auditar una recepción.
+ const [reception,tracking]=await Promise.all([
+  client.rpc('sgp_recepcion_listar',{p_token:token,p_semana:week}),
+  Promise.resolve(client.rpc('sgp_consultar_seguimiento_aluminio',{p_token:token,p_semana:week})).catch(error=>({error}))
+ ]);
+ if(sequence!==recLoadSequence)return;
+ if(reception.error)throw reception.error;
+ recRows=Array.isArray(reception.data)?reception.data:[];
+ const trackingOk=!tracking.error&&Array.isArray(tracking.data?.rows);
+ recAluminumStateIndex=indexReceptionAluminumStates(trackingOk?tracking.data.rows:[]);
+ const notice=document.querySelector('#recTrackingStatus');
+ if(notice){
+  notice.hidden=trackingOk;
+  notice.textContent=trackingOk?'':'No se pudo consultar el seguimiento de aluminio. Los estados se muestran como SIN DATO; pulsa Actualizar para reintentar.';
+ }
+ renderReception();
+}
+function receptionAluminumBadge(reserva){
+ const state=recAluminumStateIndex.get(String(reserva??'').trim());
+ const meta=receptionAluminumStateMeta(state);
+ return '<span class="rec-aluminum-badge '+meta.css+'" title="Estado según tablero de seguimiento de aluminio">'+meta.label+'</span>';
+}
+function renderReception(){
+ const q=(document.querySelector('#recSearch')?.value||'').toLowerCase(),
+ rows=recRows.filter(r=>!q||String(r.reserva).toLowerCase().includes(q)),
+ pending=rows.filter(r=>r.estado!=='RECIBIDA'),
+ received=rows.filter(r=>r.estado==='RECIBIDA');
+ document.querySelector('#recPending').textContent=pending.length;
+ document.querySelector('#recReceived').textContent=received.length;
+ document.querySelector('#recIncomplete').textContent=received.filter(r=>r.completa===false).length;
+ document.querySelector('#recUnlegalized').textContent=received.filter(r=>!r.legalizada).length;
+ document.querySelector('#recMissing').textContent=rows.reduce((a,r)=>a+Number(r.faltantes_abiertos||0),0);
+ document.querySelector('#recPendingLabel').textContent=pending.length;
+ document.querySelector('#recReceivedLabel').textContent=received.length;
+ document.querySelector('#recBody').innerHTML=pending.length?pending.map(r=>
+  '<tr><td>'+escapeHtml(r.semana_prog??'')+'</td><td>'+escapeHtml(r.reserva)+'</td><td>'+escapeHtml(r.sistema||'')+'</td><td>'+escapeHtml(r.acabado||'')+'</td><td>'+escapeHtml(r.cantidad??'')+'</td><td><span class="state-badge state-warn">PENDIENTE POR RECIBIR</span></td><td>'+receptionAluminumBadge(r.reserva)+'</td><td>'+Number(r.faltantes_abiertos||0)+'</td><td>'+Number(r.dias_pendiente||0).toFixed(1)+'</td><td><button data-receive="'+escapeHtml(r.reserva)+'">Auditar</button></td></tr>'
+ ).join(''):'<tr><td colspan="10" class="empty-state">No hay reservas pendientes por recibir.</td></tr>';
+ document.querySelector('#recReceivedBody').innerHTML=received.length?received.map(r=>
+  '<tr><td>'+escapeHtml(r.semana_prog??'')+'</td><td>'+escapeHtml(r.reserva)+'</td><td>'+escapeHtml(r.sistema||'')+'</td><td>'+escapeHtml(r.acabado||'')+'</td><td>'+escapeHtml(r.cantidad??'')+'</td><td><span class="state-badge state-ok">RECIBIDA</span></td><td>'+receptionAluminumBadge(r.reserva)+'</td><td><span class="legal-badge '+(r.legalizada?'legal-ok':'legal-pending')+'">'+(r.legalizada?'LEGALIZADA':'RECIBIDA SIN LEGALIZAR')+'</span></td><td>'+Number(r.faltantes_abiertos||0)+'</td><td><button data-receive="'+escapeHtml(r.reserva)+'">Revisar</button></td></tr>'
+ ).join(''):'<tr><td colspan="10" class="empty-state">Aún no hay reservas recibidas.</td></tr>';
+ document.querySelectorAll('[data-receive]').forEach(b=>b.onclick=()=>openReception(b.dataset.receive));
+}
 function openReception(reserva){recCurrent=recRows.find(r=>r.reserva===reserva);if(!recCurrent)return;recMissingDraft=[];document.querySelector('#recModalTitle').textContent='Auditar recepción · '+reserva;const date=document.querySelector('#recDate'),shift=document.querySelector('#recShift'),photos=document.querySelector('#recPhotos'),missing=document.querySelector('#recMissingSection');if(date)date.value=String(recCurrent.fecha_recepcion||new Date().toISOString().slice(0,10)).slice(0,10);if(shift)shift.value=recCurrent.turno||'';if(photos)photos.value='';const camera=document.querySelector('#recCameraPhotos'),sel=document.querySelector('#recPhotoSelection');if(camera)camera.value='';if(sel)sel.textContent='Sin archivos seleccionados';document.querySelectorAll('input[name="recCompleteChoice"]').forEach(x=>x.checked=recCurrent.estado==='RECIBIDA'?(x.value===(recCurrent.completa?'SI':'NO')):false);if(missing)missing.hidden=!(recCurrent.estado==='RECIBIDA'&&recCurrent.completa===false);document.querySelector('#recLegalized').checked=recCurrent?.legalizada??false;document.querySelector('#recObservation').value=recCurrent?.observacion||'';if(recCurrent.estado==='RECIBIDA'&&recCurrent.completa===false){recMissingDraft.push({perfil:'',cantidad:1,longitud:'',observacion:''})}renderMissingEditor();document.querySelector('#recModal').hidden=false}
 function renderMissingEditor(){const b=document.querySelector('#missingEditor');b.innerHTML=recMissingDraft.map((r,i)=>'<div class="missing-row"><input list="profileCatalog" data-mi="'+i+'" data-k="perfil" placeholder="Buscar perfil" value="'+escapeHtml(r.perfil||'')+'"><input type="number" min="1" data-mi="'+i+'" data-k="cantidad" placeholder="Cantidad" value="'+escapeHtml(r.cantidad||'')+'"><input type="number" min="0" step="0.01" data-mi="'+i+'" data-k="longitud" placeholder="Longitud mm" value="'+escapeHtml(r.longitud||'')+'"><input data-mi="'+i+'" data-k="observacion" placeholder="Observación" value="'+escapeHtml(r.observacion||'')+'"><button data-delmi="'+i+'">✕</button></div>').join('')+'<datalist id="profileCatalog"></datalist>';b.querySelectorAll('[data-mi]').forEach(x=>x.oninput=()=>{recMissingDraft[+x.dataset.mi][x.dataset.k]=x.value;if(x.dataset.k==='perfil')searchProfiles(x.value)});b.querySelectorAll('[data-delmi]').forEach(x=>x.onclick=()=>{recMissingDraft.splice(+x.dataset.delmi,1);renderMissingEditor()})}
 async function searchProfiles(q){if(q.length<2)return;const client=await getSupabaseClient(),{data}=await client.rpc('sgp_recepcion_catalogo_perfiles',{p_token:getAppToken(),p_buscar:q});const d=document.querySelector('#profileCatalog');if(d)d.innerHTML=(data||[]).map(x=>'<option value="'+escapeHtml(x.perfil)+'">'+escapeHtml(x.descripcion||'')+'</option>').join('')}
