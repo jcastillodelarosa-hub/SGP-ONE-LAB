@@ -871,3 +871,21 @@ Estado: **IMPLEMENTADO EN RAMA**, pruebas automáticas/PR/publicación pendiente
 **Preflight live de solo lectura:** en semana 42 hay 24 reservas en Recepción y 24 con seguimiento activo; no se observaron reservas con estados logísticos contradictorios entre los 100 identificadores activos consultados.
 
 **Estado:** IMPLEMENTADO EN RAMA; PR y CI sujetos a ejecución. **NO PUBLICADO ni VERIFICADO en navegador**. No fusionar ni desplegar sin autorización adicional. SGP_ONE_GOOGLE no se modifica.
+
+---
+
+## 2026-10-21 — LAB v312: selector de archivos unificado (propuesta en rama)
+
+**Proyecto:** SGP_ONE / SGP-ONE-LAB, rama operativa `main`. **Base:** LAB v311, commit `011fd2a885e7590f146b8a9d25641c682503c5fe`. **Rama de trabajo:** `feat/lab-v312-unified-file-pickers`.
+
+**Objetivo:** unificar la presentación de todos los controles de selección de archivos de la web con el estilo del control «Fotos de la reserva» de Mecanizado → Recepción, sin modificar los procesos de importación.
+
+**Inventario confirmado en `index.html`:** 11 entradas `type=file`. Nueve entradas XLSX visibles: Carga semanal — `programmingFiles` (múltiple), `aluminumPiecesFile`, `accessoriesFile`, `glassFile`; Actualización diaria — `dailyExportFile`, `glassLocationFile`, `ncAlFile`, `ncGlassFile`, `aluminumTrackingFile`. Dos entradas de fotografía existentes en Recepción — `recPhotos` (múltiple) y `recCameraPhotos` (múltiple con `capture=environment`) — se conservan sin cambios.
+
+**Implementación:** `index.html` presenta en las nueve cargas XLSX un botón azul claro «Elegir del dispositivo», selección de nombres/cantidad y ayuda contextual; `styles.css` adapta el control a escritorio/móvil; `src/ui/file-picker.js` actualiza el texto de selección con `textContent` al recibir `change`, sin reemplazar el `input` ni tocar el `FileList`; `app.js` inicializa el componente. La selección nativa, atributos `accept`, `multiple`, validadores y botones «Aplicar» se preservan.
+
+**Pruebas:** `tests/file-picker-v312.test.mjs` comprueba el inventario de 11, los nueve estilos, nombres de archivo, preservación de fotos/cámara y los handlers de validación. Se actualizan dos pruebas previas que verifican el número de versión del HTML.
+
+**Seguridad y alcance:** no se modifica Supabase, Firebase, Gateway, roles, tablas, datos ni RPC. No se tocan flujos de recepción ni almacenamiento de evidencias. La revisión de compatibilidad móvil y apertura del selector nativo requiere prueba real de navegador.
+
+**Estado:** IMPLEMENTADO EN RAMA. CI / PR pendientes al momento de registrar esta nota. NO FUSIONADO, NO PUBLICADO y NO VERIFICADO visualmente. Fusionar/publicar solo con autorización adicional.
