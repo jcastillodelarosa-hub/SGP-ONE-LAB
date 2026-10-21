@@ -32,12 +32,15 @@ test('inventario completo: 9 archivos XLSX y 2 controles de fotos',()=>{
 });
 
 test('los 9 selectores usan el mismo botón y muestran nombre/ayuda',()=>{
- assert.equal((html.match(/📁<\/span> Elegir del dispositivo/g)||[]).length,9);
+ assert.equal((html.match(/↑<\/span> Seleccionar archivo(?:s)?/g)||[]).length,9);
+ assert.equal((html.match(/class="sgp-file-selected" hidden/g)||[]).length,9);
  assert.equal((html.match(/class="sgp-file-selection" role="status" aria-live="polite"/g)||[]).length,9);
  assert.equal((html.match(/class="sgp-file-hint"/g)||[]).length,9);
  assert.match(css,/\.sgp-file-picker\s*\{/);
  assert.match(css,/\.sgp-file-button\s*\{/);
  assert.match(css,/\.sgp-file-picker:focus-within/);
+ assert.match(css,/\.sgp-file-card\s*\{/);
+ assert.doesNotMatch(css,/border:1px dashed #9db6d8/);
  assert.match(css,/@media\(max-width:700px\)/);
  assert.match(app,/import \{ initFilePickers \} from "\.\/src\/ui\/file-picker\.js";/);
  assert.match(app,/initFilePickers\(document\)/);
@@ -54,10 +57,18 @@ test('etiqueta segura de archivos: vacío, único, múltiple y nombres no confia
 test('change actualiza solo texto sin modificar FileList ni duplicar listeners',()=>{
  const listeners=[];
  const status={textContent:'anterior'};
+ const cards={hidden:true};
+ const picker={dataset:{},querySelector(selector){
+  if(selector==='.sgp-file-selection')return status;
+  if(selector==='.sgp-file-selected')return cards;
+  return null;
+ }};
  const input={
   dataset:{},
   files:[{name:'inicial.xlsx'}],
-  parentElement:{querySelector(selector){assert.equal(selector,'.sgp-file-selection');return status;}},
+  parentElement:picker,
+  getAttribute(){return 'Seleccionar XLSX';},
+  setAttribute(){},
   addEventListener(name,fn){listeners.push({name,fn});}
  };
  const root={querySelectorAll(selector){assert.equal(selector,'.sgp-file-picker input[type="file"]');return [input];}};
@@ -65,15 +76,19 @@ test('change actualiza solo texto sin modificar FileList ni duplicar listeners',
  initFilePickers(root);
  assert.equal(listeners.length,1);
  assert.equal(listeners[0].name,'change');
- assert.equal(status.textContent,'inicial.xlsx');
+ assert.equal(status.textContent,'✓ 1 archivo seleccionado');
+ assert.equal(picker.dataset.hasFiles,'true');
+ assert.equal(cards.hidden,false);
  const original=input.files;
  input.files=[{name:'nueva.xlsx'},{name:'otro.xlsx'}];
  listeners[0].fn();
- assert.equal(status.textContent,'2 archivos seleccionados: nueva.xlsx · otro.xlsx');
+ assert.equal(status.textContent,'✓ 2 archivos seleccionados');
  assert.notEqual(input.files,original);
  input.files=[];
  listeners[0].fn();
  assert.equal(status.textContent,'Sin archivos seleccionados');
+ assert.equal(picker.dataset.hasFiles,'false');
+ assert.equal(cards.hidden,true);
 });
 
 test('conserva flujos de validación, foto/cámara y versión consistente',()=>{
@@ -84,7 +99,7 @@ test('conserva flujos de validación, foto/cámara y versión consistente',()=>{
  assert.match(app,/els\.dailyExportFile\?\.files/);
  assert.match(app,/\#recChoosePhotos'\)\?\.addEventListener/);
  assert.match(app,/\#recTakePhoto'\)\?\.addEventListener/);
- assert.match(html,/LAB v312/);
- assert.match(html,/app\.js\?v=312/);
- assert.match(html,/styles\.css\?v=312/);
+ assert.match(html,/LAB v313/);
+ assert.match(html,/app\.js\?v=313/);
+ assert.match(html,/styles\.css\?v=313/);
 });

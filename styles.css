@@ -2150,39 +2150,90 @@ button.active,[aria-pressed="true"]{border-color:#0865ed}
  #recTable .rec-aluminum-badge,.received-reservations-wrap .rec-aluminum-badge{font-size:10px;max-width:145px}
 }
 
-/* LAB v312 · selector de archivos uniforme con la evidencia de Recepción */
-.weekly-upload-row .weekly-file-field,.daily-upload-row .daily-file-field{min-width:0}
+/* LAB v313 · selector compacto de archivos XLSX con tarjetas Excel (sustituye v312) */
+.weekly-upload-row .weekly-file-field,.daily-upload-row .daily-file-field{
+ display:grid;gap:7px;min-width:0;font-size:.82rem;font-weight:800;
+}
+.sgp-file-field-label{display:block;font-size:.82rem;font-weight:800;color:#142b50}
 .sgp-file-picker{
- position:relative;display:grid;grid-template-columns:minmax(0,1fr);gap:10px;
- box-sizing:border-box;width:100%;min-width:0;padding:12px 14px;
- border:1px dashed #9db6d8;border-radius:12px;background:#fbfdff;cursor:pointer;
+ position:relative;display:grid;gap:6px;min-width:0;width:100%;
+ box-sizing:border-box;font-weight:400;
 }
 .sgp-file-button{
- display:flex;align-items:center;justify-content:center;gap:6px;
- box-sizing:border-box;min-height:44px;width:100%;padding:10px 14px;
- border:1px solid #8db9ff;border-radius:10px;
- background:#eaf3ff;color:#1556a5;
- box-shadow:0 2px 6px rgba(37,99,235,.08);
- font-size:13px;font-weight:850;line-height:1.3;text-align:center;
- pointer-events:none;
+ box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:8px;
+ width:100%;min-height:42px;padding:9px 12px;border:1px solid #b6cdef;border-radius:9px;
+ background:#f4f8ff;color:#1658a7;font-size:13px;font-weight:800;line-height:1.25;
+ text-align:center;transition:background .15s,border-color .15s;pointer-events:none;
 }
-.sgp-file-icon{font-size:13px}
-.sgp-file-selection{display:block;min-width:0;color:#65778b;font-size:12px;font-weight:500;line-height:1.5;overflow-wrap:anywhere}
-.sgp-file-hint{display:block;min-width:0;color:#65778b;font-size:12px;font-weight:400;line-height:1.5;overflow-wrap:anywhere}
+.sgp-file-icon{
+ display:inline-grid;place-items:center;flex:0 0 23px;width:23px;height:23px;
+ border-radius:6px;background:#e0edff;color:#1163cd;font-size:18px;font-weight:800;line-height:1;
+}
+.sgp-file-hint{display:block;min-width:0;color:#66768e;font-size:11px;line-height:1.3;overflow-wrap:anywhere}
+.sgp-file-selection{display:none;min-width:0;color:#128051;font-size:11px;font-weight:750;line-height:1.3}
+.sgp-file-picker[data-has-files="true"] .sgp-file-button,
+.sgp-file-picker[data-has-files="true"] .sgp-file-hint{display:none}
+.sgp-file-picker[data-has-files="true"] .sgp-file-selection{display:block}
+.sgp-file-selected{display:grid;gap:6px;min-width:0}
+.sgp-file-selected[hidden]{display:none!important}
+.sgp-file-card{
+ box-sizing:border-box;position:relative;display:grid;grid-template-columns:38px minmax(0,1fr) 32px;
+ align-items:center;gap:10px;width:100%;min-width:0;min-height:58px;
+ padding:8px 9px;border:1px solid #c1d9fa;border-radius:10px;
+ background:#f0f6ff;color:#122d52;
+}
+.sgp-file-excel{
+ position:relative;display:grid;place-items:center;width:38px;height:38px;
+ border-radius:10px;background:#d8f5e7;
+}
+.sgp-file-excel::before{
+ content:"";position:absolute;width:21px;height:27px;right:6px;top:5px;
+ border:1px solid #69ba91;border-radius:3px;background:
+ linear-gradient(90deg,transparent 48%,#93cdaa 49%,#93cdaa 52%,transparent 53%),
+ linear-gradient(0deg,transparent 31%,#93cdaa 32%,#93cdaa 35%,transparent 36%,transparent 65%,#93cdaa 66%,#93cdaa 69%,transparent 70%),
+ #f4fff9;
+}
+.sgp-file-excel::after{
+ content:"X";position:absolute;left:6px;top:9px;display:grid;place-items:center;
+ width:21px;height:22px;border-radius:4px;background:#16834d;color:#fff;
+ font-size:14px;font-weight:900;box-shadow:0 2px 5px rgba(11,112,67,.18);
+}
+.sgp-file-details{display:grid;gap:2px;min-width:0}
+.sgp-file-name{display:block;min-width:0;font-size:12px;font-weight:800;line-height:1.3;
+ overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sgp-file-size{display:block;color:#5c6f8b;font-size:11px;font-weight:500;line-height:1.3}
+.sgp-file-picker .sgp-file-remove{
+ position:relative;z-index:4;display:grid;place-items:center;min-height:32px!important;
+ width:32px;height:32px;margin:0;padding:0!important;border:0!important;
+ border-radius:8px;background:transparent!important;color:#25466e!important;
+ font-size:22px;font-weight:400;line-height:1;cursor:pointer;
+}
+.sgp-file-picker .sgp-file-remove:hover{background:#dceaff!important;color:#123d7b!important}
+.sgp-file-picker .sgp-file-remove:focus-visible{outline:2px solid #2563eb;outline-offset:2px}
 .weekly-upload-row .sgp-file-picker input[type="file"],
 .daily-upload-row .sgp-file-picker input[type="file"]{
- position:absolute!important;top:12px!important;left:14px!important;right:auto!important;
- width:calc(100% - 28px)!important;height:44px!important;min-height:44px!important;
- margin:0!important;padding:0!important;border:0!important;border-radius:10px!important;
- background:transparent!important;opacity:0!important;z-index:2;cursor:pointer;
+ position:absolute!important;top:0!important;left:0!important;z-index:3;
+ box-sizing:border-box;width:100%!important;height:42px!important;min-height:42px!important;
+ margin:0!important;padding:0!important;border:0!important;opacity:0!important;
+ background:transparent!important;cursor:pointer;
 }
-.sgp-file-picker:hover .sgp-file-button{background:#dfedff;border-color:#609bfa}
-.sgp-file-picker:focus-within .sgp-file-button{outline:3px solid #93c5fd;outline-offset:2px}
+.sgp-file-picker[data-has-files="true"] input[type="file"]{
+ width:calc(100% - 44px)!important;height:58px!important;min-height:58px!important;
+}
+.sgp-file-picker:not([data-has-files="true"]):hover .sgp-file-button{
+ background:#eaf3ff;border-color:#79a9f3;
+}
+.sgp-file-picker:focus-within .sgp-file-button,
+.sgp-file-picker[data-has-files="true"]:focus-within .sgp-file-card:first-child{
+ outline:2px solid #60a5fa;outline-offset:2px;
+}
 @media(max-width:700px){
- .sgp-file-picker{padding:12px}
+ .sgp-file-button{min-height:46px;font-size:13px}
  .weekly-upload-row .sgp-file-picker input[type="file"],
- .daily-upload-row .sgp-file-picker input[type="file"]{left:12px!important;width:calc(100% - 24px)!important}
- .sgp-file-button{min-height:48px;font-size:14px}
- .weekly-upload-row .sgp-file-picker input[type="file"],
- .daily-upload-row .sgp-file-picker input[type="file"]{height:48px!important;min-height:48px!important}
+ .daily-upload-row .sgp-file-picker input[type="file"]{height:46px!important;min-height:46px!important}
+ .sgp-file-picker[data-has-files="true"] input[type="file"]{
+  height:58px!important;min-height:58px!important;
+ }
+ .sgp-file-card{grid-template-columns:38px minmax(0,1fr) 34px;gap:8px}
+ .sgp-file-name{font-size:12px}
 }

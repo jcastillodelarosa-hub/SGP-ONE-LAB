@@ -889,3 +889,21 @@ Estado: **IMPLEMENTADO EN RAMA**, pruebas automáticas/PR/publicación pendiente
 **Seguridad y alcance:** no se modifica Supabase, Firebase, Gateway, roles, tablas, datos ni RPC. No se tocan flujos de recepción ni almacenamiento de evidencias. La revisión de compatibilidad móvil y apertura del selector nativo requiere prueba real de navegador.
 
 **Estado:** IMPLEMENTADO EN RAMA y PR #18 en borrador; CI GitHub Actions del primer commit de PR: 78/78 pruebas aprobadas y verificación de sintaxis correcta. **NO FUSIONADO, NO PUBLICADO y NO VERIFICADO visualmente.** Fusionar/publicar solo con autorización adicional. La verificación de compatibilidad móvil y elección real de archivos sigue pendiente.
+
+---
+
+## 2026-10-21 — LAB v313: tarjetas compactas de archivos Excel (rama de propuesta)
+
+**Proyecto:** SGP_ONE — `jcastillodelarosa-hub/SGP-ONE-LAB`; **base:** LAB v312, commit `bdbe10c3aefbee62ad84ac4529006cd2917383d0`. **Rama:** `feat/lab-v313-compact-excel-file-cards`.
+
+**Solicitud y referencia:** el usuario confirmó que el selector de LAB v312 resulta demasiado alto y desproporcionado; aprobó la mejora visual de tarjeta de archivo seleccionado, con icono verde tipo Excel, nombre, tamaño y botón X para quitar.
+
+**Implementación propuesta en rama:** `index.html` conserva los nueve `input[type=file]` XLSX y dos entradas de fotos, pero sustituye el marco grande discontinuo por un botón de selección de 42 px. Al seleccionar un archivo se sustituye visualmente el botón por una tarjeta compacta de 58 px con icono XLSX verde, nombre, tamaño, X accesible y contador verde. En Programación se muestran tarjetas separadas para los archivos múltiples. `styles.css` mantiene proporciones y diseño responsive. `src/ui/file-picker.js` usa `textContent` para evitar HTML inyectado en nombres, mantiene el mismo `FileList` de los validadores y permite eliminar un archivo con `DataTransfer` donde esté disponible (si no, limpia la selección completa). La X emite `change` para invalidar las validaciones previas. El elemento de entrada permanece nativo y accesible por teclado.
+
+**Protección de regresión:** `app.js` mantiene todas las rutas de importación existentes; los controles NC Aluminio, NC Vidrio y Seguimiento ahora invalidan su previsualización al cambiar o quitar el archivo. Se comprueba la identidad del archivo antes de aceptar una previsualización asíncrona de esos tres módulos. Programación, Piezas, Accesorios, Vidrio, Export diario y Ubicación de vidrio ya tenían invalidación por `change`.
+
+**Pruebas:** se ajustan `tests/file-picker-v312.test.mjs`, `tests/piece-detail-views-v308.test.mjs`, `tests/priority-third-level-v310.test.mjs`; se añade `tests/file-picker-v313.test.mjs` para diseño compacto, icono Excel, nombre/tamaño, eliminación, selección múltiple, `change`, seguridad de nombres y protección de previsualizaciones.
+
+**Alcance y seguridad:** no se modifica Supabase, tablas, RPC, RLS, permisos, roles, datos, Firebase, Gateway ni SGP_ONE_GOOGLE. No se cambia el proceso de recepción de fotos. No se alteran las reglas de importación ni los archivos permitidos.
+
+**Estado:** IMPLEMENTADO EN RAMA; pruebas de CI y PR pendientes. **NO FUSIONADO, NO PUBLICADO y NO VERIFICADO funcionalmente.** La integración y el despliegue requieren autorización adicional; se necesita prueba real de selector nativo en escritorio y móvil.
