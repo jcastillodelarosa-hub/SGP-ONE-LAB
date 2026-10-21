@@ -2237,3 +2237,38 @@ button.active,[aria-pressed="true"]{border-color:#0865ed}
  .sgp-file-card{grid-template-columns:38px minmax(0,1fr) 34px;gap:8px}
  .sgp-file-name{font-size:12px}
 }
+
+/* LAB v314 · alineación de los controles en las 9 pestañas de carga
+ * El texto de ayuda del XLSX ya no desplaza el botón por encima de los demás.
+ * Alinear desde arriba y compensar solo la etiqueta de 16px + separación 7px.
+ * Al seleccionar archivos, las tarjetas crecen hacia abajo sin mover la fila.
+ */
+.daily-upload-row,
+.daily-upload-row.daily-upload-simple,
+.weekly-upload-row{align-items:start}
+.daily-upload-row > label,
+.weekly-upload-row > label,
+.daily-upload-row .sgp-file-field-label,
+.weekly-upload-row .sgp-file-field-label{line-height:16px}
+.daily-upload-row > button,
+.weekly-upload-row > button,
+.weekly-upload-row > .weekly-status{
+ align-self:start;
+ margin-top:23px;
+}
+/* Export diario pasa a 2 columnas: sus dos acciones ocupan la fila siguiente. */
+@media(max-width:1100px){
+ .daily-upload-row:not(.daily-upload-simple) > button{margin-top:0}
+}
+/* Las 4 etapas de Carga semanal se apilan en una sola columna. */
+@media(max-width:900px){
+ .weekly-upload-row > button,
+ .weekly-upload-row > .weekly-status{margin-top:0}
+}
+/* Ubicación, NC Aluminio, NC Vidrio y Seguimiento se apilan en móvil/tablet. */
+@media(max-width:850px){
+ .daily-upload-row.daily-upload-simple > button{margin-top:0}
+}
+@media(max-width:700px){
+ .daily-upload-row > button{margin-top:0}
+}
