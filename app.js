@@ -1,3 +1,4 @@
+import { initPickingDeliveryReport } from "./src/modules/picking-delivery-report-controller.js";
 import { trackingRows } from "./src/data/mock-data.js";
 import { createMecanizadoModule } from "./src/modules/mecanizado.js";
 import { readProgrammingWorkbook, summarizeProgramming } from "./src/domain/production-importer.js";
@@ -2546,3 +2547,5 @@ function ncReportFileName(ext){const f=document.querySelector('#ncReportFrom')?.
 async function captureNcReport(){const el=document.querySelector('#ncReportCanvas');if(!el||el.querySelector('.empty-state'))throw new Error('Primero genera el informe.');await ensureReportExportLibs();el.classList.add('report-exporting');try{return await html2canvas(el,{scale:2,useCORS:true,backgroundColor:'#f4f7fa',windowWidth:el.scrollWidth,windowHeight:el.scrollHeight})}finally{el.classList.remove('report-exporting')}}
 document.querySelector('#downloadNcReportImage')?.addEventListener('click',async()=>{try{const c=await captureNcReport(),a=document.createElement('a');a.download=ncReportFileName('png');a.href=c.toDataURL('image/png');a.click()}catch(e){alert('No fue posible generar la imagen: '+e.message)}});
 document.querySelector('#downloadNcReportPdf')?.addEventListener('click',async()=>{try{const c=await captureNcReport(),{jsPDF}=window.jspdf,pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'}),pw=210,ph=297,m=7,w=pw-m*2,h=c.height*w/c.width,img=c.toDataURL('image/jpeg',.94);let y=m,left=h;pdf.addImage(img,'JPEG',m,y,w,h);left-=ph-m*2;while(left>0){y=-(h-left)+m;pdf.addPage();pdf.addImage(img,'JPEG',m,y,w,h);left-=ph-m*2}pdf.save(ncReportFileName('pdf'))}catch(e){alert('No fue posible generar el PDF: '+e.message)}});
+
+initPickingDeliveryReport({getSupabaseClient,getAppToken});
