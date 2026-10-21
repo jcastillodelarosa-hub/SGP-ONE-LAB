@@ -36,5 +36,4 @@ begin
  fecha_actualizacion=now() where id_programacion=p_id_programacion;
  perform public.sgp_mecanizado_guardar_estado_orden(p_token,p_id_programacion,p_produccion,'REPROGRAMADO','Reprogramada a '||p_fecha||' '||p_turno||'. '||trim(p_motivo));
  return v_destino;
-end $function$
-
+end $function$;
