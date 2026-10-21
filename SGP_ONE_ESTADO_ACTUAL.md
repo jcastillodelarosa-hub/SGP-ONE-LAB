@@ -796,3 +796,58 @@ Estado: **IMPLEMENTADO EN RAMA**, pruebas automáticas/PR/publicación pendiente
 - **Pruebas:** `tests/piece-detail-views-v308.test.mjs` comprueba agrupación y sumas, preservación de fuente, contextos de las vistas, columnas y scroll. Verificación funcional móvil aún pendiente de publicación.
 
 **Estado provisional:** IMPLEMENTADO en rama; PROBADO/PUBLICADO/VERIFICADO pendientes de resultado de CI y fusión autorizada. No modifica SGP_ONE_GOOGLE.
+
+
+---
+
+## 2026-10-20 — LAB v310: tercer subnivel de prioridades
+
+**Proyecto:** SGP_ONE (NO SGP_ONE_GOOGLE). **Módulos:** Programación semanal, Mecanizado, Picking, Ensamble. **Rama:** `feat/lab-v310-priority-third-level`. **PR:** https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/pull/16 (DRAFT, no fusionado). **Main base:** `dbba4a12572c5fc2055182112e81e8c44aec4333`.
+
+### Estado real
+
+- **FRONTEND:** IMPLEMENTADO EN RAMA LAB v310, NO PUBLICADO, NO VERIFICADO VISUALMENTE. Conserva asignación por producción; Retail permite 3.1.1/3.1.2; Proyecto indivisible; otras partes bloqueadas; inicial PANELES_2. Picking y Ensamble ordenan y muestran nivel 3.
+- **BACKEND:** APLICADO EN SUPABASE SGP-ONE-LAB el 2026-10-20, proyecto `ocvxbwzqxbrfndkvjmfx`. Migración live `20261020204906_lab_v310_prioridad_tercer_nivel`. **Autorización expresa del usuario recibida el 2026-10-20.**
+- **RPC modificadas exactamente:** `sgp_mecanizado_disponibles(text,integer)`, `sgp_picking_cola(text)`, `sgp_guardar_prioridad(text,integer,integer,text,text,jsonb)`. Sobrecarga `sgp_mecanizado_disponibles(text)` intacta.
+- **SQL versionado:** `supabase/migrations/20261020_lab_v310_prioridad_tercer_nivel.sql`. **Rollback de definiciones originales:** `supabase/rollback/20261020_lab_v310_prioridad_tercer_nivel_rollback.sql` (NO ejecutado).
+- **Seguridad:** mismas firmas, SECURITY DEFINER, search_path, roles funcionales y EXECUTE anon/authenticated. Sin ALTER TABLE, RLS, GRANT, cambios de datos persistentes ni despliegues.
+- **Integridad:** `sgp_prioridades.id_prioridad` se conserva al editar una parte (upsert sin borrado indiscriminado); bloquea cambio u omisión de claves programadas, agregado a parte programada, Proyecto dividido, prioridad de cuatro niveles, y tercer nivel fuera de PANELES_2.
+- **Contrato Picking:** `parte_num` sigue siendo numérico en JSON; la clasificación de tres niveles usa segmentos ordenados sin convertir `3.1.1` directamente a NUMERIC.
+- **Cuarta RPC aplicada con autorización adicional:** `sgp_generar_prioridades_restantes(text,integer,integer,text)` admite 1, 2 y 3 niveles en el cálculo de `next_prio`. Migración Supabase `20261020210649_lab_v310_generar_prioridades_tercer_nivel`; SQL `supabase/migrations/20261020_lab_v310_generar_prioridades_restantes.sql`; rollback exacto `supabase/rollback/20261020_lab_v310_generar_prioridades_restantes_rollback.sql` (no ejecutado). Se retiró el bloqueo temporal del frontend de la rama. Conserva SECURITY DEFINER, search_path, EXECUTE, autorización funcional y JSON original.
+- **Concurrencia:** validación SQL transaccional de programación activa, sin bloquear inserciones simultáneas de programación por otras RPC. Requiere prueba de concurrencia antes de declarar verificación operativa completa.
+
+### Evidencia de pruebas backend (transacciones con ROLLBACK)
+
+1. Usuario sintético ADMINISTRADOR con sesión temporal y transporte PostgreSQL `anon`: `sgp_mecanizado_disponibles(token,43)` y `sgp_picking_cola(token)` devuelven datos válidos. Sesión temporal revertida.
+2. Reserva Retail 8690341 (semana 43, cuatro producciones, sin programación): asignación simulada `10.1.1`, `10.1.2`, `10.2`, conservando todos los UUID; Mecanizado ordena partes correctamente.
+3. Programación temporal de `10.1.1` en la misma transacción: Picking devuelve la parte y mantiene `parte_num` numérico; intento de cambiar la parte programada rechazado.
+4. Reserva 8690348 con partes programadas: reagrupación rechazada.
+5. Prioridad `10.1.1.1` rechazada; Proyecto 8566601 no divisible; rol PATINADOR sin autorización para guardar.
+6. Con `10.1.1` programada, otra parte `10.2` puede subdividirse sin alterar programación ni UUID.
+7. Tras ROLLBACK: `sgp_prioridades` mantiene **305 registros / 305 UUID únicos / 0 prioridades de tercer nivel persistidas**; `sgp_mecanizado_programacion` mantiene **47 registros / 0 registros LAB_TEST_ROLLBACK**; no quedaron sesiones sintéticas.
+8. Permisos `anon` y `authenticated` siguen en EXECUTE; SECURITY DEFINER y search_path intactos.
+9. GitHub Actions: ejecutar/regresar a comprobar CI del último commit de la rama. No confundir tests con verificación móvil/planta.
+10. Generación automática: prueba transaccional con prioridad simulada `99.1.1` y seis reservas pendientes, `siguiente_prioridad = 100 + reservas_generadas`; PATINADOR rechazado, sesión y asignaciones revertidas. Privilegios anon/authenticated, firma, SECURITY DEFINER y search_path comprobados. GitHub Actions de rama verde antes de aplicar cuarta RPC.
+
+### Pendientes y autorización
+
+1. Cuarta RPC ya autorizada, aplicada y probada con ROLLBACK; falta verificación en navegador cuando se autorice la publicación del frontend.
+2. Revisar y aprobar explícitamente fusión del PR #16; **no fusionar ni desplegar** por la sola autorización de las tres RPC.
+3. Tras publicación autorizada: validar flujo completo en navegador y móvil, con reservas reales y sin alterar datos de producción; verificar arrastre, Picking PANEL, reserva compartida/múltiple, permisos y concurrencia.
+4. No modificar SGP_ONE_GOOGLE.
+
+**Estado final:** BACKEND APLICADO Y PROBADO CON ROLLBACK; FRONTEND IMPLEMENTADO EN RAMA, NO FUSIONADO, NO PUBLICADO, NO VERIFICADO EN NAVEGADOR.
+
+
+### 2026-10-20 — Corrección de vidrio en arrastre de turno (solo rama, autorizada)
+
+**Objetivo:** que los indicadores Prep./Nov./Trasl. de órdenes pendientes de turno anterior reflejen el vidrio real de su programación original, sin alterar su estado productivo ni crear programaciones.
+
+- **Autorización:** usuario aprobó expresamente implementar en la rama del PR #16, **sin fusionar ni publicar**.
+- **Causa en `main` `dbba4a12572c5fc2055182112e81e8c44aec4333`:** `renderProductionBoard` asignaba ceros fijos a todas las órdenes `_carry`.
+- **Evidencia Supabase:** reserva 8689746, orden 871039, `key_produccion=1308927|PANELES_2`, programación original `38a9f4c6-5346-4d92-8f55-e0a1b608978d`: **4 preparados, 0 novedad, 0 traslados** en vista y RPC original. Los ceros mostrados en la captura eran falsos.
+- **IMPLEMENTADO en rama:** `app.js` consulta `sgp_mecanizado_ordenes_programacion(p_token,id_programacion_origen)` reutilizando RPC existente y caché de solicitudes por ID original. `src/domain/carry-glass.js` relaciona resultados **solo por `key_produccion`**; conserva cantidad, identidad, estado, observación y reservas compartidas de la fila arrastrada; no usa nombre de orden para emparejar. La edición de estados sigue apuntando al `id_programacion_origen` original.
+- **Sin dato:** un error de lectura, ausencia de orden o conteo inválido muestra **—**, con aclaración visible, no 0. El valor 0 solo se presenta cuando está registrado explícitamente. Una falla de vidrio no oculta el listado de órdenes ni sus acciones.
+- **Archivos:** `app.js`, `src/domain/carry-glass.js`, `styles.css`, `tests/carry-glass-v310.test.mjs` y esta documentación. Sin cambios en tablas, RLS, permisos, RPC, programación ni SGP_ONE_GOOGLE.
+- **Pruebas automatizadas:** unión por clave, caso real 871039, órdenes con nombres duplicados pero distintas líneas, conservación de estados y observaciones, errores/ausencias y ausencia de ceros artificiales. Confirmar resultado final del CI de rama antes de dar por PROBADO.
+- **Estado:** IMPLEMENTADO EN RAMA, NO FUSIONADO, NO PUBLICADO, NO VERIFICADO EN NAVEGADOR/PLANTA. Se requiere autorización específica posterior para fusionar/publicar.
