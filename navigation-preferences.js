@@ -39,6 +39,7 @@ nav.querySelectorAll('button[data-view]').forEach(btn=>{
  const label=document.createElement('span');label.className='sgp-nav-name';label.textContent=name;
  btn.replaceChildren(icon,label);
 });
+const desktopTrigger=document.createElement('button');desktopTrigger.type='button';desktopTrigger.className='sgp-nav-desktop-trigger';desktopTrigger.textContent='☰';desktopTrigger.setAttribute('aria-label','Abrir módulos');const topbar=document.querySelector('.workspace .topbar');if(topbar)topbar.prepend(desktopTrigger);desktopTrigger.addEventListener('click',()=>setOpen(!opened));
 const toggle=document.createElement('button');toggle.type='button';toggle.id='sgpNavToggle';toggle.className='sgp-nav-toggle';toggle.textContent='☰';toggle.setAttribute('aria-label','Expandir o contraer módulos');side.insertBefore(toggle,nav);
 toggle.addEventListener('click',()=>{if(!overlay()&&settings.menu==='hover'){settings.menu='toggle';save();syncInputs()}setOpen(!opened)});
 side.addEventListener('mouseenter',()=>{if(!overlay()&&settings.menu==='hover')setOpen(true)});
