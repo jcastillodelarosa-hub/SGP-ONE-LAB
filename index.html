@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SGP ONE LAB</title>
-  <link rel="stylesheet" href="styles.css?v=313" />
+  <link rel="stylesheet" href="styles.css?v=314" />
   <script src="config.js?v=20261008-1300"></script>
 </head>
 <body>
@@ -48,7 +48,7 @@
           <input id="authPassword" type="password" placeholder="Contraseña" autocomplete="current-password" />
           <button id="authLogin">Ingresar</button>
           <button id="authLogout" hidden>Cerrar sesión</button>
-          <span class="status">LAB v313</span>
+          <span class="status">LAB v314</span>
         </div>
       </header>
 
@@ -318,7 +318,7 @@
           </section>
           <section class="daily-tab-panel" data-daily-panel="nc-al" hidden>
  <div class="daily-panel-heading"><span class="daily-heading-icon icon-file" aria-hidden="true"></span><div><h3>NC Aluminio</h3><p>La Semana NC indica cuándo se creó. La Semana Maestro se obtiene de Reserva → Reserva AL de la programación vigente.</p></div></div>
- <div class="daily-upload-row">
+ <div class="daily-upload-row daily-upload-simple">
   <div class="daily-file-field"><label for="ncAlFile" class="sgp-file-field-label">Export NC</label><span class="sgp-file-picker"><input id="ncAlFile" type="file" accept=".xlsx" aria-label="Seleccionar Export de NC Aluminio" aria-describedby="sgpFileSelection-ncAlFile"><span class="sgp-file-button" aria-hidden="true"><span class="sgp-file-icon">↑</span> Seleccionar archivo</span><span class="sgp-file-selected" hidden></span><small id="sgpFileSelection-ncAlFile" class="sgp-file-selection" role="status" aria-live="polite">Sin archivo seleccionado</small><small class="sgp-file-hint">Selecciona el Export de NC Aluminio en formato XLSX.</small></span></div>
   <button id="previewNcAl" class="daily-outline-action">Validar y cruzar</button>
   <button id="applyNcAl" class="daily-primary-action" disabled>Aplicar actualización</button>
@@ -332,7 +332,7 @@
  </div>
  <div id="ncAlWeekSummary" class="daily-status">Sin validación.</div><div id="ncAlChangeSummary" class="nc-load-change-summary" hidden><button data-ncload="new"><small>NC nuevas</small><strong id="ncLoadNew">0</strong></button><button data-ncload="closed"><small>NC finalizadas</small><strong id="ncLoadClosed">0</strong></button><button data-ncload="audit"><small>Sin auditar</small><strong id="ncLoadAudit">0</strong></button></div>
 </section>
-          <section class="daily-tab-panel" data-daily-panel="nc-glass" hidden><div class="daily-panel-heading"><span class="broken-glass-icon broken-glass-large" aria-hidden="true"></span><div><h3>NC Vidrio</h3><p>Semana Maestro se toma directamente de Semana Prog del archivo.</p></div></div><div class="daily-upload-row"><div class="daily-file-field"><label for="ncGlassFile" class="sgp-file-field-label">Export NC Vidrio</label><span class="sgp-file-picker"><input id="ncGlassFile" type="file" accept=".xlsx" aria-label="Seleccionar Export de NC Vidrio" aria-describedby="sgpFileSelection-ncGlassFile"><span class="sgp-file-button" aria-hidden="true"><span class="sgp-file-icon">↑</span> Seleccionar archivo</span><span class="sgp-file-selected" hidden></span><small id="sgpFileSelection-ncGlassFile" class="sgp-file-selection" role="status" aria-live="polite">Sin archivo seleccionado</small><small class="sgp-file-hint">Selecciona el Export de NC Vidrio en formato XLSX.</small></span></div><button id="previewNcGlass" class="daily-outline-action">Validar</button><button id="applyNcGlass" class="daily-primary-action" disabled>Aplicar actualización</button></div><div id="ncGlassStatus" class="daily-status">Selecciona el Export NC Vidrio.</div><div class="daily-metrics"><span class="daily-metric-card"><small>Recibidas</small><strong id="ncGlassReceived">0</strong></span><span class="daily-metric-card"><small>Nuevas</small><strong id="ncGlassNew">0</strong></span><span class="daily-metric-card"><small>Actualizaciones</small><strong id="ncGlassUpdated">0</strong></span></div><div id="ncGlassWeeks" class="daily-status">Sin validación.</div><div id="ncGlassChangeSummary" class="nc-load-change-summary" hidden><button data-ncgload="new"><small>NC nuevas</small><strong id="ncgLoadNew">0</strong></button><button data-ncgload="closed"><small>NC finalizadas</small><strong id="ncgLoadClosed">0</strong></button><button data-ncgload="open"><small>NC abiertas</small><strong id="ncgLoadOpen">0</strong></button></div></section>
+          <section class="daily-tab-panel" data-daily-panel="nc-glass" hidden><div class="daily-panel-heading"><span class="broken-glass-icon broken-glass-large" aria-hidden="true"></span><div><h3>NC Vidrio</h3><p>Semana Maestro se toma directamente de Semana Prog del archivo.</p></div></div><div class="daily-upload-row daily-upload-simple"><div class="daily-file-field"><label for="ncGlassFile" class="sgp-file-field-label">Export NC Vidrio</label><span class="sgp-file-picker"><input id="ncGlassFile" type="file" accept=".xlsx" aria-label="Seleccionar Export de NC Vidrio" aria-describedby="sgpFileSelection-ncGlassFile"><span class="sgp-file-button" aria-hidden="true"><span class="sgp-file-icon">↑</span> Seleccionar archivo</span><span class="sgp-file-selected" hidden></span><small id="sgpFileSelection-ncGlassFile" class="sgp-file-selection" role="status" aria-live="polite">Sin archivo seleccionado</small><small class="sgp-file-hint">Selecciona el Export de NC Vidrio en formato XLSX.</small></span></div><button id="previewNcGlass" class="daily-outline-action">Validar</button><button id="applyNcGlass" class="daily-primary-action" disabled>Aplicar actualización</button></div><div id="ncGlassStatus" class="daily-status">Selecciona el Export NC Vidrio.</div><div class="daily-metrics"><span class="daily-metric-card"><small>Recibidas</small><strong id="ncGlassReceived">0</strong></span><span class="daily-metric-card"><small>Nuevas</small><strong id="ncGlassNew">0</strong></span><span class="daily-metric-card"><small>Actualizaciones</small><strong id="ncGlassUpdated">0</strong></span></div><div id="ncGlassWeeks" class="daily-status">Sin validación.</div><div id="ncGlassChangeSummary" class="nc-load-change-summary" hidden><button data-ncgload="new"><small>NC nuevas</small><strong id="ncgLoadNew">0</strong></button><button data-ncgload="closed"><small>NC finalizadas</small><strong id="ncgLoadClosed">0</strong></button><button data-ncgload="open"><small>NC abiertas</small><strong id="ncgLoadOpen">0</strong></button></div></section>
           <section class="daily-tab-panel" data-daily-panel="al-track" hidden>
             <div class="daily-panel-heading"><div><h3>Seguimiento de aluminio</h3><p>Estado logístico y seguimiento del aluminio.</p></div></div>
             <div class="daily-upload-row daily-upload-simple">
@@ -373,7 +373,7 @@
     </div>
   </div>
 
-  <script type="module" src="app.js?v=313"></script>
+  <script type="module" src="app.js?v=314"></script>
 <div id="userModal" class="modal-backdrop rec-overlay" hidden><div class="modal-card user-modal-card"><div class="modal-header"><div><strong id="userModalTitle">Nuevo usuario</strong><small>Cuenta y permisos de acceso</small></div><button id="userModalClose" class="modal-close">×</button></div><div class="user-form"><div class="rec-grid"><label>Usuario<input id="userName" autocomplete="off"></label><label>Nombre completo<input id="userFullName"></label><label>Rol<select id="userRole"><option>COORDINADOR</option><option>LIDER MECANIZADO</option><option>LIDER LINEA</option><option>RECEPCION</option><option>PATINADOR</option><option>PICKING</option><option>SUPERVISOR DE PICKING</option><option>CONSULTA</option><option>ADMINISTRADOR</option></select></label><label>Contraseña<input id="userPassword" type="password" placeholder="Vacío = conservar contraseña"></label><div class="password-reset-wrap"><button id="resetPasswordBtn" type="button" hidden>↻ Restablecer contraseña</button><small>Asigna una nueva contraseña temporal al usuario.</small></div></div><label class="user-active"><input id="userActive" type="checkbox" checked> Usuario activo</label><div class="access-title"><b>Ventanas permitidas</b><span>El usuario solo verá las opciones seleccionadas.</span></div><div id="userAccessGrid" class="access-grid"></div></div><div class="modal-actions"><button id="userCancel">Cancelar</button><button id="userSave" class="primary">Guardar usuario</button></div></div></div>
 
 <div id="glassBurroModal" class="glass-burro-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="glassBurroTitle">
