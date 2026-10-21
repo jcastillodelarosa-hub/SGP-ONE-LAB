@@ -1,0 +1,47 @@
+/* SGP ONE navegación: solo presentación, escritorio >=761px. */
+.app-shell{--sgp-nav-speed:240ms}
+.sgp-nav-logo{display:grid;place-items:center;width:43px;min-width:43px;height:43px;border-radius:13px;background:linear-gradient(140deg,#359bff,#0961d7);color:white;font-size:13px;font-weight:900}
+.app-shell .sidebar{background:linear-gradient(160deg,#091d3d,#143b77);color:#dce9ff}
+.app-shell .sidebar .nav button{display:flex;align-items:center;gap:14px;color:#c9daf4}
+.app-shell .sidebar .nav button.active{background:linear-gradient(90deg,#2e81ed,#1d5bbc);color:white}
+.sgp-nav-icon{display:inline-flex;align-items:center;justify-content:center;min-width:24px;font-size:20px}
+.sgp-nav-toggle{border:1px solid #ffffff38;background:#ffffff13;color:white;border-radius:9px;min-height:34px;cursor:pointer}
+.sgp-nav-preferences{background:#fff;border:1px solid #d9e6f7;border-radius:14px;padding:18px 20px;margin:15px 0;box-shadow:0 5px 18px #123b670c}
+.sgp-nav-preferences h3{margin:0 0 5px;color:#183b70}
+.sgp-nav-preferences p{font-size:12px;color:#6482a7}
+.sgp-nav-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:14px 0}
+.sgp-nav-fields label{display:block;font-size:12px;font-weight:700;color:#466a9a}
+.sgp-nav-fields select{display:block;width:100%;margin-top:7px;padding:10px;border:1px solid #cbdcf1;border-radius:9px;background:#f8fbff;color:#173c70}
+.sgp-nav-preferences button{border:1px solid #cbdcf1;background:#eaf3ff;color:#175bb6;padding:9px 13px;border-radius:9px}
+@media(min-width:761px){
+ .app-shell[data-sgp-nav-mode]{grid-template-columns:72px minmax(0,1fr);transition:grid-template-columns var(--sgp-nav-speed) ease}
+ .app-shell[data-sgp-nav-mode].sgp-nav-expanded{grid-template-columns:290px minmax(0,1fr)}
+ .app-shell[data-sgp-nav-mode]>.sidebar{width:auto!important;min-width:0;overflow:hidden;position:sticky;top:0;height:100vh;padding:20px 9px;gap:15px;box-shadow:5px 0 22px #071b3a20}
+ .app-shell[data-sgp-nav-mode]>.sidebar .brand{display:flex;justify-content:flex-start;gap:12px;white-space:nowrap;padding:0 7px;overflow:hidden}
+ .app-shell[data-sgp-nav-mode]>.sidebar .brand strong,.app-shell[data-sgp-nav-mode]>.sidebar .brand>span:not(.sgp-nav-logo){display:none}
+ .app-shell[data-sgp-nav-mode]>.sidebar .nav{display:flex;flex-direction:column;gap:4px;overflow-y:auto;overflow-x:hidden;min-height:0}
+ .app-shell[data-sgp-nav-mode]>.sidebar .nav button{flex:0 0 45px;min-height:45px;padding:0 13px;white-space:nowrap;font-size:13px;overflow:hidden}
+ .app-shell[data-sgp-nav-mode]>.sidebar .nav .sgp-nav-name{opacity:0;transition:opacity var(--sgp-nav-speed) ease}
+ .app-shell[data-sgp-nav-mode].sgp-nav-expanded>.sidebar .nav .sgp-nav-name{opacity:1}
+ .app-shell[data-sgp-nav-mode]>.sidebar .sidebar-foot{display:none}
+ .app-shell[data-sgp-nav-mode]>.sidebar .sgp-nav-toggle{width:44px;min-height:34px;margin-left:4px}
+ .app-shell[data-sgp-nav-mode].sgp-nav-expanded>.sidebar .sgp-nav-toggle{width:auto;margin:0 6px}
+ .app-shell[data-sgp-nav-mode="floating"]{grid-template-columns:minmax(0,1fr)}
+ .app-shell[data-sgp-nav-mode="floating"]>.sidebar{position:fixed!important;left:0;top:0;width:290px!important;transform:translateX(-101%);transition:transform var(--sgp-nav-speed);z-index:10000}
+ .app-shell[data-sgp-nav-mode="floating"].sgp-nav-expanded>.sidebar{transform:translateX(0)}
+ .app-shell[data-sgp-nav-mode="floating"]>.sidebar .nav .sgp-nav-name{opacity:1}
+ .app-shell[data-sgp-nav-mode="floating"] .workspace>.topbar:before{content:"☰";cursor:default;color:#1264c8;font-size:20px}
+}
+@media(max-width:760px){
+ .app-shell .sidebar .nav .sgp-nav-name{opacity:1}
+ .app-shell .sidebar .sgp-nav-toggle{display:none}
+ .sgp-nav-fields{grid-template-columns:1fr}
+}
+@media(prefers-reduced-motion:no-preference){
+ .sgp-nav-fade{animation:sgpFade var(--sgp-nav-speed) ease both}
+ .sgp-nav-slide{animation:sgpSlide var(--sgp-nav-speed) ease both}
+ .sgp-nav-zoom{animation:sgpZoom var(--sgp-nav-speed) ease both}
+}
+@keyframes sgpFade{from{opacity:0}to{opacity:1}}
+@keyframes sgpSlide{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:translateX(0)}}
+@keyframes sgpZoom{from{opacity:0;transform:scale(.985)}to{opacity:1;transform:scale(1)}}
