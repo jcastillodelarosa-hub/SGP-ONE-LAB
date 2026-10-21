@@ -2323,7 +2323,7 @@ function shiftReportDownloadName(d,extension){
  return 'SGP_Reporte_Turno_'+d.date+'_'+(d.turno||'TODOS').replaceAll(' ','_')+'.'+extension;
 }
 async function shiftReportCapture(preview){
- try{await ensureReportExportLibs(false)}catch(error){throw new Error('No se pudo cargar la biblioteca de imágenes. Comprueba la conexión o el acceso a cdn.jsdelivr.net.',{cause:error})}
+ try{await ensureReportExportLibs(false)}catch(error){throw new Error('No se pudo cargar la biblioteca de imágenes. Comprueba que los archivos de exportación estén disponibles en el servidor SGP_ONE.',{cause:error})}
  if(typeof window.html2canvas!=='function')throw new Error('No se pudo cargar la biblioteca de imágenes. Comprueba el acceso a los recursos de exportación.');
  const sheet=preview.querySelector('.shift-report-sheet');
  if(!sheet)throw new Error('No hay una vista previa disponible para exportar.');
@@ -2376,7 +2376,7 @@ async function openShiftReport(){
   m.querySelector('[data-shift-pdf]').onclick=()=>run(async()=>{
    await refresh();
    const canvas=await shiftReportCapture(preview);
-   if(!window.jspdf?.jsPDF){try{await ensureReportExportLibs(true)}catch(error){throw new Error('No se pudo cargar la biblioteca PDF. Comprueba la conexión o el acceso a cdn.jsdelivr.net.',{cause:error})}}
+   if(!window.jspdf?.jsPDF){try{await ensureReportExportLibs(true)}catch(error){throw new Error('No se pudo cargar la biblioteca PDF. Comprueba que los archivos de exportación estén disponibles en el servidor SGP_ONE.',{cause:error})}}
    const Pdf=window.jspdf?.jsPDF;
    if(typeof Pdf!=='function')throw new Error('No se pudo cargar la biblioteca PDF. Comprueba el acceso a los recursos de exportación.');
    const pdf=new Pdf({orientation:'landscape',unit:'mm',format:'a4'}),pw=297,ph=210,margin=6,w=pw-margin*2,h=canvas.height*w/canvas.width,img=canvas.toDataURL('image/jpeg',.95);
@@ -2528,7 +2528,20 @@ async function loadNcAlReport(){const from=document.querySelector('#ncReportFrom
 document.querySelector('#runNcReport')?.addEventListener('click',loadNcAlReport);
 document.querySelector('[data-view="informes"]')?.addEventListener('click',()=>{const to=document.querySelector('#ncReportTo'),from=document.querySelector('#ncReportFrom');if(to&&!to.value){const d=new Date(),z=n=>String(n).padStart(2,'0');to.value=d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate());const f=new Date(d);f.setDate(f.getDate()-30);from.value=f.getFullYear()+'-'+z(f.getMonth()+1)+'-'+z(f.getDate())}});
 
-async function ensureReportExportLibs(needPdf=true){if(!window.html2canvas)await new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';s.onload=ok;s.onerror=()=>no(new Error('No se pudo cargar html2canvas desde cdn.jsdelivr.net'));document.head.appendChild(s)});if(needPdf&&!window.jspdf)await new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js';s.onload=ok;s.onerror=()=>no(new Error('No se pudo cargar jsPDF desde cdn.jsdelivr.net'));document.head.appendChild(s)})}
+async function ensureReportExportLibs(needPdf=true){
+ const load=async(src,ready,label)=>{
+  if(ready())return;
+  await new Promise((resolve,reject)=>{
+   const script=document.createElement('script');
+   script.src=src;script.onload=resolve;
+   script.onerror=()=>reject(new Error('No se pudo cargar '+label+' desde el servidor SGP_ONE: '+src));
+   document.head.appendChild(script);
+  });
+  if(!ready())throw new Error('La biblioteca '+label+' no se inicializó correctamente.');
+ };
+ await load('./vendor/html2canvas.min.js',()=>typeof window.html2canvas==='function','html2canvas');
+ if(needPdf)await load('./vendor/jspdf.umd.min.js',()=>typeof window.jspdf?.jsPDF==='function','jsPDF');
+}
 function ncReportFileName(ext){const f=document.querySelector('#ncReportFrom')?.value||'',t=document.querySelector('#ncReportTo')?.value||'';return 'SGP_NC_Aluminio_'+f+'_a_'+t+'.'+ext}
 async function captureNcReport(){const el=document.querySelector('#ncReportCanvas');if(!el||el.querySelector('.empty-state'))throw new Error('Primero genera el informe.');await ensureReportExportLibs();el.classList.add('report-exporting');try{return await html2canvas(el,{scale:2,useCORS:true,backgroundColor:'#f4f7fa',windowWidth:el.scrollWidth,windowHeight:el.scrollHeight})}finally{el.classList.remove('report-exporting')}}
 document.querySelector('#downloadNcReportImage')?.addEventListener('click',async()=>{try{const c=await captureNcReport(),a=document.createElement('a');a.download=ncReportFileName('png');a.href=c.toDataURL('image/png');a.click()}catch(e){alert('No fue posible generar la imagen: '+e.message)}});
