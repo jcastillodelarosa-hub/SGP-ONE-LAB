@@ -2306,3 +2306,10 @@ button.active,[aria-pressed="true"]{border-color:#0865ed}
  #pickReceptionPanel .pick-reception-toolbar{grid-template-columns:1fr!important}
  #pickReceptionSearch,#pickReceptionWeek,#pickReceptionRefresh{grid-column:1!important}
 }
+
+/* LAB v317: filtros y mensajes accesibles del reporte de producción */
+.shift-report-work select{width:100%;box-sizing:border-box;border:1px solid #bdd3ef;border-radius:10px;padding:10px;background:#fff;color:#173454;font:inherit}
+.shift-report-work select:focus,.shift-report-work input:focus,.shift-report-work textarea:focus{outline:2px solid #0b70f5;outline-offset:1px}
+.shift-report-error{padding:10px 12px;border:1px solid #e3a0a0;background:#fff1f1;color:#8a2424;border-radius:10px;font-size:12px;line-height:1.45;overflow-wrap:anywhere}
+.shift-report-error[hidden]{display:none}
+.shift-report-actions button:disabled{opacity:.65;cursor:wait}
