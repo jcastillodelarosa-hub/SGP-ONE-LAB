@@ -49,7 +49,7 @@ export function initPickingDeliveryReport({getSupabaseClient,getAppToken}){
  $('pickReportImage')?.addEventListener('click',async()=>{
   try{
    if(!state)throw new Error('Primero consulta el reporte');
-   if(typeof window.html2canvas!=='function')throw new Error('Captura de imagen no disponible');
+   if(typeof window.html2canvas!=='function'){await new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='./vendor/html2canvas.min.js';s.onload=resolve;s.onerror=reject;document.head.appendChild(s)})}if(typeof window.html2canvas!=='function')throw new Error('Captura de imagen no disponible');
    const target=report;
    const canvas=await window.html2canvas(target,{backgroundColor:'#ffffff',scale:2,scrollX:0,scrollY:0,windowWidth:Math.max(target.scrollWidth,1100),onclone:doc=>{const node=doc.getElementById('pickReportPanel');if(node){node.style.width='1100px';node.style.maxWidth='none';node.style.overflow='visible';node.querySelectorAll('.table-wrap').forEach(t=>{t.style.overflow='visible';t.style.maxWidth='none'})}}});
    const a=document.createElement('a');a.download='SGP_Picking_Entregas_'+state.filters.fecha_inicio+'.png';a.href=canvas.toDataURL('image/png');a.click();
