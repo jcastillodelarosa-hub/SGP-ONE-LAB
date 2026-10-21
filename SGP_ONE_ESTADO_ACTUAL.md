@@ -888,4 +888,4 @@ Estado: **IMPLEMENTADO EN RAMA**, pruebas automáticas/PR/publicación pendiente
 
 **Seguridad y alcance:** no se modifica Supabase, Firebase, Gateway, roles, tablas, datos ni RPC. No se tocan flujos de recepción ni almacenamiento de evidencias. La revisión de compatibilidad móvil y apertura del selector nativo requiere prueba real de navegador.
 
-**Estado:** IMPLEMENTADO EN RAMA. CI / PR pendientes al momento de registrar esta nota. NO FUSIONADO, NO PUBLICADO y NO VERIFICADO visualmente. Fusionar/publicar solo con autorización adicional.
+**Estado:** IMPLEMENTADO EN RAMA y PR #18 en borrador; CI GitHub Actions del primer commit de PR: 78/78 pruebas aprobadas y verificación de sintaxis correcta. **NO FUSIONADO, NO PUBLICADO y NO VERIFICADO visualmente.** Fusionar/publicar solo con autorización adicional. La verificación de compatibilidad móvil y elección real de archivos sigue pendiente.
