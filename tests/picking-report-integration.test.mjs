@@ -5,7 +5,7 @@ const html=readFileSync('index.html','utf8');
 const app=readFileSync('app.js','utf8');
 const controller=readFileSync('src/modules/picking-delivery-report-controller.js','utf8');
 test('LAB v321 report integrated with Picking tabs',()=>{
- for(const id of ['pickReportTab','pickReportPanel','pickReportFrom','pickReportTo','pickReportShift','pickReportSystem','pickReportRun','pickReportPdf','pickReportExcel'])assert.ok(html.includes('id="'+id+'"'),id);
+ for(const id of ['pickReportTab','pickReportPanel','pickReportFrom','pickReportTo','pickReportShift','pickReportSystem','pickReportRun','pickReportPdf','pickReportImage'])assert.ok(html.includes('id="'+id+'"'),id);
  assert.match(html,/LAB v322/);
  assert.match(html,/app\.js\?v=322/);
  assert.match(app,/initPickingDeliveryReport\(\{getSupabaseClient,getAppToken\}\)/);
