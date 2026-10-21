@@ -2272,3 +2272,37 @@ button.active,[aria-pressed="true"]{border-color:#0865ed}
 @media(max-width:700px){
  .daily-upload-row > button{margin-top:0}
 }
+
+/* LAB v315 · semana y filtro de Recepción / Auditoría de Picking */
+.pick-reception-toolbar select{
+ min-width:185px;min-height:35px;padding:7px 12px;
+ border:1px solid #b9cbe0;border-radius:9px;
+ background:#fff;color:#173b64;font:inherit;font-size:13px;
+}
+.pick-reception-filter-status{
+ margin:0 0 10px;text-align:right;font-size:12px;
+ color:#526b8a;font-weight:700;
+}
+.pick-reception-week-warning{
+ margin:8px 0;padding:10px 12px;border:1px solid #f2cf86;
+ border-radius:9px;background:#fff8e8;color:#855300;font-size:12px;
+}
+.pick-reception-group-head{display:flex;align-items:center;gap:12px;min-width:0}
+.pick-reception-group-head>div{min-width:0}
+.pick-reception-group-head .pick-week-badge{flex:0 0 auto;min-height:40px;font-size:12px}
+.pick-reception-group>header{gap:10px}
+.pick-reception-group>header>strong{flex:0 0 auto}
+@media(max-width:760px){
+ #pickReceptionPanel .pick-reception-toolbar{grid-template-columns:minmax(0,1fr) minmax(130px,.8fr)!important}
+ #pickReceptionSearch{grid-column:1/-1!important}
+ #pickReceptionWeek{grid-column:1!important}
+ #pickReceptionRefresh{grid-column:2!important}
+ .pick-reception-filter-status{text-align:left}
+ .pick-reception-group>header{align-items:flex-start}
+ .pick-reception-group-head{align-items:flex-start;gap:8px}
+ .pick-reception-group-head .pick-week-badge{min-width:58px;min-height:36px}
+}
+@media(max-width:430px){
+ #pickReceptionPanel .pick-reception-toolbar{grid-template-columns:1fr!important}
+ #pickReceptionSearch,#pickReceptionWeek,#pickReceptionRefresh{grid-column:1!important}
+}

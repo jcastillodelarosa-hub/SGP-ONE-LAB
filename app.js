@@ -16,6 +16,7 @@ import { consolidatePieceReferences } from "./src/domain/piece-detail-views.js";
 import { mergeCarryOrdersWithGlass, glassCountLabel } from "./src/domain/carry-glass.js";
 import { indexReceptionAluminumStates, receptionAluminumStateMeta } from "./src/domain/reception-aluminum-state.js";
 import { initFilePickers } from "./src/ui/file-picker.js";
+import { attachReceptionWeeks, receptionWeekOptions, filterReceptionRows, normalizeReceptionWeek } from "./src/domain/picking-reception-weeks.js";
 import { comparePriority, priorityDepth, groupPriorityRows, splitPriorityPart, validatePriorityAssignments, hasScheduledPriority } from "./src/domain/priority-hierarchy.js";
 import { readNcAluminumWorkbook } from "./src/domain/nc-aluminum-importer.js?v=73";
 import { readNcGlassWorkbook } from "./src/domain/nc-glass-importer.js?v=84";
@@ -2021,17 +2022,71 @@ document.querySelector('#saveShiftConfig')?.addEventListener('click',async()=>{c
 
 let pickingRows=[];
 
-let pickingReceptionRows=[],pickAuditTarget=null,pickAuditDifferences=[];
-async function loadPickingReception(){const host=document.querySelector('#pickReceptionBoard');if(!host||!getAppToken())return;host.innerHTML='<div class="empty-state">Cargando órdenes por auditar…</div>';try{const db=await getSupabaseClient(),{data,error}=await db.rpc('sgp_picking_recepcion_cola',{p_token:getAppToken()});if(error)throw error;pickingReceptionRows=data||[];const ct=document.querySelector('#pickReceptionCount');if(ct)ct.textContent=pickingReceptionRows.length;renderPickingReception()}catch(e){host.innerHTML='<div class="empty-state">No fue posible cargar recepción: '+escapeHtml(e.message||String(e))+'</div>'}}
+let pickingReceptionRows=[],pickAuditTarget=null,pickAuditDifferences=[],pickingReceptionLoadId=0;
+async function loadPickingReception(){
+ const host=document.querySelector('#pickReceptionBoard');
+ if(!host||!getAppToken())return;
+ const requestId=++pickingReceptionLoadId;
+ host.innerHTML='<div class="empty-state">Cargando órdenes por auditar…</div>';
+ const warning=document.querySelector('#pickReceptionWeekWarning');
+ if(warning){warning.hidden=true;warning.textContent=''}
+ try{
+  const db=await getSupabaseClient(),token=getAppToken();
+  // La RPC de recepción no devuelve semana. La cola de Picking ya contiene
+  // la semana operativa por id_programacion (sin tocar funciones de Supabase).
+  const [reception,programming]=await Promise.all([
+   db.rpc('sgp_picking_recepcion_cola',{p_token:token}),
+   db.rpc('sgp_picking_cola',{p_token:token})
+  ]);
+  if(requestId!==pickingReceptionLoadId)return;
+  if(reception.error)throw reception.error;
+  pickingReceptionRows=attachReceptionWeeks(reception.data||[],programming.error?[]:(programming.data||[]));
+  const ct=document.querySelector('#pickReceptionCount');
+  if(ct)ct.textContent=pickingReceptionRows.length;
+  const select=document.querySelector('#pickReceptionWeek');
+  if(select){
+   const previous=select.value,options=receptionWeekOptions(pickingReceptionRows);
+   select.innerHTML='<option value="">Todas las semanas</option>'+options.map(o=>'<option value="'+o.value+'">'+o.label+'</option>').join('');
+   select.value=options.some(o=>o.value===previous)?previous:'';
+  }
+  if(warning&&programming.error){
+   warning.textContent='No fue posible consultar la semana de programación. Puedes continuar auditando y volver a intentar con «Actualizar recepción».';
+   warning.hidden=false;
+  }
+  renderPickingReception();
+ }catch(e){
+  if(requestId!==pickingReceptionLoadId)return;
+  pickingReceptionRows=[];
+  const ct=document.querySelector('#pickReceptionCount');
+  if(ct)ct.textContent='0';
+  const status=document.querySelector('#pickReceptionFilterStatus');
+  if(status)status.textContent='';
+  host.innerHTML='<div class="empty-state">No fue posible cargar recepción: '+escapeHtml(e.message||String(e))+'</div>';
+ }
+}
 function renderPickingReception(){
  const host=document.querySelector('#pickReceptionBoard');if(!host)return;
- const q=(document.querySelector('#pickReceptionSearch')?.value||'').toLowerCase();
- const rows=pickingReceptionRows.filter(x=>!q||[x.produccion,x.proyecto,x.reserva,x.parte,x.sistema,x.acabado,JSON.stringify(x.reservas_compartidas||[])].some(v=>String(v||'').toLowerCase().includes(q)));
+ const q=document.querySelector('#pickReceptionSearch')?.value||'';
+ const week=document.querySelector('#pickReceptionWeek')?.value||'';
+ const rows=filterReceptionRows(pickingReceptionRows,{week,search:q});
+ const status=document.querySelector('#pickReceptionFilterStatus');
+ if(status)status.textContent=(week||q.trim()?'Mostrando '+rows.length+' de '+pickingReceptionRows.length:'Total: '+pickingReceptionRows.length)+' órdenes pendientes de auditoría';
  const groups=new Map();
- rows.forEach(x=>{const k=String(x.reserva||'—')+'|'+String(x.parte||'—');if(!groups.has(k))groups.set(k,{reserva:x.reserva||'—',parte:x.parte||'—',sistema:x.sistema||'—',acabado:x.acabado||'—',rows:[]});groups.get(k).rows.push(x)});
- host.innerHTML=groups.size?[...groups.values()].map(g=>'<section class="pick-reception-group"><header><div><b>Reserva '+escapeHtml(g.reserva)+'</b><span> · Parte '+escapeHtml(g.parte)+'</span><small>'+escapeHtml(g.sistema)+' · '+escapeHtml(g.acabado)+'</small>'+sharedReserveNoticeHtml(g.reserva)+'</div><strong>'+g.rows.length+' orden'+(g.rows.length===1?'':'es')+'</strong></header>'+g.rows.map(x=>{const meta=sharedMetaFromEmbedded(x,x.reserva);return '<div class="pick-reception-card grouped '+(isSharedMeta(meta)?'shared-row':'')+'"><div><strong>'+escapeHtml(x.produccion||'—')+' · '+escapeHtml(x.proyecto||'')+'</strong>'+(meta?sharedBadgeHtml(meta)+sharedDetailsHtml(meta):'')+'<small>'+escapeHtml(x.cantidad_ventanas||0)+' ventanas</small></div><div><span class="prod-state pick-status-yellow">PICKING</span><span class="pick-delivery-state">'+(x.completa?'COMPLETA · POR VALIDAR':'CON PENDIENTES · POR VALIDAR')+'</span></div><div><small>Entrega '+escapeHtml(x.fecha_entrega||'—')+' · '+escapeHtml(x.turno_entrega||'—')+'</small><small>Por '+escapeHtml(x.usuario_entrega||'—')+'</small></div><div class="pick-reception-actions"><button data-audit-pieces="'+x.id_programacion+'" data-production="'+escapeHtml(x.produccion||'')+'">Ver piezas</button><button class="primary" data-audit="'+x.id_entrega+'">Auditar</button></div></div>'}).join('')+'</section>').join(''):'<div class="empty-state">No hay órdenes pendientes de auditoría.</div>';
+ rows.forEach(x=>{
+  const semana=normalizeReceptionWeek(x.semana);
+  const key=JSON.stringify([x.reserva??'—',x.parte??'—',semana]);
+  if(!groups.has(key))groups.set(key,{reserva:x.reserva||'—',parte:x.parte||'—',semana,sistema:x.sistema||'—',acabado:x.acabado||'—',rows:[]});
+  groups.get(key).rows.push(x);
+ });
+ host.innerHTML=groups.size?[...groups.values()].map(g=>
+  '<section class="pick-reception-group"><header><div class="pick-reception-group-head"><span class="pick-week-badge">SEM '+escapeHtml(g.semana||'—')+'</span><div><b>Reserva '+escapeHtml(g.reserva)+'</b><span> · Parte '+escapeHtml(g.parte)+'</span><small>'+escapeHtml(g.sistema)+' · '+escapeHtml(g.acabado)+'</small>'+sharedReserveNoticeHtml(g.reserva)+'</div></div><strong>'+g.rows.length+' orden'+(g.rows.length===1?'':'es')+'</strong></header>'+
+  g.rows.map(x=>{
+   const meta=sharedMetaFromEmbedded(x,x.reserva),semana=normalizeReceptionWeek(x.semana);
+   return '<div class="pick-reception-card grouped '+(isSharedMeta(meta)?'shared-row':'')+'"><div><strong>'+escapeHtml(x.produccion||'—')+' · '+escapeHtml(x.proyecto||'')+'</strong>'+(meta?sharedBadgeHtml(meta)+sharedDetailsHtml(meta):'')+'<small>Semana '+escapeHtml(semana||'sin identificar')+' · '+escapeHtml(x.cantidad_ventanas||0)+' ventanas</small></div><div><span class="prod-state pick-status-yellow">PICKING</span><span class="pick-delivery-state">'+(x.completa?'COMPLETA · POR VALIDAR':'CON PENDIENTES · POR VALIDAR')+'</span></div><div><small>Entrega '+escapeHtml(x.fecha_entrega||'—')+' · '+escapeHtml(x.turno_entrega||'—')+'</small><small>Por '+escapeHtml(x.usuario_entrega||'—')+'</small></div><div class="pick-reception-actions"><button data-audit-pieces="'+x.id_programacion+'" data-production="'+escapeHtml(x.produccion||'')+'">Ver piezas</button><button class="primary" data-audit="'+x.id_entrega+'">Auditar</button></div></div>';
+  }).join('')+'</section>'
+ ).join(''):'<div class="empty-state">'+(pickingReceptionRows.length?'No hay órdenes pendientes de auditoría para los filtros seleccionados.':'No hay órdenes pendientes de auditoría.')+'</div>';
  host.querySelectorAll('[data-audit-pieces]').forEach(b=>b.onclick=()=>openPickingPieces(b.dataset.auditPieces,b.dataset.production));
- host.querySelectorAll('[data-audit]').forEach(b=>b.onclick=()=>openPickingAudit(b.dataset.audit))
+ host.querySelectorAll('[data-audit]').forEach(b=>b.onclick=()=>openPickingAudit(b.dataset.audit));
 }
 function openPickingAudit(id){
  const x=pickingReceptionRows.find(r=>r.id_entrega===id);if(!x)return;
@@ -2407,7 +2462,7 @@ document.querySelectorAll('[data-ui-scale]').forEach(b=>b.addEventListener('clic
  applyUiScale(b.dataset.uiScale);
 }));
 
-document.querySelector('#pickDeliveryTab')?.addEventListener('click',()=>{document.querySelector('#pickDeliveryTab').classList.add('active');document.querySelector('#pickReceptionTab').classList.remove('active');document.querySelector('#pickDeliveryPanel').hidden=false;document.querySelector('#pickReceptionPanel').hidden=true});document.querySelector('#pickReceptionTab')?.addEventListener('click',()=>{document.querySelector('#pickReceptionTab').classList.add('active');document.querySelector('#pickDeliveryTab').classList.remove('active');document.querySelector('#pickDeliveryPanel').hidden=true;document.querySelector('#pickReceptionPanel').hidden=false;loadPickingReception()});document.querySelector('#pickReceptionRefresh')?.addEventListener('click',loadPickingReception);document.querySelector('#pickReceptionSearch')?.addEventListener('input',renderPickingReception);document.querySelector('#pickAuditValidate')?.addEventListener('click',savePickingAudit);document.querySelector('#pickAuditClose')?.addEventListener('click',()=>document.querySelector('#pickAuditModal').hidden=true);document.querySelector('#pickAuditCancel')?.addEventListener('click',()=>document.querySelector('#pickAuditModal').hidden=true);document.querySelector('#pickAuditDifference')?.addEventListener('click',openAuditDifferenceEditor);
+document.querySelector('#pickDeliveryTab')?.addEventListener('click',()=>{document.querySelector('#pickDeliveryTab').classList.add('active');document.querySelector('#pickReceptionTab').classList.remove('active');document.querySelector('#pickDeliveryPanel').hidden=false;document.querySelector('#pickReceptionPanel').hidden=true});document.querySelector('#pickReceptionTab')?.addEventListener('click',()=>{document.querySelector('#pickReceptionTab').classList.add('active');document.querySelector('#pickDeliveryTab').classList.remove('active');document.querySelector('#pickDeliveryPanel').hidden=true;document.querySelector('#pickReceptionPanel').hidden=false;loadPickingReception()});document.querySelector('#pickReceptionRefresh')?.addEventListener('click',loadPickingReception);document.querySelector('#pickReceptionSearch')?.addEventListener('input',renderPickingReception);document.querySelector('#pickReceptionWeek')?.addEventListener('change',renderPickingReception);document.querySelector('#pickAuditValidate')?.addEventListener('click',savePickingAudit);document.querySelector('#pickAuditClose')?.addEventListener('click',()=>document.querySelector('#pickAuditModal').hidden=true);document.querySelector('#pickAuditCancel')?.addEventListener('click',()=>document.querySelector('#pickAuditModal').hidden=true);document.querySelector('#pickAuditDifference')?.addEventListener('click',openAuditDifferenceEditor);
 
 document.querySelector('#alCompactTab')?.addEventListener('click',()=>{document.querySelector('#alCompactTab').classList.add('active');document.querySelector('#alDetailTab').classList.remove('active');document.querySelector('#alCompactPanel').hidden=false;document.querySelector('#alDetailPanel').hidden=true;renderAlCompact()});document.querySelector('#alDetailTab')?.addEventListener('click',()=>{document.querySelector('#alDetailTab').classList.add('active');document.querySelector('#alCompactTab').classList.remove('active');document.querySelector('#alCompactPanel').hidden=true;document.querySelector('#alDetailPanel').hidden=false;renderAlTrackRows(alTrackRows)});
 
