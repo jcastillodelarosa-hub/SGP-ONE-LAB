@@ -74,3 +74,14 @@
  .app-shell[data-sgp-nav-mode="floating"]>.sidebar .sgp-nav-logo-one{display:inline}
  .app-shell[data-sgp-nav-mode]>.sidebar .brand strong,.app-shell[data-sgp-nav-mode]>.sidebar .brand>span:not(.sgp-nav-logo){display:none!important}
 }
+
+/* Approved intense blue #0D47A1, with electric-blue edge and subtle translucent fade. */
+.app-shell .sidebar{background:linear-gradient(105deg,#092b73 0%,#0d47a1 58%,#1267eb 88%,#248cff 100%)!important;color:#eaf4ff}
+.sgp-nav-logo>span:first-child{color:#43ddff}
+.sgp-nav-logo-one{color:#fff}
+@media(min-width:761px){
+ .app-shell[data-sgp-nav-mode]>.sidebar{transition:background var(--sgp-nav-speed) ease,box-shadow var(--sgp-nav-speed) ease;box-shadow:4px 0 16px #0d47a129}
+ .app-shell[data-sgp-nav-mode]:not(.sgp-nav-expanded):not([data-sgp-nav-mode="floating"])>.sidebar{background:linear-gradient(90deg,#092b73 0%,#0d47a1 53%,#176bea 81%,rgba(56,155,255,.72) 100%)!important;box-shadow:8px 0 20px #328aff28}
+ .app-shell[data-sgp-nav-mode]>.sidebar:after{content:"";pointer-events:none;position:absolute;right:0;top:0;bottom:0;width:13px;background:linear-gradient(90deg,transparent,rgba(167,217,255,.15));opacity:.35;transition:opacity var(--sgp-nav-speed) ease}
+ .app-shell[data-sgp-nav-mode]:not(.sgp-nav-expanded)>.sidebar:after{opacity:1}
+}
