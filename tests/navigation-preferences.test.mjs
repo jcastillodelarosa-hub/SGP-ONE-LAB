@@ -22,3 +22,13 @@ test('navigation provides responsive modes and reduced-motion support',()=>{
  assert.match(css,/prefers-reduced-motion:no-preference/);
  assert.match(js,/settings\.menu==='floating'/);
 });
+
+test('appearance exposes selectable palettes and collapsed edge fade',()=>{
+ assert.match(js,/theme:\s*'intense'/);
+ assert.match(js,/edge:\s*'fade'/);
+ assert.match(js,/data-sgp-setting=\\"theme\\"/);
+ assert.match(js,/data-sgp-setting=\\"edge\\"/);
+ assert.match(css,/data-sgp-nav-theme="corporate"/);
+ assert.match(css,/data-sgp-nav-theme="modern"/);
+ assert.match(css,/data-sgp-nav-edge="solid"/);
+});
