@@ -1,0 +1,78 @@
+/* LAB v320: isolated global decorative theme layer. Operational statuses are intentionally excluded. */
+.app-shell[data-sgp-theme]{--sgp-primary:#0d47a1;--sgp-accent:#1267eb;--sgp-page:#edf4ff;--sgp-soft:#dceaff;--sgp-ink:#102f61;--sgp-border:#c4d8f8;--sgp-surface:#fff;--sgp-muted:#58718f;--sgp-on-accent:#fff;color:var(--sgp-ink)}
+.app-shell[data-sgp-theme="intense"]{--sgp-primary:#0d47a1;--sgp-accent:#1267eb;--sgp-page:#edf4ff;--sgp-soft:#dceaff;--sgp-ink:#102f61;--sgp-border:#c4d8f8}
+.app-shell[data-sgp-theme="corporate"]{--sgp-primary:#193a63;--sgp-accent:#346d9e;--sgp-page:#f0f5f9;--sgp-soft:#e1eaf3;--sgp-ink:#1b3855;--sgp-border:#c9d7e4}
+.app-shell[data-sgp-theme="modern"]{--sgp-primary:#2563eb;--sgp-accent:#38bdf8;--sgp-page:#eff6ff;--sgp-soft:#dbeafe;--sgp-ink:#143b7a;--sgp-border:#bfdbfe}
+.app-shell[data-sgp-theme="lilac"]{--sgp-primary:#7044bc;--sgp-accent:#9264de;--sgp-page:#f7f2ff;--sgp-soft:#ebdeff;--sgp-ink:#422873;--sgp-border:#dcc8f5}
+.app-shell[data-sgp-theme="orange"]{--sgp-primary:#a94d0b;--sgp-accent:#d96611;--sgp-page:#fff6ed;--sgp-soft:#ffe7cd;--sgp-ink:#713c17;--sgp-border:#f5d4b3}
+.app-shell[data-sgp-theme="emerald"]{--sgp-primary:#08765f;--sgp-accent:#0e9f7d;--sgp-page:#ecfaf5;--sgp-soft:#cff4e7;--sgp-ink:#115346;--sgp-border:#b9e7d9}
+.app-shell[data-sgp-theme="teal"]{--sgp-primary:#096b83;--sgp-accent:#0fa5b7;--sgp-page:#edfbfc;--sgp-soft:#ccf2f5;--sgp-ink:#144d61;--sgp-border:#b6e6eb}
+.app-shell[data-sgp-theme="rose"]{--sgp-primary:#a52e72;--sgp-accent:#c9418b;--sgp-page:#fff1f8;--sgp-soft:#fbd7eb;--sgp-ink:#74264e;--sgp-border:#f0c2db}
+.app-shell[data-sgp-theme="graphite"]{--sgp-primary:#303d53;--sgp-accent:#53647e;--sgp-page:#f0f3f7;--sgp-soft:#dce3ed;--sgp-ink:#25334a;--sgp-border:#c7d1de}
+
+/* Dark surfaces are scoped to app shell and do not alter functional status colors. */
+.app-shell[data-sgp-theme-mode="dark"]{--sgp-page:#111a28;--sgp-surface:#192536;--sgp-soft:#293950;--sgp-ink:#f1f5fc;--sgp-muted:#b0bfd3;--sgp-border:#3c4e65}
+.app-shell[data-sgp-theme] .workspace{background:var(--sgp-page);color:var(--sgp-ink)}
+.app-shell[data-sgp-theme] .workspace .page-heading h2,
+.app-shell[data-sgp-theme] .workspace .page-heading h1{color:var(--sgp-ink)}
+.app-shell[data-sgp-theme] .workspace .page-heading p{color:var(--sgp-muted)}
+.app-shell[data-sgp-theme] .workspace .topbar{background:var(--sgp-surface);border-color:var(--sgp-border)}
+.app-shell[data-sgp-theme] .workspace .eyebrow{color:var(--sgp-primary)}
+.app-shell[data-sgp-theme] .workspace .primary,
+.app-shell[data-sgp-theme] .workspace button.primary,
+.app-shell[data-sgp-theme] .workspace .weekly-tab.active{background:var(--sgp-primary)!important;color:var(--sgp-on-accent)!important;border-color:transparent!important}
+.app-shell[data-sgp-theme] .workspace .weekly-tabs,
+.app-shell[data-sgp-theme] .workspace .toolbar,
+.app-shell[data-sgp-theme] .workspace .summary,
+.app-shell[data-sgp-theme] .workspace .table-wrap,
+.app-shell[data-sgp-theme] .workspace .placeholder-card,
+.app-shell[data-sgp-theme] .workspace .demo-panel{background:var(--sgp-surface);border-color:var(--sgp-border);color:var(--sgp-ink)}
+.app-shell[data-sgp-theme] .workspace .weekly-tab:not(.active){background:var(--sgp-soft);color:var(--sgp-ink)}
+.app-shell[data-sgp-theme] .sgp-nav-preferences{background:var(--sgp-surface);border-color:var(--sgp-border)}
+.app-shell[data-sgp-theme] .sgp-nav-preferences h3{color:var(--sgp-ink)}
+.app-shell[data-sgp-theme] .sgp-nav-preferences p,
+.app-shell[data-sgp-theme] .sgp-nav-fields label{color:var(--sgp-muted)}
+.app-shell[data-sgp-theme] .sgp-nav-fields select{background:var(--sgp-surface);color:var(--sgp-ink);border-color:var(--sgp-border)}
+.app-shell[data-sgp-theme] .sgp-nav-preferences button[data-sgp-reset]{background:var(--sgp-soft);color:var(--sgp-ink);border-color:var(--sgp-border)}
+/* Theme-specific navigation; preserves hover/selected contrast rules. */
+.app-shell[data-sgp-theme]>.sidebar{background:linear-gradient(135deg,var(--sgp-primary),var(--sgp-accent))!important}
+.app-shell[data-sgp-theme]:not(.sgp-nav-expanded):not([data-sgp-nav-mode="floating"])>.sidebar{background:linear-gradient(90deg,var(--sgp-primary) 0%,var(--sgp-accent) 88%,color-mix(in srgb,var(--sgp-accent) 65%,transparent))!important}
+.app-shell[data-sgp-theme]>.sidebar .nav button:not([hidden]).active{background:var(--sgp-primary)!important;color:#fff!important}
+.app-shell[data-sgp-theme]>.sidebar .nav button:not([hidden]):hover:not(.active){background:var(--sgp-soft)!important;color:var(--sgp-primary)!important}
+.app-shell[data-sgp-theme]>.sidebar .nav button:not([hidden]):hover:not(.active) .sgp-nav-name{color:var(--sgp-primary)!important}
+@media(prefers-reduced-motion:no-preference){.app-shell[data-sgp-theme] .workspace{transition:background-color .2s ease,color .2s ease}}
+
+/* LAB v320 QA: dark-mode coverage for generic neutral containers, not semantic status badges. */
+.app-shell[data-sgp-theme-mode="dark"] .workspace .metric,
+.app-shell[data-sgp-theme-mode="dark"] .workspace .modal-card,
+.app-shell[data-sgp-theme-mode="dark"] .workspace .prod-summary,
+.app-shell[data-sgp-theme-mode="dark"] .workspace .programming-summary-grid,
+.app-shell[data-sgp-theme-mode="dark"] .workspace .home-week-cards,
+.app-shell[data-sgp-theme-mode="dark"] .workspace .weekly-upload-row{background:var(--sgp-surface);border-color:var(--sgp-border);color:var(--sgp-ink)}
+.app-shell[data-sgp-theme-mode="dark"] .workspace .metric strong,
+.app-shell[data-sgp-theme-mode="dark"] .workspace .metric b,
+.app-shell[data-sgp-theme-mode="dark"] .workspace .prod-summary strong{color:var(--sgp-ink)}
+.app-shell[data-sgp-theme-mode="dark"] .workspace input:not([type="checkbox"]):not([type="radio"]),
+.app-shell[data-sgp-theme-mode="dark"] .workspace select,
+.app-shell[data-sgp-theme-mode="dark"] .workspace textarea{background:var(--sgp-surface);color:var(--sgp-ink);border-color:var(--sgp-border)}
+
+/* LAB v320: neutral content panels and tab surfaces share the selected palette. */
+.app-shell[data-sgp-theme] .workspace .metric:not(.nc-orange):not(.nc-red):not(.nc-warning):not(.miss-light),
+.app-shell[data-sgp-theme] .workspace .prod-summary,
+.app-shell[data-sgp-theme] .workspace .programming-summary-grid,
+.app-shell[data-sgp-theme] .workspace .modal-card,
+.app-shell[data-sgp-theme] .workspace .daily-tabs,
+.app-shell[data-sgp-theme] .workspace .pick-main-tabs,
+.app-shell[data-sgp-theme] .workspace .assembly-tabs{
+ border-color:var(--sgp-border);
+}
+.app-shell[data-sgp-theme] .workspace .daily-tabs,
+.app-shell[data-sgp-theme] .workspace .pick-main-tabs,
+.app-shell[data-sgp-theme] .workspace .assembly-tabs{background:var(--sgp-soft)}
+.app-shell[data-sgp-theme] .workspace .daily-tabs button.active,
+.app-shell[data-sgp-theme] .workspace .pick-main-tabs button.active,
+.app-shell[data-sgp-theme] .workspace .assembly-tabs button.active{
+ background:var(--sgp-primary)!important;color:#fff!important;
+}
+.app-shell[data-sgp-theme-mode="dark"] .workspace .eyebrow{color:var(--sgp-muted)}
+/* Keep semantic warning, error, success, NC and reserve-status classes under their original rules. */

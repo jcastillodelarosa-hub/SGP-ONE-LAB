@@ -6,6 +6,14 @@
 
 ---
 
+## LAB v320 — Temas globales (propuesta implementada en rama)
+
+Se incorporan nueve paletas visuales (azul intenso, azul corporativo, azul moderno, lila, naranja, esmeralda, turquesa, rosa y grafito), modo claro/oscuro y controles en Configuración → Apariencia y navegación. Las preferencias se guardan en localStorage del navegador, no se sincronizan entre equipos. Se añaden variables CSS aisladas en global-themes.css para elementos decorativos, navegación y superficies; los colores semánticos de estados operativos se excluyen. Se actualiza LAB a v320 y las referencias de caché.
+
+**Riesgos y verificaciones:** validar contraste en todos los módulos, móviles, estados operativos y las pruebas de regresión; no declarar verificado hasta evidencia visual. Sin cambios en Supabase ni SGP_ONE_GOOGLE. Sin autorización para fusión o publicación en Firebase.
+
+---
+
 ## LAB v319 — Navegación: correcciones visuales y retorno automático (2026-10-21)
 
 **Origen:** verificación visual del usuario en LAB v318 tras el despliegue Firebase #386. El logotipo se veía como dos cápsulas, el texto del menú perdía contraste en hover y el botón ☰ convertía de manera persistente el modo automático en modo manual.
