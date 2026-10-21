@@ -19,7 +19,7 @@ const queue=[
  {id_programacion:'p3',semana:42},{id_programacion:'p4',semana:null}
 ];
 
-test('LAB v315: semana operativa se asocia por id_programacion, no por reserva ni fecha',()=>{
+test('LAB v317: semana operativa se asocia por id_programacion, no por reserva ni fecha',()=>{
  const rows=attachReceptionWeeks(reception,queue);
  assert.deepEqual(rows.map(x=>x.semana),['42','43','42',null]);
  assert.equal(rows[0].fecha_entrega,'2026-10-16');
@@ -99,7 +99,7 @@ test('estilo proporcional y móvil, sin modificar selectores de Entrega de órde
 });
 
 test('versión y archivos de publicación sincronizados',()=>{
- assert.match(html,/LAB v315/);
- assert.match(html,/app\.js\?v=315/);
- assert.match(html,/styles\.css\?v=315/);
+ assert.match(html,/LAB v317/);
+ assert.match(html,/app\.js\?v=317/);
+ assert.match(html,/styles\.css\?v=317/);
 });

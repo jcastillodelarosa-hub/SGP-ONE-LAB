@@ -21,5 +21,14 @@ jobs:
         with:
           node-version: 22
 
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Build local browser vendors
+        run: npm run build:vendor
+
+      - name: Verify release package
+        run: npm run verify:release
+
       - name: Run tests
         run: npm test
