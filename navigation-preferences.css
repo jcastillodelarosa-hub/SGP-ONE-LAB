@@ -52,3 +52,9 @@
 
 /* Preserve authorization-based hidden navigation entries. */
 .app-shell .sidebar .nav button[hidden]{display:none!important}
+
+/* Desktop floating mode: modal-like backdrop; existing mobile shade stays controlled by app.js. */
+@media(min-width:761px){
+.app-shell[data-sgp-nav-mode="floating"].sgp-nav-overlay-open:before{content:"";position:fixed;inset:0;background:#071b3666;z-index:9999}
+.app-shell[data-sgp-nav-mode="floating"]>.sidebar{z-index:10000}
+}
