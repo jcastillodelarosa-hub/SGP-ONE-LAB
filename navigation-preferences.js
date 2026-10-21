@@ -35,7 +35,7 @@ function apply(){
 function save(){try{localStorage.setItem(KEY,JSON.stringify(settings))}catch{}apply()}
 const brand=side.querySelector('.brand');
 if(brand){
- const logo=document.createElement('span');logo.className='sgp-nav-logo';logo.textContent='SGP';
+ const logo=document.createElement('span');logo.className='sgp-nav-logo';logo.innerHTML='<span>SGP</span><span class="sgp-nav-logo-one"> ONE</span>';
  brand.prepend(logo);
 }
 nav.querySelectorAll('button[data-view]').forEach(btn=>{
