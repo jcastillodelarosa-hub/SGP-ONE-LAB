@@ -14,9 +14,20 @@ export function initPickingDeliveryReport({getSupabaseClient,getAppToken}){
  let state=null;
  const status=$('pickReportStatus');
  const selectTab=tab=>{for(const name of ['Delivery','Reception','Report']){const active=name===tab;const b=$('pick'+name+'Tab'),p=$('pick'+name+'Panel');if(b)b.classList.toggle('active',active);if(p)p.hidden=!active}}
- $('pickReportTab')?.addEventListener('click',()=>{selectTab('Report');if(!state){$('pickReportFrom').value=dates();$('pickReportTo').value=dates()}});
- $('pickDeliveryTab')?.addEventListener('click',()=>selectTab('Delivery'));
- $('pickReceptionTab')?.addEventListener('click',()=>selectTab('Reception'));
+ const originalParent=report.parentNode, originalNext=report.nextSibling;
+ let overlay=null;
+ const closeOverlay=()=>{if(!overlay)return;report.hidden=true;if(originalNext&&originalNext.parentNode===originalParent)originalParent.insertBefore(report,originalNext);else originalParent.appendChild(report);overlay.remove();overlay=null;};
+ $('pickDirectReport')?.addEventListener('click',()=>{
+  if(overlay)return;
+  overlay=document.createElement('div');overlay.className='pick-report-modal-overlay';overlay.setAttribute('role','dialog');overlay.setAttribute('aria-modal','true');overlay.setAttribute('aria-label','Reporte de entregas de Picking');
+  const shell=document.createElement('div');shell.className='pick-report-modal-shell';const header=document.createElement('div');header.className='pick-report-modal-header';
+  const title=document.createElement('h2');title.textContent='SGP ONE · Reporte de entregas';const close=document.createElement('button');close.type='button';close.textContent='×';close.setAttribute('aria-label','Cerrar reporte');close.addEventListener('click',closeOverlay);
+  header.append(title,close);shell.append(header,report);overlay.append(shell);document.body.append(overlay);report.hidden=false;
+  if(!$('pickReportFrom').value)$('pickReportFrom').value=dates();if(!$('pickReportTo').value)$('pickReportTo').value=dates();close.focus();
+ });
+ $('pickReportTab')?.addEventListener('click',()=>{closeOverlay();selectTab('Report');if(!state){$('pickReportFrom').value=dates();$('pickReportTo').value=dates()}});
+ $('pickDeliveryTab')?.addEventListener('click',()=>{closeOverlay();selectTab('Delivery')});
+ $('pickReceptionTab')?.addEventListener('click',()=>{closeOverlay();selectTab('Reception')});
  const show=()=>{if(!state)return;const {summary,por_sistema,rows,total_rows,filters}=state;
   $('pickReportSummary').innerHTML='<div class="pick-report-metrics">'+[['Movimientos',summary.movimientos],['Producciones únicas',summary.producciones_unicas],['Completas',summary.completas],['Parciales',summary.parciales],['Filas faltantes',summary.filas_faltantes]].map(([k,v])=>'<div>'+safe(k)+' <strong>'+safe(v)+'</strong></div>').join('')+'</div>';
   $('pickReportSystems').innerHTML=table(summaryHeaders,por_sistema.map(g=>[g.sistema,g.movimientos,g.producciones_unicas,g.completas,g.parciales,g.filas_faltantes]));
@@ -35,7 +46,14 @@ export function initPickingDeliveryReport({getSupabaseClient,getAppToken}){
    if(rows.length!==total)throw new Error('La consulta no recuperó todos los registros');state={rows,total_rows:total,summary,por_sistema,filters};show();
   }catch(e){status.textContent='No fue posible consultar: '+(e?.message||String(e))}
  });
- const sheets=()=>{if(!state)throw new Error('Primero consulta el reporte');const {rows,por_sistema,summary}=state;return [['Resumen',[['Indicador','Valor'],...Object.entries(summary).map(([k,v])=>[k,v]),[],summaryHeaders,...por_sistema.map(g=>[g.sistema,g.movimientos,g.producciones_unicas,g.completas,g.parciales,g.filas_faltantes])]],['Entregas',[detailHeaders,...details(rows)]],['Faltantes',[missingHeaders,...missing(rows)]],['Auditoría',[['ID entrega','Fecha validación','Usuario validación','Estado'],...rows.map(r=>[r.id_entrega,r.fecha_validacion,r.usuario_validacion,r.estado])]]];};
- $('pickReportExcel')?.addEventListener('click',()=>{try{const xmlSafe=v=>safe(v).replace(/&#39;/g,'&apos;').replace(/&quot;/g,'&quot;');const book='<?xml version="1.0"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">'+sheets().map(([name,records])=>'<Worksheet ss:Name="'+xmlSafe(name)+'"><Table>'+records.map(row=>'<Row>'+row.map(value=>'<Cell><Data ss:Type="String">'+xmlSafe(value)+'</Data></Cell>').join('')+'</Row>').join('')+'</Table></Worksheet>').join('')+'</Workbook>';const blob=new Blob([book],{type:'application/vnd.ms-excel'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='SGP_Picking_Entregas_'+state.filters.fecha_inicio+'_a_'+state.filters.fecha_fin+'.xml';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)}catch(e){alert(e.message)}});
+ $('pickReportImage')?.addEventListener('click',async()=>{
+  try{
+   if(!state)throw new Error('Primero consulta el reporte');
+   if(typeof window.html2canvas!=='function')throw new Error('Captura de imagen no disponible');
+   const target=report;
+   const canvas=await window.html2canvas(target,{backgroundColor:'#ffffff',scale:2,scrollX:0,scrollY:0,windowWidth:Math.max(target.scrollWidth,1100),onclone:doc=>{const node=doc.getElementById('pickReportPanel');if(node){node.style.width='1100px';node.style.maxWidth='none';node.style.overflow='visible';node.querySelectorAll('.table-wrap').forEach(t=>{t.style.overflow='visible';t.style.maxWidth='none'})}}});
+   const a=document.createElement('a');a.download='SGP_Picking_Entregas_'+state.filters.fecha_inicio+'.png';a.href=canvas.toDataURL('image/png');a.click();
+  }catch(e){alert('No fue posible generar la imagen: '+(e.message||e))}
+ });
  $('pickReportPdf')?.addEventListener('click',async()=>{try{if(!state)throw new Error('Primero consulta el reporte');if(!window.jspdf?.jsPDF){await new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='./vendor/jspdf.umd.min.js';s.onload=resolve;s.onerror=reject;document.head.appendChild(s)})}const pdf=new window.jspdf.jsPDF({unit:'mm',format:'a4'});let y=14;const add=(text,bold=false)=>{if(y>278){pdf.addPage();y=14}pdf.setFont('helvetica',bold?'bold':'normal');const lines=pdf.splitTextToSize(String(text).normalize('NFD').replace(/[\u0300-\u036f]/g,''),188);for(const line of lines){if(y>278){pdf.addPage();y=14}pdf.text(line,10,y);y+=5}};add('SGP ONE - Reporte historico de Picking',true);add(state.filters.fecha_inicio+' a '+state.filters.fecha_fin+' / '+(state.filters.turno||'Todos los turnos'));add('Movimientos: '+state.summary.movimientos+' | Producciones unicas: '+state.summary.producciones_unicas+' | Parciales: '+state.summary.parciales);add('Resumen por sistema',true);for(const s of state.por_sistema)add(s.sistema+' | Movimientos: '+s.movimientos+' | Producciones: '+s.producciones_unicas);add('Detalle de entregas',true);for(const r of state.rows)add([r.fecha_operativa,r.turno_entrega,r.reserva,r.parte,r.produccion,r.sistema,r.completa?'Completa':'Parcial'].join(' | '));add('Faltantes historicos',true);for(const f of missing(state.rows))add(f.join(' | '));pdf.save('SGP_Picking_Entregas_'+state.filters.fecha_inicio+'.pdf')}catch(e){alert('Error PDF: '+e.message)}});
 }
