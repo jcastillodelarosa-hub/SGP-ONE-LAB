@@ -1,4 +1,4 @@
--- DRAFT ONLY / DO NOT APPLY. Pending explicit authorization to modify Supabase.
+-- Reviewed RPC SQL; user explicitly authorized creation of this RPC only. No table/RLS changes.
 -- Contract: picking delivery history v1. Review grants and role policy before activation.
 CREATE OR REPLACE FUNCTION public.sgp_picking_reporte_entregas_v1(
  p_token text, p_fecha_inicio date, p_fecha_fin date,
@@ -15,26 +15,15 @@ BEGIN
  IF p_limit IS NULL OR p_limit<1 OR p_limit>500 OR p_offset IS NULL OR p_offset<0 THEN
   RAISE EXCEPTION 'PAGINACION_INVALIDA';
  END IF;
- IF p_turno IS NOT NULL AND p_turno NOT IN ('Turno 1','Turno 2') THEN
+ IF p_turno IS NOT NULL AND p_turno NOT IN ('TURNO 1','TURNO 2') THEN
   RAISE EXCEPTION 'TURNO_INVALIDO';
  END IF;
- WITH events AS (
-  SELECT e.id_entrega,e.id_programacion,e.produccion,e.completa,e.estado,e.observacion,
-         e.usuario_entrega,e.fecha_entrega,e.fecha_operativa,e.turno_entrega,
-         e.usuario_validacion,e.fecha_validacion,p.reserva,p.prioridad_semanal AS parte,p.sistema,p.acabado
-  FROM public.sgp_picking_entregas e
-  JOIN public.sgp_mecanizado_programacion p ON p.id_programacion=e.id_programacion
-  WHERE e.fecha_operativa BETWEEN p_fecha_inicio AND p_fecha_fin
-    AND (p_turno IS NULL OR e.turno_entrega=p_turno)
-    AND (p_sistema IS NULL OR p.sistema=p_sistema)
- ), grouped AS (
-  SELECT sistema,count(*) movimientos,
-   count(DISTINCT (id_programacion,produccion,sistema)) producciones_unicas,
-   count(*) FILTER (WHERE completa IS TRUE) completas,
-   count(*) FILTER (WHERE completa IS FALSE) parciales
-  FROM events GROUP BY sistema
- )
- SELECT count(*) INTO v_total FROM events;
+ SELECT count(*) INTO v_total
+ FROM public.sgp_picking_entregas e
+ JOIN public.sgp_mecanizado_programacion p ON p.id_programacion=e.id_programacion
+ WHERE e.fecha_operativa BETWEEN p_fecha_inicio AND p_fecha_fin
+   AND (p_turno IS NULL OR e.turno_entrega=p_turno)
+   AND (p_sistema IS NULL OR p.sistema=p_sistema);
  -- Repeating CTEs is deliberate: aggregate across ALL matching events, never just the page.
  SELECT jsonb_build_object(
   'movimientos',count(*),
@@ -73,6 +62,8 @@ BEGIN
  ) z;
  RETURN jsonb_build_object('ok',true,'filters',jsonb_build_object('fecha_inicio',p_fecha_inicio,'fecha_fin',p_fecha_fin,'turno',p_turno,'sistema',p_sistema),'summary',v_summary,'por_sistema',v_systems,'total_rows',v_total,'limit',p_limit,'offset',p_offset,'rows',v_rows);
 END $fn$;
--- SECURITY REVIEW REQUIRED BEFORE DEPLOYMENT:
--- REVOKE ALL ON FUNCTION public.sgp_picking_reporte_entregas_v1(text,date,date,text,text,integer,integer) FROM PUBLIC;
--- GRANT EXECUTE ... TO intended PostgREST role ONLY, with sgp_validar_sesion_rol always enforced.
+REVOKE ALL ON FUNCTION public.sgp_picking_reporte_entregas_v1(text,date,date,text,text,integer,integer) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.sgp_picking_reporte_entregas_v1(text,date,date,text,text,integer,integer) FROM anon;
+REVOKE ALL ON FUNCTION public.sgp_picking_reporte_entregas_v1(text,date,date,text,text,integer,integer) FROM authenticated;
+GRANT EXECUTE ON FUNCTION public.sgp_picking_reporte_entregas_v1(text,date,date,text,text,integer,integer) TO anon,authenticated;
+-- All callers must pass a valid SGP app session token; sgp_validar_sesion_rol enforces app roles.
