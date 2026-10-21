@@ -505,7 +505,7 @@ let aluminumTrackingRows=[],aluminumTrackingPreview=null;
 async function validateAluminumFile() {
  const file=els.aluminumFile.files?.[0];if(!file){els.aluminumStatus.textContent="Selecciona el archivo de seguimiento.";return}
  els.validateAluminum.disabled=true;els.applyAluminumTracking.disabled=true;els.aluminumStatus.textContent="Validando…";
- try{const result=await readAluminumTrackingWorkbook(file);if(result.errors.length)throw new Error(result.errors.length+" error(es) en el archivo");aluminumTrackingRows=result.rows;const client=await getSupabaseClient(),token=sessionStorage.getItem("sgp_one_session");const {data,error}=await client.rpc("sgp_previsualizar_seguimiento_aluminio",{p_token:token,p_datos:aluminumTrackingRows});if(error)throw error;aluminumTrackingPreview={...data,file:file.name};els.aTotal.textContent=data.recibidos||0;const sum=summarizeAluminumTracking(aluminumTrackingRows);if(els.aSupply)els.aSupply.textContent=sum.states.PENDIENTE_ABASTECIMIENTO||0;if(els.aWarehouse)els.aWarehouse.textContent=sum.states.PENDIENTE_BODEGA||0;els.aDelivered.textContent=sum.states.ALUMINIO_ENTREGADO||0;els.aluminumStatus.textContent="Validación completada · "+(data.reservas||0)+" reservas · "+(data.producciones||0)+" producciones · "+(data.nuevas_relaciones||0)+" relaciones Reserva + ID nuevas · Semanas: "+Object.entries(data.por_semana||{}).map(([w,n])=>w+": "+n).join(" · ")+" · No se ha escrito información.";els.applyAluminumTracking.disabled=false}catch(error){els.aluminumStatus.textContent="Validación bloqueada: "+error.message}finally{els.validateAluminum.disabled=false}
+ try{const result=await readAluminumTrackingWorkbook(file);if(result.errors.length)throw new Error(result.errors.length+" error(es) en el archivo");aluminumTrackingRows=result.rows;const client=await getSupabaseClient(),token=sessionStorage.getItem("sgp_one_session");const {data,error}=await client.rpc("sgp_previsualizar_seguimiento_aluminio",{p_token:token,p_datos:aluminumTrackingRows});if(error)throw error;if(els.aluminumFile.files?.[0]!==file)return;aluminumTrackingPreview={...data,file:file.name};els.aTotal.textContent=data.recibidos||0;const sum=summarizeAluminumTracking(aluminumTrackingRows);if(els.aSupply)els.aSupply.textContent=sum.states.PENDIENTE_ABASTECIMIENTO||0;if(els.aWarehouse)els.aWarehouse.textContent=sum.states.PENDIENTE_BODEGA||0;els.aDelivered.textContent=sum.states.ALUMINIO_ENTREGADO||0;els.aluminumStatus.textContent="Validación completada · "+(data.reservas||0)+" reservas · "+(data.producciones||0)+" producciones · "+(data.nuevas_relaciones||0)+" relaciones Reserva + ID nuevas · Semanas: "+Object.entries(data.por_semana||{}).map(([w,n])=>w+": "+n).join(" · ")+" · No se ha escrito información.";els.applyAluminumTracking.disabled=false}catch(error){els.aluminumStatus.textContent="Validación bloqueada: "+error.message}finally{els.validateAluminum.disabled=false}
 }
 async function applyAluminumTracking(){
  if(!aluminumTrackingPreview)return;els.applyAluminumTracking.disabled=true;els.aluminumStatus.textContent="Aplicando seguimiento…";
@@ -1344,6 +1344,24 @@ document.querySelectorAll("[data-daily-tab]").forEach(b=>b.addEventListener("cli
 els.dailyExportFile?.addEventListener("change",()=>{resetDailyExport();els.dailyExportStatus.textContent="Archivo modificado. Vuelve a validar y comparar.";});
 els.dailyExportLine?.addEventListener("change",()=>{resetDailyExport();els.dailyExportStatus.textContent="Línea modificada. Selecciona y valida el Export correspondiente.";});
 els.glassLocationFile?.addEventListener("change",()=>{resetGlassLocation();els.glassLocationStatus.textContent="Archivo modificado. Vuelve a validar y depurar.";});
+ // Una selección nueva o la X de quitar archivo invalidan cualquier vista previa.
+ els.aluminumFile?.addEventListener("change",()=>{
+  aluminumTrackingRows=[];aluminumTrackingPreview=null;
+  if(els.applyAluminumTracking)els.applyAluminumTracking.disabled=true;
+  if(els.aluminumStatus)els.aluminumStatus.textContent="Archivo modificado. Vuelve a validar seguimiento.";
+ });
+ document.querySelector("#ncAlFile")?.addEventListener("change",()=>{
+  ncAlRows=[];ncAlNewRows=[];ncAlPreview=null;
+  const apply=document.querySelector("#applyNcAl"),status=document.querySelector("#ncAlStatus");
+  if(apply)apply.disabled=true;
+  if(status)status.textContent="Archivo modificado. Vuelve a validar NC Aluminio.";
+ });
+ document.querySelector("#ncGlassFile")?.addEventListener("change",()=>{
+  ncGlassRows=[];ncGlassPreview=null;
+  const apply=document.querySelector("#applyNcGlass"),status=document.querySelector("#ncGlassStatus");
+  if(apply)apply.disabled=true;
+  if(status)status.textContent="Archivo modificado. Vuelve a validar NC Vidrio.";
+ });
 els.previewGlassLocation?.addEventListener("click",previewGlassLocation);
 els.applyGlassLocation?.addEventListener("click",applyGlassLocation);
 els.loadAssembly?.addEventListener("click",loadAssembly);
@@ -1398,7 +1416,7 @@ async function previewNcAluminum(){
   ncAlRows=await readNcAluminumWorkbook(file);
   const client=await getSupabaseClient(),token=sessionStorage.getItem("sgp_one_session");
   const {data,error}=await client.rpc("sgp_previsualizar_nc_aluminio",{p_token:token,p_datos:ncAlRows}); if(error)throw error;
-  const {data:newRows,error:newErr}=await client.rpc("sgp_previsualizar_nuevas_nc_aluminio",{p_token:token,p_datos:ncAlRows});if(newErr)throw newErr;ncAlNewRows=newRows||[];ncAlPreview={...data,file:file.name};
+  const {data:newRows,error:newErr}=await client.rpc("sgp_previsualizar_nuevas_nc_aluminio",{p_token:token,p_datos:ncAlRows});if(newErr)throw newErr;ncAlNewRows=newRows||[];if(document.querySelector("#ncAlFile")?.files?.[0]!==file)return;ncAlPreview={...data,file:file.name};
   document.querySelector("#ncAlReceived").textContent=data.recibidos||0;document.querySelector("#ncAlMatched").textContent=data.relacionados||0;
   document.querySelector("#ncAlMissing").textContent=data.sin_programacion||0;document.querySelector("#ncAlAmbiguous").textContent=data.ambiguos||0;
   const weeks=(data.por_semana||[]).map(x=>`Semana Maestro ${x.semana}: ${x.cantidad} NC`).join(" · "); document.querySelector("#ncAlWeekSummary").textContent=(weeks?weeks+" · ":"")+"Fuera de programación actual: "+(data.fuera_programacion??data.sin_programacion??0)+". Semana NC se conserva como fecha de creación.";
@@ -1474,7 +1492,7 @@ document.querySelector("#ncChooseColumns")?.addEventListener("click",()=>{const 
 let ncGlassRows=[],ncGlassPreview=null;
 async function previewNcGlass(){
  const file=document.querySelector("#ncGlassFile")?.files?.[0],status=document.querySelector("#ncGlassStatus"),btn=document.querySelector("#applyNcGlass");if(!file){status.textContent="Selecciona el Export NC Vidrio.";return}
- try{status.textContent="Leyendo NC Vidrio…";btn.disabled=true;ncGlassRows=await readNcGlassWorkbook(file);const client=await getSupabaseClient(),token=sessionStorage.getItem("sgp_one_session");const {data,error}=await client.rpc("sgp_previsualizar_nc_vidrio",{p_token:token,p_datos:ncGlassRows});if(error)throw error;ncGlassPreview={...data,file:file.name};document.querySelector("#ncGlassReceived").textContent=data.recibidos||0;document.querySelector("#ncGlassNew").textContent=data.nuevos||0;document.querySelector("#ncGlassUpdated").textContent=data.actualizados||0;document.querySelector("#ncGlassWeeks").textContent="Semana Maestro detectada: "+(data.por_semana||[]).join(", ");status.textContent="Validación completada. No se ha escrito información.";btn.disabled=false}catch(e){status.textContent="Validación rechazada ✕ "+e.message}}
+ try{status.textContent="Leyendo NC Vidrio…";btn.disabled=true;ncGlassRows=await readNcGlassWorkbook(file);const client=await getSupabaseClient(),token=sessionStorage.getItem("sgp_one_session");const {data,error}=await client.rpc("sgp_previsualizar_nc_vidrio",{p_token:token,p_datos:ncGlassRows});if(error)throw error;if(document.querySelector("#ncGlassFile")?.files?.[0]!==file)return;ncGlassPreview={...data,file:file.name};document.querySelector("#ncGlassReceived").textContent=data.recibidos||0;document.querySelector("#ncGlassNew").textContent=data.nuevos||0;document.querySelector("#ncGlassUpdated").textContent=data.actualizados||0;document.querySelector("#ncGlassWeeks").textContent="Semana Maestro detectada: "+(data.por_semana||[]).join(", ");status.textContent="Validación completada. No se ha escrito información.";btn.disabled=false}catch(e){status.textContent="Validación rechazada ✕ "+e.message}}
 async function applyNcGlass(){
  if(!ncGlassPreview)return;const status=document.querySelector("#ncGlassStatus"),btn=document.querySelector("#applyNcGlass");try{btn.disabled=true;status.textContent="Aplicando NC Vidrio…";const client=await getSupabaseClient(),token=sessionStorage.getItem("sgp_one_session");const {data,error}=await client.rpc("sgp_aplicar_nc_vidrio",{p_token:token,p_nombre_archivo:ncGlassPreview.file,p_datos:ncGlassRows});if(error)throw error;status.textContent=`NC Vidrio actualizado ✓ · ${data.nuevos} nuevas · ${data.actualizados} actualizadas`;const {data:ev,error:evErr}=await client.rpc("sgp_resumen_eventos_actualizacion",{p_token:token,p_id_lote:data.id_lote,p_fuente:"NC_VIDRIO"});if(evErr)throw evErr;window.ncGlassLoadEvents=ev||{};const sm=document.querySelector("#ncGlassChangeSummary");sm.hidden=false;document.querySelector("#ncgLoadNew").textContent=(ev.NUEVA||[]).length;document.querySelector("#ncgLoadClosed").textContent=(ev.FINALIZADA||[]).length;document.querySelector("#ncgLoadOpen").textContent=(ev.ABIERTA||[]).length}catch(e){status.textContent="Aplicación rechazada ✕ "+e.message;btn.disabled=false}}
 document.querySelector("#previewNcGlass")?.addEventListener("click",previewNcGlass);document.querySelector("#applyNcGlass")?.addEventListener("click",applyNcGlass);
