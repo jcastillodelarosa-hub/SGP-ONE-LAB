@@ -1,3 +1,8 @@
+
+## LAB v321 — Reporte histórico de Picking (en rama, NO publicado)
+
+PR #29: nueva pestaña «Reporte de entregas», filtros por fecha operativa, turno y sistema, resumen por sistema, detalle de eventos y faltantes históricos, PDF y exportación compatible con Excel (SpreadsheetML .xml). Frontend consume RPC paginada de solo lectura `sgp_picking_reporte_entregas_v1` creada en Supabase con autorización explícita del usuario. La RPC rechaza tokens inválidos (PERMISO_DENEGADO), pero no se ha validado aún una sesión positiva ni el flujo completo en navegador. La consulta de fechas respeta `fecha_operativa`; turnos exactos `TURNO 1` y `TURNO 2`. Se preservan 144 pares únicos vs 163 eventos observados en auditoría de 2026-10-21; no se infieren ventanas físicas entregadas. Cambios en rama `feat/picking-delivery-report-preparation`; no fusionar ni desplegar sin nueva autorización. Exportación Excel .xlsx nativa pendiente si se requiere ese formato exacto.
+
 # SGP_ONE — ESTADO ACTUAL Y CONTINUIDAD
 
 > Documento maestro de continuidad técnica y funcional.

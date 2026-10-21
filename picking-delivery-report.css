@@ -1,0 +1,16 @@
+/* LAB v321 Picking historical report. Theme tokens inherited from global themes. */
+#pickReportPanel{padding:16px 4px 30px;display:grid;gap:12px}
+#pickReportPanel[hidden]{display:none!important}
+#pickReportPanel .pick-toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:end}
+#pickReportPanel .pick-toolbar label{display:flex;flex-direction:column;gap:4px;font-weight:600;font-size:12px}
+#pickReportPanel .pick-toolbar input,#pickReportPanel .pick-toolbar select{min-height:36px;padding:6px 9px;border:1px solid var(--sgp-border,#cbd5e1);border-radius:8px;max-width:190px}
+#pickReportPanel .pick-toolbar button{min-height:36px;border:0;border-radius:8px;background:var(--sgp-primary,#0d47a1);color:white;padding:7px 14px;font-weight:700;cursor:pointer}
+#pickReportPanel .pick-report-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+#pickReportPanel .pick-report-metrics>div{padding:14px;border:1px solid var(--sgp-border,#cbd5e1);background:var(--sgp-surface,#fff);border-radius:12px;display:flex;flex-direction:column;gap:5px}
+#pickReportPanel .pick-report-metrics strong{font-size:24px;color:var(--sgp-primary,#0d47a1)}
+#pickReportPanel .table-wrap{max-width:100%;overflow-x:auto;border:1px solid var(--sgp-border,#cbd5e1);border-radius:10px}
+#pickReportPanel table{width:100%;border-collapse:collapse;font-size:12px}
+#pickReportPanel th,#pickReportPanel td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--sgp-border,#e2e8f0);white-space:nowrap}
+#pickReportPanel th{background:var(--sgp-soft,#eaf1fb);color:var(--sgp-ink,#173452)}
+#pickReportStatus{color:var(--sgp-ink,#173452)}
+@media(max-width:650px){#pickReportPanel{padding:8px 0}#pickReportPanel .pick-toolbar label{flex:1 1 140px}#pickReportPanel .pick-toolbar input,#pickReportPanel .pick-toolbar select{width:100%;max-width:none}}
