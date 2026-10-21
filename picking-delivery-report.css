@@ -23,3 +23,51 @@
 .pick-report-modal-header button{border:1px solid var(--sgp-border,#cbd5e1);border-radius:8px;padding:7px 13px;background:transparent;color:inherit;cursor:pointer;font-size:22px}
 #pickDirectReport{white-space:normal}
 @media(max-width:650px){.pick-report-modal-overlay{padding:3px}.pick-report-modal-shell{height:98vh;padding:9px;border-radius:10px}.pick-report-modal-header h2{font-size:17px}}
+
+
+/* LAB v323: branded picking report matching the approved SGP visual reference. */
+.pick-report-modal-overlay{background:rgba(16,34,64,.65);padding:12px}
+.pick-report-modal-shell{width:min(1540px,100%);height:min(96vh,1040px);padding:0 22px 24px;background:#f6f9fe;border:1px solid #c4d9f7;border-radius:15px;overflow:auto}
+.pick-report-modal-header{position:sticky;top:0;z-index:5;margin:0 -22px 0;padding:17px 24px;background:linear-gradient(115deg,#164a8c 0%,#075ab9 62%,#1777d5 100%);color:#fff;border-bottom:3px solid #cee3ff;box-shadow:0 4px 12px rgba(15,59,113,.12)}
+.pick-report-brand{display:flex;align-items:center;gap:28px;min-width:0}
+.pick-report-wordmark{font-size:40px;font-weight:950;font-style:italic;letter-spacing:-5px;color:white;line-height:1;padding:3px 27px 3px 0;border-right:2px solid rgba(255,255,255,.75)}
+.pick-report-modal-header h2{font-size:25px;line-height:1.15;color:white;margin:0;font-weight:800}
+.pick-report-modal-header p{margin:5px 0 0;color:#e5f2ff;font-size:13px}
+.pick-report-modal-header button{background:#fff;color:#0659b7;border:1px solid #cce3ff;border-radius:9px;font-size:23px;font-weight:700;min-width:38px;min-height:38px;box-shadow:0 3px 10px #043a7955}
+#pickReportPanel{gap:16px;padding:18px 0 14px;color:#102e58}
+#pickReportPanel .pick-toolbar{display:grid;grid-template-columns:minmax(150px,1fr) minmax(150px,1fr) minmax(105px,.5fr) minmax(145px,.8fr) auto auto auto;gap:9px;align-items:end;background:#fff;border-radius:12px;padding:12px;border:1px solid #e1ecfb}
+#pickReportPanel .pick-toolbar label{color:#123665;font-weight:700;font-size:12px}
+#pickReportPanel .pick-toolbar input,#pickReportPanel .pick-toolbar select{max-width:none;width:100%;min-height:41px;background:#fff;border-color:#c9dafa;color:#153766}
+#pickReportPanel .pick-toolbar button{min-height:41px;padding:9px 14px;background:#0758bc;box-shadow:0 3px 9px #1351a02b;font-weight:800;white-space:nowrap}
+#pickReportPanel .pick-toolbar button:hover{background:#00418e}
+#pickReportStatus{background:#e5f1ff;color:#14539e;border-radius:9px;padding:12px 14px;margin:0;font-size:12px;font-weight:600}
+#pickReportPanel .pick-report-metrics{grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+#pickReportPanel .pick-report-kpi{display:flex;flex-direction:row;align-items:center;gap:12px;padding:16px 13px;border:1px solid #b8d5ff;border-left:3px solid #0865da;border-radius:12px;background:#fff;min-width:0}
+#pickReportPanel .pick-report-kpi-icon{width:48px;height:48px;min-width:48px;display:grid;place-items:center;border-radius:50%;background:#0865da;color:white;font-size:27px;font-weight:800}
+#pickReportPanel .pick-report-kpi-content{display:flex;flex-direction:column;gap:3px;min-width:0}
+#pickReportPanel .pick-report-kpi-label{font-size:13px;font-weight:750;color:#0c4eae}
+#pickReportPanel .pick-report-kpi strong{font-size:30px;line-height:1.1;color:#0952b4}
+#pickReportPanel .pick-report-kpi small{font-size:11px;color:#647b9c}
+#pickReportPanel .pick-report-kpi.unique{border-color:#a9e1cb;border-left-color:#139c72}
+#pickReportPanel .pick-report-kpi.unique .pick-report-kpi-icon{background:#159c72}
+#pickReportPanel .pick-report-kpi.unique strong,#pickReportPanel .pick-report-kpi.unique .pick-report-kpi-label{color:#087b5b}
+#pickReportPanel .pick-report-kpi.complete{border-color:#a9e1cb;border-left-color:#139c72}
+#pickReportPanel .pick-report-kpi.complete .pick-report-kpi-icon{background:#159c72}
+#pickReportPanel .pick-report-kpi.complete strong,#pickReportPanel .pick-report-kpi.complete .pick-report-kpi-label{color:#087b5b}
+#pickReportPanel .pick-report-kpi.partial{border-color:#ffdaa2;border-left-color:#ff9c00}
+#pickReportPanel .pick-report-kpi.partial .pick-report-kpi-icon{background:#ff9c00}
+#pickReportPanel .pick-report-kpi.partial strong,#pickReportPanel .pick-report-kpi.partial .pick-report-kpi-label{color:#d76d00}
+#pickReportPanel .pick-report-kpi.missing{border-color:#ffb6c0;border-left-color:#e7485c}
+#pickReportPanel .pick-report-kpi.missing .pick-report-kpi-icon{background:#e7485c}
+#pickReportPanel .pick-report-kpi.missing strong,#pickReportPanel .pick-report-kpi.missing .pick-report-kpi-label{color:#c82b45}
+#pickReportPanel>h3{font-size:17px;font-weight:850;color:#123c79;margin:12px 0 -8px;padding:4px 0}
+#pickReportPanel>h3::before{content:"▦";color:#0865da;margin-right:10px;font-size:20px}
+#pickReportPanel .table-wrap{background:white;border:1px solid #d7e7ff;border-radius:10px;box-shadow:0 2px 8px #c3d7f321}
+#pickReportPanel table{font-size:12px;color:#173966}
+#pickReportPanel th{background:#195c9d;color:white;font-weight:800;text-transform:uppercase;letter-spacing:.025em;font-size:10px;padding:12px 10px}
+#pickReportPanel td{padding:11px 10px;border-color:#e0ebfb}
+#pickReportPanel tr:nth-child(even) td{background:#f5f9ff}
+#pickReportSystems tbody tr:last-child td{background:#dcecff;font-weight:800}
+#pickReportDeliveries td:last-child{color:#ad6500;font-weight:750}
+@media(max-width:1250px){#pickReportPanel .pick-toolbar{grid-template-columns:repeat(4,minmax(0,1fr))}#pickReportPanel .pick-report-metrics{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:720px){.pick-report-modal-shell{padding:0 10px 18px;height:98vh}.pick-report-modal-header{margin:0 -10px;padding:14px}.pick-report-brand{gap:12px}.pick-report-wordmark{font-size:27px;letter-spacing:-3px;padding-right:12px}.pick-report-modal-header h2{font-size:17px}#pickReportPanel .pick-toolbar{grid-template-columns:repeat(2,minmax(0,1fr));padding:9px}#pickReportPanel .pick-report-metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}#pickReportPanel .pick-report-kpi{padding:10px 8px;gap:7px}#pickReportPanel .pick-report-kpi-icon{width:34px;height:34px;min-width:34px;font-size:20px}#pickReportPanel .pick-report-kpi strong{font-size:24px}#pickReportPanel .pick-report-kpi-label{font-size:11px}#pickReportPanel .pick-report-kpi small{font-size:10px}}
