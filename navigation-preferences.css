@@ -98,3 +98,24 @@
  .app-shell[data-sgp-nav-theme="corporate"][data-sgp-nav-edge="solid"]:not(.sgp-nav-expanded):not([data-sgp-nav-mode="floating"])>.sidebar{background:linear-gradient(110deg,#071d42,#0e3a8a 75%,#2268c9)!important}
  .app-shell[data-sgp-nav-theme="modern"][data-sgp-nav-edge="solid"]:not(.sgp-nav-expanded):not([data-sgp-nav-mode="floating"])>.sidebar{background:linear-gradient(110deg,#123d9c,#2563eb 70%,#3b82f6)!important}
 }
+
+/* LAB v319: clean wordmark; override inherited badge styles on brand spans. */
+.app-shell .sidebar .brand .sgp-nav-logo,
+.app-shell .sidebar .brand .sgp-nav-logo>span{
+ background:transparent!important;border:0!important;border-radius:0!important;
+ padding:0!important;box-shadow:none!important;
+}
+.app-shell .sidebar .brand .sgp-nav-logo{position:relative;display:inline-flex!important;align-items:baseline;gap:5px;padding:0 0 8px!important;font-size:18px!important;font-weight:900;letter-spacing:.8px}
+.app-shell .sidebar .brand .sgp-nav-logo>span:first-child{color:#45e5ff!important;font-size:inherit!important}
+.app-shell .sidebar .brand .sgp-nav-logo-one{color:#fff!important;font-size:inherit!important}
+.app-shell .sidebar .brand .sgp-nav-logo:after{content:"";position:absolute;left:0;bottom:2px;width:100%;height:3px;border-radius:3px;background:#45e5ff}
+.app-shell .sidebar .nav button:not([hidden]):hover,
+.app-shell .sidebar .nav button:not([hidden]):focus-visible{background:#d9ebff!important;color:#073d87!important}
+.app-shell .sidebar .nav button:not([hidden]):hover .sgp-nav-name,
+.app-shell .sidebar .nav button:not([hidden]):focus-visible .sgp-nav-name{color:#073d87!important}
+.app-shell .sidebar .nav button:not([hidden]).active,
+.app-shell .sidebar .nav button:not([hidden]).active:hover,
+.app-shell .sidebar .nav button:not([hidden]).active:focus-visible{background:#216fd5!important;color:#fff!important}
+.app-shell .sidebar .nav button:not([hidden]).active .sgp-nav-name{color:#fff!important}
+.app-shell .sidebar .nav button:disabled{opacity:.58;cursor:not-allowed}
+@media(min-width:761px){.app-shell[data-sgp-nav-mode]:not(.sgp-nav-expanded)>.sidebar .brand .sgp-nav-logo{font-size:14px!important}}
