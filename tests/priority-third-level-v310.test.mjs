@@ -78,9 +78,9 @@ test('módulos preservan subnivel y Picking/Ensamble usan orden jerárquico',()=
  assert.match(app,/priorityDepth\(x.parte\)===3/);
  assert.match(css,/#priorityProductionBody tr\.priority-row-locked/);
  assert.match(css,/\.priority-level3-chip/);
- assert.match(html,/LAB v310/);
- assert.match(html,/styles\.css\?v=310/);
- assert.match(html,/app\.js\?v=310/);
+ assert.ok(Number(html.match(/LAB v(\d+)/)?.[1])>=310);
+ assert.match(html,/styles\.css\?v=311/);
+ assert.match(html,/app\.js\?v=311/);
 });
 
 test('migración aplicada preserva contratos y protege programación',()=>{

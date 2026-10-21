@@ -851,3 +851,23 @@ Estado: **IMPLEMENTADO EN RAMA**, pruebas automáticas/PR/publicación pendiente
 - **Archivos:** `app.js`, `src/domain/carry-glass.js`, `styles.css`, `tests/carry-glass-v310.test.mjs` y esta documentación. Sin cambios en tablas, RLS, permisos, RPC, programación ni SGP_ONE_GOOGLE.
 - **Pruebas automatizadas:** unión por clave, caso real 871039, órdenes con nombres duplicados pero distintas líneas, conservación de estados y observaciones, errores/ausencias y ausencia de ceros artificiales. Confirmar resultado final del CI de rama antes de dar por PROBADO.
 - **Estado:** IMPLEMENTADO EN RAMA, NO FUSIONADO, NO PUBLICADO, NO VERIFICADO EN NAVEGADOR/PLANTA. Se requiere autorización específica posterior para fusionar/publicar.
+
+---
+
+## 2026-10-20 — LAB v311: estado de aluminio en Recepción (rama de propuesta)
+
+**Proyecto:** SGP_ONE, repositorio `jcastillodelarosa-hub/SGP-ONE-LAB`. **Base:** LAB v310, commit `e69e5e159d4fee648f01da2d14fe2ad17de4ae25`. **Rama:** `feat/lab-v311-recepcion-estado-aluminio`.
+
+**Objetivo autorizado:** agregar a la tabla de pendientes por recibir y al histórico de recibidas una columna independiente «Estado aluminio», con la condición logística real del tablero de seguimiento.
+
+**Fuente y alcance:** se reutiliza la RPC existente `sgp_consultar_seguimiento_aluminio(p_token,p_semana)`, ya usada por el tablero, con la misma semana consultada en `sgp_recepcion_listar`. Se toma `estado_reserva` (fuente normalizada del seguimiento), **no** `estado_operativo`, que incorpora recepción/legalización. Las filas se consolidan por `reserva`; ante estados distintos o ausencia de datos se presenta «ESTADO MIXTO» / «SIN DATO» (neutral), sin inventar entrega.
+
+**Colores:** `ALUMINIO_ENTREGADO` verde, `PENDIENTE_BODEGA` amarillo, `PENDIENTE_ABASTECIMIENTO` naranja. El estado de recepción física, faltantes, legalización, contadores, auditoría y botones se preservan sin modificación funcional.
+
+**Archivos:** `app.js`, `index.html`, `styles.css`, `src/domain/reception-aluminum-state.js`, `tests/reception-aluminum-state-v311.test.mjs` y ajustes de pruebas de versión de `tests/piece-detail-views-v308.test.mjs` y `tests/priority-third-level-v310.test.mjs`.
+
+**Seguridad / dependencias:** no se altera Supabase (tablas, datos, RPC, RLS ni grants). La RPC de seguimiento y la RPC de recepción comparten los roles permitidos (ADMINISTRADOR, COORDINADOR, LIDER, CONSULTA) según inspección de solo lectura en Supabase. Un fallo en seguimiento no bloquea auditoría y se muestra advertencia visible. Consultas concurrentes por semana descartan respuestas antiguas.
+
+**Preflight live de solo lectura:** en semana 42 hay 24 reservas en Recepción y 24 con seguimiento activo; no se observaron reservas con estados logísticos contradictorios entre los 100 identificadores activos consultados.
+
+**Estado:** IMPLEMENTADO EN RAMA; PR y CI sujetos a ejecución. **NO PUBLICADO ni VERIFICADO en navegador**. No fusionar ni desplegar sin autorización adicional. SGP_ONE_GOOGLE no se modifica.
