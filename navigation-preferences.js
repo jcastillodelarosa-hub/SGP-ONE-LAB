@@ -2,9 +2,9 @@
 (()=>{
 'use strict';
 const KEY='sgp_one_navigation_preferences_v1';
-const DEFAULT={menu:'hover',effect:'fade',speed:'240',theme:'intense',edge:'fade'};
+const DEFAULT={menu:'hover',effect:'fade',speed:'240',theme:'intense',edge:'fade',mode:'light'};
 const ICONS={inicio:'⌂',mecanizado:'▱',picking:'⬡',programacion:'▦',ensamble:'▣','nc-aluminio':'◇','nc-vidrio':'◇','seguimiento-aluminio':'▤','pendientes-aluminio':'⚠','carga-semanal':'⇪',informes:'▥',actualizacion:'↻',configuracion:'⚙'};
-const allowed={menu:['hover','toggle','fixed','floating'],effect:['fade','slide','zoom','none'],speed:['160','240','380'],theme:['intense','corporate','modern'],edge:['fade','solid']};
+const allowed={menu:['hover','toggle','fixed','floating'],effect:['fade','slide','zoom','none'],speed:['160','240','380'],theme:['intense','corporate','modern','lilac','orange','emerald','teal','rose','graphite'],edge:['fade','solid'],mode:['light','dark']};
 const safe=(p)=>Object.fromEntries(Object.keys(DEFAULT).map(k=>[k,allowed[k].includes(p?.[k])?p[k]:DEFAULT[k]]));
 let settings=DEFAULT;try{settings=safe(JSON.parse(localStorage.getItem(KEY)||'{}'))}catch{}
 const shell=document.querySelector('.app-shell'),side=document.querySelector('.sidebar'),nav=document.querySelector('.sidebar .nav');
@@ -31,6 +31,8 @@ function apply(){
  shell.dataset.sgpNavMode=settings.menu;
  shell.dataset.sgpTransition=settings.effect;
  shell.dataset.sgpNavTheme=settings.theme;
+ shell.dataset.sgpTheme=settings.theme;
+ shell.dataset.sgpThemeMode=settings.mode;
  shell.dataset.sgpNavEdge=settings.edge;
  shell.style.setProperty('--sgp-nav-speed',settings.speed+'ms');
  pinned=false;
@@ -81,7 +83,7 @@ function syncInputs(){if(inputs)for(const k of Object.keys(DEFAULT))inputs[k].va
 function mountConfig(){
  const view=document.querySelector('[data-view-panel="configuracion"]');if(!view||view.querySelector('#sgpNavigationPreferences'))return;
  const block=document.createElement('section');block.id='sgpNavigationPreferences';block.className='sgp-nav-preferences';
- block.innerHTML='<h3>Apariencia y navegación</h3><p>Personaliza tu menú y las transiciones. Estos ajustes se guardan únicamente en este navegador.</p><div class="sgp-nav-fields"><label>Estilo del menú<select data-sgp-setting="menu"><option value="hover">Expandir al pasar el cursor</option><option value="toggle">Contraíble con botón</option><option value="fixed">Siempre expandido</option><option value="floating">Flotante</option></select></label><label>Transición de módulos<select data-sgp-setting="effect"><option value="fade">Desvanecimiento</option><option value="slide">Deslizamiento</option><option value="zoom">Zoom suave</option><option value="none">Sin animación</option></select></label><label>Velocidad<select data-sgp-setting="speed"><option value="160">Rápida · 160 ms</option><option value="240">Equilibrada · 240 ms</option><option value="380">Suave · 380 ms</option></select></label><label>Color del menú<select data-sgp-setting="theme"><option value="intense">Azul intenso · predeterminado</option><option value="corporate">Azul corporativo</option><option value="modern">Azul moderno</option></select></label><label>Borde del menú contraído<select data-sgp-setting="edge"><option value="fade">Difuminado y transparencia</option><option value="solid">Sin difuminado</option></select></label></div><button type="button" data-sgp-reset>Restaurar apariencia predeterminada</button>';
+ block.innerHTML='<h3>Apariencia y navegación</h3><p>Selecciona una paleta para toda la interfaz, modo claro u oscuro, menú y transiciones. Estos ajustes se guardan únicamente en este navegador.</p><div class="sgp-nav-fields"><label>Estilo del menú<select data-sgp-setting="menu"><option value="hover">Expandir al pasar el cursor</option><option value="toggle">Contraíble con botón</option><option value="fixed">Siempre expandido</option><option value="floating">Flotante</option></select></label><label>Transición de módulos<select data-sgp-setting="effect"><option value="fade">Desvanecimiento</option><option value="slide">Deslizamiento</option><option value="zoom">Zoom suave</option><option value="none">Sin animación</option></select></label><label>Velocidad<select data-sgp-setting="speed"><option value="160">Rápida · 160 ms</option><option value="240">Equilibrada · 240 ms</option><option value="380">Suave · 380 ms</option></select></label><label>Tema de toda la aplicación<select data-sgp-setting="theme"><option value="intense">Azul intenso · predeterminado</option><option value="corporate">Azul corporativo</option><option value="modern">Azul moderno</option></select></label><label>Borde del menú contraído<select data-sgp-setting="edge"><option value="fade">Difuminado y transparencia</option><option value="solid">Sin difuminado</option></select></label></div><button type="button" data-sgp-reset>Restaurar apariencia predeterminada</button>';
  const heading=view.querySelector('.page-heading');if(heading)heading.after(block);else view.prepend(block);
  inputs=Object.fromEntries([...block.querySelectorAll('[data-sgp-setting]')].map(el=>[el.dataset.sgpSetting,el]));
  syncInputs();
