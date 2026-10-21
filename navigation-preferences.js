@@ -53,6 +53,7 @@ side.addEventListener('mouseenter',()=>{if(!overlay()&&settings.menu==='hover')s
 side.addEventListener('mouseleave',()=>{if(!overlay()&&settings.menu==='hover')setOpen(false)});
 nav.addEventListener('click',e=>{if(e.target.closest('button[data-view]')&&overlay())setOpen(false)});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&overlay())setOpen(false)});
+document.addEventListener('click',e=>{if(settings.menu==='floating'&&!compact()&&opened&&!side.contains(e.target)&&!desktopTrigger.contains(e.target))setOpen(false)});
 const shade=document.querySelector('#mobileMenuShade');
 if(shade)shade.addEventListener('click',()=>setOpen(false));
 /* Existing app.js remains the sole owner of the mobile toggle. Synchronize its state after clicks. */
