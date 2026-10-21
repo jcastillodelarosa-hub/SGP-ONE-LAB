@@ -2130,3 +2130,22 @@ button.active,[aria-pressed="true"]{border-color:#0865ed}
 
 /* LAB v310 · no presentar como cero el vidrio de arrastre sin dato de origen */
 #prodBoard .prod-glass-note{padding:8px 12px;border-top:1px solid #dce6f0;background:#fff7e8;color:#81571b;font-size:11px;font-weight:600}
+
+/* LAB v311 · estado logístico del tablero en Recepción, independiente de auditoría */
+#recTable .rec-aluminum-badge,
+.received-reservations-wrap .rec-aluminum-badge{
+ display:inline-flex;align-items:center;justify-content:center;
+ padding:5px 9px;border-radius:999px;border:1px solid transparent;
+ font-size:10px;font-weight:850;line-height:1.25;text-align:center;
+ max-width:180px;white-space:normal;overflow-wrap:anywhere;
+}
+.rec-al-delivered{background:#dcfce7;color:#166534;border-color:#86efac!important}
+.rec-al-warehouse{background:#fef3c7;color:#92400e;border-color:#fcd34d!important}
+.rec-al-supply{background:#ffedd5;color:#9a3412;border-color:#fdba74!important}
+.rec-al-neutral{background:#f1f5f9;color:#475569;border-color:#cbd5e1!important}
+.rec-tracking-warning{margin:8px 2px 0;padding:9px 12px;border:1px solid #fed7aa;border-radius:8px;background:#fff7ed;color:#9a3412;font-size:12px;font-weight:700}
+#recTable th:nth-child(7),#recTable td:nth-child(7),
+.received-reservations-wrap th:nth-child(7),.received-reservations-wrap td:nth-child(7){min-width:130px}
+@media(max-width:700px){
+ #recTable .rec-aluminum-badge,.received-reservations-wrap .rec-aluminum-badge{font-size:10px;max-width:145px}
+}
