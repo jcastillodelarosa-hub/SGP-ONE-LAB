@@ -15,11 +15,14 @@ import { buildGlassNodeInsights, glassCoverage, glassRackBreakdown } from "./src
 import { consolidatePieceReferences } from "./src/domain/piece-detail-views.js";
 import { mergeCarryOrdersWithGlass, glassCountLabel } from "./src/domain/carry-glass.js";
 import { indexReceptionAluminumStates, receptionAluminumStateMeta } from "./src/domain/reception-aluminum-state.js";
+import { initFilePickers } from "./src/ui/file-picker.js";
 import { comparePriority, priorityDepth, groupPriorityRows, splitPriorityPart, validatePriorityAssignments, hasScheduledPriority } from "./src/domain/priority-hierarchy.js";
 import { readNcAluminumWorkbook } from "./src/domain/nc-aluminum-importer.js?v=73";
 import { readNcGlassWorkbook } from "./src/domain/nc-glass-importer.js?v=84";
 
 const mecanizado = createMecanizadoModule(trackingRows);
+// UI exclusivamente visual: mantiene los inputs nativos y sus validaciones.
+initFilePickers(document);
 let validatedProductions = [];
 let validatedAccessories = null;
 let validatedGlass = null;
