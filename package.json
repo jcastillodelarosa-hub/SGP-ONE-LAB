@@ -9,6 +9,8 @@
     "verify:release": "node scripts/verify-release.mjs"
   },
   "dependencies": {
-    "@supabase/supabase-js": "2.76.1"
+    "@supabase/supabase-js": "2.76.1",
+    "html2canvas": "1.4.1",
+    "jspdf": "2.5.2"
   }
 }
