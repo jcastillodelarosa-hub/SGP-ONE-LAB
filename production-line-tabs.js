@@ -32,6 +32,9 @@
   bar.innerHTML='<strong>Ordenar por niveles</strong><label>Nivel 1 <select data-sort-level="0"></select></label><label>Nivel 2 <select data-sort-level="1"></select></label><label>Nivel 3 <select data-sort-level="2"></select></label><button type="button" data-sort-reset>Limpiar orden</button><small>Solo cambia el orden visual; no modifica prioridades guardadas.</small>';
   table.parentElement.before(bar);
   const count=document.createElement('span');count.className='production-table-count';count.setAttribute('aria-live','polite');bar.append(count);
+  const direction=document.createElement('button');direction.type='button';direction.textContent='Orden: A → Z';direction.setAttribute('aria-label','Invertir orden de filas');bar.append(direction);
+  let descending=false;
+  direction.addEventListener('click',()=>{descending=!descending;direction.textContent=descending?'Orden: Z → A':'Orden: A → Z';sortRows();});
   const search=document.createElement('input');
   search.type='search';search.placeholder='Filtrar filas visibles…';search.setAttribute('aria-label','Filtrar filas de la tabla');
   search.className='production-table-quickfilter';
@@ -64,7 +67,7 @@
    const compare=(a,b)=>{
     for(const index of columns){
      const va=a.cells[index]?.textContent?.trim()||'',vb=b.cells[index]?.textContent?.trim()||'';
-     const result=collator.compare(va,vb);if(result)return result;
+     const result=collator.compare(va,vb);if(result)return descending?-result:result;
     }
     return 0;
    };
