@@ -231,11 +231,13 @@ function weeklyPackageStatus() {
   if (validatedGlass?.conflicts) blockers.push("Conflictos en vidrio");
   return { ready: blockers.length === 0, blockers };
 }
+let weeklyCommitInProgress = false;
+let weeklyCommitNeedsVerification = false;
 function refreshWeeklyPackageGate() {
   const status = weeklyPackageStatus();
   const token = sessionStorage.getItem(APP_SESSION_KEY);
-  els.commit.disabled = !(status.ready && token);
-  els.commit.textContent = status.ready ? (token ? "Cargar semana" : "Inicia sesión para cargar") : "Carga final bloqueada";
+  els.commit.disabled = weeklyCommitInProgress || weeklyCommitNeedsVerification || !(status.ready && token);
+  els.commit.textContent = weeklyCommitInProgress ? "Carga en proceso…" : weeklyCommitNeedsVerification ? "Verificar semana antes de reintentar" : status.ready ? (token ? "Cargar semana" : "Inicia sesión para cargar") : "Carga final bloqueada";
   if (els.previewLoad) els.previewLoad.disabled = !status.ready;
   els.commit.title = status.ready
     ? "Las 4 fuentes están validadas. La carga requiere sesión autorizada y doble confirmación."
@@ -1285,6 +1287,7 @@ async function applyGlassLocation(){
 }
 
 async function commitProgramming() {
+  if (weeklyCommitInProgress || weeklyCommitNeedsVerification) return;
   const status = weeklyPackageStatus();
   if (!status.ready) { refreshWeeklyPackageGate(); return; }
   const user = await refreshAuthStatus();
@@ -1299,6 +1302,7 @@ async function commitProgramming() {
   const glassPayload = prepareGlassPayload(validatedGlass.rows, validatedProductions);
   const total = validatedProductions.length + piecesPayload.length + accessoriesPayload.length + glassPayload.length;
   const client = await getSupabaseClient();
+  const preflightStartedAt = performance.now();
 
   els.importStatus.textContent = "Preflight: comprobando sesión, rol y estado de la semana…";
   const { data: preflight, error: preflightError } = await client.rpc("sgp_preflight_carga_semanal", { p_token: token, p_anio: year, p_semana: week });
@@ -1306,6 +1310,7 @@ async function commitProgramming() {
     const msg = preflightError?.message || "Preflight no válido";
     els.importStatus.textContent = "CARGA RECHAZADA ✕ " + msg; window.alert("CARGA RECHAZADA ✕\n\n" + msg); refreshWeeklyPackageGate(); return;
   }
+  const preflightMs = Math.round(performance.now() - preflightStartedAt);
   if (preflight.semana_ya_cargada) {
     const msg = `La semana ${week} / ${year} ya figura cargada en el servidor.`;
     els.importStatus.textContent = "CARGA RECHAZADA ✕ " + msg; window.alert(msg); return;
@@ -1318,27 +1323,66 @@ async function commitProgramming() {
     return;
   }
 
+  weeklyCommitInProgress = true;
   els.commit.disabled = true; els.commit.textContent = `Enviando ${total.toLocaleString("es-CO")} registros…`;
   els.importStatus.textContent = "SOLICITUD ENVIADA… No cierres esta pestaña. Esperando confirmación del servidor.";
   if (els.previewStatus) els.previewStatus.textContent = "Estado: solicitud de carga enviada; esperando respuesta transaccional.";
   await new Promise(resolve => setTimeout(resolve, 50));
+  // Retry only an explicitly rejected concurrency lock. Never retry an uncertain timeout.
+  const maxLockRetries = 2;
+  let completed = false;
   try {
-    const { data, error } = await client.rpc("sgp_cargar_paquete_semanal", {
-      p_token: token, p_anio: year, p_semana: week, p_programacion: validatedProductions,
-      p_piezas: piecesPayload, p_accesorios: accessoriesPayload, p_vidrio: glassPayload
-    });
-    if (error) throw error;
-    const inserted = data?.insertados?.total ?? total;
-    els.importStatus.textContent = `CARGA COMPLETADA ✓ Semana ${week} · Lote ${data.id_lote_carga} · ${inserted} registros.`;
-    els.commit.textContent = "Semana cargada ✓"; els.commit.disabled = true;
-    if (els.previewStatus) els.previewStatus.textContent = `Escritura realizada: SÍ ✓ · Lote ${data.id_lote_carga} · Usuario ${data.usuario} · Total ${inserted}.`;
-    window.alert(`CARGA COMPLETADA ✓\n\nSemana ${week} / ${year}\nLote: ${data.id_lote_carga}\nRegistros insertados: ${inserted}`);
+    for (let attempt = 0; attempt <= maxLockRetries; attempt++) {
+      if (attempt > 0) {
+        els.importStatus.textContent = `Bloqueo de carga: reintento ${attempt}/${maxLockRetries} en 60 segundos…`;
+        await new Promise(resolve => setTimeout(resolve, 60000));
+        // The previous writer may have completed while we waited. Do not duplicate a week.
+        const { data: check, error: checkError } = await client.rpc("sgp_preflight_carga_semanal", {
+          p_token: token, p_anio: year, p_semana: week
+        });
+        if (checkError || !check?.ok) throw checkError || new Error("No fue posible verificar la semana antes del reintento.");
+        if (check.semana_ya_cargada) throw new Error("SEMANA_YA_CARGADA: otra carga finalizó mientras se esperaba. No se repetirá la escritura.");
+      }
+      els.importStatus.textContent = `Cargando semana ${week} · intento ${attempt + 1}/${maxLockRetries + 1}…`;
+      const rpcStartedAt = performance.now();
+      const { data, error } = await client.rpc("sgp_cargar_paquete_semanal", {
+        p_token: token, p_anio: year, p_semana: week, p_programacion: validatedProductions,
+        p_piezas: piecesPayload, p_accesorios: accessoriesPayload, p_vidrio: glassPayload
+      });
+      const rpcMs = Math.round(performance.now() - rpcStartedAt);
+      console.info("[SGP carga semanal] tiempos", { anio: year, semana: week, intento: attempt + 1, preflight_ms: preflightMs, rpc_ms: rpcMs, resultado: error ? "ERROR" : "OK", codigo: error?.code || null });
+      if (error) {
+        const isConcurrencyLock = /CARGA_SEMANAL_EN_PROCESO/i.test(error.message || "");
+        if (isConcurrencyLock && attempt < maxLockRetries) continue;
+        throw error;
+      }
+      const timings = data?.tiempos_ms;
+      if (timings && typeof timings === "object") {
+        console.info("[SGP carga semanal] tiempos por etapa (ms)", timings);
+      }
+      const inserted = data?.insertados?.total ?? total;
+      els.importStatus.textContent = `CARGA COMPLETADA ✓ Semana ${week} · Lote ${data.id_lote_carga} · ${inserted} registros · ${Math.round(rpcMs / 1000)} s.`;
+      els.commit.textContent = "Semana cargada ✓";
+      if (els.previewStatus) els.previewStatus.textContent = `Escritura realizada: SÍ ✓ · Lote ${data.id_lote_carga} · Usuario ${data.usuario} · Total ${inserted}.`;
+      window.alert(`CARGA COMPLETADA ✓\n\nSemana ${week} / ${year}\nLote: ${data.id_lote_carga}\nRegistros insertados: ${inserted}`);
+      completed = true;
+      break;
+    }
   } catch (error) {
     const msg = [error?.message,error?.details,error?.hint].filter(Boolean).join(" · ") || String(error);
-    els.importStatus.textContent = "CARGA RECHAZADA ✕ " + msg;
-    if (els.previewStatus) els.previewStatus.textContent = "Escritura realizada: NO. Error: " + msg;
-    window.alert("CARGA RECHAZADA ✕\n\nNo se confirmó ninguna escritura.\n\n" + msg);
+    const uncertain = /statement timeout|lock timeout|network|fetch failed|failed to fetch|networkerror|aborterror/i.test(msg);
+    if (uncertain) weeklyCommitNeedsVerification = true;
+    const guidance = uncertain ? "Resultado no confirmado. Verifique el estado de la semana antes de intentar una nueva carga." : "";
+    els.importStatus.textContent = "CARGA NO COMPLETADA ✕ " + msg;
+    if (els.previewStatus) els.previewStatus.textContent = "Resultado no confirmado. " + guidance + " Error: " + msg;
+    window.alert("CARGA NO COMPLETADA ✕\n\n" + msg + (guidance ? "\n\n" + guidance : ""));
     refreshWeeklyPackageGate();
+  } finally {
+    weeklyCommitInProgress = false;
+    refreshWeeklyPackageGate();
+    if (weeklyCommitNeedsVerification) {
+      els.importStatus.textContent = "RESULTADO INCIERTO: comprueba en el servidor si la semana se cargó antes de volver a intentar.";
+    }
   }
 }
 els.nav.forEach(button => button.addEventListener("click", async () => {openView(button.dataset.view);if(button.dataset.view==='inicio')loadHomeBalances();if(button.dataset.view==='configuracion')loadUserAdmin();if(button.dataset.view==='picking')loadPicking();if(button.dataset.view==='ensamble'){await refreshAssemblyWeeks(true);loadAssembly()}}));
