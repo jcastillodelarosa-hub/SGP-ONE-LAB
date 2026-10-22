@@ -22,7 +22,7 @@
         <button data-view="inicio">Inicio</button>
         <button class="active" data-view="mecanizado">Módulo de Mecanizado</button>
         <button data-view="picking">Picking</button><button data-view="programacion">Programación semanal</button>
-        <button data-view="ensamble">Ensamble</button>
+        <button data-view="ensamble">Línea de Producción</button>
 <button data-view="nc-aluminio">NC Aluminio</button>
         <button data-view="nc-vidrio">NC Vidrio</button>
         <button data-view="seguimiento-aluminio">Seguimiento de aluminio</button><button data-view="pendientes-aluminio">Pendientes de aluminio</button>
@@ -77,8 +77,8 @@
         </section>
 
         <section class="view" data-view-panel="ensamble" hidden>
-          <div class="page-heading"><span class="eyebrow">Operación</span><h2>Ensamble</h2><p>Vista provisional para seguimiento de las órdenes y sus cambios diarios.</p></div>
-          <div class="assembly-tabs"><button class="active" id="assemblySheetTab">Hoja de ensamble</button><button id="assemblyLocationReportTab">Reporte de ubicaciones</button></div><div id="assemblySheetPanel"><section class="toolbar assembly-toolbar">
+          <div class="page-heading"><span class="eyebrow">Operación</span><h2>Línea de Producción</h2><p>Seguimiento operativo de ensamble y empaque.</p></div>
+          <div class="assembly-tabs production-line-tabs" role="tablist" aria-label="Etapas de línea de producción"><button class="active" id="productionAssemblyTab" type="button" role="tab" aria-selected="true" aria-controls="productionAssemblyPanel">Ensamble</button><button id="productionPackingTab" type="button" role="tab" aria-selected="false" aria-controls="productionPackingPanel">Empaque</button></div><div id="productionAssemblyPanel" role="tabpanel" aria-labelledby="productionAssemblyTab"><div class="assembly-tabs"><button class="active" id="assemblySheetTab">Hoja de ensamble</button><button id="assemblyLocationReportTab">Reporte de ubicaciones</button></div><div id="assemblySheetPanel"><section class="toolbar assembly-toolbar">
             <select id="assemblyWeek"><option value="">Cargando semanas…</option></select>
             <select id="assemblyLine"><option value="PANELES_2">PANELES_2</option><option value="FRAMES_2">FRAMES_2</option></select>
             <select id="assemblyState"><option value="">Todos los estados</option><option value="ABIERTA">Abierta</option><option value="CERRADA">Cerrada</option><option value="ENSAMBLADA">Ensamblada</option><option value="FINALIZADA">Finalizada</option></select>
@@ -118,6 +118,7 @@
   <section class="table-wrap location-compact"><table><thead><tr><th>Burro</th><th>Clasificación</th><th>Reservas</th><th># Reservas</th><th>Cant. vidrio</th></tr></thead><tbody id="locationMixedRacks"><tr><td colspan="5" class="empty">Sin consulta</td></tr></tbody></table></section>
  </div>
 </div>
+</div><div id="productionPackingPanel" role="tabpanel" aria-labelledby="productionPackingTab" hidden><div class="production-packing-empty"><h3>Empaque</h3><p>La pestaña de Empaque está disponible. Su hoja operativa y sus datos se integrarán en una implementación independiente, conservando las reglas de ensamble.</p></div></div>
 <div id="glassDetailModal" class="modal glass-detail-modal" hidden><div class="modal-card">
  <div class="modal-head"><div><span class="eyebrow">Ubicación de vidrio</span><h3 id="glassDetailTitle">Detalle</h3><p id="glassDetailMeta"></p></div><button id="closeGlassDetail">Cerrar</button></div>
  <div id="glassDetailSummary" class="glass-detail-summary"></div>
@@ -390,5 +391,6 @@
 </div>
 <div id="glassExplorerModal" class="glass-explorer-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="glassExplorerTitle"><div class="glass-explorer-dialog"><header><div><h2 id="glassExplorerTitle">Explorador de relaciones de vidrio</h2><p>Selecciona un nodo para descubrir sus relaciones y cantidades.</p></div><button type="button" id="glassExplorerClose" aria-label="Cerrar explorador">✕</button></header><div class="glass-explorer-controls"><input id="glassExplorerSearch" type="search" placeholder="Buscar reserva, orden o burro" aria-label="Buscar nodo"><select id="glassExplorerStatus" aria-label="Estado de vidrio"><option value="prepared">Preparados</option><option value="all">Todos los estados</option></select><button type="button" id="glassExplorerReset">Restablecer</button></div><div id="glassExplorerSummary" class="glass-explorer-summary"></div><div class="glass-explorer-content"><div id="glassExplorerGraph" class="glass-explorer-graph"></div><aside id="glassExplorerDetails" class="glass-explorer-details">Selecciona un nodo de la red.</aside></div><footer><span>Azul: burro · Verde: orden · Naranja: parte · Violeta: reserva</span><button type="button" id="glassExplorerCloseBottom">Cerrar</button></footer></div></div>
 <div id="glassExplorerTooltip" class="glass-explorer-tooltip" role="tooltip" hidden></div>
+<script defer src="production-line-tabs.js?v=1"></script>
 </body>
 </html>
