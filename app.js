@@ -1195,8 +1195,21 @@ async function applyDailyExport(){
     if(error)throw error;
     els.dailyExportStatus.textContent=`Actualización aplicada ✓ ${data.actualizados} actualizados · ${data.nuevos} nuevos · ${data.ausentes} ya no aparecen.`;
     window.alert(`EXPORT ACTUALIZADO ✓\n\nLínea: ${p.line}\nActualizados: ${data.actualizados}\nFuera de base: ${data.fuera_base}\nAusentes en semanas incluidas: ${data.ausentes}`);
-    const {data:chg,error:chgErr}=await client.rpc('sgp_resumen_eventos_actualizacion',{p_token:token,p_id_lote:data.id_carga_diaria,p_fuente:'EXPORT'});if(chgErr)throw chgErr;window.exportChangeData=chg||{};const cs=document.querySelector('#dailyExportChangeSummary');if(cs)cs.hidden=false;const eo=document.querySelector('#expOpenAssembly'),ea=document.querySelector('#expAssemblyDone'),ep=document.querySelector('#expPackingDone');if(eo)eo.textContent=(chg.ABIERTA_ENSAMBLE||[]).length;if(ea)ea.textContent=(chg.ENSAMBLADA_COMPLETA||[]).length;if(ep)ep.textContent=(chg.ORDEN_COMPLETADA||[]).length;
     dailyExportPreview=null;dailyExportRows=[];
+    // The Export has already committed. Reporting/refresh failures must not relabel it as rejected.
+    try{
+      const {data:chg,error:chgErr}=await client.rpc('sgp_resumen_eventos_actualizacion',{p_token:token,p_id_lote:data.id_carga_diaria,p_fuente:'EXPORT'});
+      if(chgErr)throw chgErr;
+      window.exportChangeData=chg||{};
+      const cs=document.querySelector('#dailyExportChangeSummary');if(cs)cs.hidden=false;
+      const eo=document.querySelector('#expOpenAssembly'),ea=document.querySelector('#expAssemblyDone'),ep=document.querySelector('#expPackingDone');
+      if(eo)eo.textContent=(chg.ABIERTA_ENSAMBLE||[]).length;
+      if(ea)ea.textContent=(chg.ENSAMBLADA_COMPLETA||[]).length;
+      if(ep)ep.textContent=(chg.ORDEN_COMPLETADA||[]).length;
+    }catch(reportError){
+      console.warn('Export aplicado; resumen de eventos no disponible',reportError);
+      els.dailyExportStatus.textContent+=' · No fue posible consultar el resumen de eventos.';
+    }
     if(document.getElementById('productionPackingTab')?.getAttribute('aria-selected')==='true')void loadPackingSheet();
     if(document.getElementById('productionAssemblyTab')?.getAttribute('aria-selected')==='true')void loadAssembly();
   }catch(e){els.dailyExportStatus.textContent='Actualización rechazada ✕ '+e.message;els.applyDailyExport.disabled=false}
