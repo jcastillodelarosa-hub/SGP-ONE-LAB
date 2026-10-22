@@ -1,4 +1,4 @@
-import { initPieceMasterUI, showMissingPieceMaster } from "./src/ui/piece-master-admin.js";
+import { initPieceMasterUI, showMissingPieceMaster, configurePieceMasterUI } from "./src/ui/piece-master-admin.js";
 import { initPickingDeliveryReport } from "./src/modules/picking-delivery-report-controller.js";
 import { trackingRows } from "./src/data/mock-data.js";
 import { createMecanizadoModule } from "./src/modules/mecanizado.js";
@@ -516,6 +516,7 @@ async function applyAluminumTracking(){
  try{const client=await getSupabaseClient(),token=sessionStorage.getItem("sgp_one_session");const {data,error}=await client.rpc("sgp_aplicar_seguimiento_aluminio",{p_token:token,p_nombre_archivo:aluminumTrackingPreview.file,p_datos:aluminumTrackingRows});if(error)throw error;els.aluminumStatus.textContent=`Seguimiento actualizado ✓ · ${data.nuevas_relaciones} relaciones Reserva + ID nuevas · ${data.relaciones_existentes} existentes · ${data.cambios} cambios de estado/semana`}catch(error){els.aluminumStatus.textContent="Aplicación rechazada ✕ "+error.message;els.applyAluminumTracking.disabled=false}
 }
 
+configurePieceMasterUI({getToken:()=>getAppToken?.()||sessionStorage.getItem(APP_SESSION_KEY),onMasterSaved:async()=>{await validatePiecesFile();}});
 async function validatePiecesFile() {
   const file = els.piecesFile.files?.[0];
   if (!file) { els.piecesStatus.textContent = "Selecciona el listado de piezas."; return; }
