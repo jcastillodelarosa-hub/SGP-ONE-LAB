@@ -1125,7 +1125,7 @@ function renderPackingSheet(){
  const esc=v=>String(v??'—').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
  body.innerHTML=rows.length?rows.map(r=>{
   const freshness=r.presente_ultimo_export===false?'No figura en último Export':r.ultima_vez_export?'Actualizada por Export':'Sin fecha de Export';
-  const state=r.presente_ultimo_export===false?'Sin dato vigente':ready(r)?'Totalmente ensamblada':validBalance(r)?'Con saldo de ensamble':'Saldo sin validar';
+  const state=r.presente_ultimo_export===false?'Sin dato vigente':ready(r)?'Totalmente ensamblada':validBalance(r)&&Number(r.saldo_ensamble)>0?'Con saldo de ensamble':'Saldo sin validar';
   return '<tr><td>'+esc(r.prioridad)+'</td><td>'+esc(r.produccion)+'</td><td>'+esc(r.sistema)+'</td><td>'+esc(r.cantidad)+'</td><td>'+esc(r.ensamblado)+'</td><td>'+esc(r.saldo_ensamble)+'</td><td>'+esc(state)+'<small style="display:block;color:#61728b">'+esc(freshness)+'</small></td><td>'+esc(r.saldo_empaque)+'</td><td>—</td></tr>';
  }).join(''):'<tr><td colspan="9">No hay producciones para los filtros seleccionados.</td></tr>';
  if(status)status.textContent=rows.length+' producciones · Datos vigentes según último Export registrado · Prioridades y comentarios de Empaque aún no editables.';
