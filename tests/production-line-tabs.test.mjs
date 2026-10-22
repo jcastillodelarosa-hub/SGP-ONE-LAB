@@ -145,3 +145,10 @@ test('column filter popup remains within viewport with scrollable Apply control'
  assert.match(tabs,/menu\.style\.top=Math\.max/);
  assert.match(tabs,/menu\.style\.left=Math\.max/);
 });
+
+test('filter Apply stays accessible even when list exceeds viewport',()=>{
+ assert.match(tabs,/top:12px!important;bottom:12px!important/);
+ assert.match(tabs,/display:flex!important;flex-direction:column!important/);
+ assert.match(tabs,/sheet-filter-values\{flex:1 1 auto!important/);
+ assert.match(tabs,/sheet-apply\{flex-shrink:0!important/);
+});
