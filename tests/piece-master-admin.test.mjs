@@ -1,0 +1,6 @@
+import test from "node:test";import assert from "node:assert/strict";
+import {groupMissingPieceCodes,validateMasterRecord} from "../src/services/piece-master-admin.js";
+test("group SAP duplicates preserving descriptions and lines",()=>{const r=groupMissingPieceCodes([{codigo_sap:"A",descripcion:"Perfil A",linea:"PANELES_2"},{codigo_sap:"A",linea:"FRAMES_2"},{codigo_sap:"B",descripcion:"Perfil B"}]);assert.equal(r.length,2);assert.equal(r[0].filas,2);assert.deepEqual(r[0].lineas,["PANELES_2","FRAMES_2"]);});
+test("validate catalog data without assuming classification",()=>{assert.throws(()=>validateMasterRecord({codigo_sap:"A",tipo_pieza:"UNKNOWN",destino_productivo:"PANEL",lineas_aplicables:["PANELES_2"]}));assert.equal(validateMasterRecord({codigo_sap:"A",tipo_pieza:"PANEL",destino_productivo:"PANEL",lineas_aplicables:["PANELES_2","FRAMES_2"]}).activo,"SI");});
+
+test("maestro exige ambas líneas por contrato de base de datos",()=>{assert.throws(()=>validateMasterRecord({codigo_sap:"B",tipo_pieza:"PANEL",destino_productivo:"PANEL",lineas_aplicables:["PANELES_2"]}));});

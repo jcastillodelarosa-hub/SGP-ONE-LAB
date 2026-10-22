@@ -1,3 +1,4 @@
+import { initPieceMasterUI, showMissingPieceMaster, configurePieceMasterUI } from "./src/ui/piece-master-admin.js";
 import { initPickingDeliveryReport } from "./src/modules/picking-delivery-report-controller.js";
 import { trackingRows } from "./src/data/mock-data.js";
 import { createMecanizadoModule } from "./src/modules/mecanizado.js";
@@ -25,6 +26,7 @@ import { readNcGlassWorkbook } from "./src/domain/nc-glass-importer.js?v=84";
 const mecanizado = createMecanizadoModule(trackingRows);
 // UI exclusivamente visual: mantiene los inputs nativos y sus validaciones.
 initFilePickers(document);
+initPieceMasterUI();
 let validatedProductions = [];
 let validatedAccessories = null;
 let validatedGlass = null;
@@ -514,6 +516,7 @@ async function applyAluminumTracking(){
  try{const client=await getSupabaseClient(),token=sessionStorage.getItem("sgp_one_session");const {data,error}=await client.rpc("sgp_aplicar_seguimiento_aluminio",{p_token:token,p_nombre_archivo:aluminumTrackingPreview.file,p_datos:aluminumTrackingRows});if(error)throw error;els.aluminumStatus.textContent=`Seguimiento actualizado ✓ · ${data.nuevas_relaciones} relaciones Reserva + ID nuevas · ${data.relaciones_existentes} existentes · ${data.cambios} cambios de estado/semana`}catch(error){els.aluminumStatus.textContent="Aplicación rechazada ✕ "+error.message;els.applyAluminumTracking.disabled=false}
 }
 
+configurePieceMasterUI({getToken:()=>getAppToken?.()||sessionStorage.getItem(APP_SESSION_KEY),onMasterSaved:async()=>{await validatePiecesFile();}});
 async function validatePiecesFile() {
   const file = els.piecesFile.files?.[0];
   if (!file) { els.piecesStatus.textContent = "Selecciona el listado de piezas."; return; }
@@ -544,6 +547,7 @@ async function validatePiecesFile() {
     els.pNoMatch.textContent = pieceRelation ? pieceRelation.noMatch : "—";
     renderPiecesNoMatches(pieceRelation || { noMatchRows: [] });
     validatedPieces = { rows: classification.rows, errors: result.errors, unclassified: classification.unclassified.length, conflicts: pieceRelation?.conflicts || 0 };
+    if (classification.unclassified.length) showMissingPieceMaster(classification.unclassified);
     const lineText = Object.entries(summary.lines).map(([line,count]) => `${line}: ${count}`).join(" · ");
     els.piecesStatus.textContent = result.errors.length
       ? `Validación bloqueada: ${result.errors.length} error(es) de estructura.`
