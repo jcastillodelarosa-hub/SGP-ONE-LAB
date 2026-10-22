@@ -1,3 +1,7 @@
+## Línea de Producción — navegación Ensamble / Empaque (2026-10-21)
+
+En rama `feat/linea-produccion-ensamble-empaque-tabs` se cambia exclusivamente el nombre visible del menú Ensamble a «Línea de Producción» y se añaden pestañas superiores «Ensamble» y «Empaque». Ensamble mantiene los IDs, consultas, reporte de ubicaciones y reglas existentes. Empaque es por ahora una pestaña estructural informativa; no se inventan fuentes, tablas, estados ni acciones de empaque. Pendientes: prueba automática, revisión visual, autorización de fusión/publicación y diseño funcional de la hoja de Empaque. No se modifica Supabase.
+
 ## LAB v323 — Diseño del reporte de Picking (PROPUESTO EN RAMA)
 
 Se implementó la estética aprobada del reporte de entregas: encabezado corporativo azul con marca SGP tipográfica, subtítulo de Picking, indicadores de colores, tablas con cabeceras azules, resumen por sistema con total y porcentaje de parciales, filtros y diseño responsive. Se conservan los valores reales, la consulta RPC, PDF e imagen PNG; no se modifica Supabase ni reglas de negocio. Rama `feat/lab-v323-picking-report-visual`. Pendiente de revisión de PR, validación visual en navegador y autorización independiente de fusión y despliegue.
