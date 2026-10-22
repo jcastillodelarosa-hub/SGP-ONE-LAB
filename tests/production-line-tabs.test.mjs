@@ -49,3 +49,14 @@ test('Empaque does not present stale or invalid balance as assembled',()=>{
  assert.match(app,/const validBalance=r=>r\.saldos_inicializados===true/);
  assert.match(app,/packingRows=\[\];body\.innerHTML/);
 });
+
+test('packing priority is clearly identified as programming reference',()=>{
+ assert.match(html,/Prioridad programación \(referencia\)/);
+ assert.match(html,/La prioridad mostrada pertenece a Programación/);
+});
+test('packing refreshes for line and week changes and discards outdated responses',()=>{
+ const app=readFileSync('app.js','utf8');
+ assert.match(app,/for\(const id of \['assemblyWeek','assemblyLine'\]\)/);
+ assert.match(app,/const requestSequence=\+\+packingRequestSequence/);
+ assert.match(app,/if\(requestSequence!==packingRequestSequence\)return/);
+});
