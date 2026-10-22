@@ -14,6 +14,7 @@ jobs:
   preview:
     if: github.ref == 'refs/heads/feat/linea-produccion-ensamble-empaque-tabs'
     runs-on: ubuntu-latest
+    environment: firebase-preview-linea-produccion
     steps:
       - name: Checkout authorized preview branch
         uses: actions/checkout@v4
