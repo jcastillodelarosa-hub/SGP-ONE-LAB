@@ -32,8 +32,8 @@ begin
  insert into sgp_lotes_carga(id_lote_carga,usuario,tipo_carga,id_unidad_carga,anio,semana_base,estado,archivos_esperados,archivos_recibidos,archivos_validos,registros_recibidos,insertados,actualizados,inconsistencias,detalle)
  values(v_lote,v_usuario,'SEMANAL',p_anio||'-S'||lpad(p_semana::text,2,'0'),p_anio,p_semana,'APLICANDO',4,4,4,v_total,0,0,0,'Carga semanal transaccional');
 
- v_step:=clock_timestamp();
  v_timings:=jsonb_set(v_timings,'{lote_ms}',to_jsonb(round(extract(epoch from clock_timestamp()-v_step)*1000)));
+ v_step:=clock_timestamp();
  insert into sgp_producciones(
  key_produccion,id,id_linea,prioridad_programacion,anio,semana_base,semana_actual,tipo,mercado,proyecto,produccion,sistema,cantidad,cliente,mercado_detalle,
  ensamblado,empacado,cantidad_pt,cargue,despacho,saldo_ensamble,saldo_empaque,saldo_cargue,saldo_despacho,estado_produccion,codigo_programacion_abierto,
@@ -51,13 +51,13 @@ begin
  x->>'es_service',x->>'solo_panel_lleva_cover',x->>'sistema_pvc',x->>'tipo_sellado',x->>'mecanizado',x->>'es_sistema_modificado',x->>'lotes',coalesce(x->>'activa','SI'),x->>'fuente',v_lote
  from jsonb_array_elements(p_programacion)x;
 
- v_step:=clock_timestamp();
  v_timings:=jsonb_set(v_timings,'{producciones_ms}',to_jsonb(round(extract(epoch from clock_timestamp()-v_step)*1000)));
+ v_step:=clock_timestamp();
  insert into sgp_base_semana(key_produccion,anio,semana_base,id_carga)
  select x->>'key_produccion',p_anio,p_semana,v_lote from jsonb_array_elements(p_programacion)x;
 
- v_step:=clock_timestamp();
  v_timings:=jsonb_set(v_timings,'{base_semana_ms}',to_jsonb(round(extract(epoch from clock_timestamp()-v_step)*1000)));
+ v_step:=clock_timestamp();
  insert into sgp_aluminio(id_pieza,id_carga,fila_origen,id,key_produccion,id_linea_origen,id_linea_destino,estado_relacion_produccion,descripcion,acabado,longitud,marca,fabricacion,semana,anio,order_co,produccion,id_orden_produccion,proyecto,cantidad,codigo_sap,sistema,id_sistema,unidades,uso,tipo_pieza,destino_productivo,estado_clasificacion)
  select v_lote||':P:'||ord,v_lote,(x->>'fila_origen')::int,x->>'id',x->>'key_produccion',x->>'id_linea_origen',x->>'id_linea_destino',x->>'estado_relacion_produccion',
  x->>'descripcion',x->>'acabado',nullif(x->>'longitud','')::numeric,x->>'marca',x->>'fabricacion',(x->>'semana')::int,(x->>'anio')::int,x->>'order_co',x->>'produccion',
@@ -65,28 +65,28 @@ begin
  x->>'tipo_pieza',x->>'destino_productivo',x->>'estado_clasificacion'
  from jsonb_array_elements(p_piezas) with ordinality t(x,ord);
 
- v_step:=clock_timestamp();
  v_timings:=jsonb_set(v_timings,'{piezas_ms}',to_jsonb(round(extract(epoch from clock_timestamp()-v_step)*1000)));
+ v_step:=clock_timestamp();
  insert into sgp_accesorios(id_accesorio,id_carga,fila_origen,id,key_produccion,estado_relacion_produccion,codigo_sap,descripcion,cantidad,unidad,sistema,produccion,id_orden,orden_co,linea,semana,anio,fuente)
  select v_lote||':A:'||ord,v_lote,(x->>'fila_origen')::int,x->>'id',x->>'key_produccion',x->>'estado_relacion_produccion',x->>'codigo_sap',x->>'descripcion',
  nullif(x->>'cantidad','')::numeric,x->>'unidad',x->>'sistema',x->>'produccion',x->>'id_orden',x->>'orden_co',x->>'linea',(x->>'semana')::int,(x->>'anio')::int,x->>'fuente'
  from jsonb_array_elements(p_accesorios) with ordinality t(x,ord);
 
- v_step:=clock_timestamp();
  v_timings:=jsonb_set(v_timings,'{accesorios_ms}',to_jsonb(round(extract(epoch from clock_timestamp()-v_step)*1000)));
+ v_step:=clock_timestamp();
  insert into sgp_vidrio(id_vidrio,id_carga,fila_origen,id_export,id,key_produccion,estado_relacion_produccion,produccion,sistema,fuente,datos_origen)
  select v_lote||':V:'||ord,v_lote,(x->>'fila_origen')::int,x->>'id_export',x->>'id',x->>'key_produccion',x->>'estado_relacion_produccion',x->>'produccion',x->>'sistema',x->>'fuente',x->'datos_origen'
  from jsonb_array_elements(p_vidrio) with ordinality t(x,ord);
 
- v_step:=clock_timestamp();
  v_timings:=jsonb_set(v_timings,'{vidrio_ms}',to_jsonb(round(extract(epoch from clock_timestamp()-v_step)*1000)));
+ v_step:=clock_timestamp();
  insert into sgp_cargas(id_carga,id_lote_carga,usuario,tipo_carga,fuente,anio,semana_base,registros_recibidos,insertados,resultado)
  values(v_lote||':PROGRAMACION',v_lote,v_usuario,'SEMANAL','PROGRAMACION',p_anio,p_semana,v_prog,v_prog,'OK'),
  (v_lote||':PIEZAS',v_lote,v_usuario,'SEMANAL','PIEZAS_ALUMINIO',p_anio,p_semana,v_p,v_p,'OK'),
  (v_lote||':ACCESORIOS',v_lote,v_usuario,'SEMANAL','ACCESORIOS',p_anio,p_semana,v_a,v_a,'OK'),
  (v_lote||':VIDRIO',v_lote,v_usuario,'SEMANAL','VIDRIO',p_anio,p_semana,v_v,v_v,'OK');
- v_step:=clock_timestamp();
  v_timings:=jsonb_set(v_timings,'{registro_cargas_ms}',to_jsonb(round(extract(epoch from clock_timestamp()-v_step)*1000)));
+ v_step:=clock_timestamp();
  update sgp_lotes_carga set estado='APLICADO',insertados=v_total,fecha_aplicacion=now() where id_lote_carga=v_lote;
  v_timings:=jsonb_set(v_timings,'{cierre_lote_ms}',to_jsonb(round(extract(epoch from clock_timestamp()-v_step)*1000)));
  v_timings:=v_timings||jsonb_build_object('total_ms',round(extract(epoch from clock_timestamp()-v_t0)*1000));
