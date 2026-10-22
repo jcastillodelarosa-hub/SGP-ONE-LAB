@@ -1135,9 +1135,10 @@ async function loadPackingSheet(){
  const body=document.getElementById('packingPreviewBody'),status=document.getElementById('packingPreviewStatus');
  if(!body)return;
  const requestSequence=++packingRequestSequence;
+ const requestedToken=getAppToken();
  packingRows=[];
  body.innerHTML='<tr><td colspan="9">Consultando producciones…</td></tr>';
- const token=getAppToken();
+ const token=requestedToken;
  if(!token){packingRows=[];body.innerHTML='<tr><td colspan="9">Inicia sesión para consultar Empaque.</td></tr>';if(status)status.textContent='Inicia sesión para consultar Empaque.';return;}
  if(status)status.textContent='Consultando Empaque…';
  try{
@@ -1145,11 +1146,11 @@ async function loadPackingSheet(){
   const week=els.assemblyWeek?.value?Number(els.assemblyWeek.value):null;
   const line=els.assemblyLine?.value||'PANELES_2';
   const {data,error}=await client.rpc('sgp_consultar_ensamble',{p_token:token,p_semana:week,p_linea:line});
-  if(requestSequence!==packingRequestSequence)return;
+  if(requestSequence!==packingRequestSequence||getAppToken()!==requestedToken)return;
   if(error)throw error;
   packingRows=Array.isArray(data?.filas)?data.filas:[];
   renderPackingSheet();
- }catch(error){if(requestSequence!==packingRequestSequence)return;packingRows=[];if(status)status.textContent='Consulta rechazada: '+error.message;if(body)body.innerHTML='<tr><td colspan="9">No fue posible cargar Empaque.</td></tr>';}
+ }catch(error){if(requestSequence!==packingRequestSequence||getAppToken()!==requestedToken)return;packingRows=[];if(status)status.textContent='Consulta rechazada: '+error.message;if(body)body.innerHTML='<tr><td colspan="9">No fue posible cargar Empaque.</td></tr>';}
 }
 document.getElementById('productionPackingTab')?.addEventListener('click',()=>{void loadPackingSheet();});
 for(const id of ['assemblyWeek','assemblyLine'])document.getElementById(id)?.addEventListener('change',()=>{if(document.getElementById('productionPackingTab')?.getAttribute('aria-selected')==='true')void loadPackingSheet();});
