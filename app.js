@@ -1110,6 +1110,45 @@ async function loadAssembly(){
  catch(e){els.assemblyStatus.textContent="Consulta rechazada ✕ "+e.message}finally{els.loadAssembly.disabled=false}
 }
 
+// Empaque: consulta de solo lectura sobre la misma RPC autenticada de Ensamble.
+let packingRows=[];
+function renderPackingSheet(){
+ const body=document.getElementById('packingPreviewBody'),status=document.getElementById('packingPreviewStatus');
+ if(!body)return;
+ const search=(document.getElementById('packingPreviewSearch')?.value||'').trim().toLowerCase();
+ const filter=document.getElementById('packingPreviewFilter')?.value||'all';
+ const sort=document.getElementById('packingPreviewSort')?.value||'priority';
+ const validBalance=r=>r.saldos_inicializados===true&&r.saldo_ensamble!==null&&r.saldo_ensamble!==undefined&&Number.isFinite(Number(r.saldo_ensamble));
+ const ready=r=>validBalance(r)&&Number(r.saldo_ensamble)===0;
+ let rows=packingRows.filter(r=>(!search||[r.produccion,r.sistema,r.reserva_al,r.id].some(v=>String(v??'').toLowerCase().includes(search)))&&(filter==='all'||(filter==='ready'?ready(r):filter==='pending'?validBalance(r)&&Number(r.saldo_ensamble)>0:true)));
+ rows.sort((a,b)=>sort==='balance'?Number(b.saldo_ensamble??-1)-Number(a.saldo_ensamble??-1):sort==='production'?String(a.produccion??'').localeCompare(String(b.produccion??''),undefined,{numeric:true}):comparePriority(a.prioridad,b.prioridad)||String(a.produccion??'').localeCompare(String(b.produccion??''),undefined,{numeric:true}));
+ const esc=v=>String(v??'—').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+ body.innerHTML=rows.length?rows.map(r=>{
+  const freshness=r.presente_ultimo_export===false?'No figura en último Export':r.ultima_vez_export?'Actualizada por Export':'Sin fecha de Export';
+  const state=r.presente_ultimo_export===false?'Sin dato vigente':ready(r)?'Totalmente ensamblada':validBalance(r)?'Con saldo de ensamble':'Saldo sin validar';
+  return '<tr><td>'+esc(r.prioridad)+'</td><td>'+esc(r.produccion)+'</td><td>'+esc(r.sistema)+'</td><td>'+esc(r.cantidad)+'</td><td>'+esc(r.ensamblado)+'</td><td>'+esc(r.saldo_ensamble)+'</td><td>'+esc(state)+'<small style="display:block;color:#61728b">'+esc(freshness)+'</small></td><td>'+esc(r.saldo_empaque)+'</td><td>—</td></tr>';
+ }).join(''):'<tr><td colspan="9">No hay producciones para los filtros seleccionados.</td></tr>';
+ if(status)status.textContent=rows.length+' producciones · Datos vigentes según último Export registrado · Prioridades y comentarios de Empaque aún no editables.';
+}
+async function loadPackingSheet(){
+ const body=document.getElementById('packingPreviewBody'),status=document.getElementById('packingPreviewStatus');
+ if(!body)return;
+ const token=getAppToken();
+ if(!token){if(status)status.textContent='Inicia sesión para consultar Empaque.';return;}
+ if(status)status.textContent='Consultando Empaque…';
+ try{
+  const client=await getSupabaseClient();
+  const week=els.assemblyWeek?.value?Number(els.assemblyWeek.value):null;
+  const line=els.assemblyLine?.value||'PANELES_2';
+  const {data,error}=await client.rpc('sgp_consultar_ensamble',{p_token:token,p_semana:week,p_linea:line});
+  if(error)throw error;
+  packingRows=Array.isArray(data?.filas)?data.filas:[];
+  renderPackingSheet();
+ }catch(error){if(status)status.textContent='Consulta rechazada: '+error.message;if(body)body.innerHTML='<tr><td colspan="9">No fue posible cargar Empaque.</td></tr>';}
+}
+document.getElementById('productionPackingTab')?.addEventListener('click',()=>{void loadPackingSheet();});
+for(const id of ['packingPreviewSearch','packingPreviewFilter','packingPreviewSort'])document.getElementById(id)?.addEventListener('input',renderPackingSheet);
+
 function resetDailyExport(){
   dailyExportPreview=null;dailyExportRows=[];
   if(els.applyDailyExport)els.applyDailyExport.disabled=true;
@@ -1156,6 +1195,8 @@ async function applyDailyExport(){
     window.alert(`EXPORT ACTUALIZADO ✓\n\nLínea: ${p.line}\nActualizados: ${data.actualizados}\nFuera de base: ${data.fuera_base}\nAusentes en semanas incluidas: ${data.ausentes}`);
     const {data:chg,error:chgErr}=await client.rpc('sgp_resumen_eventos_actualizacion',{p_token:token,p_id_lote:data.id_carga_diaria,p_fuente:'EXPORT'});if(chgErr)throw chgErr;window.exportChangeData=chg||{};const cs=document.querySelector('#dailyExportChangeSummary');if(cs)cs.hidden=false;const eo=document.querySelector('#expOpenAssembly'),ea=document.querySelector('#expAssemblyDone'),ep=document.querySelector('#expPackingDone');if(eo)eo.textContent=(chg.ABIERTA_ENSAMBLE||[]).length;if(ea)ea.textContent=(chg.ENSAMBLADA_COMPLETA||[]).length;if(ep)ep.textContent=(chg.ORDEN_COMPLETADA||[]).length;
     dailyExportPreview=null;dailyExportRows=[];
+    if(document.getElementById('productionPackingTab')?.getAttribute('aria-selected')==='true')await loadPackingSheet();
+    if(document.getElementById('productionAssemblyTab')?.getAttribute('aria-selected')==='true')await loadAssembly();
   }catch(e){els.dailyExportStatus.textContent='Actualización rechazada ✕ '+e.message;els.applyDailyExport.disabled=false}
 }
 
