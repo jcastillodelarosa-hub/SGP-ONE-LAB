@@ -58,7 +58,7 @@ test('packing refreshes for line and week changes and discards outdated response
  const app=readFileSync('app.js','utf8');
  assert.match(app,/for\(const id of \['assemblyWeek','assemblyLine'\]\)/);
  assert.match(app,/const requestSequence=\+\+packingRequestSequence/);
- assert.match(app,/if\(requestSequence!==packingRequestSequence\)return/);
+ assert.match(app,/if\(requestSequence!==packingRequestSequence\|\|getAppToken\(\)!==requestedToken\)return/);
 });
 
 test('packing ignores late responses from a previous authenticated session',()=>{
@@ -71,5 +71,5 @@ test('packing rejects empty and negative balances and exposes export freshness',
  const app=readFileSync('app.js','utf8');
  assert.match(app,/r\.saldo_ensamble!==''/);
  assert.match(app,/Number\(r\.saldo_ensamble\)>=0/);
- assert.match(app,/Export: '\+new Date\(r\.ultima_vez_export\)/);
+ assert.match(app,/Export: '\+\(Number\.isNaN\(new Date\(r\.ultima_vez_export\)\.getTime\(\)\)/);
 });
