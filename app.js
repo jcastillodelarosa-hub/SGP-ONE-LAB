@@ -1119,17 +1119,17 @@ function renderPackingSheet(){
  const search=(document.getElementById('packingPreviewSearch')?.value||'').trim().toLowerCase();
  const filter=document.getElementById('packingPreviewFilter')?.value||'all';
  const sort=document.getElementById('packingPreviewSort')?.value||'priority';
- const validBalance=r=>r.saldos_inicializados===true&&r.saldo_ensamble!==null&&r.saldo_ensamble!==undefined&&Number.isFinite(Number(r.saldo_ensamble));
+ const validBalance=r=>r.saldos_inicializados===true&&r.saldo_ensamble!==null&&r.saldo_ensamble!==undefined&&r.saldo_ensamble!==''&&Number.isFinite(Number(r.saldo_ensamble))&&Number(r.saldo_ensamble)>=0;
  const ready=r=>r.presente_ultimo_export!==false&&validBalance(r)&&Number(r.saldo_ensamble)===0;
  let rows=packingRows.filter(r=>(!search||[r.produccion,r.sistema,r.reserva_al,r.id].some(v=>String(v??'').toLowerCase().includes(search)))&&(filter==='all'||(filter==='ready'?ready(r):filter==='pending'?r.presente_ultimo_export!==false&&validBalance(r)&&Number(r.saldo_ensamble)>0:true)));
  rows.sort((a,b)=>sort==='balance'?Number(b.saldo_ensamble??-1)-Number(a.saldo_ensamble??-1):sort==='production'?String(a.produccion??'').localeCompare(String(b.produccion??''),undefined,{numeric:true}):comparePriority(a.prioridad,b.prioridad)||String(a.produccion??'').localeCompare(String(b.produccion??''),undefined,{numeric:true}));
  const esc=v=>String(v??'—').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
  body.innerHTML=rows.length?rows.map(r=>{
-  const freshness=r.presente_ultimo_export===false?'No figura en último Export':r.ultima_vez_export?'Actualizada por Export':'Sin fecha de Export';
+  const freshness=r.presente_ultimo_export===false?'No figura en último Export':r.ultima_vez_export?'Export: '+new Date(r.ultima_vez_export).toLocaleString('es-CO'):'Sin fecha de Export';
   const state=r.presente_ultimo_export===false?'Sin dato vigente':ready(r)?'Totalmente ensamblada':validBalance(r)&&Number(r.saldo_ensamble)>0?'Con saldo de ensamble':'Saldo sin validar';
   return '<tr><td>'+esc(r.prioridad)+'</td><td>'+esc(r.produccion)+'</td><td>'+esc(r.sistema)+'</td><td>'+esc(r.cantidad)+'</td><td>'+esc(r.ensamblado)+'</td><td>'+esc(r.saldo_ensamble)+'</td><td>'+esc(state)+'<small style="display:block;color:#61728b">'+esc(freshness)+'</small></td><td>'+esc(r.saldo_empaque)+'</td><td>—</td></tr>';
  }).join(''):'<tr><td colspan="9">No hay producciones para los filtros seleccionados.</td></tr>';
- if(status)status.textContent=rows.length+' producciones · Datos vigentes según último Export registrado · Prioridades y comentarios de Empaque aún no editables.';
+ if(status)status.textContent=rows.length+' producciones · '+rows.filter(r=>r.presente_ultimo_export===false).length+' ausentes del último Export · Prioridades y comentarios de Empaque aún no editables.';
 }
 async function loadPackingSheet(){
  const body=document.getElementById('packingPreviewBody'),status=document.getElementById('packingPreviewStatus');
