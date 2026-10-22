@@ -33,6 +33,6 @@ test('Empaque reads authenticated existing RPC and excludes machining status',()
 });
 test('successful daily export refreshes active production-line sheet',()=>{
  const app=readFileSync('app.js','utf8');
- assert.match(app,/if\(document\.getElementById\('productionPackingTab'\)\?\.getAttribute\('aria-selected'\)==='true'\)await loadPackingSheet\(\)/);
- assert.match(app,/if\(document\.getElementById\('productionAssemblyTab'\)\?\.getAttribute\('aria-selected'\)==='true'\)await loadAssembly\(\)/);
+ assert.match(app,/if\(document\.getElementById\('productionPackingTab'\)\?\.getAttribute\('aria-selected'\)==='true'\)void loadPackingSheet\(\)/);
+ assert.match(app,/if\(document\.getElementById\('productionAssemblyTab'\)\?\.getAttribute\('aria-selected'\)==='true'\)void loadAssembly\(\)/);
 });
