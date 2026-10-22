@@ -231,11 +231,13 @@ function weeklyPackageStatus() {
   if (validatedGlass?.conflicts) blockers.push("Conflictos en vidrio");
   return { ready: blockers.length === 0, blockers };
 }
+let weeklyCommitInProgress = false;
+let weeklyCommitNeedsVerification = false;
 function refreshWeeklyPackageGate() {
   const status = weeklyPackageStatus();
   const token = sessionStorage.getItem(APP_SESSION_KEY);
-  els.commit.disabled = !(status.ready && token);
-  els.commit.textContent = status.ready ? (token ? "Cargar semana" : "Inicia sesión para cargar") : "Carga final bloqueada";
+  els.commit.disabled = weeklyCommitInProgress || weeklyCommitNeedsVerification || !(status.ready && token);
+  els.commit.textContent = weeklyCommitInProgress ? "Carga en proceso…" : weeklyCommitNeedsVerification ? "Verificar semana antes de reintentar" : status.ready ? (token ? "Cargar semana" : "Inicia sesión para cargar") : "Carga final bloqueada";
   if (els.previewLoad) els.previewLoad.disabled = !status.ready;
   els.commit.title = status.ready
     ? "Las 4 fuentes están validadas. La carga requiere sesión autorizada y doble confirmación."
@@ -1285,6 +1287,7 @@ async function applyGlassLocation(){
 }
 
 async function commitProgramming() {
+  if (weeklyCommitInProgress || weeklyCommitNeedsVerification) return;
   const status = weeklyPackageStatus();
   if (!status.ready) { refreshWeeklyPackageGate(); return; }
   const user = await refreshAuthStatus();
@@ -1318,6 +1321,7 @@ async function commitProgramming() {
     return;
   }
 
+  weeklyCommitInProgress = true;
   els.commit.disabled = true; els.commit.textContent = `Enviando ${total.toLocaleString("es-CO")} registros…`;
   els.importStatus.textContent = "SOLICITUD ENVIADA… No cierres esta pestaña. Esperando confirmación del servidor.";
   if (els.previewStatus) els.previewStatus.textContent = "Estado: solicitud de carga enviada; esperando respuesta transaccional.";
@@ -1357,16 +1361,18 @@ async function commitProgramming() {
     }
   } catch (error) {
     const msg = [error?.message,error?.details,error?.hint].filter(Boolean).join(" · ") || String(error);
-    const uncertain = /statement timeout|lock timeout|network|fetch failed/i.test(msg);
+    const uncertain = /statement timeout|lock timeout|network|fetch failed|failed to fetch|networkerror|aborterror/i.test(msg);
+    if (uncertain) weeklyCommitNeedsVerification = true;
     const guidance = uncertain ? "Resultado no confirmado. Verifique el estado de la semana antes de intentar una nueva carga." : "";
     els.importStatus.textContent = "CARGA NO COMPLETADA ✕ " + msg;
     if (els.previewStatus) els.previewStatus.textContent = "Resultado no confirmado. " + guidance + " Error: " + msg;
     window.alert("CARGA NO COMPLETADA ✕\n\n" + msg + (guidance ? "\n\n" + guidance : ""));
     refreshWeeklyPackageGate();
   } finally {
-    if (!completed) {
-      els.commit.textContent = "Confirmar carga semanal";
-      refreshWeeklyPackageGate();
+    weeklyCommitInProgress = false;
+    refreshWeeklyPackageGate();
+    if (weeklyCommitNeedsVerification) {
+      els.importStatus.textContent = "RESULTADO INCIERTO: comprueba en el servidor si la semana se cargó antes de volver a intentar.";
     }
   }
 }
