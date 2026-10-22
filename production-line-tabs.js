@@ -75,7 +75,7 @@
   locations.hidden=name!=='ubicaciones';
   if(name==='ubicaciones')byId('assemblyLocationReportTab')?.click();
   if(name==='ensamble')byId('assemblySheetTab')?.click();
-  // Legacy tab handlers may toggle the parent; restore the four-tab visibility after they run.
+  // Restore visibility after legacy handlers, without overriding the active top-level tab.
   queueMicrotask(()=>{assemblyPanel.hidden=!(name==='ensamble'||name==='ubicaciones');packingPanel.hidden=name!=='empaque';sheet.hidden=name!=='ensamble';locations.hidden=name!=='ubicaciones';});
  }
  select('planificador');
