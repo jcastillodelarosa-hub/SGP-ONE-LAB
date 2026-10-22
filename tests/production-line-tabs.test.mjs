@@ -66,3 +66,10 @@ test('packing ignores late responses from a previous authenticated session',()=>
  assert.match(app,/const requestedToken=getAppToken\(\)/);
  assert.match(app,/requestSequence!==packingRequestSequence\|\|getAppToken\(\)!==requestedToken/);
 });
+
+test('packing rejects empty and negative balances and exposes export freshness',()=>{
+ const app=readFileSync('app.js','utf8');
+ assert.match(app,/r\.saldo_ensamble!==''/);
+ assert.match(app,/Number\(r\.saldo_ensamble\)>=0/);
+ assert.match(app,/Export: '\+new Date\(r\.ultima_vez_export\)/);
+});
