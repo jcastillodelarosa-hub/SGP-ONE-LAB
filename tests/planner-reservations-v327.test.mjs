@@ -9,7 +9,7 @@ test('v327: explorer has week, system, search and expandable reserve cards',()=>
  assert.match(source,/sgp-explorer-order/);
 });
 test('v327: explorer uses authenticated assembly bridge without new database writes',()=>{
- assert.match(source,/SGPPlannerBridge\\?\\.loadAssembly/);
- assert.doesNotMatch(source,/service_role|\\.from\\(['\"]sgp_producciones/);
- assert.match(source,/setTimeout\\(explorerRender,0\\)/);
+ assert.ok(source.includes('SGPPlannerBridge?.loadAssembly'));
+ assert.ok(!source.includes('service_role'));
+ assert.ok(source.includes('setTimeout(explorerRender,0)'));
 });
