@@ -23,7 +23,7 @@
  document.head.append(style);
  // Read-only multi-level ordering for the rendered tables, without changing source data.
  function enhanceTable(tableId,host){
-  const table=byId(tableId),body=table?.tBodies?.[0];
+  const element=byId(tableId),table=element?.tagName==='TABLE'?element:element?.closest('table'),body=table?.tBodies?.[0];
   if(!table||!body||!host)return;
   const bar=document.createElement('div');
   bar.className='production-table-sortbar';
@@ -62,6 +62,7 @@
   if(table.tHead)observer.observe(table.tHead,{childList:true,subtree:true});
  }
  enhanceTable('assemblyTable',assemblyPanel);
+ enhanceTable('packingPreviewBody',packingPanel);
 
  const all=[['planificador',planner,plannerPanel],['ensamble',assembly,assemblyPanel],['empaque',packing,packingPanel],['ubicaciones',report,locations]];
  all.forEach(([name,button,panel])=>{button.setAttribute('role','tab');button.setAttribute('aria-controls',panel.id);button.addEventListener('click',()=>select(name));});
@@ -74,6 +75,8 @@
   locations.hidden=name!=='ubicaciones';
   if(name==='ubicaciones')byId('assemblyLocationReportTab')?.click();
   if(name==='ensamble')byId('assemblySheetTab')?.click();
+  // Legacy tab handlers may toggle the parent; restore the four-tab visibility after they run.
+  queueMicrotask(()=>{assemblyPanel.hidden=!(name==='ensamble'||name==='ubicaciones');packingPanel.hidden=name!=='empaque';sheet.hidden=name!=='ensamble';locations.hidden=name!=='ubicaciones';});
  }
  select('planificador');
 })();
