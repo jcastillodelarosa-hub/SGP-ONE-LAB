@@ -1322,25 +1322,52 @@ async function commitProgramming() {
   els.importStatus.textContent = "SOLICITUD ENVIADA… No cierres esta pestaña. Esperando confirmación del servidor.";
   if (els.previewStatus) els.previewStatus.textContent = "Estado: solicitud de carga enviada; esperando respuesta transaccional.";
   await new Promise(resolve => setTimeout(resolve, 50));
+  // Retry only an explicitly rejected concurrency lock. Never retry an uncertain timeout.
+  const maxLockRetries = 2;
+  let completed = false;
   try {
-    const { data, error } = await client.rpc("sgp_cargar_paquete_semanal", {
-      p_token: token, p_anio: year, p_semana: week, p_programacion: validatedProductions,
-      p_piezas: piecesPayload, p_accesorios: accessoriesPayload, p_vidrio: glassPayload
-    });
-    if (error) throw error;
-    const inserted = data?.insertados?.total ?? total;
-    els.importStatus.textContent = `CARGA COMPLETADA ✓ Semana ${week} · Lote ${data.id_lote_carga} · ${inserted} registros.`;
-    els.commit.textContent = "Semana cargada ✓"; els.commit.disabled = true;
-    if (els.previewStatus) els.previewStatus.textContent = `Escritura realizada: SÍ ✓ · Lote ${data.id_lote_carga} · Usuario ${data.usuario} · Total ${inserted}.`;
-    window.alert(`CARGA COMPLETADA ✓\n\nSemana ${week} / ${year}\nLote: ${data.id_lote_carga}\nRegistros insertados: ${inserted}`);
+    for (let attempt = 0; attempt <= maxLockRetries; attempt++) {
+      if (attempt > 0) {
+        els.importStatus.textContent = `Bloqueo de carga: reintento ${attempt}/${maxLockRetries} en 60 segundos…`;
+        await new Promise(resolve => setTimeout(resolve, 60000));
+        // The previous writer may have completed while we waited. Do not duplicate a week.
+        const { data: check, error: checkError } = await client.rpc("sgp_preflight_carga_semanal", {
+          p_token: token, p_anio: year, p_semana: week
+        });
+        if (checkError || !check?.ok) throw checkError || new Error("No fue posible verificar la semana antes del reintento.");
+        if (check.semana_ya_cargada) throw new Error("SEMANA_YA_CARGADA: otra carga finalizó mientras se esperaba. No se repetirá la escritura.");
+      }
+      els.importStatus.textContent = `Cargando semana ${week} · intento ${attempt + 1}/${maxLockRetries + 1}…`;
+      const { data, error } = await client.rpc("sgp_cargar_paquete_semanal", {
+        p_token: token, p_anio: year, p_semana: week, p_programacion: validatedProductions,
+        p_piezas: piecesPayload, p_accesorios: accessoriesPayload, p_vidrio: glassPayload
+      });
+      if (error) {
+        const isConcurrencyLock = /CARGA_SEMANAL_EN_PROCESO/i.test(error.message || "");
+        if (isConcurrencyLock && attempt < maxLockRetries) continue;
+        throw error;
+      }
+      const inserted = data?.insertados?.total ?? total;
+      els.importStatus.textContent = `CARGA COMPLETADA ✓ Semana ${week} · Lote ${data.id_lote_carga} · ${inserted} registros.`;
+      els.commit.textContent = "Semana cargada ✓";
+      if (els.previewStatus) els.previewStatus.textContent = `Escritura realizada: SÍ ✓ · Lote ${data.id_lote_carga} · Usuario ${data.usuario} · Total ${inserted}.`;
+      window.alert(`CARGA COMPLETADA ✓\\n\\nSemana ${week} / ${year}\\nLote: ${data.id_lote_carga}\\nRegistros insertados: ${inserted}`);
+      completed = true;
+      break;
+    }
   } catch (error) {
     const msg = [error?.message,error?.details,error?.hint].filter(Boolean).join(" · ") || String(error);
-    const timeoutOrLock = /statement timeout|lock timeout|CARGA_SEMANAL_EN_PROCESO/i.test(msg);
-    const guidance = timeoutOrLock ? "La operación se canceló por tiempo o bloqueo. No reintente hasta verificar en Previsualizar carga que la semana sigue disponible." : "";
-    els.importStatus.textContent = "CARGA RECHAZADA ✕ " + msg;
-    if (els.previewStatus) els.previewStatus.textContent = "Carga no confirmada. " + guidance + " Error: " + msg;
-    window.alert("CARGA RECHAZADA ✕\n\nNo se confirmó ninguna escritura.\n\n" + msg + (guidance ? "\n\n" + guidance : ""));
+    const uncertain = /statement timeout|lock timeout|network|fetch failed/i.test(msg);
+    const guidance = uncertain ? "Resultado no confirmado. Verifique el estado de la semana antes de intentar una nueva carga." : "";
+    els.importStatus.textContent = "CARGA NO COMPLETADA ✕ " + msg;
+    if (els.previewStatus) els.previewStatus.textContent = "Resultado no confirmado. " + guidance + " Error: " + msg;
+    window.alert("CARGA NO COMPLETADA ✕\\n\\n" + msg + (guidance ? "\\n\\n" + guidance : ""));
     refreshWeeklyPackageGate();
+  } finally {
+    if (!completed) {
+      els.commit.textContent = "Confirmar carga semanal";
+      refreshWeeklyPackageGate();
+    }
   }
 }
 els.nav.forEach(button => button.addEventListener("click", async () => {openView(button.dataset.view);if(button.dataset.view==='inicio')loadHomeBalances();if(button.dataset.view==='configuracion')loadUserAdmin();if(button.dataset.view==='picking')loadPicking();if(button.dataset.view==='ensamble'){await refreshAssemblyWeeks(true);loadAssembly()}}));
