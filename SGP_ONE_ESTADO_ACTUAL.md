@@ -1,3 +1,10 @@
+### Regla de reserva principal — prioridades (2026-10-22)
+
+- Regla aprobada: cuando `sgp_producciones.reserva_al` contiene varias reservas separadas por coma, la producción y todas sus unidades corresponden **únicamente a la primera reserva**. Las siguientes son referencias asociadas, no propietarios adicionales de las unidades.
+- Caso verificado: `1312146|FRAMES_2`, `reserva_al=8707142,8710471`, cantidad 2: se contabiliza en 8707142, no en 8710471. El total de 8710471 en FRAMES_2 es 119, no 121.
+- `sgp_datos_asignacion_prioridades` y `sgp_guardar_prioridad` ya respetan la primera reserva mediante `split_part(..., ',', 1)`. No se modifican estas RPC ni los datos.
+- Ajuste frontend: nota explicativa en listado y ventana de asignación para evitar confundir reservas múltiples con producciones omitidas. Pendiente CI, merge y publicación.
+
 ### Planificador de Ensamble — LAB v327 (2026-10-22)
 
 - Código v327 fusionado a main mediante PR #44, commit 6d72f7232cfc6217d7def47500ea2e1007a73ebc.
