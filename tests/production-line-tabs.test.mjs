@@ -14,8 +14,8 @@ test('navigation renames Ensamble without changing view identity',()=>{
 test('Ensamble and Empaque have independent accessible tabs',()=>{
  for(const id of ['productionAssemblyTab','productionPackingTab','productionAssemblyPanel','productionPackingPanel'])assert.ok(html.includes('id="'+id+'"'));
  assert.match(html,/production-line-tabs\.js\?v=1/);
- assert.match(tabs,/assemblyPanel.hidden=!isAssembly/);
- assert.match(tabs,/packingPanel.hidden=isAssembly/);
+ assert.match(tabs,/assemblyPanel.hidden=/);
+ assert.match(tabs,/packingPanel.hidden=/);
  assert.match(html,/id="packingPreviewBody"/);
  assert.match(html,/Saldo ensamble/);
  assert.doesNotMatch(html,/La pestaña de Empaque está disponible/);
@@ -80,4 +80,12 @@ test('packing has its own visible week and line controls',()=>{
  assert.match(app,/const selectedWeek=document\.getElementById\('packingWeek'\)\?\.value/);
  assert.match(app,/const line=document\.getElementById\('packingLine'\)\?\.value/);
  assert.match(app,/function syncPackingWeekOptions\(\)/);
+});
+
+test('four primary tabs are created without altering existing RPC and report markup',()=>{
+ for(const id of ['productionPlannerTab','productionLocationsTab','productionPlannerPanel'])assert.ok(tabs.includes(id));
+ assert.match(tabs,/select\('planificador'\)/);
+ assert.match(tabs,/locations.hidden=name!==/);
+ assert.match(tabs,/packingPanel.hidden=name!==/);
+ assert.match(tabs,/role','tab'/);
 });
