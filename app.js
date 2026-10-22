@@ -542,12 +542,12 @@ async function validatePiecesFile() {
     await new Promise(resolve => requestAnimationFrame(resolve));
     const classification = classifyAluminumPieces(result.rows, master);
     els.pUnclassified.textContent = classification.unclassified.length;
-    if (classification.unclassified.length) showMissingPieceMaster(classification.unclassified);
     const pieceRelation = validatedProductions.length ? relateAluminumPieces(result.rows, validatedProductions) : null;
     els.pRelated.textContent = pieceRelation ? pieceRelation.related : "—";
     els.pNoMatch.textContent = pieceRelation ? pieceRelation.noMatch : "—";
     renderPiecesNoMatches(pieceRelation || { noMatchRows: [] });
     validatedPieces = { rows: classification.rows, errors: result.errors, unclassified: classification.unclassified.length, conflicts: pieceRelation?.conflicts || 0 };
+    if (classification.unclassified.length) showMissingPieceMaster(classification.unclassified);
     const lineText = Object.entries(summary.lines).map(([line,count]) => `${line}: ${count}`).join(" · ");
     els.piecesStatus.textContent = result.errors.length
       ? `Validación bloqueada: ${result.errors.length} error(es) de estructura.`
