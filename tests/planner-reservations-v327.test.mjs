@@ -22,3 +22,19 @@ test('v327: glass and part detail is session-gated and joins by key_produccion',
  assert.ok(source.includes("vidrio_novedad"));
  assert.ok(source.includes("vidrio_traslado"));
 });
+
+test('v327: week selection, responsive cards and visual state/glass counters',()=>{
+ assert.ok(source.includes("sgp_picking_semanas"));
+ assert.ok(source.includes("explorerRefreshWeeks"));
+ assert.ok(source.includes("#sgpExplorerResults{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))"));
+ assert.ok(source.includes("@media(max-width:780px){#sgpExplorerResults{grid-template-columns:1fr}"));
+ for(const cls of ['sgp-glass-prep','sgp-glass-nov','sgp-glass-trans','sgp-explorer-state'])assert.ok(source.includes(cls));
+ assert.ok(source.includes('explorerState(r.estado_mecanizado)'));
+});
+
+test('v327: planner retains calendar, table and kanban selector above reservation cards',()=>{
+ assert.ok(source.includes("value=\\\"calendar\\\""));
+ assert.ok(source.includes("value=\\\"table\\\""));
+ assert.ok(source.includes("value=\\\"kanban\\\""));
+ assert.ok(source.includes("explorer.insertBefore(viewActions,explorer.querySelector('.sgp-explorer-filters'))"));
+});
