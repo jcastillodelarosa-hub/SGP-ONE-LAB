@@ -122,3 +122,12 @@ test('responsive production cards preserve table headers as mobile labels',()=>{
  assert.match(tabs,/max-width:680px/);
  assert.match(tabs,/production-table-empty/);
 });
+
+test('four production tabs support keyboard arrow and boundary navigation',()=>{
+ assert.match(tabs,/tabs\.addEventListener\('keydown'/);
+ assert.match(tabs,/ArrowLeft/);
+ assert.match(tabs,/ArrowRight/);
+ assert.match(tabs,/Home/);
+ assert.match(tabs,/End/);
+ assert.match(tabs,/all\[next\]\[1\]\.focus\(\)/);
+});
