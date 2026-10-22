@@ -1133,6 +1133,8 @@ function renderPackingSheet(){
 async function loadPackingSheet(){
  const body=document.getElementById('packingPreviewBody'),status=document.getElementById('packingPreviewStatus');
  if(!body)return;
+ packingRows=[];
+ body.innerHTML='<tr><td colspan="9">Consultando producciones…</td></tr>';
  const token=getAppToken();
  if(!token){packingRows=[];body.innerHTML='<tr><td colspan="9">Inicia sesión para consultar Empaque.</td></tr>';if(status)status.textContent='Inicia sesión para consultar Empaque.';return;}
  if(status)status.textContent='Consultando Empaque…';
