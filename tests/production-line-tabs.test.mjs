@@ -56,7 +56,7 @@ test('packing priority is clearly identified as programming reference',()=>{
 });
 test('packing refreshes for line and week changes and discards outdated responses',()=>{
  const app=readFileSync('app.js','utf8');
- assert.match(app,/for\(const id of \['assemblyWeek','assemblyLine'\]\)/);
+ assert.match(app,/for\(const id of \['packingWeek','packingLine'\]\)/);
  assert.match(app,/const requestSequence=\+\+packingRequestSequence/);
  assert.match(app,/if\(requestSequence!==packingRequestSequence\|\|getAppToken\(\)!==requestedToken\)return/);
 });
@@ -72,4 +72,12 @@ test('packing rejects empty and negative balances and exposes export freshness',
  assert.match(app,/r\.saldo_ensamble!==''/);
  assert.match(app,/Number\(r\.saldo_ensamble\)>=0/);
  assert.match(app,/Export: '\+\(Number\.isNaN\(new Date\(r\.ultima_vez_export\)\.getTime\(\)\)/);
+});
+
+test('packing has its own visible week and line controls',()=>{
+ for(const id of ['packingWeek','packingLine'])assert.match(html,new RegExp('id="'+id+'"'));
+ const app=readFileSync('app.js','utf8');
+ assert.match(app,/const selectedWeek=document\.getElementById\('packingWeek'\)\?\.value/);
+ assert.match(app,/const line=document\.getElementById\('packingLine'\)\?\.value/);
+ assert.match(app,/function syncPackingWeekOptions\(\)/);
 });
