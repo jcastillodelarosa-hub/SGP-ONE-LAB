@@ -33,8 +33,8 @@ test('v327: week selection, responsive cards and visual state/glass counters',()
 });
 
 test('v327: planner retains calendar, table and kanban selector above reservation cards',()=>{
- assert.ok(source.includes("value=\\\"calendar\\\""));
- assert.ok(source.includes("value=\\\"table\\\""));
- assert.ok(source.includes("value=\\\"kanban\\\""));
+ assert.ok(source.includes('value="calendar"'));
+ assert.ok(source.includes('value="table"'));
+ assert.ok(source.includes('value="kanban"'));
  assert.ok(source.includes("explorer.insertBefore(viewActions,explorer.querySelector('.sgp-explorer-filters'))"));
 });
