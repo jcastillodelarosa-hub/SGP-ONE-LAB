@@ -1,3 +1,4 @@
+import { initPieceMasterUI, showMissingPieceMaster } from "./src/ui/piece-master-admin.js";
 import { initPickingDeliveryReport } from "./src/modules/picking-delivery-report-controller.js";
 import { trackingRows } from "./src/data/mock-data.js";
 import { createMecanizadoModule } from "./src/modules/mecanizado.js";
@@ -25,6 +26,7 @@ import { readNcGlassWorkbook } from "./src/domain/nc-glass-importer.js?v=84";
 const mecanizado = createMecanizadoModule(trackingRows);
 // UI exclusivamente visual: mantiene los inputs nativos y sus validaciones.
 initFilePickers(document);
+initPieceMasterUI();
 let validatedProductions = [];
 let validatedAccessories = null;
 let validatedGlass = null;
@@ -539,6 +541,7 @@ async function validatePiecesFile() {
     await new Promise(resolve => requestAnimationFrame(resolve));
     const classification = classifyAluminumPieces(result.rows, master);
     els.pUnclassified.textContent = classification.unclassified.length;
+    if (classification.unclassified.length) showMissingPieceMaster(classification.unclassified);
     const pieceRelation = validatedProductions.length ? relateAluminumPieces(result.rows, validatedProductions) : null;
     els.pRelated.textContent = pieceRelation ? pieceRelation.related : "—";
     els.pNoMatch.textContent = pieceRelation ? pieceRelation.noMatch : "—";
