@@ -13,7 +13,7 @@ style.textContent='.sgp-planner-heading h3{margin:0;color:#124a89}.sgp-planner-h
 document.head.appendChild(style);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const num=v=>Number(v)||0;
-function getRows(){return typeof assemblyRows!=='undefined'&&Array.isArray(assemblyRows)?assemblyRows:[]}
+function getRows(){return Array.isArray(window.SGPPlannerBridge?.getRows?.())?window.SGPPlannerBridge.getRows():[]}
 function card(r){return '<article class="sgp-planner-card"><strong>'+esc(r.produccion||r.id||'Producción')+'</strong><small>'+esc(r.sistema)+' · Reserva '+esc(r.reserva_al||r.reserva||'—')+'</small><small>Saldo Export: '+esc(r.saldo_ensamble??'—')+' · Estado: '+esc(r.estado_produccion||'—')+'</small><small>Vidrio: '+esc(r.porc_vidrio??'—')+' · '+esc(r.ubicacion_vidrio||'Consultar reporte')+'</small></article>'}
 function render(){
 const q=document.querySelector('#sgpPlannerSearch').value.toLowerCase().trim();
