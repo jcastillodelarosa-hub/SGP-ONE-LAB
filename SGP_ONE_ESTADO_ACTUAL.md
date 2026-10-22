@@ -1,3 +1,10 @@
+## LAB v326 — Planificador de Ensamble, etapa 1 (rama; no publicado)
+
+- Rama: `feat/planificador-ensamble-v326`. Vista de consulta de Planificador dentro de Línea de Producción > Ensamble: Calendario (carga sin fechas inventadas), Tabla dinámica básica y Kanban por estado; buscador y métricas. Reutiliza `assemblyRows` de la consulta autenticada `sgp_consultar_ensamble` y acceso al reporte de ubicaciones existente.
+- Las tres vistas son **solo lectura**; sin cambios a Supabase, Export, estados, prioridades, cantidades o programación de turnos. El calendario todavía no asigna fechas ni turnos porque no existe persistencia autorizada.
+- Reglas aprobadas: saldo solo del Export; prioridad Program y disponibilidad Sale por coordinador; Ensamblado por líder con explicación de diferencias; Abierto cuando inició y no terminó; fecha/turno; arrastre automático de unidades no ejecutadas como prioridad del siguiente turno, preservando historial; movimientos completos o parciales; vínculo a mecanizado, pendientes aluminio, NC vidrio y reporte de ubicaciones.
+- Pendientes: verificar contrato y claves exactas de ubicación vidrio, diseño de persistencia, permisos, concurrencia, QA automatizado/navegador, aprobación explícita de migración, publicación y validación real. No fusionar ni desplegar sin autorización.
+
 ## Línea de Producción — avance de consulta Empaque (2026-10-21)
 
 - PR #32, rama `feat/linea-produccion-ensamble-empaque-tabs`. Navegación Ensamble/Empaque y lectura de Empaque mediante `sgp_consultar_ensamble` y sesión SGP existente.
