@@ -114,3 +114,11 @@ test('table controls expose row counts and reversible multilevel sorting',()=>{
  assert.match(tabs,/Invertir orden de filas/);
  assert.match(tabs,/descending\?-result:result/);
 });
+
+test('responsive production cards preserve table headers as mobile labels',()=>{
+ assert.match(tabs,/function labelMobileCells\(\)/);
+ assert.match(tabs,/cell\.dataset\.mobileLabel=label/);
+ assert.match(tabs,/data-mobile-label/);
+ assert.match(tabs,/max-width:680px/);
+ assert.match(tabs,/production-table-empty/);
+});
