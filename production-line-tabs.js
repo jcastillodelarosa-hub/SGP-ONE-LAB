@@ -20,6 +20,7 @@
  const style=document.createElement('style');
  style.textContent='.production-line-tabs{flex-wrap:nowrap;overflow-x:auto}.production-line-tabs button{min-width:max-content}.assembly-table-wrap,.packing-preview-scroll{overflow:auto;max-height:65vh;border-radius:14px;border:1px solid #dce5f2}.assembly-table-wrap thead th,.packing-preview-table thead th{position:sticky;top:0;z-index:2;background:#eaf1fc;color:#284d80}.assembly-table-wrap tbody tr:nth-child(even),.packing-preview-table tbody tr:nth-child(even){background:#f6f9ff}.assembly-table-wrap tbody tr:hover,.packing-preview-table tbody tr:hover{background:#e8f1ff}';
  style.textContent+=' .production-table-sortbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:12px;margin:10px 0;background:#fff;border:1px solid #dce5f2;border-radius:12px}.production-table-sortbar label{display:grid;gap:3px;font-size:12px}.production-table-sortbar select{max-width:170px;padding:7px;border:1px solid #cbdcf0;border-radius:7px}.production-table-sortbar small{color:#64748b}@media(max-width:700px){.production-table-sortbar label{flex:1;min-width:100px}.production-line-tabs{scroll-snap-type:x proximity}.production-line-tabs button{scroll-snap-align:start}}';
+ style.textContent+=' .production-table-quickfilter{min-width:180px;flex:1;padding:9px;border:1px solid #cbdcf0;border-radius:9px}.assembly-table-wrap tbody tr[hidden],.packing-preview-scroll tbody tr[hidden]{display:none!important}';
  document.head.append(style);
  // Read-only multi-level ordering for the rendered tables, without changing source data.
  function enhanceTable(tableId,host){
@@ -29,7 +30,19 @@
   bar.className='production-table-sortbar';
   bar.innerHTML='<strong>Ordenar por niveles</strong><label>Nivel 1 <select data-sort-level="0"></select></label><label>Nivel 2 <select data-sort-level="1"></select></label><label>Nivel 3 <select data-sort-level="2"></select></label><button type="button" data-sort-reset>Limpiar orden</button><small>Solo cambia el orden visual; no modifica prioridades guardadas.</small>';
   table.parentElement.before(bar);
+  const search=document.createElement('input');
+  search.type='search';search.placeholder='Filtrar filas visibles…';search.setAttribute('aria-label','Filtrar filas de la tabla');
+  search.className='production-table-quickfilter';
+  bar.insertBefore(search,bar.querySelector('small'));
   const selectors=[...bar.querySelectorAll('select')];
+  function filterRows(){
+   const query=search.value.trim().toLocaleLowerCase('es');
+   for(const row of body.rows){
+    const text=(row.textContent||'').toLocaleLowerCase('es');
+    row.hidden=!!query&&!text.includes(query);
+   }
+  }
+  search.addEventListener('input',filterRows);
   const optionLabels=()=>[...table.tHead?.querySelectorAll('th')||[]].map((th,i)=>({index:i,label:(th.textContent||'').trim().replace(/[▾▲▼]/g,'').trim()||'Columna '+(i+1)}));
   const refreshOptions=()=>{
    const options=optionLabels();
@@ -57,7 +70,7 @@
   selectors.forEach(s=>s.addEventListener('change',sortRows));
   bar.querySelector('[data-sort-reset]').addEventListener('click',()=>{selectors.forEach(s=>s.value='');const refresh=tableId==='assemblyTable'?byId('loadAssembly'):null;if(refresh)refresh.click();else byId('packingPreviewSort')?.dispatchEvent(new Event('input',{bubbles:true}));});
   refreshOptions();
-  const observer=new MutationObserver(()=>{if(busy)return;refreshOptions();sortRows();});
+  const observer=new MutationObserver(()=>{if(busy)return;refreshOptions();sortRows();filterRows();});
   observer.observe(body,{childList:true});
   if(table.tHead)observer.observe(table.tHead,{childList:true,subtree:true});
  }
