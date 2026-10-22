@@ -97,6 +97,14 @@
 
  const all=[['planificador',planner,plannerPanel],['ensamble',assembly,assemblyPanel],['empaque',packing,packingPanel],['ubicaciones',report,locations]];
  all.forEach(([name,button,panel])=>{button.setAttribute('role','tab');button.setAttribute('aria-controls',panel.id);button.addEventListener('click',()=>select(name));});
+ tabs.addEventListener('keydown',event=>{
+  if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
+  const index=all.findIndex(([,button])=>button===document.activeElement);
+  if(index<0)return;
+  event.preventDefault();
+  const next=event.key==='Home'?0:event.key==='End'?all.length-1:(index+(event.key==='ArrowRight'?1:-1)+all.length)%all.length;
+  all[next][1].focus();all[next][1].click();
+ });
  function select(name){
   for(const [key,button] of all){const active=key===name;button.classList.toggle('active',active);button.setAttribute('aria-selected',String(active));button.tabIndex=active?0:-1;}
   plannerPanel.hidden=name!=='planificador';
