@@ -1134,7 +1134,7 @@ async function loadPackingSheet(){
  const body=document.getElementById('packingPreviewBody'),status=document.getElementById('packingPreviewStatus');
  if(!body)return;
  const token=getAppToken();
- if(!token){if(status)status.textContent='Inicia sesión para consultar Empaque.';return;}
+ if(!token){packingRows=[];body.innerHTML='<tr><td colspan="9">Inicia sesión para consultar Empaque.</td></tr>';if(status)status.textContent='Inicia sesión para consultar Empaque.';return;}
  if(status)status.textContent='Consultando Empaque…';
  try{
   const client=await getSupabaseClient();
@@ -1144,7 +1144,7 @@ async function loadPackingSheet(){
   if(error)throw error;
   packingRows=Array.isArray(data?.filas)?data.filas:[];
   renderPackingSheet();
- }catch(error){if(status)status.textContent='Consulta rechazada: '+error.message;if(body)body.innerHTML='<tr><td colspan="9">No fue posible cargar Empaque.</td></tr>';}
+ }catch(error){packingRows=[];if(status)status.textContent='Consulta rechazada: '+error.message;if(body)body.innerHTML='<tr><td colspan="9">No fue posible cargar Empaque.</td></tr>';}
 }
 document.getElementById('productionPackingTab')?.addEventListener('click',()=>{void loadPackingSheet();});
 for(const id of ['packingPreviewSearch','packingPreviewFilter','packingPreviewSort'])document.getElementById(id)?.addEventListener('input',renderPackingSheet);
