@@ -18,7 +18,7 @@ export function validateMasterRecord(record){
  const tipo_pieza=String(record.tipo_pieza??"").trim().toUpperCase();
  const destino_productivo=String(record.destino_productivo??"").trim().toUpperCase();
  const lineas_aplicables=[...new Set(record.lineas_aplicables||[])];
- if(!codigo_sap||!PIECE_TYPES.includes(tipo_pieza)||!PIECE_DESTINATIONS.includes(destino_productivo)||!lineas_aplicables.length||lineas_aplicables.some(x=>!PIECE_LINES.includes(x)))throw new Error("Complete código SAP, tipo, destino y líneas válidas.");
+ if(!codigo_sap||!PIECE_TYPES.includes(tipo_pieza)||!PIECE_DESTINATIONS.includes(destino_productivo)||lineas_aplicables.length!==2||PIECE_LINES.some(x=>!lineas_aplicables.includes(x)))throw new Error("Complete código SAP, tipo, destino y líneas válidas.");
  return {codigo_sap,tipo_pieza,destino_productivo,lineas_aplicables,observacion:String(record.observacion??"").trim()||null,activo:record.activo==="NO"?"NO":"SI"};
 }
 export async function listPieceMaster(){
