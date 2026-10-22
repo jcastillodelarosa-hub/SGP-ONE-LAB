@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths-ignore:
       - '.agents/skills/**'
+      - '.github/workflows/firebase-preview-linea-produccion.yml'
   workflow_dispatch:
 
 permissions:
