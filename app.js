@@ -1335,9 +1335,11 @@ async function commitProgramming() {
     window.alert(`CARGA COMPLETADA ✓\n\nSemana ${week} / ${year}\nLote: ${data.id_lote_carga}\nRegistros insertados: ${inserted}`);
   } catch (error) {
     const msg = [error?.message,error?.details,error?.hint].filter(Boolean).join(" · ") || String(error);
+    const timeoutOrLock = /statement timeout|lock timeout|CARGA_SEMANAL_EN_PROCESO/i.test(msg);
+    const guidance = timeoutOrLock ? "La operación se canceló por tiempo o bloqueo. No reintente hasta verificar en Previsualizar carga que la semana sigue disponible." : "";
     els.importStatus.textContent = "CARGA RECHAZADA ✕ " + msg;
-    if (els.previewStatus) els.previewStatus.textContent = "Escritura realizada: NO. Error: " + msg;
-    window.alert("CARGA RECHAZADA ✕\n\nNo se confirmó ninguna escritura.\n\n" + msg);
+    if (els.previewStatus) els.previewStatus.textContent = "Carga no confirmada. " + guidance + " Error: " + msg;
+    window.alert("CARGA RECHAZADA ✕\n\nNo se confirmó ninguna escritura.\n\n" + msg + (guidance ? "\n\n" + guidance : ""));
     refreshWeeklyPackageGate();
   }
 }
