@@ -1112,6 +1112,7 @@ async function loadAssembly(){
 
 // Empaque: consulta de solo lectura sobre la misma RPC autenticada de Ensamble.
 let packingRows=[];
+let packingRequestSequence=0;
 function renderPackingSheet(){
  const body=document.getElementById('packingPreviewBody'),status=document.getElementById('packingPreviewStatus');
  if(!body)return;
@@ -1133,6 +1134,7 @@ function renderPackingSheet(){
 async function loadPackingSheet(){
  const body=document.getElementById('packingPreviewBody'),status=document.getElementById('packingPreviewStatus');
  if(!body)return;
+ const requestSequence=++packingRequestSequence;
  packingRows=[];
  body.innerHTML='<tr><td colspan="9">Consultando producciones…</td></tr>';
  const token=getAppToken();
@@ -1143,12 +1145,14 @@ async function loadPackingSheet(){
   const week=els.assemblyWeek?.value?Number(els.assemblyWeek.value):null;
   const line=els.assemblyLine?.value||'PANELES_2';
   const {data,error}=await client.rpc('sgp_consultar_ensamble',{p_token:token,p_semana:week,p_linea:line});
+  if(requestSequence!==packingRequestSequence)return;
   if(error)throw error;
   packingRows=Array.isArray(data?.filas)?data.filas:[];
   renderPackingSheet();
- }catch(error){packingRows=[];if(status)status.textContent='Consulta rechazada: '+error.message;if(body)body.innerHTML='<tr><td colspan="9">No fue posible cargar Empaque.</td></tr>';}
+ }catch(error){if(requestSequence!==packingRequestSequence)return;packingRows=[];if(status)status.textContent='Consulta rechazada: '+error.message;if(body)body.innerHTML='<tr><td colspan="9">No fue posible cargar Empaque.</td></tr>';}
 }
 document.getElementById('productionPackingTab')?.addEventListener('click',()=>{void loadPackingSheet();});
+for(const id of ['assemblyWeek','assemblyLine'])document.getElementById(id)?.addEventListener('change',()=>{if(document.getElementById('productionPackingTab')?.getAttribute('aria-selected')==='true')void loadPackingSheet();});
 for(const id of ['packingPreviewSearch','packingPreviewFilter','packingPreviewSort'])document.getElementById(id)?.addEventListener('input',renderPackingSheet);
 
 function resetDailyExport(){
