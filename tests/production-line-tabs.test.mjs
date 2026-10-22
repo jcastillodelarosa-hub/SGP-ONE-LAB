@@ -138,3 +138,10 @@ test('spreadsheet column filter keeps its values scrollable in short viewports',
  assert.match(tabs,/max-height:min\(76dvh,560px\)/);
  assert.match(tabs,/overscroll-behavior:contain/);
 });
+
+test('column filter popup remains within viewport with scrollable Apply control',()=>{
+ assert.match(tabs,/sheet-filter-menu\{box-sizing:border-box/);
+ assert.match(tabs,/sheet-filter-menu \.sheet-apply\{position:sticky/);
+ assert.match(tabs,/menu\.style\.top=Math\.max/);
+ assert.match(tabs,/menu\.style\.left=Math\.max/);
+});
