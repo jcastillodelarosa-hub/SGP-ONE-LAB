@@ -36,3 +36,16 @@ test('successful daily export refreshes active production-line sheet',()=>{
  assert.match(app,/if\(document\.getElementById\('productionPackingTab'\)\?\.getAttribute\('aria-selected'\)==='true'\)void loadPackingSheet\(\)/);
  assert.match(app,/if\(document\.getElementById\('productionAssemblyTab'\)\?\.getAttribute\('aria-selected'\)==='true'\)void loadAssembly\(\)/);
 });
+
+test('Export success remains successful if optional event summary fails',()=>{
+ const app=readFileSync('app.js','utf8');
+ assert.match(app,/Export aplicado; resumen de eventos no disponible/);
+ assert.match(app,/dailyExportPreview=null;dailyExportRows=\[\];\s*\/\/ The Export has already committed/);
+ assert.match(app,/catch\(reportError\)/);
+});
+test('Empaque does not present stale or invalid balance as assembled',()=>{
+ const app=readFileSync('app.js','utf8');
+ assert.match(app,/const ready=r=>r\.presente_ultimo_export!==false&&validBalance\(r\)&&Number\(r\.saldo_ensamble\)===0/);
+ assert.match(app,/const validBalance=r=>r\.saldos_inicializados===true/);
+ assert.match(app,/packingRows=\[\];body\.innerHTML/);
+});
