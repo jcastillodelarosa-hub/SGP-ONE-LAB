@@ -1302,6 +1302,7 @@ async function commitProgramming() {
   const glassPayload = prepareGlassPayload(validatedGlass.rows, validatedProductions);
   const total = validatedProductions.length + piecesPayload.length + accessoriesPayload.length + glassPayload.length;
   const client = await getSupabaseClient();
+  const preflightStartedAt = performance.now();
 
   els.importStatus.textContent = "Preflight: comprobando sesión, rol y estado de la semana…";
   const { data: preflight, error: preflightError } = await client.rpc("sgp_preflight_carga_semanal", { p_token: token, p_anio: year, p_semana: week });
@@ -1309,6 +1310,7 @@ async function commitProgramming() {
     const msg = preflightError?.message || "Preflight no válido";
     els.importStatus.textContent = "CARGA RECHAZADA ✕ " + msg; window.alert("CARGA RECHAZADA ✕\n\n" + msg); refreshWeeklyPackageGate(); return;
   }
+  const preflightMs = Math.round(performance.now() - preflightStartedAt);
   if (preflight.semana_ya_cargada) {
     const msg = `La semana ${week} / ${year} ya figura cargada en el servidor.`;
     els.importStatus.textContent = "CARGA RECHAZADA ✕ " + msg; window.alert(msg); return;
@@ -1342,17 +1344,20 @@ async function commitProgramming() {
         if (check.semana_ya_cargada) throw new Error("SEMANA_YA_CARGADA: otra carga finalizó mientras se esperaba. No se repetirá la escritura.");
       }
       els.importStatus.textContent = `Cargando semana ${week} · intento ${attempt + 1}/${maxLockRetries + 1}…`;
+      const rpcStartedAt = performance.now();
       const { data, error } = await client.rpc("sgp_cargar_paquete_semanal", {
         p_token: token, p_anio: year, p_semana: week, p_programacion: validatedProductions,
         p_piezas: piecesPayload, p_accesorios: accessoriesPayload, p_vidrio: glassPayload
       });
+      const rpcMs = Math.round(performance.now() - rpcStartedAt);
+      console.info("[SGP carga semanal] tiempos", { anio: year, semana: week, intento: attempt + 1, preflight_ms: preflightMs, rpc_ms: rpcMs, resultado: error ? "ERROR" : "OK", codigo: error?.code || null });
       if (error) {
         const isConcurrencyLock = /CARGA_SEMANAL_EN_PROCESO/i.test(error.message || "");
         if (isConcurrencyLock && attempt < maxLockRetries) continue;
         throw error;
       }
       const inserted = data?.insertados?.total ?? total;
-      els.importStatus.textContent = `CARGA COMPLETADA ✓ Semana ${week} · Lote ${data.id_lote_carga} · ${inserted} registros.`;
+      els.importStatus.textContent = `CARGA COMPLETADA ✓ Semana ${week} · Lote ${data.id_lote_carga} · ${inserted} registros · ${Math.round(rpcMs / 1000)} s.`;
       els.commit.textContent = "Semana cargada ✓";
       if (els.previewStatus) els.previewStatus.textContent = `Escritura realizada: SÍ ✓ · Lote ${data.id_lote_carga} · Usuario ${data.usuario} · Total ${inserted}.`;
       window.alert(`CARGA COMPLETADA ✓\n\nSemana ${week} / ${year}\nLote: ${data.id_lote_carga}\nRegistros insertados: ${inserted}`);
