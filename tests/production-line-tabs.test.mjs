@@ -16,5 +16,23 @@ test('Ensamble and Empaque have independent accessible tabs',()=>{
  assert.match(html,/production-line-tabs\.js\?v=1/);
  assert.match(tabs,/assemblyPanel.hidden=!isAssembly/);
  assert.match(tabs,/packingPanel.hidden=isAssembly/);
- assert.match(html,/La pestaña de Empaque está disponible/);
+ assert.match(html,/id="packingPreviewBody"/);
+ assert.match(html,/Saldo ensamble/);
+ assert.doesNotMatch(html,/La pestaña de Empaque está disponible/);
+});
+
+test('Empaque reads authenticated existing RPC and excludes machining status',()=>{
+ const app=readFileSync('app.js','utf8');
+ assert.match(app,/async function loadPackingSheet\(\)/);
+ assert.match(app,/client\.rpc\('sgp_consultar_ensamble'/);
+ assert.match(app,/const token=getAppToken\(\)/);
+ assert.match(app,/presente_ultimo_export!==false/);
+ const panel=html.match(/id="productionPackingPanel"[\s\S]*?<\/table>/)?.[0]||'';
+ assert.ok(panel.includes('Saldo ensamble'));
+ assert.ok(!panel.includes('Estado Mec.'));
+});
+test('successful daily export refreshes active production-line sheet',()=>{
+ const app=readFileSync('app.js','utf8');
+ assert.match(app,/if\(document\.getElementById\('productionPackingTab'\)\?\.getAttribute\('aria-selected'\)==='true'\)await loadPackingSheet\(\)/);
+ assert.match(app,/if\(document\.getElementById\('productionAssemblyTab'\)\?\.getAttribute\('aria-selected'\)==='true'\)await loadAssembly\(\)/);
 });
