@@ -97,6 +97,15 @@
  enhanceTable('assemblyTable',assemblyPanel);
  enhanceTable('packingPreviewBody',packingPanel);
 
+ document.addEventListener('click',event=>{
+  if(!event.target.closest('[data-sheet-filter]'))return;
+  queueMicrotask(()=>{
+   const menu=document.querySelector('.sheet-filter-menu');if(!menu)return;
+   const rect=menu.getBoundingClientRect(),margin=10;
+   menu.style.top=Math.max(margin,Math.min(rect.top,window.innerHeight-rect.height-margin))+'px';
+   menu.style.left=Math.max(margin,Math.min(rect.left,window.innerWidth-rect.width-margin))+'px';
+  });
+ });
  const all=[['planificador',planner,plannerPanel],['ensamble',assembly,assemblyPanel],['empaque',packing,packingPanel],['ubicaciones',report,locations]];
  all.forEach(([name,button,panel])=>{button.setAttribute('role','tab');button.setAttribute('aria-controls',panel.id);button.addEventListener('click',()=>select(name));});
  tabs.addEventListener('keydown',event=>{
