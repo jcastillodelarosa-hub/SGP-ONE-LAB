@@ -139,16 +139,11 @@ test('spreadsheet column filter keeps its values scrollable in short viewports',
  assert.match(tabs,/overscroll-behavior:contain/);
 });
 
-test('column filter popup remains within viewport with scrollable Apply control',()=>{
- assert.match(tabs,/sheet-filter-menu\{box-sizing:border-box/);
- assert.match(tabs,/sheet-filter-menu \.sheet-apply\{position:sticky/);
- assert.match(tabs,/menu\.style\.top=Math\.max/);
- assert.match(tabs,/menu\.style\.left=Math\.max/);
-});
 
-test('filter Apply stays accessible even when list exceeds viewport',()=>{
- assert.match(tabs,/top:12px!important;bottom:12px!important/);
- assert.match(tabs,/display:flex!important;flex-direction:column!important/);
- assert.match(tabs,/sheet-filter-values\{flex:1 1 auto!important/);
- assert.match(tabs,/sheet-apply\{flex-shrink:0!important/);
+
+test('column filter popup has a single non-conflicting layout and visible Apply footer',()=>{
+ assert.match(tabs,/sheet-filter-menu\{box-sizing:border-box!important;position:fixed!important/);
+ assert.match(tabs,/sheet-filter-values\{flex:1 1 auto!important;min-height:0!important/);
+ assert.match(tabs,/sheet-apply\{flex:0 0 auto!important;position:relative!important/);
+ assert.doesNotMatch(tabs,/menu\.style\.top=Math\.max/);
 });
