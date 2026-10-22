@@ -99,3 +99,11 @@ test('both operational tables support visual three-level sorting without databas
  assert.match(tabs,/ordered\.every/);
  assert.doesNotMatch(tabs,/\.rpc\(|\.from\(|\.insert\(|\.update\(/);
 });
+
+test('assembly and packing quick filters do not mutate source data',()=>{
+ assert.match(tabs,/enhanceTable\('assemblyTable',assemblyPanel\)/);
+ assert.match(tabs,/enhanceTable\('packingPreviewBody',packingPanel\)/);
+ assert.match(tabs,/search\.type='search'/);
+ assert.match(tabs,/search\.addEventListener\('input',filterRows\)/);
+ assert.match(tabs,/row\.hidden=/);
+});
