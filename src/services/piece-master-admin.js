@@ -28,6 +28,16 @@ export async function listPieceMaster(){
  if(error)throw new Error("No fue posible consultar el Maestro: "+error.message);
  return data||[];
 }
-export async function savePieceMaster(){
- throw new Error("Guardado pendiente: se requiere RPC de administración con autorización de rol y auditoría en Supabase.");
+export async function savePieceMaster(record, token){
+ const item=validateMasterRecord(record);
+ if(!token)throw new Error("Inicie sesión SGP para administrar el Maestro.");
+ const {getSupabaseClient}=await import("./supabase-client.js");
+ const client=await getSupabaseClient();
+ const {data,error}=await client.rpc("sgp_admin_maestro_piezas_guardar",{
+  p_token:token,p_codigo_sap:item.codigo_sap,p_tipo_pieza:item.tipo_pieza,
+  p_destino_productivo:item.destino_productivo,p_lineas_aplicables:item.lineas_aplicables,
+  p_observacion:item.observacion,p_activo:item.activo
+ });
+ if(error)throw new Error("No se guardó la clasificación: "+error.message);
+ return data;
 }
