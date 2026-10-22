@@ -39,6 +39,8 @@ let glassLocationRows = [];
 let ncAlRows=[]; let ncAlPreview=null; let ncAlNewRows=[];
 let queriedProductions = [];
 let assemblyRows = [];
+// Publicar únicamente un puente de consulta para el Planificador; no exponer credenciales.
+window.SGPPlannerBridge={getRows:()=>assemblyRows,getToken:()=>getAppToken(),getClient:()=>getSupabaseClient(),loadAssembly:()=>loadAssembly()};
 let queriedSystemSummary = [];
 let detailSort = { key: null, dir: 1 };
 let currentPieceRows=[];let currentPieceView='summary';let currentPieceContext='order';let pieceDetailColumns=['perfil','marca','fabricacion','longitud','cantidad','descripcion'];

@@ -2313,3 +2313,12 @@ button.active,[aria-pressed="true"]{border-color:#0865ed}
 .shift-report-error{padding:10px 12px;border:1px solid #e3a0a0;background:#fff1f1;color:#8a2424;border-radius:10px;font-size:12px;line-height:1.45;overflow-wrap:anywhere}
 .shift-report-error[hidden]{display:none}
 .shift-report-actions button:disabled{opacity:.65;cursor:wait}
+
+/* LAB v326: prioridad visible y desplazamiento contenido en escritorio y móvil */
+#priorityModal{box-sizing:border-box;padding:clamp(8px,2vh,20px) clamp(8px,2vw,24px);overflow:hidden;display:flex;align-items:center;justify-content:center}
+#priorityModal[hidden]{display:none!important}
+#priorityModal>.piece-modal-card{box-sizing:border-box;width:min(1440px,100%);max-width:100%;height:auto;max-height:calc(100dvh - clamp(16px,4vh,40px));min-height:0;margin:0;border-radius:14px;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain}
+#priorityModal>.piece-modal-card>.piece-modal-head{position:sticky;top:-20px;z-index:5;margin:-20px -20px 0;padding:20px;align-items:center;background:#fff;border-bottom:1px solid #dbe4f0}
+#priorityModal #closePriorityModal{flex:none;position:relative;z-index:6;min-width:42px;min-height:42px;cursor:pointer;border-radius:9px}
+#priorityModal #priorityReservationList .table-wrap,#priorityModal #priorityAssignedList .table-wrap{max-width:100%;overflow-x:auto}
+@media(max-width:600px){#priorityModal{padding:8px}#priorityModal>.piece-modal-card{max-height:calc(100dvh - 16px);padding:12px;border-radius:12px}#priorityModal>.piece-modal-card>.piece-modal-head{top:-12px;margin:-12px -12px 0;padding:12px}#priorityModal>.piece-modal-card>.piece-modal-head h2{font-size:18px}}
