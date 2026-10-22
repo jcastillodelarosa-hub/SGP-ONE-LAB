@@ -40,7 +40,7 @@ let ncAlRows=[]; let ncAlPreview=null; let ncAlNewRows=[];
 let queriedProductions = [];
 let assemblyRows = [];
 // Publicar únicamente un puente de consulta para el Planificador; no exponer credenciales.
-window.SGPPlannerBridge={getRows:()=>assemblyRows,getToken:()=>getAppToken(),getClient:()=>getSupabaseClient(),loadAssembly:()=>loadAssembly(),openProgrammingForProduction:(key)=>{const row=assemblyRows.find(r=>String(r.key_produccion||'')===String(key));if(!row)return {ok:false,reason:'Producción no disponible en la hoja cargada'};const reserve=String(row.reserva_al||row.reserva||'').split(',')[0].trim();if(!reserve)return {ok:false,reason:'Producción sin reserva principal'};const matching=progRows.find(p=>String(p.reserva)===reserve);if(!matching)return {ok:false,reason:'Primero carga la semana correspondiente en Programación de Mecanizado'};const order=(matching.ordenes||[]).find(o=>String(o.produccion||'')===String(row.produccion||''));if(!order)return {ok:false,reason:'Producción no disponible para programar en la semana operativa'};const qty=Number(order.cantidad||0);if(!(qty>0))return {ok:false,reason:'No hay cantidad pendiente para programar'};openProgModal(reserve,row.produccion,qty);return {ok:true};}};
+window.SGPPlannerBridge={getRows:()=>assemblyRows,getToken:()=>getAppToken(),getClient:()=>getSupabaseClient(),loadAssembly:()=>loadAssembly()};
 let queriedSystemSummary = [];
 let detailSort = { key: null, dir: 1 };
 let currentPieceRows=[];let currentPieceView='summary';let currentPieceContext='order';let pieceDetailColumns=['perfil','marca','fabricacion','longitud','cantidad','descripcion'];

@@ -9,14 +9,14 @@ test('multi-reserva: primera reserva es principal, sin inferir compartida',()=>{
 });
 test('selección de producción no depende de selector inexistente',()=>{
  assert.match(source,/sgpExplorerSelection/);
- assert.match(source,/if\(!sel\)\{explorerSelection\.scrollIntoView/);
+ assert.match(source,/SGPLinePlanner/);
  assert.match(source,/No se han guardado cambios de programación/);
 });
 
 test('planificador abre el flujo operativo existente con validaciones',()=>{
  const app=readFileSync(new URL('../app.js',import.meta.url),'utf8');
- assert.match(app,/openProgrammingForProduction:\(key\)=>/);
- assert.match(app,/openProgModal\(reserve,row\.produccion,qty\)/);
- assert.match(source,/SGPPlannerBridge\?\.openProgrammingForProduction/);
- assert.match(app,/Primero carga la semana correspondiente en Programación de Mecanizado/);
+ assert.match(source,/SGPLinePlanner/);
+ assert.match(source,/select\(b\.dataset\.planKey\)/);
+ assert.match(source,/sgpExplorerSelection/);
+ assert.doesNotMatch(app,/openProgrammingForProduction/);
 });
