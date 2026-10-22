@@ -1,3 +1,17 @@
+## Línea de Producción — avance de consulta Empaque (2026-10-21)
+
+- PR #32, rama `feat/linea-produccion-ensamble-empaque-tabs`. Navegación Ensamble/Empaque y lectura de Empaque mediante `sgp_consultar_ensamble` y sesión SGP existente.
+- Reglas: Empaque **no** muestra estado de mecanizado; usa `saldo_ensamble` y vigencia del Export diario para distinguir totalmente ensamblada, pendiente y datos sin validar. Los saldos, estado de reserva y porcentaje de vidrio siguen siendo propiedad del Export diario. No sobrescribirlos con prioridades/comentarios.
+- Las prioridades visibles son **referencia de Programación**, no prioridades persistidas de Empaque. Comentarios y prioridades independientes continúan pendientes de diseño/autorización de persistencia.
+- Protecciones: descartar consultas anteriores y sesiones cambiadas, limpiar resultados previos, separar importación exitosa de fallos en resumen de eventos y refrescar vista activa después de Export.
+- Verificación: GitHub Actions del commit `aeab16651950ed23921e32c9c4206953859eabcc`: JavaScript syntax check y SGP ONE Tests **success**. No equivale a prueba funcional en navegador.
+- No se modificaron Supabase, Firebase ni SGP_ONE_GOOGLE; no se fusionó ni desplegó.
+- Próximo: prueba con sesión real de roles permitidos/no permitidos, filtro de semana/línea, saldos no inicializados y export reciente; después diseñar escrituras independientes de prioridades/comentarios.
+
+## Línea de Producción — navegación Ensamble / Empaque (2026-10-21)
+
+En rama `feat/linea-produccion-ensamble-empaque-tabs` se cambia exclusivamente el nombre visible del menú Ensamble a «Línea de Producción» y se añaden pestañas superiores «Ensamble» y «Empaque». Ensamble mantiene los IDs, consultas, reporte de ubicaciones y reglas existentes. Empaque es por ahora una pestaña estructural informativa; no se inventan fuentes, tablas, estados ni acciones de empaque. Pendientes: prueba automática, revisión visual, autorización de fusión/publicación y diseño funcional de la hoja de Empaque. No se modifica Supabase.
+
 ## LAB v323 — Diseño del reporte de Picking (PROPUESTO EN RAMA)
 
 Se implementó la estética aprobada del reporte de entregas: encabezado corporativo azul con marca SGP tipográfica, subtítulo de Picking, indicadores de colores, tablas con cabeceras azules, resumen por sistema con total y porcentaje de parciales, filtros y diseño responsive. Se conservan los valores reales, la consulta RPC, PDF e imagen PNG; no se modifica Supabase ni reglas de negocio. Rama `feat/lab-v323-picking-report-visual`. Pendiente de revisión de PR, validación visual en navegador y autorización independiente de fusión y despliegue.

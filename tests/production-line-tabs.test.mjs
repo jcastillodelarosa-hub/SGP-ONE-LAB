@@ -1,0 +1,149 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+const html=readFileSync('index.html','utf8');
+const tabs=readFileSync('production-line-tabs.js','utf8');
+test('navigation renames Ensamble without changing view identity',()=>{
+ assert.match(html,/<button data-view="ensamble">Línea de Producción<\/button>/);
+ assert.match(html,/<section class="view" data-view-panel="ensamble"/);
+ assert.match(html,/id="assemblySheetTab"/);
+ assert.match(html,/id="assemblyLocationReportTab"/);
+ assert.match(html,/id="assemblySheetPanel"/);
+ assert.match(html,/id="assemblyLocationReportPanel"/);
+});
+test('Ensamble and Empaque have independent accessible tabs',()=>{
+ for(const id of ['productionAssemblyTab','productionPackingTab','productionAssemblyPanel','productionPackingPanel'])assert.ok(html.includes('id="'+id+'"'));
+ assert.match(html,/production-line-tabs\.js\?v=1/);
+ assert.match(tabs,/assemblyPanel.hidden=/);
+ assert.match(tabs,/packingPanel.hidden=/);
+ assert.match(html,/id="packingPreviewBody"/);
+ assert.match(html,/Saldo ensamble/);
+ assert.doesNotMatch(html,/La pestaña de Empaque está disponible/);
+});
+
+test('Empaque reads authenticated existing RPC and excludes machining status',()=>{
+ const app=readFileSync('app.js','utf8');
+ assert.match(app,/async function loadPackingSheet\(\)/);
+ assert.match(app,/client\.rpc\('sgp_consultar_ensamble'/);
+ assert.match(app,/const token=getAppToken\(\)/);
+ assert.match(app,/presente_ultimo_export!==false/);
+ const panel=html.match(/id="productionPackingPanel"[\s\S]*?<\/table>/)?.[0]||'';
+ assert.ok(panel.includes('Saldo ensamble'));
+ assert.ok(!panel.includes('Estado Mec.'));
+});
+test('successful daily export refreshes active production-line sheet',()=>{
+ const app=readFileSync('app.js','utf8');
+ assert.match(app,/if\(document\.getElementById\('productionPackingTab'\)\?\.getAttribute\('aria-selected'\)==='true'\)void loadPackingSheet\(\)/);
+ assert.match(app,/if\(document\.getElementById\('productionAssemblyTab'\)\?\.getAttribute\('aria-selected'\)==='true'\)void loadAssembly\(\)/);
+});
+
+test('Export success remains successful if optional event summary fails',()=>{
+ const app=readFileSync('app.js','utf8');
+ assert.match(app,/Export aplicado; resumen de eventos no disponible/);
+ assert.match(app,/dailyExportPreview=null;dailyExportRows=\[\];\s*\/\/ The Export has already committed/);
+ assert.match(app,/catch\(reportError\)/);
+});
+test('Empaque does not present stale or invalid balance as assembled',()=>{
+ const app=readFileSync('app.js','utf8');
+ assert.match(app,/const ready=r=>r\.presente_ultimo_export!==false&&validBalance\(r\)&&Number\(r\.saldo_ensamble\)===0/);
+ assert.match(app,/const validBalance=r=>r\.saldos_inicializados===true/);
+ assert.match(app,/packingRows=\[\];body\.innerHTML/);
+});
+
+test('packing priority is clearly identified as programming reference',()=>{
+ assert.match(html,/Prioridad programación \(referencia\)/);
+ assert.match(html,/La prioridad mostrada pertenece a Programación/);
+});
+test('packing refreshes for line and week changes and discards outdated responses',()=>{
+ const app=readFileSync('app.js','utf8');
+ assert.match(app,/for\(const id of \['packingWeek','packingLine'\]\)/);
+ assert.match(app,/const requestSequence=\+\+packingRequestSequence/);
+ assert.match(app,/if\(requestSequence!==packingRequestSequence\|\|getAppToken\(\)!==requestedToken\)return/);
+});
+
+test('packing ignores late responses from a previous authenticated session',()=>{
+ const app=readFileSync('app.js','utf8');
+ assert.match(app,/const requestedToken=getAppToken\(\)/);
+ assert.match(app,/requestSequence!==packingRequestSequence\|\|getAppToken\(\)!==requestedToken/);
+});
+
+test('packing rejects empty and negative balances and exposes export freshness',()=>{
+ const app=readFileSync('app.js','utf8');
+ assert.match(app,/r\.saldo_ensamble!==''/);
+ assert.match(app,/Number\(r\.saldo_ensamble\)>=0/);
+ assert.match(app,/Export: '\+\(Number\.isNaN\(new Date\(r\.ultima_vez_export\)\.getTime\(\)\)/);
+});
+
+test('packing has its own visible week and line controls',()=>{
+ for(const id of ['packingWeek','packingLine'])assert.match(html,new RegExp('id="'+id+'"'));
+ const app=readFileSync('app.js','utf8');
+ assert.match(app,/const selectedWeek=document\.getElementById\('packingWeek'\)\?\.value/);
+ assert.match(app,/const line=document\.getElementById\('packingLine'\)\?\.value/);
+ assert.match(app,/function syncPackingWeekOptions\(\)/);
+});
+
+test('four primary tabs are created without altering existing RPC and report markup',()=>{
+ for(const id of ['productionPlannerTab','productionLocationsTab','productionPlannerPanel'])assert.ok(tabs.includes(id));
+ assert.match(tabs,/select\('planificador'\)/);
+ assert.match(tabs,/locations.hidden=name!==/);
+ assert.match(tabs,/packingPanel.hidden=name!==/);
+ assert.match(tabs,/role','tab'/);
+});
+
+test('both operational tables support visual three-level sorting without database writes',()=>{
+ assert.match(tabs,/enhanceTable\('assemblyTable',assemblyPanel\)/);
+ assert.match(tabs,/enhanceTable\('packingPreviewBody',packingPanel\)/);
+ assert.match(tabs,/Nivel 1/);
+ assert.match(tabs,/Nivel 2/);
+ assert.match(tabs,/Nivel 3/);
+ assert.match(tabs,/ordered\.every/);
+ assert.doesNotMatch(tabs,/\.rpc\(|\.from\(|\.insert\(|\.update\(/);
+});
+
+test('assembly and packing quick filters do not mutate source data',()=>{
+ assert.match(tabs,/enhanceTable\('assemblyTable',assemblyPanel\)/);
+ assert.match(tabs,/enhanceTable\('packingPreviewBody',packingPanel\)/);
+ assert.match(tabs,/search\.type='search'/);
+ assert.match(tabs,/search\.addEventListener\('input',filterRows\)/);
+ assert.match(tabs,/row\.hidden=/);
+});
+
+test('table controls expose row counts and reversible multilevel sorting',()=>{
+ assert.match(tabs,/production-table-count/);
+ assert.match(tabs,/count\.textContent=visible/);
+ assert.match(tabs,/Invertir orden de filas/);
+ assert.match(tabs,/descending\?-result:result/);
+});
+
+test('responsive production cards preserve table headers as mobile labels',()=>{
+ assert.match(tabs,/function labelMobileCells\(\)/);
+ assert.match(tabs,/cell\.dataset\.mobileLabel=label/);
+ assert.match(tabs,/data-mobile-label/);
+ assert.match(tabs,/max-width:680px/);
+ assert.match(tabs,/production-table-empty/);
+});
+
+test('four production tabs support keyboard arrow and boundary navigation',()=>{
+ assert.match(tabs,/tabs\.addEventListener\('keydown'/);
+ assert.match(tabs,/ArrowLeft/);
+ assert.match(tabs,/ArrowRight/);
+ assert.match(tabs,/Home/);
+ assert.match(tabs,/End/);
+ assert.match(tabs,/all\[next\]\[1\]\.focus\(\)/);
+});
+
+test('spreadsheet column filter keeps its values scrollable in short viewports',()=>{
+ assert.match(tabs,/\.sheet-filter-menu \.sheet-filter-values/);
+ assert.match(tabs,/overflow-y:auto!important/);
+ assert.match(tabs,/top:12px!important;bottom:12px!important/);
+ assert.match(tabs,/overscroll-behavior:contain/);
+});
+
+
+
+test('column filter popup has a single non-conflicting layout and visible Apply footer',()=>{
+ assert.match(tabs,/sheet-filter-menu\{box-sizing:border-box!important;position:fixed!important/);
+ assert.match(tabs,/sheet-filter-values\{flex:1 1 auto!important;min-height:0!important/);
+ assert.match(tabs,/sheet-apply\{flex:0 0 auto!important;position:relative!important/);
+ assert.doesNotMatch(tabs,/menu\.style\.top=Math\.max/);
+});
