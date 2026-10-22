@@ -89,3 +89,13 @@ test('four primary tabs are created without altering existing RPC and report mar
  assert.match(tabs,/packingPanel.hidden=name!==/);
  assert.match(tabs,/role','tab'/);
 });
+
+test('both operational tables support visual three-level sorting without database writes',()=>{
+ assert.match(tabs,/enhanceTable\('assemblyTable',assemblyPanel\)/);
+ assert.match(tabs,/enhanceTable\('packingPreviewBody',packingPanel\)/);
+ assert.match(tabs,/Nivel 1/);
+ assert.match(tabs,/Nivel 2/);
+ assert.match(tabs,/Nivel 3/);
+ assert.match(tabs,/ordered\.every/);
+ assert.doesNotMatch(tabs,/\.rpc\(|\.from\(|\.insert\(|\.update\(/);
+});
