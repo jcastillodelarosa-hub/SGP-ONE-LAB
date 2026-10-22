@@ -107,3 +107,10 @@ test('assembly and packing quick filters do not mutate source data',()=>{
  assert.match(tabs,/search\.addEventListener\('input',filterRows\)/);
  assert.match(tabs,/row\.hidden=/);
 });
+
+test('table controls expose row counts and reversible multilevel sorting',()=>{
+ assert.match(tabs,/production-table-count/);
+ assert.match(tabs,/count\.textContent=visible/);
+ assert.match(tabs,/Invertir orden de filas/);
+ assert.match(tabs,/descending\?-result:result/);
+});
