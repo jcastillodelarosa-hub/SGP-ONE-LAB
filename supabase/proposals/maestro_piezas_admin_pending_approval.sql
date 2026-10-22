@@ -26,7 +26,7 @@ begin
     p_destino_productivo not in ('PANEL','FRAME') or
     p_activo not in ('SI','NO') then raise exception 'CLASIFICACION_INVALIDA'; end if;
  if p_lineas_aplicables is null or array_length(p_lineas_aplicables,1) is null or
-    p_lineas_aplicables <@ array['PANELES_2','FRAMES_2']::text[] is not true
+    p_lineas_aplicables <> array['PANELES_2','FRAMES_2']::text[]
     then raise exception 'LINEAS_INVALIDAS'; end if;
  select * into v_antes from public.sgp_maestro_piezas where codigo_sap=btrim(p_codigo_sap) for update;
  insert into public.sgp_maestro_piezas(codigo_sap,tipo_pieza,destino_productivo,lineas_aplicables,observacion,activo,fecha_actualizacion)
@@ -40,6 +40,7 @@ begin
  return v_despues.codigo_sap;
 end $$;
 revoke all on function public.sgp_admin_maestro_piezas_guardar(text,text,text,text,text[],text,text) from public,anon;
-grant execute on function public.sgp_admin_maestro_piezas_guardar(text,text,text,text,text[],text,text) to authenticated;
--- SGP usa sesiones propias y Supabase anon en algunos flujos.
--- NO habilitar anon sin confirmar patrón de permisos RPC existentes y prueba negativa.
+grant execute on function public.sgp_admin_maestro_piezas_guardar(text,text,text,text,text[],text,text) to anon, authenticated;
+-- SGP usa token de sesión propio, validado dentro de la RPC por sgp_validar_sesion_rol.
+-- GRANT a anon permite invocación, NO escritura sin token válido de ADMINISTRADOR.
+-- Ejecutar pruebas negativas de token y rol antes de publicar.
