@@ -131,3 +131,10 @@ test('four production tabs support keyboard arrow and boundary navigation',()=>{
  assert.match(tabs,/End/);
  assert.match(tabs,/all\[next\]\[1\]\.focus\(\)/);
 });
+
+test('spreadsheet column filter keeps its values scrollable in short viewports',()=>{
+ assert.match(tabs,/\.sheet-filter-menu \.sheet-filter-values/);
+ assert.match(tabs,/overflow-y:auto!important/);
+ assert.match(tabs,/max-height:min\(76dvh,560px\)/);
+ assert.match(tabs,/overscroll-behavior:contain/);
+});
