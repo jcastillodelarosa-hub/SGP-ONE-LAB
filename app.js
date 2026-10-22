@@ -1119,8 +1119,8 @@ function renderPackingSheet(){
  const filter=document.getElementById('packingPreviewFilter')?.value||'all';
  const sort=document.getElementById('packingPreviewSort')?.value||'priority';
  const validBalance=r=>r.saldos_inicializados===true&&r.saldo_ensamble!==null&&r.saldo_ensamble!==undefined&&Number.isFinite(Number(r.saldo_ensamble));
- const ready=r=>validBalance(r)&&Number(r.saldo_ensamble)===0;
- let rows=packingRows.filter(r=>(!search||[r.produccion,r.sistema,r.reserva_al,r.id].some(v=>String(v??'').toLowerCase().includes(search)))&&(filter==='all'||(filter==='ready'?ready(r):filter==='pending'?validBalance(r)&&Number(r.saldo_ensamble)>0:true)));
+ const ready=r=>r.presente_ultimo_export!==false&&validBalance(r)&&Number(r.saldo_ensamble)===0;
+ let rows=packingRows.filter(r=>(!search||[r.produccion,r.sistema,r.reserva_al,r.id].some(v=>String(v??'').toLowerCase().includes(search)))&&(filter==='all'||(filter==='ready'?ready(r):filter==='pending'?r.presente_ultimo_export!==false&&validBalance(r)&&Number(r.saldo_ensamble)>0:true)));
  rows.sort((a,b)=>sort==='balance'?Number(b.saldo_ensamble??-1)-Number(a.saldo_ensamble??-1):sort==='production'?String(a.produccion??'').localeCompare(String(b.produccion??''),undefined,{numeric:true}):comparePriority(a.prioridad,b.prioridad)||String(a.produccion??'').localeCompare(String(b.produccion??''),undefined,{numeric:true}));
  const esc=v=>String(v??'—').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
  body.innerHTML=rows.length?rows.map(r=>{
