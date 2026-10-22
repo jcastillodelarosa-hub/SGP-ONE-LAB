@@ -31,6 +31,7 @@ section.querySelector('#sgpPlannerSearch').addEventListener('input',render);
 section.querySelector('#sgpPlannerRefresh').addEventListener('click',render);
 section.querySelector('#sgpPlannerLocations').addEventListener('click',()=>document.querySelector('#productionLocationsTab')?.click());
 document.querySelector('#loadAssembly')?.addEventListener('click',()=>setTimeout(render,800));
+document.querySelector('#productionPlannerTab')?.addEventListener('click',()=>{if(!getRows().length)document.querySelector('#loadAssembly')?.click();else render()});
 const assemblyStatus=document.querySelector('#assemblyStatus');if(assemblyStatus)new MutationObserver(render).observe(assemblyStatus,{childList:true,characterData:true,subtree:true});
 render();
 })();
