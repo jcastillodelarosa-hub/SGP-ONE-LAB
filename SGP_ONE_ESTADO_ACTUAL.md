@@ -1,3 +1,12 @@
+### Planificador de Ensamble — LAB v327 (2026-10-22)
+
+- Código v327 fusionado a main mediante PR #44, commit 6d72f7232cfc6217d7def47500ea2e1007a73ebc.
+- Filtros por semana y sistema, tarjetas por reserva/sistema, detalle por parte identificada y producciones; selección de producción enlazada al panel operativo existente.
+- Consulta de solo lectura autenticada `sgp_linea_plan_explorador_v327` aplicada en Supabase y versionada en `supabase/migrations/20261022180000_linea_plan_explorador_v327.sql`. Retorna parte únicamente cuando el identificador de prioridad semanal es inequívoco; vidrio preparado, novedad y traslado por `key_produccion`.
+- CI PR #44: SGP ONE Tests #1270 y JavaScript syntax check #755 aprobados. Código fusionado y versión visible en index.html de main. Despliegue Firebase y aceptación visual en PC/móvil **pendientes de verificación externa**.
+- No se implementó todavía la fase posterior de asignación por día/turno desde tarjetas ni el calendario/resumen de sistemas programados.
+- SGP_ONE_GOOGLE no modificado.
+
 ### Corrección de integración del Planificador (2026-10-22)
 
 Se detectó que `production-line-tabs.js` ya crea una pestaña superior Planificador, mientras la primera versión de `planner-readonly-v326.js` insertaba las vistas dentro de Ensamble. Se corrigió el montaje en `#productionPlannerPanel`, el acceso a ubicaciones mediante `#productionLocationsTab` y la actualización de datos desde la consulta autenticada de Ensamble. Pendiente prueba funcional real y autorización independiente para nuevas tablas/RPC y despliegue.
