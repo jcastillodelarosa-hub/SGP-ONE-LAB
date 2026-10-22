@@ -1,7 +1,4 @@
--- PROPUESTA NO APLICADA: SGP_ONE maestro de piezas
--- Requiere aprobación separada para modificar Supabase.
--- La RPC de lectura actual filtra exclusivamente ambos valores de lineas_aplicables.
--- Revisar impacto antes de cambiar su contrato.
+-- APLICADA en Supabase SGP-ONE-LAB el 2026-10-22; migración sgp_maestro_piezas_admin_auditoria_20261022.
 create table if not exists public.sgp_maestro_piezas_auditoria (
  id bigint generated always as identity primary key,
  codigo_sap text not null,
@@ -22,11 +19,10 @@ declare v_usuario text; v_antes public.sgp_maestro_piezas%rowtype; v_despues pub
 begin
  v_usuario:=public.sgp_validar_sesion_rol(p_token,array['ADMINISTRADOR']::text[]);
  if nullif(btrim(p_codigo_sap),'') is null then raise exception 'CODIGO_SAP_REQUERIDO'; end if;
- if p_tipo_pieza not in ('PANEL','FRAME','COVER','REFUERZO','MUNTIN') or
-    p_destino_productivo not in ('PANEL','FRAME') or
-    p_activo not in ('SI','NO') then raise exception 'CLASIFICACION_INVALIDA'; end if;
- if p_lineas_aplicables is null or array_length(p_lineas_aplicables,1) is null or
-    p_lineas_aplicables <> array['PANELES_2','FRAMES_2']::text[]
+ if coalesce(p_tipo_pieza not in ('PANEL','FRAME','COVER','REFUERZO','MUNTIN'),true) or
+    coalesce(p_destino_productivo not in ('PANEL','FRAME'),true) or
+    coalesce(p_activo not in ('SI','NO'),true) then raise exception 'CLASIFICACION_INVALIDA'; end if;
+ if p_lineas_aplicables is distinct from array['PANELES_2','FRAMES_2']::text[]
     then raise exception 'LINEAS_INVALIDAS'; end if;
  select * into v_antes from public.sgp_maestro_piezas where codigo_sap=btrim(p_codigo_sap) for update;
  insert into public.sgp_maestro_piezas(codigo_sap,tipo_pieza,destino_productivo,lineas_aplicables,observacion,activo,fecha_actualizacion)
@@ -39,8 +35,8 @@ begin
  case when v_antes.codigo_sap is null then null else to_jsonb(v_antes) end,to_jsonb(v_despues));
  return v_despues.codigo_sap;
 end $$;
-revoke all on function public.sgp_admin_maestro_piezas_guardar(text,text,text,text,text[],text,text) from public,anon;
+revoke all on function public.sgp_admin_maestro_piezas_guardar(text,text,text,text,text[],text,text) from public,anon,authenticated;
 grant execute on function public.sgp_admin_maestro_piezas_guardar(text,text,text,text,text[],text,text) to anon, authenticated;
 -- SGP usa token de sesión propio, validado dentro de la RPC por sgp_validar_sesion_rol.
 -- GRANT a anon permite invocación, NO escritura sin token válido de ADMINISTRADOR.
--- Ejecutar pruebas negativas de token y rol antes de publicar.
+-- Prueba negativa de token inválido superada 2026-10-22; prueba con rol real pendiente.
