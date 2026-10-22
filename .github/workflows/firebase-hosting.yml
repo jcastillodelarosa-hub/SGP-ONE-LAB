@@ -7,6 +7,11 @@ on:
       - '.agents/skills/**'
       - '.github/workflows/firebase-preview-linea-produccion.yml'
   workflow_dispatch:
+    inputs:
+      release_reason:
+        description: 'Motivo del despliegue manual'
+        required: false
+        default: 'Publicacion controlada LAB'
 
 permissions:
   contents: read
