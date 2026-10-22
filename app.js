@@ -1351,7 +1351,7 @@ async function commitProgramming() {
       els.importStatus.textContent = `CARGA COMPLETADA ✓ Semana ${week} · Lote ${data.id_lote_carga} · ${inserted} registros.`;
       els.commit.textContent = "Semana cargada ✓";
       if (els.previewStatus) els.previewStatus.textContent = `Escritura realizada: SÍ ✓ · Lote ${data.id_lote_carga} · Usuario ${data.usuario} · Total ${inserted}.`;
-      window.alert(`CARGA COMPLETADA ✓\\n\\nSemana ${week} / ${year}\\nLote: ${data.id_lote_carga}\\nRegistros insertados: ${inserted}`);
+      window.alert(`CARGA COMPLETADA ✓\n\nSemana ${week} / ${year}\nLote: ${data.id_lote_carga}\nRegistros insertados: ${inserted}`);
       completed = true;
       break;
     }
@@ -1361,7 +1361,7 @@ async function commitProgramming() {
     const guidance = uncertain ? "Resultado no confirmado. Verifique el estado de la semana antes de intentar una nueva carga." : "";
     els.importStatus.textContent = "CARGA NO COMPLETADA ✕ " + msg;
     if (els.previewStatus) els.previewStatus.textContent = "Resultado no confirmado. " + guidance + " Error: " + msg;
-    window.alert("CARGA NO COMPLETADA ✕\\n\\n" + msg + (guidance ? "\\n\\n" + guidance : ""));
+    window.alert("CARGA NO COMPLETADA ✕\n\n" + msg + (guidance ? "\n\n" + guidance : ""));
     refreshWeeklyPackageGate();
   } finally {
     if (!completed) {
