@@ -1,3 +1,7 @@
+### Corrección de integración del Planificador (2026-10-22)
+
+Se detectó que `production-line-tabs.js` ya crea una pestaña superior Planificador, mientras la primera versión de `planner-readonly-v326.js` insertaba las vistas dentro de Ensamble. Se corrigió el montaje en `#productionPlannerPanel`, el acceso a ubicaciones mediante `#productionLocationsTab` y la actualización de datos desde la consulta autenticada de Ensamble. Pendiente prueba funcional real y autorización independiente para nuevas tablas/RPC y despliegue.
+
 ## LAB v326 — Planificador de Ensamble, etapa 1 (rama; no publicado)
 
 - Rama: `feat/planificador-ensamble-v326`. Vista de consulta de Planificador dentro de Línea de Producción > Ensamble: Calendario (carga sin fechas inventadas), Tabla dinámica básica y Kanban por estado; buscador y métricas. Reutiliza `assemblyRows` de la consulta autenticada `sgp_consultar_ensamble` y acceso al reporte de ubicaciones existente.
