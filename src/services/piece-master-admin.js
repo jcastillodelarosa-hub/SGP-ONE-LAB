@@ -21,10 +21,11 @@ export function validateMasterRecord(record){
  if(!codigo_sap||!PIECE_TYPES.includes(tipo_pieza)||!PIECE_DESTINATIONS.includes(destino_productivo)||lineas_aplicables.length!==2||PIECE_LINES.some(x=>!lineas_aplicables.includes(x)))throw new Error("Complete código SAP, tipo, destino y líneas válidas.");
  return {codigo_sap,tipo_pieza,destino_productivo,lineas_aplicables,observacion:String(record.observacion??"").trim()||null,activo:record.activo==="NO"?"NO":"SI"};
 }
-export async function listPieceMaster(){
+export async function listPieceMaster(token){
+ if(!token)throw new Error("Inicie sesión SGP como Administrador.");
  const {getSupabaseClient}=await import("./supabase-client.js");
  const client=await getSupabaseClient();
- const {data,error}=await client.from("sgp_maestro_piezas").select("codigo_sap,tipo_pieza,destino_productivo,observacion,activo,fecha_actualizacion,lineas_aplicables").order("codigo_sap").limit(1000);
+ const {data,error}=await client.rpc("sgp_admin_maestro_piezas_listar",{p_token:token});
  if(error)throw new Error("No fue posible consultar el Maestro: "+error.message);
  return data||[];
 }
