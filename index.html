@@ -8,6 +8,15 @@
   <link rel="stylesheet" href="navigation-preferences.css?v=4" />
   <link rel="stylesheet" href="global-themes.css?v=1" /><link rel="stylesheet" href="picking-delivery-report.css?v=323" />
   <script src="config.js?v=20261008-1300"></script>
+<style>
+.production-line-tabs{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0;padding:6px;background:#eaf2ff;border:1px solid #cbdcf7;border-radius:12px}
+.production-line-tabs button{flex:1;min-width:120px;padding:12px 18px;border:0;border-radius:9px;background:transparent;color:#184b88;font-weight:800;cursor:pointer}
+.production-line-tabs button.active{background:#1158b7;color:#fff;box-shadow:0 3px 9px #164b8b30}
+#productionAssemblyPanel[hidden],#productionPackingPanel[hidden]{display:none!important}
+.production-packing-empty{padding:26px;border:1px solid #cfdef4;background:#fff;border-radius:12px;color:#173d70}
+.production-packing-empty h3{margin:0 0 8px;color:#1253a5}
+@media(max-width:600px){.production-line-tabs button{padding:12px 8px}}
+</style>
 </head>
 <body>
   <div class="app-shell">
