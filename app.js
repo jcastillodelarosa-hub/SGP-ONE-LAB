@@ -1356,6 +1356,10 @@ async function commitProgramming() {
         if (isConcurrencyLock && attempt < maxLockRetries) continue;
         throw error;
       }
+      const timings = data?.tiempos_ms;
+      if (timings && typeof timings === "object") {
+        console.info("[SGP carga semanal] tiempos por etapa (ms)", timings);
+      }
       const inserted = data?.insertados?.total ?? total;
       els.importStatus.textContent = `CARGA COMPLETADA ✓ Semana ${week} · Lote ${data.id_lote_carga} · ${inserted} registros · ${Math.round(rpcMs / 1000)} s.`;
       els.commit.textContent = "Semana cargada ✓";
