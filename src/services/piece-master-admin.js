@@ -1,5 +1,5 @@
 /* SGP_ONE: administración del maestro. Escrituras deshabilitadas hasta aprobar RPC segura. */
-import { getSupabaseClient } from "./supabase-client.js";
+
 export const PIECE_TYPES=Object.freeze(["PANEL","FRAME","COVER","REFUERZO","MUNTIN"]);
 export const PIECE_DESTINATIONS=Object.freeze(["PANEL","FRAME"]);
 export const PIECE_LINES=Object.freeze(["PANELES_2","FRAMES_2"]);
@@ -22,6 +22,7 @@ export function validateMasterRecord(record){
  return {codigo_sap,tipo_pieza,destino_productivo,lineas_aplicables,observacion:String(record.observacion??"").trim()||null,activo:record.activo==="NO"?"NO":"SI"};
 }
 export async function listPieceMaster(){
+ const {getSupabaseClient}=await import("./supabase-client.js");
  const client=await getSupabaseClient();
  const {data,error}=await client.from("sgp_maestro_piezas").select("codigo_sap,tipo_pieza,destino_productivo,observacion,activo,fecha_actualizacion,lineas_aplicables").order("codigo_sap").limit(1000);
  if(error)throw new Error("No fue posible consultar el Maestro: "+error.message);
