@@ -52,7 +52,7 @@
     }
     return 0;
    };
-   busy=true;rows.sort(compare).forEach(row=>body.append(row));busy=false;
+   const ordered=[...rows].sort(compare);if(ordered.every((row,i)=>row===rows[i]))return;busy=true;ordered.forEach(row=>body.append(row));busy=false;
   }
   selectors.forEach(s=>s.addEventListener('change',sortRows));
   bar.querySelector('[data-sort-reset]').addEventListener('click',()=>{selectors.forEach(s=>s.value='');const refresh=tableId==='assemblyTable'?byId('loadAssembly'):null;if(refresh)refresh.click();else byId('packingPreviewSort')?.dispatchEvent(new Event('input',{bubbles:true}));});
