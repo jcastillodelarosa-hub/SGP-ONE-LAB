@@ -1,7 +1,7 @@
 /* LAB v326: Planificador de línea, primera etapa de consulta sin escrituras. */
 (()=>{
 'use strict';
-const root=document.querySelector('#productionAssemblyPanel');
+const root=document.querySelector('#productionPlannerPanel');
 if(!root||document.querySelector('#sgpPlanner'))return;
 const section=document.createElement('section');
 section.id='sgpPlanner';
@@ -29,7 +29,8 @@ content.innerHTML='<p class="sgp-planner-note">Vista de carga semanal. Fechas y 
 section.querySelector('#sgpPlannerView').addEventListener('change',render);
 section.querySelector('#sgpPlannerSearch').addEventListener('input',render);
 section.querySelector('#sgpPlannerRefresh').addEventListener('click',render);
-section.querySelector('#sgpPlannerLocations').addEventListener('click',()=>document.querySelector('#assemblyLocationReportTab')?.click());
+section.querySelector('#sgpPlannerLocations').addEventListener('click',()=>document.querySelector('#productionLocationsTab')?.click());
 document.querySelector('#loadAssembly')?.addEventListener('click',()=>setTimeout(render,800));
+const assemblyStatus=document.querySelector('#assemblyStatus');if(assemblyStatus)new MutationObserver(render).observe(assemblyStatus,{childList:true,characterData:true,subtree:true});
 render();
 })();
