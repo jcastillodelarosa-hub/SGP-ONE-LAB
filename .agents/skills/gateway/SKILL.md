@@ -6,7 +6,7 @@ description: Design and review explicit Firebase Gateway contracts.
 # SGP Gateway
 
 ## Project
-SGP_ONE. Direct browser Supabase; Firebase Hosting sgp-one-lab; LAB v281 and backend hotfix v282 browser verification pending.
+SGP_ONE. Direct browser Supabase; Firebase Hosting sgp-one-lab; Current release status must be checked from live repository and evidence; do not rely on historical version numbers.
 
 ## Activation
 Use when the user asks for gateway work in SGP_ONE. Follow the project's permanent instructions and current GitHub documentation.
