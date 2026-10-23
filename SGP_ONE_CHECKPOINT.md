@@ -1,31 +1,40 @@
-# SGP_ONE — CHECKPOINT OPERATIVO
+# SGP_ONE — CHECKPOINT OPERATIVO (Continuity v2.1)
 
-Actualizado: 2026-10-22 (registro de validación de continuidad)
-Repositorio: jcastillodelarosa-hub/SGP-ONE-LAB
-Rama oficial: main
+Fecha de conciliación: 2026-10-22 (fecha documental; comprobar fecha/hora de GitHub al recuperar)
+Repositorio: `jcastillodelarosa-hub/SGP-ONE-LAB`
+Rama oficial: `main`
 
-## Estado confirmado y fuentes
-- Continuity v2: **FUSIONADA EN MAIN**, PR #51, commit de integración `bd1d603aec481d2909d87c0a5d83f4a0f9a2df1f`. Se verificó lectura de `.agents/skills/continuity/SKILL.md`, `.agents/skills/orchestrator/SKILL.md` y este archivo en main.
-- Referencia de main antes de esta actualización documental: commit de integración PR #51 `bd1d603aec481d2909d87c0a5d83f4a0f9a2df1f`; **no asumir que sigue siendo HEAD**. El commit de esta actualización y cualquier cambio posterior deben comprobarse al iniciar otro chat.
-- Frontend en main: `index.html` referencia `styles.css?v=327` y `production-line-visual-v327.css?v=1`; esto confirma referencias de assets, **no prueba el despliegue**.
-- Planificador Ensamble: `SGP_ONE_ESTADO_ACTUAL.md` documenta LAB v327 fusionado mediante PR #44, commit `6d72f7232cfc6217d7def47500ea2e1007a73ebc`. Firebase y aceptación funcional en PC/móvil siguen **SIN VERIFICAR EN ESTA AUDITORÍA**.
-- Regla de reserva principal: `SGP_ONE_ESTADO_ACTUAL.md` documenta asignación a la primera reserva separada por coma; la nota de frontend figuraba pendiente de CI/merge/publicación. **Estado actual de esa nota no comprobado**.
-- PR abiertos observados en consulta: #46 (hotfix LAB v327), #34, #22, #14, #6 y #1. Revalidar antes de actuar; no inferir que deban fusionarse.
+## Cómo recuperar sin confundir el commit con el contenido
+El SHA del commit que escribe este archivo se genera **después** de guardar. No exigir que el checkpoint contenga su propio SHA. Verificar el HEAD real, historial del archivo, SHA de contenido y PR relevantes desde GitHub. El último HEAD comprobado **antes** de esta conciliación es `e1b78f914f0f9b9889de15fd04e9b8325a1b65e9`; NO asumir que siga siendo HEAD.
 
-## Trabajo en curso
-Objetivo: probar recuperación y mantenimiento del checkpoint entre conversaciones.
-Última acción confirmada: lectura y conciliación de Continuity v2 con PR #51 y main; actualización documental de este checkpoint autorizada por el usuario.
-Alcance autorizado: **solo actualizar SGP_ONE_CHECKPOINT.md**; no modificar código, Supabase, Firebase, SGP_ONE_GOOGLE ni fusionar PR.
-Estado: **PROTOCOLO DOCUMENTAL FUSIONADO / CHECKPOINT EN ACTUALIZACIÓN**. La prueba desde un chat realmente nuevo sigue pendiente.
-Riesgo: el checkpoint no se guarda automáticamente al agotarse el chat; requiere escrituras GitHub autorizadas y confirmadas. Un archivo puede quedar desactualizado y siempre debe cotejarse con main.
+## Hitos fusionados comprobados (código en main; no implica despliegue)
+- PR #44 — Planificador Ensamble LAB v327; commit `6d72f7232cfc6217d7def47500ea2e1007a73ebc`.
+- PR #47 — mejoras visuales Planificador/Ensamble/Empaque LAB v327; commit `3b9eadee45e0fe46933c3f5829ff2ece790cceb0`.
+- PR #48 — reserva principal en prioridades; commit `0a00d0a847015d0a6f7870a1c33a6f6800754a09`.
+- PR #49 — selección y programación desde explorador v328; commit `e6863b72e22c4133362179377bd5c0612fd298ed`.
+- PR #50 — conexión Planificador–Programación de Línea v329; commit `114a003c721c915d044a1bbc3a1c5a473501b322`.
+- PR #51 — protocolo documental Continuity v2; commit `bd1d603aec481d2909d87c0a5d83f4a0f9a2df1f`.
+- Commit `e1b78f914f0f9b9889de15fd04e9b8325a1b65e9` — primera conciliación del checkpoint tras PR #51.
 
-## Estados de validación
-- Implementación documental: FUSIONADA EN MAIN (PR #51).
-- Recuperación en el chat actual: LECTURA Y DETECCIÓN DE DESFASE CONFIRMADAS.
-- Escritura de checkpoint: comprobar commit y relectura de main tras esta operación.
-- Supabase: NO CONSULTADO / SIN CAMBIOS.
-- Firebase: NO CONSULTADO / SIN CAMBIOS.
-- Aceptación funcional PC/móvil: NO VERIFICADA.
+## Versiones y estados, sin inferencias
+- `index.html` en main referencia `styles.css?v=327` y `production-line-visual-v327.css?v=1`. Estas son **versiones de recursos visuales**, no un indicador exhaustivo de todas las funcionalidades.
+- Funcionalidades v328 y v329: **FUSIONADAS EN MAIN** según PR #49 y #50. No afirmar que la aplicación completa esté publicada o validada en producción.
+- `SGP_ONE_MASTER_CONTEXT.md` conserva snapshot de 2026-10-19 (LAB v281/backend v282); es **histórico**, no estado ejecutivo actual.
+- `SGP_ONE_ESTADO_ACTUAL.md` es historial con entradas de distintas fechas; sus menciones de trabajos pendientes deben cotejarse con PR posteriores.
+- Supabase: el historial documenta RPC `sgp_linea_plan_explorador_v327` aplicada; **no se consultó Supabase vivo en esta conciliación**.
+- Firebase Hosting: **despliegue actual no comprobado**.
+- PC/móvil: **aceptación funcional del Planificador v327/v328/v329 no comprobada**.
+
+## PR abiertos observados
+#46 hotfix v327; #34 CI Firebase; #22 reprogramación/vidrio; #14 cantidad móvil; #6 documentación Skills; #1 Picking/programación. No fusionar sin comparar con main; una rama antigua puede contener cambios ya integrados por otros PR.
+
+## Prueba de continuidad
+- Recuperación desde conversación nueva: **SUPERADA** en lectura de documentos, Skills, HEAD y PR; el usuario reportó resultado global **PARCIAL** por desactualización del checkpoint.
+- Conciliación documental v2.1: esta edición corrige hitos y criterio de SHA. Verificar el commit de escritura y relectura de main tras guardar.
+- Automatización de checkpoints: **NO autónoma**. En cada hito autorizado, escribir, verificar y reportar el commit; si no hay permiso de escritura, entregar texto en chat.
+
+## Alcance de esta operación
+Autorizado: conciliación documental del checkpoint y referencias ejecutivas obsoletas. Prohibido: modificar lógica de aplicación, Supabase, Firebase, SGP_ONE_GOOGLE, desplegar o fusionar PR.
 
 ## Siguiente paso único
-Abrir **un chat nuevo** dentro del proyecto SGP, solicitar recuperación de Continuity v2 leyendo este checkpoint y compararlo con main, PR y estado real; reportar cualquier discrepancia antes de continuar.
+Abrir un chat nuevo y ejecutar una **prueba de recuperación de solo lectura**: leer MASTER_CONTEXT, ESTADO_ACTUAL, CHECKPOINT y Skills; contrastar HEAD, PR #47–#51, estado de despliegue y pendientes. Reportar cualquier diferencia antes de implementar.
