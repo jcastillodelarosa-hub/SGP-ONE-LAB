@@ -9,7 +9,7 @@ const dailyIds=['dailyExportFile','glassLocationFile','ncAlFile','ncGlassFile','
 const weeklyIds=['programmingFiles','aluminumPiecesFile','accessoriesFile','glassFile'];
 
 test('LAB v314: 5 pestañas diarias y 4 etapas semanales comparten la corrección',()=>{
- assert.match(html,/LAB v337/);
+ assert.match(html,/LAB v339/);
  assert.match(html,/app\.js\?v=337/);
  assert.match(html,/styles\.css\?v=337/);
  assert.equal((html.match(/class="daily-upload-row(?: daily-upload-simple)?"/g)||[]).length,5);
