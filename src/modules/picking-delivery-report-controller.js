@@ -58,7 +58,7 @@ export function initPickingDeliveryReport({getSupabaseClient,getAppToken}){
    if(!state)throw new Error('Primero consulta el reporte');
    if(typeof window.html2canvas!=='function'){await new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='./vendor/html2canvas.min.js';s.onload=resolve;s.onerror=reject;document.head.appendChild(s)})}if(typeof window.html2canvas!=='function')throw new Error('Captura de imagen no disponible');
    const target=report;
-   const canvas=await window.html2canvas(target,{backgroundColor:'#ffffff',scale:2,scrollX:0,scrollY:0,windowWidth:Math.max(target.scrollWidth,1100),onclone:doc=>{const node=doc.getElementById('pickReportPanel');if(node){node.style.width='1100px';node.style.maxWidth='none';node.style.overflow='visible';node.querySelectorAll('.table-wrap').forEach(t=>{t.style.overflow='visible';t.style.maxWidth='none'})}}});
+   const canvas=await window.html2canvas(target,{backgroundColor:'#ffffff',scale:2,scrollX:0,scrollY:0,windowWidth:Math.max(target.scrollWidth,1100),onclone:doc=>{const node=doc.getElementById('pickReportPanel');if(node){node.classList.add('pick-report-export');node.style.width='1150px';node.style.maxWidth='none';node.style.overflow='visible';node.querySelectorAll('.table-wrap').forEach(t=>{t.style.overflow='visible';t.style.maxWidth='none'})}}});
    const a=document.createElement('a');a.download='SGP_Picking_Entregas_'+state.filters.fecha_inicio+'.png';a.href=canvas.toDataURL('image/png');a.click();
   }catch(e){alert('No fue posible generar la imagen: '+(e.message||e))}
  });
@@ -71,16 +71,20 @@ export function initPickingDeliveryReport({getSupabaseClient,getAppToken}){
   if(heading){heading.innerHTML='<div><strong>SGP ONE | REPORTE DE ENTREGAS DE PRODUCCIÓN</strong><small>PICKING · ALUMINIO | Línea: '+safe($('pickReportLine')?.value||'Línea de Picking')+' | Desde: '+safe(state.filters.fecha_inicio)+' | Hasta: '+safe(state.filters.fecha_fin)+' | Turno: '+safe(state.filters.turno||'Todos')+' | Generado: '+safe(new Date().toLocaleString('es-CO'))+'</small></div>';heading.style.cssText='background:linear-gradient(110deg,#103e79,#0867c7);color:#fff;padding:18px 22px;border-radius:8px';heading.querySelector('small').style.color='#e8f3ff'}
   const holder=document.createElement('div');holder.style.cssText='position:fixed;left:-20000px;top:0;width:1150px;background:white;padding:18px;z-index:-1';holder.append(clone);document.body.append(holder);
   try{
-   clone.style.display='block';clone.querySelectorAll('.table-wrap').forEach(x=>{x.style.overflow='visible';x.style.maxWidth='none'});
+   clone.style.display='block';clone.classList.add('pick-report-export');clone.querySelectorAll('.table-wrap').forEach(x=>{x.style.overflow='visible';x.style.maxWidth='none'});
    const canvas=await window.html2canvas(holder,{backgroundColor:'#fff',scale:1.6,scrollX:0,scrollY:0,windowWidth:1200});
    const pdf=new window.jspdf.jsPDF({orientation:'landscape',unit:'mm',format:'a4'}),margin=7,pw=297,ph=210,w=pw-margin*2,usable=ph-margin*2;
    const pagePixels=Math.floor(canvas.width*usable/w);let page=0;
-   for(let offset=0;offset<canvas.height;offset+=pagePixels){
+   // Slice at table-row boundaries to avoid cutting a production or missing-piece record.
+   const holderTop=holder.getBoundingClientRect().top;const scaleY=canvas.height/Math.max(holder.scrollHeight,1);
+   const rowBoundaries=[...holder.querySelectorAll('tr')].map(el=>Math.round((el.getBoundingClientRect().bottom-holderTop)*scaleY)).filter(y=>y>0&&y<canvas.height).sort((a,b)=>a-b);
+   for(let offset=0;offset<canvas.height;){
+    const targetEnd=Math.min(canvas.height,offset+pagePixels);const safeEnd=rowBoundaries.filter(y=>y>offset+pagePixels*.55&&y<=targetEnd).pop();const end=safeEnd||targetEnd;
     if(page++)pdf.addPage();
-    const slice=document.createElement('canvas');slice.width=canvas.width;slice.height=Math.min(pagePixels,canvas.height-offset);
+    const slice=document.createElement('canvas');slice.width=canvas.width;slice.height=end-offset;
     slice.getContext('2d').drawImage(canvas,0,offset,canvas.width,slice.height,0,0,slice.width,slice.height);
     pdf.addImage(slice.toDataURL('image/jpeg',.92),'JPEG',margin,margin,w,slice.height*w/slice.width);
-    pdf.setFontSize(8);pdf.setTextColor(80,100,130);pdf.text('SGP ONE · Picking | Página '+page,margin,ph-3);
+    pdf.setFontSize(8);pdf.setTextColor(80,100,130);pdf.text('SGP ONE · Picking | Página '+page,margin,ph-3);offset=end;
    }
    pdf.save('SGP_Picking_Entregas_'+state.filters.fecha_inicio+'.pdf');
   }finally{holder.remove()}
