@@ -1866,7 +1866,7 @@ function showOpsChangeDetail(rows,title){rows=rows||[];document.querySelector('#
 
 // Persistent getAppToken already defined above.
 function getAppUser(){try{const t=getAppToken();return t?{username:(currentAuth?.usuario||document.querySelector("#authUser")?.value||"")} : null}catch{return null}}
-let recRows=[],recCurrent=null,recMissingDraft=[],recAluminumStateIndex=new Map(),recLoadSequence=0;
+let recTypeIndex=new Map(),recRows=[],recCurrent=null,recMissingDraft=[],recAluminumStateIndex=new Map(),recLoadSequence=0;
 async function loadReception(){
  const token=getAppToken();if(!token)return;
  const sequence=++recLoadSequence;
@@ -1882,6 +1882,7 @@ async function loadReception(){
  recRows=Array.isArray(reception.data)?reception.data:[];
  const trackingOk=!tracking.error&&Array.isArray(tracking.data?.rows);
  recAluminumStateIndex=indexReceptionAluminumStates(trackingOk?tracking.data.rows:[]);
+ recTypeIndex=new Map();if(trackingOk){for(const item of tracking.data.rows){const key=String(item.reserva??'').trim();const raw=String(item.tipo_orden??'').trim().toUpperCase();const type=raw==='PROYECTO'?'Proyecto':raw==='RETAIL'?'Retail':null;if(!key||!type)continue;const old=recTypeIndex.get(key);recTypeIndex.set(key,old&&old!==type?'Sin dato':old||type)}}
  const notice=document.querySelector('#recTrackingStatus');
  if(notice){
   notice.hidden=trackingOk;
@@ -1907,8 +1908,8 @@ function renderReception(){
  document.querySelector('#recPendingLabel').textContent=pending.length;
  document.querySelector('#recReceivedLabel').textContent=received.length;
  document.querySelector('#recBody').innerHTML=pending.length?pending.map(r=>
-  '<tr><td>'+escapeHtml(r.semana_prog??'')+'</td><td>'+escapeHtml(r.reserva)+'</td><td>'+escapeHtml(r.sistema||'')+'</td><td>'+escapeHtml(r.acabado||'')+'</td><td>'+escapeHtml(r.cantidad??'')+'</td><td><span class="state-badge state-warn">PENDIENTE POR RECIBIR</span></td><td>'+receptionAluminumBadge(r.reserva)+'</td><td>'+Number(r.faltantes_abiertos||0)+'</td><td>'+Number(r.dias_pendiente||0).toFixed(1)+'</td><td><button data-receive="'+escapeHtml(r.reserva)+'">Auditar</button></td></tr>'
- ).join(''):'<tr><td colspan="10" class="empty-state">No hay reservas pendientes por recibir.</td></tr>';
+  '<tr><td>'+escapeHtml(r.semana_prog??'')+'</td><td>'+escapeHtml(r.reserva)+'</td><td>'+escapeHtml(recTypeIndex.get(String(r.reserva??'').trim())||'Sin dato')+'</td><td>'+escapeHtml(r.sistema||'')+'</td><td>'+escapeHtml(r.acabado||'')+'</td><td>'+escapeHtml(r.cantidad??'')+'</td><td><span class="state-badge state-warn">PENDIENTE POR RECIBIR</span></td><td>'+receptionAluminumBadge(r.reserva)+'</td><td>'+Number(r.faltantes_abiertos||0)+'</td><td>'+Number(r.dias_pendiente||0).toFixed(1)+'</td><td><button data-receive="'+escapeHtml(r.reserva)+'">Auditar</button></td></tr>'
+ ).join(''):'<tr><td colspan="11" class="empty-state">No hay reservas pendientes por recibir.</td></tr>';
  document.querySelector('#recReceivedBody').innerHTML=received.length?received.map(r=>
   '<tr><td>'+escapeHtml(r.semana_prog??'')+'</td><td>'+escapeHtml(r.reserva)+'</td><td>'+escapeHtml(r.sistema||'')+'</td><td>'+escapeHtml(r.acabado||'')+'</td><td>'+escapeHtml(r.cantidad??'')+'</td><td><span class="state-badge state-ok">RECIBIDA</span></td><td>'+receptionAluminumBadge(r.reserva)+'</td><td><span class="legal-badge '+(r.legalizada?'legal-ok':'legal-pending')+'">'+(r.legalizada?'LEGALIZADA':'RECIBIDA SIN LEGALIZAR')+'</span></td><td>'+Number(r.faltantes_abiertos||0)+'</td><td><button data-receive="'+escapeHtml(r.reserva)+'">Revisar</button></td></tr>'
  ).join(''):'<tr><td colspan="10" class="empty-state">Aún no hay reservas recibidas.</td></tr>';
