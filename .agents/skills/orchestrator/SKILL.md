@@ -17,6 +17,9 @@ Use when the user asks for orchestrator work in SGP_ONE. Follow the project's pe
 3. Current relevant source files on `main` and live read-only evidence when necessary.
 4. Other project's documentation only for integration boundaries.
 
+## Design engineering routing
+For authorized UI/UX, mobile, table, navigation, modal or animation work, read `.agents/skills/design-engineering/SKILL.md` after mandatory continuity recovery. This is an SGP-specific adaptation inspired by Emil Kowalski's public design skills, not an automatically installed ChatGPT skill. Respect read-only scope and require explicit authorization before source changes.
+
 ## Procedure
 Read both project boundaries; determine whether task is analysis, change, deployment or test; activate audit before implementation; demand explicit approval for production-impacting operations; hand off structured evidence.
 
