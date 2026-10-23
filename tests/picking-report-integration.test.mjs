@@ -7,7 +7,7 @@ const controller=readFileSync('src/modules/picking-delivery-report-controller.js
 test('LAB v321 report integrated with Picking tabs',()=>{
  for(const id of ['pickReportTab','pickReportPanel','pickReportFrom','pickReportTo','pickReportShift','pickReportSystem','pickReportRun','pickReportPdf','pickReportImage'])assert.ok(html.includes('id="'+id+'"'),id);
  assert.match(html,/LAB v339/);
- assert.match(html,/app\.js\?v=337/);
+ assert.match(html,/app\.js\?v=339/);
  assert.match(app,/initPickingDeliveryReport\(\{getSupabaseClient,getAppToken\}\)/);
 });
 test('historical report consumes authorized read-only RPC and complete pagination',()=>{
