@@ -16,6 +16,10 @@ Cuando se soliciten cambios de diseño, tablas dinámicas, transiciones, navegac
 2. Revisar código CSS/HTML/JS actual y PR abiertos/fusionados; confirmar necesidades no resueltas y dependencias con autenticación, roles, RPC y estados.
 3. Distinguir **propuesta**, **prototipo independiente**, **cambio autorizado**, **fusionado**, **desplegado** y **verificado**. No editar la aplicación sin autorización explícita.
 
+
+## Norma global obligatoria — Design System v1
+Antes de diseñar o cambiar cualquier interfaz de SGP_ONE, leer `SGP_ONE_DESIGN_SYSTEM.md` desde GitHub `main` y aplicar sus tokens, componentes, flujo de aprobación y pruebas. Es una norma de apariencia GLOBAL, no por módulo; el Centro de Diseño de Configuración está propuesto, NO implementado. Si la norma y el código vigente discrepan, auditar y reportar antes de intervenir. Reutilizar componentes existentes; no introducir estilos paralelos ni modificar estados de negocio, permisos o persistencia por una decisión estética. Los valores visuales del documento son baseline sujeto a validación, no evidencia de despliegue.
+
 ## Principios aplicados a SGP
 - **Claridad primero:** prioridades, reservas, partes, producciones, estados y cantidades visibles y legibles. No ocultar información operacional crítica tras animaciones.
 - **Azul SGP:** respetar paleta azul existente, contrastes accesibles, jerarquía clara, botones consistentes y estados semánticos ya definidos. No sustituir colores de negocio arbitrariamente.
