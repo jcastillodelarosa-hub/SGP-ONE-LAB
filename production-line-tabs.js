@@ -96,6 +96,29 @@
  enhanceTable('assemblyTable',assemblyPanel);
  enhanceTable('packingPreviewBody',packingPanel);
 
+
+ // LAB v341: visible shortcut from Ensamble to the existing, single-source planner views.
+ const assemblyShortcuts=document.createElement('section');
+ assemblyShortcuts.className='sgp-assembly-quickviews';
+ assemblyShortcuts.setAttribute('aria-label','Consultas de Ensamble');
+ assemblyShortcuts.innerHTML='<strong>Programación y seguimiento</strong><div class="sgp-assembly-quicktabs"><button type="button" data-open-plan="calendar">Calendario por turno</button><button type="button" data-open-plan="pending">Pendientes</button><button type="button" data-open-plan="tracking">Seguimiento</button></div><small>Consulta las asignaciones de la línea sin abandonar el contexto de Ensamble.</small>';
+ const sheetHost=byId('assemblySheetPanel');
+ const sheetStatus=byId('assemblyStatus');
+ const sheetSummary=byId('assemblySummary');
+ if(sheetSummary?.parentElement)sheetSummary.after(assemblyShortcuts);
+ else if(sheetStatus?.parentElement)sheetStatus.after(assemblyShortcuts);
+ else sheetHost?.prepend(assemblyShortcuts);
+ assemblyShortcuts.querySelectorAll('[data-open-plan]').forEach(button=>button.addEventListener('click',()=>{
+  select('planificador');
+  const target=button.dataset.openPlan;
+  const viewButton=plannerPanel.querySelector('.sgp-line-view-tabs [data-view="'+target+'"]');
+  if(viewButton){viewButton.click();viewButton.scrollIntoView({block:'start',behavior:'smooth'});}
+  else plannerPanel.scrollIntoView({block:'start',behavior:'smooth'});
+ }));
+ const quickStyle=document.createElement('style');
+ quickStyle.textContent='.sgp-assembly-quickviews{padding:14px;margin:12px 0;border:1px solid #cbdcf0;border-radius:14px;background:#f8fbff;color:#103b73}.sgp-assembly-quicktabs{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.sgp-assembly-quicktabs button{min-height:44px;padding:9px 12px;border:1px solid #bad2ee;border-radius:10px;background:#eaf2ff;color:#124b8b;font-weight:650}.sgp-assembly-quickviews small{display:block;color:#526781}@media(max-width:680px){.sgp-assembly-quickviews{position:relative;margin:10px 0;padding:12px}.sgp-assembly-quicktabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.sgp-assembly-quicktabs button{font-size:12px;padding:8px 3px}.assembly-table-wrap tbody tr{padding:6px 10px}.assembly-table-wrap tbody td{padding:6px 2px!important;font-size:13px}.assembly-table-wrap tbody td:first-child{font-weight:700;color:#103b73}.production-table-sortbar{padding:9px;gap:7px}.production-table-sortbar label{min-width:0}}';
+ document.head.append(quickStyle);
+
  const all=[['planificador',planner,plannerPanel],['ensamble',assembly,assemblyPanel],['empaque',packing,packingPanel],['ubicaciones',report,locations]];
  all.forEach(([name,button,panel])=>{button.setAttribute('role','tab');button.setAttribute('aria-controls',panel.id);button.addEventListener('click',()=>select(name));});
  tabs.addEventListener('keydown',event=>{
