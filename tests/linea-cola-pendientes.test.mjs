@@ -14,3 +14,10 @@ test('cola mantiene filtro y vista accesible',()=>{
  assert.match(source,/aria-label="Filtrar pendientes"/);
  assert.match(source,/focus-visible/);
 });
+
+test('estado de mecanizado se muestra sin confundir PROCESADO con entrega Picking',()=>{
+ assert.match(source,/r\.estado_mecanizado\|\|'Sin dato'/);
+ assert.match(source,/Entrega Picking: consultar Picking/);
+ assert.match(source,/Observación mecanizado:/);
+ assert.doesNotMatch(source,/estado_mecanizado\s*===\s*['"]PROCESADO['"]\s*\?\s*['"]ENTREGADO/);
+});
