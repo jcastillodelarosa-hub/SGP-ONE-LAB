@@ -36,5 +36,11 @@ El SHA del commit que escribe este archivo se genera **después** de guardar. No
 ## Alcance de esta operación
 Autorizado: conciliación documental del checkpoint y referencias ejecutivas obsoletas. Prohibido: modificar lógica de aplicación, Supabase, Firebase, SGP_ONE_GOOGLE, desplegar o fusionar PR.
 
+## Hito documental posterior — Design Engineering (2026-10-22)
+- Skill original SGP `.agents/skills/design-engineering/SKILL.md` creada en main, inspirada en fuentes públicas de Emil Kowalski; **no equivale a instalar una skill oficial en ChatGPT**.
+- Orchestrator actualizado para consultar esta skill en solicitudes de interfaz, tablas, animaciones y móvil, tras recuperación de continuidad.
+- Estado: **DOCUMENTACIÓN EN MAIN**; no se modificó HTML/CSS/JS operativo, Supabase, Firebase ni SGP_ONE_GOOGLE. No se han ejecutado pruebas funcionales de la aplicación por este cambio.
+- Comprobar contenido y SHA del archivo en GitHub en el siguiente chat antes de aplicar recomendaciones.
+
 ## Siguiente paso único
-Abrir un chat nuevo y ejecutar una **prueba de recuperación de solo lectura**: leer MASTER_CONTEXT, ESTADO_ACTUAL, CHECKPOINT y Skills; contrastar HEAD, PR #47–#51, estado de despliegue y pendientes. Reportar cualquier diferencia antes de implementar.
+Realizar una **prueba de recuperación de solo lectura** desde otro chat: comprobar que Orchestrator encuentra y consulta Design Engineering para una solicitud de diseño SGP; verificar GitHub main y no cambiar código.
