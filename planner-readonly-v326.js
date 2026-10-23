@@ -140,10 +140,10 @@ if(view==='table'){content.innerHTML='<table class="sgp-planner-table"><thead><t
 if(view==='kanban'){const lanes=[['ABIERTA','Abiertas'],['ENSAMBLADA','Ensambladas'],['OTROS','Otros estados']];content.innerHTML='<div class="sgp-planner-board">'+lanes.map(([code,label])=>'<div class="sgp-planner-lane"><strong>'+label+'</strong>'+rows.filter(r=>code==='OTROS'?!['ABIERTA','ENSAMBLADA'].includes(r.estado_produccion):r.estado_produccion===code).map(card).join('')+'</div>').join('')+'</div>';return}
 content.innerHTML='<p class="sgp-planner-note">Vista de carga semanal. Fechas y turnos pendientes de la nueva programación persistente; no se inventan asignaciones.</p><div class="sgp-planner-grid">'+rows.map(card).join('')+'</div>';
 }
-section.querySelector('#sgpPlannerView').addEventListener('change',render);
-section.querySelector('#sgpPlannerSearch').addEventListener('input',render);
-section.querySelector('#sgpPlannerRefresh').addEventListener('click',render);
-section.querySelector('#sgpPlannerLocations').addEventListener('click',()=>document.querySelector('#productionLocationsTab')?.click());
+explorer.querySelector('#sgpPlannerView').addEventListener('change',render);
+explorer.querySelector('#sgpPlannerSearch').addEventListener('input',render);
+explorer.querySelector('#sgpPlannerRefresh').addEventListener('click',render);
+explorer.querySelector('#sgpPlannerLocations').addEventListener('click',()=>document.querySelector('#productionLocationsTab')?.click());
 document.querySelector('#loadAssembly')?.addEventListener('click',()=>setTimeout(render,800));
 document.querySelector('#productionPlannerTab')?.addEventListener('click',()=>{if(!getRows().length)document.querySelector('#loadAssembly')?.click();else render()});
 const assemblyStatus=document.querySelector('#assemblyStatus');if(assemblyStatus)new MutationObserver(render).observe(assemblyStatus,{childList:true,characterData:true,subtree:true});
