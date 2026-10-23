@@ -111,19 +111,19 @@ const assemblyStatus=document.querySelector('#assemblyStatus');if(assemblyStatus
 render();
 
 /* Pending assembly queue: read-only, preserves original assignment workflow. */
-const pending=document.createElement('section');pending.id='sgpPendingAssemblyQueue';pending.innerHTML='<h3>Pendientes por programar</h3><p>Saldo de ensamble positivo de la hoja cargada. Continuar solo prepara el formulario.</p><input type="search" id="sgpPendingSearch" placeholder="Filtrar producción, sistema o reserva" aria-label="Filtrar pendientes"><div id="sgpPendingRows"></div>';
+const pending=document.createElement('section');pending.id='sgpPendingAssemblyQueue';pending.innerHTML='<h3>Órdenes pendientes · Programación directa</h3><p>Saldo de ensamble positivo de la hoja cargada. Selecciona una orden y confirma fecha, turno, prioridad y cantidad antes de guardar. El saldo Export no equivale necesariamente al saldo sin programar.</p><p id="sgpPendingCount" role="status"></p><input type="search" id="sgpPendingSearch" placeholder="Filtrar producción, sistema o reserva" aria-label="Filtrar pendientes"><div id="sgpPendingRows"></div>';
 root.append(pending);
-const queueStyle=document.createElement('style');queueStyle.textContent='#sgpPendingAssemblyQueue{margin:16px 0;padding:16px;border:1px solid #c9d9eb;border-radius:14px;background:#f7f9fc}#sgpPendingAssemblyQueue h3{color:#103b73;margin:0}#sgpPendingAssemblyQueue p{font-size:13px;color:#526781}#sgpPendingSearch{box-sizing:border-box;width:100%;padding:11px;border:1px solid #b7cee9;border-radius:8px}.sgp-pending-item{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:8px 0;padding:12px;border:1px solid #dce5f2;border-radius:12px;background:white}.sgp-pending-item small{display:block;color:#526781}.sgp-pending-item button{min-height:44px;padding:8px 14px;border:0;border-radius:8px;background:#1264c8;color:white}.sgp-pending-item button:focus-visible{outline:3px solid #103b73;outline-offset:2px}@media(max-width:640px){.sgp-pending-item{flex-direction:column;align-items:stretch}}';document.head.append(queueStyle);
+const queueStyle=document.createElement('style');queueStyle.textContent='#sgpPendingAssemblyQueue{margin:16px 0;padding:16px;border:1px solid #c9d9eb;border-radius:14px;background:#f7f9fc}#sgpPendingAssemblyQueue h3{color:#103b73;margin:0}#sgpPendingAssemblyQueue p{font-size:13px;color:#526781}#sgpPendingSearch{box-sizing:border-box;width:100%;padding:11px;border:1px solid #b7cee9;border-radius:8px}.sgp-pending-item{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:8px 0;padding:12px;border:1px solid #dce5f2;border-radius:12px;background:white}.sgp-pending-item small{display:block;color:#526781}.sgp-pending-item button{min-height:44px;padding:8px 14px;border:0;border-radius:8px;background:#1264c8;color:white;font-weight:800;cursor:pointer}.sgp-pending-item button:focus-visible{outline:3px solid #103b73;outline-offset:2px}@media(max-width:640px){.sgp-pending-item{flex-direction:column;align-items:stretch}}';document.head.append(queueStyle);
 function renderPending(){
  const q=document.querySelector('#sgpPendingSearch').value.trim().toLowerCase();
  const records=getRows().filter(r=>Number(r.saldo_ensamble)>0).filter(r=>!q||[r.produccion,r.sistema,r.reserva_al,r.reserva].some(v=>String(v??'').toLowerCase().includes(q)));
  const host=document.querySelector('#sgpPendingRows');host.replaceChildren();
- if(!records.length){host.textContent='Sin pendientes en la hoja cargada para este filtro.';return;}
+ document.querySelector('#sgpPendingCount').textContent=records.length+' órdenes con saldo de ensamble positivo · Semana '+(document.querySelector('#assemblyWeek')?.value||'—');if(!records.length){host.textContent='Sin pendientes en la hoja cargada para este filtro.';return;}
  records.forEach(r=>{
   const item=document.createElement('article');item.className='sgp-pending-item';
   const label=document.createElement('div'),name=document.createElement('strong'),detail=document.createElement('small'),button=document.createElement('button');
   name.textContent=r.produccion||'Producción';detail.textContent=[r.sistema||'Sin sistema','Reserva '+(r.reserva_al||r.reserva||'—'),'Saldo '+r.saldo_ensamble].join(' · ');const state=document.createElement('small');state.textContent='Estado: ';const stateBadge=document.createElement('span');stateBadge.className='sgp-explorer-state';stateBadge.dataset.state=String(r.estado_mecanizado||'Sin dato').trim().toUpperCase();stateBadge.textContent=stateBadge.dataset.state;state.append(stateBadge);const obs=document.createElement('small');obs.textContent=r.observacion_mecanizado?'Observación mecanizado: '+r.observacion_mecanizado:'';label.append(name,detail,state);if(obs.textContent)label.append(obs);
-  button.type='button';button.textContent='Continuar';button.onclick=()=>{
+  button.type='button';button.textContent='Programar';button.setAttribute('aria-label','Programar '+(r.produccion||'producción'));button.onclick=()=>{
    const result=window.SGPLinePlanner?.selectProduction?.(r.key_produccion);
    if(!result?.ok){const msg=document.querySelector('#sgpPlanMessage');if(msg)msg.textContent=result?.message||'Actualiza la hoja de Ensamble.';return;}
    document.querySelector('#sgpPlanProduction')?.focus();
@@ -131,7 +131,7 @@ function renderPending(){
   };item.append(label,button);host.append(item);
  });
 }
-document.querySelector('#sgpPendingSearch').addEventListener('input',renderPending);
+document.querySelector('#sgpPendingSearch').addEventListener('input',renderPending);document.addEventListener('sgp:line-plan-updated',renderPending);
 document.querySelector('#productionPlannerTab')?.addEventListener('click',()=>setTimeout(renderPending,0));
 document.querySelector('#loadAssembly')?.addEventListener('click',()=>setTimeout(renderPending,850));
 if(assemblyStatus)new MutationObserver(renderPending).observe(assemblyStatus,{childList:true,subtree:true});
