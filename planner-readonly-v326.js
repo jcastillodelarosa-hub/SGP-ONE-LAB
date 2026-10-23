@@ -94,7 +94,7 @@ async function explorerLoadOperations(){
   }
  }
  // Fuente canónica del calendario: ejecución por id_programacion; no confundir PROGRAMADA con PROCESADO.
- // Las lecturas directas respetan los permisos actuales del usuario, sin service_role.
+ // Las lecturas directas respetan los permisos actuales del usuario, sin credenciales privilegiadas.
  try{
   const visible=getRows(),reservations=[...new Set(visible.map(explorerPrimaryReserva).filter(Boolean))];
   if(reservations.length&&reservations.length<=300){
