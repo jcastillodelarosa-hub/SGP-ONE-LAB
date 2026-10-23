@@ -47,10 +47,10 @@
   const panel = document.createElement('div');
   panel.className = 'config-panel sgp-design-center'; panel.dataset.configPanel = 'diseno';
   panel.id = 'sgpDesignCenter'; panel.hidden = true;
-  panel.innerHTML = `<div class="sgp-design-heading"><div><h3>Centro de Diseño</h3><p>Identidad corporativa aprobada · ajustes de vista previa de este dispositivo. No modifica datos ni permisos.</p></div><span class="sgp-design-tag">Fase 1 · local</span></div>
-  <div class="sgp-design-grid"><section class="sgp-design-card"><h4>Identidad aprobada</h4><div class="sgp-design-brand"><strong>SGP<span>_ONE</span></strong><small>SISTEMA DE GESTIÓN DE PRODUCCIÓN</small></div><p>Tipografía geométrica · plano corporativo · favicon propuesto: iniciales SGP.</p><p class="sgp-design-note">El favicon del navegador no se cambia en esta fase.</p></section>
+  panel.innerHTML = `<div class="sgp-design-heading"><div><h3>Centro de Diseño</h3><p>Identidad corporativa aprobada · ajustes de vista previa de este dispositivo. No modifica datos ni permisos.</p></div><span class="sgp-design-tag">Fase 2 · local</span></div>
+  <div class="sgp-design-grid"><section class="sgp-design-card"><h4>Identidad aprobada</h4><div class="sgp-design-brand"><strong>SGP<span>_ONE</span></strong><small>SISTEMA DE GESTIÓN DE PRODUCCIÓN</small></div><p>Tipografía geométrica · plano corporativo · favicon propuesto: iniciales SGP.</p><p class="sgp-design-note">El favicon SGP está incluido en la versión web; puede depender de la caché del navegador.</p></section>
   <section class="sgp-design-card"><h4>Menú y paleta</h4><label>Azul de la interfaz<select id="sgpDesignTheme"><option value="intense">Azul intenso</option><option value="corporate">Azul corporativo</option><option value="modern">Azul moderno</option></select></label><label>Comportamiento del menú<select id="sgpDesignMenu"><option value="hover">Contraer y expandir automáticamente</option><option value="toggle">Botón para expandir</option><option value="fixed">Siempre expandido</option><option value="floating">Flotante</option></select></label><p class="sgp-design-note">La navegación y el contenido conservan el ajuste adaptable existente.</p></section>
-  <section class="sgp-design-card sgp-design-wide"><h4>Iconos por módulo</h4><p>Selecciona un módulo y compara símbolos funcionales. Se muestran en el menú actual sin cambiar sus accesos.</p><div class="sgp-design-controls"><label>Módulo<select id="sgpDesignModule"></select></label><label>Icono<select id="sgpDesignIcon"></select></label></div><div class="sgp-design-preview"><span id="sgpDesignPreviewIcon" aria-hidden="true">▦</span><span id="sgpDesignPreviewName">Programación</span></div></section></div>
+  <section class="sgp-design-card sgp-design-wide"><h4>Iconos por módulo</h4><p>Selecciona un módulo y compara símbolos funcionales. Se muestran en el menú actual sin cambiar sus accesos.</p><div class="sgp-design-controls"><label>Módulo<select id="sgpDesignModule"></select></label><label>Icono<select id="sgpDesignIcon"></select></label></div><div class="sgp-design-preview"><span id="sgpDesignPreviewIcon" aria-hidden="true">▦</span><span id="sgpDesignPreviewName">Programación</span></div></section><section class="sgp-design-card sgp-design-wide"><h4>Componentes y legibilidad</h4><p>Vista previa de controles y tablas; no altera información ni estados de producción.</p><div class="sgp-design-controls"><label>Densidad de tabla<select id="sgpDesignDensity"><option value="comfortable">Cómoda</option><option value="compact">Compacta</option></select></label><label>Forma de controles<select id="sgpDesignRadius"><option value="soft">Suave</option><option value="rounded">Redondeada</option><option value="square">Recta</option></select></label><label>Movimiento<select id="sgpDesignMotion"><option value="standard">Discreto</option><option value="reduced">Reducido</option></select></label></div><div class="sgp-design-sample" id="sgpDesignSample"><div class="sgp-design-sample-head"><strong>Vista previa</strong><button type="button">Acción primaria</button></div><div class="sgp-design-sample-table"><div><b>Orden</b><b>Estado</b><b>Cantidad</b></div><div><span>PROD-001</span><span>Procesado</span><span>24</span></div><div><span>PROD-002</span><span>Mecanizado</span><span>12</span></div></div></div></section></div>
   <div class="sgp-design-actions"><button type="button" id="sgpDesignApply" class="primary">Guardar en este navegador</button><button type="button" id="sgpDesignRestore">Restaurar preferencias visuales</button><button type="button" id="sgpDesignExport">Exportar JSON</button><span id="sgpDesignStatus" role="status" aria-live="polite"></span></div>`;
   tabs.after(panel);
   const $ = id => panel.querySelector('#'+id);
@@ -76,7 +76,7 @@
       const next={...read(KEY),theme:theme.value,menu:menu.value};
       localStorage.setItem(KEY,JSON.stringify(next));
       localStorage.setItem(ICON_KEY,JSON.stringify(icons));
-      status.textContent='Guardado en este navegador. Recarga para aplicar el menú y la paleta.';
+      status.textContent='Preferencias guardadas en este navegador. Recarga para aplicar el menú y la paleta.';
     }catch{status.textContent='No se pudo guardar: almacenamiento local no disponible.'}
   });
   $('sgpDesignRestore').addEventListener('click',()=>{
@@ -84,9 +84,21 @@
     try{localStorage.removeItem(ICON_KEY);localStorage.setItem(KEY,JSON.stringify({...read(KEY),theme:'intense',menu:'hover'}));status.textContent='Restaurado. Recarga para aplicar los cambios.'}catch{status.textContent='Restauración visual aplicada; no se pudo guardar.'}
   });
   $('sgpDesignExport').addEventListener('click',()=>{
-    const payload={schema:'sgp-design-local-v1',logo:'typographic-geometric-flat',favicon:'SGP',theme:theme.value,menu:menu.value,icons};
+    const payload={schema:'sgp-design-local-v2',logo:'typographic-geometric-flat',favicon:'SGP',theme:theme.value,menu:menu.value,icons,components:{density:density.value,radius:radius.value,motion:motion.value}};
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
     const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='sgp-one-diseno.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
   });
+  const DESIGN_KEY='sgp_one_design_components_v2';
+  const density=$('sgpDesignDensity'),radius=$('sgpDesignRadius'),motion=$('sgpDesignMotion'),sample=$('sgpDesignSample');
+  const componentDefaults={density:'comfortable',radius:'soft',motion:'standard'};
+  const components={...componentDefaults,...read(DESIGN_KEY)};
+  density.value=['comfortable','compact'].includes(components.density)?components.density:'comfortable';
+  radius.value=['soft','rounded','square'].includes(components.radius)?components.radius:'soft';
+  motion.value=['standard','reduced'].includes(components.motion)?components.motion:'standard';
+  const previewComponents=()=>{sample.dataset.density=density.value;sample.dataset.radius=radius.value;sample.dataset.motion=motion.value};
+  [density,radius,motion].forEach(control=>control.addEventListener('change',previewComponents));
+  $('sgpDesignApply').addEventListener('click',()=>{try{localStorage.setItem(DESIGN_KEY,JSON.stringify({density:density.value,radius:radius.value,motion:motion.value}));status.textContent='Preferencias visuales guardadas en este navegador.'}catch{status.textContent='No se pudo guardar la preferencia de componentes.'}});
+  $('sgpDesignRestore').addEventListener('click',()=>{density.value='comfortable';radius.value='soft';motion.value='standard';previewComponents();try{localStorage.removeItem(DESIGN_KEY)}catch{}});
+  previewComponents();
   applyIcons();sync();
 })();

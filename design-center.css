@@ -28,3 +28,25 @@
 .sidebar .nav .sgp-nav-icon svg{display:block;width:20px;height:20px;flex-shrink:0;stroke:currentColor}
 .sgp-design-preview>span:first-child svg{display:block;width:26px;height:26px;stroke:currentColor}
 .sgp-design-center button:focus-visible,.sgp-design-center select:focus-visible{outline:3px solid #58a6ff;outline-offset:2px}
+
+/* Centro de Diseño v2: solo vista previa; no toca tablas productivas. */
+.sgp-design-sample{border:1px solid #cbdcf0;border-radius:12px;padding:14px;background:#f7f9fc;max-width:100%;overflow:hidden}
+.sgp-design-sample-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.sgp-design-sample-head button{background:#1264c8;color:#fff;border:0;border-radius:8px;min-height:42px;padding:8px 16px;font-weight:700}
+.sgp-design-sample-table{overflow-x:auto}
+.sgp-design-sample-table>div{display:grid;grid-template-columns:minmax(90px,1fr) minmax(100px,1fr) 70px;min-width:280px;align-items:center;border-bottom:1px solid #d9e5f3;gap:10px;padding:13px 10px;font-size:13px}
+.sgp-design-sample-table>div:first-child{background:#eaf2fb;color:#103b73}
+.sgp-design-sample[data-density="compact"] .sgp-design-sample-table>div{padding-top:6px;padding-bottom:6px}
+.sgp-design-sample[data-radius="square"],.sgp-design-sample[data-radius="square"] button{border-radius:0}
+.sgp-design-sample[data-radius="rounded"],.sgp-design-sample[data-radius="rounded"] button{border-radius:20px}
+.sgp-design-sample[data-motion="standard"] button{transition:transform .16s ease,box-shadow .16s ease}
+.sgp-design-sample[data-motion="standard"] button:hover{transform:translateY(-1px);box-shadow:0 4px 10px #103b7326}
+@media(max-width:760px){
+[data-view-panel="configuracion"] .config-tabs{display:flex;overflow-x:auto;overscroll-behavior-x:contain;max-width:100%;scroll-snap-type:x proximity;gap:8px;padding:8px 4px;-webkit-overflow-scrolling:touch}
+[data-view-panel="configuracion"] .config-tabs button{flex:0 0 auto;scroll-snap-align:start;white-space:nowrap}
+.sgp-design-center{padding:16px 0 30px;min-width:0;overflow-wrap:anywhere}
+.sgp-design-heading h3{font-size:clamp(20px,5vw,24px)}
+.sgp-design-brand strong{font-size:clamp(25px,8vw,40px)}
+.sgp-design-card{min-width:0}
+}
+@media(prefers-reduced-motion:reduce){.sgp-design-sample button{transition:none!important;transform:none!important}}
