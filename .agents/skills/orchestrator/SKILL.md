@@ -18,7 +18,7 @@ Use when the user asks for orchestrator work in SGP_ONE. Follow the project's pe
 4. Other project's documentation only for integration boundaries.
 
 ## Design engineering routing
-For authorized UI/UX, mobile, table, navigation, modal or animation work, read `.agents/skills/design-engineering/SKILL.md` after mandatory continuity recovery. This is an SGP-specific adaptation inspired by Emil Kowalski's public design skills, not an automatically installed ChatGPT skill. Respect read-only scope and require explicit authorization before source changes.
+For any UI/UX, mobile, table, navigation, modal or animation work, after mandatory continuity recovery read `SGP_ONE_DESIGN_SYSTEM.md` and `.agents/skills/design-engineering/SKILL.md` from current main before proposing or implementing changes. Apply the GLOBAL visual standard across all modules and new work, not separate module themes. Audit existing components and PRs first; the Configuración Design Center remains a proposal until separately authorized and verified. This is an SGP-specific adaptation inspired by Emil Kowalski's public design skills, not an automatically installed ChatGPT skill. Respect read-only scope and require explicit authorization before source changes.
 
 ## Procedure
 Read both project boundaries; determine whether task is analysis, change, deployment or test; activate audit before implementation; demand explicit approval for production-impacting operations; hand off structured evidence.
