@@ -4,7 +4,7 @@ const $=id=>document.getElementById(id);
 const safe=v=>String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const dates=()=>{const d=new Date();const local=new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10);return local};
 const table=(headers,rows)=>'<div class="table-wrap"><table><thead><tr>'+headers.map(x=>'<th>'+safe(x)+'</th>').join('')+'</tr></thead><tbody>'+(rows.length?rows.map(row=>'<tr>'+row.map(v=>'<td>'+safe(v)+'</td>').join('')+'</tr>').join(''):'<tr><td colspan="'+headers.length+'">Sin registros</td></tr>')+'</tbody></table></div>';
-const details=rows=>rows.map(r=>[r.fecha_operativa,r.turno_entrega,r.reserva,r.parte,r.produccion,r.sistema,r.acabado,r.cantidad_programada??'Sin dato',r.usuario_entrega,r.completa?'Completa':'Parcial']);
+const details=rows=>rows.map(r=>[r.fecha_operativa,r.turno_entrega,r.reserva,r.parte,r.produccion,r.sistema,r.acabado,r.cantidad_programada??'Sin dato',r.nombre_responsable||r.usuario_entrega,r.completa?'Completa':'Parcial']);
 const missing=rows=>flattenDeliveryDetails(rows).map(f=>[f.reserva,f.parte,f.produccion,f.sistema,f.perfil,f.longitud,f.fabricacion,f.marca,f.cantidad,f.nc,f.reserva_pendiente]);
 const summaryHeaders=['Sistema','Movimientos','Producciones','Ventanas programadas','Ventanas estimadas*','Completas','Parciales','Faltantes'];
 const detailHeaders=['Fecha operativa','Turno','Reserva','Parte','Producción','Sistema','Acabado','Ventanas programadas','Responsable','Estado'];
