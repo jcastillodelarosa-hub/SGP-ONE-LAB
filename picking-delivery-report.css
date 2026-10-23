@@ -73,3 +73,29 @@
 @media(max-width:720px){.pick-report-modal-shell{padding:0 10px 18px;height:98vh}.pick-report-modal-header{margin:0 -10px;padding:14px}.pick-report-brand{gap:12px}.pick-report-wordmark{font-size:27px;letter-spacing:-3px;padding-right:12px}.pick-report-modal-header h2{font-size:17px}#pickReportPanel .pick-toolbar{grid-template-columns:repeat(2,minmax(0,1fr));padding:9px}#pickReportPanel .pick-report-metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}#pickReportPanel .pick-report-kpi{padding:10px 8px;gap:7px}#pickReportPanel .pick-report-kpi-icon{width:34px;height:34px;min-width:34px;font-size:20px}#pickReportPanel .pick-report-kpi strong{font-size:24px}#pickReportPanel .pick-report-kpi-label{font-size:11px}#pickReportPanel .pick-report-kpi small{font-size:10px}}
 
 .pick-report-document-heading{display:flex;align-items:center;gap:14px;padding:16px 18px;background:#fff;border-bottom:2px solid #15599d;color:#134a82}.pick-report-document-heading img{width:52px;height:52px;object-fit:contain;flex-shrink:0}.pick-report-document-heading strong{display:block;font-size:18px;line-height:1.35}.pick-report-document-heading small{display:block;color:#56708a;font-size:12px;margin-top:5px}.pick-report-document-heading div{min-width:0}@media(max-width:600px){.pick-report-document-heading{padding:12px}.pick-report-document-heading strong{font-size:14px}.pick-report-document-heading img{width:38px;height:38px}}
+
+/* Picking horizontal report: approved compact corporate layout, shared by screen and exports. */
+#pickReportPanel{background:#fff;gap:8px;padding:8px 0;color:#0b2442}
+#pickReportPanel .pick-report-document-heading{background:linear-gradient(110deg,#103b73,#1264c8);border:0;border-radius:7px;color:#fff;padding:12px 16px}
+#pickReportPanel .pick-report-document-heading small{color:#e8f3ff}
+#pickReportPanel .pick-report-metrics{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
+#pickReportPanel .pick-report-kpi{padding:8px 10px;gap:8px;border-radius:7px}
+#pickReportPanel .pick-report-kpi-icon{width:32px;height:32px;min-width:32px;font-size:17px}
+#pickReportPanel .pick-report-kpi strong{font-size:22px}
+#pickReportPanel .pick-report-kpi-label{font-size:11px}
+#pickReportPanel .pick-report-kpi small{font-size:9px}
+#pickReportPanel>h3{font-size:13px;margin:4px 0 0}
+#pickReportPanel>h3::before{font-size:14px;margin-right:5px}
+#pickReportPanel .table-wrap{border-radius:4px}
+#pickReportPanel table{font-size:10px;table-layout:auto}
+#pickReportPanel th{font-size:9px;padding:6px 7px}
+#pickReportPanel td{padding:6px 7px;white-space:normal;overflow-wrap:anywhere}
+#pickReportDeliveries td:nth-child(7){font-weight:800;color:#b56c00}
+#pickReportDeliveries tr:has(td:nth-child(7)) td:nth-child(7){color:#b56c00}
+#pickReportDeliveries tr:has(td:nth-child(7)) td:nth-child(7):not(:empty){font-weight:800}
+#pickReportPanel .pick-report-document-heading strong{font-size:16px}
+#pickReportPanel.pick-report-export{width:1150px!important;max-width:none!important;gap:7px}
+#pickReportPanel.pick-report-export .pick-toolbar,#pickReportPanel.pick-report-export #pickReportStatus{display:none!important}
+#pickReportPanel.pick-report-export .table-wrap{overflow:visible;max-width:none}
+#pickReportPanel.pick-report-export tr{break-inside:avoid;page-break-inside:avoid}
+@media(max-width:720px){#pickReportPanel .pick-report-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}#pickReportPanel .pick-report-kpi{padding:8px}}
