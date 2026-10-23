@@ -4,10 +4,10 @@ const $=id=>document.getElementById(id);
 const safe=v=>String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const dates=()=>{const d=new Date();const local=new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10);return local};
 const table=(headers,rows)=>'<div class="table-wrap"><table><thead><tr>'+headers.map(x=>'<th>'+safe(x)+'</th>').join('')+'</tr></thead><tbody>'+(rows.length?rows.map(row=>'<tr>'+row.map(v=>'<td>'+safe(v)+'</td>').join('')+'</tr>').join(''):'<tr><td colspan="'+headers.length+'">Sin registros</td></tr>')+'</tbody></table></div>';
-const details=rows=>rows.map(r=>[r.fecha_operativa,r.turno_entrega,r.reserva,r.parte,r.produccion,r.sistema,r.acabado,r.usuario_entrega,r.completa?'Completa':'Parcial']);
+const details=rows=>rows.map(r=>[r.fecha_operativa,r.turno_entrega,r.reserva,r.parte,r.produccion,r.sistema,r.acabado,r.cantidad_programada??'Sin dato',r.nombre_responsable||r.usuario_entrega,r.completa?'Completa':'Parcial']);
 const missing=rows=>flattenDeliveryDetails(rows).map(f=>[f.reserva,f.parte,f.produccion,f.sistema,f.perfil,f.longitud,f.fabricacion,f.marca,f.cantidad,f.nc,f.reserva_pendiente]);
-const summaryHeaders=['Sistema','Movimientos','Producciones','Cant. orden','Cant. efectiva','Completas','Parciales','Faltantes'];
-const detailHeaders=['Fecha operativa','Turno','Reserva','Parte','Producción','Sistema','Acabado','Responsable','Estado'];
+const summaryHeaders=['Sistema','Movimientos','Producciones','Ventanas programadas','Ventanas estimadas*','Completas','Parciales','Faltantes'];
+const detailHeaders=['Fecha operativa','Turno','Reserva','Parte','Producción','Sistema','Acabado','Ventanas programadas','Responsable','Estado'];
 const missingHeaders=['Reserva','Parte','Producción','Sistema','Perfil','Longitud','Fabricación','Marca','Cantidad','NC','Reserva solución'];
 export function initPickingDeliveryReport({getSupabaseClient,getAppToken}){
  const report=$('pickReportPanel');if(!report)return;
@@ -33,7 +33,7 @@ export function initPickingDeliveryReport({getSupabaseClient,getAppToken}){
   $('pickReportSystems').innerHTML=table([...summaryHeaders,'% parciales'],[...por_sistema.map(g=>[g.sistema,g.movimientos,g.producciones_unicas,qMap.get(g.sistema)?.cantidad_orden??0,qMap.get(g.sistema)?.cantidad_efectiva??0,g.completas,g.parciales,g.filas_faltantes,g.movimientos?Math.round(g.parciales/g.movimientos*100)+'%':'0%']),['TOTAL',summary.movimientos,summary.producciones_unicas,quantities.cantidad_orden,quantities.cantidad_efectiva,summary.completas,summary.parciales,summary.filas_faltantes,summary.movimientos?Math.round(summary.parciales/summary.movimientos*100)+'%':'0%']]);
   $('pickReportDeliveries').innerHTML=table(detailHeaders,details(rows));
   $('pickReportMissing').innerHTML=table(missingHeaders,missing(rows));
-  status.textContent='ⓘ '+total_rows+' movimientos · '+filters.fecha_inicio+' a '+filters.fecha_fin+' · Cant. efectiva = Cant. orden − piezas faltantes (mínimo 0).'+(quantities.ordenes_sin_cantidad?' '+quantities.ordenes_sin_cantidad+' órdenes sin cantidad de referencia.':'');
+  status.textContent='ⓘ '+total_rows+' movimientos · '+filters.fecha_inicio+' a '+filters.fecha_fin+' · Ventanas programadas: cantidad_programada por producción única. *Ventanas estimadas: resta piezas faltantes; no equivale a ventanas físicamente entregadas.'+(quantities.ordenes_sin_cantidad?' '+quantities.ordenes_sin_cantidad+' órdenes sin cantidad de referencia.':'');
  };
  $('pickReportRun')?.addEventListener('click',async()=>{status.textContent='Consultando…';state=null;for(const id of ['pickReportSummary','pickReportSystems','pickReportDeliveries','pickReportMissing'])$(id).replaceChildren();
   try{const f=normalizeReportFilters({from:$('pickReportFrom').value,to:$('pickReportTo').value,shift:$('pickReportShift').value,system:$('pickReportSystem').value});
