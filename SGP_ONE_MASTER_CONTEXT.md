@@ -5,8 +5,8 @@
 **Repositorio operativo:** `jcastillodelarosa-hub/SGP-ONE-LAB`\
 **Rama:** `main`\
 **Commit revisado:** `9f366ef4e12a16132f369505648be42965c8459f`\
-**Frontend visible:** **LAB v281**\
-**Último hotfix backend:** **v282 --- permiso RPC de arrastre**\
+**Frontend del snapshot histórico (NO versión actual):** **LAB v281**\
+**Hotfix backend del snapshot histórico (NO versión actual):** **v282 --- permiso RPC de arrastre**\
 **Uso:** contexto maestro para instrucciones permanentes y Skills
 especializadas de SGP_ONE.
 
@@ -14,8 +14,8 @@ especializadas de SGP_ONE.
 
 ## 1. Uso y jerarquía de fuentes
 
-Este archivo es un snapshot técnico-funcional. No sustituye la
-verificación del sistema vivo.
+Este archivo es un snapshot técnico-funcional histórico (2026-10-19). No sustituye la
+verificación del sistema vivo. Para el estado operativo vigente leer primero `SGP_ONE_CHECKPOINT.md`, luego contrastar `SGP_ONE_ESTADO_ACTUAL.md`, GitHub main y evidencia real.
 
 Toda Skill debe consultar, en este orden:
 
