@@ -17,7 +17,8 @@ test('cola mantiene filtro y vista accesible',()=>{
 
 test('estado de mecanizado se muestra sin confundir PROCESADO con entrega Picking',()=>{
  assert.match(source,/r\.estado_mecanizado/);
- assert.match(source,/Consultar Picking/);
+ assert.match(source,/explorerState\(r\.estado_mecanizado\)/);
+ assert.match(source,/data-state/);
  assert.match(source,/Observación mecanizado:/);
  assert.doesNotMatch(source,/estado_mecanizado\s*===\s*['"]PROCESADO['"]\s*\?\s*['"]ENTREGADO/);
 });
