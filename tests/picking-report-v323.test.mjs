@@ -5,8 +5,8 @@ const html=readFileSync('index.html','utf8');
 const controller=readFileSync('src/modules/picking-delivery-report-controller.js','utf8');
 const css=readFileSync('picking-delivery-report.css','utf8');
 test('LAB v323 report has branded header and no new data contract',()=>{
- assert.match(html,/LAB v343/);
- assert.match(html,/picking-delivery-report[.]css[?]v=343/);
+ assert.match(html,/LAB v344/);
+ assert.match(html,/picking-delivery-report[.]css[?]v=344/);
  assert.match(controller,/pick-report-wordmark/);
  assert.match(controller,/Reporte de Entregas/);
  assert.match(controller,/Picking · Entrega de órdenes/);
@@ -15,9 +15,9 @@ test('LAB v323 report has branded header and no new data contract',()=>{
  assert.match(controller,/pickReportImage/);
 });
 test('summary visual uses real data and accurate labels',()=>{
- for(const field of ['summary.movimientos','summary.producciones_unicas','summary.completas','summary.parciales','summary.filas_faltantes'])assert.ok(controller.includes(field),field);
- assert.match(controller,/Ventanas estimadas/);
- assert.match(controller,/% parciales/);
+ for(const field of ['summary.movimientos','summary.producciones_unicas','summary.completas','summary.parciales'])assert.ok(controller.includes(field),field);
+ assert.match(controller,/Cant. efectiva/);
+ assert.match(controller,/Cant. orden/);
  assert.match(css,/pick-report-kpi/);
  assert.match(css,/pick-report-modal-header/);
  assert.match(css,/@media\(max-width:720px\)/);

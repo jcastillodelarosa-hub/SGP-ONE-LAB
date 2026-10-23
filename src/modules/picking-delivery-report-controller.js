@@ -3,11 +3,11 @@ import { normalizeReportFilters, flattenDeliveryDetails, summarizeDeliveredWindo
 const $=id=>document.getElementById(id);
 const safe=v=>String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const dates=()=>{const d=new Date();const local=new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10);return local};
-const table=(headers,rows)=>'<div class="table-wrap"><table><thead><tr>'+headers.map(x=>'<th>'+safe(x)+'</th>').join('')+'</tr></thead><tbody>'+(rows.length?rows.map(row=>'<tr>'+row.map(v=>'<td>'+safe(v)+'</td>').join('')+'</tr>').join(''):'<tr><td colspan="'+headers.length+'">Sin registros</td></tr>')+'</tbody></table></div>';
-const details=rows=>rows.map(r=>[r.fecha_operativa,r.turno_entrega,r.reserva,r.parte,r.produccion,r.sistema,r.acabado,r.cantidad_programada??'Sin dato',r.nombre_responsable||r.usuario_entrega,r.completa?'Completa':'Parcial']);
+const table=(headers,rows)=>'<div class="table-wrap"><table><thead><tr>'+headers.map(x=>'<th>'+safe(x)+'</th>').join('')+'</tr></thead><tbody>'+(rows.length?rows.map(row=>'<tr>'+row.map(v=>'<td>'+(v==='Completa'?'<span class="pick-report-state complete">Completa</span>':v==='Parcial'?'<span class="pick-report-state partial">Parcial</span>':safe(v))+'</td>').join('')+'</tr>').join(''):'<tr><td colspan="'+headers.length+'">Sin registros</td></tr>')+'</tbody></table></div>';
+const details=rows=>rows.map(r=>[r.fecha_operativa,r.turno_entrega,r.reserva,r.parte,r.produccion,r.sistema,r.completa?'Completa':'Parcial',r.cantidad_produccion??'Sin dato',r.cantidad_produccion==null?'Sin dato':Math.max(0,Number(r.cantidad_produccion)-((r.faltantes||[]).reduce((n,f)=>n+Math.max(0,Number(f.ventanas_afectadas)||0),0))),r.cantidad_produccion==null?'Sin dato':-((r.faltantes||[]).reduce((n,f)=>n+Math.max(0,Number(f.ventanas_afectadas)||0),0))]);
 const missing=rows=>flattenDeliveryDetails(rows).map(f=>[f.reserva,f.parte,f.produccion,f.sistema,f.perfil,f.longitud,f.fabricacion,f.marca,f.cantidad,f.nc,f.reserva_pendiente]);
-const summaryHeaders=['Sistema','Movimientos','Producciones','Ventanas programadas','Ventanas estimadas*','Completas','Parciales','Faltantes'];
-const detailHeaders=['Fecha operativa','Turno','Reserva','Parte','Producción','Sistema','Acabado','Ventanas programadas','Responsable','Estado'];
+const summaryHeaders=['Sistema','Movimientos','Producciones','Cant. orden','Cant. efectiva','Diferencia'];
+const detailHeaders=['Fecha','Turno','Reserva','Parte','Producción','Sistema','Estado','Cant. orden','Cant. efectiva','Dif.'];
 const missingHeaders=['Reserva','Parte','Producción','Sistema','Perfil','Longitud','Fabricación','Marca','Cantidad','NC','Reserva solución'];
 export function initPickingDeliveryReport({getSupabaseClient,getAppToken}){
  const report=$('pickReportPanel');if(!report)return;
@@ -29,11 +29,12 @@ export function initPickingDeliveryReport({getSupabaseClient,getAppToken}){
  $('pickDeliveryTab')?.addEventListener('click',()=>{closeOverlay();selectTab('Delivery')});
  $('pickReceptionTab')?.addEventListener('click',()=>{closeOverlay();selectTab('Reception')});
  const show=()=>{if(!state)return;const {summary,por_sistema,rows,total_rows,filters}=state;const quantities=summarizeDeliveredWindows(rows);$('pickReportDocumentMeta').textContent=filters.fecha_inicio+' a '+filters.fecha_fin+' · '+(filters.turno||'Todos los turnos')+' · Generado: '+new Date().toLocaleString('es-CO');const qMap=new Map(quantities.porSistema.map(x=>[x.sistema,x]));
-  $('pickReportSummary').innerHTML='<div class="pick-report-metrics">'+[['Movimientos',summary.movimientos,'Registros de entrega','↗','movements'],['Producciones únicas',summary.producciones_unicas,'Producciones distintas','◇','unique'],['Completas',summary.completas,'Entregas completas','✓','complete'],['Parciales',summary.parciales,'Entregas con pendientes','◷','partial'],['Filas faltantes',summary.filas_faltantes,'Registros de faltantes','≡','missing']].map(([k,v,desc,symbol,tone])=>'<div class="pick-report-kpi '+tone+'"><span class="pick-report-kpi-icon" aria-hidden="true">'+symbol+'</span><span class="pick-report-kpi-content"><span class="pick-report-kpi-label">'+safe(k)+'</span><strong>'+safe(v)+'</strong><small>'+safe(desc)+'</small></span></div>').join('')+'</div>';
-  $('pickReportSystems').innerHTML=table([...summaryHeaders,'% parciales'],[...por_sistema.map(g=>[g.sistema,g.movimientos,g.producciones_unicas,qMap.get(g.sistema)?.cantidad_orden??0,qMap.get(g.sistema)?.cantidad_efectiva??0,g.completas,g.parciales,g.filas_faltantes,g.movimientos?Math.round(g.parciales/g.movimientos*100)+'%':'0%']),['TOTAL',summary.movimientos,summary.producciones_unicas,quantities.cantidad_orden,quantities.cantidad_efectiva,summary.completas,summary.parciales,summary.filas_faltantes,summary.movimientos?Math.round(summary.parciales/summary.movimientos*100)+'%':'0%']]);
+  $('pickReportSummary').innerHTML='<div class="pick-report-metrics">'+[['Movimientos',summary.movimientos,'Registros de entrega','↗','movements'],['Producciones únicas',summary.producciones_unicas,'Producciones distintas','◇','unique'],['Completas',summary.completas,'Entregas completas','✓','complete'],['Parciales',summary.parciales,'Entregas parciales','◷','partial']].map(([k,v,desc,symbol,tone])=>'<div class="pick-report-kpi '+tone+'"><span class="pick-report-kpi-icon" aria-hidden="true">'+symbol+'</span><span class="pick-report-kpi-content"><span class="pick-report-kpi-label">'+safe(k)+'</span><strong>'+safe(v)+'</strong><small>'+safe(desc)+'</small></span></div>').join('')+'</div>';
+  const totals=rows.reduce((acc,row)=>{const k=JSON.stringify([row.id_programacion,row.produccion,row.sistema]);if(!acc.has(k))acc.set(k,row);return acc},new Map());const grouped=new Map();for(const row of totals.values()){const key=row.sistema||'SIN SISTEMA';if(!grouped.has(key))grouped.set(key,{known:0,actual:0,unknown:0});const g=grouped.get(key);if(row.cantidad_produccion==null){g.unknown++;continue}const qty=Number(row.cantidad_produccion);if(!Number.isFinite(qty)){g.unknown++;continue}g.known+=qty;g.actual+=Math.max(0,qty-(row.faltantes||[]).reduce((n,f)=>n+Math.max(0,Number(f.ventanas_afectadas)||0),0))}const sum=arr=>arr.reduce((n,x)=>n+x,0);const vals=[...grouped.values()];const totalUnknown=sum(vals.map(g=>g.unknown));const sumKnown=sum(vals.map(g=>g.known)),sumActual=sum(vals.map(g=>g.actual));const format=g=>g&&g.unknown===0?g.known:'Sin dato';const effective=g=>g&&g.unknown===0?g.actual:'Sin dato';const diff=g=>g&&g.unknown===0?g.actual-g.known:'Sin dato';
+  $('pickReportSystems').innerHTML=table(summaryHeaders,[...por_sistema.map(g=>{const q=grouped.get(g.sistema);return[g.sistema,g.movimientos,g.producciones_unicas,format(q),effective(q),diff(q)]}),['TOTAL',summary.movimientos,summary.producciones_unicas,totalUnknown?'Sin dato':sumKnown,totalUnknown?'Sin dato':sumActual,totalUnknown?'Sin dato':sumActual-sumKnown]]);
   $('pickReportDeliveries').innerHTML=table(detailHeaders,details(rows));
   $('pickReportMissing').innerHTML=table(missingHeaders,missing(rows));
-  status.textContent='ⓘ '+total_rows+' movimientos · '+filters.fecha_inicio+' a '+filters.fecha_fin+' · Ventanas programadas: cantidad_programada por producción única. *Ventanas estimadas: resta piezas faltantes; no equivale a ventanas físicamente entregadas.'+(quantities.ordenes_sin_cantidad?' '+quantities.ordenes_sin_cantidad+' órdenes sin cantidad de referencia.':'');
+  status.textContent='ⓘ '+total_rows+' movimientos · '+filters.fecha_inicio+' a '+filters.fecha_fin+' · Cantidad por producción PANELES_2; sin coincidencia inequívoca se indica Sin dato. Diferencia: ventanas afectadas reportadas, no piezas.';
  };
  $('pickReportRun')?.addEventListener('click',async()=>{status.textContent='Consultando…';state=null;for(const id of ['pickReportSummary','pickReportSystems','pickReportDeliveries','pickReportMissing'])$(id).replaceChildren();
   try{const f=normalizeReportFilters({from:$('pickReportFrom').value,to:$('pickReportTo').value,shift:$('pickReportShift').value,system:$('pickReportSystem').value});
@@ -43,7 +44,13 @@ export function initPickingDeliveryReport({getSupabaseClient,getAppToken}){
     if(offset===0){total=Number(data.total_rows)||0;summary=data.summary;por_sistema=data.por_sistema||[];filters=data.filters; if(total>20000)throw new Error('El reporte supera 20.000 movimientos; reduzca el rango');}
     rows.push(...(data.rows||[]));if(rows.length>=total)break;if(!(data.rows||[]).length)throw new Error('Paginación incompleta');
    }
-   if(rows.length!==total)throw new Error('La consulta no recuperó todos los registros');state={rows,total_rows:total,summary,por_sistema,filters};show();
+   if(rows.length!==total)throw new Error('La consulta no recuperó todos los registros');
+   // Reuse the role-validated Picking queue RPC, which resolves per-production PANEL quantities.
+   // No direct table access or permission changes. Historical missing orders remain unknown.
+   const {data:queue,error:queueError}=await db.rpc('sgp_picking_cola',{p_token:token});
+   const orderMap=new Map();if(!queueError&&Array.isArray(queue)){for(const item of queue){for(const order of item.ordenes||[]){const key=JSON.stringify([String(item.id_programacion),String(order.produccion||'').trim(),String(item.sistema||'').trim()]);const qty=Number(order.cantidad);if(Number.isFinite(qty)&&qty>=0&&!orderMap.has(key))orderMap.set(key,qty)}}}
+   for(const row of rows){const key=JSON.stringify([String(row.id_programacion),String(row.produccion||'').trim(),String(row.sistema||'').trim()]);row.cantidad_produccion=orderMap.has(key)?orderMap.get(key):null}
+   state={rows,total_rows:total,summary,por_sistema,filters};show();
   }catch(e){status.textContent='No fue posible consultar: '+(e?.message||String(e))}
  });
  $('pickReportImage')?.addEventListener('click',async()=>{
@@ -51,7 +58,7 @@ export function initPickingDeliveryReport({getSupabaseClient,getAppToken}){
    if(!state)throw new Error('Primero consulta el reporte');
    if(typeof window.html2canvas!=='function'){await new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='./vendor/html2canvas.min.js';s.onload=resolve;s.onerror=reject;document.head.appendChild(s)})}if(typeof window.html2canvas!=='function')throw new Error('Captura de imagen no disponible');
    const target=report;
-   const canvas=await window.html2canvas(target,{backgroundColor:'#ffffff',scale:2,scrollX:0,scrollY:0,windowWidth:Math.max(target.scrollWidth,1100),onclone:doc=>{const node=doc.getElementById('pickReportPanel');if(node){node.style.width='1100px';node.style.maxWidth='none';node.style.overflow='visible';node.querySelectorAll('.table-wrap').forEach(t=>{t.style.overflow='visible';t.style.maxWidth='none'})}}});
+   const canvas=await window.html2canvas(target,{backgroundColor:'#ffffff',scale:2,scrollX:0,scrollY:0,windowWidth:Math.max(target.scrollWidth,1100),onclone:doc=>{const node=doc.getElementById('pickReportPanel');if(node){node.classList.add('pick-report-export');node.style.width='1150px';node.style.maxWidth='none';node.style.overflow='visible';node.querySelectorAll('.table-wrap').forEach(t=>{t.style.overflow='visible';t.style.maxWidth='none'})}}});
    const a=document.createElement('a');a.download='SGP_Picking_Entregas_'+state.filters.fecha_inicio+'.png';a.href=canvas.toDataURL('image/png');a.click();
   }catch(e){alert('No fue posible generar la imagen: '+(e.message||e))}
  });
@@ -64,16 +71,20 @@ export function initPickingDeliveryReport({getSupabaseClient,getAppToken}){
   if(heading){heading.innerHTML='<div><strong>SGP ONE | REPORTE DE ENTREGAS DE PRODUCCIÓN</strong><small>PICKING · ALUMINIO | Línea: '+safe($('pickReportLine')?.value||'Línea de Picking')+' | Desde: '+safe(state.filters.fecha_inicio)+' | Hasta: '+safe(state.filters.fecha_fin)+' | Turno: '+safe(state.filters.turno||'Todos')+' | Generado: '+safe(new Date().toLocaleString('es-CO'))+'</small></div>';heading.style.cssText='background:linear-gradient(110deg,#103e79,#0867c7);color:#fff;padding:18px 22px;border-radius:8px';heading.querySelector('small').style.color='#e8f3ff'}
   const holder=document.createElement('div');holder.style.cssText='position:fixed;left:-20000px;top:0;width:1150px;background:white;padding:18px;z-index:-1';holder.append(clone);document.body.append(holder);
   try{
-   clone.style.display='block';clone.querySelectorAll('.table-wrap').forEach(x=>{x.style.overflow='visible';x.style.maxWidth='none'});
+   clone.style.display='block';clone.classList.add('pick-report-export');clone.querySelectorAll('.table-wrap').forEach(x=>{x.style.overflow='visible';x.style.maxWidth='none'});
    const canvas=await window.html2canvas(holder,{backgroundColor:'#fff',scale:1.6,scrollX:0,scrollY:0,windowWidth:1200});
    const pdf=new window.jspdf.jsPDF({orientation:'landscape',unit:'mm',format:'a4'}),margin=7,pw=297,ph=210,w=pw-margin*2,usable=ph-margin*2;
    const pagePixels=Math.floor(canvas.width*usable/w);let page=0;
-   for(let offset=0;offset<canvas.height;offset+=pagePixels){
+   // Slice at table-row boundaries to avoid cutting a production or missing-piece record.
+   const holderTop=holder.getBoundingClientRect().top;const scaleY=canvas.height/Math.max(holder.scrollHeight,1);
+   const rowBoundaries=[...holder.querySelectorAll('tr')].map(el=>Math.round((el.getBoundingClientRect().bottom-holderTop)*scaleY)).filter(y=>y>0&&y<canvas.height).sort((a,b)=>a-b);
+   for(let offset=0;offset<canvas.height;){
+    const targetEnd=Math.min(canvas.height,offset+pagePixels);const safeEnd=rowBoundaries.filter(y=>y>offset+pagePixels*.55&&y<=targetEnd).pop();const end=safeEnd||targetEnd;
     if(page++)pdf.addPage();
-    const slice=document.createElement('canvas');slice.width=canvas.width;slice.height=Math.min(pagePixels,canvas.height-offset);
+    const slice=document.createElement('canvas');slice.width=canvas.width;slice.height=end-offset;
     slice.getContext('2d').drawImage(canvas,0,offset,canvas.width,slice.height,0,0,slice.width,slice.height);
     pdf.addImage(slice.toDataURL('image/jpeg',.92),'JPEG',margin,margin,w,slice.height*w/slice.width);
-    pdf.setFontSize(8);pdf.setTextColor(80,100,130);pdf.text('SGP ONE · Picking | Página '+page,margin,ph-3);
+    pdf.setFontSize(8);pdf.setTextColor(80,100,130);pdf.text('SGP ONE · Picking | Página '+page,margin,ph-3);offset=end;
    }
    pdf.save('SGP_Picking_Entregas_'+state.filters.fecha_inicio+'.pdf');
   }finally{holder.remove()}
