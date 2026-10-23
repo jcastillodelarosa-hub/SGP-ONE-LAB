@@ -70,7 +70,7 @@ export function initPickingDeliveryReport({getSupabaseClient,getAppToken}){
   const clone=report.cloneNode(true);clone.querySelector('.pick-toolbar')?.remove();clone.querySelector('#pickReportStatus')?.remove();
   const heading=clone.querySelector('.pick-report-document-heading');
   if(heading){heading.innerHTML='<div><strong>SGP ONE | REPORTE DE ENTREGAS DE PRODUCCIÓN</strong><small>PICKING · ALUMINIO | Línea: '+safe($('pickReportLine')?.value||'Línea de Picking')+' | Desde: '+safe(state.filters.fecha_inicio)+' | Hasta: '+safe(state.filters.fecha_fin)+' | Turno: '+safe(state.filters.turno||'Todos')+' | Generado: '+safe(new Date().toLocaleString('es-CO'))+'</small></div>';heading.style.cssText='background:linear-gradient(110deg,#103e79,#0867c7);color:#fff;padding:18px 22px;border-radius:8px';heading.querySelector('small').style.color='#e8f3ff'}
-  const holder=document.createElement('div');holder.style.cssText='position:fixed;left:-20000px;top:0;width:1150px;background:white;padding:18px;z-index:-1';holder.append(clone);document.body.append(holder);
+  const holder=document.createElement('div');holder.style.cssText='position:fixed;left:0;top:0;width:1150px;background:white;padding:18px;z-index:-1';holder.append(clone);document.body.append(holder);
   try{
    clone.style.display='grid';clone.dataset.pickPdfClone='true';clone.classList.add('pick-report-export');clone.querySelectorAll('.table-wrap').forEach(x=>{x.style.overflow='visible';x.style.maxWidth='none'});
    const canvas=await window.html2canvas(holder,{backgroundColor:'#fff',scale:1.6,scrollX:0,scrollY:0,windowWidth:1200,onclone:doc=>{const el=doc.querySelector('[data-pick-pdf-clone]');if(el){el.style.display='grid';el.classList.add('pick-report-export')}}});
