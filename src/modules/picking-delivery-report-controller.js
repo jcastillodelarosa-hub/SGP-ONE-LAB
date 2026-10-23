@@ -44,7 +44,13 @@ export function initPickingDeliveryReport({getSupabaseClient,getAppToken}){
     if(offset===0){total=Number(data.total_rows)||0;summary=data.summary;por_sistema=data.por_sistema||[];filters=data.filters; if(total>20000)throw new Error('El reporte supera 20.000 movimientos; reduzca el rango');}
     rows.push(...(data.rows||[]));if(rows.length>=total)break;if(!(data.rows||[]).length)throw new Error('Paginación incompleta');
    }
-   if(rows.length!==total)throw new Error('La consulta no recuperó todos los registros');state={rows,total_rows:total,summary,por_sistema,filters};show();
+   if(rows.length!==total)throw new Error('La consulta no recuperó todos los registros');
+   // Read-only lookup: use the PANELES_2 production quantity, never reservation totals.
+   // RLS remains authoritative; missing or ambiguous matches stay unknown.
+   const names=[...new Set(rows.map(x=>String(x.produccion||'').trim()).filter(Boolean))];const candidates=[];
+   for(let i=0;i<names.length;i+=100){const {data:matches,error:lookupError}=await db.from('sgp_producciones').select('produccion,sistema,reserva_al,cantidad,id_linea').eq('id_linea','PANELES_2').in('produccion',names.slice(i,i+100));if(lookupError){status.textContent='Aviso: cantidades por producción no disponibles ('+lookupError.message+').';break}candidates.push(...(matches||[]))}
+   for(const row of rows){const matched=candidates.filter(p=>String(p.produccion||'').trim()===String(row.produccion||'').trim()&&String(p.sistema||'').trim()===String(row.sistema||'').trim()&&String(p.reserva_al||'').split(',')[0].trim()===String(row.reserva||'').trim());const valid=matched.filter(p=>p.cantidad!==null&&Number.isFinite(Number(p.cantidad))&&Number(p.cantidad)>=0);row.cantidad_produccion=matched.length===1&&valid.length===1?Number(valid[0].cantidad):null}
+   state={rows,total_rows:total,summary,por_sistema,filters};show();
   }catch(e){status.textContent='No fue posible consultar: '+(e?.message||String(e))}
  });
  $('pickReportImage')?.addEventListener('click',async()=>{
