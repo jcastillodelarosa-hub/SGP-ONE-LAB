@@ -55,5 +55,27 @@ export function initPickingDeliveryReport({getSupabaseClient,getAppToken}){
    const a=document.createElement('a');a.download='SGP_Picking_Entregas_'+state.filters.fecha_inicio+'.png';a.href=canvas.toDataURL('image/png');a.click();
   }catch(e){alert('No fue posible generar la imagen: '+(e.message||e))}
  });
- $('pickReportPdf')?.addEventListener('click',async()=>{try{if(!state)throw new Error('Primero consulta el reporte');if(!window.jspdf?.jsPDF){await new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='./vendor/jspdf.umd.min.js';s.onload=resolve;s.onerror=reject;document.head.appendChild(s)})}const pdf=new window.jspdf.jsPDF({unit:'mm',format:'a4'});let y=14;const add=(text,bold=false)=>{if(y>278){pdf.addPage();y=14}pdf.setFont('helvetica',bold?'bold':'normal');const lines=pdf.splitTextToSize(String(text).normalize('NFD').replace(/[\u0300-\u036f]/g,''),188);for(const line of lines){if(y>278){pdf.addPage();y=14}pdf.text(line,10,y);y+=5}};add('SGP ONE | REPORTE DE ENTREGAS DE PRODUCCION',true);add('Generado: '+new Date().toLocaleString('es-CO'));add(state.filters.fecha_inicio+' a '+state.filters.fecha_fin+' / '+(state.filters.turno||'Todos los turnos'));add('Movimientos: '+state.summary.movimientos+' | Producciones unicas: '+state.summary.producciones_unicas+' | Parciales: '+state.summary.parciales);add('Resumen por sistema',true);const quantitySummary=summarizeDeliveredWindows(state.rows);const bySystem=new Map(quantitySummary.porSistema.map(x=>[x.sistema,x]));for(const s of state.por_sistema){const q=bySystem.get(s.sistema);add(s.sistema+' | Movimientos: '+s.movimientos+' | Producciones: '+s.producciones_unicas+' | Cant. orden: '+(q?.cantidad_orden??0)+' | Cant. efectiva: '+(q?.cantidad_efectiva??0));}add('TOTAL | Cant. orden: '+quantitySummary.cantidad_orden+' | Cant. efectiva: '+quantitySummary.cantidad_efectiva);add('Detalle de entregas',true);for(const r of state.rows)add([r.fecha_operativa,r.turno_entrega,r.reserva,r.parte,r.produccion,r.sistema,r.completa?'Completa':'Parcial'].join(' | '));add('Faltantes historicos',true);for(const f of missing(state.rows))add(f.join(' | '));pdf.save('SGP_Picking_Entregas_'+state.filters.fecha_inicio+'.pdf')}catch(e){alert('Error PDF: '+e.message)}});
+ $('pickReportPdf')?.addEventListener('click',async()=>{try{
+  if(!state)throw new Error('Primero consulta el reporte');
+  if(typeof window.html2canvas!=='function')await new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='./vendor/html2canvas.min.js';s.onload=resolve;s.onerror=reject;document.head.appendChild(s)});
+  if(!window.jspdf?.jsPDF)await new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='./vendor/jspdf.umd.min.js';s.onload=resolve;s.onerror=reject;document.head.appendChild(s)});
+  const clone=report.cloneNode(true);clone.removeAttribute('id');clone.querySelector('.pick-toolbar')?.remove();clone.querySelector('#pickReportStatus')?.remove();
+  const heading=clone.querySelector('.pick-report-document-heading');
+  if(heading){heading.innerHTML='<div><strong>SGP ONE | REPORTE DE ENTREGAS DE PRODUCCIÓN</strong><small>PICKING · ALUMINIO | Línea: '+safe($('pickReportLine')?.value||'Línea de Picking')+' | Desde: '+safe(state.filters.fecha_inicio)+' | Hasta: '+safe(state.filters.fecha_fin)+' | Turno: '+safe(state.filters.turno||'Todos')+' | Generado: '+safe(new Date().toLocaleString('es-CO'))+'</small></div>';heading.style.cssText='background:linear-gradient(110deg,#103e79,#0867c7);color:#fff;padding:18px 22px;border-radius:8px';heading.querySelector('small').style.color='#e8f3ff'}
+  const holder=document.createElement('div');holder.style.cssText='position:fixed;left:-20000px;top:0;width:1150px;background:white;padding:18px;z-index:-1';holder.append(clone);document.body.append(holder);
+  try{
+   clone.style.display='block';clone.querySelectorAll('.table-wrap').forEach(x=>{x.style.overflow='visible';x.style.maxWidth='none'});
+   const canvas=await window.html2canvas(holder,{backgroundColor:'#fff',scale:1.6,scrollX:0,scrollY:0,windowWidth:1200});
+   const pdf=new window.jspdf.jsPDF({orientation:'landscape',unit:'mm',format:'a4'}),margin=7,pw=297,ph=210,w=pw-margin*2,usable=ph-margin*2;
+   const pagePixels=Math.floor(canvas.width*usable/w);let page=0;
+   for(let offset=0;offset<canvas.height;offset+=pagePixels){
+    if(page++)pdf.addPage();
+    const slice=document.createElement('canvas');slice.width=canvas.width;slice.height=Math.min(pagePixels,canvas.height-offset);
+    slice.getContext('2d').drawImage(canvas,0,offset,canvas.width,slice.height,0,0,slice.width,slice.height);
+    pdf.addImage(slice.toDataURL('image/jpeg',.92),'JPEG',margin,margin,w,slice.height*w/slice.width);
+    pdf.setFontSize(8);pdf.setTextColor(80,100,130);pdf.text('SGP ONE · Picking | Página '+page,margin,ph-3);
+   }
+   pdf.save('SGP_Picking_Entregas_'+state.filters.fecha_inicio+'.pdf');
+  }finally{holder.remove()}
+ }catch(e){alert('Error PDF: '+e.message)}});
 }
