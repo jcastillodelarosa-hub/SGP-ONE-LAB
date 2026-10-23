@@ -1,3 +1,5 @@
+> **Nota ejecutiva de continuidad (2026-10-22):** Este documento conserva hitos históricos, incluidos encabezados antiguos LAB v281. No interpretar esas referencias como versión vigente. PR #47 (visual v327), #48 (reserva principal), #49 (programación desde explorador v328), #50 (conexión Planificador–Programación v329) y #51 (Continuity v2) constan fusionados en main. Las pruebas funcionales y el despliegue actual no se han verificado en esta conciliación. Ver `SGP_ONE_CHECKPOINT.md` y comprobar HEAD/PR antes de actuar.
+
 ### Regla de reserva principal — prioridades (2026-10-22)
 
 - Regla aprobada: cuando `sgp_producciones.reserva_al` contiene varias reservas separadas por coma, la producción y todas sus unidades corresponden **únicamente a la primera reserva**. Las siguientes son referencias asociadas, no propietarios adicionales de las unidades.
