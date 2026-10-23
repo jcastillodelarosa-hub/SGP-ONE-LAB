@@ -99,3 +99,8 @@
 #pickReportPanel.pick-report-export .table-wrap{overflow:visible;max-width:none}
 #pickReportPanel.pick-report-export tr{break-inside:avoid;page-break-inside:avoid}
 @media(max-width:720px){#pickReportPanel .pick-report-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}#pickReportPanel .pick-report-kpi{padding:8px}}
+
+#pickReportPanel .pick-report-state{display:inline-block;padding:3px 7px;border-radius:5px;font-weight:800;font-size:10px}
+#pickReportPanel .pick-report-state.complete{color:#067647;background:#dcfae6}
+#pickReportPanel .pick-report-state.partial{color:#a45b00;background:#fff0cc}
+#pickReportDeliveries td:last-child{color:inherit;font-weight:inherit}
