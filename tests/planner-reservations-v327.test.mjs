@@ -29,7 +29,7 @@ test('v327: week selection, responsive cards and visual state/glass counters',()
  assert.ok(source.includes("#sgpExplorerResults{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))"));
  assert.ok(source.includes("@media(max-width:780px){#sgpExplorerResults{grid-template-columns:1fr}"));
  for(const cls of ['sgp-glass-prep','sgp-glass-nov','sgp-glass-trans','sgp-explorer-state'])assert.ok(source.includes(cls));
- assert.ok(source.includes('explorerState(r.estado_mecanizado)'));
+ assert.ok(source.includes('explorerState(explorerMechanized(r))'));
 });
 
 test('v327: planner retains calendar, table and kanban selector above reservation cards',()=>{
