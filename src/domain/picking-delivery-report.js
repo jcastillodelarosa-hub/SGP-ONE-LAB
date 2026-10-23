@@ -27,3 +27,28 @@ export function summarizeDeliveryEvents(events=[]){
 export function flattenDeliveryDetails(events=[]){
  return events.flatMap(e=>(Array.isArray(e.faltantes)?e.faltantes:[]).map(f=>({id_entrega:e.id_entrega,fecha_operativa:e.fecha_operativa,turno_entrega:e.turno_entrega,reserva:e.reserva,parte:e.parte,produccion:e.produccion,sistema:e.sistema,perfil:f.perfil,longitud:f.longitud,fabricacion:f.fabricacion,marca:f.marca,cantidad:f.cantidad,nc:f.nc,reserva_pendiente:f.reserva_pendiente})));
 }
+
+// Quantities are counted once per programming/production/system, not once per delivery movement.
+// Each missing physical piece reduces the effective count by one, per approved operational rule.
+export function summarizeDeliveredWindows(events=[]){
+ const orders=new Map();
+ for(const e of events){
+  const system=String(e.sistema||'SIN SISTEMA');
+  const key=JSON.stringify([e.id_programacion,e.produccion,system]);
+  const quantity=e.cantidad_programada==null?NaN:Number(e.cantidad_programada);
+  if(!orders.has(key))orders.set(key,{system,quantity:Number.isFinite(quantity)&&quantity>=0?quantity:null,missing:0});
+  const order=orders.get(key);
+  if(order.quantity===null&&Number.isFinite(quantity)&&quantity>=0)order.quantity=quantity;
+  order.missing+=(Array.isArray(e.faltantes)?e.faltantes:[]).reduce((sum,f)=>sum+Math.max(0,Number(f.cantidad)||0),0);
+ }
+ const systems=new Map();let known=0,effective=0,unknown=0;
+ for(const order of orders.values()){
+  if(!systems.has(order.system))systems.set(order.system,{sistema:order.system,cantidad_orden:0,cantidad_efectiva:0,ordenes_sin_cantidad:0});
+  const g=systems.get(order.system);
+  if(order.quantity===null){g.ordenes_sin_cantidad++;unknown++;continue;}
+  g.cantidad_orden+=order.quantity;
+  g.cantidad_efectiva+=Math.max(0,order.quantity-order.missing);
+  known+=order.quantity;effective+=Math.max(0,order.quantity-order.missing);
+ }
+ return {porSistema:[...systems.values()],cantidad_orden:known,cantidad_efectiva:effective,ordenes_sin_cantidad:unknown};
+}

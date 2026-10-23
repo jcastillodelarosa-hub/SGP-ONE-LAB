@@ -1,7 +1,7 @@
 // Isolated presentation model. Not wired into production navigation or Supabase.
-import { summarizeDeliveryEvents, flattenDeliveryDetails } from '../domain/picking-delivery-report.js';
+import { summarizeDeliveryEvents, flattenDeliveryDetails, summarizeDeliveredWindows } from '../domain/picking-delivery-report.js';
 export function buildPickingReportViewModel(events = [], filters = {}) {
- const totals = summarizeDeliveryEvents(events);
+ const totals = {...summarizeDeliveryEvents(events),...summarizeDeliveredWindows(events)};
  const deliveries = events.map(event => ({
   id_entrega:event.id_entrega,
   fecha_operativa:event.fecha_operativa,
