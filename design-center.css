@@ -1,0 +1,30 @@
+/* Centro de Diseño: estilos aislados, no modifican estados operativos. */
+.sgp-design-center{padding:18px 0 30px;color:#0b2442}
+.sgp-design-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:18px}
+.sgp-design-heading h3{margin:0 0 6px;font-size:24px}
+.sgp-design-heading p,.sgp-design-card p{margin:0 0 12px;color:#526681;line-height:1.5}
+.sgp-design-tag{white-space:nowrap;background:#eaf2fb;color:#103b73;border-radius:999px;padding:7px 12px;font-size:12px;font-weight:700}
+.sgp-design-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.sgp-design-card{background:#fff;border:1px solid #d9e5f3;border-radius:16px;padding:20px;min-width:0}
+.sgp-design-card h4{margin:0 0 14px;font-size:17px;color:#103b73}
+.sgp-design-wide{grid-column:1/-1}
+.sgp-design-brand{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:132px;background:#0b2442;border-radius:12px;color:white;margin-bottom:14px;text-align:center;padding:18px}
+.sgp-design-brand strong{font:800 clamp(28px,4vw,48px)/1 system-ui,sans-serif;letter-spacing:-1.5px}
+.sgp-design-brand strong span{color:#3994ff}
+.sgp-design-brand small{font-size:10px;letter-spacing:2px;margin-top:10px}
+.sgp-design-card label{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;font-weight:700;font-size:13px}
+.sgp-design-card select{width:100%;min-height:44px;border:1px solid #a9c2df;border-radius:8px;background:#fff;color:#0b2442;padding:9px;font:inherit}
+.sgp-design-note{font-size:12px}
+.sgp-design-controls{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.sgp-design-preview{display:flex;align-items:center;gap:14px;background:#0b2442;color:white;padding:15px;border-radius:12px;max-width:360px}
+.sgp-design-preview>span:first-child{display:grid;place-items:center;width:44px;height:44px;background:#1264c8;border-radius:9px;font-size:25px}
+.sgp-design-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:18px}
+.sgp-design-actions button{min-height:42px;border:1px solid #aac2de;border-radius:8px;padding:10px 16px;background:#fff;color:#103b73;cursor:pointer;font-weight:700}
+.sgp-design-actions button.primary{background:#1264c8;color:#fff;border-color:#1264c8}
+#sgpDesignStatus{font-size:13px;color:#215b8f}
+@media(max-width:760px){.sgp-design-grid,.sgp-design-controls{grid-template-columns:1fr}.sgp-design-heading{flex-direction:column}.sgp-design-card{padding:15px}}
+@media(prefers-reduced-motion:reduce){.sgp-design-center *{transition:none!important;animation:none!important}}
+/* Iconografía SVG consistente en menú compacto y vista previa. */
+.sidebar .nav .sgp-nav-icon svg{display:block;width:20px;height:20px;flex-shrink:0;stroke:currentColor}
+.sgp-design-preview>span:first-child svg{display:block;width:26px;height:26px;stroke:currentColor}
+.sgp-design-center button:focus-visible,.sgp-design-center select:focus-visible{outline:3px solid #58a6ff;outline-offset:2px}
