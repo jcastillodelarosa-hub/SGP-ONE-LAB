@@ -45,11 +45,11 @@ export function initPickingDeliveryReport({getSupabaseClient,getAppToken}){
     rows.push(...(data.rows||[]));if(rows.length>=total)break;if(!(data.rows||[]).length)throw new Error('Paginación incompleta');
    }
    if(rows.length!==total)throw new Error('La consulta no recuperó todos los registros');
-   // Read-only lookup: use the PANELES_2 production quantity, never reservation totals.
-   // RLS remains authoritative; missing or ambiguous matches stay unknown.
-   const names=[...new Set(rows.map(x=>String(x.produccion||'').trim()).filter(Boolean))];const candidates=[];
-   for(let i=0;i<names.length;i+=100){const {data:matches,error:lookupError}=await db.from('sgp_producciones').select('produccion,sistema,reserva_al,cantidad,id_linea').eq('id_linea','PANELES_2').in('produccion',names.slice(i,i+100));if(lookupError){status.textContent='Aviso: cantidades por producción no disponibles ('+lookupError.message+').';break}candidates.push(...(matches||[]))}
-   for(const row of rows){const matched=candidates.filter(p=>String(p.produccion||'').trim()===String(row.produccion||'').trim()&&String(p.sistema||'').trim()===String(row.sistema||'').trim()&&String(p.reserva_al||'').split(',')[0].trim()===String(row.reserva||'').trim());const valid=matched.filter(p=>p.cantidad!==null&&Number.isFinite(Number(p.cantidad))&&Number(p.cantidad)>=0);row.cantidad_produccion=matched.length===1&&valid.length===1?Number(valid[0].cantidad):null}
+   // Reuse the role-validated Picking queue RPC, which resolves per-production PANEL quantities.
+   // No direct table access or permission changes. Historical missing orders remain unknown.
+   const {data:queue,error:queueError}=await db.rpc('sgp_picking_cola',{p_token:token});
+   const orderMap=new Map();if(!queueError&&Array.isArray(queue)){for(const item of queue){for(const order of item.ordenes||[]){const key=JSON.stringify([String(item.id_programacion),String(order.produccion||'').trim(),String(item.sistema||'').trim()]);const qty=Number(order.cantidad);if(Number.isFinite(qty)&&qty>=0&&!orderMap.has(key))orderMap.set(key,qty)}}}
+   for(const row of rows){const key=JSON.stringify([String(row.id_programacion),String(row.produccion||'').trim(),String(row.sistema||'').trim()]);row.cantidad_produccion=orderMap.has(key)?orderMap.get(key):null}
    state={rows,total_rows:total,summary,por_sistema,filters};show();
   }catch(e){status.textContent='No fue posible consultar: '+(e?.message||String(e))}
  });
