@@ -16,7 +16,7 @@ test('LAB v323 report has branded header and no new data contract',()=>{
 });
 test('summary visual uses real data and accurate labels',()=>{
  for(const field of ['summary.movimientos','summary.producciones_unicas','summary.completas','summary.parciales','summary.filas_faltantes'])assert.ok(controller.includes(field),field);
- assert.match(controller,/Cant[.] efectiva/);
+ assert.match(controller,/Ventanas estimadas/);
  assert.match(controller,/% parciales/);
  assert.match(css,/pick-report-kpi/);
  assert.match(css,/pick-report-modal-header/);
