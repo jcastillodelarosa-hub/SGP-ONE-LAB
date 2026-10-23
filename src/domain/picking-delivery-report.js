@@ -35,7 +35,7 @@ export function summarizeDeliveredWindows(events=[]){
  for(const e of events){
   const system=String(e.sistema||'SIN SISTEMA');
   const key=JSON.stringify([e.id_programacion,e.produccion,system]);
-  const quantity=Number(e.cantidad_programada);
+  const quantity=e.cantidad_programada==null?NaN:Number(e.cantidad_programada);
   if(!orders.has(key))orders.set(key,{system,quantity:Number.isFinite(quantity)&&quantity>=0?quantity:null,missing:0});
   const order=orders.get(key);
   if(order.quantity===null&&Number.isFinite(quantity)&&quantity>=0)order.quantity=quantity;
