@@ -93,6 +93,42 @@ async function explorerLoadOperations(){
    if(hasDelivery)explorerOps.picking.set(key,{entrega:'ENTREGADA',completitud:order.entrega_completa===true?'COMPLETA':order.entrega_completa===false?'CON FALTANTES':'SIN DATO',validacion:raw==='PENDIENTE_VALIDACION'?'PENDIENTE DE VALIDACIÓN':raw==='VALIDADA'?'VALIDADA':raw==='AUDITADA_DIFERENCIA'?'VALIDADA CON DIFERENCIAS':raw});
   }
  }
+ // Fuente canónica del calendario: ejecución por id_programacion; no confundir PROGRAMADA con PROCESADO.
+ // Las lecturas directas respetan los permisos actuales del usuario, sin service_role.
+ try{
+  const visible=getRows(),reservations=[...new Set(visible.map(explorerPrimaryReserva).filter(Boolean))];
+  if(reservations.length&&reservations.length<=300){
+   const {data:plans,error:planError}=await client.from('sgp_mecanizado_programacion')
+    .select('id_programacion,reserva,fecha_programacion,estado').in('reserva',reservations).neq('estado','CANCELADA');
+   if(planError)throw planError;
+   if(seq!==explorerOpsSeq)return;
+   const ids=[...new Set((plans||[]).map(p=>p.id_programacion).filter(Boolean))];
+   if(ids.length&&ids.length<=500){
+    const [execution,details]=await Promise.all([
+     client.from('sgp_mecanizado_ejecucion').select('id_programacion,estado').in('id_programacion',ids),
+     client.from('sgp_mecanizado_programacion_detalle').select('id_programacion,key_produccion').in('id_programacion',ids)
+    ]);
+    if(execution.error)throw execution.error;
+    if(seq!==explorerOpsSeq)return;
+    const statusById=new Map((execution.data||[]).map(e=>[String(e.id_programacion),String(e.estado||'').toUpperCase()]));
+    const plansByReserve=new Map();
+    for(const p of plans||[]){const k=String(p.reserva||'').trim();if(!plansByReserve.has(k))plansByReserve.set(k,[]);plansByReserve.get(k).push(p)}
+    const keysByReserve=new Map();
+    for(const row of visible){const k=explorerPrimaryReserva(row);if(!keysByReserve.has(k))keysByReserve.set(k,new Set());keysByReserve.get(k).add(String(row.key_produccion||''))}
+    const statusByKey=new Map();
+    if(!details.error)for(const d of details.data||[]){const st=statusById.get(String(d.id_programacion));if(st&&d.key_produccion){const k=String(d.key_produccion);if(!statusByKey.has(k))statusByKey.set(k,new Set());statusByKey.get(k).add(st)}}
+    for(const [key,states] of statusByKey)if(states.size===1)explorerOps.mechanized.set(key,[...states][0]);
+    for(const [reserve,items] of plansByReserve){
+     const keys=keysByReserve.get(reserve);
+     if(!keys||keys.size!==1)continue; // No propagar estado de reserva a múltiples producciones.
+     const statuses=new Set(items.map(p=>statusById.get(String(p.id_programacion))).filter(Boolean));
+     if(statuses.size===1){const key=[...keys][0];if(!statusByKey.has(key))explorerOps.mechanized.set(key,[...statuses][0])}
+    }
+    explorerOps.mechanizedOk=true;
+   }
+  }
+ }catch(e){console.warn('Estados de ejecución del explorador no disponibles:',e)}
+ if(seq!==explorerOpsSeq)return;
  const reception=results[1];
  if(reception.status==='fulfilled'&&!reception.value.error&&Array.isArray(reception.value.data)){
   explorerOps.receptionOk=true;
