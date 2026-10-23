@@ -6,7 +6,7 @@ if(!root||document.querySelector('#sgpPlanner'))return;
 const section=document.createElement('section');
 section.id='sgpPlanner';
 section.setAttribute('aria-label','Planificador de ensamble');
-section.innerHTML='<div class="sgp-planner-heading"><h3>Planificador de Ensamble <small>Programación · LAB v327</small></h3><p>Calendario, tabla y Kanban. Las asignaciones y cantidades parciales se gestionan en el panel de programación inferior.</p></div><div class="sgp-planner-actions"><label>Vista <select id="sgpPlannerView"><option value="calendar">Calendario</option><option value="table">Tabla dinámica</option><option value="kanban">Kanban</option></select></label><input id="sgpPlannerSearch" type="search" placeholder="Buscar producción, reserva o sistema" aria-label="Buscar en planificador"><button type="button" id="sgpPlannerRefresh">Actualizar vista</button><button type="button" id="sgpPlannerLocations">Reporte de ubicaciones</button></div><div id="sgpPlannerStats" class="sgp-planner-stats"></div><div id="sgpPlannerContent" class="sgp-planner-content" aria-live="polite"></div><p class="sgp-planner-note">Los saldos y estados provienen de la consulta vigente. No se modifican datos. La programación por turno se gestiona abajo y requiere permisos de sesión.</p>';
+section.innerHTML='<div class="sgp-planner-heading"><h3>Planificador de Ensamble <small>Programación · LAB v330</small></h3><p>Calendario, tabla y Kanban. Las asignaciones y cantidades parciales se gestionan en el panel de programación inferior.</p></div><div class="sgp-planner-actions"><label>Vista <select id="sgpPlannerView"><option value="calendar">Calendario</option><option value="table">Tabla dinámica</option><option value="kanban">Kanban</option></select></label><input id="sgpPlannerSearch" type="search" placeholder="Buscar producción, reserva o sistema" aria-label="Buscar en planificador"><button type="button" id="sgpPlannerRefresh">Actualizar vista</button><button type="button" id="sgpPlannerLocations">Reporte de ubicaciones</button></div><div id="sgpPlannerStats" class="sgp-planner-stats"></div><div id="sgpPlannerContent" class="sgp-planner-content" aria-live="polite"></div><p class="sgp-planner-note">Los saldos y estados provienen de la consulta vigente. No se modifican datos. La programación por turno se gestiona abajo y requiere permisos de sesión.</p>';
 root.insertBefore(section,root.firstChild);
 // LAB v327: exploración jerárquica en solo lectura, sin inferir partes ni escribir programación.
 const explorer=document.createElement('section');explorer.id='sgpPlannerExplorer';
@@ -109,4 +109,31 @@ document.querySelector('#loadAssembly')?.addEventListener('click',()=>setTimeout
 document.querySelector('#productionPlannerTab')?.addEventListener('click',()=>{if(!getRows().length)document.querySelector('#loadAssembly')?.click();else render()});
 const assemblyStatus=document.querySelector('#assemblyStatus');if(assemblyStatus)new MutationObserver(render).observe(assemblyStatus,{childList:true,characterData:true,subtree:true});
 render();
+
+/* Pending assembly queue: read-only, preserves original assignment workflow. */
+const pending=document.createElement('section');pending.id='sgpPendingAssemblyQueue';pending.innerHTML='<h3>Pendientes por programar</h3><p>Saldo de ensamble positivo de la hoja cargada. Continuar solo prepara el formulario.</p><input type="search" id="sgpPendingSearch" placeholder="Filtrar producción, sistema o reserva" aria-label="Filtrar pendientes"><div id="sgpPendingRows"></div>';
+root.append(pending);
+const queueStyle=document.createElement('style');queueStyle.textContent='#sgpPendingAssemblyQueue{margin:16px 0;padding:16px;border:1px solid #c9d9eb;border-radius:14px;background:#f7f9fc}#sgpPendingAssemblyQueue h3{color:#103b73;margin:0}#sgpPendingAssemblyQueue p{font-size:13px;color:#526781}#sgpPendingSearch{box-sizing:border-box;width:100%;padding:11px;border:1px solid #b7cee9;border-radius:8px}.sgp-pending-item{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:8px 0;padding:12px;border:1px solid #dce5f2;border-radius:12px;background:white}.sgp-pending-item small{display:block;color:#526781}.sgp-pending-item button{min-height:44px;padding:8px 14px;border:0;border-radius:8px;background:#1264c8;color:white}.sgp-pending-item button:focus-visible{outline:3px solid #103b73;outline-offset:2px}@media(max-width:640px){.sgp-pending-item{flex-direction:column;align-items:stretch}}';document.head.append(queueStyle);
+function renderPending(){
+ const q=document.querySelector('#sgpPendingSearch').value.trim().toLowerCase();
+ const records=getRows().filter(r=>Number(r.saldo_ensamble)>0).filter(r=>!q||[r.produccion,r.sistema,r.reserva_al,r.reserva].some(v=>String(v??'').toLowerCase().includes(q)));
+ const host=document.querySelector('#sgpPendingRows');host.replaceChildren();
+ if(!records.length){host.textContent='Sin pendientes en la hoja cargada para este filtro.';return;}
+ records.forEach(r=>{
+  const item=document.createElement('article');item.className='sgp-pending-item';
+  const label=document.createElement('div'),name=document.createElement('strong'),detail=document.createElement('small'),button=document.createElement('button');
+  name.textContent=r.produccion||'Producción';detail.textContent=[r.sistema||'Sin sistema','Reserva '+(r.reserva_al||r.reserva||'—'),'Saldo '+r.saldo_ensamble].join(' · ');label.append(name,detail);
+  button.type='button';button.textContent='Continuar';button.onclick=()=>{
+   const result=window.SGPLinePlanner?.selectProduction?.(r.key_produccion);
+   if(!result?.ok){const msg=document.querySelector('#sgpPlanMessage');if(msg)msg.textContent=result?.message||'Actualiza la hoja de Ensamble.';return;}
+   document.querySelector('#sgpPlanProduction')?.focus();
+   document.querySelector('.sgp-planner-operations')?.scrollIntoView({behavior:'auto',block:'start'});
+  };item.append(label,button);host.append(item);
+ });
+}
+document.querySelector('#sgpPendingSearch').addEventListener('input',renderPending);
+document.querySelector('#productionPlannerTab')?.addEventListener('click',()=>setTimeout(renderPending,0));
+document.querySelector('#loadAssembly')?.addEventListener('click',()=>setTimeout(renderPending,850));
+if(assemblyStatus)new MutationObserver(renderPending).observe(assemblyStatus,{childList:true,subtree:true});
+renderPending();
 })();
