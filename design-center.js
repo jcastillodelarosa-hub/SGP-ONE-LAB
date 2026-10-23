@@ -76,7 +76,7 @@
       const next={...read(KEY),theme:theme.value,menu:menu.value};
       localStorage.setItem(KEY,JSON.stringify(next));
       localStorage.setItem(ICON_KEY,JSON.stringify(icons));
-      status.textContent='Guardado en este navegador. Recarga para aplicar el menú y la paleta.';
+      status.textContent='Preferencias guardadas en este navegador. Recarga para aplicar el menú y la paleta.';
     }catch{status.textContent='No se pudo guardar: almacenamiento local no disponible.'}
   });
   $('sgpDesignRestore').addEventListener('click',()=>{
@@ -84,7 +84,7 @@
     try{localStorage.removeItem(ICON_KEY);localStorage.setItem(KEY,JSON.stringify({...read(KEY),theme:'intense',menu:'hover'}));status.textContent='Restaurado. Recarga para aplicar los cambios.'}catch{status.textContent='Restauración visual aplicada; no se pudo guardar.'}
   });
   $('sgpDesignExport').addEventListener('click',()=>{
-    const payload={schema:'sgp-design-local-v1',logo:'typographic-geometric-flat',favicon:'SGP',theme:theme.value,menu:menu.value,icons};
+    const payload={schema:'sgp-design-local-v2',logo:'typographic-geometric-flat',favicon:'SGP',theme:theme.value,menu:menu.value,icons,components:{density:density.value,radius:radius.value,motion:motion.value}};
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
     const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='sgp-one-diseno.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
   });
@@ -97,7 +97,7 @@
   motion.value=['standard','reduced'].includes(components.motion)?components.motion:'standard';
   const previewComponents=()=>{sample.dataset.density=density.value;sample.dataset.radius=radius.value;sample.dataset.motion=motion.value};
   [density,radius,motion].forEach(control=>control.addEventListener('change',previewComponents));
-  $('sgpDesignApply').addEventListener('click',()=>{try{localStorage.setItem(DESIGN_KEY,JSON.stringify({density:density.value,radius:radius.value,motion:motion.value}))}catch{status.textContent='No se pudo guardar la preferencia de componentes.'}});
+  $('sgpDesignApply').addEventListener('click',()=>{try{localStorage.setItem(DESIGN_KEY,JSON.stringify({density:density.value,radius:radius.value,motion:motion.value}));status.textContent='Preferencias visuales guardadas en este navegador.'}catch{status.textContent='No se pudo guardar la preferencia de componentes.'}});
   $('sgpDesignRestore').addEventListener('click',()=>{density.value='comfortable';radius.value='soft';motion.value='standard';previewComponents();try{localStorage.removeItem(DESIGN_KEY)}catch{}});
   previewComponents();
   applyIcons();sync();
