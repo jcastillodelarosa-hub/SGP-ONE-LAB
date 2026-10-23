@@ -16,8 +16,19 @@ test('cola mantiene filtro y vista accesible',()=>{
 });
 
 test('estado de mecanizado se muestra sin confundir PROCESADO con entrega Picking',()=>{
- assert.match(source,/r\.estado_mecanizado\|\|'Sin dato'/);
- assert.match(source,/Entrega Picking: consultar Picking/);
+ assert.match(source,/r\.estado_mecanizado/);
+ assert.match(source,/explorerState\(r\.estado_mecanizado\)/);
+ assert.match(source,/data-state/);
  assert.match(source,/Observación mecanizado:/);
  assert.doesNotMatch(source,/estado_mecanizado\s*===\s*['"]PROCESADO['"]\s*\?\s*['"]ENTREGADO/);
+});
+
+test('explorador permite filtrar y ordenar por estado de mecanizado',()=>{
+ assert.match(source,/sgpExplorerStateFilter/);
+ assert.match(source,/sgpExplorerSort/);
+ assert.match(source,/estado_asc/);
+ assert.match(source,/estado_desc/);
+ assert.match(source,/ventanas_desc/);
+ assert.match(source,/explorerStateFilter\.addEventListener/);
+ assert.match(source,/explorerSort\.addEventListener/);
 });
