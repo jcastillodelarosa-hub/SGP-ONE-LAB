@@ -15,8 +15,57 @@ function selectPart(keys,meta={}){refreshProductions();const distinct=[...new Se
 window.SGPLinePlanner=Object.freeze({selectProduction,selectPart,getAssignments:()=>items.slice(),reloadAssignments:()=>load()});
 
 async function rpc(name,params){const token=window.SGPPlannerBridge?.getToken?.();if(!token)throw Error('No hay sesión accesible para el Planificador');const client=await window.SGPPlannerBridge.getClient();const {data,error}=await client.rpc(name,{p_token:token,...params});if(error)throw error;return data}
-async function load(){try{const d=date.value;if(!d)throw Error('Selecciona una fecha');const next=new Date(d+'T12:00:00');next.setDate(next.getDate()+6);items=await rpc('sgp_linea_plan_consultar',{p_desde:d,p_hasta:next.toLocaleDateString('en-CA'),p_linea:$('assemblyLine')?.value||null});render();document.dispatchEvent(new CustomEvent('sgp:line-plan-updated'));notify(items.length+' asignaciones consultadas')}catch(e){notify('No fue posible consultar: '+e.message)}}
+async function load(){try{const d=date.value;if(!d)throw Error('Selecciona una fecha');const next=new Date(d+'T12:00:00');next.setDate(next.getDate()+6);items=await rpc('sgp_linea_plan_consultar',{p_desde:d,p_hasta:next.toLocaleDateString('en-CA'),p_linea:$('assemblyLine')?.value||null});render();renderViews();document.dispatchEvent(new CustomEvent('sgp:line-plan-updated'));notify(items.length+' asignaciones consultadas')}catch(e){notify('No fue posible consultar: '+e.message)}}
 function render(){const el=$('sgpPlanAssignments');el.replaceChildren();if(!items.length){el.textContent='Sin asignaciones para el rango seleccionado.';return}items.forEach(a=>{const node=document.createElement('div');node.className='sgp-plan-row';node.innerHTML='<strong>'+escape(a.produccion)+'</strong> · '+escape(a.sistema)+' · '+escape(a.fecha)+' T'+escape(a.turno)+' · Prioridad '+escape(a.prioridad)+'<p>Programado: '+escape(a.cantidad)+' · Ensamblado registrado: '+escape(a.ejecutado)+' · Estado: '+escape(a.estado)+'</p><button data-act="move">Mover/dividir</button><button data-act="exec">Registrar ensamble</button>';node.querySelector('[data-act="move"]').onclick=async()=>{const qty=Number(prompt('Cantidad a mover (máximo '+a.cantidad+')',a.cantidad));if(!Number.isInteger(qty)||qty<1||qty>a.cantidad)return;try{await rpc('sgp_linea_plan_mover',{p_asignacion:a.id,p_fecha:date.value,p_turno:Number($('sgpPlanShift').value),p_cantidad:qty,p_prioridad:Number($('sgpPlanPriority').value)});await load()}catch(e){notify('Movimiento rechazado: '+e.message)}};node.querySelector('[data-act="exec"]').onclick=async()=>{const qty=Number(prompt('Unidades ensambladas',Math.max(1,a.cantidad-Number(a.ejecutado))));if(!Number.isInteger(qty)||qty<1)return;const obs=prompt('Observación (obligatoria si queda pendiente)','');if(obs===null)return;try{await rpc('sgp_linea_plan_registrar',{p_asignacion:a.id,p_cantidad:qty,p_observacion:obs});await load()}catch(e){notify('Registro rechazado: '+e.message)}};el.append(node)})}
+
+/* LAB v339: tres vistas enlazadas a la misma consulta de asignaciones. */
+const viewShell=document.createElement('section');
+viewShell.className='sgp-line-views';
+viewShell.innerHTML='<nav class="sgp-line-view-tabs" aria-label="Vistas de planificación"><button type="button" data-view="calendar" aria-pressed="true">Calendario</button><button type="button" data-view="pending" aria-pressed="false">Pendientes</button><button type="button" data-view="tracking" aria-pressed="false">Seguimiento</button></nav><div class="sgp-line-view-content" aria-live="polite"></div>';
+panel.prepend(viewShell);
+const viewContent=viewShell.querySelector('.sgp-line-view-content');
+let activeView='calendar',selectedDay='';
+const sum=(arr,k)=>arr.reduce((n,a)=>n+(Number(a[k])||0),0);
+const dayKey=a=>String(a.fecha||'').slice(0,10);
+function renderViews(){
+ const data=Array.isArray(items)?items:[],all=rows();
+ viewShell.querySelectorAll('[data-view]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.view===activeView)));
+ if(activeView==='pending'){
+  viewContent.innerHTML='<div class="sgp-line-view-head"><h4>Pendientes de Ensamble</h4><input type="search" id="sgpLinePendingSearch" placeholder="Buscar producción, reserva o sistema" aria-label="Buscar pendientes"></div><div id="sgpLinePendingRows"></div>';
+  const list=viewContent.querySelector('#sgpLinePendingRows');
+  const draw=()=>{const q=viewContent.querySelector('#sgpLinePendingSearch').value.toLocaleLowerCase().trim();
+   const filtered=all.filter(a=>Number(a.saldo_ensamble)>0&&[a.produccion,a.id,a.sistema,a.reserva_al,a.reserva].some(v=>String(v??'').toLocaleLowerCase().includes(q)));
+   list.replaceChildren();
+   if(!filtered.length){list.textContent='No hay producciones con saldo positivo para el filtro actual.';return}
+   filtered.forEach(a=>{const line=document.createElement('div');line.className='sgp-line-pending-row';
+    line.innerHTML='<div><strong>'+escape(a.produccion||a.id||'Producción')+'</strong><small>'+escape(a.sistema||'—')+' · Reserva '+escape(a.reserva_al||a.reserva||'—')+' · Saldo Export '+escape(a.saldo_ensamble)+'</small></div><button type="button">Programar</button>';
+    line.querySelector('button').onclick=()=>{const result=selectProduction(a.key_produccion);notify(result.message);if(result.ok)panel.querySelector('#sgpPlanProduction')?.scrollIntoView({behavior:'smooth',block:'center'});};
+    list.append(line);
+   });
+  };viewContent.querySelector('#sgpLinePendingSearch').addEventListener('input',draw);draw();return;
+ }
+ if(activeView==='calendar'){
+  const days=[...new Set(data.map(dayKey).filter(Boolean))].sort();
+  viewContent.innerHTML='<div class="sgp-line-view-head"><h4>Calendario por día y turno</h4><small>Asignaciones consultadas · Selecciona un día</small></div><div class="sgp-line-days"></div><div id="sgpLineDayDetail"></div>';
+  const grid=viewContent.querySelector('.sgp-line-days');
+  if(!days.length){grid.textContent='Sin asignaciones para el rango consultado. Pulsa Consultar turnos.';return}
+  if(!days.includes(selectedDay))selectedDay=days[0];
+  days.forEach(d=>{const entries=data.filter(a=>dayKey(a)===d),button=document.createElement('button');button.type='button';button.className='sgp-line-day';
+   button.setAttribute('aria-pressed',String(d===selectedDay));button.innerHTML='<strong>'+escape(d)+'</strong><span>T1: '+sum(entries.filter(a=>Number(a.turno)===1),'cantidad')+'</span><span>T2: '+sum(entries.filter(a=>Number(a.turno)===2),'cantidad')+'</span>';
+   button.onclick=()=>{selectedDay=d;renderViews()};grid.append(button)});
+  const day=data.filter(a=>dayKey(a)===selectedDay),detail=viewContent.querySelector('#sgpLineDayDetail');
+  detail.innerHTML='<h5>'+escape(selectedDay)+' · '+day.length+' asignaciones</h5>'+[1,2].map(t=>{const shift=day.filter(a=>Number(a.turno)===t);return '<details open><summary>Turno '+t+' · '+sum(shift,'cantidad')+' programadas · '+sum(shift,'ejecutado')+' ensambladas</summary>'+ (shift.length?shift.map(a=>'<div class="sgp-line-detail"><strong>'+escape(a.produccion)+'</strong><small>Prioridad '+escape(a.prioridad)+' · '+escape(a.cantidad)+' programadas · '+escape(a.ejecutado)+' ensambladas</small></div>').join(''):'<p>Sin asignaciones</p>')+'</details>'}).join('');return;
+ }
+ viewContent.innerHTML='<div class="sgp-line-view-head"><h4>Seguimiento de Ensamble</h4><small>Datos de asignaciones y ejecución consultadas</small></div><div class="sgp-line-table-wrap"><table><thead><tr><th>Fecha</th><th>Turno</th><th>Prioridad</th><th>Producción</th><th>Programado</th><th>Ensamblado</th><th>Pendiente</th><th>Estado</th></tr></thead><tbody></tbody></table></div>';
+ const tbody=viewContent.querySelector('tbody');if(!data.length){tbody.innerHTML='<tr><td colspan="8">Sin asignaciones consultadas</td></tr>';return}
+ data.forEach(a=>{const tr=document.createElement('tr');const cells=[dayKey(a),a.turno,a.prioridad,a.produccion,a.cantidad,a.ejecutado,Math.max(0,(Number(a.cantidad)||0)-(Number(a.ejecutado)||0)),a.estado];cells.forEach(v=>{const td=document.createElement('td');td.textContent=String(v??'—');tr.append(td)});tbody.append(tr)});
+}
+viewShell.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>{activeView=b.dataset.view;renderViews()});
+const viewCss=document.createElement('style');
+viewCss.textContent='.sgp-line-views{margin-bottom:14px}.sgp-line-view-tabs{display:flex;gap:6px;overflow-x:auto;padding:3px 0 12px}.sgp-line-view-tabs button{flex:1;min-width:95px;min-height:44px;border:1px solid #cbdcf0;background:#fff;color:#103b73;border-radius:10px;font-weight:650}.sgp-line-view-tabs button[aria-pressed="true"]{background:#1264c8;color:#fff}.sgp-line-view-head{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;margin:5px 0 12px}.sgp-line-view-head h4{margin:0;color:#103b73}.sgp-line-view-head input{padding:10px;border:1px solid #cbdcf0;border-radius:9px;max-width:100%;flex:1}.sgp-line-days{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:8px}.sgp-line-day{display:grid;gap:4px;text-align:left;border:1px solid #cbdcf0;border-radius:12px;padding:10px;background:#fff;color:#0b2442}.sgp-line-day[aria-pressed="true"]{border:2px solid #1264c8;background:#eaf2fb}.sgp-line-day span,.sgp-line-detail small,.sgp-line-pending-row small{display:block;color:#526781;font-size:12px}.sgp-line-pending-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #dce5f2}.sgp-line-pending-row strong{font-size:14px}.sgp-line-pending-row button{border:0;background:#1264c8;color:white;border-radius:9px;min-height:40px;padding:0 14px}.sgp-line-detail{padding:8px;border-bottom:1px solid #e5ecf5}.sgp-line-table-wrap{overflow:auto;max-height:65vh}.sgp-line-table-wrap table{width:100%;border-collapse:collapse;min-width:680px}.sgp-line-table-wrap th,.sgp-line-table-wrap td{padding:10px;border-bottom:1px solid #dce5f2;text-align:left}.sgp-line-table-wrap th{position:sticky;top:0;background:#eaf2fb;color:#103b73}.sgp-line-view-content details{margin:10px 0;padding:10px;border:1px solid #dce5f2;border-radius:10px}@media(max-width:650px){.sgp-line-views{margin:-4px -5px 12px}.sgp-line-days{grid-template-columns:repeat(2,minmax(0,1fr))}.sgp-line-pending-row{padding:8px 0}.sgp-line-pending-row strong{font-size:13px}.sgp-line-pending-row button{flex:none}.sgp-planner-operations .sgp-plan-row{font-size:13px}}@media(prefers-reduced-motion:reduce){.sgp-line-views *{scroll-behavior:auto!important}}';
+document.head.append(viewCss);
+renderViews();
+
 $('sgpPlanPartCancel').onclick=()=>{pendingPart=null;$('sgpPlanPartBatch').hidden=true;notify('Selección de parte cancelada; no se guardaron cambios.');};
 $('sgpPlanPartSave').disabled=true;$('sgpPlanPartSave').textContent='Programación masiva pendiente de validación';$('sgpPlanPartSave').title='Se requiere una operación transaccional autorizada en Supabase para evitar programación parcial o duplicada.';
 $('sgpPlanSave').onclick=async()=>{const key=$('sgpPlanProduction').value;const qty=Number($('sgpPlanQuantity').value);if(!key||!Number.isInteger(qty)||qty<1){notify('Selecciona producción y cantidad entera positiva');return}try{await rpc('sgp_linea_plan_programar',{p_key_produccion:key,p_fecha:date.value,p_turno:Number($('sgpPlanShift').value),p_cantidad:qty,p_prioridad:Number($('sgpPlanPriority').value)});await load()}catch(e){notify('Programación rechazada: '+e.message)}};
