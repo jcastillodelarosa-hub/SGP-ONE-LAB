@@ -99,7 +99,7 @@ test('conserva flujos de validación, foto/cámara y versión consistente',()=>{
  assert.match(app,/els\.dailyExportFile\?\.files/);
  assert.match(app,/\#recChoosePhotos'\)\?\.addEventListener/);
  assert.match(app,/\#recTakePhoto'\)\?\.addEventListener/);
- assert.match(html,/LAB v332/);
- assert.match(html,/app\.js\?v=332/);
- assert.match(html,/styles\.css\?v=332/);
+ assert.match(html,/LAB v333/);
+ assert.match(html,/app\.js\?v=333/);
+ assert.match(html,/styles\.css\?v=333/);
 });
