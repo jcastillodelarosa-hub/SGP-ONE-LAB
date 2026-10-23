@@ -24,9 +24,9 @@ test('9 controles XLSX compactos, sin etiquetas anidadas ni cambios en entradas 
  assert.match(html,/id="programmingFiles"[^>]*multiple/);
  assert.match(html,/id="recPhotos" type="file" accept="image\/\*" multiple hidden/);
  assert.match(html,/id="recCameraPhotos" type="file" accept="image\/\*" capture="environment" multiple hidden/);
- assert.match(html,/LAB v341/);
- assert.match(html,/app\.js\?v=341/);
- assert.match(html,/styles\.css\?v=341/);
+ assert.match(html,/LAB v342/);
+ assert.match(html,/app\.js\?v=342/);
+ assert.match(html,/styles\.css\?v=342/);
 });
 
 test('estados compactos: icono Excel, tarjetas proporcionales y quitar accesible',()=>{
