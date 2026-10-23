@@ -24,3 +24,7 @@
 #sgpDesignStatus{font-size:13px;color:#215b8f}
 @media(max-width:760px){.sgp-design-grid,.sgp-design-controls{grid-template-columns:1fr}.sgp-design-heading{flex-direction:column}.sgp-design-card{padding:15px}}
 @media(prefers-reduced-motion:reduce){.sgp-design-center *{transition:none!important;animation:none!important}}
+/* Iconografía SVG consistente en menú compacto y vista previa. */
+.sidebar .nav .sgp-nav-icon svg{display:block;width:20px;height:20px;flex-shrink:0;stroke:currentColor}
+.sgp-design-preview>span:first-child svg{display:block;width:26px;height:26px;stroke:currentColor}
+.sgp-design-center button:focus-visible,.sgp-design-center select:focus-visible{outline:3px solid #58a6ff;outline-offset:2px}
