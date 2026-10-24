@@ -38,7 +38,7 @@ test('ausencia, estado desconocido y contradicciones nunca se interpretan como e
  assert.deepEqual(indexReceptionAluminumStates(null),new Map());
 });
 
-test('colores y etiquetas: entregado verde, bodega amarillo, abastecimiento naranja',()=>{
+test('colores y etiquetas: entregado verde, bodega amarillo, abastecimiento rojo',()=>{
  assert.deepEqual(receptionAluminumStateMeta('ALUMINIO_ENTREGADO'),{label:'ALUMINIO ENTREGADO',css:'rec-al-delivered'});
  assert.deepEqual(receptionAluminumStateMeta('PENDIENTE_BODEGA'),{label:'PEND. BODEGA',css:'rec-al-warehouse'});
  assert.deepEqual(receptionAluminumStateMeta('PENDIENTE_ABASTECIMIENTO'),{label:'PEND. ABASTECIMIENTO',css:'rec-al-supply'});
@@ -61,5 +61,5 @@ test('Recepción conserva auditoría y consulta la misma RPC de seguimiento que 
  assert.match(html,/id="recTrackingStatus"/);
  assert.match(css,/\.rec-al-delivered\s*\{[^}]*#dcfce7/);
  assert.match(css,/\.rec-al-warehouse\s*\{[^}]*#fef3c7/);
- assert.match(css,/\.rec-al-supply\s*\{[^}]*#ffedd5/);
+ assert.match(css,/\.rec-al-supply\s*\{[^}]*#fee2e2/);
 });
