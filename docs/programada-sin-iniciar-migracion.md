@@ -42,10 +42,18 @@ Los cambios actuales en `app.js` y `src/config/domain.js` son preparatorios y **
 
 ## Resultado de revisión integral posterior (2026-10-24)
 
-**Aclaración temporal:** los párrafos iniciales describen hallazgos antes de las correcciones sucesivas. El SQL `STAGED` actual ya contempla los CHECK de ejecución general y por orden, estados predeterminados `SIN INICIAR`, triggers de `programada`, reemplazo de RPC de escritura y respaldo de arrastre/Picking con comprobaciones de contrato. Continúa **sin ejecución real** sobre una base de ensayo.
+**Aclaración temporal:** los párrafos iniciales describen hallazgos antes de las correcciones sucesivas. La migración `20261024154000_programada_independiente_v348.sql` ya contempla los CHECK de ejecución general y por orden, estados predeterminados `SIN INICIAR`, triggers de `programada`, reemplazo de RPC de escritura y respaldo de arrastre/Picking con comprobaciones de contrato. Continúa **sin ejecución real** sobre una base de ensayo.
 
 **CI validada:** GitHub Actions 40103946305 (195/195 pruebas, diez de v348), 40103946303 (sintaxis JS). El paquete de release pasa su verificación automática; las pruebas son estáticas/de código, **no validan integración con PostgreSQL vivo**.
 
 **Preflight vivo de Supabase (solo lectura):** 64 `PROGRAMADA` y 3 `CANCELADA` en programación; 2 `PROGRAMADA`, 2 `CORTE`, 128 `PROCESADO`, 5 `REPROGRAMADO` en ejecución por orden; 6 `CORTE`, 2 `MECANIZADO`, 41 `PROCESADO` en ejecución general. La segunda tabla tiene CHECK que rechaza `SIN INICIAR` hoy, subsanado en el SQL preparado, no en la base real.
 
 **Gate NO superado:** ensayo SQL en rama Supabase (requiere consentimiento explícito del coste que indique Supabase) o entorno de pruebas equivalente; pruebas de roles, cancelación/reprogramación/arrastre/Picking con datos de ensayo; plan de reversión; después migración coordinada y despliegue/aceptación PC y móvil. No interpretar 195/195 como publicación ni aceptación funcional.
+
+
+## Ensayo transaccional y reversión (2026-10-24)
+- **Ensayo sobre la conexión real de Supabase sin persistir cambios:** SQL completo ejecutado dentro de `BEGIN ... ROLLBACK`, con límites de bloqueo y tiempo; comprobadas restricciones, backfill, triggers de cancelación/reactivación y sustitución controlada de RPC de arrastre y Picking. La columna `programada` no permaneció en producción tras el ensayo.
+- **Ensayo de reversión:** se ejecutó secuencialmente migración y el script de restauración de las tres definiciones RPC originales dentro de una transacción revertida; las comprobaciones SQL confirmaron retorno de estado y ausencia de columna persistente.
+- **CI:** 195/195 pruebas automatizadas y verificación sintáctica aprobadas en el commit `fa573a52` antes de pasar el archivo al nombre definitivo.
+- **Archivo de reversión:** `docs/programada-sin-iniciar-v348-rollback.sql` contiene las definiciones originales y protege contra reversión insegura si se crearon nuevas ejecuciones generales `SIN INICIAR`.
+- **Alcance pendiente:** no se ensayaron llamadas con sesión real de usuario ni interfaz de PC/móvil; no existe rama aislada. La prueba transaccional no equivale a validación operativa real. Se requiere verificar esos flujos tras la publicación.
