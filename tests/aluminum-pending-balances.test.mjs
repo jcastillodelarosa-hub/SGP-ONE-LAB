@@ -59,3 +59,7 @@ test('reverso con cantidad diferente se rechaza', () => {
  const moves=[{id_movimiento:'m1',id_detalle:'a',tipo:'AVANCE',cantidad:2},{tipo:'REVERSO',id_movimiento_revertido:'m1',id_detalle:'a',cantidad:1}];
  assert.throws(() => calculateFabricationBalances(details,moves));
 });
+
+test('detalles duplicados se rechazan', () => {
+ assert.throws(() => calculateFabricationBalances([{id_detalle:'a',cantidad_validada:2},{id_detalle:'a',cantidad_validada:3}],[]));
+});
