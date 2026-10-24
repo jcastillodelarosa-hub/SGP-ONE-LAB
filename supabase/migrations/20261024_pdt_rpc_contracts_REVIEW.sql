@@ -50,8 +50,8 @@ BEGIN
    SELECT 1 FROM public.sgp_aluminio a
    WHERE a.activo='SI' AND a.tipo_pieza='PANEL'
      AND btrim(coalesce(a.codigo_sap,''))=btrim(coalesce(v_p.perfil,''))
-     AND ((v_p.key_produccion IS NOT NULL AND a.key_produccion=v_p.key_produccion)
-          OR a.produccion=v_p.produccion)
+     AND ((nullif(btrim(v_p.key_produccion),'') IS NOT NULL AND a.key_produccion=v_p.key_produccion)
+          OR (nullif(btrim(v_p.key_produccion),'') IS NULL AND a.produccion=v_p.produccion))
      AND lower(btrim(coalesce(a.fabricacion,'')))=lower(v_fab)
      AND a.longitud=v_long AND upper(btrim(coalesce(a.acabado,'')))=upper(v_acab)
   ) INTO v_source;
