@@ -72,8 +72,10 @@ function show(){
  render();document.body.appendChild(overlay);document.addEventListener('keydown',key);overlay.querySelector('[data-close]').focus();
  overlay.addEventListener('click',e=>{if(e.target===overlay)close()});
 }
+window.SGPShowWeeklySummary=show;
 function install(){
  const host=document.querySelector('#progAgenda');if(!host)return;
+ if(host.querySelector('[data-cal-weekly-summary]'))return;
  if(host.querySelector('.sgp-shift-open'))return;
  const button=document.createElement('button');button.type='button';button.className='sgp-shift-open';button.textContent='▦ Ver resumen semanal por sistema y turno';button.onclick=show;host.appendChild(button);
 }
