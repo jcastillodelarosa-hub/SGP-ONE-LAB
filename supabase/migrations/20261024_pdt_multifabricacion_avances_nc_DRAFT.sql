@@ -17,10 +17,16 @@ CREATE TABLE IF NOT EXISTS public.sgp_aluminio_pendiente_detalles (
 CREATE INDEX IF NOT EXISTS sgp_pdt_detalle_pendiente_idx
   ON public.sgp_aluminio_pendiente_detalles (id_pendiente);
 
+-- Enforce that every movement references a detail of the SAME pending.
+ALTER TABLE public.sgp_aluminio_pendiente_detalles
+  ADD CONSTRAINT sgp_pdt_detalle_parent_unique UNIQUE (id_pendiente,id_detalle);
+
 CREATE TABLE IF NOT EXISTS public.sgp_aluminio_pendiente_movimientos (
   id_movimiento uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   id_pendiente uuid NOT NULL REFERENCES public.sgp_aluminio_pendientes(id_pendiente),
-  id_detalle uuid NOT NULL REFERENCES public.sgp_aluminio_pendiente_detalles(id_detalle),
+  id_detalle uuid NOT NULL,
+  CONSTRAINT sgp_pdt_mov_detalle_mismo_pendiente FOREIGN KEY (id_pendiente,id_detalle)
+    REFERENCES public.sgp_aluminio_pendiente_detalles(id_pendiente,id_detalle),
   tipo text NOT NULL CHECK (tipo IN ('AVANCE', 'REVERSO')),
   cantidad integer NOT NULL CHECK (cantidad > 0),
   id_movimiento_revertido uuid REFERENCES public.sgp_aluminio_pendiente_movimientos(id_movimiento),
