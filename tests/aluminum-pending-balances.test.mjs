@@ -69,3 +69,8 @@ test('reverso de fabricación incorrecta se rechaza', () => {
  const moves=[{id_movimiento:'m1',id_detalle:'a',tipo:'AVANCE',cantidad:2},{tipo:'REVERSO',id_movimiento_revertido:'m1',id_detalle:'b',cantidad:2}];
  assert.throws(() => calculateFabricationBalances(rows,moves));
 });
+
+test('NC repetidas no duplican el indicador', () => {
+ const values=normalizeNcNumbers('1006163,1006164;1006163');
+ assert.deepEqual(values,['1006163','1006164']);
+});
