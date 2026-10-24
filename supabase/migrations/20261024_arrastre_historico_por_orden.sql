@@ -33,7 +33,7 @@ begin
    public.sgp_es_reserva_compartida(sp.key_produccion) reserva_compartida,
    public.sgp_reservas_por_produccion_json(sp.key_produccion) reservas_compartidas,
    coalesce(eo.estado,me.estado,'PROGRAMADA') estado_actual,eo.observacion,
-   (select min(h.fecha_evento) from public.sgp_mecanizado_historial_orden h where h.id_programacion=mp.id_programacion and h.produccion=sp.produccion and h.estado_nuevo='PROCESADO') procesado_en,
+   (select max(h.fecha_evento) from public.sgp_mecanizado_historial_orden h where h.id_programacion=mp.id_programacion and h.produccion=sp.produccion and h.estado_nuevo='PROCESADO') procesado_en,
    (select max(h.fecha_evento) from public.sgp_mecanizado_historial_orden h where h.id_programacion=mp.id_programacion and h.produccion=sp.produccion and h.estado_nuevo='REPROGRAMADO') reprogramado_en,
    (select min(r.creado_en) from public.sgp_mecanizado_reprogramaciones r where r.id_origen=mp.id_programacion and r.produccion=sp.produccion) movido_en
   from public.sgp_mecanizado_programacion mp
