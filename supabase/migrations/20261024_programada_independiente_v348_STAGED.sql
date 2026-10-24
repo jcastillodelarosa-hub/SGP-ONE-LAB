@@ -23,6 +23,21 @@ UPDATE public.sgp_mecanizado_programacion
 SET estado = 'SIN INICIAR'
 WHERE estado = 'PROGRAMADA';
 
+-- Nueva programación: el indicador debe ser SÍ desde el INSERT, incluso
+-- antes de adaptar todas las sobrecargas de sgp_mecanizado_programar.
+-- Trigger limitado a INSERT: no reescribe cancelaciones ni programación histórica.
+CREATE OR REPLACE FUNCTION public.sgp_mecanizado_programada_al_insertar()
+RETURNS trigger LANGUAGE plpgsql SET search_path TO 'public'
+AS $function$
+BEGIN
+ NEW.programada := (NEW.estado IS DISTINCT FROM 'CANCELADA');
+ RETURN NEW;
+END $function$;
+DROP TRIGGER IF EXISTS trg_sgp_mecanizado_programada_insert ON public.sgp_mecanizado_programacion;
+CREATE TRIGGER trg_sgp_mecanizado_programada_insert
+BEFORE INSERT ON public.sgp_mecanizado_programacion
+FOR EACH ROW EXECUTE FUNCTION public.sgp_mecanizado_programada_al_insertar();
+
 -- Normalización de escritura: preserva autorización, observaciones e historial.
 -- El estado de programación queda separado de los estados de ejecución.
 CREATE OR REPLACE FUNCTION public.sgp_mecanizado_guardar_estado_orden(
