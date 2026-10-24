@@ -39,8 +39,11 @@ function show(){
  const systems=[...new Set([...week.map(x=>String(x.sistema||'SIN SISTEMA').trim()),...demand.keys()])].sort((a,b)=>a.localeCompare(b,'es'));
  const total=week.reduce((s,x)=>s+num(x.cantidad_programada),0);
  const demandTotal=[...demand.values()].reduce((a,b)=>a+b,0);
- const validCoverage=!!Number(document.querySelector('#progWeek')?.value)&&demandTotal>0&&!conflicts.length;
- const warnings=[...conflicts];if(!Number(document.querySelector('#progWeek')?.value))warnings.push('Selecciona una semana para comparar con su demanda.');if(!demandTotal)warnings.push('No hay demanda semanal disponible para conciliar.');
+ const selectedWeek=Number(document.querySelector('#progWeek')?.value)||null;
+ const thursday=new Date(monday);thursday.setDate(thursday.getDate()+3);const firstThursday=new Date(thursday.getFullYear(),0,4,12);firstThursday.setDate(firstThursday.getDate()-(firstThursday.getDay()+6)%7);const calendarWeek=1+Math.round((monday-firstThursday)/604800000);
+ const weekAligned=selectedWeek===calendarWeek;
+ const validCoverage=!!selectedWeek&&weekAligned&&demandTotal>0&&!conflicts.length;
+ const warnings=[...conflicts];if(!Number(document.querySelector('#progWeek')?.value))warnings.push('Selecciona una semana para comparar con su demanda.');if(!demandTotal)warnings.push('No hay demanda semanal disponible para conciliar.');if(selectedWeek&&!weekAligned)warnings.push('El calendario muestra la semana '+calendarWeek+' pero el filtro de demanda es la semana '+selectedWeek+'. Selecciona la misma semana antes de interpretar porcentajes.');
  const perSys=new Map(systems.map(s=>[s,week.filter(x=>String(x.sistema||'SIN SISTEMA').trim()===s).reduce((n,x)=>n+num(x.cantidad_programada),0)]));
  systems.forEach(s=>{if((perSys.get(s)||0)>(demand.get(s)||0))warnings.push('Programación superior a demanda semanal: '+s+'. Revisar arrastres y alcance de semana.')});
  const overlay=document.createElement('div');overlay.className='sgp-shift-overlay';overlay.setAttribute('role','presentation');
