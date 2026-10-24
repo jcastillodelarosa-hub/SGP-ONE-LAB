@@ -89,7 +89,7 @@ DECLARE v_usuario text; v_p public.sgp_aluminio_pendientes%rowtype;
  v_solved bigint; v_remaining bigint; v_existing public.sgp_aluminio_pendiente_movimientos%rowtype;
 BEGIN
  v_usuario:=public.sgp_validar_sesion_rol(p_token,ARRAY['ADMINISTRADOR','COORDINADOR','LIDER MECANIZADO','LIDER']);
- IF p_cantidad IS NULL OR p_cantidad<=0 OR p_turno IS NULL OR p_turno NOT IN ('T1','T2')
+ IF p_id IS NULL OR p_id_detalle IS NULL OR p_cantidad IS NULL OR p_cantidad<=0 OR p_turno IS NULL OR p_turno NOT IN ('T1','T2')
  OR p_fecha_operativa IS NULL OR p_idempotency_key IS NULL
  THEN RAISE EXCEPTION 'Parámetros de avance inválidos'; END IF;
  SELECT * INTO v_p FROM public.sgp_aluminio_pendientes WHERE id_pendiente=p_id FOR UPDATE;
