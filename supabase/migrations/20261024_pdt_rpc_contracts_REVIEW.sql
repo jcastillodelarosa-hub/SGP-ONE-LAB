@@ -36,6 +36,7 @@ BEGIN
     OR v_row->>'cantidad' !~ '^[0-9]+$'
   THEN RAISE EXCEPTION 'Longitud y cantidad deben ser numéricas'; END IF;
   v_long:=(v_row->>'longitud')::numeric;
+  IF length(v_row->>'cantidad')>9 THEN RAISE EXCEPTION 'Cantidad fuera de rango'; END IF;
   v_cant:=(v_row->>'cantidad')::integer;
   IF v_fab IS NULL OR v_acab IS NULL OR v_long<=0 OR v_cant<=0
   THEN RAISE EXCEPTION 'Fabricación, acabado, longitud y cantidad obligatorios'; END IF;
