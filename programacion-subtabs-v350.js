@@ -41,7 +41,7 @@ function dateKey(d){return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0
 function weeklyDashboard(){
  const all=getSchedule().filter(x=>/^\d{4}-\d\d-\d\d$/.test(String(x.fecha_programacion||'').slice(0,10)));
  const chosen=Number(document.querySelector('#progWeek')?.value)||null;
- if(!weeklyAnchor){const matched=all.map(x=>String(x.fecha_programacion).slice(0,10)).filter(d=>weekOf(d).week===chosen).sort();weeklyAnchor=matched[0]||dateKey(new Date())}
+ if(!weeklyAnchor || (chosen&&chosen!==weeklySelectedWeek)){const matched=all.map(x=>String(x.fecha_programacion).slice(0,10)).filter(d=>weekOf(d).week===chosen).sort();weeklyAnchor=matched[0]||dateKey(new Date());weeklySelectedWeek=chosen}
  const monday=weekMonday(weeklyAnchor),days=Array.from({length:7},(_,i)=>{const d=new Date(monday);d.setDate(d.getDate()+i);return dateKey(d)});
  const week=weekOf(days[0]),records=all.filter(x=>days.includes(String(x.fecha_programacion).slice(0,10)));
  const systems=[...new Set(records.map(x=>String(x.sistema||'SIN SISTEMA').trim()))].sort();
@@ -71,7 +71,7 @@ function render(){
  root.innerHTML=html;
  root.querySelectorAll('[data-sgp-weekly]').forEach(b=>b.addEventListener('click',weekly));
  root.querySelector('[data-sgp351-system]')?.addEventListener('change',e=>{weeklySystem=e.target.value;render()});
- root.querySelector('[data-sgp351-week]')?.addEventListener('change',e=>{const [y,w]=e.target.value.split('-').map(Number);const d=new Date(y,0,4,12);d.setDate(d.getDate()-(d.getDay()+6)%7+(w-1)*7);weeklyAnchor=dateKey(d);weeklySystem='';render()});
+ root.querySelector('[data-sgp351-week]')?.addEventListener('change',e=>{const [y,w]=e.target.value.split('-').map(Number);const d=new Date(y,0,4,12);d.setDate(d.getDate()-(d.getDay()+6)%7+(w-1)*7);weeklyAnchor=dateKey(d);weeklySelectedWeek=Number(document.querySelector('#progWeek')?.value)||null;weeklySystem='';render()});
  root.querySelector('[data-sgp351-refresh]')?.addEventListener('click',()=>{const b=document.querySelector('#progRefresh');if(b)b.click();else render()});
 }
 function select(tab){active=tab;const nav=document.querySelector('#sgpProgTabs');if(!nav)return;nav.querySelectorAll('button').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.tab===tab)));const legacy=document.querySelector('#sgpProgLegacy'),extra=document.querySelector('#sgpProgView');if(legacy)legacy.hidden=!['reservas','calendario'].includes(tab);if(extra)extra.hidden=['reservas','calendario'].includes(tab);document.querySelector('[data-mach-panel="programacion"]')?.classList.toggle('sgp-prog-calendar',tab==='calendario');if(legacy){const pool=legacy.querySelector('.prog-layout>div:first-child');if(pool)pool.style.display=tab==='calendario'?'none':'';const agenda=legacy.querySelector('.prog-layout>div:last-child');if(agenda)agenda.style.display=tab==='reservas'?'none':''}if(!['reservas','calendario'].includes(tab))render()}
