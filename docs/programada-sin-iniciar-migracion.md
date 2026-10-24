@@ -1,6 +1,6 @@
-# Migración propuesta: programación independiente del estado operativo
+# LAB v348: programación independiente del estado operativo
 
-Estado: IMPLEMENTACIÓN PARCIAL EN RAMA, NO APLICADA EN SUPABASE, NO PUBLICADA.
+Estado vigente: MIGRACIÓN APLICADA EN SUPABASE Y COMPROBADA MEDIANTE SQL; FRONTEND EN RAMA HASTA DESPLIEGUE.
 
 ## Reglas aprobadas
 - Una unidad elegible no programada tiene `programada = NO`.
@@ -57,3 +57,10 @@ Los cambios actuales en `app.js` y `src/config/domain.js` son preparatorios y **
 - **CI:** 195/195 pruebas automatizadas y verificación sintáctica aprobadas en el commit `fa573a52` antes de pasar el archivo al nombre definitivo.
 - **Archivo de reversión:** `docs/programada-sin-iniciar-v348-rollback.sql` contiene las definiciones originales y protege contra reversión insegura si se crearon nuevas ejecuciones generales `SIN INICIAR`.
 - **Alcance pendiente:** no se ensayaron llamadas con sesión real de usuario ni interfaz de PC/móvil; no existe rama aislada. La prueba transaccional no equivale a validación operativa real. Se requiere verificar esos flujos tras la publicación.
+
+
+## Aplicación comprobada en Supabase (2026-10-24)
+- Se aplicó `lab_v348_programada_independiente` en el proyecto operativo `ocvxbwzqxbrfndkvjmfx` mediante herramienta de migraciones: `{success:true}`. **No** se modificó SGP_ONE_GOOGLE.
+- Verificación posterior: 68 programaciones, 65 `SIN INICIAR` y 3 `CANCELADA`; indicador `programada` en 65 SÍ y 3 NO, con 0 inconsistencias. Estados por orden: 11 `SIN INICIAR`, 2 CORTE, 128 PROCESADO y 5 REPROGRAMADO. Ejecución general: 8 CORTE, 2 MECANIZADO y 41 PROCESADO. **No** se alteraron identidades ni se borró historial (283 entradas tras migración).
+- Confirmados 2 triggers del indicador; versiones actualizadas de RPC de arrastre y Picking. Ensayos SQL de migración y reversión (dentro de transacción sin persistencia) satisfactorios.
+- La ausencia de pruebas con una sesión válida de usuario y aceptación visual en PC/móvil impide declarar **VERIFICADO FUNCIONALMENTE**. El despliegue Firebase deberá confirmarse con su run y con el sitio servido.
