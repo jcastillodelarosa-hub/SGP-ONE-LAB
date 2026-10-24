@@ -3,7 +3,7 @@
 'use strict';
 const css=`
 .sgp-shift-open{margin-top:10px;width:100%;border:1px solid #bed5f7;border-radius:9px;background:#eaf2fb;color:#103b73;font-weight:800;padding:11px;cursor:pointer}
-.sgp-shift-overlay[hidden]{display:none!important}.sgp-shift-overlay{position:fixed;inset:0;z-index:10060;background:rgba(11,36,66,.58);display:flex;align-items:center;justify-content:center;padding:14px}
+.prog-calendar-nav .sgp-shift-open{width:auto;margin:0;padding:8px 12px;background:#eaf2fb;color:#103b73;white-space:normal;line-height:1.2;min-height:34px}.prog-calendar-head{flex-wrap:wrap;gap:10px}.prog-calendar-nav{flex-wrap:wrap;justify-content:flex-end}\n.sgp-shift-overlay[hidden]{display:none!important}.sgp-shift-overlay{position:fixed;inset:0;z-index:10060;background:rgba(11,36,66,.58);display:flex;align-items:center;justify-content:center;padding:14px}
 .sgp-shift-dialog{background:#f7f9fc;color:#0b2442;border-radius:16px;width:min(1520px,98vw);max-height:94vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 65px #0b244255}
 .sgp-shift-head{display:flex;justify-content:space-between;align-items:center;gap:15px;padding:16px 20px;background:#fff;border-bottom:1px solid #dbe6f5}
 .sgp-shift-head h2{margin:0;font-size:23px}.sgp-shift-head p{margin:5px 0 0;color:#57708d;font-size:13px}.sgp-shift-close{border:1px solid #c6d7ee;background:white;color:#103b73;border-radius:8px;padding:9px 13px;cursor:pointer;font-weight:800}
