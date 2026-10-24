@@ -1136,3 +1136,12 @@ Un registro puede pertenecer a la semana de programación 44 y ejecutarse en la 
 5. **Consistencia:** el total del día debe coincidir con la suma de sus turnos y del detalle visible para los filtros activos. No inventar cantidades pendientes; conciliar cobertura con fuentes canónicas y reglas de reserva principal, compartidas, multirreserva, reprogramación y arrastre.
 
 **Aceptación requerida:** probar semana 44 aislada, semanas 43+44, cambio de semana calendario, apertura del día y cierre del detalle, datos sin programación, PC y móvil. La actualización documental no implica cambios de código, despliegue ni verificación funcional.
+
+
+### Regla funcional confirmada por el usuario — semana de programación frente a calendario (2026-10-24)
+
+**Regla aprobada:** cada reserva pertenece a **una sola semana de programación**. La misma reserva puede tener cantidades programadas en varios días, turnos y **varias semanas calendario de ejecución**, sin cambiar su semana de programación de origen.
+
+**Aplicación al resumen:** el filtro de semanas 43/44 se aplica por la semana de programación propia de la reserva, y el calendario navega independientemente por fechas reales de ejecución. No excluir reservas por estar distribuidas entre varias semanas calendario. En el detalle diario se muestran solo los registros de las reservas de las semanas de programación seleccionadas. La fuente exacta del vínculo reserva→semana de programación debe verificarse en los contratos y datos reales antes de publicar; no inferirla de la semana ISO de la fecha de ejecución.
+
+**Estado:** regla funcional confirmada y documentada; verificación de implementación y publicación pendiente.
