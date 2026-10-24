@@ -2141,7 +2141,7 @@ button.active,[aria-pressed="true"]{border-color:#0865ed}
 }
 .rec-al-delivered{background:#dcfce7;color:#166534;border-color:#86efac!important}
 .rec-al-warehouse{background:#fef3c7;color:#92400e;border-color:#fcd34d!important}
-.rec-al-supply{background:#ffedd5;color:#9a3412;border-color:#fdba74!important}
+.rec-al-supply{background:#fee2e2;color:#991b1b;border-color:#ef4444!important}
 .rec-al-neutral{background:#f1f5f9;color:#475569;border-color:#cbd5e1!important}
 .rec-tracking-warning{margin:8px 2px 0;padding:9px 12px;border:1px solid #fed7aa;border-radius:8px;background:#fff7ed;color:#9a3412;font-size:12px;font-weight:700}
 #recTable th:nth-child(7),#recTable td:nth-child(7),
