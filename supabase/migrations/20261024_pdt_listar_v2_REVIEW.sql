@@ -15,6 +15,8 @@ BEGIN
    'id_detalle',d.id_detalle,'fabricacion',d.fabricacion,'longitud',d.longitud,
    'acabado',d.acabado,'validada',d.cantidad_validada,
    'avanzada',coalesce((SELECT sum(CASE WHEN m.tipo='AVANCE' THEN m.cantidad ELSE -m.cantidad END)
+    FROM public.sgp_aluminio_pendiente_movimientos m WHERE m.id_detalle=d.id_detalle),0),
+   'saldo',d.cantidad_validada-coalesce((SELECT sum(CASE WHEN m.tipo='AVANCE' THEN m.cantidad ELSE -m.cantidad END)
     FROM public.sgp_aluminio_pendiente_movimientos m WHERE m.id_detalle=d.id_detalle),0)
   )) FROM public.sgp_aluminio_pendiente_detalles d WHERE d.id_pendiente=p.id_pendiente),'[]'::jsonb),
   'ncs',coalesce((SELECT jsonb_agg(n.consecutivo ORDER BY n.consecutivo)
