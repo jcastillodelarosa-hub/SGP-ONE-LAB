@@ -86,7 +86,7 @@ test('v348: interfaz y recursos reportan versión coincidente',()=>{
  assert.match(css,/\.state-sin-iniciar\{background:#f3e81b!important;color:#202020!important\}/);
  assert.match(html,/LAB v353/);
  for(const asset of ['styles.css','app.js']){
-  assert.ok(html.includes(asset+'?v=350'));
+  assert.ok(html.includes(asset+'?v=353'));
  }
  assert.ok(html.includes('picking-delivery-report.css?v=348'));
 });
