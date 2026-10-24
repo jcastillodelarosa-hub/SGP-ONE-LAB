@@ -1964,6 +1964,19 @@ let progRows=[],progSchedule=[],progCoverage=[],progOrderCoverage=[],progConfirm
 // Read-only bridge for weekly system/shift summary; no direct backend access.
 window.SGPWeeklySchedule=()=>progSchedule;
 window.SGPWeeklyDemand=()=>progRows;
+// Independent read-only lookup for multi-week dashboard; never mutates the operational progRows selection.
+window.SGPWeeklyDemandForWeeks=async weeks=>{
+ const requested=[...new Set((Array.isArray(weeks)?weeks:[]).map(Number).filter(n=>Number.isInteger(n)&&n>=1&&n<=53))];
+ if(!requested.length)return [];
+ const token=getAppToken();if(!token)throw new Error('Sesión requerida para consultar semanas');
+ const client=await getSupabaseClient();
+ const result=await Promise.all(requested.map(async week=>{
+  const {data,error}=await client.rpc('sgp_mecanizado_disponibles',{p_token:token,p_semana:week});
+  if(error)throw error;
+  return (data||[]).map(row=>({...row,semana:week}));
+ }));
+ return result.flat();
+};
 window.SGPWeeklyAnchor=()=>progCalendarAnchor;
 const progGroupName={1:'OK / Entregadas en sistema',2:'Recibidas sin legalizar',3:'Pendientes por Bodega',4:'Pendientes por Abastecimiento'};
 async function loadProgramming(){const c=await getSupabaseClient(),token=getAppToken();if(!token)return;await ensureSharedReservations();const week=Number(document.querySelector('#progWeek')?.value)||null;const [a,b,cv,oc]=await Promise.all([c.rpc('sgp_mecanizado_disponibles',{p_token:token,p_semana:week}),c.rpc('sgp_mecanizado_programacion_listar',{p_token:token}),c.rpc('sgp_mecanizado_cobertura_programacion',{p_token:token,p_semana:week}),c.rpc('sgp_mecanizado_cobertura_ordenes',{p_token:token,p_semana:week})]);if(a.error||b.error||cv.error||oc.error){console.error(a.error||b.error||cv.error||oc.error);return}progRows=a.data||[];progSchedule=b.data||[];progCoverage=cv.data||[];progOrderCoverage=oc.data||[];const cf=await c.rpc('sgp_mecanizado_conciliaciones_listar',{p_token:token});progConfirmations=cf.error?[]:(cf.data||[]);renderProgramming();window.dispatchEvent(new Event('sgp:programming-loaded'))}
