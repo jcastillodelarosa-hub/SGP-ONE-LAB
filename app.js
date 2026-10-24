@@ -1882,6 +1882,21 @@ async function loadReception(){
  recRows=Array.isArray(reception.data)?reception.data:[];
  const trackingOk=!tracking.error&&Array.isArray(tracking.data?.rows);
  recAluminumStateIndex=indexReceptionAluminumStates(trackingOk?tracking.data.rows:[]);
+ // Tipo de reserva: usar la misma fuente autorizada de Seguimiento de Aluminio.
+ // Si una reserva contiene tipos diferentes, no atribuir uno arbitrariamente.
+ const typesByReservation=new Map();
+ for(const row of trackingOk?tracking.data.rows:[]){
+  const key=String(row.reserva??'').trim();if(!key)continue;
+  const raw=String(row.tipo_orden??'').trim().toUpperCase();
+  const type=raw.includes('RETAIL')?'RETAIL':raw.includes('PROYECTO')?'PROYECTO':'';
+  if(!typesByReservation.has(key))typesByReservation.set(key,new Set());
+  if(type)typesByReservation.get(key).add(type);
+ }
+ recRows=recRows.map(row=>{
+  const types=typesByReservation.get(String(row.reserva??'').trim());
+  const tipo_reserva=types?.size>1?'MIXTO':types?.size===1?[...types][0]:'';
+  return {...row,tipo_reserva};
+ });
  const notice=document.querySelector('#recTrackingStatus');
  if(notice){
   notice.hidden=trackingOk;
