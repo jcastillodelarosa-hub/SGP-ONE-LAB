@@ -65,6 +65,12 @@ BEGIN
  IF new_state NOT IN ('SIN INICIAR','CORTE','MECANIZADO','PROCESADO','REPROGRAMADO') THEN
   RAISE EXCEPTION 'Estado de mecanizado no permitido: %',p_estado;
  END IF;
+ IF new_state='REPROGRAMADO' AND NOT EXISTS (
+  SELECT 1 FROM sgp_mecanizado_reprogramaciones
+  WHERE id_origen=p_id_programacion AND produccion=p_produccion
+ ) THEN
+  RAISE EXCEPTION 'REPROGRAMADO requiere vínculo de reprogramación';
+ END IF;
  IF NOT EXISTS (SELECT 1 FROM sgp_mecanizado_programacion
                 WHERE id_programacion=p_id_programacion AND estado<>'CANCELADA') THEN
   IF new_state <> 'REPROGRAMADO' OR NOT EXISTS (SELECT 1 FROM sgp_mecanizado_reprogramaciones WHERE id_origen=p_id_programacion AND produccion=p_produccion) THEN
