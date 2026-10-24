@@ -99,6 +99,22 @@ BEGIN
  RETURN true;
 END $function$;
 
+-- Arrastre: reemplazar solo el valor de respaldo cuando no existe ejecución,
+-- preservando fechas, turnos, trazabilidad y la lógica de pendientes vigente.
+DO $migration$
+DECLARE v_def text;
+BEGIN
+ SELECT pg_get_functiondef(p.oid) INTO v_def
+ FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
+ WHERE n.nspname='public' AND p.proname='sgp_mecanizado_pendientes_turno';
+ IF v_def IS NULL OR position('coalesce(eo.estado,me.estado,''PROGRAMADA'')' in v_def)=0 THEN
+  RAISE EXCEPTION 'La RPC de arrastre cambió: revisar contrato antes de migrar';
+ END IF;
+ v_def:=replace(v_def,'coalesce(eo.estado,me.estado,''PROGRAMADA'')',
+                        'coalesce(eo.estado,me.estado,''SIN INICIAR'')');
+ EXECUTE v_def;
+END $migration$;
+
 -- REPROGRAMADO es evento interno usado por la RPC de reprogramación; nunca debe mostrarse como etapa seleccionable.
 -- El guardado de arrastre reutiliza sgp_mecanizado_guardar_estado_orden;
 -- no se modifica la función de arrastre ni sus reglas de identificación.
