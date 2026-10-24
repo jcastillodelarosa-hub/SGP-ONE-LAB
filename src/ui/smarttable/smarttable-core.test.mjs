@@ -1,0 +1,11 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {columnsOf,queryRows,escapeHtml,csv} from './smarttable-core.mjs';
+const rows=[{order:'B',qty:12,status:'PROCESADO'},{order:'A',qty:2,status:'CORTE'},{order:'C',qty:30,status:'PROCESADO'}],cols=columnsOf(rows,[{id:'order'},{id:'qty',type:'number'},{id:'status'}]);
+test('infer columns',()=>assert.deepEqual(columnsOf(rows).map(c=>c.id),['order','qty','status']));
+test('numeric sort',()=>assert.deepEqual(queryRows(rows,cols,{sorts:[{id:'qty',dir:'asc'}]}).rows.map(r=>r.qty),[2,12,30]));
+test('filter',()=>assert.equal(queryRows(rows,cols,{filters:{status:['CORTE']}}).total,1));
+test('search',()=>assert.equal(queryRows(rows,cols,{search:'procesado'}).total,2));
+test('pagination',()=>assert.equal(queryRows(rows,cols,{pageSize:10,page:99}).page,1));
+test('stable source',()=>{const before=JSON.stringify(rows);queryRows(rows,cols,{sorts:[{id:'qty',dir:'desc'}]});assert.equal(JSON.stringify(rows),before)});
+test('escape',()=>assert.equal(escapeHtml('<script>'),'&lt;script&gt;'));
+test('CSV formula safety',()=>assert.ok(csv([{order:'=1+1'}],cols).includes("'=1+1")));
+test('duplicate columns rejected',()=>assert.throws(()=>columnsOf(rows,[{id:'order'},{id:'order'}])));
