@@ -45,3 +45,11 @@ test('NC finalizada es posible solucion y no confirma material fisico', () => {
   assert.equal(alert.elapsedHours,3);
   assert.equal(alert.physicallyAvailable,null);
 });
+
+test('no permite avance superior al saldo validado', () => {
+  assert.throws(() => calculateFabricationBalances([{id_detalle:'a',cantidad_validada:2}],[{id_movimiento:'x',id_detalle:'a',tipo:'AVANCE',cantidad:3}]));
+});
+
+test('rechaza reverso de movimiento inexistente', () => {
+  assert.throws(() => calculateFabricationBalances([{id_detalle:'a',cantidad_validada:2}],[{tipo:'REVERSO',id_movimiento_revertido:'missing'}]));
+});
