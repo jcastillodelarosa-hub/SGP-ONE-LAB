@@ -60,6 +60,7 @@ BEGIN
  -- BLOCKER: legacy validator excludes RECEPCION; this wrapper must not be applied
  -- until equivalent secure reservation/source checks are extracted to a shared internal helper.
  -- Reuse legacy reservation/acabado validation, audit and session checks.
+ -- Existing legacy validator is retained for compatibility; RECEPCION access remains a blocker.
  v_out:=public.sgp_aluminio_pendiente_validar(
    p_token,p_id,v_first->>'fabricacion',(v_first->>'longitud')::numeric,
    p_reserva,v_first->>'acabado',p_observacion);
