@@ -1894,6 +1894,11 @@ function receptionAluminumBadge(reserva){
  const meta=receptionAluminumStateMeta(state);
  return '<span class="rec-aluminum-badge '+meta.css+'" title="Estado según tablero de seguimiento de aluminio">'+meta.label+'</span>';
 }
+function receptionTypeBadge(r){
+ const raw=String(r.tipo_reserva??r.tipo??'').trim().toUpperCase();
+ const tipo=raw==='PROYECTO'?'PROYECTO':raw==='RETAIL'?'RETAIL':raw==='MIXTO'?'MIXTO':'SIN DATO';
+ return '<span class="rec-type-badge rec-type-'+tipo.toLowerCase().replace(' ','-')+'">'+tipo+'</span>';
+}
 function renderReception(){
  const q=(document.querySelector('#recSearch')?.value||'').toLowerCase(),
  rows=recRows.filter(r=>!q||String(r.reserva).toLowerCase().includes(q)),
@@ -1907,11 +1912,11 @@ function renderReception(){
  document.querySelector('#recPendingLabel').textContent=pending.length;
  document.querySelector('#recReceivedLabel').textContent=received.length;
  document.querySelector('#recBody').innerHTML=pending.length?pending.map(r=>
-  '<tr><td>'+escapeHtml(r.semana_prog??'')+'</td><td>'+escapeHtml(r.reserva)+'</td><td>'+escapeHtml(r.sistema||'')+'</td><td>'+escapeHtml(r.acabado||'')+'</td><td>'+escapeHtml(r.cantidad??'')+'</td><td><span class="state-badge state-warn">PENDIENTE POR RECIBIR</span></td><td>'+receptionAluminumBadge(r.reserva)+'</td><td>'+Number(r.faltantes_abiertos||0)+'</td><td>'+Number(r.dias_pendiente||0).toFixed(1)+'</td><td><button data-receive="'+escapeHtml(r.reserva)+'">Auditar</button></td></tr>'
- ).join(''):'<tr><td colspan="10" class="empty-state">No hay reservas pendientes por recibir.</td></tr>';
+  '<tr><td>'+escapeHtml(r.semana_prog??'')+'</td><td>'+escapeHtml(r.reserva)+'</td><td>'+escapeHtml(r.sistema||'')+'</td><td>'+escapeHtml(r.acabado||'')+'</td><td>'+receptionTypeBadge(r)+'</td><td>'+escapeHtml(r.cantidad??'')+'</td><td><span class="state-badge state-warn">PENDIENTE POR RECIBIR</span></td><td>'+receptionAluminumBadge(r.reserva)+'</td><td>'+Number(r.faltantes_abiertos||0)+'</td><td>'+Number(r.dias_pendiente||0).toFixed(1)+'</td><td><button data-receive="'+escapeHtml(r.reserva)+'">Auditar</button></td></tr>'
+ ).join(''):'<tr><td colspan="11" class="empty-state">No hay reservas pendientes por recibir.</td></tr>';
  document.querySelector('#recReceivedBody').innerHTML=received.length?received.map(r=>
-  '<tr><td>'+escapeHtml(r.semana_prog??'')+'</td><td>'+escapeHtml(r.reserva)+'</td><td>'+escapeHtml(r.sistema||'')+'</td><td>'+escapeHtml(r.acabado||'')+'</td><td>'+escapeHtml(r.cantidad??'')+'</td><td><span class="state-badge state-ok">RECIBIDA</span></td><td>'+receptionAluminumBadge(r.reserva)+'</td><td><span class="legal-badge '+(r.legalizada?'legal-ok':'legal-pending')+'">'+(r.legalizada?'LEGALIZADA':'RECIBIDA SIN LEGALIZAR')+'</span></td><td>'+Number(r.faltantes_abiertos||0)+'</td><td><button data-receive="'+escapeHtml(r.reserva)+'">Revisar</button></td></tr>'
- ).join(''):'<tr><td colspan="10" class="empty-state">Aún no hay reservas recibidas.</td></tr>';
+  '<tr><td>'+escapeHtml(r.semana_prog??'')+'</td><td>'+escapeHtml(r.reserva)+'</td><td>'+escapeHtml(r.sistema||'')+'</td><td>'+escapeHtml(r.acabado||'')+'</td><td>'+receptionTypeBadge(r)+'</td><td>'+escapeHtml(r.cantidad??'')+'</td><td><span class="state-badge state-ok">RECIBIDA</span></td><td>'+receptionAluminumBadge(r.reserva)+'</td><td><span class="legal-badge '+(r.legalizada?'legal-ok':'legal-pending')+'">'+(r.legalizada?'LEGALIZADA':'RECIBIDA SIN LEGALIZAR')+'</span></td><td>'+Number(r.faltantes_abiertos||0)+'</td><td><button data-receive="'+escapeHtml(r.reserva)+'">Revisar</button></td></tr>'
+ ).join(''):'<tr><td colspan="11" class="empty-state">Aún no hay reservas recibidas.</td></tr>';
  document.querySelectorAll('[data-receive]').forEach(b=>b.onclick=()=>openReception(b.dataset.receive));
 }
 function openReception(reserva){recCurrent=recRows.find(r=>r.reserva===reserva);if(!recCurrent)return;recMissingDraft=[];document.querySelector('#recModalTitle').textContent='Auditar recepción · '+reserva;const date=document.querySelector('#recDate'),shift=document.querySelector('#recShift'),photos=document.querySelector('#recPhotos'),missing=document.querySelector('#recMissingSection');if(date)date.value=String(recCurrent.fecha_recepcion||new Date().toISOString().slice(0,10)).slice(0,10);if(shift)shift.value=recCurrent.turno||'';if(photos)photos.value='';const camera=document.querySelector('#recCameraPhotos'),sel=document.querySelector('#recPhotoSelection');if(camera)camera.value='';if(sel)sel.textContent='Sin archivos seleccionados';document.querySelectorAll('input[name="recCompleteChoice"]').forEach(x=>x.checked=recCurrent.estado==='RECIBIDA'?(x.value===(recCurrent.completa?'SI':'NO')):false);if(missing)missing.hidden=!(recCurrent.estado==='RECIBIDA'&&recCurrent.completa===false);document.querySelector('#recLegalized').checked=recCurrent?.legalizada??false;document.querySelector('#recObservation').value=recCurrent?.observacion||'';if(recCurrent.estado==='RECIBIDA'&&recCurrent.completa===false){recMissingDraft.push({perfil:'',cantidad:1,longitud:'',observacion:''})}renderMissingEditor();document.querySelector('#recModal').hidden=false}
