@@ -1,4 +1,4 @@
-// Static contract checks for the proposed carryover RPC.
+// Static contract checks for prospective carryover (not a database test).
 // Run: node tests/mecanizado-arrastre-contract.test.cjs
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -8,7 +8,12 @@ assert.match(sql, /sgp_mecanizado_pendientes_turno\(p_token text, p_fecha date, 
 assert.match(sql, /sgp_validar_sesion_rol/);
 assert.match(sql, /partition by reserva,key_produccion/);
 assert.match(sql, /max\(h\.fecha_evento\)[^\n]+h\.estado_nuevo='PROCESADO'/);
-assert.match(sql, /procesado_en>=v_inicio and procesado_en<v_inicio\+interval '12 hours'/);
+assert.match(sql, /sgp_mecanizado_arrastre_activacion/);
+assert.match(sql, /ON CONFLICT \(id\) DO NOTHING/);
+assert.match(sql, /ENABLE ROW LEVEL SECURITY/);
+assert.match(sql, /procesado_en>=greatest\(v_inicio,v_activado\) and procesado_en<v_fin/);
+assert.match(sql, /extract\(isodow from p_fecha\)=7/);
+assert.doesNotMatch(sql, /procesado_en>=v_inicio then 'MECANIZADO'/);
 assert.match(sql, /'id_programacion_origen',id_programacion/);
 assert.match(sql, /'fecha_culminacion'/);
 assert.match(sql, /v_ahora<v_habilitado/);
