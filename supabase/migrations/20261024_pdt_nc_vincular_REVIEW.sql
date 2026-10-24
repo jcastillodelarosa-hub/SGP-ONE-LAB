@@ -15,8 +15,7 @@ BEGIN
  IF NOT FOUND OR p.fecha_cierre IS NOT NULL OR p.estado_repo='PICKING' OR p.estado='PICKING' THEN RAISE EXCEPTION 'Pendiente no activo'; END IF;
  FOREACH n IN ARRAY p_ncs LOOP
   n:=btrim(n);
-  IF n IS NULL OR n !~ '^[0-9]{1,20}
-  IF NOT (n=ANY(ncs)) THEN ncs:=array_append(ncs,n); END IF;
+  IF n IS NULL OR n !~ '^[0-9]{1,20}  IF NOT (n=ANY(ncs)) THEN ncs:=array_append(ncs,n); END IF;
  END LOOP;
  FOREACH n IN ARRAY ncs LOOP
   INSERT INTO public.sgp_aluminio_pendiente_ncs(id_pendiente,consecutivo,enlazado_por)
@@ -28,8 +27,7 @@ BEGIN
 END $fn$;
 REVOKE ALL ON FUNCTION public.sgp_aluminio_pendiente_nc_vincular_v1(text,uuid,text[]) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.sgp_aluminio_pendiente_nc_vincular_v1(text,uuid,text[]) TO anon,authenticated;
-COMMIT;
- THEN RAISE EXCEPTION 'Consecutivo NC invalido'; END IF;
+COMMIT; THEN RAISE EXCEPTION 'Consecutivo NC invalido'; END IF;
   IF NOT (n=ANY(ncs)) THEN ncs:=array_append(ncs,n); END IF;
  END LOOP;
  FOREACH n IN ARRAY ncs LOOP
