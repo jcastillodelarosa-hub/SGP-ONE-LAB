@@ -22,6 +22,7 @@ const qty=v=>Number(v)||0;
 const fmt=v=>Math.round(v).toLocaleString('es-CO');
 const names=[['resumen','▦ Resumen'],['calendario','▣ Calendario'],['reservas','▤ Reservas'],['ordenes','☷ Órdenes'],['carga','▥ Carga por sistema'],['conflictos','⚠ Conflictos']];
 let active='resumen',busy=false;
+window.addEventListener('sgp:programming-loaded',()=>{if(!['reservas','calendario'].includes(active))render()});
 function table(head,rows){return '<div class="sgp-prog-table-wrap"><table class="sgp-prog-table"><thead><tr>'+head.map(h=>'<th>'+esc(h)+'</th>').join('')+'</tr></thead><tbody>'+rows.map(row=>'<tr>'+row.map(v=>'<td>'+esc(v)+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>'}
 function getRows(){return window.SGPWeeklyDemand?.()||[]}
 function getSchedule(){return (window.SGPWeeklySchedule?.()||[]).filter(x=>x.estado!=='CANCELADA')}
