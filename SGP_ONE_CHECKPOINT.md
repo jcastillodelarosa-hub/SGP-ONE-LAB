@@ -75,3 +75,11 @@ Realizar una **prueba de recuperación de solo lectura** desde otro chat: compro
 - No se han creado ni aplicado RPC; migracion SQL sigue en borrador. Sin cambios a Supabase, main ni Firebase.
 - Riesgo: frontend de validacion multifabricacion y avances no conectado a backend; no declarar implementacion completa.
 - Proximo paso: completar contrato RPC seguro, integrar UI y ejecutar pruebas; pedir autorizacion separada antes de aplicar SQL.
+
+
+## 2026-10-24 — Autorización ampliada y bloqueo técnico PR #91
+- Usuario autorizó cambios necesarios; no confundir autorización con pruebas superadas.
+- Supabase producción inspeccionada solo con SELECT; proyecto ocvxbwzqxbrfndkvjmfx. Se comprobó que sgp_aluminio_pendiente_validar permite ADMINISTRADOR/COORDINADOR/LIDER LINEA/SUPERVISOR DE PICKING, pero no RECEPCION. sgp_validar_sesion_rol tiene equivalencia RECEPCION solo cuando se solicita LIDER, no cuando se solicita LIDER LINEA.
+- Archivo supabase/migrations/20261024_pdt_rpc_contracts_REVIEW.sql preparado con RPC de validación multifabricación y avance parcial; **NO APLICAR**: la RPC propuesta delega en el validador antiguo, que rechaza RECEPCION. Debe extraerse comprobación equivalente a función interna segura, sin ampliar permisos involuntarios.
+- Otros pendientes de revisión: fecha operativa/turnos, NC múltiples, reversión de movimientos, cierre Picking, RLS/grants, migración histórica, pruebas de SQL y de navegador.
+- Estado: PROTOTIPO DE CONTRATOS EN RAMA; NO APTO PARA DESPLIEGUE. No hubo migración, merge ni Firebase deploy.
