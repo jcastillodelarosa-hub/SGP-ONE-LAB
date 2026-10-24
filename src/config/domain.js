@@ -4,7 +4,9 @@ export const SGP = Object.freeze({
   productionIdentity: "ID|ID_LINEA",
   trackingIdentity: "ID|RESERVA",
   reservationStates: Object.freeze(["PENDIENTE_ABASTECIMIENTO","PENDIENTE_BODEGA","ALUMINIO_ENTREGADO"]),
-  processFlow: Object.freeze(["CORTE","MECANIZADO","PROCESADO","PICKING"]),
+  processFlow: Object.freeze(["SIN INICIAR","CORTE","MECANIZADO","PROCESADO"]),
+  programmingStates: Object.freeze(["NO","SI"]),
+  pickingIsDelivery: true,
   productionStates: Object.freeze(["CERRADA","ABIERTA","ENSAMBLADA","FINALIZADA"]),
   blockingAluminumStates: Object.freeze(["SAP_NO_CLASIFICADO","DESTINO_NO_RESUELTO","CONFLICTO"]),
   nonBlockingAluminumStates: Object.freeze(["SIN_MATCH"])

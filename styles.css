@@ -2327,3 +2327,6 @@ button.active,[aria-pressed="true"]{border-color:#0865ed}
 .rec-type-proyecto{background:#dbeafe;color:#1e40af}
 .rec-type-retail{background:#dcfce7;color:#166534}
 .rec-type-mixto{background:#fef3c7;color:#92400e}
+
+/* LAB v348: estado operativo inicial legible, incluido en selects y tarjetas móviles. */
+.state-sin-iniciar{background:#f3e81b!important;color:#202020!important}
