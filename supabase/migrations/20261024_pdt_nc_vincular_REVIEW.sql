@@ -16,6 +16,8 @@ BEGIN
  FOREACH n IN ARRAY p_ncs LOOP
   n:=btrim(n);
   IF n IS NULL OR n !~ '^[0-9]{1,20}$' THEN RAISE EXCEPTION 'Consecutivo NC invalido'; END IF;
+  IF NOT EXISTS (SELECT 1 FROM public.sgp_nc_aluminio nc WHERE nc.consecutivo=n)
+  THEN RAISE EXCEPTION 'NC no existe en registro de aluminio: %',n; END IF;
   IF NOT (n=ANY(ncs)) THEN ncs:=array_append(ncs,n); END IF;
  END LOOP;
  FOREACH n IN ARRAY ncs LOOP
