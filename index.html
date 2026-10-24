@@ -5,11 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SGP ONE LAB</title>
   <link rel="icon" type="image/svg+xml" href="favicon-sgp.svg" />
-  <link rel="stylesheet" href="styles.css?v=346" />
+  <link rel="stylesheet" href="styles.css?v=347" />
   <link rel="stylesheet" href="navigation-preferences.css?v=4" />
   <link rel="stylesheet" href="design-center.css?v=2" />
   <link rel="stylesheet" href="production-line-visual-v327.css?v=1" />
-  <link rel="stylesheet" href="global-themes.css?v=1" /><link rel="stylesheet" href="picking-delivery-report.css?v=346" />
+  <link rel="stylesheet" href="global-themes.css?v=1" /><link rel="stylesheet" href="picking-delivery-report.css?v=347" />
   <script src="config.js?v=20261008-1300"></script>
 <style>
 .production-line-tabs{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0;padding:6px;background:#eaf2ff;border:1px solid #cbdcf7;border-radius:12px}
@@ -63,7 +63,7 @@
           <input id="authPassword" type="password" placeholder="Contraseña" autocomplete="current-password" />
           <button id="authLogin">Ingresar</button>
           <button id="authLogout" hidden>Cerrar sesión</button>
-          <span class="status">LAB v346</span>
+          <span class="status">LAB v347</span>
         </div>
       </header>
 
@@ -389,7 +389,7 @@
     </div>
   </div>
 
-  <script type="module" src="app.js?v=346"></script>
+  <script type="module" src="app.js?v=347"></script>
   <script defer src="navigation-preferences.js?v=4"></script>
   <script defer src="design-center.js?v=2"></script>
 <div id="userModal" class="modal-backdrop rec-overlay" hidden><div class="modal-card user-modal-card"><div class="modal-header"><div><strong id="userModalTitle">Nuevo usuario</strong><small>Cuenta y permisos de acceso</small></div><button id="userModalClose" class="modal-close">×</button></div><div class="user-form"><div class="rec-grid"><label>Usuario<input id="userName" autocomplete="off"></label><label>Nombre completo<input id="userFullName"></label><label>Rol<select id="userRole"><option>COORDINADOR</option><option>LIDER MECANIZADO</option><option>LIDER LINEA</option><option>RECEPCION</option><option>PATINADOR</option><option>PICKING</option><option>SUPERVISOR DE PICKING</option><option>CONSULTA</option><option>ADMINISTRADOR</option></select></label><label>Contraseña<input id="userPassword" type="password" placeholder="Vacío = conservar contraseña"></label><div class="password-reset-wrap"><button id="resetPasswordBtn" type="button" hidden>↻ Restablecer contraseña</button><small>Asigna una nueva contraseña temporal al usuario.</small></div></div><label class="user-active"><input id="userActive" type="checkbox" checked> Usuario activo</label><div class="access-title"><b>Ventanas permitidas</b><span>El usuario solo verá las opciones seleccionadas.</span></div><div id="userAccessGrid" class="access-grid"></div></div><div class="modal-actions"><button id="userCancel">Cancelar</button><button id="userSave" class="primary">Guardar usuario</button></div></div></div>
@@ -406,7 +406,7 @@
 <div id="glassExplorerModal" class="glass-explorer-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="glassExplorerTitle"><div class="glass-explorer-dialog"><header><div><h2 id="glassExplorerTitle">Explorador de relaciones de vidrio</h2><p>Selecciona un nodo para descubrir sus relaciones y cantidades.</p></div><button type="button" id="glassExplorerClose" aria-label="Cerrar explorador">✕</button></header><div class="glass-explorer-controls"><input id="glassExplorerSearch" type="search" placeholder="Buscar reserva, orden o burro" aria-label="Buscar nodo"><select id="glassExplorerStatus" aria-label="Estado de vidrio"><option value="prepared">Preparados</option><option value="all">Todos los estados</option></select><button type="button" id="glassExplorerReset">Restablecer</button></div><div id="glassExplorerSummary" class="glass-explorer-summary"></div><div class="glass-explorer-content"><div id="glassExplorerGraph" class="glass-explorer-graph"></div><aside id="glassExplorerDetails" class="glass-explorer-details">Selecciona un nodo de la red.</aside></div><footer><span>Azul: burro · Verde: orden · Naranja: parte · Violeta: reserva</span><button type="button" id="glassExplorerCloseBottom">Cerrar</button></footer></div></div>
 <div id="glassExplorerTooltip" class="glass-explorer-tooltip" role="tooltip" hidden></div>
 <script defer src="production-line-tabs.js?v=1"></script>
-<script defer src="planner-readonly-v326.js?v=346"></script>
-<script defer src="planner-operations-v326.js?v=346"></script>
+<script defer src="planner-readonly-v326.js?v=347"></script>
+<script defer src="planner-operations-v326.js?v=347"></script>
 </body>
 </html>
