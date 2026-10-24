@@ -1145,3 +1145,21 @@ Un registro puede pertenecer a la semana de programación 44 y ejecutarse en la 
 **Aplicación al resumen:** el filtro de semanas 43/44 se aplica por la semana de programación propia de la reserva, y el calendario navega independientemente por fechas reales de ejecución. No excluir reservas por estar distribuidas entre varias semanas calendario. En el detalle diario se muestran solo los registros de las reservas de las semanas de programación seleccionadas. La fuente exacta del vínculo reserva→semana de programación debe verificarse en los contratos y datos reales antes de publicar; no inferirla de la semana ISO de la fecha de ejecución.
 
 **Estado:** regla funcional confirmada y documentada; verificación de implementación y publicación pendiente.
+
+
+## PDT aluminio — multifabricación, avances parciales y NC múltiples (2026-10-24)
+
+**Decisiones funcionales aprobadas por el usuario:**
+- Patinador puede reportar un pendiente con varias NC enlazadas individualmente.
+- Recepción/validador puede corregir cantidad total y distribuir entre varias fabricaciones (longitud/acabado), conservando el reporte original y motivo de corrección.
+- Mecanizado registra avances parciales por fabricación y cantidad; cada movimiento guarda usuario, fecha, turno y observación. El saldo se actualiza sin perder el historial; ejemplo 9 reportadas, 5 E17 y 4 E17-1, Brajhan T1 procesa 2 E17, saldo 3+4=7.
+- Saldo de mecanizado cero NO cierra PDT: la entrega en Picking confirma el cierre.
+- REPO OK deja de ser estado manual: aviso derivado de NC finalizadas que señala posible solución, sin asumir material físicamente disponible.
+- Si solo 2/3 NC están finalizadas, mostrar alerta parcial y seguimiento. Si 3/3 finalizadas, destacar REPO OK. Mostrar avisos en Producción y Pendientes, responsable y antigüedad.
+- Preservar reglas de reserva principal, reserva compartida, multirreserva, perfiles PANEL, etapas de mecanizado y permisos actuales.
+
+**Alcance autorizado:** desarrollar exclusivamente en rama, crear PR y ejecutar pruebas no destructivas. **PROHIBIDO** aplicar migraciones a Supabase, modificar datos operativos, fusionar a main o desplegar Firebase sin autorización posterior.
+
+**Rama:** `feat/pdt-multifabricacion-avances-nc`; **PR:** #91 (draft). Documento de diseño `docs/PDT_MULTIFABRICACION_IMPLEMENTACION.md`. Migración `supabase/migrations/20261024_pdt_multifabricacion_avances_nc_DRAFT.sql` es BORRADOR, NO APLICADA.
+
+**Estado:** REGLAS APROBADAS; DISEÑO EN RAMA; RPC, frontend y pruebas de integración PENDIENTES. No afirmar que se implementó ni publicó.
