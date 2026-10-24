@@ -82,3 +82,12 @@ E. Pruebas de integración controladas, autorización separada para merge y publ
 
 ## Pendientes de implementación
 Este commit prepara únicamente el esquema aditivo y este contrato. **No equivale a tener las RPC ni la UI listas.** No ejecutar migración borrador: faltan revisión de permisos y estrategia de transición.
+
+## Puertas obligatorias para liberar (auditoría 2026-10-24)
+- NO APLICAR los SQL REVIEW/DRAFT: la validación delega en RPC legacy que no autoriza RECEPCION. Resolver con contrato de recepción que replique las comprobaciones de reserva y PANEL sin elevar permisos globales.
+- NO CERRAR PDT por mecanizado. La RPC legacy `sgp_aluminio_pendiente_resolver` cierra directamente sin prueba Picking; requiere control de entrega real y plan de compatibilidad antes de liberar.
+- La lista v2 no consulta estado de NC finalizada: indicador REPO OK y alertas de responsable/tiempo siguen sin contrato completo.
+- Confirmar existencia y formato de NC en origen antes de vincular, y conservar compatibilidad de NC histórica en texto.
+- Ejecutar pruebas de transacción con datos sintéticos en entorno aislado: autorización, concurrencia, reverso duplicado, idempotencia, suma y saldos, rollback, cierre y NC múltiples.
+- Integrar frontend y validar flujo Recepción → Mecanizado → Picking con roles reales; verificar despliegue separado.
+- No fusionar ni desplegar PR #91 mientras cualquiera de estas puertas esté abierta.
