@@ -16,7 +16,7 @@ BEGIN
  FOREACH n IN ARRAY p_ncs LOOP
   n:=btrim(n);
   IF n !~ '^[0-9]{1,20}$' THEN RAISE EXCEPTION 'Consecutivo NC invalido'; END IF;
-  IF NOT n=ANY(ncs) THEN ncs:=array_append(ncs,n); END IF;
+  IF NOT (n=ANY(ncs)) THEN ncs:=array_append(ncs,n); END IF;
  END LOOP;
  FOREACH n IN ARRAY ncs LOOP
   INSERT INTO public.sgp_aluminio_pendiente_ncs(id_pendiente,consecutivo,enlazado_por)
