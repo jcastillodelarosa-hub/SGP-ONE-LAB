@@ -42,6 +42,7 @@ export function validateFabricationDistribution(details, expectedTotal = null) {
 }
 export function calculateFabricationBalances(details, movements = []) {
   if (!Array.isArray(details) || !Array.isArray(movements)) throw new Error('Datos inválidos');
+  if (new Set(details.map(d => String(d.id_detalle))).size !== details.length) throw new Error('Detalle duplicado');
   const rows = new Map(details.map(d => [String(d.id_detalle), {
     id_detalle: String(d.id_detalle), fabricacion: d.fabricacion,
     validada: positiveInt(d.cantidad_validada, 'Cantidad validada'), solucionada: 0, saldo: 0
