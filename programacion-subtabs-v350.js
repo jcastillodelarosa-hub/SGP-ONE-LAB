@@ -40,15 +40,16 @@ let weeklyAnchor='',weeklySystem='',weeklySelectedWeek=null,selectedWeeks=new Se
 function weekOf(d){const x=new Date(d+'T12:00:00');x.setDate(x.getDate()+3-(x.getDay()+6)%7);const y=x.getFullYear();const j=new Date(y,0,4,12);j.setDate(j.getDate()-(j.getDay()+6)%7);return {year:y,week:1+Math.round((x-j)/604800000)}}
 function weekMonday(d){const x=new Date(d+'T12:00:00');x.setDate(x.getDate()-(x.getDay()+6)%7);return x}
 function dateKey(d){return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')}
+function getProgrammingWeek(x){for(const k of ['semana_programacion','semana_prog','semana_origen','semana']){const n=Number(x[k]);if(Number.isInteger(n)&&n>=1&&n<=53)return n}return null}
+function getReservationWeeks(){const by=new Map();for(const r of getRows()){const id=String(r.reserva||'');if(!id)continue;const w=getProgrammingWeek(r);if(w===null)continue;const set=by.get(id)||new Set();set.add(w);by.set(id,set)}return by}
+function resolveProgrammingWeek(x,by){const direct=getProgrammingWeek(x);if(direct!==null)return direct;const weeks=by.get(String(x.reserva||''));return weeks?.size===1?[...weeks][0]:null}
 function weeklyDashboard(){
  const all=getSchedule().filter(x=>/^\d{4}-\d\d-\d\d$/.test(String(x.fecha_programacion||'').slice(0,10)));
  const chosen=Number(document.querySelector('#progWeek')?.value)||null;
- const originWeek=x=>{for(const k of ['semana_programacion','semana_prog','semana_origen','semana']){const n=Number(x[k]);if(Number.isInteger(n)&&n>=1&&n<=53)return n}return null};
- const options=[...new Set([...all.map(originWeek),...getRows().map(x=>Number(x.semana)),...Array.from(document.querySelector('#progWeek')?.options||[],o=>Number(o.value))].filter(n=>Number.isInteger(n)&&n>=1&&n<=53))].sort((a,b)=>a-b);
+ const options=[...new Set([...all.map(getProgrammingWeek),...getRows().map(getProgrammingWeek),...Array.from(document.querySelector('#progWeek')?.options||[],o=>Number(o.value))].filter(n=>Number.isInteger(n)&&n>=1&&n<=53))].sort((a,b)=>a-b);
  if(!weeksReady){selectedWeeks=new Set(chosen?[chosen]:options.slice(-1));weeksReady=true}
- const demandByReservation=new Map();for(const r of getRows()){const id=String(r.reserva||'');if(!id)continue;const weeks=demandByReservation.get(id)||new Set();weeks.add(Number(r.semana));demandByReservation.set(id,weeks)}
- const reservationWeek=id=>{const weeks=demandByReservation.get(String(id||''));return weeks&&weeks.size===1?[...weeks][0]:null};
- const recordWeek=x=>originWeek(x)??reservationWeek(x.reserva);
+ const demandByReservation=getReservationWeeks();
+ const recordWeek=x=>resolveProgrammingWeek(x,demandByReservation);
  const eligible=all.filter(x=>selectedWeeks.has(recordWeek(x)));
  const unresolved=all.filter(x=>recordWeek(x)===null).length;
  const selectionNotLoaded=[...selectedWeeks].filter(w=>!getRows().some(r=>Number(r.semana)===w));
@@ -84,7 +85,7 @@ function render(){
  root.querySelector('[data-sgp351-system]')?.addEventListener('change',e=>{weeklySystem=e.target.value;render()});
  root.querySelectorAll('[data-sgp351-week]').forEach(c=>c.addEventListener('change',()=>{const w=Number(c.dataset.sgp351Week);if(c.checked)selectedWeeks.add(w);else selectedWeeks.delete(w);weeklyAnchor='';weeklySystem='';render()}));
  root.querySelectorAll('[data-sgp351-prev],[data-sgp351-next]').forEach(b=>b.addEventListener('click',()=>{const d=weekMonday(weeklyAnchor);d.setDate(d.getDate()+(b.hasAttribute('data-sgp351-next')?7:-7));weeklyAnchor=dateKey(d);render()}));
- root.querySelectorAll('[data-sgp351-day]').forEach(b=>b.addEventListener('click',()=>{const date=b.dataset.sgp351Day,shift=b.dataset.sgp351Shift;const rows=getSchedule().filter(x=>String(x.fecha_programacion||'').slice(0,10)===date&&(!shift||['TURNO '+shift,'T'+shift,shift].includes(String(x.turno||'').trim().toUpperCase()))).filter(x=>{const w=Number(x.semana_programacion||x.semana_prog||x.semana_origen||x.semana)||null;const matches=getRows().filter(r=>String(r.reserva)===String(x.reserva));const known=[...new Set(matches.map(r=>Number(r.semana)).filter(Boolean))];return selectedWeeks.has(w??(known.length===1?known[0]:null))});const modal=root.querySelector('#sgp351Modal');modal.querySelector('#sgp351ModalContent').innerHTML='<p>'+esc(date)+' · '+(shift?'Turno '+esc(shift):'Todos los turnos')+'</p>'+table(['Reserva','Orden / producción','Sistema','Turno','Ventanas','Estado'],rows.map(x=>[x.reserva||'—',x.produccion||x.orden||'—',x.sistema||'—',x.turno||'—',fmt(qty(x.cantidad_programada)),x.estado||'—']));modal.showModal()}));
+ root.querySelectorAll('[data-sgp351-day]').forEach(b=>b.addEventListener('click',()=>{const date=b.dataset.sgp351Day,shift=b.dataset.sgp351Shift;const rows=getSchedule().filter(x=>String(x.fecha_programacion||'').slice(0,10)===date&&(!shift||['TURNO '+shift,'T'+shift,shift].includes(String(x.turno||'').trim().toUpperCase()))).filter(x=>{return selectedWeeks.has(resolveProgrammingWeek(x,getReservationWeeks()))});const modal=root.querySelector('#sgp351Modal');modal.querySelector('#sgp351ModalContent').innerHTML='<p>'+esc(date)+' · '+(shift?'Turno '+esc(shift):'Todos los turnos')+'</p>'+table(['Reserva','Orden / producción','Sistema','Turno','Ventanas','Estado'],rows.map(x=>[x.reserva||'—',x.produccion||x.orden||'—',x.sistema||'—',x.turno||'—',fmt(qty(x.cantidad_programada)),x.estado||'—']));modal.showModal()}));
  root.querySelector('[data-sgp351-close]')?.addEventListener('click',()=>root.querySelector('#sgp351Modal')?.close());
  root.querySelector('[data-sgp351-refresh]')?.addEventListener('click',()=>{const b=document.querySelector('#progRefresh');if(b)b.click();else render()});
 }
