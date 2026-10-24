@@ -19,7 +19,7 @@ DECLARE
  v_total bigint:=0; v_count integer:=0; v_first jsonb; v_source boolean;
  v_key text; v_keys text[]:=array[]::text[]; v_out jsonb;
 BEGIN
- v_usuario:=public.sgp_validar_sesion_rol(p_token,ARRAY['ADMINISTRADOR','COORDINADOR','LIDER LINEA','SUPERVISOR DE PICKING','RECEPCION']);
+ v_usuario:=public.sgp_validar_sesion_rol(p_token,ARRAY['ADMINISTRADOR','COORDINADOR','LIDER LINEA','SUPERVISOR DE PICKING']);
  SELECT * INTO v_p FROM public.sgp_aluminio_pendientes WHERE id_pendiente=p_id FOR UPDATE;
  IF NOT FOUND OR v_p.estado<>'PENDIENTE' OR coalesce(v_p.validacion_estado,'POR_VALIDAR')='VALIDADO'
  THEN RAISE EXCEPTION 'Pendiente no activo o ya validado'; END IF;
