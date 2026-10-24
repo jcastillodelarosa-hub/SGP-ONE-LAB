@@ -1078,3 +1078,48 @@ Estado: **IMPLEMENTADO EN RAMA**, pruebas automáticas/PR/publicación pendiente
 - Migración versionada en supabase/migrations/20261024154000_programada_independiente_v348.sql; reversión de referencia en docs/programada-sin-iniciar-v348-rollback.sql.
 - CI PR #82: 195 pruebas de código y sintaxis aprobadas en commit fa573a52 y posteriores. Sin pruebas reales autenticadas en PC/móvil/planta.
 - ESTADO: APLICADO EN SUPABASE; INTERFAZ IMPLEMENTADA EN RAMA; PUBLICACIÓN Y VERIFICACIÓN FUNCIONAL PENDIENTES.
+
+
+---
+
+## Propuesta UX — Resumen semanal con selección múltiple de semanas de programación (2026-10-24)
+
+**Estado:** PROPUESTO / BOCETO; NO IMPLEMENTADO NI PUBLICADO. Solicitud de diseño y actualización documental, no autorización de cambios funcionales ni despliegue.
+
+### Necesidad y distinción de conceptos
+
+En Mecanizado → Programación → Resumen deben distinguirse dos dimensiones independientes:
+
+1. **Semana(s) de programación:** semanas de origen de la demanda de reservas/producciones, seleccionables simultáneamente (ejemplo: 43 y 44 de 2026). Selección múltiple mediante chips y desplegable con casillas, con opción de una semana o varias.
+2. **Semana calendario de ejecución:** intervalo real lunes-domingo que ocupa las columnas de la matriz y al que se asignan fecha y turno. Navegación anterior/siguiente sin alterar las semanas de origen seleccionadas.
+
+Un registro puede pertenecer a la semana de programación 44 y ejecutarse en la semana calendario 43. No igualar ni sincronizar automáticamente ambas dimensiones. El filtro por sistema es independiente.
+
+### Boceto funcional solicitado
+
+- Encabezado: selector múltiple de semanas de programación (ej. chips «Semana 43», «Semana 44»); selector/navegador de semana calendario; sistema; Actualizar.
+- KPIs: **demanda total de las semanas seleccionadas**, **ventanas de esa demanda programadas**, **ventanas pendientes de programar**, **porcentaje de cobertura**, **sistemas**. Mostrar explícitamente alcance y unidad de cada indicador.
+- Barras de avance por sistema: numerador = unidades de demanda programadas; denominador = unidades de demanda total del sistema dentro de las semanas de origen seleccionadas. No presentar la distribución relativa del calendario como porcentaje de cobertura.
+- Matriz: lunes a domingo por columnas, Turno 1 y Turno 2 por filas, desglose por sistema y totales; filtrar las programaciones visibles por **ambas** dimensiones cuando corresponda.
+- Drilldown al pulsar KPI, sistema, celda o cantidad: reservas, órdenes/producciones, sistema, semana de origen, fecha, turno, cantidad programada, cantidad pendiente y estado, según disponibilidad de datos autorizados.
+- Diferenciar «avance de programación» de estados físicos SIN INICIAR, CORTE, MECANIZADO, PROCESADO y PICKING. No confundir reservas disponibles con ventanas pendientes.
+- En móvil, chips con selección accesible y matriz con desplazamiento horizontal; mantener norma visual global azul.
+
+### Reglas de cálculo y conciliación antes de implementar
+
+- Identificar fuente canónica de semana de origen y demanda total, sin derivar demanda únicamente del listado de disponibles ni de los registros del calendario.
+- Conciliar programaciones parciales, reprogramaciones, arrastres entre turnos, reservas compartidas y reservas múltiples sin doble conteo; preservar reserva principal y trazabilidad.
+- Para selección múltiple, deduplicar por identificador funcional de unidad/programación según contrato real; no sumar la misma ventana dos veces.
+- Si la demanda o cobertura no puede validarse, mostrar «N/D — pendiente de conciliación» con explicación; no inventar porcentajes ni números.
+- Validar contratos RPC, roles y permisos antes de cambios; no modificar Supabase sin autorización específica.
+
+### Pruebas de aceptación propuestas
+
+1. Seleccionar solo semana 43, solo semana 44 y ambas: verificar denominadores, numeradores y pendientes sin duplicaciones.
+2. Cambiar semana calendario sin cambiar las semanas de programación seleccionadas; comprobar que el calendario cambia y el alcance de demanda permanece estable.
+3. Cambiar semanas de programación sin mover semana calendario; verificar el filtro de la matriz y sus detalles.
+4. Comprobar registros de adelanto, arrastre, reprogramación y programación parcial, así como reserva compartida y multirreserva.
+5. Abrir detalle desde KPI, sistema y celda; conciliar sumas con la fuente de datos.
+6. Probar PC y móvil, sin sesión y con roles autorizados/no autorizados; no considerar CI o Firebase equivalentes a verificación funcional.
+
+**Pendiente:** aprobación del boceto y auditoría de los contratos actuales antes de implementar. Esta sección no modifica las reglas de negocio vigentes.
