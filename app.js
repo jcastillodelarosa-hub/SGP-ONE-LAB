@@ -2371,9 +2371,9 @@ function openNoveltyDetail(id){const x=noveltyRows.find(n=>n.id_novedad===id);if
 async function saveNoveltyUpdate(){const m=document.querySelector('#novDetailModal'),id=m?.dataset.id;if(!id)return;try{const db=await getSupabaseClient(),{error}=await db.rpc('sgp_mecanizado_novedad_actualizar',{p_token:getAppToken(),p_id:id,p_estado:document.querySelector('#novEditState').value,p_observacion:document.querySelector('#novEditObs').value,p_numero_nc:document.querySelector('#novEditNC').value,p_reserva_solucion:document.querySelector('#novEditSolution').value});if(error)throw error;m.hidden=true;await loadNovelties()}catch(e){alert('No fue posible actualizar la novedad: '+e.message)}}
 document.querySelector('#novRefresh')?.addEventListener('click',loadNovelties);document.querySelector('#novSearch')?.addEventListener('input',renderNovelties);document.querySelector('#novState')?.addEventListener('change',renderNovelties);document.querySelector('#novOrigin')?.addEventListener('change',renderNovelties);document.querySelector('#novWeek')?.addEventListener('change',renderNovelties);document.querySelector('#novDetailClose')?.addEventListener('click',()=>document.querySelector('#novDetailModal').hidden=true);document.querySelector('#novDetailCancel')?.addEventListener('click',()=>document.querySelector('#novDetailModal').hidden=true);document.querySelector('#novDetailSave')?.addEventListener('click',saveNoveltyUpdate);
 let prodRows=[],prodNoveltyTarget=null,prodNoveltyProduction=null,prodNoveltySharedMeta=null;
-const PROD_STATES=['PROGRAMADA','CORTE','MECANIZADO','PROCESADO','REPROGRAMADO'];
+const PROD_STATES=['SIN INICIAR','CORTE','MECANIZADO','PROCESADO'];
 const noveltyTypes={PROVEEDOR:['Detalle de proveedor'],BODEGA:['Detalle del perfil','Error de acabado','Medida errada'],MECANIZADO_PERSONAL:['Daño de pieza por personal'],MECANIZADO_MAQUINA:['Daño de pieza por máquina'],INGENIERIA:['XML no disponible','Error de fabricación','Información / plano','Otro'],CALIDAD:['Novedad de calidad','Liberación / definición','Otro']};
-function prodStateClass(s){return 'state-'+String(s||'PROGRAMADA').toLowerCase()}
+function prodStateClass(s){return 'state-'+String(s||'SIN INICIAR').toLowerCase().replace(/\s+/g,'-')}
 
 let prodPendingWeekSort='asc';
 async function loadAluminumPending(){
