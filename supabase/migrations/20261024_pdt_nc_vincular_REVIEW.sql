@@ -12,7 +12,7 @@ BEGIN
  IF p_id IS NULL OR p_ncs IS NULL OR cardinality(p_ncs) NOT BETWEEN 1 AND 30
  THEN RAISE EXCEPTION 'Listado NC invalido'; END IF;
  SELECT * INTO p FROM public.sgp_aluminio_pendientes WHERE id_pendiente=p_id FOR UPDATE;
- IF NOT FOUND OR p.fecha_cierre IS NOT NULL THEN RAISE EXCEPTION 'Pendiente no activo'; END IF;
+ IF NOT FOUND OR p.fecha_cierre IS NOT NULL OR p.estado_repo='PICKING' THEN RAISE EXCEPTION 'Pendiente no activo'; END IF;
  FOREACH n IN ARRAY p_ncs LOOP
   n:=btrim(n);
   IF n IS NULL OR n !~ '^[0-9]{1,20}
