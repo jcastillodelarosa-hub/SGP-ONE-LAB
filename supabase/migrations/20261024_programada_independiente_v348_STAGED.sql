@@ -92,6 +92,8 @@ END $function$;
 
 -- NO modificar REPROGRAMADO, PICKING, CORTE, MECANIZADO, PROCESADO,
 -- sgp_mecanizado_historial_orden ni las asignaciones/identificadores.
--- ATENCIÓN: RPC existentes que escriben PROGRAMADA pueden reintroducirlo.
--- No ejecutar hasta versionar/validar esas RPC en la misma entrega.
+-- ATENCIÓN: la reprogramación escribe REPROGRAMADO como evento histórico,
+-- y las RPC de cobertura siguen interpretando PROGRAMADA como cobertura.
+-- Se requiere revisar todas las lecturas antes de aplicar este cambio.
+-- No ejecutar hasta validar cancelación total, reprogramación y cobertura en la misma entrega.
 COMMIT;
