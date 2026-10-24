@@ -1123,3 +1123,16 @@ Un registro puede pertenecer a la semana de programación 44 y ejecutarse en la 
 6. Probar PC y móvil, sin sesión y con roles autorizados/no autorizados; no considerar CI o Firebase equivalentes a verificación funcional.
 
 **Pendiente:** aprobación del boceto y auditoría de los contratos actuales antes de implementar. Esta sección no modifica las reglas de negocio vigentes.
+
+
+### Ajustes aprobados al segundo boceto — 2026-10-24
+
+**Estado: DISEÑO APROBADO, IMPLEMENTACIÓN PENDIENTE.** El usuario eligió el **segundo boceto** del Resumen semanal con selección múltiple de semanas de programación y solicitó los siguientes ajustes:
+
+1. **Total por día:** retirar el símbolo de sumatoria (Σ); mostrar únicamente la etiqueta «Total por día» y la cantidad correspondiente.
+2. **Filtro de semana de programación:** admitir selección única (ej. 44) o múltiple (ej. 43 y 44), independiente de la semana calendario de ejecución.
+3. **Ubicación automática en fechas reales:** al seleccionar únicamente la semana de programación 44, situar inicialmente la vista calendario en el intervalo que contenga la primera fecha real con reservas programadas pertenecientes a esa semana de origen, aunque sea anterior o posterior a la semana 44 del calendario. No confundir semana de origen con fecha de ejecución. Permitir navegar a otros intervalos sin perder el filtro.
+4. **Detalle por día:** al hacer clic en el encabezado o total de un día, abrir una ventana accesible con la programación de ese día y de las semanas de origen seleccionadas. Mostrar fecha, turno, reserva, producción/orden, sistema, cantidad de ventanas, semana de programación y estado de mecanizado, cuando los datos autorizados existan. Ofrecer cierre y desplazamiento adecuado en móvil.
+5. **Consistencia:** el total del día debe coincidir con la suma de sus turnos y del detalle visible para los filtros activos. No inventar cantidades pendientes; conciliar cobertura con fuentes canónicas y reglas de reserva principal, compartidas, multirreserva, reprogramación y arrastre.
+
+**Aceptación requerida:** probar semana 44 aislada, semanas 43+44, cambio de semana calendario, apertura del día y cierre del detalle, datos sin programación, PC y móvil. La actualización documental no implica cambios de código, despliegue ni verificación funcional.
