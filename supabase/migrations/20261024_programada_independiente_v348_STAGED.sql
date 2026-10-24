@@ -11,6 +11,16 @@ UPDATE public.sgp_mecanizado_programacion
 SET programada = (estado IS DISTINCT FROM 'CANCELADA')
 WHERE programada IS DISTINCT FROM (estado IS DISTINCT FROM 'CANCELADA');
 
+-- El guardado general de mecanizado también escribe SIN INICIAR y su CHECK
+-- vigente solo admite PICKING/CORTE/MECANIZADO/PROCESADO/REPROGRAMADO.
+ALTER TABLE public.sgp_mecanizado_ejecucion
+ DROP CONSTRAINT IF EXISTS sgp_mecanizado_ejecucion_estado_check;
+ALTER TABLE public.sgp_mecanizado_ejecucion
+ ADD CONSTRAINT sgp_mecanizado_ejecucion_estado_check
+ CHECK (estado IN ('SIN INICIAR','PICKING','CORTE','MECANIZADO','PROCESADO','REPROGRAMADO'));
+ALTER TABLE public.sgp_mecanizado_ejecucion
+ ALTER COLUMN estado SET DEFAULT 'SIN INICIAR';
+
 -- La restricción actual no acepta SIN INICIAR; reemplazarla en la misma transacción.
 ALTER TABLE public.sgp_mecanizado_ejecucion_orden
  DROP CONSTRAINT IF EXISTS sgp_mecanizado_ejecucion_orden_estado_check;
