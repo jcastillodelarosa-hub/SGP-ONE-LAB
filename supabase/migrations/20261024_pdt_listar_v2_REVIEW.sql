@@ -1,4 +1,6 @@
 -- SGP_ONE PR91 - REVIEW ONLY. Aggregated read contract.
+-- Roles aligned with existing sgp_aluminio_pendientes_listar: do not grant new read privileges implicitly.
+-- This response is NOT a drop-in replacement for the legacy list contract.
 BEGIN;
 CREATE OR REPLACE FUNCTION public.sgp_aluminio_pendientes_listar_v2(
  p_token text,p_solo_abiertos boolean DEFAULT true
@@ -6,7 +8,7 @@ CREATE OR REPLACE FUNCTION public.sgp_aluminio_pendientes_listar_v2(
 AS $fn$
 DECLARE u text; resultado jsonb;
 BEGIN
- u:=public.sgp_validar_sesion_rol(p_token,ARRAY['ADMINISTRADOR','COORDINADOR','RECEPCION','PATINADOR','LIDER MECANIZADO','LIDER','LIDER LINEA','SUPERVISOR DE PICKING','PICKING','CONSULTA']);
+ u:=public.sgp_validar_sesion_rol(p_token,ARRAY['ADMINISTRADOR','COORDINADOR','PATINADOR','LIDER MECANIZADO','LIDER','LIDER LINEA','SUPERVISOR DE PICKING','CONSULTA']);
  SELECT coalesce(jsonb_agg(jsonb_build_object(
   'id_pendiente',p.id_pendiente,'produccion',p.produccion,'perfil',p.perfil,
   'estado',p.estado,'estado_repo',p.estado_repo,'validacion_estado',p.validacion_estado,
