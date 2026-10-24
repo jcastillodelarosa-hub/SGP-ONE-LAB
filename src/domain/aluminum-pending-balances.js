@@ -81,3 +81,30 @@ export function ncAvailability(ncs) {
     estado: total === 0 ? 'SIN_NC' : completed === total ? 'REPO_OK' : completed > 0 ? 'PARCIAL' : 'PENDIENTE',
     posibleSolucion: total > 0 && completed === total };
 }
+
+/**
+ * Business-level pending closure: machining completion is NOT delivery.
+ * A confirmed Picking handoff is required to close the pending record.
+ */
+export function pendingClosureState(balances, pickingDelivered) {
+  const saldo = Number(balances?.saldo);
+  if (!Number.isSafeInteger(saldo) || saldo < 0) throw new Error('Saldo inválido');
+  if (saldo > 0) return { closed: false, stage: 'MECANIZADO_PENDIENTE' };
+  return pickingDelivered === true
+    ? { closed: true, stage: 'PICKING' }
+    : { closed: false, stage: 'PROCESADO_PENDIENTE_ENTREGA' };
+}
+
+/**
+ * Pure, conservative NC indicator for a single pending item.
+ * NC finalization is a potential solution, never proof of physical stock.
+ */
+export function pendingNcAlert(ncs, readySince = null, now = new Date()) {
+  const availability = ncAvailability(ncs);
+  const start = readySince ? new Date(readySince) : null;
+  const end = now instanceof Date ? now : new Date(now);
+  const validDates = start && Number.isFinite(start.getTime()) && Number.isFinite(end.getTime());
+  const elapsedHours = validDates ? Math.max(0, Math.floor((end.getTime() - start.getTime()) / 3600000)) : null;
+  return { ...availability, elapsedHours, requiresAction: availability.finalizadas > 0,
+    physicallyAvailable: null };
+}
