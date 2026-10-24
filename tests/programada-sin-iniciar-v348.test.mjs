@@ -6,7 +6,7 @@ import {SGP} from '../src/config/domain.js';
 const app=readFileSync(new URL('../app.js',import.meta.url),'utf8');
 const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
 const css=readFileSync(new URL('../styles.css',import.meta.url),'utf8');
-const sql=readFileSync(new URL('../supabase/migrations/20261024_programada_independiente_v348_STAGED.sql',import.meta.url),'utf8');
+const sql=readFileSync(new URL('../supabase/migrations/20261024154000_programada_independiente_v348.sql',import.meta.url),'utf8');
 
 test('v348: programación Sí/No es distinta del flujo de mecanizado y Picking',()=>{
  assert.deepEqual(SGP.programmingStates,['NO','SI']);
