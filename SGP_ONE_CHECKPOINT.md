@@ -67,3 +67,11 @@ Realizar una **prueba de recuperación de solo lectura** desde otro chat: compro
 - Autorizado: rama, PR y pruebas no destructivas. Sin cambios Supabase, fusion ni publicacion.
 - Estado: reglas y borrador SQL documentados; RPC e interfaz pendientes.
 - Siguiente paso: contratos RPC versionados y pruebas sin aplicar SQL.
+
+
+## Continuidad PDT 2026-10-24 — avance PR #91
+- Rama feat/pdt-multifabricacion-avances-nc; cambios en app.js: REPO_OK ya no seleccionable manualmente; conserva visualizacion de valores historicos. Entrada NC multiples explicita; busqueda individual existente no se presenta como verificacion multiple.
+- Funciones puras de saldos, estado NC y cierre por Picking con pruebas escritas, aun no ejecutadas.
+- No se han creado ni aplicado RPC; migracion SQL sigue en borrador. Sin cambios a Supabase, main ni Firebase.
+- Riesgo: frontend de validacion multifabricacion y avances no conectado a backend; no declarar implementacion completa.
+- Proximo paso: completar contrato RPC seguro, integrar UI y ejecutar pruebas; pedir autorizacion separada antes de aplicar SQL.
