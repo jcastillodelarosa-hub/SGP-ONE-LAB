@@ -15,7 +15,7 @@ BEGIN
  IF p_id IS NULL OR p_movimiento IS NULL OR p_clave IS NULL OR nullif(btrim(p_motivo),'') IS NULL
  THEN RAISE EXCEPTION 'Parametros invalidos'; END IF;
  SELECT * INTO p FROM public.sgp_aluminio_pendientes WHERE id_pendiente=p_id FOR UPDATE;
- IF NOT FOUND OR p.estado <> 'PENDIENTE' OR p.estado_repo = 'PICKING'
+ IF NOT FOUND OR p.estado <> 'PENDIENTE' OR p.estado_repo = 'PICKING' OR p.fecha_cierre IS NOT NULL
  THEN RAISE EXCEPTION 'Pendiente no apto'; END IF;
  SELECT * INTO e FROM public.sgp_aluminio_pendiente_movimientos WHERE idempotency_key=p_clave;
  IF FOUND THEN
