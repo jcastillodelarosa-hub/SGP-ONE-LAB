@@ -6,7 +6,7 @@ CREATE OR REPLACE FUNCTION public.sgp_aluminio_pendiente_nc_vincular_v1(
 AS $fn$
 DECLARE
  u text; p public.sgp_aluminio_pendientes%rowtype;
- n text; ncs text[]:=ARRAY[]::text[]; total integer:=0;
+ n text; ncs text[]:=ARRAY[]::text[];
 BEGIN
  u:=public.sgp_validar_sesion_rol(p_token,ARRAY['ADMINISTRADOR','COORDINADOR','PATINADOR']);
  IF p_id IS NULL OR p_ncs IS NULL OR cardinality(p_ncs) NOT BETWEEN 1 AND 30
@@ -21,7 +21,6 @@ BEGIN
  FOREACH n IN ARRAY ncs LOOP
   INSERT INTO public.sgp_aluminio_pendiente_ncs(id_pendiente,consecutivo,enlazado_por)
   VALUES(p_id,n,u) ON CONFLICT DO NOTHING;
-  GET DIAGNOSTICS total = ROW_COUNT;
  END LOOP;
  INSERT INTO public.sgp_aluminio_pendientes_historial(id_pendiente,usuario,tipo_evento,datos_nuevos)
  VALUES(p_id,u,'VINCULACION_NC_PDT',jsonb_build_object('ncs',ncs));
