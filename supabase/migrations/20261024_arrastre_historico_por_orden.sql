@@ -46,7 +46,7 @@ begin
     and mp.estado<>'CANCELADA'
  ), eligible as (
   select *,row_number() over(partition by reserva,key_produccion order by fecha_programacion desc,case when upper(trim(turno))='TURNO 2' then 2 else 1 end desc,id_programacion desc) rn
-  from base where (procesado_en is null or procesado_en>=v_inicio)
+  from base where ((procesado_en is null and estado_actual<>'PROCESADO') or procesado_en>=v_inicio)
     and (movido_en is null or movido_en>=v_inicio) and (reprogramado_en is null or reprogramado_en>=v_inicio)
  )
  select jsonb_agg(jsonb_build_object(
