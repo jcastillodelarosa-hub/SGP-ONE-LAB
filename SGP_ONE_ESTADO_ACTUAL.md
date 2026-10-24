@@ -1067,3 +1067,14 @@ Estado: **IMPLEMENTADO EN RAMA**, pruebas automáticas/PR/publicación pendiente
 **Barrera de publicación pendiente:** no existe una base de ensayo independiente; la creación de rama de Supabase exige confirmación de coste por el usuario. No ejecutar la migración STAGED ni fusionar PR/deplegar mientras falten ensayo transaccional, backups/rollback, pruebas positivas y negativas con roles reales, validación en navegador y móvil, y verificación de Firebase. Sin cambios en Supabase, Firebase ni SGP_ONE_GOOGLE durante esta auditoría.
 
 **Estado:** **IMPLEMENTADO EN RAMA + CI VALIDADO, SQL NO APLICADO, NO FUSIONADO, NO PUBLICADO, NO VERIFICADO FUNCIONALMENTE**.
+
+---
+
+## 2026-10-24 — LAB v348: migración Supabase aplicada; interfaz pendiente de publicación
+
+- Alcance SGP_ONE exclusivamente; SGP_ONE_GOOGLE sin cambios.
+- Migración lab_v348_programada_independiente registrada en Supabase con versión 20261024154023, proyecto ocvxbwzqxbrfndkvjmfx. Ensayos transaccionales con ROLLBACK previos, incluida reversión de RPC y esquema.
+- Verificación backend: 68 programaciones = 65 SIN INICIAR + 3 CANCELADA; bandera 65 SÍ / 3 NO; 0 inconsistencias. Órdenes: 11 SIN INICIAR, 2 CORTE, 128 PROCESADO, 5 REPROGRAMADO. Ejecución general: 8 CORTE, 2 MECANIZADO, 41 PROCESADO. Historial 283 registros; 2 triggers sincronizadores; RPC de arrastre y Picking actualizadas.
+- Migración versionada en supabase/migrations/20261024154000_programada_independiente_v348.sql; reversión de referencia en docs/programada-sin-iniciar-v348-rollback.sql.
+- CI PR #82: 195 pruebas de código y sintaxis aprobadas en commit fa573a52 y posteriores. Sin pruebas reales autenticadas en PC/móvil/planta.
+- ESTADO: APLICADO EN SUPABASE; INTERFAZ IMPLEMENTADA EN RAMA; PUBLICACIÓN Y VERIFICACIÓN FUNCIONAL PENDIENTES.
