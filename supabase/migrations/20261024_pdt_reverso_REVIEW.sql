@@ -19,7 +19,7 @@ BEGIN
  THEN RAISE EXCEPTION 'Pendiente no apto'; END IF;
  SELECT * INTO e FROM public.sgp_aluminio_pendiente_movimientos WHERE idempotency_key=p_clave;
  IF FOUND THEN
-  IF e.tipo <> 'REVERSO' OR e.id_pendiente <> p_id OR e.id_movimiento_revertido <> p_movimiento
+  IF e.tipo <> 'REVERSO' OR e.id_pendiente <> p_id OR e.id_movimiento_revertido <> p_movimiento OR e.observacion IS DISTINCT FROM p_motivo
   THEN RAISE EXCEPTION 'Clave reutilizada'; END IF;
   RETURN jsonb_build_object('ok',true,'duplicado',true,'id_movimiento',e.id_movimiento);
  END IF;
