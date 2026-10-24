@@ -20,3 +20,21 @@ Estado: IMPLEMENTACIÓN PARCIAL EN RAMA, NO APLICADA EN SUPABASE, NO PUBLICADA.
 6. Solicitar autorización explícita para aplicar SQL y publicar.
 
 Los cambios actuales en `app.js` y `src/config/domain.js` son preparatorios y **no deben fusionarse** hasta completar backend y pruebas.
+
+
+## Auditoría de escritura y validación previa a publicación (2026-10-24)
+- RPC `sgp_mecanizado_guardar_estado_orden` actual: valida roles, pero admite cualquier `p_estado`; su reemplazo debe validar explícitamente los estados operativos antes de actualizar y registrar historial.
+- RPC `sgp_mecanizado_programar` con prioridad semanal: inserta programación sin la futura bandera; adaptar su inserción para `programada = true` y preservar la comprobación de composición canónica, la identidad `key_produccion` y las cantidades.
+- Conservar la sobrecarga de `sgp_mecanizado_programar` sin prioridad semanal y revisar todos los llamadores antes de migrar.
+- Los filtros de cobertura actuales consultan `estado_orden = 'PROGRAMADA'` como indicador de cobertura, **no como estado operativo**. No reemplazarlos indiscriminadamente por `SIN INICIAR`.
+- La tabla `sgp_mecanizado_programacion` también tiene `estado = 'CANCELADA'`; no perder el marcador de cancelación al normalizar estados.
+- El script SQL STAGED existente **no es ejecutable como release integral**: falta adaptación y pruebas de RPC, compatibilidad con cancelaciones, rollback y reconciliación. No aplicar ni desplegar hasta superar los gates.
+- Frontend: guarda de escritura operativa agregada en `app.js` en rama. Aún falta revisar el guardado masivo de estados, reportes, arrastre y valores predeterminados.
+
+## Gate de aceptación
+1. Probar migración en transacción de ensayo o entorno aislado, con backup, y comparar conteos por estado/identidad antes y después.
+2. Confirmar que 64 PROGRAMADA de programación, 3 CANCELADA y los estados de ejecución existentes se conservan según reglas aprobadas (conteos de referencia sujetos a cambios en tiempo real).
+3. Probar autorización válida e inválida de RPC, sin cambiar roles ni RLS.
+4. Probar programación parcial y compartida, arrastre y Picking PANEL.
+5. Ejecutar suite de CI, revisión de sintaxis y prueba manual de PC/móvil.
+6. Solo después fusionar, aplicar migración coordinada y publicar con verificación real.
