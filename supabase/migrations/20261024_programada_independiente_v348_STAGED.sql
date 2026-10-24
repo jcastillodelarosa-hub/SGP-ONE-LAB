@@ -125,6 +125,25 @@ BEGIN
  EXECUTE v_def;
 END $migration$;
 
+-- La cola de Picking presenta estado operativo, no estado de cobertura;
+-- homologar el estado inicial y su prioridad de ordenación sin tocar entregas.
+DO $picking$
+DECLARE v_def text;
+BEGIN
+ SELECT pg_get_functiondef(p.oid) INTO v_def
+ FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
+ WHERE n.nspname='public' AND p.proname='sgp_picking_cola';
+ IF v_def IS NULL OR position('coalesce(p.estado_ejecucion,''PROGRAMADA'')' in v_def)=0
+    OR position('when ''PROGRAMADA'' then 3' in v_def)=0 THEN
+  RAISE EXCEPTION 'La RPC de Picking cambió: revisar contrato antes de migrar';
+ END IF;
+ v_def:=replace(v_def,'coalesce(p.estado_ejecucion,''PROGRAMADA'')',
+                        'coalesce(p.estado_ejecucion,''SIN INICIAR'')');
+ v_def:=replace(v_def,'when ''PROGRAMADA'' then 3',
+  'when ''PROGRAMADA'' then 3 when ''SIN INICIAR'' then 3');
+ EXECUTE v_def;
+END $picking$;
+
 -- REPROGRAMADO es evento interno usado por la RPC de reprogramación; nunca debe mostrarse como etapa seleccionable.
 -- El guardado de arrastre reutiliza sgp_mecanizado_guardar_estado_orden;
 -- no se modifica la función de arrastre ni sus reglas de identificación.
