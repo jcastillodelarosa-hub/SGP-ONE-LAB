@@ -5,6 +5,7 @@ import {SGP} from '../src/config/domain.js';
 
 const app=readFileSync(new URL('../app.js',import.meta.url),'utf8');
 const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
+const css=readFileSync(new URL('../styles.css',import.meta.url),'utf8');
 const sql=readFileSync(new URL('../supabase/migrations/20261024_programada_independiente_v348_STAGED.sql',import.meta.url),'utf8');
 
 test('v348: programación Sí/No es distinta del flujo de mecanizado y Picking',()=>{
@@ -82,6 +83,7 @@ test('v348: Picking y reportes normalizan etiquetas, sin cambiar cobertura',()=>
 });
 
 test('v348: interfaz y recursos reportan versión coincidente',()=>{
+ assert.match(css,/\\.state-sin-iniciar\\{background:#f3e81b!important;color:#202020!important\\}/);
  assert.match(html,/LAB v348/);
  for(const asset of ['styles.css','app.js','picking-delivery-report.css']){
   assert.ok(html.includes(asset+'?v=348'));

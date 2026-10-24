@@ -38,3 +38,14 @@ Los cambios actuales en `app.js` y `src/config/domain.js` son preparatorios y **
 4. Probar programación parcial y compartida, arrastre y Picking PANEL.
 5. Ejecutar suite de CI, revisión de sintaxis y prueba manual de PC/móvil.
 6. Solo después fusionar, aplicar migración coordinada y publicar con verificación real.
+
+
+## Resultado de revisión integral posterior (2026-10-24)
+
+**Aclaración temporal:** los párrafos iniciales describen hallazgos antes de las correcciones sucesivas. El SQL `STAGED` actual ya contempla los CHECK de ejecución general y por orden, estados predeterminados `SIN INICIAR`, triggers de `programada`, reemplazo de RPC de escritura y respaldo de arrastre/Picking con comprobaciones de contrato. Continúa **sin ejecución real** sobre una base de ensayo.
+
+**CI validada:** GitHub Actions 40103946305 (195/195 pruebas, diez de v348), 40103946303 (sintaxis JS). El paquete de release pasa su verificación automática; las pruebas son estáticas/de código, **no validan integración con PostgreSQL vivo**.
+
+**Preflight vivo de Supabase (solo lectura):** 64 `PROGRAMADA` y 3 `CANCELADA` en programación; 2 `PROGRAMADA`, 2 `CORTE`, 128 `PROCESADO`, 5 `REPROGRAMADO` en ejecución por orden; 6 `CORTE`, 2 `MECANIZADO`, 41 `PROCESADO` en ejecución general. La segunda tabla tiene CHECK que rechaza `SIN INICIAR` hoy, subsanado en el SQL preparado, no en la base real.
+
+**Gate NO superado:** ensayo SQL en rama Supabase (requiere consentimiento explícito del coste que indique Supabase) o entorno de pruebas equivalente; pruebas de roles, cancelación/reprogramación/arrastre/Picking con datos de ensayo; plan de reversión; después migración coordinada y despliegue/aceptación PC y móvil. No interpretar 195/195 como publicación ni aceptación funcional.

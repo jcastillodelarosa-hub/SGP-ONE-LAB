@@ -1050,3 +1050,20 @@ Estado: **IMPLEMENTADO EN RAMA**, pruebas automáticas/PR/publicación pendiente
 **Pendientes y riesgos:** identificar propietario persistente del indicador para unidades no programadas; auditar y adaptar RPC de escritura, defaults, consultas, reprogramación, arrastre y Picking; construir migración SQL idempotente con pre/post conteos y reversión; implementar separación visual superior/inferior; pruebas de permisos, reservas compartidas, programación parcial, estados y móvil. No aplicar cambios aislados de frontend.
 
 **Evidencia y clasificación:** GitHub rama de trabajo con commits; **IMPLEMENTADO PARCIALMENTE EN RAMA, NO FUSIONADO, NO APLICADO EN SUPABASE, NO PUBLICADO EN FIREBASE, NO PROBADO NI VERIFICADO FUNCIONALMENTE**. `main` continúa en LAB v347 hasta que se confirme otra actualización. No se creó PR ni se desplegó.
+
+
+---
+
+## 2026-10-24 — Auditoría integral de cierre preparatorio LAB v348 / PR #82
+
+**Baseline confirmado:** `main` commit `f342bf7198d3e7638b412756acce0acad9bca301`; trabajo en `feat/programada-sin-iniciar-20261024`, PR #82 **borrador** (no fusionado).
+
+**Correcciones comprobadas en GitHub:** (1) se homologa visualización de `PROGRAMADA` operacional a `SIN INICIAR` preservando `estado_orden='PROGRAMADA'` de cobertura; (2) lista superior sin programar, parcial con **Continuar**, completadas abajo; (3) estados de Producción y Picking, vista compacta, informe de turno y contraste de distintivo `SIN INICIAR`; (4) migración STAGED con bandera `programada`, backfill sin reactivar `CANCELADA`, restricciones de ambas tablas de ejecución, triggers de sincronización, validación de roles, reprogramación vinculada, RPC de arrastre y cola Picking.
+
+**Datos reales consultados en Supabase (solo lectura):** programación: 64 `PROGRAMADA`, 3 `CANCELADA`; ejecución general: 6 `CORTE`, 2 `MECANIZADO`, 41 `PROCESADO`; ejecución por orden: 2 `PROGRAMADA`, 2 `CORTE`, 128 `PROCESADO`, 5 `REPROGRAMADO`. El esquema operativo todavía no tiene aplicada la columna `programada` ni la migración v348.
+
+**Pruebas verificadas en rama:** GitHub Actions **SGP ONE Tests** run `40103946305`: 195/195 aprobadas, incluidos 10 casos automatizados v348 de integridad documental/estática. **JavaScript syntax check** run `40103946303`: satisfactoria. El workflow incluye `npm run verify:release`, y la versión `v348` y recursos de caché coinciden. Las pruebas de fuente no demuestran que SQL se haya ejecutado.
+
+**Barrera de publicación pendiente:** no existe una base de ensayo independiente; la creación de rama de Supabase exige confirmación de coste por el usuario. No ejecutar la migración STAGED ni fusionar PR/deplegar mientras falten ensayo transaccional, backups/rollback, pruebas positivas y negativas con roles reales, validación en navegador y móvil, y verificación de Firebase. Sin cambios en Supabase, Firebase ni SGP_ONE_GOOGLE durante esta auditoría.
+
+**Estado:** **IMPLEMENTADO EN RAMA + CI VALIDADO, SQL NO APLICADO, NO FUSIONADO, NO PUBLICADO, NO VERIFICADO FUNCIONALMENTE**.
