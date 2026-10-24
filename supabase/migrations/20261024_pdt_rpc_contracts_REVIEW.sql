@@ -99,6 +99,7 @@ BEGIN
  IF FOUND THEN
   IF v_existing.id_pendiente<>p_id OR v_existing.id_detalle<>p_id_detalle
     OR v_existing.cantidad<>p_cantidad OR v_existing.tipo<>'AVANCE'
+    OR v_existing.turno<>p_turno OR v_existing.fecha_operativa<>p_fecha_operativa
   THEN RAISE EXCEPTION 'Clave de idempotencia reutilizada'; END IF;
   RETURN jsonb_build_object('ok',true,'duplicado',true,'id_movimiento',v_existing.id_movimiento);
  END IF;
