@@ -46,16 +46,16 @@ function show(){
  const crossWeek=allSchedule.some(x=>{const system=String(x.sistema||'SIN SISTEMA').trim();return demand.has(system)&&!days.includes(String(x.fecha_programacion||'').slice(0,10))&&demandRows.some(r=>String(r.reserva)===String(x.reserva))});
  const sharedUncertain=demandRows.some(r=>JSON.stringify(r).toUpperCase().includes('COMPARTIDA'));
  const validCoverage=!!selectedWeek&&weekAligned&&demandTotal>0&&!conflicts.length&&!crossWeek&&!sharedUncertain;
- const warnings=[...conflicts];if(!Number(document.querySelector('#progWeek')?.value))warnings.push('Selecciona una semana para comparar con su demanda.');if(!demandTotal)warnings.push('No hay demanda semanal disponible para conciliar.');if(selectedWeek&&!weekAligned)warnings.push('El calendario muestra la semana '+calendarWeek+' pero el filtro de demanda es la semana '+selectedWeek+'. Selecciona la misma semana antes de interpretar porcentajes.');if(crossWeek)warnings.push('Hay asignaciones de estas reservas fuera de la semana visible; no es válido comparar solo esta semana con su demanda completa.');if(sharedUncertain)warnings.push('Se detectaron referencias a reservas compartidas; la demanda necesita conciliación canónica por orden antes de calcular porcentajes.');
+ const warnings=[...conflicts];if(!Number(document.querySelector('#progWeek')?.value))warnings.push('Selecciona una semana para comparar con su demanda.');if(!demandTotal)warnings.push('No hay demanda semanal disponible para conciliar.');if(selectedWeek&&!weekAligned)warnings.push('El calendario muestra la semana '+calendarWeek+' pero el filtro de demanda es la semana '+selectedWeek+'. Selecciona la misma semana antes de interpretar porcentajes.');warnings.push('Porcentajes de cobertura deshabilitados hasta validar el total canónico por sistema, reserva y orden.');if(crossWeek)warnings.push('Hay asignaciones de estas reservas fuera de la semana visible; no es válido comparar solo esta semana con su demanda completa.');if(sharedUncertain)warnings.push('Se detectaron referencias a reservas compartidas; la demanda necesita conciliación canónica por orden antes de calcular porcentajes.');
  const perSys=new Map(systems.map(s=>[s,week.filter(x=>String(x.sistema||'SIN SISTEMA').trim()===s).reduce((n,x)=>n+num(x.cantidad_programada),0)]));
  systems.forEach(s=>{if((perSys.get(s)||0)>(demand.get(s)||0))warnings.push('Programación superior a demanda semanal: '+s+'. Revisar arrastres y alcance de semana.')});
- const coverageReliable=validCoverage&&systems.every(s=>(perSys.get(s)||0)<=(demand.get(s)||0));
+ const coverageReliable=false; // No se certifica el denominador hasta reconciliar cobertura canónica por orden y arrastres.
  const overlay=document.createElement('div');overlay.className='sgp-shift-overlay';overlay.setAttribute('role','presentation');
  const render=(selected='')=>{
  const filtered=selected?week.filter(x=>String(x.sistema||'SIN SISTEMA').trim()===selected):week;
  const totalFiltered=filtered.reduce((s,x)=>s+num(x.cantidad_programada),0);
  const labels=['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
- const rows=[1,2].map(turn=>'<tr><td class="sgp-shift-rowhead">Turno '+turn+'<small>'+(turn===1?'7 a. m. – 7 p. m.':'7 p. m. – 7 a. m.')+'</small></td>'+days.map(date=>{
+ const rows=[1,2].map(turn=>'<tr><td class="sgp-shift-rowhead">Turno '+turn+'</td>'+days.map(date=>{
  const items=filtered.filter(x=>String(x.fecha_programacion).slice(0,10)===date&&['TURNO '+turn,'T'+turn,String(turn)].includes(String(x.turno||'').trim().toUpperCase()));
  const by=new Map();items.forEach(x=>{const k=String(x.sistema||'SIN SISTEMA');by.set(k,(by.get(k)||0)+num(x.cantidad_programada))});
  const t=items.reduce((s,x)=>s+num(x.cantidad_programada),0);
