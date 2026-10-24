@@ -43,7 +43,7 @@ test('v348: migración conserva canceladas, no altera historial, es atómica',()
 test('v348: las dos tablas de ejecución admiten SIN INICIAR antes del primer guardado',()=>{
  for(const t of ['sgp_mecanizado_ejecucion','sgp_mecanizado_ejecucion_orden']){
   assert.match(sql,new RegExp('ALTER TABLE public\\.'+t+'\\s+[\\s\\S]*?ADD CONSTRAINT '+t+'_estado_check'));
-  assert.match(sql,new RegExp("ALTER TABLE public\\\\."+t+"\\\\s+ALTER COLUMN estado SET DEFAULT 'SIN INICIAR'"));
+  assert.match(sql,new RegExp("ALTER TABLE public[.]"+t+"\\s+ALTER COLUMN estado SET DEFAULT 'SIN INICIAR'"));
  }
  assert.match(sql,/CHECK \(estado IN \('SIN INICIAR','PICKING','CORTE','MECANIZADO','PROCESADO','REPROGRAMADO'\)\)/);
  assert.match(sql,/CHECK \(estado IN \('SIN INICIAR','PROGRAMADA','PICKING','CORTE','MECANIZADO','PROCESADO','REPROGRAMADO'\)\)/);
