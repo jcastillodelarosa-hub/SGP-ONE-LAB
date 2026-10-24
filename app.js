@@ -2033,7 +2033,7 @@ function renderProgCalendar(){
  host.querySelector('[data-cal-prev]').onclick=()=>{const d=progWeekStart(progCalendarAnchor);d.setDate(d.getDate()-7);progCalendarAnchor=progDateISO(d);renderProgCalendar()};
  host.querySelector('[data-cal-next]').onclick=()=>{const d=progWeekStart(progCalendarAnchor);d.setDate(d.getDate()+7);progCalendarAnchor=progDateISO(d);renderProgCalendar()};
  host.querySelector('[data-cal-today]').onclick=()=>{progCalendarAnchor=progDateISO(new Date());renderProgCalendar()};
- host.querySelector('[data-cal-weekly-summary]').onclick=()=>{if(typeof window.SGPShowWeeklySummary==='function')window.SGPShowWeeklySummary();else alert('El resumen semanal todavía no está disponible. Actualiza la página.')};
+ host.querySelector('[data-cal-weekly-summary]').onclick=async()=>{if(typeof window.SGPShowWeeklySummary!=='function'){try{await import('./mecanizado-weekly-shifts-v349.js?v=350')}catch(e){console.error('No fue posible cargar resumen semanal',e)}}if(typeof window.SGPShowWeeklySummary==='function')window.SGPShowWeeklySummary();else alert('No fue posible cargar el resumen semanal. Revisa la conexión e inténtalo nuevamente.')};
  host.querySelectorAll('[data-cal-day]').forEach(b=>b.onclick=()=>openProgDay(b.dataset.calDay))
 }
 function renderProgramming(){
