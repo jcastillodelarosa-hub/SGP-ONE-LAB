@@ -28,12 +28,12 @@ const num=n=>Number(n)||0;
 const iso=d=>[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');
 const fmt=n=>Math.round(n).toLocaleString('es-CO');
 function show(){
- const source=(typeof progSchedule!=='undefined'?progSchedule:[]).filter(x=>x.estado!=='CANCELADA');
- const anchor=(typeof progCalendarAnchor!=='undefined'&&progCalendarAnchor)?progCalendarAnchor:iso(new Date());
+ const source=(window.SGPWeeklySchedule?.()||[]).filter(x=>x.estado!=='CANCELADA');
+ const anchor=(window.SGPWeeklyAnchor?.()||iso(new Date()));
  const monday=new Date(anchor+'T12:00:00');monday.setDate(monday.getDate()-(monday.getDay()+6)%7);
  const days=Array.from({length:7},(_,i)=>{const d=new Date(monday);d.setDate(monday.getDate()+i);return iso(d)});
  const week=source.filter(x=>days.includes(String(x.fecha_programacion||'').slice(0,10)));
- const demandRows=(typeof progRows!=='undefined'?progRows:[]).filter(r=>{const w=Number(document.querySelector('#progWeek')?.value)||null;return !w||Number(r.semana)===w});
+ const demandRows=(window.SGPWeeklyDemand?.()||[]).filter(r=>{const w=Number(document.querySelector('#progWeek')?.value)||null;return !w||Number(r.semana)===w});
  const demand=new Map(),seen=new Set(),conflicts=[];
  demandRows.forEach(r=>{const system=String(r.sistema||'SIN SISTEMA').trim(),key=String(r.reserva)+'|'+system,qty=num(r.cantidad);if(!r.reserva||!Number.isFinite(qty)||qty<0){conflicts.push('Registro de demanda inválido');return}if(seen.has(key)){conflicts.push('Reserva duplicada en demanda: '+key);return}seen.add(key);demand.set(system,(demand.get(system)||0)+qty)});
  const systems=[...new Set([...week.map(x=>String(x.sistema||'SIN SISTEMA').trim()),...demand.keys()])].sort((a,b)=>a.localeCompare(b,'es'));
@@ -42,7 +42,7 @@ function show(){
  const selectedWeek=Number(document.querySelector('#progWeek')?.value)||null;
  const thursday=new Date(monday);thursday.setDate(thursday.getDate()+3);const firstThursday=new Date(thursday.getFullYear(),0,4,12);firstThursday.setDate(firstThursday.getDate()-(firstThursday.getDay()+6)%7);const calendarWeek=1+Math.round((monday-firstThursday)/604800000);
  const weekAligned=selectedWeek===calendarWeek;
- const allSchedule=(typeof progSchedule!=='undefined'?progSchedule:[]).filter(x=>x.estado!=='CANCELADA');
+ const allSchedule=(window.SGPWeeklySchedule?.()||[]).filter(x=>x.estado!=='CANCELADA');
  const crossWeek=allSchedule.some(x=>{const system=String(x.sistema||'SIN SISTEMA').trim();return demand.has(system)&&!days.includes(String(x.fecha_programacion||'').slice(0,10))&&demandRows.some(r=>String(r.reserva)===String(x.reserva))});
  const sharedUncertain=demandRows.some(r=>JSON.stringify(r).toUpperCase().includes('COMPARTIDA'));
  const validCoverage=!!selectedWeek&&weekAligned&&demandTotal>0&&!conflicts.length&&!crossWeek&&!sharedUncertain;
