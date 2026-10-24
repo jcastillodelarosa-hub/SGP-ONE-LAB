@@ -47,7 +47,7 @@ function weeklyDashboard(){
  const systems=[...new Set(records.map(x=>String(x.sistema||'SIN SISTEMA').trim()))].sort();
  if(weeklySystem&&!systems.includes(weeklySystem))weeklySystem='';
  const shown=weeklySystem?records.filter(x=>String(x.sistema||'SIN SISTEMA').trim()===weeklySystem):records;
- const total=shown.reduce((n,x)=>n+qty(x.cantidad_programada),0);const pendingReservations=[...new Set(weekRows().map(x=>String(x.reserva||'')).filter(Boolean))];
+ const total=shown.reduce((n,x)=>n+qty(x.cantidad_programada),0);const pendingRows=weekRows();const pendingReservations=[...new Set(pendingRows.map(x=>String(x.reserva||'')).filter(Boolean))];
  const bySystem=systems.map((name,i)=>({name,color:weeklyColors[i%weeklyColors.length],value:records.filter(x=>String(x.sistema||'SIN SISTEMA').trim()===name).reduce((n,x)=>n+qty(x.cantidad_programada),0)})).sort((a,b)=>b.value-a.value);
  const colors=new Map(bySystem.map(x=>[x.name,x.color])),max=Math.max(1,...bySystem.map(x=>x.value));
  const progress=bySystem.slice(0,5).map(x=>'<details class="sgp351-detail"><summary class="sgp351-system"><span>'+esc(x.name)+'</span><div class="sgp351-bar"><i style="background:'+x.color+';width:'+Math.round(x.value/max*100)+'%"></i></div><b>'+fmt(x.value)+' ▾</b></summary><div class="sgp351-detailrows">'+records.filter(r=>String(r.sistema||'SIN SISTEMA').trim()===x.name).map(r=>'<div>'+esc(String(r.fecha_programacion||'').slice(0,10))+' · '+esc(r.turno||'Turno sin definir')+' · Reserva '+esc(r.reserva||'—')+' · '+fmt(qty(r.cantidad_programada))+' ventanas</div>').join('')+'</div></details>').join('');
