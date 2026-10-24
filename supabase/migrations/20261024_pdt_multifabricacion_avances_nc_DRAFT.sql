@@ -5,7 +5,7 @@ BEGIN;
 CREATE TABLE IF NOT EXISTS public.sgp_aluminio_pendiente_detalles (
   id_detalle uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   id_pendiente uuid NOT NULL REFERENCES public.sgp_aluminio_pendientes(id_pendiente),
-  id_pieza text,
+  id_pieza text NOT NULL DEFAULT '',
   fabricacion text NOT NULL CHECK (length(btrim(fabricacion)) > 0),
   longitud numeric NOT NULL CHECK (longitud > 0),
   acabado text NOT NULL CHECK (length(btrim(acabado)) > 0),
@@ -49,6 +49,8 @@ CREATE TABLE IF NOT EXISTS public.sgp_aluminio_pendiente_ncs (
 CREATE INDEX IF NOT EXISTS sgp_pdt_nc_consecutivo_idx
   ON public.sgp_aluminio_pendiente_ncs (consecutivo);
 
+-- PRECONDITION: new RPC must enforce matching id_pendiente on detail and movement,
+-- unique reversals, exact reversal quantity, row locking, and server-side role validation.
 -- REVISAR ANTES DE APLICAR: politica RLS y EXECUTE de RPC SECURITY DEFINER;
 -- NO conceder acceso directo al navegador a estas tablas.
 -- Los saldos se calcularan en RPC transaccional con bloqueo de cabecera/detalles.
