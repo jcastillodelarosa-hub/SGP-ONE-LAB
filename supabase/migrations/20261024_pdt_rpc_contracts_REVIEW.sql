@@ -94,7 +94,7 @@ BEGIN
  THEN RAISE EXCEPTION 'Parámetros de avance inválidos'; END IF;
  SELECT * INTO v_p FROM public.sgp_aluminio_pendientes WHERE id_pendiente=p_id FOR UPDATE;
  IF NOT FOUND OR v_p.estado<>'PENDIENTE' OR v_p.validacion_estado<>'VALIDADO'
- OR v_p.estado_repo='PICKING' THEN RAISE EXCEPTION 'Pendiente no apto para avances'; END IF;
+ OR v_p.estado_repo='PICKING' OR v_p.fecha_cierre IS NOT NULL THEN RAISE EXCEPTION 'Pendiente no apto para avances'; END IF;
  SELECT * INTO v_existing FROM public.sgp_aluminio_pendiente_movimientos
  WHERE idempotency_key=p_idempotency_key;
  IF FOUND THEN
