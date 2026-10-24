@@ -57,8 +57,8 @@ BEGIN
   ) INTO v_source;
   IF NOT v_source THEN RAISE EXCEPTION 'Fabricación % no encontrada como PANEL de la producción',v_fab; END IF;
  END LOOP;
- -- BLOCKER: legacy validator excludes RECEPCION; this wrapper must not be applied
- -- until equivalent secure reservation/source checks are extracted to a shared internal helper.
+ -- SECURITY REVIEW: legacy validator excludes RECEPCION; do not widen global roles.
+ -- This RPC is intentionally restricted until a dedicated validated reception contract exists.
  -- Reuse legacy reservation/acabado validation, audit and session checks.
  -- Existing legacy validator is retained for compatibility; RECEPCION access remains a blocker.
  v_out:=public.sgp_aluminio_pendiente_validar(
