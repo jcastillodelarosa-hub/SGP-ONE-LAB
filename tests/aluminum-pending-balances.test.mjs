@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { normalizeNcNumbers, validateFabricationDistribution, calculateFabricationBalances, ncAvailability } from '../src/domain/aluminum-pending-balances.js';
+import { normalizeNcNumbers, validateFabricationDistribution, calculateFabricationBalances, ncAvailability, pendingClosureState, pendingNcAlert } from '../src/domain/aluminum-pending-balances.js';
 
 test('NC multiples se normalizan', () => {
   assert.deepEqual(normalizeNcNumbers('1006163,1006164,1006163'), ['1006163','1006164']);
@@ -32,4 +32,16 @@ test('NC parcial y REPO OK automatico', () => {
   assert.equal(ncAvailability(ncs).estado,'PARCIAL');
   assert.equal(ncAvailability(ncs.map(x=>({...x,estado:'Finalizada'}))).estado,'REPO_OK');
   assert.equal(ncAvailability([]).estado,'SIN_NC');
+});
+
+test('saldo cero requiere confirmacion Picking para cerrar', () => {
+  assert.deepEqual(pendingClosureState({saldo:0},false),{closed:false,stage:'PROCESADO_PENDIENTE_ENTREGA'});
+  assert.deepEqual(pendingClosureState({saldo:0},true),{closed:true,stage:'PICKING'});
+  assert.equal(pendingClosureState({saldo:7},true).closed,false);
+});
+test('NC finalizada es posible solucion y no confirma material fisico', () => {
+  const alert=pendingNcAlert([{estado:'Finalizada'},{estado:'Consultada'}],'2026-10-24T08:00:00Z','2026-10-24T11:00:00Z');
+  assert.equal(alert.estado,'PARCIAL');
+  assert.equal(alert.elapsedHours,3);
+  assert.equal(alert.physicallyAvailable,null);
 });
