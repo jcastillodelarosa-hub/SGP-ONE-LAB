@@ -42,6 +42,12 @@ CREATE TABLE IF NOT EXISTS public.sgp_aluminio_pendiente_movimientos (
 CREATE UNIQUE INDEX IF NOT EXISTS sgp_pdt_mov_reverso_unico_idx
   ON public.sgp_aluminio_pendiente_movimientos (id_movimiento_revertido)
   WHERE id_movimiento_revertido IS NOT NULL;
+-- The referenced movement must also belong to the same pending and detail.
+ALTER TABLE public.sgp_aluminio_pendiente_movimientos
+  ADD CONSTRAINT sgp_pdt_mov_reversal_parent_unique UNIQUE (id_pendiente,id_detalle,id_movimiento);
+ALTER TABLE public.sgp_aluminio_pendiente_movimientos
+  ADD CONSTRAINT sgp_pdt_mov_reversal_same_detail FOREIGN KEY (id_pendiente,id_detalle,id_movimiento_revertido)
+  REFERENCES public.sgp_aluminio_pendiente_movimientos(id_pendiente,id_detalle,id_movimiento);
 CREATE INDEX IF NOT EXISTS sgp_pdt_mov_detalle_idx
   ON public.sgp_aluminio_pendiente_movimientos (id_detalle, registrado_en);
 
