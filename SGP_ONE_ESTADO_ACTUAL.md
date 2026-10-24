@@ -1027,3 +1027,54 @@ Estado: **IMPLEMENTADO EN RAMA**, pruebas automáticas/PR/publicación pendiente
 **Pruebas:** `tests/picking-reception-weeks-v315.test.mjs` cubre asociación por programación, semanas válidas/ambiguas, filtros combinados, conteos, búsqueda, botones de auditoría, degradación si falla la consulta de semanas, presentación móvil y versión; se actualizan las pruebas anteriores de versión. **CI del PR #21:** 98/98 pruebas automatizadas aprobadas en GitHub Actions run 39587569902, sin fallos ni omisiones; comprobación de sintaxis JavaScript aprobada en run 39587570047. Pruebas funcionales en navegador, móvil y roles reales siguen pendientes.
 
 **Riesgos y pendientes:** consulta adicional de lectura `sgp_picking_cola` al abrir/actualizar Recepción; si una programación deja de aparecer en la cola, se etiqueta `Sin semana` en lugar de inventar un dato. Se requiere prueba real con roles Picking/Líder Línea, reservas compartidas, búsquedas, refresco y móvil. **Estado: IMPLEMENTADO EN RAMA; NO FUSIONADO, NO PUBLICADO, NO VERIFICADO FUNCIONALMENTE.** Requiere autorización expresa adicional para fusionar y publicar.
+
+
+---
+
+## 2026-10-24 — Separación de PROGRAMADA y estado de mecanizado (LAB v348 en rama)
+
+**Alcance:** SGP_ONE / Programación y Mecanizado. No aplica a SGP_ONE_GOOGLE.
+
+**Reglas funcionales confirmadas por el usuario:**
+- `programada` es una condición Sí/No independiente del estado operativo; inicialmente NO y SÍ al asignar programación.
+- La pantalla de programación debe presentar arriba las unidades no programadas y abajo las programadas, **conservando la lógica vigente** de reservas, partes, producciones, programación parcial, cantidades, prioridades, reservas compartidas y múltiples.
+- En la migración de registros existentes, toda unidad con un estado registrado se considera programada; el único estado que se convierte es `PROGRAMADA` → `SIN INICIAR`. Los demás valores permanecen sin cambio. No reactivar registros `CANCELADA` por inferencia.
+- Flujo operativo: `SIN INICIAR`, `CORTE`, `MECANIZADO`, `PROCESADO`. `REPROGRAMADO` se preserva en datos existentes, pero conceptualmente es un evento de programación. `PICKING` registra entrega física, con validación y faltantes independientes. Conservar trazabilidad de arrastre e identificadores.
+
+**Implementado solo en rama** `feat/programada-sin-iniciar-20261024`:
+- `src/config/domain.js`: flujo de estados operativos y definición Sí/No; Picking separado conceptualmente.
+- `app.js`: controles de estado de producción muestran `SIN INICIAR`, `CORTE`, `MECANIZADO`, `PROCESADO`; cambio preparatorio **no compatible todavía de forma verificada con las RPC actuales**.
+- `docs/programada-sin-iniciar-migracion.md`: especificación, restricciones y pasos pendientes.
+- `index.html`: versión visual y parámetros de caché incrementados de LAB v347 a **LAB v348**. Commit de versión `ed1c95c342fa68fd9211beb2db0f48f76b19a0e7`.
+
+**Pendientes y riesgos:** identificar propietario persistente del indicador para unidades no programadas; auditar y adaptar RPC de escritura, defaults, consultas, reprogramación, arrastre y Picking; construir migración SQL idempotente con pre/post conteos y reversión; implementar separación visual superior/inferior; pruebas de permisos, reservas compartidas, programación parcial, estados y móvil. No aplicar cambios aislados de frontend.
+
+**Evidencia y clasificación:** GitHub rama de trabajo con commits; **IMPLEMENTADO PARCIALMENTE EN RAMA, NO FUSIONADO, NO APLICADO EN SUPABASE, NO PUBLICADO EN FIREBASE, NO PROBADO NI VERIFICADO FUNCIONALMENTE**. `main` continúa en LAB v347 hasta que se confirme otra actualización. No se creó PR ni se desplegó.
+
+
+---
+
+## 2026-10-24 — Auditoría integral de cierre preparatorio LAB v348 / PR #82
+
+**Baseline confirmado:** `main` commit `f342bf7198d3e7638b412756acce0acad9bca301`; trabajo en `feat/programada-sin-iniciar-20261024`, PR #82 **borrador** (no fusionado).
+
+**Correcciones comprobadas en GitHub:** (1) se homologa visualización de `PROGRAMADA` operacional a `SIN INICIAR` preservando `estado_orden='PROGRAMADA'` de cobertura; (2) lista superior sin programar, parcial con **Continuar**, completadas abajo; (3) estados de Producción y Picking, vista compacta, informe de turno y contraste de distintivo `SIN INICIAR`; (4) migración STAGED con bandera `programada`, backfill sin reactivar `CANCELADA`, restricciones de ambas tablas de ejecución, triggers de sincronización, validación de roles, reprogramación vinculada, RPC de arrastre y cola Picking.
+
+**Datos reales consultados en Supabase (solo lectura):** programación: 64 `PROGRAMADA`, 3 `CANCELADA`; ejecución general: 6 `CORTE`, 2 `MECANIZADO`, 41 `PROCESADO`; ejecución por orden: 2 `PROGRAMADA`, 2 `CORTE`, 128 `PROCESADO`, 5 `REPROGRAMADO`. El esquema operativo todavía no tiene aplicada la columna `programada` ni la migración v348.
+
+**Pruebas verificadas en rama:** GitHub Actions **SGP ONE Tests** run `40103946305`: 195/195 aprobadas, incluidos 10 casos automatizados v348 de integridad documental/estática. **JavaScript syntax check** run `40103946303`: satisfactoria. El workflow incluye `npm run verify:release`, y la versión `v348` y recursos de caché coinciden. Las pruebas de fuente no demuestran que SQL se haya ejecutado.
+
+**Barrera de publicación pendiente:** no existe una base de ensayo independiente; la creación de rama de Supabase exige confirmación de coste por el usuario. No ejecutar la migración STAGED ni fusionar PR/deplegar mientras falten ensayo transaccional, backups/rollback, pruebas positivas y negativas con roles reales, validación en navegador y móvil, y verificación de Firebase. Sin cambios en Supabase, Firebase ni SGP_ONE_GOOGLE durante esta auditoría.
+
+**Estado:** **IMPLEMENTADO EN RAMA + CI VALIDADO, SQL NO APLICADO, NO FUSIONADO, NO PUBLICADO, NO VERIFICADO FUNCIONALMENTE**.
+
+---
+
+## 2026-10-24 — LAB v348: migración Supabase aplicada; interfaz pendiente de publicación
+
+- Alcance SGP_ONE exclusivamente; SGP_ONE_GOOGLE sin cambios.
+- Migración lab_v348_programada_independiente registrada en Supabase con versión 20261024154023, proyecto ocvxbwzqxbrfndkvjmfx. Ensayos transaccionales con ROLLBACK previos, incluida reversión de RPC y esquema.
+- Verificación backend: 68 programaciones = 65 SIN INICIAR + 3 CANCELADA; bandera 65 SÍ / 3 NO; 0 inconsistencias. Órdenes: 11 SIN INICIAR, 2 CORTE, 128 PROCESADO, 5 REPROGRAMADO. Ejecución general: 8 CORTE, 2 MECANIZADO, 41 PROCESADO. Historial 283 registros; 2 triggers sincronizadores; RPC de arrastre y Picking actualizadas.
+- Migración versionada en supabase/migrations/20261024154000_programada_independiente_v348.sql; reversión de referencia en docs/programada-sin-iniciar-v348-rollback.sql.
+- CI PR #82: 195 pruebas de código y sintaxis aprobadas en commit fa573a52 y posteriores. Sin pruebas reales autenticadas en PC/móvil/planta.
+- ESTADO: APLICADO EN SUPABASE; INTERFAZ IMPLEMENTADA EN RAMA; PUBLICACIÓN Y VERIFICACIÓN FUNCIONAL PENDIENTES.
