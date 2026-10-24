@@ -21,7 +21,7 @@ DECLARE
 BEGIN
  v_usuario:=public.sgp_validar_sesion_rol(p_token,ARRAY['ADMINISTRADOR','COORDINADOR','LIDER LINEA','SUPERVISOR DE PICKING']);
  SELECT * INTO v_p FROM public.sgp_aluminio_pendientes WHERE id_pendiente=p_id FOR UPDATE;
- IF NOT FOUND OR v_p.estado<>'PENDIENTE' OR coalesce(v_p.estado_repo,'PENDIENTE')='PICKING' OR coalesce(v_p.validacion_estado,'POR_VALIDAR')='VALIDADO'
+ IF NOT FOUND OR v_p.estado<>'PENDIENTE' OR v_p.fecha_cierre IS NOT NULL OR coalesce(v_p.estado_repo,'PENDIENTE')='PICKING' OR coalesce(v_p.validacion_estado,'POR_VALIDAR')='VALIDADO'
  THEN RAISE EXCEPTION 'Pendiente no activo o ya validado'; END IF;
  IF jsonb_typeof(p_detalles)<>'array' OR jsonb_array_length(p_detalles) NOT BETWEEN 1 AND 100
  THEN RAISE EXCEPTION 'Se requiere entre 1 y 100 fabricaciones'; END IF;
