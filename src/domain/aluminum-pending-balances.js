@@ -58,7 +58,14 @@ export function calculateFabricationBalances(details, movements = []) {
       reversed.add(target);
     } else throw new Error('Tipo de movimiento inválido');
   }
-  for (const target of reversed) if (!advances.has(target)) throw new Error('Reverso sin avance original');
+  for (const m of movements.filter(x => x.tipo === 'REVERSO')) {
+    const original = advances.get(String(m.id_movimiento_revertido));
+    if (!original) throw new Error('Reverso sin avance original');
+    if (String(m.id_detalle ?? original.id_detalle) !== String(original.id_detalle)
+        || Number(m.cantidad ?? original.cantidad) !== Number(original.cantidad)) {
+      throw new Error('Reverso no coincide con el avance original');
+    }
+  }
   for (const [id, m] of advances) {
     const row = rows.get(String(m.id_detalle));
     if (!row) throw new Error('Movimiento de fabricación desconocida');
