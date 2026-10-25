@@ -17,9 +17,9 @@ DECLARE
  v_usuario text; v_p public.sgp_aluminio_pendientes%rowtype;
  v_row jsonb; v_fab text; v_acab text; v_long numeric; v_cant integer;
  v_total bigint:=0; v_count integer:=0; v_first jsonb; v_source boolean;
- v_key text; v_keys text[]:=array[]::text[]; v_out jsonb; v_correction boolean;
+ v_key text; v_keys text[]:=array[]::text[]; v_out jsonb; v_correction boolean; v_res text; v_acab_res text;
 BEGIN
- v_usuario:=public.sgp_validar_sesion_rol(p_token,ARRAY['ADMINISTRADOR','COORDINADOR','LIDER LINEA','SUPERVISOR DE PICKING']);
+ v_usuario:=public.sgp_validar_sesion_rol(p_token,ARRAY['ADMINISTRADOR','COORDINADOR','LIDER LINEA','SUPERVISOR DE PICKING','RECEPCION']);
  SELECT * INTO v_p FROM public.sgp_aluminio_pendientes WHERE id_pendiente=p_id FOR UPDATE;
  IF NOT FOUND OR v_p.estado<>'PENDIENTE' OR v_p.fecha_cierre IS NOT NULL OR coalesce(v_p.estado_repo,'PENDIENTE')='PICKING' OR coalesce(v_p.validacion_estado,'POR_VALIDAR')='VALIDADO'
  THEN RAISE EXCEPTION 'Pendiente no activo o ya validado'; END IF;
@@ -60,14 +60,31 @@ BEGIN
  v_correction := v_total IS DISTINCT FROM v_p.cantidad;
  IF v_correction AND nullif(btrim(coalesce(p_observacion,'')),'') IS NULL
  THEN RAISE EXCEPTION 'Corrección de cantidad requiere observación'; END IF;
- -- SECURITY REVIEW: legacy validator excludes RECEPCION; do not widen global roles.
- -- This RPC is intentionally restricted until a dedicated validated reception contract exists.
- -- Reuse legacy reservation/acabado validation, audit and session checks.
- -- Existing legacy validator is retained for compatibility; RECEPCION access remains a blocker.
- v_out:=public.sgp_aluminio_pendiente_validar(
-   p_token,p_id,v_first->>'fabricacion',(v_first->>'longitud')::numeric,
-   p_reserva,v_first->>'acabado',p_observacion);
- -- No change to the reported pending quantity.
+ -- Dedicated validation for this new RPC. Legacy validator is not modified.
+ v_res:=coalesce(nullif(btrim(coalesce(p_reserva,'')),''),v_p.reserva);
+ v_acab_res:=coalesce(nullif(btrim(coalesce(v_p.acabado_pendiente,'')),''),nullif(btrim(v_first->>'acabado'),''));
+ IF v_res IS NULL OR v_acab_res IS NULL THEN RAISE EXCEPTION 'Reserva y acabado obligatorios'; END IF;
+ IF nullif(btrim(coalesce(v_p.key_produccion,'')),'') IS NOT NULL
+ AND NOT EXISTS (SELECT 1 FROM public.sgp_produccion_reservas_v r
+  WHERE r.key_produccion=v_p.key_produccion AND r.reserva=v_res
+    AND (r.acabado_reserva IS NULL OR upper(btrim(r.acabado_reserva))=upper(v_acab_res)))
+ THEN RAISE EXCEPTION 'Reserva/acabado no pertenece a producción'; END IF;
+ IF EXISTS (SELECT 1 FROM jsonb_array_elements(p_detalles) d
+  WHERE upper(btrim(d->>'acabado'))<>upper(v_acab_res))
+ THEN RAISE EXCEPTION 'Acabado distinto al de la reserva'; END IF;
+ UPDATE public.sgp_aluminio_pendientes SET
+  fabricacion=btrim(v_first->>'fabricacion'),longitud=(v_first->>'longitud')::numeric,
+  reserva=v_res,acabado_pendiente=v_acab_res,validacion_estado='VALIDADO',
+  validado_por=v_usuario,fecha_validacion=now(),
+  observacion_validacion=nullif(btrim(coalesce(p_observacion,'')),'')
+ WHERE id_pendiente=p_id;
+ INSERT INTO public.sgp_aluminio_pendientes_historial
+ (id_pendiente,usuario,observacion,tipo_evento,datos_anteriores,datos_nuevos)
+ VALUES(p_id,v_usuario,p_observacion,'VALIDACION_PDT',
+  jsonb_build_object('fabricacion',v_p.fabricacion,'longitud',v_p.longitud,
+   'reserva',v_p.reserva,'acabado',v_p.acabado_pendiente,'validacion_estado',v_p.validacion_estado),
+  jsonb_build_object('fabricacion',v_first->>'fabricacion','reserva',v_res,
+   'acabado',v_acab_res,'validacion_estado','VALIDADO'));
  FOR v_row IN SELECT value FROM jsonb_array_elements(p_detalles)
  LOOP
   INSERT INTO public.sgp_aluminio_pendiente_detalles
