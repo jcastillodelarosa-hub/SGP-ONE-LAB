@@ -21,7 +21,7 @@ CREATE OR REPLACE FUNCTION public.sgp_pdt_estado_v2(p_token text,p_id uuid,p_est
 RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path TO '' AS $fn$
 DECLARE p public.sgp_aluminio_pendientes%rowtype; u text;
 BEGIN
- u:=public.sgp_validar_sesion_rol(p_token,ARRAY['ADMINISTRADOR','COORDINADOR','LIDER MECANIZADO','LIDER']);
+ u:=public.sgp_pdt_validar_rol_real(p_token,ARRAY['ADMINISTRADOR','COORDINADOR','LIDER MECANIZADO','LIDER']);
  SELECT * INTO STRICT p FROM public.sgp_aluminio_pendientes WHERE id_pendiente=p_id FOR UPDATE;
  IF p.contrato_pdt<>'V2' OR p.estado<>'PENDIENTE' THEN RAISE EXCEPTION 'PDT no activo V2'; END IF;
  IF p_estado IS NULL OR p_estado NOT IN ('CORTE','MECANIZADO','PROCESADO') THEN RAISE EXCEPTION 'Etapa inválida'; END IF;

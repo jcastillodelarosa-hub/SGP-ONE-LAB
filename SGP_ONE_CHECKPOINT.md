@@ -116,3 +116,72 @@ Realizar una **prueba de recuperación de solo lectura** desde otro chat: compro
   No APLICADO EN SUPABASE, no PUBLICADO ni VERIFICADO EN PRODUCCIÓN.
 - Siguiente paso: revisión técnica de PR #91 y contraste con definiciones reales,
   antes de solicitar cualquier aprobación de aplicación, integración o publicación.
+
+## Preparación local: rol real PDT v2 — 2026-10-25
+
+- HEAD sigue d90d850f2a8ee7d1a111a71073e93a63f04fbac1, cambios SIN COMMIT/PUSH.
+- Avances/reversos/etapas requieren rol exacto de sgp_sesion_actual; helper legacy
+  y equivalencia Recepción→Líder permanecen intactos. No modifica permisos legacy.
+- SQL aislado sintético: 37 aserciones base, 26 regresiones, seis concurrencias.
+- Conservada corrección AUDITADA_DIFERENCIA; únicamente VALIDADA acredita entrega.
+- Contrato real de sesión y cuerpos completos de funciones aún requieren contraste;
+  no hay prueba de autenticación productiva. No SQL productivo, merge ni despliegue.
+- Siguiente paso: revisar este diff y contrastar el resultado del preflight real;
+  no autorizar instalación por resultados de mocks.
+
+## Cierre autónomo de preparación PDT — 2026-10-25
+
+- Cambios locales preservados; HEAD d90d850f2a8ee7d1a111a71073e93a63f04fbac1.
+- Informe único: docs/sql-proposals/pdt/FINAL_READINESS.md.
+- 222 JS, 63 SQL sintéticos, seis concurrencias, 12 unitarias de herramientas;
+  instalación atómica/fallo inducido, navegador PC/móvil y recuperación de fixture aprobados.
+- Dump/restauración comprobada SOLO en fixture sintética, no respaldo de Supabase.
+- Bloqueos: falta JSON/cuerpos productivos completos, réplica compatible y prueba
+  de autenticación/recuperación productiva. No inventar definiciones 6/8 ni triggers.
+- Próximo paso único: propietario ejecuta preflight SQL actualizado y aporta JSON.
+- Sin commits/push nuevos, SQL productivo, merge ni Firebase; no tocar otros repositorios.
+
+## Contraste con complemento confirmado — 2026-10-25
+
+- Resultado PARCIAL. Local PostgreSQL 17.11 coincide con versión comunicada.
+- Fixture de sgp_sesion_actual incorpora valida/usuario/nombre/rol; 63 SQL y seis
+  concurrencias se mantienen, con rollback/instalación AB probados nuevamente.
+- Confirmación del propietario: 3 triggers, 19 columnas, 5 extensiones y 7 firmas
+  con MD5. No hay artefacto de sus cuerpos/valores en adjuntos ni comentarios PR.
+- Siguiente paso único: hacer accesible el export existente, sin repetir SQL.
+- FINAL_READINESS.md actualizado; cambios conservados sin commit/push ni producción.
+
+## Evidencia real recibida e integrada — 2026-10-25
+
+- Los dos archivos reales están en scripts/pdt-compatibility/evidence/ sin modificar.
+- Siete MD5 coinciden tras CRLF→LF; cuatro del complemento reconstruido coinciden
+  directamente. Se mantiene expresamente su procedencia reconstruida.
+- 19 columnas y tres triggers reales reproducidos en PostgreSQL 17.11.
+- Pruebas con autenticación real por hash: 63 base + 21 adicionales, seis concurrencias;
+  fallo transaccional revierte DDL y las 11 definiciones. Dos entregas intactas.
+- Bloqueo anterior de archivos RESUELTO. Incompatibilidad confirmada: defaults
+  solapados hacen ambigua la llamada legacy de seis argumentos antes/después del PR.
+- Retirar defaults requiere DROP/CREATE; intento CREATE OR REPLACE rechazado en QA
+  y retirado del SQL propuesto. No se introdujo DROP ni cambio unilateral legacy.
+- FINAL_READINESS.md actualizado: PARCIAL para integración final, no producción.
+- Siguiente paso único: revisión/aprobación de solución delimitada a sobrecarga 6/8.
+- HEAD sigue d90d850f2a8ee7d1a111a71073e93a63f04fbac1; sin commit/push, merge o despliegue.
+
+## Consolidación final autorizada PR #91 — 2026-10-25
+
+- Estado vigente: IMPLEMENTADO EN RAMA; reemplaza los bloqueos históricos anteriores.
+- Main observado db70f601cc01a470a6a3908cae19caac59dfe34b; rama existente
+  feat/pdt-multifabricacion-avances-nc. El commit de esta entrada consolida el trabajo
+  pendiente sobre d90d850f2a8ee7d1a111a71073e93a63f04fbac1, con commit/push autorizados.
+- Fuentes reales conservadas y 11/11 MD5 contrastados; complemento reconstruido.
+- Compatibilidad 6/8 resuelta en aislamiento con traslado del original a esquema
+  privado, entrada pública sin defaults solapados y recuperación sin DROP.
+- 222 JS, 63 + 24 SQL, seis concurrencias, 12 Python, seis HTTP y PC/móvil aprobados;
+  instalación atómica, rollback inducido y dump/restore/reinstalación QA comprobados.
+- Informe y evidencia: docs/sql-proposals/pdt/FINAL_READINESS.md y
+  scripts/pdt-compatibility/validation-report.json.
+- No Supabase productivo, merge, Firebase, main, GOOGLE ni LAC modificados.
+- Límites: dependencias DDL parcialmente reconstruidas; consumidores externos y
+  catálogo íntegro/RLS productivos no verificados; no backup productivo recuperable.
+- Próximo paso único: revisión PR #91 y autorización separada de réplica restaurada
+  para aceptación final. No repetir consultas ya aportadas ni asumir publicación.

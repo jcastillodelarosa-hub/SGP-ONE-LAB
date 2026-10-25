@@ -1,0 +1,265 @@
+{
+  "tipo": "PDT_COMPLEMENTO_NO_ES_CATALOGO_COMPLETO",
+  "nota_procedencia": "RECONSTRUIDO desde el JSON íntegro pegado por el usuario en la conversación; no es el archivo de exportación original. Conservar huellas capturadas, no recalculadas.",
+  "captura": {
+    "fecha_utc": "2026-10-25T15:22:59Z",
+    "version_num": "170011",
+    "rol_consulta": "postgres"
+  },
+  "funciones_faltantes": [
+    {
+      "firma": "sgp_mecanizado_programada_al_actualizar()",
+      "md5": "281f90a86038c515c320349564651c82",
+      "definicion": "CREATE OR REPLACE FUNCTION public.sgp_mecanizado_programada_al_actualizar()\n RETURNS trigger\n LANGUAGE plpgsql\n SET search_path TO 'public'\nAS $function$\nBEGIN\n NEW.programada := (NEW.estado IS DISTINCT FROM 'CANCELADA');\n RETURN NEW;\nEND $function$\n",
+      "owner": "postgres",
+      "execute": {
+        "anon": true,
+        "postgres": true,
+        "service_role": true,
+        "authenticated": true
+      },
+      "retorno": "trigger",
+      "lenguaje": "plpgsql",
+      "argumentos": "",
+      "search_path": "search_path=public",
+      "retorna_conjunto": false,
+      "security_definer": false,
+      "cuerpo_omitido_por_posible_secreto": false
+    },
+    {
+      "firma": "sgp_mecanizado_programada_al_insertar()",
+      "md5": "14ed1835587b8958c7dcf725d108b56f",
+      "definicion": "CREATE OR REPLACE FUNCTION public.sgp_mecanizado_programada_al_insertar()\n RETURNS trigger\n LANGUAGE plpgsql\n SET search_path TO 'public'\nAS $function$\nBEGIN\n NEW.programada := (NEW.estado IS DISTINCT FROM 'CANCELADA');\n RETURN NEW;\nEND $function$\n",
+      "owner": "postgres",
+      "execute": {
+        "anon": true,
+        "postgres": true,
+        "service_role": true,
+        "authenticated": true
+      },
+      "retorno": "trigger",
+      "lenguaje": "plpgsql",
+      "argumentos": "",
+      "search_path": "search_path=public",
+      "retorna_conjunto": false,
+      "security_definer": false,
+      "cuerpo_omitido_por_posible_secreto": false
+    },
+    {
+      "firma": "sgp_mecanizado_validar_prioridad_nueva()",
+      "md5": "7f175660ebd49d03ce44436e8169a95a",
+      "definicion": "CREATE OR REPLACE FUNCTION public.sgp_mecanizado_validar_prioridad_nueva()\n RETURNS trigger\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$ begin if new.prioridad_semanal is null then raise exception 'Prioridad semanal requerida'; end if; if not exists(select 1 from public.sgp_prioridades pr where pr.reserva=new.reserva and pr.prioridad=new.prioridad_semanal and pr.id_linea='PANELES_2') then raise exception 'Prioridad no corresponde a la reserva'; end if; return new; end $function$\n",
+      "owner": "postgres",
+      "execute": {
+        "anon": true,
+        "postgres": true,
+        "service_role": true,
+        "authenticated": true
+      },
+      "retorno": "trigger",
+      "lenguaje": "plpgsql",
+      "argumentos": "",
+      "search_path": "search_path=\"\"",
+      "retorna_conjunto": false,
+      "security_definer": true,
+      "cuerpo_omitido_por_posible_secreto": false
+    },
+    {
+      "firma": "sgp_sesion_actual(text)",
+      "md5": "e964ea0d6f9af2c88010542cd3c84f9e",
+      "definicion": "CREATE OR REPLACE FUNCTION public.sgp_sesion_actual(p_token text)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\ndeclare u sgp_usuarios%rowtype;\nbegin\n select x.* into u from sgp_sesiones_app s join sgp_usuarios x on x.id_usuario=s.id_usuario\n where s.token_hash=encode(extensions.digest(coalesce(p_token,''),'sha256'),'hex')\n and s.revocado_en is null and s.expira_en>now() and x.activo=true;\n if u.id_usuario is null then return jsonb_build_object('valida',false); end if;\n return jsonb_build_object('valida',true,'usuario',u.usuario,'nombre',u.nombre,'rol',u.rol);\nend $function$\n",
+      "owner": "postgres",
+      "execute": {
+        "anon": true,
+        "postgres": true,
+        "service_role": true,
+        "authenticated": true
+      },
+      "retorno": "jsonb",
+      "lenguaje": "plpgsql",
+      "argumentos": "p_token text",
+      "search_path": "search_path=public",
+      "retorna_conjunto": false,
+      "security_definer": true,
+      "cuerpo_omitido_por_posible_secreto": false
+    }
+  ],
+  "triggers_programacion": [
+    {
+      "nombre": "sgp_mecanizado_validar_prioridad_nueva",
+      "funcion": "sgp_mecanizado_validar_prioridad_nueva()",
+      "definicion": "CREATE TRIGGER sgp_mecanizado_validar_prioridad_nueva BEFORE INSERT ON sgp_mecanizado_programacion FOR EACH ROW EXECUTE FUNCTION sgp_mecanizado_validar_prioridad_nueva()",
+      "habilitado": "O",
+      "argumentos_requieren_revision_local": false
+    },
+    {
+      "nombre": "trg_sgp_mecanizado_programada_insert",
+      "funcion": "sgp_mecanizado_programada_al_insertar()",
+      "definicion": "CREATE TRIGGER trg_sgp_mecanizado_programada_insert BEFORE INSERT ON sgp_mecanizado_programacion FOR EACH ROW EXECUTE FUNCTION sgp_mecanizado_programada_al_insertar()",
+      "habilitado": "O",
+      "argumentos_requieren_revision_local": false
+    },
+    {
+      "nombre": "trg_sgp_mecanizado_programada_update",
+      "funcion": "sgp_mecanizado_programada_al_actualizar()",
+      "definicion": "CREATE TRIGGER trg_sgp_mecanizado_programada_update BEFORE UPDATE OF estado ON sgp_mecanizado_programacion FOR EACH ROW EXECUTE FUNCTION sgp_mecanizado_programada_al_actualizar()",
+      "habilitado": "O",
+      "argumentos_requieren_revision_local": false
+    }
+  ],
+  "columnas_programacion": [
+    {
+      "nombre": "id_programacion",
+      "tipo": "uuid",
+      "not_null": true
+    },
+    {
+      "nombre": "reserva",
+      "tipo": "text",
+      "not_null": true
+    },
+    {
+      "nombre": "produccion",
+      "tipo": "text",
+      "not_null": false
+    },
+    {
+      "nombre": "cantidad_programada",
+      "tipo": "integer",
+      "not_null": true
+    },
+    {
+      "nombre": "fecha_programacion",
+      "tipo": "date",
+      "not_null": true
+    },
+    {
+      "nombre": "turno",
+      "tipo": "text",
+      "not_null": true
+    },
+    {
+      "nombre": "prioridad",
+      "tipo": "numeric(8,2)",
+      "not_null": true
+    },
+    {
+      "nombre": "observacion",
+      "tipo": "text",
+      "not_null": false
+    },
+    {
+      "nombre": "observacion_orden",
+      "tipo": "text",
+      "not_null": false
+    },
+    {
+      "nombre": "sistema",
+      "tipo": "text",
+      "not_null": false
+    },
+    {
+      "nombre": "acabado",
+      "tipo": "text",
+      "not_null": false
+    },
+    {
+      "nombre": "porc_vidrio_snapshot",
+      "tipo": "numeric",
+      "not_null": false
+    },
+    {
+      "nombre": "cant_vidrio_snapshot",
+      "tipo": "numeric",
+      "not_null": false
+    },
+    {
+      "nombre": "estado",
+      "tipo": "text",
+      "not_null": true
+    },
+    {
+      "nombre": "usuario_programa",
+      "tipo": "text",
+      "not_null": true
+    },
+    {
+      "nombre": "fecha_creacion",
+      "tipo": "timestamp with time zone",
+      "not_null": true
+    },
+    {
+      "nombre": "fecha_actualizacion",
+      "tipo": "timestamp with time zone",
+      "not_null": true
+    },
+    {
+      "nombre": "prioridad_semanal",
+      "tipo": "text",
+      "not_null": false
+    },
+    {
+      "nombre": "programada",
+      "tipo": "boolean",
+      "not_null": true
+    }
+  ],
+  "referencias_ya_disponibles": [
+    {
+      "firma": "sgp_aluminio_pendiente_estado(text,uuid,text,text)",
+      "md5": "78760ab168140b4ff6c2518350ef4607"
+    },
+    {
+      "firma": "sgp_aluminio_pendiente_resolver(text,uuid)",
+      "md5": "f862a315bd7758c82e23754e689c1ad3"
+    },
+    {
+      "firma": "sgp_picking_entrega_orden(text,uuid,text,boolean,text,jsonb,date,text)",
+      "md5": "b7a4b58eb8a8f9db4439d1cd354b92c8"
+    },
+    {
+      "firma": "sgp_picking_entrega_orden(text,uuid,text,boolean,text,jsonb)",
+      "md5": "0a5e2afcca140be9c621d6968525f229"
+    },
+    {
+      "firma": "sgp_picking_rechazar_entrega_completa_duplicada()",
+      "md5": "c5e07e6cdbba51037c6d1dc0a5cac1b1"
+    },
+    {
+      "firma": "sgp_picking_validar_recepcion(text,uuid,jsonb,jsonb,text)",
+      "md5": "ff5790e874d81b713d82f4b91cb3be08"
+    },
+    {
+      "firma": "sgp_validar_sesion_rol(text,text[])",
+      "md5": "951943ae26baccc4797eea5fed57fcb6"
+    }
+  ],
+  "extensiones": [
+    {
+      "nombre": "pg_stat_statements",
+      "schema": "extensions",
+      "version": "1.11"
+    },
+    {
+      "nombre": "pgcrypto",
+      "schema": "extensions",
+      "version": "1.3"
+    },
+    {
+      "nombre": "plpgsql",
+      "schema": "pg_catalog",
+      "version": "1.0"
+    },
+    {
+      "nombre": "supabase_vault",
+      "schema": "vault",
+      "version": "0.3.1"
+    },
+    {
+      "nombre": "uuid-ossp",
+      "schema": "extensions",
+      "version": "1.1"
+    }
+  ],
+  "limites": "Complemento para unir a las definiciones previas. No datos operativos ni valores de sesion. No certifica autenticacion ni descubre todo SQL dinamico. Revisar literales antes de compartir; si un cuerpo se omite, no publicar su contenido sin revision local."
+}

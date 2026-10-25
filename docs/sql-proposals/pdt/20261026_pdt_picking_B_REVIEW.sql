@@ -143,12 +143,14 @@ RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path TO '' AS $fn$
 BEGIN
  IF EXISTS(SELECT 1 FROM public.sgp_pdt_entrega_lineas WHERE id_entrega=OLD.id_entrega AND estado<>'ANULADA') THEN
   IF TG_OP='DELETE' THEN RAISE EXCEPTION 'Entrega con evidencia PDT vigente'; END IF;
-  IF ROW(NEW.estado,NEW.produccion,NEW.id_programacion) IS DISTINCT FROM ROW(OLD.estado,OLD.produccion,OLD.id_programacion) THEN
-   -- Initial validation is permitted; later mutation requires explicit line annulment first.
-   IF NOT (OLD.estado IS DISTINCT FROM 'VALIDADA' AND NEW.estado='VALIDADA'
-    AND NEW.produccion IS NOT DISTINCT FROM OLD.produccion AND NEW.id_programacion=OLD.id_programacion) THEN
-    RAISE EXCEPTION 'Conciliar evidencia PDT antes de modificar entrega';
-   END IF;
+  IF ROW(NEW.produccion,NEW.id_programacion) IS DISTINCT FROM ROW(OLD.produccion,OLD.id_programacion) THEN
+   RAISE EXCEPTION 'Conciliar evidencia PDT antes de modificar entrega';
+  END IF;
+  -- Registered quantities do not certify delivery: let the legacy audit produce
+  -- VALIDADA or AUDITADA_DIFERENCIA. Once certified, annul explicitly first.
+  IF NEW.estado IS DISTINCT FROM OLD.estado AND EXISTS(
+   SELECT 1 FROM public.sgp_pdt_entrega_lineas WHERE id_entrega=OLD.id_entrega AND estado='VALIDADA') THEN
+   RAISE EXCEPTION 'Conciliar evidencia PDT antes de modificar entrega';
   END IF;
  END IF;
  IF TG_OP='DELETE' THEN RETURN OLD; END IF;

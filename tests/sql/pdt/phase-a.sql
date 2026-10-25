@@ -32,7 +32,7 @@ SELECT qa_reject('Patinador cannot validate',$q$SELECT sgp_aluminio_pendiente_va
 UPDATE sgp_aluminio SET tipo_pieza='NO_PANEL' WHERE id_pieza='qa-source-2';
 SELECT qa_reject('non PANEL rejected',$q$SELECT sgp_aluminio_pendiente_validar_detalles_v1('RECEPCION','00000000-0000-0000-0000-000000000003','[{"id_pieza":"qa-source-2","fabricacion":"E17-1","longitud":"109.9375","acabado":"DS","cantidad":9}]')$q$,'Fuente PANEL');
 UPDATE sgp_aluminio SET tipo_pieza='PANEL' WHERE id_pieza='qa-source-2';
-SELECT qa_assert('Picking overloads preserved',(SELECT count(*)=2 AND bool_and(q.digest=md5(pg_get_functiondef(p.oid))) FROM qa_picking_defs q JOIN pg_proc p USING(oid)));
+SELECT qa_assert('Picking overloads preserved',(SELECT count(*)=2 AND bool_and(q.body_digest=md5(p.prosrc) AND q.arg_types=p.proargtypes::text AND q.definer=p.prosecdef AND q.proowner=p.proowner AND q.proconfig IS NOT DISTINCT FROM p.proconfig) FROM qa_picking_defs q JOIN pg_proc p USING(oid)));
 SAVEPOINT rollback_conversion;
 INSERT INTO sgp_aluminio_pendientes(id_pendiente,key_produccion,produccion,perfil,cantidad,reserva,acabado_pendiente)
 VALUES('00000000-0000-0000-0000-000000000005','qa|PANELES_2','QA-PROD','QA-PERFIL',5,'QA-RES','DS');

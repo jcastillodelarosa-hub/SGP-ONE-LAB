@@ -8,6 +8,28 @@ REVOKE ALL ON public.sgp_aluminio_pendiente_detalles FROM PUBLIC, anon, authenti
 REVOKE ALL ON public.sgp_aluminio_pendiente_movimientos FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON public.sgp_aluminio_pendiente_ncs FROM PUBLIC, anon, authenticated;
 
+-- Exact server session role; never accept a role asserted by the browser.
+-- Contract already consumed by app.js: sgp_sesion_actual(text) -> {valida,rol}.
+CREATE OR REPLACE FUNCTION public.sgp_pdt_validar_rol_real(p_token text,p_roles text[])
+RETURNS text LANGUAGE plpgsql SECURITY DEFINER SET search_path TO '' AS $fn$
+DECLARE sesion jsonb; rol_real text;
+BEGIN
+ IF p_token IS NULL OR p_roles IS NULL OR cardinality(p_roles)=0 THEN
+  RAISE EXCEPTION 'PDT_ROL_REAL_NO_AUTORIZADO';
+ END IF;
+ sesion:=to_jsonb(public.sgp_sesion_actual(p_token));
+ IF jsonb_typeof(sesion) IS DISTINCT FROM 'object' OR sesion->'valida' IS DISTINCT FROM 'true'::jsonb THEN
+  RAISE EXCEPTION 'PDT_SESION_NO_VALIDA';
+ END IF;
+ rol_real:=upper(btrim(sesion->>'rol'));
+ IF rol_real IS NULL OR NOT coalesce(rol_real=ANY(p_roles),false) THEN
+  RAISE EXCEPTION 'PDT_ROL_REAL_NO_AUTORIZADO';
+ END IF;
+ -- Preserve legacy actor resolution only AFTER the exact-role check.
+ RETURN public.sgp_validar_sesion_rol(p_token,p_roles);
+END $fn$;
+REVOKE ALL ON FUNCTION public.sgp_pdt_validar_rol_real(text,text[]) FROM PUBLIC,anon,authenticated;
+
 CREATE OR REPLACE FUNCTION public.sgp_aluminio_pendiente_validar_detalles_v1(
  p_token text, p_id uuid, p_detalles jsonb, p_reserva text DEFAULT NULL,
  p_observacion text DEFAULT NULL
@@ -113,7 +135,7 @@ DECLARE v_usuario text; v_p public.sgp_aluminio_pendientes%rowtype;
  v_d public.sgp_aluminio_pendiente_detalles%rowtype;
  v_solved bigint; v_remaining bigint; v_existing public.sgp_aluminio_pendiente_movimientos%rowtype;
 BEGIN
- v_usuario:=public.sgp_validar_sesion_rol(p_token,ARRAY['ADMINISTRADOR','COORDINADOR','LIDER MECANIZADO','LIDER']);
+ v_usuario:=public.sgp_pdt_validar_rol_real(p_token,ARRAY['ADMINISTRADOR','COORDINADOR','LIDER MECANIZADO','LIDER']);
  IF p_id IS NULL OR p_id_detalle IS NULL OR p_cantidad IS NULL OR p_cantidad<=0 OR p_turno IS NULL OR p_turno NOT IN ('T1','T2')
  OR p_fecha_operativa IS NULL OR p_idempotency_key IS NULL
  THEN RAISE EXCEPTION 'Parámetros de avance inválidos'; END IF;

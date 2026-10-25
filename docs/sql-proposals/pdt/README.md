@@ -1,3 +1,83 @@
+> Estado vigente 2026-10-25: 11/11 huellas contrastadas; 63 + 24 aserciones SQL,
+> seis concurrencias y contratos 6/8 por HTTP aprobados. Solución sin DROP preparada,
+> diez propuestas forward fuera de migraciones automáticas. Ver [FINAL_READINESS.md](FINAL_READINESS.md).
+> Los apartados siguientes son historial; sus bloqueos de adjuntos/ambigüedad fueron superados.
+> No aplicado ni verificado en producción. Se requiere aprobación separada de instalación/merge/despliegue.
+
+## Consolidación local de seguridad y preflight — 2026-10-25
+
+Reejecución aprobada: 63 aserciones SQL (37 base + 26 regresiones) y seis
+escenarios concurrentes en fixture aislada. Autorización exacta de sesión vigente;
+equivalencia legacy sin cambios; AUDITADA_DIFERENCIA sigue sin acreditar cantidades.
+Seis pruebas adicionales del comparador de catálogos aprobadas.
+
+Preflight solo lectura preparado para una réplica existente, ANTES de instalar:
+
+```bash
+python tests/sql/pdt/run-isolated.py --compatible-db sgp_pdt_qa_91_REPLICA --production-catalog /ruta/catalogo-productivo.json
+```
+
+Acepta el JSON completo generado por PDT_PREFLIGHT_SUPABASE.sql, tanto objeto
+como resultado exportado del SQL Editor. Compara funciones/argumentos/cuerpos,
+columnas/constraints/índices, owners/ACL, triggers, políticas, roles, membresías,
+secuencias y grants por defecto. Ignora OIDs de objetos que cambian al restaurar;
+conserva orden de argumentos y columnas. Nunca ejecuta definiciones ni instala.
+
+Bloqueo restante: no está disponible el export productivo completo ni una réplica
+contrastada contra él. Los resúmenes recibidos no contienen los cuerpos completos
+ni los tres triggers de programación. Debe confirmarse además que
+sgp_sesion_actual(text) retorna JSON/JSONB escalar con valida booleana y rol real,
+sin transformar RECEPCION a LIDER. El preflight rechaza ausencia de catálogo,
+contrato de sesión incorrecto, mocks y diferencias estructurales no revisadas.
+Por tanto NO hay aceptación sobre Supabase real ni autenticación real demostrada.
+Cambios locales preservados SIN COMMIT/PUSH; HEAD d90d850f2a8ee7d1a111a71073e93a63f04fbac1.
+
+Las notas siguientes registran etapas anteriores.
+
+> Estado posterior — permisos exactos PDT v2 (2026-10-25):
+> - Avance, reverso y etapa llaman a sgp_pdt_validar_rol_real(text,text[]).
+>   Obtiene la sesión exclusivamente desde sgp_sesion_actual(text), exige objeto
+>   JSON con valida=true y rol real permitido; solo después resuelve el actor con
+>   el helper legacy. No confía en un rol enviado por el navegador.
+> - No reemplaza sgp_validar_sesion_rol ni su equivalencia RECEPCION→LIDER.
+>   Conserva LIDER, LIDER MECANIZADO, COORDINADOR y ADMINISTRADOR legítimos.
+> - Nuevo helper interno SECURITY DEFINER/search_path vacío y EXECUTE revocado
+>   para PUBLIC/anon/authenticated. Firma real de sesión requerida: JSON/JSONB
+>   escalar con valida booleana y rol sin equivalencia; contrato consumido en app.js.
+> - Pruebas sintéticas: 37 aserciones base, 26 regresiones y seis escenarios
+>   concurrentes. Recepción rechazada sin movimientos/historial parciales;
+>   sesión inválida, nula o sin rol rechazada. Legacy y auditoría preservados.
+> - El modelo de sesión/equivalencia NO es autenticación real. Faltan los cuerpos
+>   completos de las funciones productivas: solo se recibieron resúmenes de sus
+>   hallazgos, y los adjuntos disponibles no contienen CREATE FUNCTION.
+> - Sin commit/push ni aplicación productiva. Las notas siguientes describen
+>   etapas anteriores y quedan sustituidas donde contradigan esta actualización.
+
+> Contraste dirigido posterior, 2026-10-25 (hallazgos aportados por propietario):
+> - Equivalencia RECEPCION→LIDER amplía avances, reversos y etapas v2. El modelo
+>   aislado reproduce ese acceso; NO equivale a aprobarlo. Corrección propuesta:
+>   autorización estricta por rol real para esas RPC nuevas, conservando LIDER
+>   legítimo y sin modificar el validador global ni legacy. Falta su contrato real.
+> - Corregido localmente el guard de origen: permite auditoría legacy de líneas
+>   REGISTRADAS, incluidos VALIDADA/AUDITADA_DIFERENCIA. Líneas VALIDADAS siguen
+>   protegidas. Únicamente evento VALIDADA permite validar/acreditar la línea.
+> - Prueba aislada: 37 aserciones base (35 previas + 2 estados auditados), 11
+>   regresiones adicionales con ROLLBACK y seis escenarios concurrentes aprobados.
+>   Tres regresiones documentan ampliación de rol PENDIENTE de resolución.
+> - El runner sintético carga el trigger de duplicados versionado y prueba rechazo
+>   de completa duplicada y aceptación de parcial. Esto NO verifica el cuerpo real.
+> - Las firmas de entrega 6/8 no se reemplazan. Fixtures 4/5 siguen siendo mocks;
+>   tipos/cuerpos reales y triggers de programación aún faltan para aceptación exacta.
+> - No hay nuevos commits/push, aplicación productiva ni cambio en funciones globales.
+
+> Compatibilidad real pendiente (2026-10-25): se corrigió únicamente la firma
+> sintética de estado a cuatro parámetros. Las entregas mock de 4/5 parámetros
+> NO reproducen las firmas reales 6/8 y faltan los tres triggers de programación
+> y autenticación real. El runner exige modo explícito: `--synthetic` para mocks
+> o `--compatible-db <base-aislada>` para preflight SOLO LECTURA. Este último
+> detiene la instalación ante diferencias; no instala SQL aun si pasa el inventario.
+> No usar los 35 tests anteriores como aceptación sobre el esquema productivo.
+
 # PDT v2 — fases A/B, estado local actual
 
 Fecha: 2026-10-25. Rama `feat/pdt-multifabricacion-avances-nc`.
@@ -71,7 +151,7 @@ capabilities fase A sobre fase B; el script rechaza esa degradación.
 
 - `npm test`: suite JS completa; incluye adaptador, ausencia de backend, error sin
   fallback de escritura, identidad fuente y cantidades.
-- `python tests/sql/pdt/run-isolated.py`: solo contenedor `sgp-pdt-qa-91`, red NONE,
+- `python tests/sql/pdt/run-isolated.py --synthetic`: solo contenedor `sgp-pdt-qa-91`, red NONE,
   sin puertos publicados. Crea base nueva sgp_pdt_qa_91_<id>; datos sintéticos.
 - `python tests/pdt-v2-browser.py`: Chromium, RPC simuladas, 1280×900 y 390×844;
   distribución 5+4, avance parcial, entrega positiva y cierre del modal accesible.

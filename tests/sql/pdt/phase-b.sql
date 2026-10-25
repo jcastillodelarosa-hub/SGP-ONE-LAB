@@ -12,6 +12,9 @@ SELECT sgp_pdt_entrega_registrar_v2('PICKING',id_detalle,'60000000-0000-0000-000
 SELECT sgp_pdt_entrega_registrar_v2('PICKING',id_detalle,'60000000-0000-0000-0000-000000000001',3,'70000000-0000-0000-0000-000000000001') FROM sgp_aluminio_pendiente_detalles WHERE id_pendiente='00000000-0000-0000-0000-000000000002';
 SELECT qa_assert('B line retry once',(SELECT count(*)=1 FROM sgp_pdt_entrega_lineas));
 SELECT qa_reject('B unvalidated event rejected',format('SELECT sgp_pdt_entrega_validar_v2(%L,%L)','RECEPCION',id_linea),'sin validación') FROM sgp_pdt_entrega_lineas;
+UPDATE sgp_picking_entregas SET estado='AUDITADA_DIFERENCIA' WHERE id_entrega='60000000-0000-0000-0000-000000000001';
+SELECT qa_assert('B audit difference does not certify line',(SELECT bool_and(estado='REGISTRADA') FROM sgp_pdt_entrega_lineas));
+SELECT qa_reject('B audit difference cannot validate PDT line',format('SELECT sgp_pdt_entrega_validar_v2(%L,%L)','RECEPCION',id_linea),'sin validación') FROM sgp_pdt_entrega_lineas;
 UPDATE sgp_picking_entregas SET estado='VALIDADA' WHERE id_entrega='60000000-0000-0000-0000-000000000001';
 SELECT sgp_pdt_entrega_validar_v2('RECEPCION',id_linea) FROM sgp_pdt_entrega_lineas;
 SELECT sgp_pdt_asignar_v2('RECEPCION',id_linea,'80000000-0000-0000-0000-000000000001') FROM sgp_pdt_entrega_lineas;

@@ -1,9 +1,14 @@
 """Concurrent RPC tests on the synthetic, network-disabled fixture only."""
 import subprocess,concurrent.futures,sys,json,uuid
 container='sgp-pdt-qa-91';database=sys.argv[1]
+real_contracts='--real-contracts' in sys.argv[2:]
+if real_contracts:
+ sys.dont_write_bytecode=True
+ from real_fixture_adapter import adapt_program_inserts
 if not database.startswith('sgp_pdt_qa_91_'):raise SystemExit('Invalid QA destination')
 if json.loads(subprocess.check_output(['docker','inspect',container]))[0]['HostConfig']['NetworkMode']!='none':raise SystemExit('Not isolated')
 def sql(statement):
+ if real_contracts:statement=adapt_program_inserts(statement)
  return subprocess.run(['docker','exec','-i',container,'psql','-X','-tA','-U','postgres','-d',database,'-v','ON_ERROR_STOP=1'],input=statement,text=True,capture_output=True)
 def run(statement):
  r=sql(statement)

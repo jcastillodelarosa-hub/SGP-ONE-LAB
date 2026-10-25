@@ -23,11 +23,19 @@ CREATE FUNCTION public.sgp_validar_sesion_rol(token text,roles text[]) RETURNS t
 BEGIN IF token IS NULL OR NOT token=ANY(roles) THEN RAISE EXCEPTION 'Rol no autorizado'; END IF; RETURN token; END $$;
 CREATE FUNCTION public.sgp_aluminio_pendiente_resolver(p_token text,p_id uuid) RETURNS jsonb LANGUAGE plpgsql AS $$
 BEGIN UPDATE public.sgp_aluminio_pendientes SET estado='RESUELTO',fecha_cierre=now() WHERE id_pendiente=p_id; RETURN '{"ok":true}'; END $$;
-CREATE FUNCTION public.sgp_aluminio_pendiente_estado(p_token text,p_id uuid,p_estado text) RETURNS jsonb LANGUAGE plpgsql AS $$
+CREATE FUNCTION public.sgp_aluminio_pendiente_estado(p_token text,p_id uuid,p_estado text,p_observacion text DEFAULT NULL) RETURNS jsonb LANGUAGE plpgsql AS $$
 BEGIN UPDATE public.sgp_aluminio_pendientes SET estado_repo=p_estado WHERE id_pendiente=p_id; RETURN '{"ok":true}'; END $$;
 
 CREATE FUNCTION public.sgp_picking_entrega_orden(p_token text,p_id uuid,p_produccion text,p_completa boolean)
 RETURNS jsonb LANGUAGE sql AS 'SELECT ''{"ok":true,"fixture":1}''::jsonb';
 CREATE FUNCTION public.sgp_picking_entrega_orden(p_token text,p_id uuid,p_produccion text,p_completa boolean,p_faltantes jsonb)
 RETURNS jsonb LANGUAGE sql AS 'SELECT ''{"ok":true,"fixture":2}''::jsonb';
-CREATE TABLE qa_picking_defs AS SELECT oid,md5(pg_get_functiondef(oid)) digest FROM pg_proc WHERE proname='sgp_picking_entrega_orden';
+CREATE TABLE qa_picking_defs AS SELECT oid,md5(pg_get_functiondef(oid)) digest,md5(prosrc) body_digest,proargtypes::text arg_types,prosecdef definer,proconfig,proowner FROM pg_proc WHERE proname='sgp_picking_entrega_orden';
+
+-- Synthetic server session contract, not the production implementation.
+CREATE FUNCTION public.sgp_sesion_actual(p_token text) RETURNS jsonb LANGUAGE sql AS $$
+ SELECT CASE WHEN p_token='QA_EXPIRED' THEN jsonb_build_object('valida',false,'usuario',p_token,'nombre','QA expirada','rol','COORDINADOR')
+ WHEN p_token='QA_NO_ROLE' THEN jsonb_build_object('valida',true)
+ WHEN p_token='QA_NULL' THEN NULL::jsonb
+ ELSE jsonb_build_object('valida',p_token IS NOT NULL,'usuario',p_token,'nombre','QA usuario','rol',p_token) END;
+$$;

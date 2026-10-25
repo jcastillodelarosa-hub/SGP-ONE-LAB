@@ -11,7 +11,7 @@ DECLARE
  e public.sgp_aluminio_pendiente_movimientos%rowtype;
  nuevo uuid;
 BEGIN
- u := public.sgp_validar_sesion_rol(p_token, ARRAY['ADMINISTRADOR','COORDINADOR','LIDER MECANIZADO','LIDER']);
+ u := public.sgp_pdt_validar_rol_real(p_token, ARRAY['ADMINISTRADOR','COORDINADOR','LIDER MECANIZADO','LIDER']);
  IF p_id IS NULL OR p_movimiento IS NULL OR p_clave IS NULL OR nullif(btrim(p_motivo),'') IS NULL
  THEN RAISE EXCEPTION 'Parametros invalidos'; END IF;
  SELECT * INTO p FROM public.sgp_aluminio_pendientes WHERE id_pendiente=p_id FOR UPDATE;
