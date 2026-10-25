@@ -50,6 +50,13 @@ def idempotent_role_creation(data):
  pattern=r'^CREATE ROLE ((?:"(?:[^"\n]|"")*"|[a-zA-Z_][a-zA-Z_0-9$]*));$'
  return re.sub(pattern,lambda m:'DO '+tag+' BEGIN CREATE ROLE '+m.group(1)+'; EXCEPTION WHEN duplicate_object THEN NULL; END '+tag+';',text,flags=re.M).encode()
 
+def canonical_default_acl_query(entries):
+ # Decode the archived textual ACL with PG17 itself, using restored role names.
+ # Compare privileges/grantors semantically, not the unstable aclitem[] order.
+ if not entries:return "SELECT '[]'::jsonb;"
+ rows=','.join('('+','.join('NULL' if e.get(k) is None else literal(e[k]) for k in ('owner','schema','tipo','acl'))+')' for e in entries)
+ return "WITH defaults(owner,schema,tipo,acl) AS (VALUES "+rows+") SELECT jsonb_agg(jsonb_build_object('owner',owner,'schema',schema,'tipo',tipo,'acl_efectiva',(SELECT coalesce(jsonb_agg(jsonb_build_object('grantor',pg_get_userbyid(a.grantor),'grantee',CASE WHEN a.grantee=0 THEN 'PUBLIC' ELSE pg_get_userbyid(a.grantee) END,'privilegio',a.privilege_type,'grantable',a.is_grantable) ORDER BY a.grantor,a.grantee,a.privilege_type,a.is_grantable),'[]'::jsonb) FROM aclexplode(acl::aclitem[]) a))) FROM defaults;"
+
 def main():
  if os.environ.get('GITHUB_ACTIONS')!='true':raise SafeFailure('PROTECTED_RUNNER_REQUIRED')
  resume=os.environ.get('SGP_RESTORE_EXISTING')=='true'
@@ -176,6 +183,10 @@ def main():
    restored_counts=isolated('postgres',counts_query) if count_parts else {}
    if restored_counts!=source_counts:raise SafeFailure('RESTORED_TABLE_COUNTS_DIFFER')
    restored_catalog=isolated('postgres',catalog_body(),True)
+   # Preserve the private archived metadata; canonicalize only comparison copies.
+   source_catalog=dict(source_catalog);restored_catalog=dict(restored_catalog)
+   for catalog in (source_catalog,restored_catalog):
+    catalog['grants_por_defecto']=isolated('postgres',canonical_default_acl_query(catalog['grants_por_defecto']))
    differences=compare_catalogs(source_catalog,restored_catalog)
    if differences:raise SafeFailure('RESTORED_CATALOG_DIFFER_'+','.join(differences))
    manifest['status']='POSTGRES_BACKUP_RESTORED_VERIFIED'
