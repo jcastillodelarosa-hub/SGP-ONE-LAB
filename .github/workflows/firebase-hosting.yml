@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
     paths-ignore:
+      - 'AGENTS.md'
       - '.agents/skills/**'
       - '.github/workflows/firebase-preview-linea-produccion.yml'
   workflow_dispatch:
