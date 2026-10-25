@@ -17,10 +17,15 @@ def classify_error(error):
         return 'Verificación TLS PostgreSQL fallida'
     return 'Conectividad PostgreSQL fallida'
 
+def report_failure(message):
+    print(message)
+    if os.environ.get('GITHUB_ACTIONS')=='true':
+        print('::error title=Supabase read-only connection::'+message)
+
 def main():
     password=os.environ.get('SUPABASE_DB_PASSWORD')
     if not password:
-        print('Secreto SUPABASE_DB_PASSWORD no disponible en el entorno supabase-backup')
+        report_failure('Secreto SUPABASE_DB_PASSWORD no disponible en el entorno supabase-backup')
         return 1
     environment=os.environ.copy()
     environment['PGPASSWORD']=password
@@ -36,13 +41,13 @@ def main():
     try:
         result=subprocess.run(argv,env=environment,capture_output=True,text=True,timeout=90)
     except (subprocess.SubprocessError,OSError):
-        print('Conectividad PostgreSQL fallida')
+        report_failure('Conectividad PostgreSQL fallida')
         return 1
     if result.returncode:
-        print(classify_error(result.stderr))
+        report_failure(classify_error(result.stderr))
         return 1
     if result.stdout.strip()!='SGP_POSTGRES17_READ_ONLY_OK':
-        print('Base o versión PostgreSQL inesperada; intervención detenida')
+        report_failure('Base o versión PostgreSQL inesperada; intervención detenida')
         return 1
     print('Conexión PostgreSQL verificada: solo lectura, TLS y servidor PostgreSQL 17')
     summary=os.environ.get('GITHUB_STEP_SUMMARY')
