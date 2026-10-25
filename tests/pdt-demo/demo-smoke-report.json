@@ -41,7 +41,7 @@
   "environment": "Local network-none QA; bind127.0.0.1; no public endpoint",
   "limitations": [
     "Desktop/mobile Chromium tested; physical device not tested",
-    "GitHub authentication unavailable during this delivery",
     "Previous attempt exposed demo reload/modal race, corrected and focused browser acceptance repeated successfully"
-  ]
+  ],
+  "github_connection": "Initial 401 recovered; demo implementation commit 626f5c46bd32579ef2cec298caaa49911ff8d57b pushed and confirmed on existing Draft PR91"
 }

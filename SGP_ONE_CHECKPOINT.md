@@ -201,8 +201,9 @@ Realizar una **prueba de recuperación de solo lectura** desde otro chat: compro
   dentro de orden parcial. Rutas internas y Origin externo rechazados.
   Pruebas anteriores reutilizadas: SQL/operación no modificados.
   Evidencia: tests/pdt-demo/demo-smoke-report.json y screenshots/.
-- Bloqueo externo: GitHub API 401 Bad credentials y Git HTTPS sin credenciales
-  en esta sesión. No afirmar que PR/remote fueron actualizados sin comprobarlo.
+- Conexión GitHub: hubo 401 al inicio; se recuperó durante la entrega. Commit
+  funcional 626f5c46bd32579ef2cec298caaa49911ff8d57b publicado y confirmado por Git/API
+  en el PR #91 OPEN/DRAFT. Main continúa db70f601cc01a470a6a3908cae19caac59dfe34b.
 - No SQL productivo, merge, publicación, main, GOOGLE ni LAC modificados.
-- Próximo paso: abrir la demo local; restablecer la integración GitHub para
-  transferir el commit de esta entrega al PR existente, sin otro PR ni despliegue.
+- Próximo paso: abrir la demo local siguiendo tests/pdt-demo/README.md.
+  No hay enlace público; acceso externo/publicación requeriría autorización separada.
