@@ -20,7 +20,8 @@
       "dataconnect/**",
       "scripts/**",
       "sql-test*",
-      "**/.*"
+      "**/.*",
+      "**/*.sql"
     ],
     "headers": [
       {
