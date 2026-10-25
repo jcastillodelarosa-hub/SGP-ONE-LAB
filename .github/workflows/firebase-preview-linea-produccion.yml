@@ -12,6 +12,7 @@ on:
           - gcs-readiness
           - restore-readiness
           - create-gcs-bucket
+          - gcs-channel-check
 
 permissions:
   contents: read
@@ -75,7 +76,7 @@ jobs:
 
   gcs-backup-readiness:
     name: GCS backup - existing resources read-only
-    if: github.ref == 'refs/heads/feat/pdt-multifabricacion-avances-nc' && inputs.operation == 'gcs-readiness'
+    if: github.ref == 'refs/heads/feat/pdt-multifabricacion-avances-nc' && (inputs.operation == 'gcs-readiness' || inputs.operation == 'gcs-channel-check')
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     environment: supabase-backup
@@ -96,7 +97,11 @@ jobs:
       - name: Configure official Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v3
       - name: Inspect existing GCS buckets without changes
+        if: inputs.operation == 'gcs-readiness'
         run: python3 tests/pdt-backup/gcs_readiness.py
+      - name: Verify prefix-restricted backup channel with non-sensitive metadata
+        if: inputs.operation == 'gcs-channel-check'
+        run: python3 tests/pdt-backup/gcs_storage.py
 
   restore-image-readiness:
     name: Supabase restore image - isolated synthetic readiness
