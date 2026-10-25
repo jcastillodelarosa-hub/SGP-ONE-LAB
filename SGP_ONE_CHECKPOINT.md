@@ -83,3 +83,36 @@ Realizar una **prueba de recuperación de solo lectura** desde otro chat: compro
 - Archivo supabase/migrations/20261024_pdt_rpc_contracts_REVIEW.sql preparado con RPC de validación multifabricación y avance parcial; **NO APLICAR**: la RPC propuesta delega en el validador antiguo, que rechaza RECEPCION. Debe extraerse comprobación equivalente a función interna segura, sin ampliar permisos involuntarios.
 - Otros pendientes de revisión: fecha operativa/turnos, NC múltiples, reversión de movimientos, cierre Picking, RLS/grants, migración histórica, pruebas de SQL y de navegador.
 - Estado: PROTOTIPO DE CONTRATOS EN RAMA; NO APTO PARA DESPLIEGUE. No hubo migración, merge ni Firebase deploy.
+
+## Handoff local PR #91 — fases PDT A/B (2026-10-25)
+
+- Rama local `feat/pdt-multifabricacion-avances-nc`, HEAD sin cambio
+  `4f486b8e90a40c4f0f4daaa2e16b0aa158e09f49`. Cambios SIN COMMIT NI PUSH.
+- Contrato LEGACY/V2 explícito, UUID/snapshot de detalle, avances/reversos/NC,
+  adaptador y modal por capacidades; SQL fuera de migraciones automáticas.
+- Fase A mantiene cierre v2 deshabilitado y preserva cierre legacy; fase B separada
+  incorpora registro positivo, validación, asignación y cierre cuantitativo.
+- Evidencia: tests JS, PostgreSQL 17 sin red con fixtures sintéticas y controlador
+  Chromium PC/móvil con RPC simuladas; resultados y comandos en
+  `docs/sql-proposals/pdt/README.md`.
+- NO equivale a restauración de Supabase, prueba de sesiones SGP reales,
+  aplicación productiva, integración a main o despliegue Firebase.
+- Próximo paso: revisión de diff y contraste de firmas/esquema reales antes de
+  autorizar transferencia o aplicación. Preservar protección Hosting de PR #92.
+
+## Consolidación autorizada PR #91 — 2026-10-25
+
+- Propietario autorizó commits, push exclusivamente a la rama existente y actualizar
+  el PR #91; no autorizó merge, SQL productivo ni Firebase.
+- Base local anterior a consolidación: `4f486b8e90a40c4f0f4daaa2e16b0aa158e09f49`;
+  main remoto comprobado `db70f601cc01a470a6a3908cae19caac59dfe34b`.
+- Revalidación: 222 pruebas JS; 35 aserciones SQL sintéticas; seis escenarios
+  concurrentes; controlador Chromium PC/móvil; release y sintaxis aprobados.
+- Revisión de workflows: push a esta rama no publica Firebase; solo CI del PR.
+  Pages has_pages=false. No cambios a firebase.json ni workflows.
+- Revisados archivos nuevos y diff: sin credenciales privadas detectadas; fixtures
+  usan roles/tokens sintéticos. SQL REVIEW fuera de migraciones automáticas.
+- Estado de entrega: IMPLEMENTADO EN RAMA; comprobar SHA final con Git/GitHub.
+  No APLICADO EN SUPABASE, no PUBLICADO ni VERIFICADO EN PRODUCCIÓN.
+- Siguiente paso: revisión técnica de PR #91 y contraste con definiciones reales,
+  antes de solicitar cualquier aprobación de aplicación, integración o publicación.

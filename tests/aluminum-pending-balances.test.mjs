@@ -36,7 +36,7 @@ test('NC parcial y REPO OK automatico', () => {
 
 test('saldo cero requiere confirmacion Picking para cerrar', () => {
   assert.deepEqual(pendingClosureState({saldo:0},false),{closed:false,stage:'PROCESADO_PENDIENTE_ENTREGA'});
-  assert.deepEqual(pendingClosureState({saldo:0},true),{closed:true,stage:'PICKING'});
+  assert.deepEqual(pendingClosureState({saldo:0},true),{closed:false,stage:'PROCESADO_PENDIENTE_ENTREGA'});
   assert.equal(pendingClosureState({saldo:7},true).closed,false);
 });
 test('NC finalizada es posible solucion y no confirma material fisico', () => {

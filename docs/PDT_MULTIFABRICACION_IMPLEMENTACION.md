@@ -1,3 +1,18 @@
+> Estado local fases A/B, 2026-10-25: marcador LEGACY/V2, identidad UUID con
+> snapshot fuente, UI por capacidades y Picking cuantitativo implementados para
+> pruebas aisladas. Fase A bloquea cierre V2; fase B agrega acreditación y cierre.
+> Legacy no migrado conserva su contrato. Ver [estado actual](sql-proposals/pdt/README.md).
+> Ningún SQL aplicado a Supabase ni publicación Firebase.
+
+> Actualización local 2026-10-25: contrato PARCIAL, NO APLICADO NI PUBLICADO.
+> La información de las secciones históricas siguientes debe cotejarse con
+> [el estado correctivo actual](sql-proposals/pdt/README.md).
+> Las RPC de validación dedicada, avances, reversos, NC y listado existen en rama;
+> ya permiten reportada 9 / validada 8 con motivo. No repetir esas correcciones.
+> Los SQL se trasladaron de supabase/migrations a docs/sql-proposals/pdt.
+> Nota histórica anterior a fases A/B: la identidad y evidencia estaban bloqueadas.
+> Nota histórica: el cierre estaba deshabilitado; fase B ahora tiene contrato aislado.
+
 # PDT aluminio — Contrato funcional y plan de implementación (BORRADOR)
 Fecha: 2026-10-24. Proyecto SGP_ONE; no afecta SGP_ONE_GOOGLE.
 Estado: PREPARADO EN RAMA, NO APLICADO EN SUPABASE, NO PUBLICADO.
@@ -28,7 +43,7 @@ Estado: PREPARADO EN RAMA, NO APLICADO EN SUPABASE, NO PUBLICADO.
 - No derivar fabricación desde reserva compartida ni confundir varias reservas de una producción con reserva compartida.
 - Picking PANEL y separación de órdenes por sistema permanecen intactos.
 
-## RPC propuestas (NO implementadas ni aplicadas)
+## Contrato histórico de RPC (implementación parcial; ninguna aplicación verificada)
 - sgp_aluminio_pendiente_validar_detalles_v1(token, id, detalles jsonb, observacion): bloquear PDT; validar sesión/rol; cantidad corregida > 0, suma exacta, detalle contra piezas PANEL y relación reserva/acabado; guardar cabecera y detalle en una transacción; historial original/corregido; rechazar si ya hubo avances.
 - sgp_aluminio_pendiente_registrar_avance_v1(token, id, id_detalle, cantidad, turno, fecha_operativa, idempotency_key, observacion): validar rol, PDT VALIDADO, cantidad <= saldo, bloqueo y atomicidad; respuesta saldo antes/después.
 - sgp_aluminio_pendiente_revertir_avance_v1(token, id_movimiento, idempotency_key, motivo): permiso reforzado, reversión única, sin borrar eventos.
@@ -80,13 +95,13 @@ C. Frontend con adaptación gradual y fallback seguro mientras backend no esté 
 D. Revisión del PR y autorización separada para aplicar migración.
 E. Pruebas de integración controladas, autorización separada para merge y publicación.
 
-## Pendientes de implementación
+## Snapshot histórico de pendientes de implementación
 Este commit prepara únicamente el esquema aditivo y este contrato. **No equivale a tener las RPC ni la UI listas.** No ejecutar migración borrador: faltan revisión de permisos y estrategia de transición.
 
 ## Puertas obligatorias para liberar (auditoría 2026-10-24)
-- NO APLICAR los SQL REVIEW/DRAFT: la validación delega en RPC legacy que no autoriza RECEPCION. Resolver con contrato de recepción que replique las comprobaciones de reserva y PANEL sin elevar permisos globales.
+- NO APLICAR los SQL REVIEW/DRAFT. La delegación legacy ya se eliminó en HEAD; existe validación dedicada para RECEPCION. Falta verificar identidad, instalación y permisos reales.
 - NO CERRAR PDT por mecanizado. La RPC legacy `sgp_aluminio_pendiente_resolver` cierra directamente sin prueba Picking; requiere control de entrega real y plan de compatibilidad antes de liberar.
-- La lista v2 no consulta estado de NC finalizada: indicador REPO OK y alertas de responsable/tiempo siguen sin contrato completo.
+- La lista v2 consulta estado NC; las alertas por fecha de finalización todavía carecen de fuente histórica verificable.
 - Confirmar existencia y formato de NC en origen antes de vincular, y conservar compatibilidad de NC histórica en texto.
 - Ejecutar pruebas de transacción con datos sintéticos en entorno aislado: autorización, concurrencia, reverso duplicado, idempotencia, suma y saldos, rollback, cierre y NC múltiples.
 - Integrar frontend y validar flujo Recepción → Mecanizado → Picking con roles reales; verificar despliegue separado.
@@ -94,7 +109,7 @@ Este commit prepara únicamente el esquema aditivo y este contrato. **No equival
 
 ## Conciliación previa a publicación
 
-- La regla aprobada permite corregir cantidad (9 a 8) con motivo e historial. La RPC propuesta actualmente rechaza esta operación: corregir antes de liberar.
+- La regla aprobada permite corregir cantidad (9 a 8) con motivo e historial y está implementada en SQL de revisión; falta probarla en PostgreSQL aislado.
 - La RPC heredada de cierre no verifica entrega real de Picking: bloquear publicación hasta preservar esa garantía.
 - Recepción no puede utilizar el validador heredado: resolver autorización específica sin ampliar roles globales.
 - Los SQL de revisión ubicados en migrations no están aprobados para ejecución automática.

@@ -16,14 +16,14 @@ AS $fn$
 DECLARE
  v_usuario text; v_p public.sgp_aluminio_pendientes%rowtype;
  v_row jsonb; v_fab text; v_acab text; v_long numeric; v_cant integer;
- v_total bigint:=0; v_count integer:=0; v_first jsonb; v_source boolean;
+ v_total bigint:=0; v_count integer:=0; v_first jsonb; v_source integer; v_detalle uuid; v_a public.sgp_aluminio%rowtype;
  v_key text; v_keys text[]:=array[]::text[]; v_out jsonb; v_correction boolean; v_res text; v_acab_res text;
 BEGIN
  v_usuario:=public.sgp_validar_sesion_rol(p_token,ARRAY['ADMINISTRADOR','COORDINADOR','LIDER LINEA','SUPERVISOR DE PICKING','RECEPCION']);
  SELECT * INTO v_p FROM public.sgp_aluminio_pendientes WHERE id_pendiente=p_id FOR UPDATE;
  IF NOT FOUND OR v_p.estado<>'PENDIENTE' OR v_p.fecha_cierre IS NOT NULL OR coalesce(v_p.estado_repo,'PENDIENTE')='PICKING' OR coalesce(v_p.validacion_estado,'POR_VALIDAR')='VALIDADO'
  THEN RAISE EXCEPTION 'Pendiente no activo o ya validado'; END IF;
- IF jsonb_typeof(p_detalles)<>'array' OR jsonb_array_length(p_detalles) NOT BETWEEN 1 AND 100
+ IF p_detalles IS NULL OR jsonb_typeof(p_detalles)<>'array' OR jsonb_array_length(p_detalles) NOT BETWEEN 1 AND 100
  THEN RAISE EXCEPTION 'Se requiere entre 1 y 100 fabricaciones'; END IF;
  IF EXISTS (SELECT 1 FROM public.sgp_aluminio_pendiente_movimientos WHERE id_pendiente=p_id)
  THEN RAISE EXCEPTION 'No se puede revalidar un pendiente con movimientos'; END IF;
@@ -36,26 +36,27 @@ BEGIN
     OR v_row->>'cantidad' !~ '^[0-9]+$'
   THEN RAISE EXCEPTION 'Longitud y cantidad deben ser numéricas'; END IF;
   v_long:=(v_row->>'longitud')::numeric;
-  IF length(v_row->>'cantidad')>9 THEN RAISE EXCEPTION 'Cantidad fuera de rango'; END IF;
+  IF length(v_row->>'cantidad')>10 OR (v_row->>'cantidad')::numeric>2147483647 THEN RAISE EXCEPTION 'Cantidad fuera de rango'; END IF;
   v_cant:=(v_row->>'cantidad')::integer;
   IF v_fab IS NULL OR v_acab IS NULL OR v_long<=0 OR v_cant<=0
   THEN RAISE EXCEPTION 'Fabricación, acabado, longitud y cantidad obligatorios'; END IF;
-  v_key:=lower(v_fab)||'|'||v_long::text||'|'||upper(v_acab);
+  v_key:=v_row->>'id_pieza';
+  IF nullif(v_key,'') IS NULL THEN RAISE EXCEPTION 'Referencia fuente requerida'; END IF;
   IF v_key=ANY(v_keys) THEN RAISE EXCEPTION 'Fabricación repetida'; END IF;
   v_keys:=array_append(v_keys,v_key);
   IF v_count=1 THEN v_first:=v_row; END IF;
   v_total:=v_total+v_cant;
   IF v_total>2147483647 THEN RAISE EXCEPTION 'Cantidad fuera de rango'; END IF;
-  SELECT EXISTS(
-   SELECT 1 FROM public.sgp_aluminio a
-   WHERE a.activo='SI' AND a.tipo_pieza='PANEL'
-     AND btrim(coalesce(a.codigo_sap,''))=btrim(coalesce(v_p.perfil,''))
-     AND ((nullif(btrim(v_p.key_produccion),'') IS NOT NULL AND a.key_produccion=v_p.key_produccion)
-          OR (nullif(btrim(v_p.key_produccion),'') IS NULL AND a.produccion=v_p.produccion))
-     AND lower(btrim(coalesce(a.fabricacion,'')))=lower(v_fab)
-     AND a.longitud=v_long AND upper(btrim(coalesce(a.acabado,'')))=upper(v_acab)
-  ) INTO v_source;
-  IF NOT v_source THEN RAISE EXCEPTION 'Fabricación % no encontrada como PANEL de la producción',v_fab; END IF;
+  IF nullif(btrim(v_p.key_produccion),'') IS NULL THEN RAISE EXCEPTION 'Identidad producción no resuelta'; END IF;
+  SELECT count(*) INTO v_source FROM public.sgp_aluminio a
+   JOIN public.sgp_producciones prod ON prod.key_produccion=a.key_produccion
+   WHERE a.id_pieza=v_key AND a.activo='SI' AND a.tipo_pieza='PANEL'
+     AND a.key_produccion=v_p.key_produccion
+     AND upper(btrim(a.sistema))=upper(btrim(prod.sistema))
+     AND btrim(a.codigo_sap)=btrim(v_p.perfil)
+     AND lower(btrim(a.fabricacion))=lower(v_fab) AND a.longitud=v_long
+     AND upper(btrim(a.acabado))=upper(v_acab);
+  IF v_source<>1 THEN RAISE EXCEPTION 'Fuente PANEL inexistente o ambigua'; END IF;
  END LOOP;
  v_correction := v_total IS DISTINCT FROM v_p.cantidad;
  IF v_correction AND nullif(btrim(coalesce(p_observacion,'')),'') IS NULL
@@ -72,12 +73,6 @@ BEGIN
  IF EXISTS (SELECT 1 FROM jsonb_array_elements(p_detalles) d
   WHERE upper(btrim(d->>'acabado'))<>upper(v_acab_res))
  THEN RAISE EXCEPTION 'Acabado distinto al de la reserva'; END IF;
- UPDATE public.sgp_aluminio_pendientes SET
-  fabricacion=btrim(v_first->>'fabricacion'),longitud=(v_first->>'longitud')::numeric,
-  reserva=v_res,acabado_pendiente=v_acab_res,validacion_estado='VALIDADO',
-  validado_por=v_usuario,fecha_validacion=now(),
-  observacion_validacion=nullif(btrim(coalesce(p_observacion,'')),'')
- WHERE id_pendiente=p_id;
  INSERT INTO public.sgp_aluminio_pendientes_historial
  (id_pendiente,usuario,observacion,tipo_evento,datos_anteriores,datos_nuevos)
  VALUES(p_id,v_usuario,p_observacion,'VALIDACION_PDT',
@@ -89,9 +84,18 @@ BEGIN
  LOOP
   INSERT INTO public.sgp_aluminio_pendiente_detalles
    (id_pendiente,id_pieza,fabricacion,longitud,acabado,cantidad_validada,creado_por)
-  VALUES (p_id,'',btrim(v_row->>'fabricacion'),(v_row->>'longitud')::numeric,
-          btrim(v_row->>'acabado'),(v_row->>'cantidad')::integer,v_usuario);
+  VALUES (p_id,v_row->>'id_pieza',btrim(v_row->>'fabricacion'),(v_row->>'longitud')::numeric,
+          btrim(v_row->>'acabado'),(v_row->>'cantidad')::integer,v_usuario) RETURNING id_detalle INTO v_detalle;
+  SELECT * INTO STRICT v_a FROM public.sgp_aluminio WHERE id_pieza=v_row->>'id_pieza';
+  INSERT INTO public.sgp_pdt_fuentes(id_detalle,id_pieza,id_carga,fila_origen,snapshot)
+  VALUES(v_detalle,v_a.id_pieza,v_a.id_carga,v_a.fila_origen,to_jsonb(v_a));
  END LOOP;
+ UPDATE public.sgp_aluminio_pendientes SET contrato_pdt='V2',
+  fabricacion=btrim(v_first->>'fabricacion'),longitud=(v_first->>'longitud')::numeric,
+  reserva=v_res,acabado_pendiente=v_acab_res,validacion_estado='VALIDADO',
+  validado_por=v_usuario,fecha_validacion=now(),
+  observacion_validacion=nullif(btrim(coalesce(p_observacion,'')),'')
+ WHERE id_pendiente=p_id;
  INSERT INTO public.sgp_aluminio_pendientes_historial
  (id_pendiente,usuario,observacion,tipo_evento,datos_anteriores,datos_nuevos)
  VALUES(p_id,v_usuario,p_observacion,'VALIDACION_DETALLES_PDT',
@@ -114,8 +118,7 @@ BEGIN
  OR p_fecha_operativa IS NULL OR p_idempotency_key IS NULL
  THEN RAISE EXCEPTION 'Parámetros de avance inválidos'; END IF;
  SELECT * INTO v_p FROM public.sgp_aluminio_pendientes WHERE id_pendiente=p_id FOR UPDATE;
- IF NOT FOUND OR v_p.estado<>'PENDIENTE' OR v_p.validacion_estado<>'VALIDADO'
- OR v_p.estado_repo='PICKING' OR v_p.fecha_cierre IS NOT NULL THEN RAISE EXCEPTION 'Pendiente no apto para avances'; END IF;
+ IF NOT FOUND THEN RAISE EXCEPTION 'Pendiente inexistente'; END IF;
  SELECT * INTO v_existing FROM public.sgp_aluminio_pendiente_movimientos
  WHERE idempotency_key=p_idempotency_key;
  IF FOUND THEN
@@ -126,6 +129,8 @@ BEGIN
   THEN RAISE EXCEPTION 'Clave de idempotencia reutilizada'; END IF;
   RETURN jsonb_build_object('ok',true,'duplicado',true,'id_movimiento',v_existing.id_movimiento);
  END IF;
+ IF v_p.contrato_pdt<>'V2' OR v_p.estado<>'PENDIENTE' OR v_p.validacion_estado<>'VALIDADO'
+ OR v_p.estado_repo='PICKING' OR v_p.fecha_cierre IS NOT NULL THEN RAISE EXCEPTION 'Pendiente no apto para avances'; END IF;
  SELECT * INTO v_d FROM public.sgp_aluminio_pendiente_detalles
  WHERE id_detalle=p_id_detalle AND id_pendiente=p_id FOR UPDATE;
  IF NOT FOUND THEN RAISE EXCEPTION 'Fabricación no pertenece al pendiente'; END IF;

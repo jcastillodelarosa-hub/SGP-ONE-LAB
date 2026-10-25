@@ -14,7 +14,7 @@ export function normalizeNcNumbers(input) {
 }
 function positiveInt(value, label) {
   const n = Number(value);
-  if (!Number.isSafeInteger(n) || n <= 0) throw new Error(label + ' debe ser entero positivo');
+  if (!Number.isSafeInteger(n) || n <= 0 || n > 2147483647) throw new Error(label + ' debe ser entero positivo');
   return n;
 }
 export function validateFabricationDistribution(details, expectedTotal = null) {
@@ -28,13 +28,13 @@ export function validateFabricationDistribution(details, expectedTotal = null) {
     if (!fabricacion || !acabado || !Number.isFinite(longitud) || longitud <= 0) {
       throw new Error('Fabricación, longitud y acabado son obligatorios');
     }
-    const key = [String(item.id_pieza ?? ''), fabricacion, longitud, acabado].join('|');
+    const key = item.id_pieza ? JSON.stringify(['source',String(item.id_pieza)]) : JSON.stringify([fabricacion.toLowerCase(),longitud,acabado.toUpperCase()]);
     if (seen.has(key)) throw new Error('Fabricación duplicada');
     seen.add(key);
     return { id_pieza: item.id_pieza ?? null, fabricacion, longitud, acabado, cantidad };
   });
   const total = normalized.reduce((sum, row) => sum + row.cantidad, 0);
-  if (!Number.isSafeInteger(total)) throw new Error('Cantidad total fuera de rango');
+  if (!Number.isSafeInteger(total) || total > 2147483647) throw new Error('Cantidad total fuera de rango');
   if (expectedTotal !== null && total !== positiveInt(expectedTotal, 'Total validado')) {
     throw new Error('La distribución no coincide con el total validado');
   }
@@ -82,8 +82,15 @@ export function calculateFabricationBalances(details, movements = []) {
     saldo: list.reduce((s,r)=>s+r.saldo,0) };
 }
 export function ncAvailability(ncs) {
-  const rows = Array.isArray(ncs) ? ncs : [];
-  const completed = rows.filter(x => ['FINALIZADA','FINALIZADO'].includes(String(x.estado ?? '').trim().toUpperCase())).length;
+  const seen=new Set();
+  const rows = (Array.isArray(ncs) ? ncs : []).filter(x=>{
+    const key=x.consecutivo||x.cod_nc||x.referencia;
+    if(!key)return true;
+    if(seen.has(key))return false;seen.add(key);return true;
+  });
+  const completed = rows.filter(x => x.activo !== false &&
+    !['INACTIVA','NO_ENCONTRADA','AMBIGUA'].includes(x.resolucion) &&
+    ['FINALIZADA','FINALIZADO'].includes(String(x.estado ?? '').trim().toUpperCase())).length;
   const total = rows.length;
   return { total, finalizadas: completed,
     estado: total === 0 ? 'SIN_NC' : completed === total ? 'REPO_OK' : completed > 0 ? 'PARCIAL' : 'PENDIENTE',
@@ -92,15 +99,14 @@ export function ncAvailability(ncs) {
 
 /**
  * Business-level pending closure: machining completion is NOT delivery.
- * A confirmed Picking handoff is required to close the pending record.
+ * Advisory only. Closure stays disabled until server evidence is implemented.
+ * A browser boolean (or any client-supplied evidence object) is never certification.
  */
-export function pendingClosureState(balances, pickingDelivered) {
+export function pendingClosureState(balances) {
   const saldo = Number(balances?.saldo);
   if (!Number.isSafeInteger(saldo) || saldo < 0) throw new Error('Saldo inválido');
   if (saldo > 0) return { closed: false, stage: 'MECANIZADO_PENDIENTE' };
-  return pickingDelivered === true
-    ? { closed: true, stage: 'PICKING' }
-    : { closed: false, stage: 'PROCESADO_PENDIENTE_ENTREGA' };
+  return { closed: false, stage: 'PROCESADO_PENDIENTE_ENTREGA' };
 }
 
 /**
