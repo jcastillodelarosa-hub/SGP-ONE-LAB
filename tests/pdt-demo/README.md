@@ -1,4 +1,11 @@
-# PDT v2 — demostración local
+# PDT v2 — demostración
+
+**Sin instalar Python ni Docker:** descarga `PDT_V2_DEMO_AUTOCONTENIDA.html` desde
+GitHub (Download raw file) y ábrelo en Chrome. Es una **simulación visual**, sin RPC
+ni backend: todos los cambios viven en memoria. Ver [acceso y alternativa HTTPS](REMOTE_ACCESS.md).
+
+La demo QA con backend real descrita debajo solo abre en el equipo que ejecuta
+el servidor. `localhost` de Codex no es un enlace accesible desde el PC del propietario.
 
 Datos ficticios, PostgreSQL 17.11 y PostgREST 12.2.3 locales. Se reutilizan el
 controlador, adaptador y RPC del PR #91; no son respuestas simuladas.

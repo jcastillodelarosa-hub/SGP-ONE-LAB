@@ -207,3 +207,18 @@ Realizar una **prueba de recuperación de solo lectura** desde otro chat: compro
 - No SQL productivo, merge, publicación, main, GOOGLE ni LAC modificados.
 - Próximo paso: abrir la demo local siguiendo tests/pdt-demo/README.md.
   No hay enlace público; acceso externo/publicación requeriría autorización separada.
+
+## Acceso corregido a demostración — 2026-10-25
+
+- No usar localhost de Codex como enlace desde el PC del propietario.
+- Alternativa sin instalación: tests/pdt-demo/PDT_V2_DEMO_AUTOCONTENIDA.html,
+  descargar desde GitHub (Download raw file) y abrir en Chrome. Es SIMULACIÓN
+  VISUAL en memoria: cero RPC, backend, autenticación real o acceso productivo.
+- Controlador real reutilizado; recorrido PC/móvil aprobado con red desactivada,
+  cero solicitudes HTTP/HTTPS y cero errores JS. Evidencia offline-smoke-report.json.
+- Herramientas de esta sesión sin port-forward/preview/túnel autenticado.
+  No se publicó URL QA; plan Cloudflare Tunnel+Access con expiración en
+  tests/pdt-demo/REMOTE_ACCESS.md, sujeto a autorización externa separada.
+- No SQL productivo, merge, main, Firebase, GOOGLE o LAC modificados.
+- Próximo paso: propietario descarga y abre el HTML autocontenido; si requiere
+  operaciones contra QA remoto, aprobar primero la infraestructura protegida.

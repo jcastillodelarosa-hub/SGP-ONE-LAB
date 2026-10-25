@@ -1,0 +1,24 @@
+{
+  "backend": "SIMULATED in-memory operations; no backend",
+  "offline": true,
+  "network_requests": 0,
+  "javascript_errors": [],
+  "passed": [
+    "PANEL distribution 5+4",
+    "partial advance",
+    "controlled reversal",
+    "two NC links",
+    "Reception UI restrictions",
+    "early close rejected",
+    "quantitative 5+4 delivery",
+    "Reception VALIDADA",
+    "quantity accreditation",
+    "PDT closed within partial order",
+    "390px mobile layout and modal dismissal"
+  ],
+  "production_access": false,
+  "timestamp_utc": "2026-10-25T18:39:01.725825+00:00",
+  "artifact_sha256": "41937b68a521b2f3e3009379e1c029e59ab7e6feb570e230736d2299c3d2ff24",
+  "browser_verification": "HTML loaded directly into separate Chromium PC/mobile renderers with network offline. This environment blocks file:// navigation by administrator policy; no claim of testing owner device/file policy.",
+  "external_access": "No remote QA URL created. Self-contained file delivered by existing GitHub repository, not served from Codex localhost."
+}
