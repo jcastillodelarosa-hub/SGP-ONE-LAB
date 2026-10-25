@@ -6,16 +6,13 @@ description: Perform read-only analysis before any proposed implementation.
 # SGP Audit
 
 ## Project
-SGP_ONE. Direct browser Supabase; Firebase Hosting sgp-one-lab; LAB v281 and backend hotfix v282 browser verification pending.
+SGP_ONE. Direct browser Supabase; Firebase Hosting sgp-one-lab; Estado actual: recuperar continuidad y contrastar main; las versiones históricas no son baseline vigente.
 
 ## Activation
 Use when the user asks for audit work in SGP_ONE. Follow the project's permanent instructions and current GitHub documentation.
 
-## Required sources
-1. `SGP_ONE_MASTER_CONTEXT.md` on `main`.
-2. `SGP_ONE_ESTADO_ACTUAL.md` on `main`.
-3. Current relevant source files on `main` and live read-only evidence when necessary.
-4. Other project's documentation only for integration boundaries.
+## Fuentes y evidencia comunes para Codex
+Seguir `AGENTS.md` raíz: CHECKPOINT → ESTADO_ACTUAL → MASTER_CONTEXT → código actual de main, PR y evidencia pertinente. Los tres documentos contienen historia: contrastar fechas, reglas y SHA; no tomar versiones antiguas como estado vigente. Aplicar los estados de evidencia y el formato de entrega definidos allí. Leer esta Skill explícitamente si no aparece en el catálogo; su lectura no demuestra activación nativa ni concede permisos.
 
 ## Procedure
 Inspect current main and relevant code paths, imports, RPC calls, role checks, storage and workflows; map dependencies and regression risks; report evidence and unknowns; propose minimal change set.

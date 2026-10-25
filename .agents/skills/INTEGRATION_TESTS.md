@@ -1,3 +1,24 @@
+# Validación Codex — inventario vigente
+
+Inventario actual: diez Skills. Los informes históricos de nueve Skills corresponden a la fase anterior a design-engineering; no son pruebas nuevas ni evidencia de descubrimiento nativo. Los recuentos históricos deben interpretarse en su fecha.
+
+## Casos de aceptación actuales
+- C1: leer AGENTS.md raíz y recuperar CHECKPOINT → ESTADO_ACTUAL → MASTER_CONTEXT; contrastar main y declarar datos históricos.
+- C2: localizar diez SKILL.md, validar frontmatter name/description únicos y leer los archivos seleccionados; separar esto de activación nativa.
+- C3: solicitud Picking → orchestrator, continuity, audit, business-rules y testing-qa; sin escritura durante auditoría.
+- C4: solicitud UI → design-engineering + SGP_ONE_DESIGN_SYSTEM.md, sin inferir estado del Centro de Diseño.
+- C5: distinguir LAB directo, GOOGLE Gateway y LAC; no trasladar cookies o despliegues entre proyectos.
+- C6: distinguir programada, estado operativo, entrega Picking, reserva principal y semanas de origen/ejecución.
+- C7: no declarar verificación funcional por CI verde ni migración aplicada por existir SQL.
+- C8: API de PR bloqueada → informar y no crear un PR cuando no pueda descartarse duplicación.
+- C9: AGENTS.md no está excluido de Hosting push main → no fusionar/publicar ni ejecutar workflow_dispatch; solicitar resolución de CI en alcance independiente antes de integración.
+- C10: emitir evidencia con rama/SHA, fuentes, diff, checks ejecutados/no ejecutados y siguiente paso; no escribir checkpoint fuera del alcance autorizado.
+
+Estado de C1–C10: especificados para validación; una revisión estática no equivale a ejecutar estos casos en una sesión nueva de Codex. No afirmar 10/10 pruebas de comportamiento aprobadas sin sus resultados.
+
+## Archivo histórico conservado
+Los apartados siguientes describen integración previa en ChatGPT. Sus fechas, cantidades y resultados no establecen estado vigente de Codex; prevalece el protocolo actual de AGENTS.md para recuperación y autorización.
+
 Proyecto: SGP_ONE
 
 # SGP Engineering Skills — Protocolo de integración v1

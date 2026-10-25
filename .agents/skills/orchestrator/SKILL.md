@@ -11,14 +11,11 @@ SGP_ONE. Direct browser Supabase; Firebase Hosting sgp-one-lab; Version and rele
 ## Activation
 Use when the user asks for orchestrator work in SGP_ONE. Follow the project's permanent instructions and current GitHub documentation.
 
-## Required sources
-1. `SGP_ONE_MASTER_CONTEXT.md` on `main` and `SGP_ONE_CHECKPOINT.md` (reconcile with actual main).
-2. `SGP_ONE_ESTADO_ACTUAL.md` on `main`.
-3. Current relevant source files on `main` and live read-only evidence when necessary.
-4. Other project's documentation only for integration boundaries.
+## Fuentes y evidencia comunes para Codex
+Seguir `AGENTS.md` raíz: CHECKPOINT → ESTADO_ACTUAL → MASTER_CONTEXT → código actual de main, PR y evidencia pertinente. Los tres documentos contienen historia: contrastar fechas, reglas y SHA; no tomar versiones antiguas como estado vigente. Aplicar los estados de evidencia y el formato de entrega definidos allí. Leer esta Skill explícitamente si no aparece en el catálogo; su lectura no demuestra activación nativa ni concede permisos.
 
 ## Design engineering routing
-For any UI/UX, mobile, table, navigation, modal or animation work, after mandatory continuity recovery read `SGP_ONE_DESIGN_SYSTEM.md` and `.agents/skills/design-engineering/SKILL.md` from current main before proposing or implementing changes. Apply the GLOBAL visual standard across all modules and new work, not separate module themes. Audit existing components and PRs first; the Configuración Design Center remains a proposal until separately authorized and verified. This is an SGP-specific adaptation inspired by Emil Kowalski's public design skills, not an automatically installed ChatGPT skill. Respect read-only scope and require explicit authorization before source changes.
+For any UI/UX, mobile, table, navigation, modal or animation work, after mandatory continuity recovery read `SGP_ONE_DESIGN_SYSTEM.md` and `.agents/skills/design-engineering/SKILL.md` from current main before proposing or implementing changes. Apply the GLOBAL visual standard across all modules and new work, not separate module themes. Audit existing components and PRs first; check the current Design Center implementation and authorization scope; file existence alone does not prove functional acceptance. This is an SGP-specific adaptation inspired by Emil Kowalski's public design skills, not an automatically installed ChatGPT skill. Respect read-only scope and require explicit authorization before source changes.
 
 ## Procedure
 Read both project boundaries; determine whether task is analysis, change, deployment or test; activate audit before implementation; demand explicit approval for production-impacting operations; hand off structured evidence.

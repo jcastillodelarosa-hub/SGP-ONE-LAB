@@ -6,19 +6,16 @@ description: Prepare minimal controlled releases through approved workflows.
 # SGP Deployment
 
 ## Project
-SGP_ONE. Direct browser Supabase; Firebase Hosting sgp-one-lab; LAB v281 and backend hotfix v282 browser verification pending.
+SGP_ONE. Direct browser Supabase; Firebase Hosting sgp-one-lab; Estado actual: recuperar continuidad y contrastar main; las versiones históricas no son baseline vigente.
 
 ## Activation
 Use when the user asks for deployment work in SGP_ONE. Follow the project's permanent instructions and current GitHub documentation.
 
-## Required sources
-1. `SGP_ONE_MASTER_CONTEXT.md` on `main`.
-2. `SGP_ONE_ESTADO_ACTUAL.md` on `main`.
-3. Current relevant source files on `main` and live read-only evidence when necessary.
-4. Other project's documentation only for integration boundaries.
+## Fuentes y evidencia comunes para Codex
+Seguir `AGENTS.md` raíz: CHECKPOINT → ESTADO_ACTUAL → MASTER_CONTEXT → código actual de main, PR y evidencia pertinente. Los tres documentos contienen historia: contrastar fechas, reglas y SHA; no tomar versiones antiguas como estado vigente. Aplicar los estados de evidencia y el formato de entrega definidos allí. Leer esta Skill explícitamente si no aparece en el catálogo; su lectura no demuestra activación nativa ni concede permisos.
 
 ## Procedure
-Check repository, branch, diff, test gates, Firebase target, GitHub Actions WIF, Secret Manager, affected Functions and rollback; obtain approval before production deployment; record workflow run, commit and verification outcomes.
+Check repository, branch, diff, test gates, Firebase target, actual workflow authentication, affected services and rollback; obtain approval before production deployment; record workflow run, commit and verification outcomes.
 
 ## Guardrails
 No JSON keys, no unrelated deployments, no production deployment as part of skill setup.
@@ -29,3 +26,6 @@ Report: project; module; objective; baseline; sources and commit; findings; depe
 
 ## Mandatory deployment/PR preflight
 Before creating a branch, PR, merge or deployment, verify the user has explicitly authorized that specific class of change. Inspect `main`, existing open and merged PRs, target file contents and the deployment workflow. Check for equivalent work already merged (including squash merges), and for pending PRs addressing the same objective. If the requested result already exists, do not create a duplicate PR or deploy; report the evidence. Do not equate a mergeable PR or non-empty branch diff with missing changes. Documentary-only tests must never trigger writes. Keep application, Supabase and Firebase unchanged unless separately approved.
+
+## Procedimiento real LAB
+Consultar .github/workflows/firebase-hosting.yml: Node 22, build:vendor, verify:release, npm test y Hosting sgp-one-lab. No asumir WIF, Secret Manager o despliegue Functions por instrucciones de GOOGLE. AGENTS.md raíz no está excluido de push a main; bloquear integración/publicación hasta resolver expresamente ese disparador. Un diff local no ejecuta Actions.

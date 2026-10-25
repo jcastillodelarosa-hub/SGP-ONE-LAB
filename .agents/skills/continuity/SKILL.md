@@ -5,21 +5,24 @@ description: Preserve verified SGP state with checkpoint-based handoffs across c
 
 # SGP Continuity v2 — checkpoint protocol
 
+## Fuentes y evidencia comunes para Codex
+Seguir `AGENTS.md` raíz: CHECKPOINT → ESTADO_ACTUAL → MASTER_CONTEXT → código actual de main, PR y evidencia pertinente. Los tres documentos contienen historia: contrastar fechas, reglas y SHA; no tomar versiones antiguas como estado vigente. Aplicar los estados de evidencia y el formato de entrega definidos allí. Leer esta Skill explícitamente si no aparece en el catálogo; su lectura no demuestra activación nativa ni concede permisos.
+
 ## Scope and authority
 Applies to SGP_ONE in jcastillodelarosa-hub/SGP-ONE-LAB. This skill is an instruction, not an autonomous background process. It never grants write authorization. Read-only requests remain read-only. Follow orchestrator preflight and never alter SGP_ONE_GOOGLE, Supabase, Firebase or production without separately scoped authorization.
 
 ## Mandatory startup recovery
-1. Read SGP_ONE_MASTER_CONTEXT.md for stable rules and SGP_ONE_ESTADO_ACTUAL.md for chronological history on main.
-2. Read SGP_ONE_CHECKPOINT.md for the most recent handoff; if absent or stale, say so.
+1. Read SGP_ONE_CHECKPOINT.md, then SGP_ONE_ESTADO_ACTUAL.md, then SGP_ONE_MASTER_CONTEXT.md, following AGENTS.md.
+2. Identify historical entries and stale or missing handoff evidence explicitly.
 3. Inspect current main HEAD, relevant source files, merged/open PRs, workflows and deployments as appropriate; compare checkpoint commit with actual main and never assume the checkpoint is current.
 4. Resolve discrepancies explicitly. Code and verified live evidence outrank stale version labels. Do not treat a passing CI run as proof of deployment or functional acceptance.
 5. Before proposing work, confirm no existing PR or merged implementation already satisfies the goal.
 
 ## Checkpoints during work
-At the start of each authorized implementation, record the objective, baseline, scope and expected next action in the handoff; after each meaningful milestone (commit, PR, merge, migration, deploy, test or blocker), prepare an updated checkpoint immediately, rather than waiting for the conversation to end. When documentation writes are explicitly authorized, commit the checkpoint in the approved scope and verify the resulting SHA. When they are not authorized, provide a copyable checkpoint in chat and clearly state GitHub is not updated. Never claim automatic saving if a write did not succeed.
+At the start of each authorized implementation, record the objective, baseline, scope and expected next action in the handoff; after each meaningful milestone (commit, PR, merge, migration, deploy, test or blocker), prepare an updated checkpoint immediately, rather than waiting for the conversation to end. When checkpoint edits are within the authorized files, update it; create a commit only when that action is authorized and verify its SHA. When they are not authorized, provide a copyable checkpoint in chat and clearly state GitHub is not updated. Never claim automatic saving if a write did not succeed.
 
 ## State labels
-PROPOSED / IMPLEMENTED IN BRANCH / MERGED TO MAIN / APPLIED IN SUPABASE / DEPLOYED / FUNCTIONALLY VERIFIED / BLOCKED / UNKNOWN. Distinguish evidence and date for each; do not promote any label by inference.
+Use the Spanish state labels in AGENTS.md, including IMPLEMENTADO LOCALMENTE and BLOQUEADO. Record date, source and environment independently for each dimension.
 
 ## Checkpoint minimum schema
 - UTC timestamp and project/repository/branch
