@@ -40,7 +40,10 @@ Usar precondición generation-match=0 al guardar y generación fija al recuperar
 
 La credencial existente solo se reutilizó para inventario. No ampliar sus permisos
 ni cambiar la identidad del despliegue Firebase para configurar el respaldo.
-WIF requiere configuración/atributos y permisos administrativos verificados; no se
+Para la identidad inmediata puede evaluarse OAuth con token de corta duración
+downscoped al bucket/prefijo (sin crear claves); no considerarlo verificado sin
+probar subida/recuperación y precondiciones. WIF sigue siendo la opción reutilizable
+preferida. WIF requiere configuración/atributos y permisos administrativos verificados; no se
 han inventado provider IDs ni aplicado políticas en este encargo.
 
 ## Respaldo y restauración pendientes del destino
@@ -58,6 +61,10 @@ han inventado provider IDs ni aplicado políticas en este encargo.
 - El dump no incluye Storage externo, secretos ni todos los elementos administrados de
   plataforma. No afirmar recuperación completa solo por disponer de un archivo.
 - No hay prueba de restauración productiva hasta completar esos pasos.
+- Entorno preparado: imagen oficial `supabase/postgres:17.11.0.006`; engine y
+  restauración de fixture custom sintética aprobados en run 40235106387. Los
+  archivos control de extensiones existen; no prueba restaurar extensiones,
+  datos, roles o secretos productivos. No se accedió a producción en ese job.
 
 ## Instalación productiva
 

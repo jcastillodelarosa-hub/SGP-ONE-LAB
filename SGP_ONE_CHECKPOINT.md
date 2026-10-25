@@ -243,3 +243,29 @@ Realizar una **prueba de recuperación de solo lectura** desde otro chat: compro
   última 40133962854. No automatizar pausas de planta ni restaurar dumps antiguos.
 - Próximo paso: recibir destino privado y ventana operativa solicitados al propietario,
   completar respaldo/restauración y continuar la instalación autorizada.
+
+## GCS y restauración aislada preparados — 2026-10-25
+
+- Ventana autorizada por propietario: 25/10/2026 22:00–23:00 Colombia,
+  equivalente a 26/10/2026 03:00–04:00 UTC. La coordinación efectiva de
+  escrituras con planta NO está confirmada; no detener operaciones ni migrar
+  solo por llegar a esa hora. No pedir de nuevo aprobación de SQL/merge/deploy.
+- GCS autenticado con OAuth del SDK reutilizando la credencial existente,
+  sin crear claves ni activar IAM Credentials API (la primera ruta la requería).
+- Inventario real: proyecto sgp-one-lab, CERO buckets, run 40234463659 SUCCESS.
+  Sin cambios en IAM, buckets, objetos o servicios; no se exportaron datos.
+- Propuesta revisable: tests/pdt-backup/gcs-config/bucket.json y writer-role.json.
+  Bucket privado sgp-one-lab-supabase-backups, cifrado GCS, acceso público
+  impedido, retención propuesta siete días; permisos sin delete/overwrite/IAM.
+  Su creación/consumo puede generar cargos: requiere aprobación expresa conforme
+  a la restricción del propietario. No asumir cuota gratuita ni crear el recurso.
+- Entorno de restauración preparado: supabase/postgres:17.11.0.006, extensión
+  control files verificados y restauración custom SINTÉTICA aprobada, run
+  40235106387 SUCCESS. Datos ficticios, contenedor sin red ni puertos publicados.
+  El intento local encontró límite de extracción Docker; se resolvió en runner
+  aislado sin borrar QA local. No declarar restauración productiva verificada.
+- Diez pruebas de las nuevas barreras/conectividad aprobadas; contratos PDT y
+  pruebas SQL anteriores reutilizados. No SQL productivo, merge ni Firebase.
+- Firebase live sigue en 476 ejecuciones; última 40133962854.
+- Próximo paso: aprobación del bucket y su consumo, o destino privado existente
+  autorizado; después respaldo consistente/recuperación real antes de instalación.
