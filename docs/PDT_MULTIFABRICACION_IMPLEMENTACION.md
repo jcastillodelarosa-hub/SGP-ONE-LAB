@@ -91,3 +91,11 @@ Este commit prepara únicamente el esquema aditivo y este contrato. **No equival
 - Ejecutar pruebas de transacción con datos sintéticos en entorno aislado: autorización, concurrencia, reverso duplicado, idempotencia, suma y saldos, rollback, cierre y NC múltiples.
 - Integrar frontend y validar flujo Recepción → Mecanizado → Picking con roles reales; verificar despliegue separado.
 - No fusionar ni desplegar PR #91 mientras cualquiera de estas puertas esté abierta.
+
+## Conciliación previa a publicación
+
+- La regla aprobada permite corregir cantidad (9 a 8) con motivo e historial. La RPC propuesta actualmente rechaza esta operación: corregir antes de liberar.
+- La RPC heredada de cierre no verifica entrega real de Picking: bloquear publicación hasta preservar esa garantía.
+- Recepción no puede utilizar el validador heredado: resolver autorización específica sin ampliar roles globales.
+- Los SQL de revisión ubicados en migrations no están aprobados para ejecución automática.
+- Las pruebas JavaScript no sustituyen pruebas SQL transaccionales ni aceptación PC/móvil.
