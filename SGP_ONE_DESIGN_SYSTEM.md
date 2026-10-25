@@ -1,6 +1,11 @@
 # SGP_ONE — DESIGN SYSTEM v1
 Fecha de aprobación documental: 2026-10-22
 Estado: NORMA DOCUMENTAL APROBADA; IMPLEMENTACIÓN VISUAL PENDIENTE
+
+> Metodología vigente (2026-10-25): aplicar AGENTS.md. Recuperar contexto una vez,
+> reutilizar evidencias y demostrar pronto. Las revisiones siguientes son dirigidas
+> al cambio/riesgo; no obligan a repetir auditorías generales ni a detener una demo
+> aislada por mejoras menores. Se mantienen autorizaciones de producción y permisos.
 Repositorio: jcastillodelarosa-hub/SGP-ONE-LAB | Rama: main
 
 ## 1. Decisión y alcance

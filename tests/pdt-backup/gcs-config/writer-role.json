@@ -1,0 +1,11 @@
+{
+  "title": "SGP Supabase backup writer and restorer",
+  "description": "Read privacy metadata; create new backup objects and recover them. No delete, overwrite, IAM modification or bucket creation.",
+  "stage": "GA",
+  "includedPermissions": [
+    "storage.buckets.get",
+    "storage.buckets.getIamPolicy",
+    "storage.objects.create",
+    "storage.objects.get"
+  ]
+}

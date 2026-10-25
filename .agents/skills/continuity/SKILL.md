@@ -5,6 +5,15 @@ description: Preserve verified SGP state with checkpoint-based handoffs across c
 
 # SGP Continuity v2 — checkpoint protocol
 
+## Método principal
+Necesidad funcional → implementación → demostración visible → correcciones → cierre.
+Aplicar AGENTS.md: evidencia previa reutilizable, revisión dirigida y pruebas
+proporcionales al cambio; no auditoría general ni batería completa por defecto.
+CRÍTICO bloquea la operación afectada; IMPORTANTE se corrige en el encargo;
+MENOR se documenta sin detener la demo. Resolver ajustes técnicos autorizados sin
+pedir confirmaciones repetidas; mantener seguridad y permisos de producción.
+El handoff se consolida en la entrega, no tras cada corrección menor.
+
 ## Scope and authority
 Applies to SGP_ONE in jcastillodelarosa-hub/SGP-ONE-LAB. This skill is an instruction, not an autonomous background process. It never grants write authorization. Read-only requests remain read-only. Follow orchestrator preflight and never alter SGP_ONE_GOOGLE, Supabase, Firebase or production without separately scoped authorization.
 
@@ -16,7 +25,7 @@ Applies to SGP_ONE in jcastillodelarosa-hub/SGP-ONE-LAB. This skill is an instru
 5. Before proposing work, confirm no existing PR or merged implementation already satisfies the goal.
 
 ## Checkpoints during work
-At the start of each authorized implementation, record the objective, baseline, scope and expected next action in the handoff; after each meaningful milestone (commit, PR, merge, migration, deploy, test or blocker), prepare an updated checkpoint immediately, rather than waiting for the conversation to end. When documentation writes are explicitly authorized, commit the checkpoint in the approved scope and verify the resulting SHA. When they are not authorized, provide a copyable checkpoint in chat and clearly state GitHub is not updated. Never claim automatic saving if a write did not succeed.
+At the start of each authorized implementation, record the objective, baseline, scope and expected next action in the handoff; at delivery or a durable milestone, consolidate a useful checkpoint; do not require a new report for every minor fix or test. When documentation writes are explicitly authorized, commit the checkpoint in the approved scope and verify the resulting SHA. When they are not authorized, provide a copyable checkpoint in chat and clearly state GitHub is not updated. Never claim automatic saving if a write did not succeed.
 
 ## State labels
 PROPOSED / IMPLEMENTED IN BRANCH / MERGED TO MAIN / APPLIED IN SUPABASE / DEPLOYED / FUNCTIONALLY VERIFIED / BLOCKED / UNKNOWN. Distinguish evidence and date for each; do not promote any label by inference.

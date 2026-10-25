@@ -1,0 +1,388 @@
+{
+  "timestamp_utc": "2026-10-25T18:05:26.534201+00:00",
+  "scope": "Isolated preparation only; no production access or deployment",
+  "javascript": {
+    "passed": 222,
+    "failed": 0
+  },
+  "python_unit_tests": {
+    "passed": 12,
+    "failed": 0
+  },
+  "sql": {
+    "base_and_regression_assertions": 63,
+    "additional_assertions": 24,
+    "concurrency_scenarios": 6,
+    "seven_argument_resolution_explain": true
+  },
+  "real_contracts": {
+    "database": "sgp_pdt_qa_91_real_1792951409359678789",
+    "production_access": false,
+    "atomic_failure_rollback_verified": true,
+    "compatibility_lifecycle_verified": true,
+    "source_functions_verified": [
+      {
+        "signature": "sgp_aluminio_pendiente_estado(text,uuid,text,text)",
+        "md5": "78760ab168140b4ff6c2518350ef4607"
+      },
+      {
+        "signature": "sgp_aluminio_pendiente_resolver(text,uuid)",
+        "md5": "f862a315bd7758c82e23754e689c1ad3"
+      },
+      {
+        "signature": "sgp_picking_entrega_orden(text,uuid,text,boolean,text,jsonb,date,text)",
+        "md5": "b7a4b58eb8a8f9db4439d1cd354b92c8"
+      },
+      {
+        "signature": "sgp_picking_entrega_orden(text,uuid,text,boolean,text,jsonb)",
+        "md5": "0a5e2afcca140be9c621d6968525f229"
+      },
+      {
+        "signature": "sgp_picking_rechazar_entrega_completa_duplicada()",
+        "md5": "c5e07e6cdbba51037c6d1dc0a5cac1b1"
+      },
+      {
+        "signature": "sgp_picking_validar_recepcion(text,uuid,jsonb,jsonb,text)",
+        "md5": "ff5790e874d81b713d82f4b91cb3be08"
+      },
+      {
+        "signature": "sgp_validar_sesion_rol(text,text[])",
+        "md5": "951943ae26baccc4797eea5fed57fcb6"
+      },
+      {
+        "signature": "sgp_mecanizado_programada_al_actualizar()",
+        "md5": "281f90a86038c515c320349564651c82"
+      },
+      {
+        "signature": "sgp_mecanizado_programada_al_insertar()",
+        "md5": "14ed1835587b8958c7dcf725d108b56f"
+      },
+      {
+        "signature": "sgp_mecanizado_validar_prioridad_nueva()",
+        "md5": "7f175660ebd49d03ce44436e8169a95a"
+      },
+      {
+        "signature": "sgp_sesion_actual(text)",
+        "md5": "e964ea0d6f9af2c88010542cd3c84f9e"
+      }
+    ],
+    "supplied_function_metadata_verified": true,
+    "programming_columns": [
+      {
+        "nombre": "id_programacion",
+        "tipo": "uuid",
+        "not_null": true
+      },
+      {
+        "nombre": "reserva",
+        "tipo": "text",
+        "not_null": true
+      },
+      {
+        "nombre": "produccion",
+        "tipo": "text",
+        "not_null": false
+      },
+      {
+        "nombre": "cantidad_programada",
+        "tipo": "integer",
+        "not_null": true
+      },
+      {
+        "nombre": "fecha_programacion",
+        "tipo": "date",
+        "not_null": true
+      },
+      {
+        "nombre": "turno",
+        "tipo": "text",
+        "not_null": true
+      },
+      {
+        "nombre": "prioridad",
+        "tipo": "numeric(8,2)",
+        "not_null": true
+      },
+      {
+        "nombre": "observacion",
+        "tipo": "text",
+        "not_null": false
+      },
+      {
+        "nombre": "observacion_orden",
+        "tipo": "text",
+        "not_null": false
+      },
+      {
+        "nombre": "sistema",
+        "tipo": "text",
+        "not_null": false
+      },
+      {
+        "nombre": "acabado",
+        "tipo": "text",
+        "not_null": false
+      },
+      {
+        "nombre": "porc_vidrio_snapshot",
+        "tipo": "numeric",
+        "not_null": false
+      },
+      {
+        "nombre": "cant_vidrio_snapshot",
+        "tipo": "numeric",
+        "not_null": false
+      },
+      {
+        "nombre": "estado",
+        "tipo": "text",
+        "not_null": true
+      },
+      {
+        "nombre": "usuario_programa",
+        "tipo": "text",
+        "not_null": true
+      },
+      {
+        "nombre": "fecha_creacion",
+        "tipo": "timestamp with time zone",
+        "not_null": true
+      },
+      {
+        "nombre": "fecha_actualizacion",
+        "tipo": "timestamp with time zone",
+        "not_null": true
+      },
+      {
+        "nombre": "prioridad_semanal",
+        "tipo": "text",
+        "not_null": false
+      },
+      {
+        "nombre": "programada",
+        "tipo": "boolean",
+        "not_null": true
+      }
+    ],
+    "programming_triggers": [
+      {
+        "nombre": "sgp_mecanizado_validar_prioridad_nueva",
+        "funcion": "sgp_mecanizado_validar_prioridad_nueva()",
+        "definicion": "CREATE TRIGGER sgp_mecanizado_validar_prioridad_nueva BEFORE INSERT ON sgp_mecanizado_programacion FOR EACH ROW EXECUTE FUNCTION sgp_mecanizado_validar_prioridad_nueva()",
+        "habilitado": "O",
+        "argumentos_requieren_revision_local": false
+      },
+      {
+        "nombre": "trg_sgp_mecanizado_programada_insert",
+        "funcion": "sgp_mecanizado_programada_al_insertar()",
+        "definicion": "CREATE TRIGGER trg_sgp_mecanizado_programada_insert BEFORE INSERT ON sgp_mecanizado_programacion FOR EACH ROW EXECUTE FUNCTION sgp_mecanizado_programada_al_insertar()",
+        "habilitado": "O",
+        "argumentos_requieren_revision_local": false
+      },
+      {
+        "nombre": "trg_sgp_mecanizado_programada_update",
+        "funcion": "sgp_mecanizado_programada_al_actualizar()",
+        "definicion": "CREATE TRIGGER trg_sgp_mecanizado_programada_update BEFORE UPDATE OF estado ON sgp_mecanizado_programacion FOR EACH ROW EXECUTE FUNCTION sgp_mecanizado_programada_al_actualizar()",
+        "habilitado": "O",
+        "argumentos_requieren_revision_local": false
+      }
+    ],
+    "source_note": "RECONSTRUIDO desde el JSON íntegro pegado por el usuario en la conversación; no es el archivo de exportación original. Conservar huellas capturadas, no recalculadas.",
+    "schema_scope": "19 real programming columns; other dependency DDL reconstructed explicitly for tests",
+    "extensions_available": "[{\"name\" : \"plpgsql\", \"default_version\" : \"1.0\"}, {\"name\" : \"pgcrypto\", \"default_version\" : \"1.3\"}, {\"name\" : \"uuid-ossp\", \"default_version\" : \"1.1\"}, {\"name\" : \"pg_stat_statements\", \"default_version\" : \"1.11\"}]",
+    "legacy_six_call": "resolved; original eight-argument OID/body/ACL retained privately and public forwarder requires seven arguments, optional turno",
+    "unchanged_supplied_bodies_after_install": [
+      "sgp_picking_entrega_orden(text,uuid,text,boolean,text,jsonb,date,text)",
+      "sgp_picking_entrega_orden(text,uuid,text,boolean,text,jsonb)",
+      "sgp_picking_rechazar_entrega_completa_duplicada()",
+      "sgp_picking_validar_recepcion(text,uuid,jsonb,jsonb,text)",
+      "sgp_validar_sesion_rol(text,text[])",
+      "sgp_mecanizado_programada_al_actualizar()",
+      "sgp_mecanizado_programada_al_insertar()",
+      "sgp_mecanizado_validar_prioridad_nueva()",
+      "sgp_sesion_actual(text)"
+    ],
+    "evidence_files_sha256": {
+      "PDT_COMPLEMENTO_REAL.json": "99ad4f2102b26a54934038b9c06840f23ff90bc7d8886da7fdddee9e5a7872b3",
+      "PDT_FUNCIONES_REALES.json": "5ec68f9fc60e7c040c34d84c7c5244669f7a8abb7088a7fd74a8f9a42468466b"
+    }
+  },
+  "postgrest": {
+    "database": "sgp_pdt_qa_91_real_1792951409359678789",
+    "postgrest": "12.2.3",
+    "network": "shared QA loopback only",
+    "checks": [
+      "HTTP six-argument named RPC resolves",
+      "HTTP eight-argument named RPC resolves",
+      "HTTP real Reception audit works",
+      "HTTP Reception machining denied",
+      "HTTP Coordinator advance retained",
+      "HTTP direct table write denied without mutation"
+    ],
+    "production_access": false
+  },
+  "recovery": {
+    "report": "/tmp/sgp-pdt-qa-recovery-ifji4wwq/report.json",
+    "archive": "/tmp/sgp-pdt-qa-recovery-ifji4wwq/fixture.dump",
+    "timestamp_utc": "2026-10-25T18:05:06.668649+00:00",
+    "source": "sgp_pdt_qa_91_real_1792951409359678789",
+    "restored": "sgp_pdt_qa_91_restore_1792951499517569906",
+    "container": "sgp-pdt-qa-91",
+    "network": "none",
+    "sha256": "7611c9c272b441c9e6f06390d761c6b5afe25edc034191cf1a2971ee64ecc789",
+    "archive_toc_readable": true,
+    "row_counts_equal": true,
+    "table_counts": {
+      "public.qa_assertions": {
+        "count": 37,
+        "rows_md5": "e86e3d7829fbf40b71053ef8f62adba2"
+      },
+      "public.qa_picking_defs": {
+        "count": 2,
+        "rows_md5": "db9086f8d80fadf2d96f68bd8c19bdab"
+      },
+      "public.qa_reservas": {
+        "count": 1,
+        "rows_md5": "4d6a9bebb4a75a53e7b42b92245f45a0"
+      },
+      "public.sgp_aluminio": {
+        "count": 2,
+        "rows_md5": "6c5165e99ade892ee5c1f34b51c12905"
+      },
+      "public.sgp_aluminio_pendiente_detalles": {
+        "count": 6,
+        "rows_md5": "70561cc8bd78b3971cd0e4c03592fdd6"
+      },
+      "public.sgp_aluminio_pendiente_movimientos": {
+        "count": 8,
+        "rows_md5": "8b7a012b49f3c55358f76521403d53cb"
+      },
+      "public.sgp_aluminio_pendiente_ncs": {
+        "count": 3,
+        "rows_md5": "51754255754c79397df511782ef2c6e7"
+      },
+      "public.sgp_aluminio_pendientes": {
+        "count": 7,
+        "rows_md5": "6e0896e701bc7a02bbc9e3ba908405ae"
+      },
+      "public.sgp_aluminio_pendientes_historial": {
+        "count": 33,
+        "rows_md5": "1773dddc7ced44dbda3e7016113d33aa"
+      },
+      "public.sgp_mecanizado_programacion": {
+        "count": 2,
+        "rows_md5": "0469ae899c2ed83ffacd72735cb30a22"
+      },
+      "public.sgp_nc_aluminio": {
+        "count": 2,
+        "rows_md5": "3f924f3acf49f0cebbce9d59b08d06d9"
+      },
+      "public.sgp_pdt_asignaciones": {
+        "count": 6,
+        "rows_md5": "d00b52b1e78a8f7f2f1bfe31e5e92225"
+      },
+      "public.sgp_pdt_cierres": {
+        "count": 3,
+        "rows_md5": "286dc2a176b22ddba5d47b6492e297bd"
+      },
+      "public.sgp_pdt_entrega_lineas": {
+        "count": 6,
+        "rows_md5": "f9ed7a0a9b3db5c46ba923404391637b"
+      },
+      "public.sgp_pdt_fuentes": {
+        "count": 6,
+        "rows_md5": "9db9876f1f2c289257a8ce92479226b8"
+      },
+      "public.sgp_pdt_legacy_definiciones": {
+        "count": 2,
+        "rows_md5": "1d4de087ddad0ec76171653d3a40a0ec"
+      },
+      "public.sgp_picking_auditoria_diferencias": {
+        "count": 0,
+        "rows_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      "public.sgp_picking_entregas": {
+        "count": 8,
+        "rows_md5": "8674b3de8b85e84adf256c8db6c91c59"
+      },
+      "public.sgp_picking_faltantes": {
+        "count": 0,
+        "rows_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      "public.sgp_prioridades": {
+        "count": 2,
+        "rows_md5": "71016046332c26bf6a6f8f0a7b825322"
+      },
+      "public.sgp_producciones": {
+        "count": 1,
+        "rows_md5": "37daedd2798679bde00fffb194d39391"
+      },
+      "public.sgp_sesiones_app": {
+        "count": 14,
+        "rows_md5": "2ecebd5f8189a382e28d1f977893a69c"
+      },
+      "public.sgp_usuarios": {
+        "count": 14,
+        "rows_md5": "7b5c744bda52002f10be6e4ded58adfb"
+      },
+      "sgp_pdt_compat_91.entrega_backup": {
+        "count": 1,
+        "rows_md5": "50f22ce839d50b93445dfdaeaac602d6"
+      }
+    },
+    "catalog_differences": [],
+    "fixture_restore_verified": true,
+    "production_backup": false,
+    "limitations": [
+      "Synthetic fixture only; no production recovery claim",
+      "Cluster roles already existed in same QA cluster; roles are not included in pg_dump",
+      "No Storage object backup, external secrets or Supabase platform settings",
+      "No preservation/replay of later production writes demonstrated"
+    ],
+    "compatibility_rebind_rollback_reinstall_verified": true
+  },
+  "browser": {
+    "viewports": [
+      [
+        1280,
+        900
+      ],
+      [
+        390,
+        844
+      ]
+    ],
+    "rpc": "simulated",
+    "passed": true
+  },
+  "static_checks": [
+    "release assets",
+    "JavaScript syntax",
+    "git diff --check"
+  ],
+  "installation_manifest": {
+    "phase": "AB",
+    "sql_sha256": "ea61f47cf67ba3f7e8e637076014cd70e37d9b16634fa5397fd38ed2a9ebfdf4",
+    "sources": {
+      "20261025_picking_entrega_68_compat_REVIEW.sql": "16c7bd391a4dd7f58623764e653f6cbbdcbe3af02fa739dcdfd022e0fbe988bd",
+      "20261024_pdt_multifabricacion_avances_nc_DRAFT.sql": "7bfff16ceee22965c34f34143883b888083a66664c5a541f483c28947ba5d84a",
+      "20261025_pdt_fail_closed_REVIEW.sql": "cb3879c7ca44c69429f868693da52f1c4e993dfcf227aa370252670e9b4fd671",
+      "20261024_pdt_rpc_contracts_REVIEW.sql": "3d7c334efd7c833c0ee92198946e71eedbb83a1af2ade5c8348e8bb2e677ca71",
+      "20261024_pdt_reverso_REVIEW.sql": "0cc8de17dd42106d0b449201d65e090bc67b379b8c59764b78c27faae0105d18",
+      "20261024_pdt_nc_vincular_REVIEW.sql": "2d983a28979765a14367a4f923d755ff63ae7de8ee97f21dcd14631079cf3feb",
+      "20261024_pdt_listar_v2_REVIEW.sql": "d4b63fb7ef3237fb50916f2c191b5cb7b97885abd035ebb5ed61ee79660f4b1d",
+      "20261025_pdt_legacy_guard_REVIEW.sql": "63a9e6de08eaff2ec9a4e2a35061af4f25719efd6f6d5324050fdbdde2875172",
+      "20261025_pdt_capacidades_REVIEW.sql": "2b8dac8f40b1035284e8f868ed80c61c31a19be2a8eb104336ff7037117a8a22",
+      "20261026_pdt_picking_B_REVIEW.sql": "81f98dad1ec519a992022823046be26bff1709491441daf8c5c225fa335e3038"
+    },
+    "production_applied": false
+  },
+  "negative_evidence": [
+    "An initial recovery comparison while HTTP fixtures were writing failed safely with integrity mismatch; repeated after writer stopped and passed. Production recovery must use an agreed snapshot/write-reconciliation procedure."
+  ],
+  "limitations": [
+    "Not complete Supabase schema/RLS/ACL parity",
+    "External named-argument consumers not exhaustively inventoried",
+    "No production backup/restore, SQL installation, merge or deployment"
+  ]
+}
