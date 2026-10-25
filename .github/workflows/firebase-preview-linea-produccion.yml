@@ -84,15 +84,14 @@ jobs:
         uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - name: Obtain temporary token using the existing Firebase credential
+      - name: Authenticate with the existing Firebase credential (no new key)
         id: google-auth
         uses: google-github-actions/auth@v3
         with:
           credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SGP_ONE_LAB }}
-          create_credentials_file: false
-          token_format: access_token
-          access_token_lifetime: 1800s
+          create_credentials_file: true
+          cleanup_credentials: true
+      - name: Configure official Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v3
       - name: Inspect existing GCS buckets without changes
-        env:
-          GCS_READ_TOKEN: ${{ steps.google-auth.outputs.access_token }}
         run: python3 tests/pdt-backup/gcs_readiness.py

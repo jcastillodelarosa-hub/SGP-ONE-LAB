@@ -1,7 +1,7 @@
 """Read-only GCS inventory in the existing SGP project; never writes objects/IAM.
 Only safe resource metadata is reported. Access tokens and API bodies are not logged.
 """
-import json,os,sys,urllib.request,urllib.error,urllib.parse
+import json,os,sys,subprocess,urllib.request,urllib.error,urllib.parse
 PROJECT='sgp-one-lab'
 
 def eligible(bucket,policy):
@@ -15,8 +15,14 @@ def eligible(bucket,policy):
 def main():
     token=os.environ.get('GCS_READ_TOKEN')
     if not token:
-        print('::error title=GCS readiness::No hay autenticación GCS reutilizable disponible')
-        return 1
+        try:
+            result=subprocess.run(['gcloud','auth','print-access-token'],capture_output=True,text=True,timeout=60)
+            if result.returncode:raise RuntimeError()
+            token=result.stdout.strip()
+            if not token:raise RuntimeError()
+        except Exception:
+            print('::error title=GCS readiness::No hay autenticación GCS reutilizable disponible')
+            return 1
     def get(path):
         request=urllib.request.Request('https://storage.googleapis.com/storage/v1/'+path,headers={'Authorization':'Bearer '+token})
         with urllib.request.urlopen(request,timeout=30) as r:return json.load(r)
