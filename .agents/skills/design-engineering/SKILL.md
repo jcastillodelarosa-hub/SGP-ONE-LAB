@@ -5,20 +5,29 @@ description: Guide SGP_ONE UI/UX decisions using original SGP standards and sele
 
 # SGP Design Engineering — guía documental
 
+## Método principal
+Necesidad funcional → implementación → demostración visible → correcciones → cierre.
+Aplicar AGENTS.md: evidencia previa reutilizable, revisión dirigida y pruebas
+proporcionales al cambio; no auditoría general ni batería completa por defecto.
+CRÍTICO bloquea la operación afectada; IMPORTANTE se corrige en el encargo;
+MENOR se documenta sin detener la demo. Resolver ajustes técnicos autorizados sin
+pedir confirmaciones repetidas; mantener seguridad y permisos de producción.
+El handoff se consolida en la entrega, no tras cada corrección menor.
+
 ## Origen y alcance
 Guía ORIGINAL adaptada para SGP_ONE, **inspirada** en las skills públicas de Emil Kowalski (https://github.com/emilkowalski/skills); **no es una copia ni una instalación oficial** de sus skills. Referencias de consulta: `emil-design-eng`, `animate`, `review-animations`, `mobile-native`, `prototype`, `break-ui`. Consultar fuentes originales y sus licencias antes de reutilizar texto o código. Esta skill no concede autorización para editar, instalar dependencias, desplegar o alterar bases de datos.
 
 ## Cuándo consultar
 Cuando se soliciten cambios de diseño, tablas dinámicas, transiciones, navegación lateral, modales, experiencia táctil, Ensamble, Empaque, Programación, Picking o vistas responsivas. Para tareas solo de datos o backend, no forzar rediseño.
 
-## Preflight obligatorio
+## Contexto inicial — reutilizar en los ajustes siguientes
 1. Leer `SGP_ONE_MASTER_CONTEXT.md`, `SGP_ONE_ESTADO_ACTUAL.md`, `SGP_ONE_CHECKPOINT.md`, `.agents/skills/orchestrator/SKILL.md` y `.agents/skills/continuity/SKILL.md` desde main.
 2. Revisar código CSS/HTML/JS actual y PR abiertos/fusionados; confirmar necesidades no resueltas y dependencias con autenticación, roles, RPC y estados.
 3. Distinguir **propuesta**, **prototipo independiente**, **cambio autorizado**, **fusionado**, **desplegado** y **verificado**. No editar la aplicación sin autorización explícita.
 
 
 ## Norma global obligatoria — Design System v1
-Antes de diseñar o cambiar cualquier interfaz de SGP_ONE, leer `SGP_ONE_DESIGN_SYSTEM.md` desde GitHub `main` y aplicar sus tokens, componentes, flujo de aprobación y pruebas. Es una norma de apariencia GLOBAL, no por módulo; el Centro de Diseño de Configuración está propuesto, NO implementado. Si la norma y el código vigente discrepan, auditar y reportar antes de intervenir. Reutilizar componentes existentes; no introducir estilos paralelos ni modificar estados de negocio, permisos o persistencia por una decisión estética. Los valores visuales del documento son baseline sujeto a validación, no evidencia de despliegue.
+Antes de diseñar o cambiar cualquier interfaz de SGP_ONE, leer `SGP_ONE_DESIGN_SYSTEM.md` desde GitHub `main` y aplicar sus tokens, componentes, flujo de aprobación y pruebas. Es una norma de apariencia GLOBAL, no por módulo; el Centro de Diseño de Configuración está propuesto, NO implementado. Si hay diferencias, clasificar su riesgo; bloquear únicamente la operación afectada por riesgos críticos. Reutilizar componentes existentes; no introducir estilos paralelos ni modificar estados de negocio, permisos o persistencia por una decisión estética. Los valores visuales del documento son baseline sujeto a validación, no evidencia de despliegue.
 
 ## Principios aplicados a SGP
 - **Claridad primero:** prioridades, reservas, partes, producciones, estados y cantidades visibles y legibles. No ocultar información operacional crítica tras animaciones.
@@ -30,7 +39,7 @@ Antes de diseñar o cambiar cualquier interfaz de SGP_ONE, leer `SGP_ONE_DESIGN_
 - **Pruebas de estrés visual:** nombres largos, muchas órdenes, cantidades grandes, vacíos, errores de red, múltiples sistemas, reservas compartidas, permisos diferentes, zoom, pantallas pequeñas y scroll dentro de modales.
 
 ## Flujo recomendado
-1. Auditar la vista actual y proponer objetivos medibles.
+1. Reutilizar el contexto vigente; revisar solo la vista y el cambio necesarios para demostrar la necesidad.
 2. Preparar bocetos o prototipo aislado si hay cambios grandes, sin afectar producción.
 3. Comparar alternativas en PC y móvil; pedir aprobación del diseño antes de cambiar flujos sensibles.
 4. Implementar solo tras autorización, en el alcance indicado, con pruebas de regresión y accesibilidad.

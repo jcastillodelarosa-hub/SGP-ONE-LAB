@@ -1,0 +1,47 @@
+{
+  "backend": "Real QA RPCs via PostgREST; synthetic data only",
+  "passed": [
+    "PANEL distribution 5+4",
+    "partial advance",
+    "controlled reversal",
+    "two NC links",
+    "Reception UI restrictions",
+    "early close rejected",
+    "quantitative 5+4 delivery",
+    "Reception VALIDADA",
+    "quantity accreditation",
+    "PDT closed within partial order",
+    "390px mobile layout and modal dismissal"
+  ],
+  "production_access": false,
+  "timestamp_utc": "2026-10-25T18:20:42.345832+00:00",
+  "isolation_checks": [
+    {
+      "path": "/config.js",
+      "status": 404
+    },
+    {
+      "path": "/.git/config",
+      "status": 404
+    },
+    {
+      "path": "/docs/sql-proposals/pdt/FINAL_READINESS.md",
+      "status": 404
+    },
+    {
+      "path": "/rpc/unknown",
+      "status": 404
+    },
+    {
+      "cross_origin": true,
+      "status": 403
+    }
+  ],
+  "reused_evidence": "scripts/pdt-compatibility/validation-report.json; contract SQL and operational application unchanged",
+  "environment": "Local network-none QA; bind127.0.0.1; no public endpoint",
+  "limitations": [
+    "Desktop/mobile Chromium tested; physical device not tested",
+    "GitHub authentication unavailable during this delivery",
+    "Previous attempt exposed demo reload/modal race, corrected and focused browser acceptance repeated successfully"
+  ]
+}

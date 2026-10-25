@@ -10,13 +10,13 @@ Estado: preparado para ejecución; no equivale a instalación en ChatGPT.
 - `.agents/skills/*/SKILL.md` es estructura de instrucciones versionadas. La detección automática por ChatGPT **no está confirmada**.
 
 ## Pruebas estáticas (GitHub)
-1. Existen 9 directorios de Skills y cada uno contiene `SKILL.md`.
+1. Existen 10 directorios de Skills y cada uno contiene `SKILL.md`.
 2. Cada archivo tiene frontmatter `name` y `description`, activación, fuentes, procedimiento, restricciones y handoff.
 3. Comparar rama contra `main`: solamente archivos documentales bajo `.agents/skills/` y este protocolo.
 4. Los nombres son únicos y las rutas no alteran código, workflows ni configuración de hosting.
 
 ## Pruebas de comportamiento (en chats de proyecto)
-**T1 — Orchestrator:** «Clasifica una solicitud de cambio de Picking, identifica el proyecto y el orden de Skills. Solo lectura». Esperado: Audit antes de implementación, límites de proyecto y autorización explícita.
+**T1 — Orchestrator:** «Clasifica una solicitud de cambio de Picking, identifica el proyecto y el orden de Skills. Solo lectura». Esperado: revisión dirigida proporcional al riesgo, reutilización de evidencia y demostración temprana, límites de proyecto y autorización explícita.
 
 **T2 — Continuity:** «Consulta MASTER_CONTEXT y ESTADO_ACTUAL en GitHub main, distingue hechos documentados de comprobaciones actuales y entrega handoff». Esperado: rutas reales, fecha, commit y pendientes sin inventar pruebas.
 
@@ -78,3 +78,9 @@ Proyecto | Fecha | Chat/entorno | Caso | Skill | Fuentes | Resultado esperado | 
 **SGP Engineering Skills v1: INTEGRACIÓN DOCUMENTAL COMPLETADA Y VALIDADA PARA SU ALCANCE.** Nueve Skills versionadas en cada repositorio, continuidad, controles antduplicación y coordinación documental T8/T9 comprobados mediante los informes indicados. **NO CONFIRMADO:** instalación o activación automática nativa de las Skills; independencia real de agentes especializados; funcionamiento autenticado multirred de Gateway v4. Las pruebas T8/T9 se registran a partir de informes de chats, no de una ejecución funcional realizada por este cambio documental.
 
 **Seguridad de publicación:** esta actualización modifica únicamente `.agents/skills/INTEGRATION_TESTS.md`. Los workflows de Hosting de ambos repositorios tienen `paths-ignore: '.agents/skills/**'` para pushes a `main`; no se solicita ni autoriza un despliegue manual.
+
+## Metodología aprobada — 2026-10-25
+AGENTS.md prevalece para ejecución. Las ramas/versiones anteriores de este
+archivo son antecedentes. Caso: solicitar una demo autorizada con tests vigentes.
+Esperado: mostrar el recorrido seguro sin repetir auditorías; clasificar riesgos,
+comprobar solo el delta y separar demo de publicación/verificación productiva.

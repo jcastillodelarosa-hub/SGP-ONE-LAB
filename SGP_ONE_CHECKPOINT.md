@@ -185,3 +185,24 @@ Realizar una **prueba de recuperación de solo lectura** desde otro chat: compro
   catálogo íntegro/RLS productivos no verificados; no backup productivo recuperable.
 - Próximo paso único: revisión PR #91 y autorización separada de réplica restaurada
   para aceptación final. No repetir consultas ya aportadas ni asumir publicación.
+
+## Metodología y demostración PDT v2 — 2026-10-25
+
+- Regla vigente: necesidad → implementación → demostración → correcciones → cierre.
+  AGENTS.md y las diez Skills priorizan evidencia reutilizable y pruebas proporcionales.
+- Trabajo en feat/pdt-multifabricacion-avances-nc, PR #91; base local 51d77d9a8666f2ede30afc6ca054d5b97bdc516b.
+- Demo local: `python tests/pdt-demo/start.py`, abrir http://localhost:8765 en el
+  mismo PC. PostgreSQL/PostgREST QA con datos ficticios, controlador y RPC reales.
+  No usar este localhost como enlace público del entorno de Codex.
+- Recorridos: 5+4, avance parcial/reverso, NC múltiples; entrega positiva,
+  validación, acreditación y cierre de PDT dentro de orden parcial.
+- Recorrido nuevo de demo APROBADO en Chromium PC/móvil con RPC QA reales:
+  distribución, avance/reverso, NC, cierre prematuro rechazado y cierre con evidencia
+  dentro de orden parcial. Rutas internas y Origin externo rechazados.
+  Pruebas anteriores reutilizadas: SQL/operación no modificados.
+  Evidencia: tests/pdt-demo/demo-smoke-report.json y screenshots/.
+- Bloqueo externo: GitHub API 401 Bad credentials y Git HTTPS sin credenciales
+  en esta sesión. No afirmar que PR/remote fueron actualizados sin comprobarlo.
+- No SQL productivo, merge, publicación, main, GOOGLE ni LAC modificados.
+- Próximo paso: abrir la demo local; restablecer la integración GitHub para
+  transferir el commit de esta entrega al PR existente, sin otro PR ni despliegue.
