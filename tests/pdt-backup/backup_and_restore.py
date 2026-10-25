@@ -65,7 +65,7 @@ def main():
     'Supabase-managed Vault keys are not recoverable from pg_dump alone',
     'No PITR or automatic replay of later production writes demonstrated',
     'Whole bucket IAM inspection unavailable; enforced public access prevention and prefix-downscoped token verified']}
- clients=[];keeper=None;sandbox=None;phase='SETUP';admin='sgp_restore_'+uuid.uuid4().hex[:16]
+ clients=[];keeper=None;sandbox=None;phase='SETUP';admin='supabase_admin'
  environment=os.environ.copy();environment['PGPASSWORD']=os.environ.get('SUPABASE_DB_PASSWORD','')
  with tempfile.TemporaryDirectory(prefix='sgp-backup-public-ca-') as temp:
   # Only public CA certificates touch disk. Production data stays in memory/tmpfs.
@@ -155,22 +155,27 @@ def main():
    phase='RESTORE_GLOBALS'
    # Recovery material is downloaded from the private object generation, SHA256 checked.
    global_bytes=storage.get(manifest['objects']['globals'])
-   r=subprocess.run(pg,input=global_bytes,capture_output=True,timeout=120)
-   if r.returncode and role_error_code(r.stderr)=='ROLE_ALREADY_EXISTS':
-    r=subprocess.run(pg,input=idempotent_role_creation(global_bytes),capture_output=True,timeout=120)
+   # Supabase's bootstrap role must retain PostgreSQL bootstrap OID 10.
+   # PG17 GRANTED BY distinguishes that role from a newly created namesake.
+   # Preserve all original role attributes and grantor clauses; only tolerate
+   # CREATE of the already-initialized bootstrap role in this disposable copy.
+   r=subprocess.run(pg,input=idempotent_role_creation(global_bytes),capture_output=True,timeout=120)
    global_bytes=None
    if r.returncode:raise SafeFailure(role_error_code(r.stderr)+': '+safe_role_diagnostic(r.stderr))
-   r=subprocess.run(pg,input=b'CREATE DATABASE sgp_recovered;\n',capture_output=True,timeout=30)
+   # Drop only the empty initdb database inside this newly-owned, networkless sandbox.
+   # --create restores original database ownership, ACL and database settings.
+   maintenance_pg=pg.copy();maintenance_pg[maintenance_pg.index('-d')+1]='template1'
+   r=subprocess.run(maintenance_pg,input=b'DROP DATABASE postgres;\n',capture_output=True,timeout=30)
    if r.returncode:raise SafeFailure('ISOLATED_DATABASE_CREATE_FAILED')
    phase='RESTORE_DATABASE'
    archive=storage.get(record)
-   r=subprocess.run(['docker','exec','-i',sandbox,'pg_restore','-h','/tmp/sgp-restore','-U',admin,'-d','sgp_recovered','--single-transaction','--exit-on-error'],input=archive,capture_output=True,timeout=900)
+   r=subprocess.run(['docker','exec','-i',sandbox,'pg_restore','-h','/tmp/sgp-restore','-U',admin,'-d','template1','--create','--exit-on-error'],input=archive,capture_output=True,timeout=900)
    archive=None
    if r.returncode:raise SafeFailure('DATABASE_RESTORE_FAILED')
    phase='RESTORE_INTEGRITY'
-   restored_counts=isolated('sgp_recovered',counts_query) if count_parts else {}
+   restored_counts=isolated('postgres',counts_query) if count_parts else {}
    if restored_counts!=source_counts:raise SafeFailure('RESTORED_TABLE_COUNTS_DIFFER')
-   restored_catalog=isolated('sgp_recovered',catalog_body(),True)
+   restored_catalog=isolated('postgres',catalog_body(),True)
    differences=compare_catalogs(source_catalog,restored_catalog)
    if differences:raise SafeFailure('RESTORED_CATALOG_DIFFER_'+','.join(differences))
    manifest['status']='POSTGRES_BACKUP_RESTORED_VERIFIED'
