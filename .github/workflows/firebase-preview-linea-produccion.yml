@@ -2,6 +2,14 @@ name: Preview SGP ONE (manual, isolated)
 
 on:
   workflow_dispatch:
+    inputs:
+      operation:
+        description: 'PDT branch: read-only connection or GCS inventory; original preview branch unchanged'
+        type: choice
+        default: connection
+        options:
+          - connection
+          - gcs-readiness
 
 permissions:
   contents: read
@@ -45,7 +53,7 @@ jobs:
   # Existing preview remains restricted to its original branch above.
   supabase-backup-connectivity:
     name: Supabase backup - read-only connectivity
-    if: github.ref == 'refs/heads/feat/pdt-multifabricacion-avances-nc'
+    if: github.ref == 'refs/heads/feat/pdt-multifabricacion-avances-nc' && inputs.operation == 'connection'
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     environment: supabase-backup
@@ -62,3 +70,29 @@ jobs:
         env:
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
         run: python3 tests/pdt-backup/check_connection.py
+
+  gcs-backup-readiness:
+    name: GCS backup - existing resources read-only
+    if: github.ref == 'refs/heads/feat/pdt-multifabricacion-avances-nc' && inputs.operation == 'gcs-readiness'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    environment: supabase-backup
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout authorized PDT branch
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Obtain temporary token using the existing Firebase credential
+        id: google-auth
+        uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SGP_ONE_LAB }}
+          create_credentials_file: false
+          token_format: access_token
+          access_token_lifetime: 1800s
+      - name: Inspect existing GCS buckets without changes
+        env:
+          GCS_READ_TOKEN: ${{ steps.google-auth.outputs.access_token }}
+        run: python3 tests/pdt-backup/gcs_readiness.py
