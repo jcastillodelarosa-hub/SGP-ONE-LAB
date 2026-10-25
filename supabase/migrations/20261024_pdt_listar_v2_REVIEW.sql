@@ -21,11 +21,11 @@ BEGIN
    'saldo',d.cantidad_validada-coalesce((SELECT sum(CASE WHEN m.tipo='AVANCE' THEN m.cantidad ELSE -m.cantidad END)
     FROM public.sgp_aluminio_pendiente_movimientos m WHERE m.id_detalle=d.id_detalle),0)
   )) FROM public.sgp_aluminio_pendiente_detalles d WHERE d.id_pendiente=p.id_pendiente),'[]'::jsonb),
-  'ncs',coalesce((SELECT jsonb_agg(jsonb_build_object('consecutivo',n.consecutivo,'estado',(SELECT nc.estado FROM public.sgp_nc_aluminio nc WHERE nc.consecutivo=n.consecutivo ORDER BY nc.fecha_actualizacion DESC NULLS LAST,nc.creacion DESC NULLS LAST LIMIT 1),'responsable',(SELECT nc.responsable FROM public.sgp_nc_aluminio nc WHERE nc.consecutivo=n.consecutivo ORDER BY nc.fecha_actualizacion DESC NULLS LAST,nc.creacion DESC NULLS LAST LIMIT 1),'creacion',(SELECT nc.creacion FROM public.sgp_nc_aluminio nc WHERE nc.consecutivo=n.consecutivo ORDER BY nc.fecha_actualizacion DESC NULLS LAST,nc.creacion DESC NULLS LAST LIMIT 1)) ORDER BY n.consecutivo)
+  'ncs',coalesce((SELECT jsonb_agg(jsonb_build_object('consecutivo',n.consecutivo,'estado',(SELECT nc.estado FROM public.sgp_nc_aluminio nc WHERE nc.activo=true AND (nc.consecutivo=n.consecutivo OR nc.cod_nc=n.consecutivo) ORDER BY nc.fecha_actualizacion DESC NULLS LAST,nc.creacion DESC NULLS LAST LIMIT 1),'responsable',(SELECT nc.responsable FROM public.sgp_nc_aluminio nc WHERE nc.consecutivo=n.consecutivo ORDER BY nc.fecha_actualizacion DESC NULLS LAST,nc.creacion DESC NULLS LAST LIMIT 1),'creacion',(SELECT nc.creacion FROM public.sgp_nc_aluminio nc WHERE nc.consecutivo=n.consecutivo ORDER BY nc.fecha_actualizacion DESC NULLS LAST,nc.creacion DESC NULLS LAST LIMIT 1)) ORDER BY n.consecutivo)
    FROM public.sgp_aluminio_pendiente_ncs n WHERE n.id_pendiente=p.id_pendiente),'[]'::jsonb)
   )),'[]'::jsonb)
  INTO resultado FROM public.sgp_aluminio_pendientes p
- WHERE (NOT coalesce(p_solo_abiertos,true) OR p.fecha_cierre IS NULL);
+ WHERE p.estado IN ('PENDIENTE','RESUELTO') AND (NOT coalesce(p_solo_abiertos,true) OR (p.estado='PENDIENTE' AND coalesce(p.estado_repo,'PENDIENTE')<>'PICKING'));
  RETURN jsonb_build_object('ok',true,'pendientes',resultado);
 END $fn$;
 REVOKE ALL ON FUNCTION public.sgp_aluminio_pendientes_listar_v2(text,boolean) FROM PUBLIC;
