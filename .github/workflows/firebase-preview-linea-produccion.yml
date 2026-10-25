@@ -15,6 +15,7 @@ on:
           - gcs-channel-check
           - backup-restore
           - restore-backup
+          - install-production
 
 permissions:
   contents: read
@@ -146,7 +147,7 @@ jobs:
 
   private-backup-and-restore:
     name: Supabase - private PostgreSQL backup and isolated recovery
-    if: github.ref == 'refs/heads/feat/pdt-multifabricacion-avances-nc' && (inputs.operation == 'backup-restore' || inputs.operation == 'restore-backup')
+    if: github.ref == 'refs/heads/feat/pdt-multifabricacion-avances-nc' && (inputs.operation == 'backup-restore' || inputs.operation == 'restore-backup' || inputs.operation == 'install-production')
     runs-on: ubuntu-24.04
     timeout-minutes: 40
     environment: supabase-backup
@@ -168,5 +169,6 @@ jobs:
       - name: Back up privately and verify isolated recovery without production writes
         env:
           SGP_RESTORE_EXISTING: ${{ inputs.operation == 'restore-backup' && 'true' || 'false' }}
-          SUPABASE_DB_PASSWORD: ${{ inputs.operation == 'backup-restore' && secrets.SUPABASE_DB_PASSWORD || '' }}
+          SUPABASE_DB_PASSWORD: ${{ (inputs.operation == 'backup-restore' || inputs.operation == 'install-production') && secrets.SUPABASE_DB_PASSWORD || '' }}
+          SGP_INSTALL_PRODUCTION: ${{ inputs.operation == 'install-production' && 'PDT91_AUTHORIZED_NOW' || '' }}
         run: python3 tests/pdt-backup/backup_and_restore.py

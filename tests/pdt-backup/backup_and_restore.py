@@ -60,6 +60,10 @@ def canonical_default_acl_query(entries):
 def main():
  if os.environ.get('GITHUB_ACTIONS')!='true':raise SafeFailure('PROTECTED_RUNNER_REQUIRED')
  resume=os.environ.get('SGP_RESTORE_EXISTING')=='true'
+ install=os.environ.get('SGP_INSTALL_PRODUCTION')=='PDT91_AUTHORIZED_NOW'
+ if install and resume:raise SafeFailure('FRESH_RECOVERY_REQUIRED_BEFORE_INSTALL')
+ if install:
+  from production_install import FREEZE_SQL,batch_body,acceptance_sql,safe_ddl_error,manifest as sql_manifest
  if not resume and not os.environ.get('SUPABASE_DB_PASSWORD'):raise SafeFailure('DATABASE_SECRET_UNAVAILABLE')
  storage=PrivateStorage();storage.verify_boundary()
  created=datetime.datetime.now(datetime.timezone.utc)
@@ -117,9 +121,10 @@ def main():
     # The session pooler on 5432 preserves this transaction until pg_dump finishes.
     keeper_error=tempfile.TemporaryFile()
     keeper=subprocess.Popen(client('psql',['-X','-qAt','--no-password','-v','ON_ERROR_STOP=1']),env=environment,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=keeper_error)
-    keeper.stdin.write(b'BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY; SELECT pg_export_snapshot();\n');keeper.stdin.flush()
+    keeper.stdin.write(FREEZE_SQL.encode() if install else b'BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY; SELECT pg_export_snapshot();\n');keeper.stdin.flush()
     snapshot=keeper.stdout.readline().decode().strip()
-    if not re.fullmatch(r'[A-Fa-f0-9]+-[A-Fa-f0-9]+-[0-9]+',snapshot):raise SafeFailure('CONSISTENT_SNAPSHOT_NOT_AVAILABLE')
+    if not re.fullmatch(r'[A-Fa-f0-9]+-[A-Fa-f0-9]+-[0-9]+',snapshot):raise SafeFailure('WRITES_CONTROL_OR_SNAPSHOT_NOT_AVAILABLE')
+    if install:print('::notice title=PDT production::Affected public tables write-locked transactionally; automatic writers cannot bypass table locks; fresh consistent backup starting.')
     size=production("SELECT pg_database_size(current_database())::bigint;",snapshot)
     if size>MAX_DB_BYTES:raise SafeFailure('SOURCE_EXCEEDS_APPROVED_IN_MEMORY_RESTORE_CAPACITY')
     manifest['source_database_bytes']=size
@@ -140,8 +145,9 @@ def main():
     if dump.returncode:raise SafeFailure('PG_DUMP_FAILED')
     record=storage.put(base+'database.dump',dump.stdout)
     manifest['objects']['database']=record;dump=None
-    keeper.stdin.write(b'ROLLBACK;\n\\q\n');keeper.stdin.flush();keeper.stdin.close();keeper.wait(timeout=30)
-    keeper=None;keeper_error.close()
+    if not install:
+     keeper.stdin.write(b'ROLLBACK;\n\\q\n');keeper.stdin.flush();keeper.stdin.close();keeper.wait(timeout=30)
+     keeper=None;keeper_error.close()
     private_metadata=json.dumps({'catalog':source_catalog,'counts':source_counts,'tables':tables},ensure_ascii=False).encode()
     manifest['objects']['catalog_and_counts']=storage.put(base+'catalog-and-counts.json',private_metadata)
     private_metadata=None
@@ -196,6 +202,31 @@ def main():
    storage.put(base+'recovery-verified.json',json.dumps(manifest,ensure_ascii=False).encode())
    print('::notice title=Supabase recovery::PostgreSQL backup stored privately in GCS and restored with SHA256, table counts and catalog verification. No production writes; no migrations; no GitHub backup artifacts.')
    print('::notice title=Supabase recovery record::'+base+'recovery-verified.json')
+   if install:
+    phase='ISOLATED_REAL_SCHEMA_INSTALL'
+    # Execute the reviewed batch as the real source owner on the recovered copy.
+    # Roll back the clone trial; do not rerun PDT fixtures or touch operational data.
+    trial="SET ROLE postgres; BEGIN;"+batch_body()+acceptance_sql(source_catalog)+"ROLLBACK;"
+    result=subprocess.run(pg,input=trial.encode(),capture_output=True,timeout=300)
+    if result.returncode:raise SafeFailure('REAL_SCHEMA_INSTALL_REJECTED: '+safe_ddl_error(result.stderr))
+    phase='PRODUCTION_ATOMIC_INSTALL'
+    if keeper.poll() is not None:raise SafeFailure('WRITE_CONTROL_SESSION_LOST_NO_INSTALL')
+    sql=batch_body()+acceptance_sql(source_catalog)+"NOTIFY pgrst, 'reload schema'; COMMIT; SELECT 'PDT91_COMMITTED';\n"
+    keeper.stdin.write(sql.encode());keeper.stdin.flush()
+    committed=False
+    for line in keeper.stdout:
+     if line.strip()==b'PDT91_COMMITTED':committed=True;break
+    if not committed:
+     keeper.wait(timeout=15);keeper_error.seek(0)
+     raise SafeFailure('INSTALL_NOT_CONFIRMED: '+safe_ddl_error(keeper_error.read()))
+    keeper.stdin.write(b'\\q\n');keeper.stdin.flush();keeper.stdin.close();keeper.wait(timeout=30)
+    keeper=None;keeper_error.close()
+    manifest['installation']={'status':'PRODUCTION_COMMITTED','sql_sha256':sql_manifest('AB'),
+     'transactional_write_control':True,'isolated_real_schema_install_rollback_passed':True,
+     'rpc_permissions_guards_acceptance_passed':True,'frontend_published':False}
+    storage.put(base+'production-install-committed.json',json.dumps(manifest,ensure_ascii=False).encode())
+    print('::notice title=PDT production::PDT91_PRODUCTION_COMMITTED: fresh backup restored, real-schema installation rollback passed, RPC/permissions/guards acceptance passed. Locks released by atomic commit; frontend not yet published.')
+
    return 0
   except SafeFailure as e:
    manifest['status']='NOT_RECOVERY_VERIFIED';manifest['failed_phase']=phase;manifest['safe_error']=str(e)
