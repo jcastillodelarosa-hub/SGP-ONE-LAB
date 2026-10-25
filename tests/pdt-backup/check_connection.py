@@ -34,7 +34,8 @@ def main():
         '--env','PGHOST=aws-0-us-east-2.pooler.supabase.com',
         '--env','PGPORT=5432','--env','PGDATABASE=postgres',
         '--env','PGUSER=postgres.ocvxbwzqxbrfndkvjmfx',
-        '--env','PGSSLMODE=verify-full','--env','PGSSLROOTCERT=system',
+        '--env','PGSSLMODE=verify-full','--env','PGSSLROOTCERT=/etc/sgp-ca.crt',
+        '--mount','type=bind,source=/etc/ssl/certs/ca-certificates.crt,target=/etc/sgp-ca.crt,readonly',
         '--env','PGCONNECT_TIMEOUT=20',
         '--env','PGOPTIONS=-c default_transaction_read_only=on -c statement_timeout=15000',
         'postgres:17','psql','-X','-qAt','--no-password','-v','ON_ERROR_STOP=1','-c',SQL]

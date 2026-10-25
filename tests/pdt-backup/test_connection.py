@@ -16,7 +16,7 @@ class ConnectionProbeTests(unittest.TestCase):
   self.assertEqual(status,0);argv=run.call_args.args[0]
   self.assertNotIn('synthetic-private-value',repr(argv)+out)
   self.assertEqual(run.call_args.kwargs['env']['PGPASSWORD'],'synthetic-private-value')
-  self.assertIn('PGSSLMODE=verify-full',argv);self.assertIn('BEGIN READ ONLY;',argv[-1])
+  self.assertIn('PGSSLMODE=verify-full',argv);self.assertIn('PGSSLROOTCERT=/etc/sgp-ca.crt',argv);self.assertIn('type=bind,source=/etc/ssl/certs/ca-certificates.crt,target=/etc/sgp-ca.crt,readonly',argv);self.assertIn('BEGIN READ ONLY;',argv[-1])
  def test_authentication_failure_has_only_required_safe_message(self):
   status,out,_=self.execute(subprocess.CompletedProcess([],1,'','FATAL: password authentication failed synthetic-private-value'))
   self.assertEqual(status,1);self.assertEqual(out.strip(),'Autenticación PostgreSQL fallida')
