@@ -57,6 +57,7 @@ BEGIN
   ) INTO v_source;
   IF NOT v_source THEN RAISE EXCEPTION 'Fabricación % no encontrada como PANEL de la producción',v_fab; END IF;
  END LOOP;
+ IF v_total <> v_p.cantidad THEN RAISE EXCEPTION 'Cantidad distribuida diferente a cantidad reportada'; END IF;
  -- SECURITY REVIEW: legacy validator excludes RECEPCION; do not widen global roles.
  -- This RPC is intentionally restricted until a dedicated validated reception contract exists.
  -- Reuse legacy reservation/acabado validation, audit and session checks.
