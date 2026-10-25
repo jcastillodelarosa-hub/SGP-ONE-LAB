@@ -35,16 +35,20 @@ def main():
             page=data.get('nextPageToken')
             if not page:break
         result=[]
+        actor=subprocess.run(['gcloud','auth','list','--filter=status:ACTIVE','--format=value(account)'],capture_output=True,text=True,timeout=30)
+        account=actor.stdout.strip()
+        if actor.returncode or not account.endswith('.iam.gserviceaccount.com') or '\n' in account:account='not-verified'
         for bucket in items:
             name=bucket['name'];path='b/'+urllib.parse.quote(name,safe='')
+            permissions=get(path+'/iam/testPermissions?'+urllib.parse.urlencode({'permissions':['storage.buckets.get','storage.buckets.getIamPolicy','storage.buckets.setIamPolicy','storage.objects.create','storage.objects.get','storage.objects.list']},doseq=True)).get('permissions',[])
+            basic={'bucket':name,'location':bucket.get('location'),'public_access_prevention':bucket.get('iamConfiguration',{}).get('publicAccessPrevention'),'uniform_access':bucket.get('iamConfiguration',{}).get('uniformBucketLevelAccess',{}).get('enabled'),'retention_seconds':bucket.get('retentionPolicy',{}).get('retentionPeriod'),'retention_locked':bucket.get('retentionPolicy',{}).get('isLocked',False),'object_permissions':permissions}
             try:policy=get(path+'/iam')
             except urllib.error.HTTPError as e:
-                result.append({'bucket':name,'ready':False,'reason':'IAM no verificable','http':e.code});continue
-            permissions=get(path+'/iam/testPermissions?'+urllib.parse.urlencode({'permissions':['storage.objects.create','storage.objects.get','storage.objects.list']},doseq=True)).get('permissions',[])
+                result.append({**basic,'ready':False,'reason':'IAM no verificable','http':e.code});continue
             private=eligible(bucket,policy)
             can_backup=private and all(p in permissions for p in ['storage.objects.create','storage.objects.get','storage.objects.list'])
             result.append({'bucket':name,'ready':can_backup,'private_checks_pass':private,'location':bucket.get('location'),'encryption':'Google-managed at rest' if not bucket.get('encryption',{}).get('defaultKmsKeyName') else 'CMEK configured','object_permissions':permissions})
-        safe={'project':PROJECT,'buckets':result,'writes_performed':False}
+        safe={'project':PROJECT,'principal':account,'buckets':result,'writes_performed':False}
         # Metadata only; no object names, contents, tokens, credentials or private backups.
         print(json.dumps(safe,ensure_ascii=False))
         summary=os.environ.get('GITHUB_STEP_SUMMARY')
@@ -57,6 +61,10 @@ def main():
             # Resource names are not credentials. Annotations remain readable even when log downloads are blocked.
             print('::notice title=GCS readiness::Buckets privados elegibles: '+', '.join(candidates))
         print('::notice title=GCS inventory::'+json.dumps(safe,ensure_ascii=False))
+        print('::notice title=GCS identity::'+account)
+        for entry in result:
+            if entry.get('http')==403:
+                print('::warning title=GCS IAM::'+entry['bucket']+': IAM no verificable. Permisos disponibles: '+', '.join(entry['object_permissions']))
         return 0
     except urllib.error.HTTPError as e:
         print('::error title=GCS readiness::Consulta GCS denegada o no disponible (HTTP '+str(e.code)+')')
