@@ -17,6 +17,10 @@ class GlobalRoleRecoveryTests(unittest.TestCase):
  def test_duplicate_roles_are_classified_without_names_or_sql(self):
   self.assertEqual(m.role_error_code(b'ERROR: role "bootstrap" already exists'),'ROLE_ALREADY_EXISTS')
   self.assertEqual(m.role_error_code(b'ERROR: unrecognized configuration parameter "private.setting"'),'ROLE_CONFIGURATION_NOT_AVAILABLE')
+ def test_diagnostic_redacts_identifiers(self):
+  result=m.safe_role_diagnostic(b'ERROR: permission denied to grant role "private-role"\nDETAIL: private data')
+  self.assertNotIn('private-role',result);self.assertNotIn('private data',result)
+  self.assertIn('[identifier]',result)
  def test_adapter_only_wraps_role_creation(self):
   raw=b'CREATE ROLE postgres;\nALTER ROLE postgres WITH NOLOGIN;\nGRANT anon TO postgres;\n'
   adapted=m.idempotent_role_creation(raw)

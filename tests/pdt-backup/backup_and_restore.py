@@ -34,6 +34,17 @@ def role_error_code(error):
  if 'tablespace' in text:return 'TABLESPACE_CONFIGURATION_REQUIRED'
  return 'GLOBAL_ROLES_RESTORE_FAILED'
 
+def safe_role_diagnostic(error):
+ text=error.decode(errors='replace')
+ matches=re.findall(r'ERROR:\s*([^\r\n]+)',text)
+ if not matches:return 'ROLE_ERROR_DETAILS_UNAVAILABLE'
+ message=matches[0]
+ if not any(x in message.lower() for x in ['permission denied','must be superuser','only superuser','reserved role']):return role_error_code(error)
+ message=re.sub(r'"(?:[^"\n]|"")*"', '[identifier]',message)
+ message=re.sub(r"'(?:[^'\n]|'')*'", '[identifier]',message)
+ message=re.sub(r'https?://\S+','[URL]',message)
+ return message[:240]
+
 def idempotent_role_creation(data):
  text=data.decode();tag='$sgp_role_'+uuid.uuid4().hex+'$'
  pattern=r'^CREATE ROLE ((?:"(?:[^"\n]|"")*"|[a-zA-Z_][a-zA-Z_0-9$]*));$'
@@ -148,7 +159,7 @@ def main():
    if r.returncode and role_error_code(r.stderr)=='ROLE_ALREADY_EXISTS':
     r=subprocess.run(pg,input=idempotent_role_creation(global_bytes),capture_output=True,timeout=120)
    global_bytes=None
-   if r.returncode:raise SafeFailure(role_error_code(r.stderr))
+   if r.returncode:raise SafeFailure(role_error_code(r.stderr)+': '+safe_role_diagnostic(r.stderr))
    r=subprocess.run(pg,input=b'CREATE DATABASE sgp_recovered;\n',capture_output=True,timeout=30)
    if r.returncode:raise SafeFailure('ISOLATED_DATABASE_CREATE_FAILED')
    phase='RESTORE_DATABASE'
