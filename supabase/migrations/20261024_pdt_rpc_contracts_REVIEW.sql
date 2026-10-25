@@ -65,7 +65,7 @@ BEGIN
  v_out:=public.sgp_aluminio_pendiente_validar(
    p_token,p_id,v_first->>'fabricacion',(v_first->>'longitud')::numeric,
    p_reserva,v_first->>'acabado',p_observacion);
- UPDATE public.sgp_aluminio_pendientes SET cantidad=v_total WHERE id_pendiente=p_id;
+ -- No change to the reported pending quantity.
  FOR v_row IN SELECT value FROM jsonb_array_elements(p_detalles)
  LOOP
   INSERT INTO public.sgp_aluminio_pendiente_detalles
