@@ -13,6 +13,7 @@ on:
           - restore-readiness
           - create-gcs-bucket
           - gcs-channel-check
+          - backup-restore
 
 permissions:
   contents: read
@@ -141,3 +142,29 @@ jobs:
       - uses: google-github-actions/setup-gcloud@v3
       - name: Create and verify the specifically authorized private bucket
         run: python3 tests/pdt-backup/create_gcs_bucket.py
+
+  private-backup-and-restore:
+    name: Supabase - private PostgreSQL backup and isolated recovery
+    if: github.ref == 'refs/heads/feat/pdt-multifabricacion-avances-nc' && inputs.operation == 'backup-restore'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    environment: supabase-backup
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Authenticate with existing credential; no new key
+        uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SGP_ONE_LAB }}
+          create_credentials_file: true
+          cleanup_credentials: true
+      - uses: google-github-actions/setup-gcloud@v3
+      - name: Pull official PostgreSQL 17.11 clients and isolated recovery engine
+        run: docker pull supabase/postgres:17.11.0.006
+      - name: Back up privately and verify isolated recovery without production writes
+        env:
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: python3 tests/pdt-backup/backup_and_restore.py
