@@ -312,3 +312,39 @@ con un mecanismo probado; no se ha demostrado replay automático.
 Sin SQL productivo, fusión ni despliegue. Main sigue en
 `db70f601cc01a470a6a3908cae19caac59dfe34b`; Firebase live conserva 476 runs,
 último `40133962854`. PR #91 sigue OPEN/DRAFT.
+
+## Instalación productiva autorizada ejecutada — 2026-10-25
+
+El propietario adelantó expresamente la ventana y garantizó ausencia de turno,
+usuarios y operaciones de planta durante la intervención. Run
+[40246792417](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/actions/runs/40246792417)
+SUCCESS, commit ejecutado `36c320bf3f39f227372fc490d2d9890ad632dba2`.
+
+- Control técnico: misma transacción PostgreSQL REPEATABLE READ READ WRITE con
+  SHARE ROW EXCLUSIVE NOWAIT sobre tablas public; bloquea escritores ordinarios
+  y automáticos, permite las lecturas del respaldo. Si hay conflicto no instala.
+  Timeout idle 15 minutos; rollback/desconexión libera el control ante fallo.
+- Nuevo respaldo consistente privado GCS, recuperación completa del alcance
+  PostgreSQL y catálogo crítico verificados antes del DDL. Manifiesto privado:
+  `gs://sgp-one-lab-supabase-backups/supabase/ocvxbwzqxbrfndkvjmfx/20261025T235430Z-d3d77abf5e124c9bbe998e783e8088a9/recovery-verified.json`.
+- Diez SQL A/B probados con aceptación y ROLLBACK sobre esa copia real recuperada,
+  ejecutados como postgres. Luego aplicados en la transacción productiva que
+  conservaba el control de escrituras. Commit confirmado PDT91_PRODUCTION_COMMITTED.
+- Aceptación previa al commit: permisos RPC públicos/internos, RLS y ausencia de
+  escritura directa en tablas nuevas, guards V2 y sesión inválida rechazada.
+  Auth legacy y firma de entrega6 sin cambios. Ningún PDT convertido automáticamente.
+- NOTIFY pgrst reload schema enviado transaccionalmente. Bloqueos liberados por
+  commit. Registro privado production-install-committed.json junto al respaldo
+  contiene SHA256 de cada SQL aplicado. No backup/datos/credenciales en GitHub.
+- Main/PR92 incorporado a la rama antes de integrar, conservando protección
+  Hosting. Se excluyen también los SQL de Hosting, sin dependencia frontend.
+- Siguiente fase: integrar PR91 y publicar con el workflow Firebase live existente;
+  verificar acceso HTTPS/recursos, PC/móvil y login/capacidades reales. El smoke
+  transaccional crea un usuario sintético y su sesión únicamente dentro de una
+  transacción que termina ROLLBACK. No utiliza cuentas/credenciales operativas
+  ni declara probadas escrituras reales de Picking por usuarios de planta.
+
+La autorización de merge/despliegue está vigente; no pedirla otra vez. La evidencia
+final de publicación y smoke se registra en el PR91 y la entrega de esta ejecución.
+No restaurar este dump sobre escrituras posteriores: después del commit conservar
+datos/guards y preferir corrección forward; replay automático no demostrado.

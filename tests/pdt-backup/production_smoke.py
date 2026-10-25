@@ -17,7 +17,7 @@ def main():
    'postgres:17','psql','-X','-qAt','-v','ON_ERROR_STOP=1']
   env=os.environ.copy();env['PGPASSWORD']=os.environ['SUPABASE_DB_PASSWORD']
   query="""BEGIN; SET LOCAL lock_timeout='3s'; SET LOCAL statement_timeout='20s';
-DO $smoke$ DECLARE col text; username text:='pdt_qa_'||replace(gen_random_uuid()::text,'-','');
+DO $smoke$ DECLARE col text; username text:='991'||floor(random()*100000000000000)::bigint::text;
  password text:=gen_random_uuid()::text||gen_random_uuid()::text; response jsonb; session jsonb; caps jsonb; definition text;
 BEGIN
  SELECT pg_get_functiondef('public.sgp_login(text,text)'::regprocedure) INTO definition;

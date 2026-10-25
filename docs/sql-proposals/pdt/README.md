@@ -1,3 +1,8 @@
+> Estado posterior: PDT v2 A/B APLICADO EN SUPABASE el 25/10/2026, run 40246792417 SUCCESS.
+> Respaldo actualizado/restauración real y control transaccional de escrituras verificados.
+> Instalación, autorización y bloqueos de las notas históricas siguientes quedan sustituidos
+> por el último hito de FINAL_READINESS.md y el estado final del PR91.
+
 > Estado vigente 2026-10-25: 11/11 huellas contrastadas; 63 + 24 aserciones SQL,
 > seis concurrencias y contratos 6/8 por HTTP aprobados. Solución sin DROP preparada,
 > diez propuestas forward fuera de migraciones automáticas. Ver [FINAL_READINESS.md](FINAL_READINESS.md).
