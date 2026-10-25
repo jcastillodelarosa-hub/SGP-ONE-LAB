@@ -10,6 +10,7 @@ on:
         options:
           - connection
           - gcs-readiness
+          - restore-readiness
 
 permissions:
   contents: read
@@ -95,3 +96,20 @@ jobs:
         uses: google-github-actions/setup-gcloud@v3
       - name: Inspect existing GCS buckets without changes
         run: python3 tests/pdt-backup/gcs_readiness.py
+
+  restore-image-readiness:
+    name: Supabase restore image - isolated synthetic readiness
+    if: github.ref == 'refs/heads/feat/pdt-multifabricacion-avances-nc' && inputs.operation == 'restore-readiness'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout authorized PDT branch
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Pull official Supabase PostgreSQL 17.11 restore image
+        run: docker pull supabase/postgres:17.11.0.006
+      - name: Verify isolated restore prerequisites without production data
+        run: python3 tests/pdt-backup/prepare_restore_image.py

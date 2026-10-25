@@ -1,0 +1,16 @@
+{
+  "name": "sgp-one-lab-supabase-backups",
+  "location": "US-EAST1",
+  "storageClass": "STANDARD",
+  "iamConfiguration": {
+    "uniformBucketLevelAccess": {"enabled": true},
+    "publicAccessPrevention": "enforced"
+  },
+  "versioning": {"enabled": false},
+  "retentionPolicy": {"retentionPeriod": "604800"},
+  "labels": {
+    "project": "sgp-one-lab",
+    "purpose": "supabase-backup",
+    "data-classification": "private"
+  }
+}
