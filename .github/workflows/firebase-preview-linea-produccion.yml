@@ -40,3 +40,25 @@ jobs:
           projectId: sgp-one-lab
           channelId: linea-produccion-pr32
           expires: 7d
+
+  # Registered manual entry point; only the PDT branch runs this read-only job.
+  # Existing preview remains restricted to its original branch above.
+  supabase-backup-connectivity:
+    name: Supabase backup - read-only connectivity
+    if: github.ref == 'refs/heads/feat/pdt-multifabricacion-avances-nc'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    environment: supabase-backup
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout authorized PDT branch
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Obtain official PostgreSQL 17 client
+        run: docker pull postgres:17
+      - name: Verify PostgreSQL authentication and TLS without writes
+        env:
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: python3 tests/pdt-backup/check_connection.py
