@@ -25,9 +25,24 @@ def catalog_body():
  text=text.replace('BEGIN TRANSACTION READ ONLY;','',1)
  return text.rsplit('ROLLBACK;',1)[0]
 
+def role_error_code(error):
+ text=error.decode(errors='replace').lower()
+ if re.search(r'role [^\n]+ already exists',text):return 'ROLE_ALREADY_EXISTS'
+ if 'unrecognized configuration parameter' in text:return 'ROLE_CONFIGURATION_NOT_AVAILABLE'
+ if 'permission denied' in text or 'must be superuser' in text:return 'ROLE_PRIVILEGE_ERROR'
+ if 'syntax error' in text:return 'GLOBAL_SQL_SYNTAX_ERROR'
+ if 'tablespace' in text:return 'TABLESPACE_CONFIGURATION_REQUIRED'
+ return 'GLOBAL_ROLES_RESTORE_FAILED'
+
+def idempotent_role_creation(data):
+ text=data.decode();tag='$sgp_role_'+uuid.uuid4().hex+'$'
+ pattern=r'^CREATE ROLE ((?:"(?:[^"\n]|"")*"|[a-zA-Z_][a-zA-Z_0-9$]*));$'
+ return re.sub(pattern,lambda m:'DO '+tag+' BEGIN CREATE ROLE '+m.group(1)+'; EXCEPTION WHEN duplicate_object THEN NULL; END '+tag+';',text,flags=re.M).encode()
+
 def main():
  if os.environ.get('GITHUB_ACTIONS')!='true':raise SafeFailure('PROTECTED_RUNNER_REQUIRED')
- if not os.environ.get('SUPABASE_DB_PASSWORD'):raise SafeFailure('DATABASE_SECRET_UNAVAILABLE')
+ resume=os.environ.get('SGP_RESTORE_EXISTING')=='true'
+ if not resume and not os.environ.get('SUPABASE_DB_PASSWORD'):raise SafeFailure('DATABASE_SECRET_UNAVAILABLE')
  storage=PrivateStorage();storage.verify_boundary()
  created=datetime.datetime.now(datetime.timezone.utc)
  base=PREFIX+created.strftime('%Y%m%dT%H%M%SZ')+'-'+uuid.uuid4().hex+'/'
@@ -39,8 +54,8 @@ def main():
     'Supabase-managed Vault keys are not recoverable from pg_dump alone',
     'No PITR or automatic replay of later production writes demonstrated',
     'Whole bucket IAM inspection unavailable; enforced public access prevention and prefix-downscoped token verified']}
- clients=[];keeper=None;sandbox=None;phase='SETUP'
- environment=os.environ.copy();environment['PGPASSWORD']=os.environ['SUPABASE_DB_PASSWORD']
+ clients=[];keeper=None;sandbox=None;phase='SETUP';admin='sgp_restore_'+uuid.uuid4().hex[:16]
+ environment=os.environ.copy();environment['PGPASSWORD']=os.environ.get('SUPABASE_DB_PASSWORD','')
  with tempfile.TemporaryDirectory(prefix='sgp-backup-public-ca-') as temp:
   # Only public CA certificates touch disk. Production data stays in memory/tmpfs.
   ca=pathlib.Path(temp)/'ca.crt';certs=pathlib.Path(__file__).with_name('certs')
@@ -66,66 +81,79 @@ def main():
   def isolated(database,query,as_source=False):
    header='BEGIN READ ONLY; SET LOCAL timezone=\'UTC\';'
    if as_source:header+=' SET LOCAL ROLE postgres;'
-   r=subprocess.run(['docker','exec','-i',sandbox,'psql','-X','-qAt','-h','/tmp/sgp-restore','-U','sgp_restore_admin','-d',database,'-v','ON_ERROR_STOP=1'],input=(header+query+'\nROLLBACK;\n').encode(),capture_output=True,timeout=180)
+   r=subprocess.run(['docker','exec','-i',sandbox,'psql','-X','-qAt','-h','/tmp/sgp-restore','-U',admin,'-d',database,'-v','ON_ERROR_STOP=1'],input=(header+query+'\nROLLBACK;\n').encode(),capture_output=True,timeout=180)
    if r.returncode:raise SafeFailure('ISOLATED_METADATA_READ_FAILED')
    return json.loads(r.stdout)
   try:
-   phase='SOURCE_SNAPSHOT'
-   # The session pooler on 5432 preserves this transaction until pg_dump finishes.
-   keeper_error=tempfile.TemporaryFile()
-   keeper=subprocess.Popen(client('psql',['-X','-qAt','--no-password','-v','ON_ERROR_STOP=1']),env=environment,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=keeper_error)
-   keeper.stdin.write(b'BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY; SELECT pg_export_snapshot();\n');keeper.stdin.flush()
-   snapshot=keeper.stdout.readline().decode().strip()
-   if not re.fullmatch(r'[A-Fa-f0-9]+-[A-Fa-f0-9]+-[0-9]+',snapshot):raise SafeFailure('CONSISTENT_SNAPSHOT_NOT_AVAILABLE')
-   size=production("SELECT pg_database_size(current_database())::bigint;",snapshot)
-   if size>MAX_DB_BYTES:raise SafeFailure('SOURCE_EXCEEDS_APPROVED_IN_MEMORY_RESTORE_CAPACITY')
-   manifest['source_database_bytes']=size
-   phase='SOURCE_CATALOG'
-   source_catalog=production(catalog_body(),snapshot)
-   tables=production("SELECT coalesce(json_agg(json_build_object('schema',n.nspname,'name',c.relname) ORDER BY n.nspname,c.relname),'[]') FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE c.relkind IN ('r','p') AND n.nspname NOT IN ('pg_catalog','information_schema') AND n.nspname NOT LIKE 'pg_toast%' AND c.relpersistence<>'t';",snapshot)
-   count_parts=["SELECT "+literal(t['schema']+'.'+t['name'])+" AS name,count(*)::bigint AS count FROM "+ident(t['schema'])+'.'+ident(t['name']) for t in tables]
-   counts_query="SELECT jsonb_object_agg(name,count) FROM ("+' UNION ALL '.join(count_parts)+") AS table_counts;"
-   source_counts=production(counts_query,snapshot) if count_parts else {}
-   phase='GLOBAL_ROLES_DUMP'
-   globals_result=subprocess.run(client('pg_dumpall',['--globals-only','--no-role-passwords','--no-password']),env=environment,capture_output=True,timeout=180)
-   if globals_result.returncode:raise SafeFailure('GLOBAL_ROLES_BACKUP_FAILED')
-   globals_record=storage.put(base+'globals.sql',globals_result.stdout)
-   manifest['objects']['globals']=globals_record
-   globals_result=None
-   phase='DATABASE_DUMP'
-   dump=subprocess.run(client('pg_dump',['--format=custom','--no-password','--snapshot='+snapshot,'--lock-wait-timeout=5s']),env=environment,capture_output=True,timeout=900)
-   if dump.returncode:raise SafeFailure('PG_DUMP_FAILED')
-   record=storage.put(base+'database.dump',dump.stdout)
-   manifest['objects']['database']=record;dump=None
-   keeper.stdin.write(b'ROLLBACK;\n\\q\n');keeper.stdin.flush();keeper.stdin.close();keeper.wait(timeout=30)
-   keeper=None;keeper_error.close()
-   private_metadata=json.dumps({'catalog':source_catalog,'counts':source_counts},ensure_ascii=False).encode()
-   manifest['objects']['catalog_and_counts']=storage.put(base+'catalog-and-counts.json',private_metadata)
-   private_metadata=None
-   manifest['status']='BACKUP_STORED_RESTORE_PENDING'
-   storage.put(base+'backup-record.json',json.dumps(manifest,ensure_ascii=False).encode())
+   if resume:
+    phase='LOAD_EXISTING_PRIVATE_BACKUP'
+    manifest=storage.latest_backup_manifest();base=manifest['prefix']
+    data=json.loads(storage.get(manifest['objects']['catalog_and_counts']))
+    source_catalog=data['catalog'];source_counts=data['counts']
+    tables=data.get('tables') or [{'schema':n.split('.',1)[0],'name':n.split('.',1)[1]} for n in source_counts]
+    count_parts=["SELECT "+literal(t['schema']+'.'+t['name'])+" AS name,count(*)::bigint AS count FROM "+ident(t['schema'])+'.'+ident(t['name']) for t in tables]
+    counts_query="SELECT jsonb_object_agg(name,count) FROM ("+' UNION ALL '.join(count_parts)+") AS table_counts;"
+    record=manifest['objects']['database']
+   else:
+    phase='SOURCE_SNAPSHOT'
+    # The session pooler on 5432 preserves this transaction until pg_dump finishes.
+    keeper_error=tempfile.TemporaryFile()
+    keeper=subprocess.Popen(client('psql',['-X','-qAt','--no-password','-v','ON_ERROR_STOP=1']),env=environment,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=keeper_error)
+    keeper.stdin.write(b'BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY; SELECT pg_export_snapshot();\n');keeper.stdin.flush()
+    snapshot=keeper.stdout.readline().decode().strip()
+    if not re.fullmatch(r'[A-Fa-f0-9]+-[A-Fa-f0-9]+-[0-9]+',snapshot):raise SafeFailure('CONSISTENT_SNAPSHOT_NOT_AVAILABLE')
+    size=production("SELECT pg_database_size(current_database())::bigint;",snapshot)
+    if size>MAX_DB_BYTES:raise SafeFailure('SOURCE_EXCEEDS_APPROVED_IN_MEMORY_RESTORE_CAPACITY')
+    manifest['source_database_bytes']=size
+    phase='SOURCE_CATALOG'
+    source_catalog=production(catalog_body(),snapshot)
+    tables=production("SELECT coalesce(json_agg(json_build_object('schema',n.nspname,'name',c.relname) ORDER BY n.nspname,c.relname),'[]') FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE c.relkind IN ('r','p') AND n.nspname NOT IN ('pg_catalog','information_schema') AND n.nspname NOT LIKE 'pg_toast%' AND c.relpersistence<>'t';",snapshot)
+    count_parts=["SELECT "+literal(t['schema']+'.'+t['name'])+" AS name,count(*)::bigint AS count FROM "+ident(t['schema'])+'.'+ident(t['name']) for t in tables]
+    counts_query="SELECT jsonb_object_agg(name,count) FROM ("+' UNION ALL '.join(count_parts)+") AS table_counts;"
+    source_counts=production(counts_query,snapshot) if count_parts else {}
+    phase='GLOBAL_ROLES_DUMP'
+    globals_result=subprocess.run(client('pg_dumpall',['--globals-only','--no-role-passwords','--no-password']),env=environment,capture_output=True,timeout=180)
+    if globals_result.returncode:raise SafeFailure('GLOBAL_ROLES_BACKUP_FAILED')
+    globals_record=storage.put(base+'globals.sql',globals_result.stdout)
+    manifest['objects']['globals']=globals_record
+    globals_result=None
+    phase='DATABASE_DUMP'
+    dump=subprocess.run(client('pg_dump',['--format=custom','--no-password','--snapshot='+snapshot,'--lock-wait-timeout=5s']),env=environment,capture_output=True,timeout=900)
+    if dump.returncode:raise SafeFailure('PG_DUMP_FAILED')
+    record=storage.put(base+'database.dump',dump.stdout)
+    manifest['objects']['database']=record;dump=None
+    keeper.stdin.write(b'ROLLBACK;\n\\q\n');keeper.stdin.flush();keeper.stdin.close();keeper.wait(timeout=30)
+    keeper=None;keeper_error.close()
+    private_metadata=json.dumps({'catalog':source_catalog,'counts':source_counts,'tables':tables},ensure_ascii=False).encode()
+    manifest['objects']['catalog_and_counts']=storage.put(base+'catalog-and-counts.json',private_metadata)
+    private_metadata=None
+    manifest['status']='BACKUP_STORED_RESTORE_PENDING'
+    storage.put(base+'backup-record.json',json.dumps(manifest,ensure_ascii=False).encode())
    phase='ISOLATED_ENGINE'
    sandbox='sgp-production-restore-'+uuid.uuid4().hex[:14]
-   start="initdb -D /tmp/sgp-restore/db -U sgp_restore_admin --auth=trust >/tmp/sgp-restore/init.log 2>&1 && exec postgres -D /tmp/sgp-restore/db -k /tmp/sgp-restore -c listen_addresses=''"
+   start="initdb -D /tmp/sgp-restore/db -U "+admin+" --auth=trust >/tmp/sgp-restore/init.log 2>&1 && exec postgres -D /tmp/sgp-restore/db -k /tmp/sgp-restore -c listen_addresses=''"
    r=subprocess.run(['docker','run','-d','--name',sandbox,'--network','none','--cpus','2','--memory','3g','--cap-drop','ALL','--security-opt','no-new-privileges',
     '--tmpfs','/tmp/sgp-restore:rw,size=2147483648,mode=1777','--user','postgres','--entrypoint','bash',IMAGE,'-c',start],capture_output=True,timeout=90)
    if r.returncode:raise SafeFailure('ISOLATED_ENGINE_START_FAILED')
    for _ in range(80):
-    r=subprocess.run(['docker','exec',sandbox,'pg_isready','-h','/tmp/sgp-restore','-U','sgp_restore_admin'],capture_output=True)
+    r=subprocess.run(['docker','exec',sandbox,'pg_isready','-h','/tmp/sgp-restore','-U',admin],capture_output=True)
     if r.returncode==0:break
     time.sleep(.25)
    else:raise SafeFailure('ISOLATED_ENGINE_NOT_READY')
-   pg=['docker','exec','-i',sandbox,'psql','-X','-qAt','-h','/tmp/sgp-restore','-U','sgp_restore_admin','-d','postgres','-v','ON_ERROR_STOP=1']
+   pg=['docker','exec','-i',sandbox,'psql','-X','-qAt','-h','/tmp/sgp-restore','-U',admin,'-d','postgres','-v','ON_ERROR_STOP=1']
    phase='RESTORE_GLOBALS'
    # Recovery material is downloaded from the private object generation, SHA256 checked.
    global_bytes=storage.get(manifest['objects']['globals'])
-   r=subprocess.run(pg,input=global_bytes,capture_output=True,timeout=120);global_bytes=None
-   if r.returncode:raise SafeFailure('GLOBAL_ROLES_RESTORE_FAILED')
+   r=subprocess.run(pg,input=global_bytes,capture_output=True,timeout=120)
+   if r.returncode and role_error_code(r.stderr)=='ROLE_ALREADY_EXISTS':
+    r=subprocess.run(pg,input=idempotent_role_creation(global_bytes),capture_output=True,timeout=120)
+   global_bytes=None
+   if r.returncode:raise SafeFailure(role_error_code(r.stderr))
    r=subprocess.run(pg,input=b'CREATE DATABASE sgp_recovered;\n',capture_output=True,timeout=30)
    if r.returncode:raise SafeFailure('ISOLATED_DATABASE_CREATE_FAILED')
    phase='RESTORE_DATABASE'
    archive=storage.get(record)
-   r=subprocess.run(['docker','exec','-i',sandbox,'pg_restore','-h','/tmp/sgp-restore','-U','sgp_restore_admin','-d','sgp_recovered','--single-transaction','--exit-on-error'],input=archive,capture_output=True,timeout=900)
+   r=subprocess.run(['docker','exec','-i',sandbox,'pg_restore','-h','/tmp/sgp-restore','-U',admin,'-d','sgp_recovered','--single-transaction','--exit-on-error'],input=archive,capture_output=True,timeout=900)
    archive=None
    if r.returncode:raise SafeFailure('DATABASE_RESTORE_FAILED')
    phase='RESTORE_INTEGRITY'

@@ -13,4 +13,17 @@ class BackupSafetyTests(unittest.TestCase):
   q=m.catalog_body();self.assertNotIn('BEGIN TRANSACTION READ ONLY;',q);self.assertNotIn('ROLLBACK;',q)
  def test_identifier_and_string_quoting(self):
   self.assertEqual(m.ident('a"b'),'"a""b"');self.assertEqual(m.literal("a'b"),"'a''b'")
+class GlobalRoleRecoveryTests(unittest.TestCase):
+ def test_duplicate_roles_are_classified_without_names_or_sql(self):
+  self.assertEqual(m.role_error_code(b'ERROR: role "bootstrap" already exists'),'ROLE_ALREADY_EXISTS')
+  self.assertEqual(m.role_error_code(b'ERROR: unrecognized configuration parameter "private.setting"'),'ROLE_CONFIGURATION_NOT_AVAILABLE')
+ def test_adapter_only_wraps_role_creation(self):
+  raw=b'CREATE ROLE postgres;\nALTER ROLE postgres WITH NOLOGIN;\nGRANT anon TO postgres;\n'
+  adapted=m.idempotent_role_creation(raw)
+  self.assertIn(b'EXCEPTION WHEN duplicate_object THEN NULL',adapted)
+  self.assertIn(b'ALTER ROLE postgres WITH NOLOGIN;',adapted)
+  self.assertIn(b'GRANT anon TO postgres;',adapted)
+  self.assertNotIn(b'DROP',adapted)
+ def test_quoted_role_names_remain_quoted(self):
+  self.assertIn(b'CREATE ROLE "a""b";',m.idempotent_role_creation(b'CREATE ROLE "a""b";\n'))
 if __name__=='__main__':unittest.main()

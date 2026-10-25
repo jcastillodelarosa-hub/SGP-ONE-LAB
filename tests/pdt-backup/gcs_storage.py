@@ -68,6 +68,23 @@ class PrivateStorage:
   data=request(url,self.token)
   if len(data)!=item['bytes'] or hashlib.sha256(data).hexdigest()!=item['sha256']:raise SafeFailure('GCS_DOWNLOAD_INTEGRITY_FAILED')
   return data
+ def latest_backup_manifest(self):
+  r=subprocess.run(['gcloud','auth','print-access-token'],capture_output=True,text=True,timeout=60)
+  if r.returncode:raise SafeFailure('GCS_RECORD_LIST_AUTH_FAILED')
+  source=r.stdout.strip();names=[];page=None
+  while True:
+   query={'prefix':PREFIX,'fields':'items(name,generation),nextPageToken'}
+   if page:query['pageToken']=page
+   records=json.loads(request('https://storage.googleapis.com/storage/v1/b/'+BUCKET+'/o?'+urllib.parse.urlencode(query),source))
+   names.extend(i for i in records.get('items',[]) if i['name'].endswith('/backup-record.json'))
+   page=records.get('nextPageToken')
+   if not page:break
+  if not names:raise SafeFailure('NO_PRIVATE_BACKUP_RECORD_AVAILABLE')
+  item=sorted(names,key=lambda x:x['name'])[-1];validate_name(item['name'])
+  url='https://storage.googleapis.com/storage/v1/b/'+BUCKET+'/o/'+urllib.parse.quote(item['name'],safe='')+'?'+urllib.parse.urlencode({'alt':'media','generation':item['generation']})
+  record=json.loads(request(url,self.token))
+  if record.get('project_ref')!='ocvxbwzqxbrfndkvjmfx' or not record.get('prefix','').startswith(PREFIX):raise SafeFailure('BACKUP_RECORD_WRONG_PROJECT')
+  return record
  def verify_boundary(self):
   # A read outside the permitted prefix must fail before any backup is exported.
   name='out-of-scope-check-'+uuid.uuid4().hex
