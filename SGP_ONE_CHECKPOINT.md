@@ -222,3 +222,24 @@ Realizar una **prueba de recuperación de solo lectura** desde otro chat: compro
 - No SQL productivo, merge, main, Firebase, GOOGLE o LAC modificados.
 - Próximo paso: propietario descarga y abre el HTML autocontenido; si requiere
   operaciones contra QA remoto, aprobar primero la infraestructura protegida.
+
+## Conexión productiva de respaldo desbloqueada — 2026-10-25
+
+- Environment GitHub: supabase-backup; contraseña utilizada solo dentro del runner.
+- Conexión PostgreSQL 17 verificada en modo solo lectura con TLS verify-full,
+  pooler suministrado por el propietario y CA públicas del CLI oficial Supabase.
+- Evidencia: Actions run 40233611474, commit be5cf504fb2585c15a4f360c00d54850522222bb.
+  Job de conexión SUCCESS, preview SKIPPED. Cinco pruebas nuevas de manejo seguro
+  aprobadas; no se repitió la batería PDT SQL. El CI existente pasó automáticamente.
+- Entrada manual registrada: firebase-preview-linea-produccion.yml, seleccionando
+  feat/pdt-multifabricacion-avances-nc. Solo esa rama ejecuta el job de conexión;
+  la rama original de preview conserva su condición y comportamiento.
+- Respaldo productivo aún NO generado, restaurado ni verificado. Pendiente destino
+  privado cifrado fuera de GitHub y ventana coordinada con planta. No subir dumps
+  a artefactos/logs/repositorio ni usar un archivo efímero como respaldo recuperable.
+- Autorización de instalación/merge/publicación permanece vigente, condicionada a
+  respaldo restaurado, integridad y recuperación que preserve escrituras posteriores.
+- No migraciones, fusión ni publicación. Firebase live conserva 476 ejecuciones,
+  última 40133962854. No automatizar pausas de planta ni restaurar dumps antiguos.
+- Próximo paso: recibir destino privado y ventana operativa solicitados al propietario,
+  completar respaldo/restauración y continuar la instalación autorizada.
