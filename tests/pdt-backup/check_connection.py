@@ -2,7 +2,8 @@
 Never prints credentials, subprocess errors, database content or connection URLs.
 No backup data is created or uploaded by this step.
 """
-import os,re,subprocess,sys
+import os,re,subprocess,sys,tempfile
+from pathlib import Path
 
 SQL="""BEGIN READ ONLY;
 SELECT CASE WHEN current_database()='postgres'
@@ -30,12 +31,19 @@ def main():
     environment=os.environ.copy()
     environment['PGPASSWORD']=password
     # Pass secret by environment name, never its value or a URI in argv.
+    trust=tempfile.TemporaryDirectory(prefix='sgp-postgres-ca-')
+    ca=Path(trust.name)/'trusted-ca.crt'
+    # Official Supabase public roots plus the runner's system trust store.
+    certificates=Path(__file__).with_name('certs')
+    ca.write_bytes(Path('/etc/ssl/certs/ca-certificates.crt').read_bytes()+b'\n'+
+        (certificates/'prod-ca-2021.crt').read_bytes()+b'\n'+
+        (certificates/'prod-ca-2025.crt').read_bytes())
     argv=['docker','run','--rm','--log-driver=none','--env','PGPASSWORD',
         '--env','PGHOST=aws-0-us-east-2.pooler.supabase.com',
         '--env','PGPORT=5432','--env','PGDATABASE=postgres',
         '--env','PGUSER=postgres.ocvxbwzqxbrfndkvjmfx',
         '--env','PGSSLMODE=verify-full','--env','PGSSLROOTCERT=/etc/sgp-ca.crt',
-        '--mount','type=bind,source=/etc/ssl/certs/ca-certificates.crt,target=/etc/sgp-ca.crt,readonly',
+        '--mount','type=bind,source='+str(ca)+',target=/etc/sgp-ca.crt,readonly',
         '--env','PGCONNECT_TIMEOUT=20',
         '--env','PGOPTIONS=-c default_transaction_read_only=on -c statement_timeout=15000',
         'postgres:17','psql','-X','-qAt','--no-password','-v','ON_ERROR_STOP=1','-c',SQL]
@@ -44,6 +52,8 @@ def main():
     except (subprocess.SubprocessError,OSError):
         report_failure('Conectividad PostgreSQL fallida')
         return 1
+    finally:
+        trust.cleanup()
     if result.returncode:
         report_failure(classify_error(result.stderr))
         return 1
