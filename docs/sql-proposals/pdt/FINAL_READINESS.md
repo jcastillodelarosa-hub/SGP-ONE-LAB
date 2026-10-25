@@ -117,10 +117,51 @@ restaurar producción, preservar primero escrituras posteriores mediante mecanis
 comprobado (PITR/WAL o conciliación auditada); un dump antiguo por sí solo no las
 conserva. No se ha probado recuperación productiva ni replay de escrituras nuevas.
 
+
+## Recuperación real desde GCS — 2026-10-25
+
+**VERIFICADA para el alcance PostgreSQL/contratos SGP**, run
+[40246169107](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/actions/runs/40246169107),
+commit ejecutado `f6ccd4edd7c0c9ea92897c243b941e9478ff73b3`.
+Se reutilizó el respaldo existente; no se generó otro ni se consultó producción.
+Manifiesto privado (no público): `gs://sgp-one-lab-supabase-backups/supabase/ocvxbwzqxbrfndkvjmfx/20261025T214531Z-0328f4586c6949528a1333cf9b0c14c2/recovery-verified.json`.
+
+- Archivos recuperados desde generaciones GCS fijas, SHA256 y tamaños comprobados.
+- PostgreSQL/Supabase 17.11, contenedor nuevo sin red ni puertos, datos solo en tmpfs.
+- Restaurados globales sin contraseñas y archivo custom con `pg_restore --create
+  --exit-on-error`, conservando owner/ACL/configuración de base. No se filtra el TOC.
+- Error PG17 de `GRANTED BY` resuelto preservando `supabase_admin` como bootstrap
+  (OID 10), en lugar de crear un homónimo bajo un bootstrap distinto. Solo CREATE
+  ROLE duplicado es tolerado; ALTER ROLE y membresías originales permanecen intactos.
+- Coinciden conteos de todas las tablas inventariadas en el snapshot y catálogo
+  crítico: funciones/cuerpos, relaciones, triggers, políticas, roles, membresías,
+  secuencias, extensiones y permisos por defecto. Estos últimos se comparan mediante
+  `aclexplode`, preservando grantor/grantee/privilegio/grantable y sin depender del
+  orden textual del array ACL. No se relajó la comparación de permisos.
+- No se excluyeron objetos SGP ni roles administrados presentes en el dump.
+  La copia no es una réplica completa de la plataforma Supabase: no incluye hashes
+  de contraseñas, claves externas Vault, bytes de Storage externo, servicios de
+  autenticación/gateway ni configuración externa. No se probaron esos componentes
+  ni PITR/replay de escrituras posteriores. Conteos no equivalen a hashes por fila.
+- Se conservaron las pruebas PDT previas sin repetirlas; 24 pruebas de seguridad
+  del mecanismo de respaldo aprobadas. La recuperación real confirma catálogo/datos,
+  no declara PDT aplicado o validado en producción.
+
+**Gate productivo pendiente:** control efectivo de escrituras con planta, no
+confirmado. Ventana autorizada 25/10 22:00–23:00 Colombia (26/10 03:00–04:00 UTC).
+No detener operaciones por llegar a la hora. Las autorizaciones SQL/merge/deploy
+permanecen vigentes; no se requiere volver a solicitarlas. Antes de DDL, verificar
+ese control y vigencia de ventana. No restaurar este snapshot sobre producción
+activa: perdería operaciones posteriores; rollback transaccional antes del commit
+y corrección forward compatible después, conservando datos/eventos V2. Si fuera
+necesaria recuperación destructiva, primero preservar/reconciliar escrituras nuevas
+con un mecanismo probado; no se ha demostrado replay automático.
+
+Sin SQL productivo, fusión ni despliegue. Main sigue en
+`db70f601cc01a470a6a3908cae19caac59dfe34b`; Firebase live conserva 476 runs,
+último `40133962854`. PR #91 sigue OPEN/DRAFT.
+
 ## Próximo paso único
 
-Revisión del PR #91 y autorización separada de una réplica productiva restaurada
-para aceptación final de catálogo/consumidores y recuperación. Aplicar SQL
-productivo, fusionar y desplegar requieren autorizaciones independientes y una
-ventana de contención Firebase. El push de esta rama solo activa CI del PR;
-no modifica workflows, Firebase, Supabase, Pages, main, GOOGLE ni LAC.
+Confirmar control efectivo de escrituras de planta dentro de la ventana autorizada
+antes de ejecutar la instalación, integración y publicación ya autorizadas.

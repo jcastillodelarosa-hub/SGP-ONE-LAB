@@ -1,76 +1,27 @@
-# Configuración de respaldo GCS — preparada, no aplicada
+# Respaldo privado GCS — estado verificado 2026-10-25
 
-Inventario real del proyecto `sgp-one-lab`: **cero buckets**, run 40234463659.
-Se autenticó con la credencial existente de Firebase, mediante OAuth del SDK.
-No se creó ninguna clave, API, bucket ni permiso IAM; no se exportaron datos.
+Bucket autorizado y creado: `gs://sgp-one-lab-supabase-backups`, proyecto
+`sgp-one-lab`, US-EAST1. El propietario autorizó cargos de almacenamiento/operaciones.
+Metadatos verificados: PAP enforced, acceso uniforme, cifrado Google-managed,
+retención 604800 segundos (siete días), sin bloqueo irreversible. HTTPS obligatorio.
 
-## Recurso propuesto para aprobación
+Se reutiliza la credencial existente solo dentro de Actions; no se generaron claves
+JSON nuevas. El trabajador de objetos usa token STS temporal limitado al prefijo
+`supabase/ocvxbwzqxbrfndkvjmfx/`, objectCreator/objectViewer, sin delete/overwrite/IAM.
+Subida con generation-match=0, descarga por generación y SHA256; comprobación real
+de acceso fuera del prefijo rechazada (run 40236497823). La lectura de la política
+IAM completa sigue sin permiso; no se afirma que se auditó o redujo toda la IAM.
+`writer-role.json` es una propuesta no aplicada; WIF dedicado queda como mejora.
 
-`bucket.json`: `gs://sgp-one-lab-supabase-backups`, región US-EAST1, Standard,
-acceso público impedido y permisos uniformes. Cifrado automático Google-managed
-at rest; transferencia únicamente HTTPS. Sin claves JSON nuevas ni KMS facturable.
-Retención mínima propuesta siete días, sin bloqueo irreversible ni borrado automático.
-El nombre es una propuesta: disponibilidad global no verificada. Mantener prefijo
-por proyecto: `supabase/ocvxbwzqxbrfndkvjmfx/<fecha-UTC>/<run-id>/`.
+Respaldo productivo existente y recuperación aislada verificados: run 40246169107.
+No se guardaron dumps en GitHub, cachés, logs o artefactos. Manifiesto privado y
+alcance/exclusiones en `docs/sql-proposals/pdt/FINAL_READINESS.md`. No equivale a
+recuperación completa de servicios externos Supabase ni replay de escrituras nuevas.
 
-La creación y el uso pueden generar cargos de almacenamiento, operaciones y
-transferencia. No se promete costo cero ni disponibilidad de cuota gratuita.
-**No ejecutar la creación hasta autorización expresa de ese consumo.**
+Para continuar la misma recuperación, operación manual `restore-backup` del workflow
+392452313, rama existente del PR #91: no usa contraseña de base ni genera otro dump.
+No utilizar `backup-restore` para repetir el respaldo sin necesidad.
 
-Comando de creación para un administrador, tras aprobar el recurso/costo:
-
-```bash
-gcloud storage buckets create gs://sgp-one-lab-supabase-backups \
-  --project=sgp-one-lab --location=US-EAST1 --default-storage-class=STANDARD \
-  --uniform-bucket-level-access --public-access-prevention
-```
-
-Aplicar la retención de siete días propuesta solo como parte de la configuración
-aprobada; no bloquearla de forma irreversible. Verificar IAM sin allUsers ni
-allAuthenticatedUsers antes de exportar. No reutilizar buckets públicos/de aplicación.
-
-## Identidad y privilegios mínimos
-
-Preferir cuenta de servicio dedicada y Workload Identity Federation GitHub→GCP,
-restringida a repositorio numérico y environment `supabase-backup`, sin claves nuevas.
-`writer-role.json` es el rol de permisos propuesto, asociado **solo a este bucket**.
-No permite borrar, sobrescribir objetos, cambiar IAM, crear buckets ni desplegar Firebase.
-El escritor no necesita listar objetos: conoce sus rutas/generaciones exactas.
-Usar precondición generation-match=0 al guardar y generación fija al recuperar.
-
-La credencial existente solo se reutilizó para inventario. No ampliar sus permisos
-ni cambiar la identidad del despliegue Firebase para configurar el respaldo.
-Para la identidad inmediata puede evaluarse OAuth con token de corta duración
-downscoped al bucket/prefijo (sin crear claves); no considerarlo verificado sin
-probar subida/recuperación y precondiciones. WIF sigue siendo la opción reutilizable
-preferida. WIF requiere configuración/atributos y permisos administrativos verificados; no se
-han inventado provider IDs ni aplicado políticas en este encargo.
-
-## Respaldo y restauración pendientes del destino
-
-- pg_dump 17 custom con snapshot consistente, sin bloquear escrituras de aplicación.
-- Globales/roles sin contraseñas, metadatos/ACL y limitaciones Supabase documentados.
-- Enviar el dump al destino privado por streaming o ficheros temporales protegidos;
-  nunca al repositorio, logs, cachés ni artefactos GitHub. No retener solo en runner efímero.
-- Registrar fecha, tamaño, SHA256, generación GCS y huellas de catálogo en manifiesto
-  privado; recuperar desde GCS y comprobar SHA256 antes de restaurar.
-- Restaurar a base NUEVA y aislada, sin red/puertos públicos, con PostgreSQL 17.11
-  y extensiones Supabase. No ejecutar un dump remoto como SQL en producción.
-- Comparar tablas/conteos del mismo snapshot, funciones, triggers, permisos y contratos;
-  no publicar filas, funciones potencialmente sensibles ni manifiestos de datos en logs.
-- El dump no incluye Storage externo, secretos ni todos los elementos administrados de
-  plataforma. No afirmar recuperación completa solo por disponer de un archivo.
-- No hay prueba de restauración productiva hasta completar esos pasos.
-- Entorno preparado: imagen oficial `supabase/postgres:17.11.0.006`; engine y
-  restauración de fixture custom sintética aprobados en run 40235106387. Los
-  archivos control de extensiones existen; no prueba restaurar extensiones,
-  datos, roles o secretos productivos. No se accedió a producción en ese job.
-
-## Instalación productiva
-
-Ventana autorizada: 25/10/2026 22:00–23:00 Colombia;
-26/10/2026 03:00–04:00 UTC. Antes de intervenir comprobar control efectivo de
-escrituras con planta, respaldo restaurado y contratos críticos. No pausar operaciones
-ni migrar por el solo hecho de alcanzar esa hora. Sin PITR, no restaurar un dump
-anterior sobre producción activa; preservar escrituras posteriores y preferir
-rollback transaccional/corrección forward compatible.
+Producción sigue sin modificaciones. Instalación condicionada a control efectivo
+de escrituras con planta y ventana 25/10/2026 22:00–23:00 Colombia. No restaurar un
+dump antiguo sobre producción activa ni asumir que preserva operaciones posteriores.
