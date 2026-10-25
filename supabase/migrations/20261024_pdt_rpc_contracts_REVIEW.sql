@@ -17,7 +17,7 @@ DECLARE
  v_usuario text; v_p public.sgp_aluminio_pendientes%rowtype;
  v_row jsonb; v_fab text; v_acab text; v_long numeric; v_cant integer;
  v_total bigint:=0; v_count integer:=0; v_first jsonb; v_source boolean;
- v_key text; v_keys text[]:=array[]::text[]; v_out jsonb;
+ v_key text; v_keys text[]:=array[]::text[]; v_out jsonb; v_correction boolean;
 BEGIN
  v_usuario:=public.sgp_validar_sesion_rol(p_token,ARRAY['ADMINISTRADOR','COORDINADOR','LIDER LINEA','SUPERVISOR DE PICKING']);
  SELECT * INTO v_p FROM public.sgp_aluminio_pendientes WHERE id_pendiente=p_id FOR UPDATE;
@@ -57,7 +57,9 @@ BEGIN
   ) INTO v_source;
   IF NOT v_source THEN RAISE EXCEPTION 'Fabricación % no encontrada como PANEL de la producción',v_fab; END IF;
  END LOOP;
- IF v_total <> v_p.cantidad THEN RAISE EXCEPTION 'Cantidad distribuida diferente a cantidad reportada'; END IF;
+ v_correction := v_total IS DISTINCT FROM v_p.cantidad;
+ IF v_correction AND nullif(btrim(coalesce(p_observacion,'')),'') IS NULL
+ THEN RAISE EXCEPTION 'Corrección de cantidad requiere observación'; END IF;
  -- SECURITY REVIEW: legacy validator excludes RECEPCION; do not widen global roles.
  -- This RPC is intentionally restricted until a dedicated validated reception contract exists.
  -- Reuse legacy reservation/acabado validation, audit and session checks.
@@ -77,8 +79,8 @@ BEGIN
  (id_pendiente,usuario,observacion,tipo_evento,datos_anteriores,datos_nuevos)
  VALUES(p_id,v_usuario,p_observacion,'VALIDACION_DETALLES_PDT',
   jsonb_build_object('cantidad_reportada',v_p.cantidad,'fabricacion_reportada',v_p.fabricacion),
-  jsonb_build_object('cantidad_validada',v_total,'detalles',p_detalles));
- RETURN jsonb_build_object('ok',true,'cantidad',v_total,'detalles',v_count);
+  jsonb_build_object('cantidad_validada',v_total,'correccion',v_correction,'detalles',p_detalles));
+ RETURN jsonb_build_object('ok',true,'cantidad_reportada',v_p.cantidad,'cantidad_validada',v_total,'detalles',v_count);
 END $fn$;
 
 CREATE OR REPLACE FUNCTION public.sgp_aluminio_pendiente_registrar_avance_v1(
