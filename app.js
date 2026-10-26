@@ -1,7 +1,7 @@
 import {createReadMetrics,createInFlightReads,scopedReadClient,latestTask} from './src/services/mecanizado-performance.js';
 import {readReprogramming} from './src/services/mecanizado-reprogramming.js';
 import {machiningCarry,enrichMoveSources,clearMoveSources} from './src/services/mecanizado-carry.js';
-import {operationalLoad,applyScheduleMoves,workloadTotals} from './src/domain/mecanizado-operational-load.js';
+import {operationalLoad,applyScheduleMoves,workloadTotals,physicalProgress} from './src/domain/mecanizado-operational-load.js';
 import {renderWorkloadCalendar,openWorkloadDetail} from './src/modules/mecanizado-operational-calendar.js';
 import {productionPdtControls,productionPdtStatus} from './src/modules/pdt-production-actions.js';
 import {saveProductionNovelty} from './src/services/production-novelty-repository.js';
@@ -2018,6 +2018,45 @@ window.SGPWeeklyDemandForWeeks=async weeks=>{
  }));
  return result.flat();
 };
+// Issue103: one session-scoped read snapshot; filters do not refetch per system/order.
+let physicalSnapshot=null,physicalPending=null,physicalSession=null,physicalRevision=0,physicalScheduleReady=false;
+window.addEventListener('sgp:programming-loaded',()=>{physicalScheduleReady=true;physicalRevision++;physicalSnapshot=null;physicalPending=null;});
+window.addEventListener('sgp:programming-loading',()=>{physicalScheduleReady=false;physicalRevision++;physicalSnapshot=null;physicalPending=null;});
+window.SGPWeeklyPhysicalContext=()=>{const token=getAppToken();if(token!==physicalSession){physicalSession=token;physicalRevision++;physicalSnapshot=null;physicalPending=null;}return token?physicalRevision:null;};
+async function readPhysicalRows(client,table,columns,ids,order){
+ const rows=[];for(let offset=0;offset<ids.length;offset+=150){
+  const batch=ids.slice(offset,offset+150);for(let page=0;page<200;page++){
+   let q=client.from(table).select(columns).in(table==='sgp_produccion_reservas_v'?'reserva':'id_programacion',batch);
+   for(const field of order)q=q.order(field);const result=await q.range(page*500,page*500+499);
+   if(result.error)throw result.error;if(!Array.isArray(result.data))throw new Error('Respuesta de avance inválida');rows.push(...result.data);if(result.data.length<500)break;if(page===199)throw new Error('Consulta de avance incompleta: límite de paginación');
+  }
+ }return rows;
+}
+window.SGPWeeklyPhysicalProgress=async({weeks,system=''})=>{
+ const token=getAppToken();if(!token)throw new Error('Se requiere sesión SGP para consultar avance');
+ if(!physicalScheduleReady)throw new Error('Programación aún no disponible o no actualizada');
+ if(progMovesError)throw new Error(progMovesError);
+ if(physicalSession!==token){physicalSession=token;physicalSnapshot=null;physicalPending=null;}
+ const revision=physicalRevision;
+ if(!physicalSnapshot||Date.now()-physicalSnapshot.time>30000){
+  if(!physicalPending){
+   const schedule=progSchedule.map(row=>({...row})),moves=progMoves.map(row=>({...row}));
+   const pending=(async()=>{const client=await getMecanizadoReadClient(),ids=[...new Set(schedule.map(r=>r.id_programacion))],reserves=[...new Set(schedule.map(r=>String(r.reserva)))];
+    const [executions,orderExecutions,links,cov]=await Promise.all([
+     readPhysicalRows(client,'sgp_mecanizado_ejecucion','id_programacion,estado,cantidad_procesada',ids,['id_programacion']),
+     readPhysicalRows(client,'sgp_mecanizado_ejecucion_orden','id_programacion,produccion,estado',ids,['id_programacion','produccion']),
+     readPhysicalRows(client,'sgp_produccion_reservas_v','key_produccion,id_linea,reserva,produccion,semana_produccion,acabado_reserva',reserves,['key_produccion','reserva']),
+     client.rpc('sgp_mecanizado_cobertura_ordenes',{p_token:token,p_semana:null})]);
+    if(cov.error)throw cov.error;if(!Array.isArray(cov.data))throw new Error('Cobertura de órdenes inválida');
+    if(token!==getAppToken()||revision!==physicalRevision)throw new Error('La sesión o programación cambió durante la lectura');
+    const snapshot={schedule,moves,executions,orderExecutions,links,coverage:cov.data};physicalSnapshot={data:snapshot,time:Date.now()};return snapshot;
+   })();physicalPending=pending;pending.finally(()=>{if(physicalPending===pending)physicalPending=null;}).catch(()=>{});
+  }
+  await physicalPending;
+ }
+ if(token!==getAppToken()||revision!==physicalRevision)throw new Error('Datos de avance obsoletos');
+ return physicalProgress(physicalSnapshot.data,weeks,system);
+};
 window.SGPWeeklyAnchor=()=>progCalendarAnchor;
 const progGroupName={1:'OK / Entregadas en sistema',2:'Recibidas sin legalizar',3:'Pendientes por Bodega',4:'Pendientes por Abastecimiento'};
 let programmingRequestSeq=0;
@@ -2026,6 +2065,7 @@ function scheduleProgrammingLoad(){programmingRequestSeq++;return deferredProgra
 async function loadProgramming(options={}){
  const request=++programmingRequestSeq,token=getAppToken(),week=Number(document.querySelector('#progWeek')?.value)||null;if(!token)return;
  if(options?.invalidateCarry){deferredProgrammingLoad.cancel();machiningCarry.clear();clearMoveSources();}
+ window.dispatchEvent(new Event('sgp:programming-loading'));
  return machiningMetrics.measure('load','programming',async()=>{
   try{
    const c=await getMecanizadoReadClient();

@@ -1,0 +1,50 @@
+[
+  {
+    "viewport": [
+      1366,
+      1000
+    ],
+    "initial_show_calls": 1,
+    "automatic_close": false,
+    "fresh_E17_advance": 2,
+    "fresh_E17_saldo": 2,
+    "same_dialog": true,
+    "stages_without_reopen": [
+      "CORTE",
+      "MECANIZADO",
+      "PROCESADO"
+    ],
+    "date_shift_scroll_focus_preserved": true,
+    "picking_register_validate_assign": true,
+    "double_click_single_write": true,
+    "committed_write_read_failure_no_resubmit": true,
+    "uncertain_retry_same_uuid_once": true,
+    "parent_refresh_only_on_explicit_close": true,
+    "external_network": false,
+    "errors": []
+  },
+  {
+    "viewport": [
+      390,
+      844
+    ],
+    "initial_show_calls": 1,
+    "automatic_close": false,
+    "fresh_E17_advance": 2,
+    "fresh_E17_saldo": 2,
+    "same_dialog": true,
+    "stages_without_reopen": [
+      "CORTE",
+      "MECANIZADO",
+      "PROCESADO"
+    ],
+    "date_shift_scroll_focus_preserved": true,
+    "picking_register_validate_assign": true,
+    "double_click_single_write": true,
+    "committed_write_read_failure_no_resubmit": true,
+    "uncertain_retry_same_uuid_once": true,
+    "parent_refresh_only_on_explicit_close": true,
+    "external_network": false,
+    "errors": []
+  }
+]

@@ -1,0 +1,62 @@
+[
+  {
+    "viewport": [
+      1366,
+      1000
+    ],
+    "week44": {
+      "programmed": 75,
+      "processed": 62,
+      "pending": 13,
+      "workload": 132
+    },
+    "multiweek": [
+      95,
+      82,
+      13
+    ],
+    "system_filter": [
+      28,
+      23,
+      5
+    ],
+    "destination_preserves_origin_week": true,
+    "filter_queries_after_initial_snapshot": 0,
+    "failed_read_has_no_zeros": true,
+    "retry": true,
+    "session_change_hides_old_data": true,
+    "responsive_no_page_overflow": true,
+    "external_network_allowed": false,
+    "errors": []
+  },
+  {
+    "viewport": [
+      390,
+      844
+    ],
+    "week44": {
+      "programmed": 75,
+      "processed": 62,
+      "pending": 13,
+      "workload": 132
+    },
+    "multiweek": [
+      95,
+      82,
+      13
+    ],
+    "system_filter": [
+      28,
+      23,
+      5
+    ],
+    "destination_preserves_origin_week": true,
+    "filter_queries_after_initial_snapshot": 0,
+    "failed_read_has_no_zeros": true,
+    "retry": true,
+    "session_change_hides_old_data": true,
+    "responsive_no_page_overflow": true,
+    "external_network_allowed": false,
+    "errors": []
+  }
+]

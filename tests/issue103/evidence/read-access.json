@@ -1,0 +1,45 @@
+{
+  "time_utc": "2026-10-26T19:02:56.054721+00:00",
+  "project": "ocvxbwzqxbrfndkvjmfx",
+  "method": "GET existing publishable application key, no bypass or session impersonation; no row identities exported",
+  "checks": {
+    "execution": {
+      "http": 200,
+      "returned_rows": 55,
+      "content_range": "0-54/55",
+      "processed_quantity_in_returned_rows": 1887.0,
+      "states": {
+        "CORTE": 3,
+        "MECANIZADO": 2,
+        "PROCESADO": 49,
+        "SIN INICIAR": 1
+      }
+    },
+    "schedule": {
+      "http": 200,
+      "returned_rows": 76,
+      "content_range": "0-75/76"
+    },
+    "order_execution": {
+      "http": 200,
+      "returned_rows": 163,
+      "content_range": "0-162/163"
+    },
+    "details": {
+      "http": 401,
+      "accessible": false
+    }
+  },
+  "live_header_example": {
+    "state": "PROCESADO",
+    "programmed": 43,
+    "recorded_processed": 43,
+    "operational_rule_processed": 43,
+    "scope": "One existing execution/header read, identifiers omitted. Validates PROCESADO rule only, not origin-week/deduplicated totals or authenticated UI."
+  },
+  "limitations": [
+    "No SGP session available to invoke protected coverage/reprogramming RPCs during diagnostics; their existing frontend signatures and versioned contracts were reused.",
+    "Private details table rejected; not queried by new feature, no RLS/grant changes.",
+    "No write requests or RPC mutations executed."
+  ]
+}

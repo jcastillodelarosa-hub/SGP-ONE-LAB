@@ -1,0 +1,50 @@
+[
+  {
+    "viewport": [
+      1366,
+      1000
+    ],
+    "active_component": "programacion-subtabs-v350.js Resumen 7days x2shifts",
+    "production_total": 65,
+    "calendar_total": 65,
+    "new": 8,
+    "carry": 57,
+    "systems": {
+      "ES-MX4000_carry": 16,
+      "ES-EL400_carry": 41
+    },
+    "occupancy": "72.2% of90",
+    "shared_RPC_queries": 14,
+    "no_per_order_N_plus_1": true,
+    "origin_informational_only": true,
+    "modal_scroll_close": true,
+    "SIN_INICIAR_background": "rgb(229, 231, 235)",
+    "backend_writes": 0,
+    "external_network_allowed": false,
+    "errors": []
+  },
+  {
+    "viewport": [
+      390,
+      844
+    ],
+    "active_component": "programacion-subtabs-v350.js Resumen 7days x2shifts",
+    "production_total": 65,
+    "calendar_total": 65,
+    "new": 8,
+    "carry": 57,
+    "systems": {
+      "ES-MX4000_carry": 16,
+      "ES-EL400_carry": 41
+    },
+    "occupancy": "72.2% of90",
+    "shared_RPC_queries": 14,
+    "no_per_order_N_plus_1": true,
+    "origin_informational_only": true,
+    "modal_scroll_close": true,
+    "SIN_INICIAR_background": "rgb(229, 231, 235)",
+    "backend_writes": 0,
+    "external_network_allowed": false,
+    "errors": []
+  }
+]
