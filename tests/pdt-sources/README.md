@@ -1,3 +1,9 @@
+> **OBSOLETO como plan de instalación.** La regla posterior del propietario exige
+> clasificar por maestro y asociar PANEL exclusivamente a PANELES_2 y FRAME a FRAMES_2.
+> La propuesta de contexto cruzado queda bloqueada; estas pruebas/capturas son historia
+> y no constituyen aceptación de la nueva corrección. El propietario informó 47 PDT
+> ya corregidos; no repetir esa actualización ni alterar los 22 validados sin alcance completo.
+
 # PDT v2: consulta de fuentes y distribución — preparación, sin publicación
 
 ## Causa comprobada, alcance del caso

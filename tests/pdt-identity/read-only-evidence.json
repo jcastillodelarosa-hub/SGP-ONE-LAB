@@ -1,0 +1,83 @@
+{
+  "production_project_ref": "ocvxbwzqxbrfndkvjmfx",
+  "core_run": 40260774688,
+  "cohort_run": 40261173332,
+  "permissions_run": 40263861377,
+  "cohort": {
+    "groups": [
+      {
+        "n": 47,
+        "line": "PANELES_2",
+        "estado": "PENDIENTE",
+        "estado_repo": "PENDIENTE",
+        "master_tipo": "PANEL",
+        "contrato_pdt": "LEGACY",
+        "master_activo": "SI",
+        "master_destino": "PANEL",
+        "validacion_estado": "POR_VALIDAR"
+      },
+      {
+        "n": 11,
+        "line": "FRAMES_2",
+        "estado": "PENDIENTE",
+        "estado_repo": "PENDIENTE",
+        "master_tipo": "PANEL",
+        "contrato_pdt": "LEGACY",
+        "master_activo": "SI",
+        "master_destino": "PANEL",
+        "validacion_estado": "VALIDADO"
+      },
+      {
+        "n": 6,
+        "line": "FRAMES_2",
+        "estado": "PENDIENTE",
+        "estado_repo": "PROCESADO",
+        "master_tipo": "PANEL",
+        "contrato_pdt": "LEGACY",
+        "master_activo": "SI",
+        "master_destino": "PANEL",
+        "validacion_estado": "VALIDADO"
+      },
+      {
+        "n": 5,
+        "line": "FRAMES_2",
+        "estado": "PENDIENTE",
+        "estado_repo": "PICKING",
+        "master_tipo": "PANEL",
+        "contrato_pdt": "LEGACY",
+        "master_activo": "SI",
+        "master_destino": "PANEL",
+        "validacion_estado": "VALIDADO"
+      }
+    ],
+    "pending": true,
+    "backup_count": 69,
+    "matched_count": 69,
+    "classifications": [
+      {
+        "n": 20,
+        "activo": "SI",
+        "tipo_pieza": "PANEL",
+        "destino_productivo": "PANEL"
+      }
+    ],
+    "dependent_counts": {
+      "ncs": 0,
+      "cierres": 0,
+      "detalles": 0,
+      "movimientos": 0
+    }
+  },
+  "permissions": {
+    "novelty": {
+      "rls": false,
+      "owner": "postgres",
+      "policies": null,
+      "force_rls": false,
+      "anon_insert": true,
+      "authenticated_insert": true
+    },
+    "pending": true
+  },
+  "production_writes": false
+}

@@ -1,3 +1,5 @@
+import {saveProductionNovelty} from './src/services/production-novelty-repository.js';
+import {attachNoveltyIdentity} from './src/modules/production-novelty-identity.js';
 import {pendingFlowGuidance} from './src/modules/pdt-flow-guidance.js';
 import {loadPendingRows} from './src/services/aluminum-pending-v2.js';
 import {openPdtV2} from './src/modules/pdt-v2-controller.js';
@@ -2397,7 +2399,7 @@ function renderNovelties(){const body=document.querySelector('#novBody'),sum=doc
 function openNoveltyDetail(id){const x=noveltyRows.find(n=>n.id_novedad===id);if(!x)return;const m=document.querySelector('#novDetailModal');m.dataset.id=id;document.querySelector('#novDetailTitle').textContent='Novedad - '+(x.reserva||'-');document.querySelector('#novDetailMeta').textContent=(x.produccion?'Orden '+x.produccion+' - ':'')+(x.tipo||'');document.querySelector('#novDetailInfo').innerHTML='<div><span>Reserva / parte</span><b>'+escapeHtml(x.reserva||'-')+' / '+escapeHtml(x.parte||'-')+'</b></div><div><span>Orden</span><b>'+escapeHtml(x.produccion||'-')+'</b></div><div><span>Perfil</span><b>'+escapeHtml(x.perfil||'-')+'</b></div><div><span>Cantidad</span><b>'+escapeHtml(x.cantidad??'-')+'</b></div><div><span>Longitud</span><b>'+escapeHtml(x.longitud??'-')+'</b></div><div><span>Cortes afectados</span><b>'+escapeHtml(x.cortes_afectados||'-')+'</b></div><div><span>Origen</span><b>'+escapeHtml(String(x.origen||'').replaceAll('_',' '))+'</b></div><div><span>Reportado por</span><b>'+escapeHtml(x.reportado_por||'-')+'</b></div>';document.querySelector('#novEditState').value=x.estado||'PENDIENTE_RESOLVER';document.querySelector('#novEditNC').value=x.numero_nc||'';document.querySelector('#novEditSolution').value=x.reserva_solucion||'';document.querySelector('#novEditObs').value=x.observacion||'';m.hidden=false}
 async function saveNoveltyUpdate(){const m=document.querySelector('#novDetailModal'),id=m?.dataset.id;if(!id)return;try{const db=await getSupabaseClient(),{error}=await db.rpc('sgp_mecanizado_novedad_actualizar',{p_token:getAppToken(),p_id:id,p_estado:document.querySelector('#novEditState').value,p_observacion:document.querySelector('#novEditObs').value,p_numero_nc:document.querySelector('#novEditNC').value,p_reserva_solucion:document.querySelector('#novEditSolution').value});if(error)throw error;m.hidden=true;await loadNovelties()}catch(e){alert('No fue posible actualizar la novedad: '+e.message)}}
 document.querySelector('#novRefresh')?.addEventListener('click',loadNovelties);document.querySelector('#novSearch')?.addEventListener('input',renderNovelties);document.querySelector('#novState')?.addEventListener('change',renderNovelties);document.querySelector('#novOrigin')?.addEventListener('change',renderNovelties);document.querySelector('#novWeek')?.addEventListener('change',renderNovelties);document.querySelector('#novDetailClose')?.addEventListener('click',()=>document.querySelector('#novDetailModal').hidden=true);document.querySelector('#novDetailCancel')?.addEventListener('click',()=>document.querySelector('#novDetailModal').hidden=true);document.querySelector('#novDetailSave')?.addEventListener('click',saveNoveltyUpdate);
-let prodRows=[],prodNoveltyTarget=null,prodNoveltyProduction=null,prodNoveltySharedMeta=null;
+let prodRows=[],prodNoveltyTarget=null,prodNoveltyProduction=null,prodNoveltySharedMeta=null,prodNoveltyIdentity=null,prodNoveltySaving=false;
 const PROD_STATES=['SIN INICIAR','CORTE','MECANIZADO','PROCESADO'];
 // Compatibilidad de lectura con datos históricos hasta aplicar la migración de Supabase.
 function prodDisplayState(value){return String(value||'SIN INICIAR').toUpperCase()==='PROGRAMADA'?'SIN INICIAR':String(value||'SIN INICIAR')}
@@ -2634,52 +2636,49 @@ function renderProductionBoard(){
 }
 async function saveProductionExecution(id){const row=prodRows.find(x=>x.id_programacion===id),detail=document.querySelector('[data-prod-detail="'+id+'"]'),state=detail.querySelector('.prod-state-picker .selected')?.dataset.prodState||'',obs=detail.querySelector('[data-prod-obs]').value;if(!prodCanWriteState(state))return alert('Selecciona explícitamente un estado operativo válido antes de guardar');try{const db=await getSupabaseClient(),{error}=await db.from('sgp_mecanizado_ejecucion').upsert({id_programacion:id,estado:state,cantidad_procesada:state==='PROCESADO'?Number(row.cantidad_programada||0):0,observacion:obs,usuario:currentAuth?.usuario||'',actualizado_en:new Date().toISOString()},{onConflict:'id_programacion'});if(error)throw error;await loadProductionBoard()}catch(e){alert('No fue posible guardar: '+e.message)}}
 async function openProductionNovelty(id,production=null){
- prodNoveltyTarget=id;prodNoveltyProduction=production;
+ prodNoveltyIdentity?.dispose();prodNoveltyIdentity=null;prodNoveltyTarget=id;prodNoveltyProduction=production;
  const r=prodRows.find(x=>x.id_programacion===id);
  await ensureSharedReservations();
- prodNoveltySharedMeta=production?sharedMetaForOrder({produccion:production},r?.reserva):null;
+ prodNoveltySharedMeta=null; // Never resolve a line from a production name.
  const options=sharedReserveOptions(prodNoveltySharedMeta,r?.reserva||'',r?.acabado||'');
  const reserveSel=document.querySelector('#prodNoveltyReserve'),finishInp=document.querySelector('#prodNoveltyFinish'),help=document.querySelector('#prodNoveltyReserveHelp');
  if(reserveSel){
   reserveSel.innerHTML=options.map((x,i)=>'<option value="'+escapeHtml(x.reserva)+'" data-finish="'+escapeHtml(x.acabado||'')+'">'+escapeHtml(x.reserva)+' · '+escapeHtml(reserveRelationLabel(x))+' · '+escapeHtml(x.acabado||'ACABADO POR CONFIRMAR')+'</option>').join('');
   const syncFinish=()=>{const op=reserveSel.selectedOptions?.[0],fin=op?.dataset.finish||'';if(finishInp){finishInp.value=fin;finishInp.readOnly=!!fin;finishInp.placeholder=fin?'':'Escribe el acabado real antes de guardar'}};
-  reserveSel.onchange=()=>{syncFinish();searchProfiles()};syncFinish();
+  reserveSel.onchange=syncFinish;syncFinish();
  }
  if(help)help.textContent=options.length>1?'Orden con varias reservas asociadas: selecciona la reserva y el acabado del material pendiente.':'Reserva asociada al pendiente.';
  document.querySelector('#prodNoveltyContext').textContent=(r?.reserva||'')+' · Parte '+(r?.prioridad_semanal||'—')+(production?' · Orden '+production:'');
  document.querySelector('#prodNoveltyModal').hidden=false;
  document.querySelector('#prodNoveltyOrigin').value='';document.querySelector('#prodNoveltyOrigin').dispatchEvent(new Event('change'));
  const inp=document.querySelector('#prodNoveltyProfile'),dl=document.querySelector('#prodProfileCatalog'),len=document.querySelector('#prodNoveltyLength');inp.value='';len.value='';
- let timer;
- async function searchProfiles(){try{const db=await getSupabaseClient(),selected=reserveSel?.value||r?.reserva||'',{data,error}=await db.rpc('sgp_mecanizado_perfiles_reserva',{p_token:getAppToken(),p_reserva:String(selected),p_buscar:inp.value.trim()});if(error)throw error;dl.innerHTML=(data||[]).map(p=>'<option value="'+escapeHtml(p.perfil)+'" data-length="'+escapeHtml(p.longitud??'')+'">'+escapeHtml(p.descripcion||'')+' · '+escapeHtml(p.longitud??'—')+' pulg</option>').join('')}catch(e){dl.innerHTML=''}}
- inp.oninput=()=>{clearTimeout(timer);timer=setTimeout(searchProfiles,180)};
- inp.onchange=()=>{const opt=[...dl.options].find(o=>o.value===inp.value);if(opt?.dataset.length)len.value=opt.dataset.length};
- await searchProfiles()
+ const db=await getSupabaseClient();
+ prodNoveltyIdentity=attachNoveltyIdentity({root:document.querySelector('#prodNoveltyModal'),client:db,token:getAppToken(),production,
+  onIdentity:source=>{
+   prodNoveltySharedMeta=source?{key_produccion:source.key_produccion,reserva_principal:source.reserva_principal,es_reserva_compartida:source.es_reserva_compartida,reservas:source.reservas}:null;
+   if(source){
+    const selected=reserveSel.value,chosenFinish=source.acabado;finishInp.value=source.acabado;
+    const pairs=sharedReserveOptions(prodNoveltySharedMeta,selected,chosenFinish);
+    reserveSel.innerHTML=pairs.map(x=>'<option value="'+escapeHtml(x.reserva)+'" data-finish="'+escapeHtml(x.acabado||'')+'" '+(x.reserva===selected&&x.acabado===chosenFinish?'selected':'')+'>'+escapeHtml(x.reserva)+' · '+escapeHtml(reserveRelationLabel(x))+' · '+escapeHtml(x.acabado||'')+'</option>').join('');
+    help.textContent='Reservas verificadas para '+source.id_linea+'. Cambiar la reserva exige volver a seleccionar la pieza.';
+   }
+  }});
+ await prodNoveltyIdentity.refresh()
 }
 document.querySelector('#prodNoveltyOrigin')?.addEventListener('change',e=>{const o=e.target.value,t=document.querySelector('#prodNoveltyType'),lab=document.querySelector('#prodNoveltyRefLabel');t.innerHTML='<option value="">Seleccionar…</option>'+((noveltyTypes[o]||[]).map(x=>'<option>'+x+'</option>').join(''));lab.firstChild.textContent=o==='MECANIZADO_MAQUINA'?'Ticket mantenimiento ':['INGENIERIA','CALIDAD'].includes(o)?'Número de novedad ':'Número de NC ';});
 document.querySelector('#prodNoveltySave')?.addEventListener('click',async()=>{
+ if(prodNoveltySaving)return;
  const o=document.querySelector('#prodNoveltyOrigin').value,t=document.querySelector('#prodNoveltyType').value,ref=document.querySelector('#prodNoveltyRef').value.trim();
  if(!o||!t)return alert('Selecciona origen y tipo de novedad.');
  if((o==='MECANIZADO_PERSONAL'||o==='MECANIZADO_MAQUINA'||o==='INGENIERIA'||o==='CALIDAD')&&!ref)return alert('Debes suministrar '+(o==='MECANIZADO_MAQUINA'?'el ticket de mantenimiento':o==='MECANIZADO_PERSONAL'?'el número de NC':'el número de novedad')+'.');
  const payload={id_programacion:prodNoveltyTarget,produccion:prodNoveltyProduction||null,origen:o,tipo:t,perfil:document.querySelector('#prodNoveltyProfile').value,longitud:Number(document.querySelector('#prodNoveltyLength').value)||null,cantidad:Number(document.querySelector('#prodNoveltyQty').value)||null,cortes_afectados:document.querySelector('#prodNoveltyCuts').value,observacion:document.querySelector('#prodNoveltyObs').value,usuario:currentAuth?.usuario||'',estado:ref?'REPORTADA':'PENDIENTE_RESOLVER'};
  if(o==='MECANIZADO_MAQUINA')payload.ticket_mtto=ref;else if(['INGENIERIA','CALIDAD'].includes(o))payload.numero_novedad=ref;else payload.numero_nc=ref;
  try{
-  const db=await getSupabaseClient(),{error}=await db.from('sgp_mecanizado_novedades').insert(payload);if(error)throw error;
-  const perfil=payload.perfil?.trim(),qty=Number(payload.cantidad||0);
-  if(perfil&&qty>0){
-   const row=prodRows.find(x=>x.id_programacion===prodNoveltyTarget)||{},sel=document.querySelector('#prodNoveltyReserve'),fin=document.querySelector('#prodNoveltyFinish')?.value.trim()||'',selectedReserve=sel?.value||row.reserva||null;
-   if(!selectedReserve)return alert('Selecciona la reserva correspondiente al pendiente.');
-   if(!fin)return alert('Indica el acabado correspondiente al pendiente.');
-   const ap=await db.rpc('sgp_aluminio_pendiente_crear',{
-    p_token:getAppToken(),p_reserva:selectedReserve,p_reserva_principal:row.reserva||null,
-    p_key_produccion:prodNoveltySharedMeta?.key_produccion||null,p_acabado_pendiente:fin,
-    p_produccion:prodNoveltyProduction||null,p_perfil:perfil,p_cantidad:qty,p_longitud:payload.longitud,
-    p_origen:'PRODUCCION',p_causa:o+' · '+t,p_observacion:payload.observacion||null
-   });
-   if(ap.error)throw ap.error
-  }
+  prodNoveltySaving=true;prodNoveltyIdentity?.setSaving(true);
+  const source=payload.perfil?.trim()?prodNoveltyIdentity?.getIdentity():null;
+  await saveProductionNovelty(await getSupabaseClient(),{token:getAppToken(),payload,source});
   document.querySelector('#prodNoveltyModal').hidden=true;await loadProductionBoard()
- }catch(e){alert('No fue posible guardar la novedad: '+e.message)}
+ }catch(e){alert('No fue posible guardar la novedad: '+e.message)}finally{prodNoveltySaving=false;prodNoveltyIdentity?.setSaving(false)}
 });
 document.querySelector('#prodShiftReport')?.addEventListener('click',openShiftReport);document.querySelector('#prodRefresh')?.addEventListener('click',loadProductionBoard);
 // Refresco de solo lectura: únicamente mientras Producción está visible y la pestaña del navegador activa.
@@ -2687,7 +2686,7 @@ const productionPanelVisible=()=>{const panel=document.querySelector('[data-mach
 document.querySelector('#prodDate')?.addEventListener('change',()=>{if(productionPanelVisible())loadProductionBoard()});
 document.querySelector('#prodShift')?.addEventListener('change',()=>{if(productionPanelVisible())loadProductionBoard()});
 setInterval(()=>{if(productionPanelVisible())loadProductionBoard()},60000);
-document.addEventListener('visibilitychange',()=>{if(productionPanelVisible())loadProductionBoard()});document.querySelector('#prodNoveltyClose')?.addEventListener('click',()=>document.querySelector('#prodNoveltyModal').hidden=true);document.querySelector('#prodNoveltyCancel')?.addEventListener('click',()=>document.querySelector('#prodNoveltyModal').hidden=true);
+document.addEventListener('visibilitychange',()=>{if(productionPanelVisible())loadProductionBoard()});document.querySelector('#prodNoveltyClose')?.addEventListener('click',()=>{prodNoveltyIdentity?.dispose();document.querySelector('#prodNoveltyModal').hidden=true});document.querySelector('#prodNoveltyCancel')?.addEventListener('click',()=>{prodNoveltyIdentity?.dispose();document.querySelector('#prodNoveltyModal').hidden=true});
 if(document.querySelector('#prodDate'))document.querySelector('#prodDate').value=new Date().toISOString().slice(0,10);
 
 // UI scale preference v233

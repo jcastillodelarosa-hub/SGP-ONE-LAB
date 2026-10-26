@@ -361,3 +361,18 @@ Pruebas limitadas a fuentes/distribución/PC-móvil aprobadas. Evidencia, captur
 límites exactos en tests/pdt-sources/README.md. No aplicar propuesta, fusionar ni
 publicar sin nueva autorización; falta ensayo completo de esa nueva instalación.
 No hubo escritura Supabase productivo ni operaciones de prueba sobre datos reales.
+
+## Identidad definitiva por maestro y reparación22 — implementado en rama
+
+Main leído e1a5ca5c38456fb746c5954ae4b8e8f127116ea4. Lecturas40260774688,
+40261173332,40263861377 confirman respaldo69, 47 corregidos y22 LEGACY/VALIDADO
+FRAMES_2 (11 PENDIENTE/6 PROCESADO/5 PICKING), sin relaciones V2 consultadas.
+No repetir47 ni aceptar PANEL en FRAMES_2. Propuesta cruzada anterior bloqueada.
+Frontend usa pieza real + clasificación del maestro; backend rechaza clave de
+cliente inconsistente y guarda novedad/PDT atómicamente. V2 PANEL estricto.
+Reparación22 key-only sin desactivar triggers, con ledger privado y reversión
+condicional. Bundle único transaccional preparado mediante builder sin conexión.
+235 pruebas JS,17 escenarios SQL en PG17.11 y PC/móvil aprobados; datos sintéticos.
+Fuentes, matriz9casos, límites y estados en docs/sql-proposals/pdt/identity/README.md.
+No SQL productivo, no Firebase, no main, no fusión/despliegue. Preparar PR Draft
+para revisión; aplicar/merge/publicar requieren autorización posterior independiente.

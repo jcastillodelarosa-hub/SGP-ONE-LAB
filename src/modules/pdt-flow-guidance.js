@@ -3,6 +3,7 @@ const validators=['ADMINISTRADOR','COORDINADOR','RECEPCION','LIDER LINEA','SUPER
 const readers=[...validators,'PATINADOR','LIDER MECANIZADO','LIDER','CONSULTA','PICKING'];
 export function pendingFlowGuidance(row,role,capabilities){
  const v2=row.contrato_pdt==='V2';
+ if(row.tipo_pieza&&row.tipo_pieza!=='PANEL')return {contract:v2?'V2':'LEGACY',action:null,label:'Flujo tradicional',explanation:'Esta pieza está clasificada como '+row.tipo_pieza+'. La distribución PDT v2 corresponde exclusivamente a PANEL; se conserva su flujo tradicional.'};
  const active=row.estado==='PENDIENTE'&&row.estado_repo!=='PICKING';
  const available=capabilities?.contract_version===2;
  const action=available&&active&&(v2?readers.includes(role):validators.includes(role)&&row.validacion_estado!=='VALIDADO');

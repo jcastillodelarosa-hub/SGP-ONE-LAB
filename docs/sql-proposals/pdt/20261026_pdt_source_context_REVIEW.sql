@@ -1,3 +1,5 @@
+-- OBSOLETO / NO APLICAR: regla posterior del propietario exige PANEL -> PANELES_2, FRAME -> FRAMES_2 desde maestro.
+-- Conservar solo como historial; permitir FRAMES_2 -> fuentes PANEL contradice esa regla.
 -- REVIEW ONLY. Outside automatic migrations. NOT APPLIED TO PRODUCTION.
 -- Atomic forward proposal: source reader + its validator + dependent snapshot guard.
 -- Requires separately authorized backup/control/application; no business row updates.
@@ -5,6 +7,7 @@
 BEGIN;
 SET LOCAL lock_timeout='5s';
 DO $preflight$ DECLARE f record; BEGIN
+ RAISE EXCEPTION 'OBSOLETO_NO_APLICAR: resolver primero la clasificación del maestro y la clave correcta; no permitir contexto cruzado FRAME/PANEL';
  FOR f IN SELECT * FROM (VALUES
   ('public.sgp_aluminio_pendiente_validar_detalles_v1(text,uuid,jsonb,text,text)','531f1b67efff0806667d0666c9f8911b'),
   ('public.sgp_pdt_fuentes_v2(text,uuid)','0ba2d5fa00c3782a8c3af91141508c17'),

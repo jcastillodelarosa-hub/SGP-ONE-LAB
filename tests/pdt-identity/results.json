@@ -1,0 +1,27 @@
+{
+  "database": "sgp_pdt_qa_91_identity_1792985368284258863",
+  "production_writes": false,
+  "postgres_version": "17.11 (Debian 17.11-1.pgdg13+2)",
+  "real_auth_definitions": true,
+  "pending_master_novelty_columns_from_catalog": true,
+  "cases": [
+    "Repair rejects changed rows, new dependencies and ambiguous target without any partial changes",
+    "69 backup / 47 unchanged / 22 key-only repaired incl 11 pending + 6 processed + 5 Picking; real guard remains enabled",
+    "Injected failure fully rolls back; reverse restores 22 only; reverse rejects later writes",
+    "Simultaneous lines: PANEL old-signature creation resolves PANELES_2",
+    "FRAME master maps to FRAMES_2 even with legacy imported source key PANEL",
+    "Frontend key cannot bypass master; direct insert is guarded",
+    "Missing master and invalid quantity reject without partial data",
+    "Unchanged legacy historical edits remain possible without implicit reclassification",
+    "Shared reserve and principal are preserved; novelty/PDT save atomically",
+    "Wrong source/key/principal reject before novelty or PDT is persisted",
+    "Failure after pending INSERT rolls back both atomic writes",
+    "Master type/destination inconsistency rejects new associations",
+    "Unauthorized role cannot create or discover sources",
+    "Duplicate production name cannot be disambiguated by caller key alone",
+    "FRAME never enters PANEL V2; row IDs/quantities of PANEL sources stay exact",
+    "PANEL V2 distribution, advances, Picking and closure preserve strict same-line identity",
+    "Full combined install commits all three components or rolls back every row and DDL on injected failure"
+  ],
+  "all_passed": true
+}
