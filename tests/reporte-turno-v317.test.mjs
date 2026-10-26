@@ -32,9 +32,9 @@ test('controles evitan exportaciones concurrentes y recuperan estado tras fallar
  assert.match(css,/\.shift-report-actions button:disabled/);
 });
 test('LAB v317 identifica los recursos de la misma versión',()=>{
- assert.match(html,/LAB v354/);
- assert.match(html,/app\.js\?v=354/);
- assert.match(html,/styles\.css\?v=354/);
+ assert.match(html,/LAB v355/);
+ assert.match(html,/app\.js\?v=355/);
+ assert.match(html,/styles\.css\?v=355/);
 });
 
 test('imagen no requiere biblioteca PDF y los scripts son locales',()=>{

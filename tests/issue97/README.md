@@ -34,7 +34,7 @@ La RPC decide la culminación en el turno; no se proyectan arrastres futuros ni 
 traslada una culminación desde el cliente. Los totales semanales son suma de carga
 por turnos, no número de ventanas físicas únicas a lo largo de todos los turnos.
 
-Auditoría de movimientos se lee en una consulta; estados de ejecución en lote.
+Auditoría de movimientos se lee en una RPC SGP autorizada, sin acceso directo a la tabla; estados de ejecución en lote.
 Solo las reservas/partes con traslado parcial en fechas visibles requieren la RPC
 existente `sgp_mecanizado_ordenes_programacion`, una vez por origen (no por orden),
 con caché y lotes de4. Conserva autorización del servidor. Si no puede verificarse
@@ -63,22 +63,33 @@ Capturas de detalle son de viewport real y el modal cabe dentro de su altura.
 HTTPS externo está bloqueado en las pruebas; no se usan sesiones ni datos productivos.
 No son pruebas de teléfono físico ni aceptación sobre la base real.
 
-## Dependencias pendientes antes de integrar
+## Continuación PR98 — LABv355 y RPC segura
 
-Sin cambios SQL/backend. Del SQL versionado se verifican `id_origen`, `produccion`,
-RPC de arrastres y exclusión de órdenes movidas en el detalle canónico. El vínculo
-`id_destino` y los permisos efectivos de lectura de
-`sgp_mecanizado_reprogramaciones` deben contrastarse con el catálogo real antes de
-fusionar. El acceso de metadatos desde este entorno no estuvo disponible; no se
-simula esa comprobación como realizada. Si el catálogo usa otro nombre, adaptar el
-mapeo explícito del vínculo; nunca buscar destino solo por nombre de producción.
-Destino/cantidad desconocidos o lectura denegada se anuncian como incompletos, sin
-habilitar operación del origen. No se amplían permisos ni se aplica SQL como atajo.
+Versión de main/build observada:LABv354. No había PR abierto reservando LABv355;
+se prepara LABv355 (interfaz, cache-bust app/CSS, releaseLabel, pruebas y verificación
+visual manual). El Hosting no fue accesible desde el entorno para verificar su badge;
+no se afirma LABv355 publicado. Las referencias históricas permanecen históricas.
 
-La caché representa un snapshot de hasta30s; actualización explícita invalida lecturas.
-Comprobar roles y estos contratos en un entorno autorizado antes de aprobar merge.
-Reversión de frontend: revertir el commit con autorización; no hay datos que restaurar.
-No se modificaron Supabase, Firebase, workflows, main, GOOGLE ni LAC.
+ChatGPT verificó cuatro vínculos id_destino válidos y que la tabla no permite SELECT
+desde el navegador. Ese bloqueo se resuelve mediante la propuesta RPC segura en
+`docs/sql-proposals/mecanizado/`. Programación y Producción usan el adaptador RPC;
+la fixture prohíbe expresamente from(tabla) para prevenir regresión.
 
-Siguiente paso único: revisión de ChatGPT del PR Draft y sus evidencias. No fusionar
-ni desplegar; esta rama no dispara Hosting (pushmain/manual exclusivamente).
+Validación de esta continuación:
+- 259/259 pruebas JS, incluidas cuatro regresiones del adaptador RPC y versión355.
+- 34 aserciones PostgreSQL17 aislado con los helpers reales disponibles: roles,
+  sesiones, tabla privada, payload mínimo, ACL/RLS intactas e instalación/reversión.
+- Navegador PC1366/móvil390: fuentes RPC, versión355 de index.html, caso8+57=65,
+  modal, origen informativo y navegación tardía aprobados; capturas actualizadas.
+- Sintaxis JS, YAML de la verificación visual manual, verify:release LABv355 y
+  diff --check aprobados. No se ejecutó manualmente ningún workflow.
+
+Nuevo resultado SQL: `evidence/rpc-security-results.json`; reproducción local:
+`python tests/issue97/security-sql.py`. Este script crea una base sintética únicamente
+en el contenedor QA existente sin red/puertos; no se conecta a Supabase.
+
+La RPC NO está aplicada a producción. Revisar/aplicar de forma separadamente
+autorizada antes de publicar el frontend355. No se requiere abrir SELECT/RLS de tabla.
+Procedimiento y reversión en el README SQL. Continúan sin cambios los contratos del
+Issue97/PR94/PR96. No fusionar ni desplegar; siguiente paso: revisión de ChatGPT del
+mismo PR Draft98, SQL y evidencias.

@@ -469,3 +469,38 @@ suite completa previa fue254/254. CI vuelve a validar el commit completo.
 Regresión final de navegación Issue97: una respuesta tardía de la semana anterior
 no puede sustituir el encabezado de la semana nueva. Comprobada en Chromium PC/móvil
 con el renderer real de app.js; resultados anteriores se conservan aprobados.
+
+
+## PR98 — RPC de reprogramaciones y LABv355 preparada
+
+Registro UTC: 2026-10-26T15:31:46.158812+00:00. Rama existente
+`feat/issue-97-operational-calendar`, PR98 OPEN/DRAFT; base main
+`eb0e1dc197d67072d556c226af318f5cd28a800e`, LABv354. Sin cambios concurrentes observados.
+Siguiente número preparado LABv355; badge, cache-bust app/CSS, generador de release,
+expectativas de pruebas y nombre de verificación visual manual sincronizados.
+No se verificó el badge del Hosting por falta de acceso desde este entorno;
+LABv355 NO se declara publicado. No se altera el workflow Firebase live.
+
+Dato confirmado por ChatGPT/propietario: los cuatro id_destino son válidos; la tabla
+no admite lectura directa del navegador. Se elimina from(tabla) en Programación y
+Producción y se incorpora adaptador RPC sin fallback. Propuesta
+sgp_mecanizado_reprogramaciones_listar(text): SECURITY DEFINER postgres, STABLE,
+search_path vacío, validación SGP + rol real, payload mínimo. Roles de lectura de
+Mecanizado; RECEPCION no elude mediante equivalencia legacy. EXECUTE técnico para
+anon/authenticated; sin permisos generales sobre la tabla. No desactiva RLS ni cambia
+políticas, datos, triggers o helpers. SQL e inversa REVIEW fuera de automigraciones:
+`docs/sql-proposals/mecanizado/`, README con procedimiento posterior controlado.
+
+Pruebas:259/259 JS,34 aserciones SQL en PostgreSQL17 aislado usando definiciones
+reales disponibles de helpers y datos sintéticos. Lectura privada/RLS/ACL y filas
+conservadas; prueba instalación ROLLBACK, inversa y rechazo de inversa sobre cuerpo
+modificado. Sin conexión productiva. PC1366/móvil390 con RPC simulada, badge355 y
+26/10/2026 T1=8nuevas+57arrastre=65,72,2%de90 aprobados. Los cuatro cambios Issue97
+y PR94/96 se conservan. Sintaxis JS/YAML, verify:release LABv355 y diff --check aprobados.
+Evidencia: tests/issue97/README.md y evidence/rpc-security-results.json/capturas.
+
+Estado: IMPLEMENTADO EN RAMA / SQL PROPUESTO Y VERIFICADO AISLADAMENTE; NO APLICADO
+EN SUPABASE, NO FUSIONADO, NO PUBLICADO. Pendiente revisar/aplicar RPC con autorización
+separada y verificar permisos/payload reales antes de cualquier publicación355.
+Siguiente paso único: revisión ChatGPT del mismo PR98 y del SQL. No crear otro PR,
+no tocar producción, main, Firebase, GOOGLE ni LAC. Conservar commits y cambios locales.
