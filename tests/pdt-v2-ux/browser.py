@@ -1,7 +1,7 @@
 """Issue95: actual controller + CSS, synthetic RPC fixture, no external network."""
 import functools,http.server,json,pathlib,threading,os
 from playwright.sync_api import sync_playwright
-ROOT=pathlib.Path(__file__).resolve().parents[2];OUT=ROOT/'tests/pdt-v2-ux/evidence'
+ROOT=pathlib.Path(__file__).resolve().parents[2];OUT=pathlib.Path(os.environ.get('SGP_QA_OUT',ROOT/'tests/pdt-v2-ux/evidence'));OUT.mkdir(parents=True,exist_ok=True)
 class H(http.server.SimpleHTTPRequestHandler):
  def log_message(self,*args):pass
 server=http.server.ThreadingHTTPServer(('127.0.0.1',0),functools.partial(H,directory=str(ROOT)))

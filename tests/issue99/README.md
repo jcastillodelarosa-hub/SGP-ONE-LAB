@@ -1,4 +1,13 @@
-# Issue #99 — LAB v356: evidencia local
+> Cambio concurrente detectado al cierre: main avanzó a
+> `eca84e06b19d7e43e5caf1b4d01e1e0805489158` (selector de semanas, LAB v356),
+> incorporado a esta rama sin modificar su lógica. PR #101 reserva LAB v357;
+> esta entrega utiliza **LAB v358**, siguiente número disponible. Firebase live
+> run `40364911753` del nuevo main terminó FAILURE; no se declara v356 publicado.
+> El baseline de rendimiento sigue siendo c6d7597, cuyo app.js no cambió en ese
+> avance de main. El selector heredado es trabajo de ChatGPT, fuera del diff de
+> este PR. PR101 continúa independiente, sin incorporar sus cambios.
+
+# Issue #99 — LAB v358: evidencia local
 
 ## Resultado y alcance
 
@@ -72,7 +81,7 @@ La aceptación con red, sesión real y hardware de planta sigue PENDIENTE.
 
 - `npm test`: **265/265** aprobadas; incluye seis nuevas de métricas/privacidad,
   lecturas simultáneas, sesiones, errores, no agrupar escrituras, filtros y refresco.
-- `node --check app.js` y `npm run verify:release`: aprobadas, LAB v356 autocontenido.
+- `node --check app.js` y `npm run verify:release`: aprobadas, LAB v358 autocontenido.
 - `python tests/issue99/browser-pdt.py`: ambos tamaños aprobados con controlador
   real y RPC sintéticas con estado; red externa bloqueada, sin errores JS.
   CORTE→MECANIZADO→PROCESADO sin reabrir, avance2/saldo2, reverso, Picking,

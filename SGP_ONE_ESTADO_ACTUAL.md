@@ -1,4 +1,13 @@
-## Estado ejecutivo vigente — Issue #99 / LAB v356 en rama
+> Cambio concurrente detectado al cierre: main avanzó a
+> `eca84e06b19d7e43e5caf1b4d01e1e0805489158` (selector de semanas, LAB v356),
+> incorporado a esta rama sin modificar su lógica. PR #101 reserva LAB v357;
+> esta entrega utiliza **LAB v358**, siguiente número disponible. Firebase live
+> run `40364911753` del nuevo main terminó FAILURE; no se declara v356 publicado.
+> El baseline de rendimiento sigue siendo c6d7597, cuyo app.js no cambió en ese
+> avance de main. El selector heredado es trabajo de ChatGPT, fuera del diff de
+> este PR. PR101 continúa independiente, sin incorporar sus cambios.
+
+## Estado ejecutivo vigente — Issue #99 / LAB v358 en rama
 
 Actualizado UTC: 2026-10-26T17:28:07.513655+00:00. Esta entrada prevalece sobre estados históricos inferiores.
 Repositorio exclusivo: SGP-ONE-LAB. Base main comprobada para el encargo:
@@ -13,7 +22,7 @@ código guardado y subido: `beb6e80`; consultar el SHA final del PR para la entr
 | PR #98 — carga por turno, RPC segura y LAB v355 | FUSIONADO, `c6d759751ea7a8e879233ad7d3df9f1c8876321e`. Workflow Firebase live run `40354206607` SUCCESS sobre ese SHA: evidencia de PUBLICACIÓN v355; no prueba funcional autenticada. |
 | RPC `sgp_mecanizado_reprogramaciones_listar` | Código/SQL versionados por PR98; instalación efectiva no reconsultada aquí. No inferir aplicación a partir de merge o despliegue. No volver a SELECT directo/RLS abierto. |
 | Hotfix historial PDT v2 | APLICADO y definiciones VERIFICADAS según evidencia de ChatGPT en Issue99: tres funciones con estado_nuevo y guard de rol real. Archivo equivalente en docs/sql-applied; NO reaplicar. E2E real pendiente. |
-| LAB v356, Issue99 | IMPLEMENTADO EN RAMA, VERIFICADO LOCALMENTE con fixtures. No APLICADO nuevamente en Supabase, no FUSIONADO ni PUBLICADO. |
+| LAB v358, Issue99 | IMPLEMENTADO EN RAMA, VERIFICADO LOCALMENTE con fixtures. No APLICADO nuevamente en Supabase, no FUSIONADO ni PUBLICADO. |
 
 PDT: mismo modal tras escribir, datos leídos otra vez del servidor, contexto conservado,
 prevención de duplicados y reintento seguro. Mecanizado: lecturas independientes en
@@ -22,7 +31,7 @@ paralelo, agrupamiento40ms/sesión, filtros locales sin recarga de calendario, c
 
 Evidencias actuales: `tests/issue99/README.md` y `tests/issue99/evidence/`: 265/265 JS,
 23 aserciones SQL aisladas PG17.11, PC1366/móvil390 con RPC sintéticas, regresiones de
-once contratos y caso26/10 T1=8+57=65; sintaxis y verify:release LABv356 aprobados.
+once contratos y caso26/10 T1=8+57=65; sintaxis y verify:release LABv358 aprobados.
 Medición controlada45ms/lectura: semanas rápidas24→8, búsqueda3→0 y fecha/turno74→9
 solicitudes. Tiempos exactos/muestras antes/después y límites en el README/JSON;
 no representan latencia productiva. CI del SHA final debe comprobarse en el PR.
