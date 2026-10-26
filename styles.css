@@ -2436,3 +2436,11 @@ button.active,[aria-pressed="true"]{border-color:#0865ed}
 @media(max-width:760px){.mec-workload-grid{grid-template-columns:1fr}.mec-workload-grid section{padding:12px}.mec-workload-cell{min-height:0}.mec-workload-items dl{grid-template-columns:repeat(2,minmax(0,1fr))}.mec-workload-modal header{flex-wrap:wrap}.mec-workload-modal footer{font-size:13px}.mec-workload-modal{width:calc(100vw - 12px)}.mec-workload-body{padding:10px}}
 /* LABv356: persistent confirmation while the same PDT dialog refreshes. */
 .pdt-v2-modal .repo-work-footer{flex-wrap:wrap}.pdt-feedback{flex:1 0 100%;font-size:13px;color:#155832;min-height:0;overflow-wrap:anywhere}.pdt-feedback:empty{display:none}.pdt-feedback[role=alert]{color:#9b1c1c}.pdt-v2-modal [data-refresh-pdt]{min-height:42px}
+
+/* Mobile viewport containment for mecanizado programming summary. */
+@media (max-width: 640px) {
+  .app-shell, .main-content, .content, .view-panel, [data-mach-panel],
+  .sgp-prog-panel, .sgp-prog-tabs, .mach-tabs { min-width: 0; max-width: 100%; }
+  .sgp-prog-tabs, .mach-tabs { overflow-x: auto; overscroll-behavior-x: contain; }
+  .sgp-prog-panel { overflow-x: clip; }
+}
