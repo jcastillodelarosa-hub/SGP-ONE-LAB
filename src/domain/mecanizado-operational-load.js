@@ -62,7 +62,8 @@ export function workloadTotals(rows){
  const total=nuevas+arrastre;return {nuevas,arrastre,total,bySystem,capacity:90,occupancy:total/90*100};
 }
 
-/** Physical progress, never workload/carry. Ambiguous source allocations are excluded explicitly. */
+/** @deprecated Assigned-only historical model. Current base denominator uses mecanizado-base-progress.js.
+ * Kept for compatibility; never use this model as the production-base denominator. */
 export function physicalProgress({schedule,executions,orderExecutions,moves,links,coverage},weeks,system=''){
  for(const value of [schedule,executions,orderExecutions,moves,links,coverage])if(!Array.isArray(value))throw new Error('Consulta de avance incompleta');
  const selected=new Set(weeks.map(Number)),warnings=[],excluded=new Set(),byId=new Map(),totals=new Map();

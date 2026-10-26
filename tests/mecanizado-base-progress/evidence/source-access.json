@@ -1,0 +1,19 @@
+{
+  "date_colombia": "2026-10-26T16:56:36.178096-05:00",
+  "checks": {
+    "base": {
+      "http": 200,
+      "returned_rows": 0,
+      "content_range": "*/0",
+      "columns": [],
+      "by_system": {}
+    },
+    "base_snapshot": {
+      "http": 400
+    },
+    "reception": {
+      "http": 404
+    }
+  },
+  "method": "read-only GET existing publishable key; no role or policy changes; empty results do not certify empty base"
+}

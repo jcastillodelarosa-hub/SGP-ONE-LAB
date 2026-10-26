@@ -1,7 +1,8 @@
+import {basePhysicalProgress} from './src/domain/mecanizado-base-progress.js';
 import {createReadMetrics,createInFlightReads,scopedReadClient,latestTask} from './src/services/mecanizado-performance.js';
 import {readReprogramming} from './src/services/mecanizado-reprogramming.js';
 import {machiningCarry,enrichMoveSources,clearMoveSources} from './src/services/mecanizado-carry.js';
-import {operationalLoad,applyScheduleMoves,workloadTotals,physicalProgress} from './src/domain/mecanizado-operational-load.js';
+import {operationalLoad,applyScheduleMoves,workloadTotals} from './src/domain/mecanizado-operational-load.js';
 import {renderWorkloadCalendar,openWorkloadDetail} from './src/modules/mecanizado-operational-calendar.js';
 import {productionPdtControls,productionPdtStatus} from './src/modules/pdt-production-actions.js';
 import {saveProductionNovelty} from './src/services/production-novelty-repository.js';
@@ -2020,9 +2021,10 @@ window.SGPWeeklyDemandForWeeks=async weeks=>{
 };
 // Issue103: one session-scoped read snapshot; filters do not refetch per system/order.
 let physicalSnapshot=null,physicalPending=null,physicalSession=null,physicalRevision=0,physicalScheduleReady=false;
-window.addEventListener('sgp:programming-loaded',()=>{physicalScheduleReady=true;physicalRevision++;physicalSnapshot=null;physicalPending=null;});
-window.addEventListener('sgp:programming-loading',()=>{physicalScheduleReady=false;physicalRevision++;physicalSnapshot=null;physicalPending=null;});
-window.SGPWeeklyPhysicalContext=()=>{const token=getAppToken();if(token!==physicalSession){physicalSession=token;physicalRevision++;physicalSnapshot=null;physicalPending=null;}return token?physicalRevision:null;};
+const physicalBaseCache=new Map();
+window.addEventListener('sgp:programming-loaded',()=>{physicalScheduleReady=true;physicalRevision++;physicalSnapshot=null;physicalPending=null;physicalBaseCache.clear();});
+window.addEventListener('sgp:programming-loading',()=>{physicalScheduleReady=false;physicalRevision++;physicalSnapshot=null;physicalPending=null;physicalBaseCache.clear();});
+window.SGPWeeklyPhysicalContext=()=>{const token=getAppToken();if(token!==physicalSession){physicalSession=token;physicalRevision++;physicalSnapshot=null;physicalPending=null;physicalBaseCache.clear();}return token?physicalRevision:null;};
 async function readPhysicalRows(client,table,columns,ids,order){
  const rows=[];for(let offset=0;offset<ids.length;offset+=150){
   const batch=ids.slice(offset,offset+150);for(let page=0;page<200;page++){
@@ -2032,30 +2034,48 @@ async function readPhysicalRows(client,table,columns,ids,order){
   }
  }return rows;
 }
-window.SGPWeeklyPhysicalProgress=async({weeks,system=''})=>{
+window.SGPWeeklyPhysicalProgress=async({weeks,year=new Date().getFullYear(),line='PANELES_2',system=''})=>{
  const token=getAppToken();if(!token)throw new Error('Se requiere sesión SGP para consultar avance');
+ if(!Number.isInteger(year)||year<2020||year>2100||line!=='PANELES_2')throw new Error('Año o línea no válidos');
  if(!physicalScheduleReady)throw new Error('Programación aún no disponible o no actualizada');
  if(progMovesError)throw new Error(progMovesError);
- if(physicalSession!==token){physicalSession=token;physicalSnapshot=null;physicalPending=null;}
- const revision=physicalRevision;
+ if(physicalSession!==token){physicalSession=token;physicalSnapshot=null;physicalPending=null;physicalBaseCache.clear();}
+ const revision=physicalRevision,client=await getMecanizadoReadClient();
+ const requireRows=(data,name)=>{if(!Array.isArray(data)||data.length>=1000)throw new Error(name+': respuesta no verificable o posiblemente truncada');return data;};
+ const readBase=async()=>{
+  const result=[];const selected=[...new Set(weeks.map(Number))].sort((a,b)=>a-b);
+  for(let offset=0;offset<selected.length;offset+=3)result.push(...(await Promise.all(selected.slice(offset,offset+3).map(async week=>{
+   if(!Number.isInteger(week)||week<1||week>53)throw new Error('Semana inválida');
+   const key=year+':'+week,hit=physicalBaseCache.get(key);if(hit&&hit.expires>Date.now())return hit.promise;
+   const entry={expires:Date.now()+30000};entry.promise=client.rpc('sgp_consultar_programacion_semana',{p_token:token,p_anio:year,p_semana:week}).then(response=>{
+    if(response.error)throw response.error;if(response.data?.ok===false||!Array.isArray(response.data?.producciones))throw new Error('La consulta base no devolvió producciones verificables');return response.data.producciones;
+   }).catch(error=>{if(physicalBaseCache.get(key)===entry)physicalBaseCache.delete(key);throw error;});
+   physicalBaseCache.set(key,entry);return entry.promise;
+  }))).flat());return result;
+ };
  if(!physicalSnapshot||Date.now()-physicalSnapshot.time>30000){
   if(!physicalPending){
    const schedule=progSchedule.map(row=>({...row})),moves=progMoves.map(row=>({...row}));
-   const pending=(async()=>{const client=await getMecanizadoReadClient(),ids=[...new Set(schedule.map(r=>r.id_programacion))],reserves=[...new Set(schedule.map(r=>String(r.reserva)))];
-    const [executions,orderExecutions,links,cov]=await Promise.all([
+   requireRows(schedule,'Asignaciones de mecanizado');
+   const pending=(async()=>{const ids=[...new Set(schedule.map(r=>r.id_programacion))],reserves=[...new Set(schedule.map(r=>String(r.reserva)))];
+    const [executions,orderExecutions,links,cov,reception,relations]=await Promise.all([
      readPhysicalRows(client,'sgp_mecanizado_ejecucion','id_programacion,estado,cantidad_procesada',ids,['id_programacion']),
      readPhysicalRows(client,'sgp_mecanizado_ejecucion_orden','id_programacion,produccion,estado',ids,['id_programacion','produccion']),
      readPhysicalRows(client,'sgp_produccion_reservas_v','key_produccion,id_linea,reserva,produccion,semana_produccion,acabado_reserva',reserves,['key_produccion','reserva']),
-     client.rpc('sgp_mecanizado_cobertura_ordenes',{p_token:token,p_semana:null})]);
-    if(cov.error)throw cov.error;if(!Array.isArray(cov.data))throw new Error('Cobertura de órdenes inválida');
+     client.rpc('sgp_mecanizado_cobertura_ordenes',{p_token:token,p_semana:null}),
+     client.rpc('sgp_recepcion_listar',{p_token:token,p_semana:null}),
+     client.rpc('sgp_reservas_asociadas_listar',{p_token:token,p_semana:null,p_linea:line})]);
+    for(const response of [cov,reception,relations])if(response.error)throw response.error;
     if(token!==getAppToken()||revision!==physicalRevision)throw new Error('La sesión o programación cambió durante la lectura');
-    const snapshot={schedule,moves,executions,orderExecutions,links,coverage:cov.data};physicalSnapshot={data:snapshot,time:Date.now()};return snapshot;
+    const snapshot={schedule,moves,executions,orderExecutions,links,coverage:requireRows(cov.data,'Cobertura'),receipts:requireRows(reception.data,'Recepción'),shared:requireRows(relations.data,'Relaciones de reserva')};physicalSnapshot={data:snapshot,time:Date.now()};return snapshot;
    })();physicalPending=pending;pending.finally(()=>{if(physicalPending===pending)physicalPending=null;}).catch(()=>{});
   }
-  await physicalPending;
  }
+ const [base]=await Promise.all([readBase(),physicalPending||Promise.resolve()]);
  if(token!==getAppToken()||revision!==physicalRevision)throw new Error('Datos de avance obsoletos');
- return physicalProgress(physicalSnapshot.data,weeks,system);
+ const data=physicalSnapshot.data;
+ if(!base.some(p=>p.id_linea===line&&Number(p.anio)===year&&weeks.includes(Number(p.semana_actual??p.semana_base)))&&data.schedule.some(s=>Number(String(s.fecha_programacion||'').slice(0,4))===year&&data.links.some(l=>l.id_linea===line&&String(l.reserva)===String(s.reserva)&&weeks.includes(Number(l.semana_produccion)))))throw new Error('La base devolvió cero pese a relaciones productivas del alcance; revisar acceso y contrato de la RPC');
+ return basePhysicalProgress({...data,base},{weeks,year,line,system});
 };
 window.SGPWeeklyAnchor=()=>progCalendarAnchor;
 const progGroupName={1:'OK / Entregadas en sistema',2:'Recibidas sin legalizar',3:'Pendientes por Bodega',4:'Pendientes por Abastecimiento'};

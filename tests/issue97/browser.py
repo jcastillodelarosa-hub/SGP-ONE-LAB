@@ -31,7 +31,7 @@ try:
     window.SGPOpenOperationalDetail=openWorkloadDetail;window.renderCalendar=()=>renderWorkloadCalendar({host:document.querySelector('#legacyCalendar'),dates:['2026-10-26','2026-10-27','2026-10-28','2026-10-29','2026-10-30','2026-10-31','2026-11-01'],load:window.SGPOperationalLoad});
     document.querySelector('#progRefresh').onclick=()=>{window.reader.clear();window.dispatchEvent(new Event('sgp:programming-loaded'));};
    }''',{'base':base,'production':production})
-   assert 'LAB v359' in page.locator('#releaseVersion').inner_text()
+   assert 'LAB v360' in page.locator('#releaseVersion').inner_text()
    assert page.evaluate('window.prodSnapshot.reduce((n,row)=>n+row.cantidad_programada,0)')==65
    page.locator('#prodBoard').evaluate('node=>node.remove()')
    page.add_script_tag(url=base+'/programacion-subtabs-v350.js')

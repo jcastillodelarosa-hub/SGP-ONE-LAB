@@ -1,0 +1,54 @@
+[
+  {
+    "viewport": [
+      1366,
+      1000
+    ],
+    "base_reference_2026_week44": 1106,
+    "source_of_reference": "owner supplied Supabase aggregate, reproduced as fixture, not a live authenticated comparison",
+    "synthetic_received": 650,
+    "synthetic_processed": 440,
+    "no_base_assignment_required": true,
+    "unassigned_NC300": 14,
+    "one_nested_bar_per_system": true,
+    "blue_ratio": 0.6082036775106082,
+    "green_ratio": 0.4243281471004243,
+    "totals_weighted": true,
+    "units_percentage_chart": true,
+    "year_week_system_filters": true,
+    "partial_reception_unknown_not_zero": true,
+    "processed_above_received_not_clamped": true,
+    "failed_query_no_stale_totals": true,
+    "late_response_discarded": true,
+    "session_change_protected": true,
+    "external_network": false,
+    "horizontal_page_overflow": false,
+    "errors": []
+  },
+  {
+    "viewport": [
+      390,
+      844
+    ],
+    "base_reference_2026_week44": 1106,
+    "source_of_reference": "owner supplied Supabase aggregate, reproduced as fixture, not a live authenticated comparison",
+    "synthetic_received": 650,
+    "synthetic_processed": 440,
+    "no_base_assignment_required": true,
+    "unassigned_NC300": 14,
+    "one_nested_bar_per_system": true,
+    "blue_ratio": 0.6082036775106082,
+    "green_ratio": 0.4243281471004243,
+    "totals_weighted": true,
+    "units_percentage_chart": true,
+    "year_week_system_filters": true,
+    "partial_reception_unknown_not_zero": true,
+    "processed_above_received_not_clamped": true,
+    "failed_query_no_stale_totals": true,
+    "late_response_discarded": true,
+    "session_change_protected": true,
+    "external_network": false,
+    "horizontal_page_overflow": false,
+    "errors": []
+  }
+]
