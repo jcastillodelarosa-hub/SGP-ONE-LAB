@@ -17,6 +17,7 @@ on:
           - restore-backup
           - install-production
           - production-smoke
+          - inspect-pdt-case
 
 permissions:
   contents: read
@@ -176,7 +177,7 @@ jobs:
 
   production-smoke:
     name: PDT - live release verification without persistent QA data
-    if: github.ref == 'refs/heads/feat/pdt-multifabricacion-avances-nc' && inputs.operation == 'production-smoke'
+    if: github.ref == 'refs/heads/feat/pdt-multifabricacion-avances-nc' && (inputs.operation == 'production-smoke' || inputs.operation == 'inspect-pdt-case')
     runs-on: ubuntu-24.04
     timeout-minutes: 12
     environment: supabase-backup
@@ -193,4 +194,4 @@ jobs:
       - name: Verify real authentication transaction and deployed browser
         env:
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-        run: python3 tests/pdt-backup/production_smoke.py --browser-only
+        run: python3 tests/pdt-backup/production_smoke.py ${{ inputs.operation == 'inspect-pdt-case' && '--inspect-pdt-case' || '--browser-only' }}
