@@ -2282,8 +2282,18 @@ function openProgModal(reserva,produccion,qty,partPriority=null){if(qty<=0)retur
 function closeProgModal(){document.querySelector('#progModal').hidden=true;document.querySelector('#progQty').readOnly=false;progSelection=null}
 async function saveProgramming(){if(!progSelection)return;const args={p_token:getAppToken(),p_reserva:progSelection.reserva,p_produccion:progSelection.produccion,p_cantidad:Number(document.querySelector('#progQty').value),p_fecha:document.querySelector('#progDate').value,p_turno:document.querySelector('#progShift').value,p_prioridad:Number(document.querySelector('#progPriority').value),p_prioridad_semanal:progSelection.part?String(progSelection.part.prioridad):null,p_observacion:document.querySelector('#progObs').value,p_observacion_orden:[document.querySelector('#progOrderObs').value,...[...document.querySelectorAll('#progPartsBox textarea')].filter(x=>x.value.trim()).map(x=>x.dataset.partOrder+': '+x.value.trim())].filter(Boolean).join(' | ')};if(!args.p_fecha||!args.p_cantidad){alert('Complete fecha y cantidad.');return}if(args.p_cantidad>progSelection.maxQty){alert('Solo quedan '+progSelection.maxQty+' ventanas pendientes por programar.');return}if(!args.p_produccion&&progSelection.part){
  const eligible=(progSelection.part.ordenes||[]).filter(o=>Number(o.cantidad||0)===args.p_cantidad&&!progOrderCoverage.some(c=>String(c.reserva)===String(args.p_reserva)&&String(c.prioridad_semanal||'')===String(args.p_prioridad_semanal)&&String(c.produccion||'')===String(o.produccion||'')&&c.estado_orden==='PROGRAMADA'));
- if(eligible.length===1)args.p_produccion=eligible[0].produccion;
- else{alert('Esta parte contiene varias órdenes. Selecciona «Programar esta orden» para evitar incluir cantidades o acabados de otra producción.');return}
+ // La programación completa de una parte conserva p_produccion=null: el RPC
+ // vincula todas las órdenes canónicas pendientes y valida el total atómicamente.
+ // Para cantidades parciales seguimos exigiendo una orden inequívoca.
+ const fullPart=Number(args.p_cantidad)===Number(progSelection.maxQty);
+ if(fullPart){
+   args.p_produccion=null;
+ }else if(eligible.length===1){
+   args.p_produccion=eligible[0].produccion;
+ }else{
+   alert('Para programar una cantidad parcial de esta parte, selecciona «Programar esta orden». Para programarla completa, utiliza todas las ventanas pendientes.');
+   return;
+ }
 }
 const c=await getSupabaseClient();let {error}=await c.rpc('sgp_mecanizado_programar',args);if(error&&/schema cache|Could not find the function/i.test(error.message||'')){await new Promise(r=>setTimeout(r,700));({error}=await c.rpc('sgp_mecanizado_programar',args))}if(error){alert(error.message);return}closeProgModal();await loadProgramming({invalidateCarry:true})}
 document.querySelector('#progRefresh')?.addEventListener('click',()=>{deferredProgrammingLoad.cancel();loadProgramming({invalidateCarry:true})});document.querySelector('#progWeek')?.addEventListener('change',scheduleProgrammingLoad);document.querySelector('#progSearch')?.addEventListener('input',latestTask(()=>machiningMetrics.sync('programming-filter',()=>renderProgramming({skipCalendar:true})),40));document.querySelector('#progModalClose')?.addEventListener('click',closeProgModal);document.querySelector('#progCancel')?.addEventListener('click',closeProgModal);document.querySelector('#progSave')?.addEventListener('click',saveProgramming);
