@@ -39,6 +39,9 @@ jobs:
       - name: Build local Supabase browser SDK
         run: npm run build:vendor
 
+      - name: Stamp actual release commit in the visible version indicator
+        run: node scripts/build-release-info.mjs
+
       - name: Verify LAB release package
         run: npm run verify:release
 

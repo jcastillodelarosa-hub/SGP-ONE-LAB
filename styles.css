@@ -2330,3 +2330,22 @@ button.active,[aria-pressed="true"]{border-color:#0865ed}
 
 /* LAB v348: estado operativo inicial legible, incluido en selects y tarjetas móviles. */
 .state-sin-iniciar{background:#f3e81b!important;color:#202020!important}
+
+/* PDT contract guidance and scoped contrast: broad legacy modal-head rules set white text. */
+#repoWorkModal .repo-work-body{color:#173e5e;background:#fff}
+#repoWorkModal .repo-work-body .repo-section-head,
+#repoWorkModal .repo-work-body .repo-piece-source-head{color:#173e5e!important}
+#repoWorkModal .repo-work-body .repo-section-head :is(h3,span,small,p),
+#repoWorkModal .repo-work-body .repo-piece-source-head :is(b,span,strong),
+#repoWorkModal .repo-work-body .repo-piece-head span{color:#173e5e!important}
+#repoWorkModal .repo-work-body label,#repoWorkModal .repo-piece-row{color:#173e5e}
+#repoWorkModal .repo-work-body :is(input,select,textarea){color:#173e5e;background:#fff}
+#repoWorkModal .repo-work-footer button.success{background:#087443;border-color:#087443;color:#fff}
+.repo-flow-notice{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px;margin-bottom:16px;border:1px solid #b8cce0;border-radius:10px;background:#f0f6fc;color:#173e5e}
+.repo-flow-notice p{margin:8px 0 0;line-height:1.55;font-size:13px;max-width:72ch}
+.repo-contract-badge{display:inline-block;padding:4px 8px;border:1px solid #b8cce0;border-radius:5px;background:#edf4fa;color:#174e79;font-size:11px;font-weight:800;white-space:nowrap}
+.repo-v2-entry{padding:10px 13px;border:1px solid #0753a6;border-radius:7px;background:#0753a6;color:#fff;font-size:12px;font-weight:750;cursor:pointer}
+.repo-v2-entry:hover{background:#063f7d}
+.repo-v2-entry:focus-visible{outline:3px solid #dc8d13;outline-offset:3px}
+.repo-flow-notice .repo-v2-entry{flex-shrink:0}
+@media(max-width:600px){.repo-flow-notice{align-items:stretch;flex-direction:column;gap:12px}.repo-flow-notice .repo-v2-entry{width:100%}}
