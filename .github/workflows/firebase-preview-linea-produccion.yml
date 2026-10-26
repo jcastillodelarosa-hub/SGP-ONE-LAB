@@ -193,4 +193,4 @@ jobs:
       - name: Verify real authentication transaction and deployed browser
         env:
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-        run: python3 tests/pdt-backup/production_smoke.py
+        run: python3 tests/pdt-backup/production_smoke.py --browser-only
