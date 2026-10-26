@@ -1,0 +1,60 @@
+[
+  {
+    "viewport": [
+      1366,
+      1000
+    ],
+    "metrics": [
+      9,
+      9,
+      0,
+      9
+    ],
+    "distribution": [
+      4,
+      5
+    ],
+    "NC": [
+      1006163,
+      1006164,
+      1006165
+    ],
+    "repo_ok_not_delivery": true,
+    "all_11_write_RPC_contracts": true,
+    "reception_no_machining": true,
+    "audit_not_creditable": true,
+    "closed_readonly": true,
+    "keyboard_scroll_no_horizontal_overflow": true,
+    "external_requests_allowed": false,
+    "js_errors": []
+  },
+  {
+    "viewport": [
+      390,
+      844
+    ],
+    "metrics": [
+      9,
+      9,
+      0,
+      9
+    ],
+    "distribution": [
+      4,
+      5
+    ],
+    "NC": [
+      1006163,
+      1006164,
+      1006165
+    ],
+    "repo_ok_not_delivery": true,
+    "all_11_write_RPC_contracts": true,
+    "reception_no_machining": true,
+    "audit_not_creditable": true,
+    "closed_readonly": true,
+    "keyboard_scroll_no_horizontal_overflow": true,
+    "external_requests_allowed": false,
+    "js_errors": []
+  }
+]

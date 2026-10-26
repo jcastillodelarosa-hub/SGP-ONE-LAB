@@ -2387,3 +2387,46 @@ button.active,[aria-pressed="true"]{border-color:#0865ed}
 #prodNoveltyModal .modal-header{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
 #prodNoveltyModal .modal-header>div{display:grid;gap:4px;min-width:0}
 #prodNoveltyModal .modal-header small{display:block;line-height:1.4}
+
+/* Issue95: existing work dialog, shared SGP blue/white hierarchy. */
+.pdt-v2-modal .repo-work-card{width:min(1180px,calc(100vw - 28px))}
+.pdt-v2-modal .repo-work-body{background:#f7f9fc;color:#0b2442;min-height:0}
+.pdt-detail-header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.pdt-detail-header p{margin:8px 0;font-weight:600;overflow-wrap:anywhere}
+.pdt-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:16px 0}
+.pdt-metrics>div{border:1px solid #dce6ef;border-radius:12px;background:#fff;padding:14px 18px}
+.pdt-metrics span{display:block;color:#48627d;font-size:13px}.pdt-metrics strong{display:block;font-size:28px;color:#103b73;margin-top:4px}
+.pdt-availability{background:#edf8f1;border:1px solid #8bc6a3;border-radius:10px;padding:12px 16px;margin-bottom:16px;color:#155832}
+.pdt-availability p{margin:8px 0 0;font-size:13px}.pdt-repo-ok{display:inline-block;color:#155832;background:#dff3e6;border-radius:6px;padding:5px 8px;font-weight:750}.pdt-repo-partial{color:#79520b;background:#fff2d4;padding:5px 8px;border-radius:6px}
+.pdt-tabs{display:flex;gap:4px;border-bottom:1px solid #b8cce0;margin:16px 0 0}
+.pdt-tabs button{background:transparent;border:0;border-bottom:3px solid transparent;color:#48627d;font:inherit;font-weight:650;padding:12px 14px;cursor:pointer}
+.pdt-tabs button[aria-selected=true]{color:#103b73;border-bottom-color:#1264c8;background:#eaf2fb}
+.pdt-panel{min-width:0;border:1px solid #dce6ef;border-top:0;background:#fff;border-radius:0 0 12px 12px}
+.pdt-panel:not([open]){display:none}.pdt-panel>summary{display:none}.pdt-panel-content{padding:18px;min-width:0}
+.pdt-table-wrap{max-width:100%;overflow-x:auto;border:1px solid #dce6ef;border-radius:8px;margin:12px 0}
+.pdt-table-wrap table{width:100%;border-collapse:collapse;font-size:14px}.pdt-table-wrap :is(td,th){text-align:left;padding:10px 12px;border-bottom:1px solid #e1e9f2;overflow-wrap:anywhere}.pdt-table-wrap thead{background:#eaf2fb;color:#103b73}.pdt-table-wrap input{width:100%;min-width:64px;max-width:110px}
+.pdt-v2-modal :is(button,input,select,textarea):focus-visible,.pdt-v2-modal summary:focus-visible{outline:3px solid #1264c8;outline-offset:3px}
+.pdt-v2-modal .repo-modal-section{border:0;margin:0;padding:0}.pdt-v2-modal label{display:grid;gap:6px;margin:12px 0;font-weight:600}.pdt-v2-modal :is(input,select,textarea){box-sizing:border-box;max-width:100%;min-height:42px;border:1px solid #b8cce0;border-radius:8px;padding:8px;background:#fff;color:#0b2442;font:inherit}
+.pdt-v2-modal .pdt-panel-content button{min-height:42px;background:#1264c8;color:#fff;border:1px solid #1264c8;border-radius:8px;padding:8px 12px;font-weight:650;cursor:pointer}.pdt-v2-modal button:disabled{opacity:.5;cursor:not-allowed}
+.pdt-advance-context{display:flex;gap:12px;align-items:end;flex-wrap:wrap}.pdt-advance-context label{flex:1;min-width:140px}.pdt-history{padding-left:22px}.pdt-history li{padding:10px;border-bottom:1px solid #e1e9f2}.pdt-history span{display:block;margin-top:6px;color:#48627d}.pdt-readonly{font-weight:650;color:#103b73}
+.pdt-list-menu{position:relative}.pdt-list-menu summary{cursor:pointer;list-style:none;padding:8px;border:1px solid #b8cce0;border-radius:8px}.pdt-list-menu[open]{z-index:5}.pdt-list-menu>div{position:absolute;right:0;min-width:190px;background:#fff;border:1px solid #b8cce0;padding:6px;box-shadow:0 6px 18px #103b7320;border-radius:8px}.pdt-list-menu button{display:block;width:100%;text-align:left;padding:9px;border:0;background:#fff;color:#103b73;cursor:pointer}
+@media(max-width:640px){
+ .pdt-v2-modal .repo-work-card{width:calc(100vw - 12px);max-height:96dvh}.pdt-metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.pdt-metrics>div{padding:12px}.pdt-metrics strong{font-size:24px}
+ .pdt-tabs{display:none}.pdt-panel,.pdt-panel:not([open]){display:block;border:1px solid #dce6ef;border-radius:10px;margin:10px 0}.pdt-panel>summary{display:block;padding:14px;font-weight:750;color:#103b73;cursor:pointer;background:#eaf2fb;border-radius:10px}.pdt-panel>summary::after{content:'\002b';float:right}.pdt-panel[open]>summary::after{content:'\2212'}.pdt-panel-content{padding:12px}.pdt-v2-modal .repo-work-footer{position:sticky;bottom:0;padding-bottom:max(10px,env(safe-area-inset-bottom))}
+ .pdt-table-wrap{overflow:visible;border:0}.pdt-table-wrap table,.pdt-table-wrap tbody{display:block}.pdt-table-wrap thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}.pdt-table-wrap tr{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border:1px solid #dce6ef;border-radius:8px;margin:10px 0;padding:6px}.pdt-table-wrap :is(td,th){display:block;padding:8px;min-width:0}.pdt-table-wrap :is(td,th)::before{content:attr(data-label);display:block;color:#48627d;font-size:12px;margin-bottom:4px}.pdt-table-wrap input{max-width:100%}.pdt-table-wrap button{max-width:100%;white-space:normal}
+}
+/* Neutralize old global modal [class*=head] white-text rule on this light header. */
+.pdt-v2-modal .pdt-detail-header :is(p,span){color:#103b73!important}
+.pdt-v2-modal .pdt-detail-header{min-width:0}
+.pdt-v2-modal .pdt-table-wrap table{min-width:0}
+.pdt-v2-modal :is(select,textarea){min-width:0;width:100%}
+.pdt-v2-modal .pdt-panel-content{overflow-wrap:anywhere}
+.al-pending-sort label{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.al-pending-sort input{max-width:100%;min-height:40px;border:1px solid #b8cce0;padding:8px;border-radius:8px;background:#fff;color:#0b2442}.al-pending-row .repo-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+#prodAluminumPending .al-pending-row{padding:14px;gap:12px;overflow-wrap:anywhere}
+#prodAluminumPending .al-pending-row b{font-size:14px}
+#prodAluminumPending .al-pending-row :is(span,small){font-size:13px;line-height:1.5}
+#prodAluminumPending .al-pending-row .pdt-repo-ok{font-size:13px;color:#155832;white-space:normal}
+#prodAluminumPending .al-pending-head span{font-size:12px}
+#prodAluminumPending .repo-actions button,#prodAluminumPending .pdt-list-menu summary{min-height:42px;min-width:42px}
+#prodAluminumPending .pdt-list-menu>div{min-width:210px}
+#prodAluminumPending .pdt-production-disclaimer{font-size:13px;line-height:1.5;margin:0;padding:10px 14px;background:#edf8f1;color:#155832;border-bottom:1px solid #b7dbc5}

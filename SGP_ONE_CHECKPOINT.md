@@ -376,3 +376,46 @@ condicional. Bundle único transaccional preparado mediante builder sin conexió
 Fuentes, matriz9casos, límites y estados en docs/sql-proposals/pdt/identity/README.md.
 No SQL productivo, no Firebase, no main, no fusión/despliegue. Preparar PR Draft
 para revisión; aplicar/merge/publicar requieren autorización posterior independiente.
+
+
+## Issue95 — interfaz PDT v2 y Producción, preparada sin publicación
+
+Registro UTC: 2026-10-26T13:59:35.189655+00:00. Proyecto SGP-ONE-LAB únicamente.
+Base main verificada `89c2bbf4713082167961df22d82e511eccfd5f0e`: PR94 ya fusionado.
+Rama independiente `feat/issue-95-pdt-v2-ux`; implementación preservada en
+`4bdc48a5d3ceb9dc9cdd0297a05602609b792a22`. Fuente: Issue95 de GitHub, sin comentarios
+ni imagen adjunta; se implementa su especificación textual del boceto azul/blanco.
+
+Implementado: encabezado/métricas, REPO OK independiente sin acreditar inventario,
+distribución en consulta, avances por fabricación, NC, Picking positivo y faltantes
+por id_entrega, historial bajo demanda, tabs PC/acordeones móvil, acción fija,
+confirmaciones, teclado/foco/errores. Producción con estados y validación separados,
+Abrir/menú condicionado, reserva/sistema/semana/cantidad, búsqueda local y orden.
+Conserva RPC, argumentos, idempotencia, roles reales, LEGACY/V2 y maestro PANEL/FRAME.
+PICKING V2 cerrado queda en consulta; no se amplían permisos de mecanizado a Recepción.
+No se cambia ningún SQL del PR94 ni su reparación22; no se repiten las47 correcciones.
+
+Archivos y matriz: `tests/pdt-v2-ux/README.md`; módulos controller/presentation/
+production-actions/flow-guidance, app.js, estilos y pruebas. Capturas PC1366×1000 y
+móvil390×844, resultados JSON y fixture sintética en `tests/pdt-v2-ux/evidence/`.
+Caso sintético9=4+5, tres NC finalizadas, avance0/saldo9; once escrituras RPC probadas
+contra cliente simulado, no producción. Historial/faltantes consultados por RPC ya
+existentes; faltantes ausentes en la cola no se convierten en cero ni prueba de entrega.
+
+Evidencia local: suite JS238/238 antes de la última regresión vacía; archivo dirigido
+4/4 después (incluye una nueva aserción independiente de cantidad no inventada).
+Navegador nuevo PC/móvil aprobado; regresión existente en1280/390 aprobada;
+node --check, verify:release LABv354 y diff --check aprobados. Sin credenciales
+coincidentes en revisión dirigida. No se repiten baterías SQL sin cambios de backend.
+Push de rama no activa Hosting: solo pushmain/manual; PR ejecuta Tests/Sintaxis.
+
+Estado: IMPLEMENTADO EN RAMA / VERIFICADO LOCALMENTE; NO FUSIONADO, NO APLICADO A
+SUPABASE, NO PUBLICADO por esta tarea. El caso operativo y teléfono físico no se
+probaron; capturas no equivalen a validación productiva ni comparación píxel a píxel.
+No se modificaron Firebase, Supabase, workflows, main, GOOGLE ni LAC. Se conservan
+los cambios históricos de otros worktrees. El checkpoint anterior de reparación22
+es histórico; el PR94 ya forma parte de la base de este hito.
+
+Siguiente paso único: revisar el PR Draft de esta rama y las capturas. Detenerse
+antes de fusión/despliegue; requieren autorización posterior. No reejecutar SQL94
+ni crear otro PR por recuperar continuidad.
