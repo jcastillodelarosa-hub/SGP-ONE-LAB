@@ -38,6 +38,10 @@ SELECT jsonb_build_object('pending',true,'backup_count',(SELECT count(*) FROM b)
  'dependent_counts',jsonb_build_object('detalles',(SELECT count(*) FROM public.sgp_aluminio_pendiente_detalles d JOIN cohort c USING(id_pendiente)), 'movimientos',(SELECT count(*) FROM public.sgp_aluminio_pendiente_movimientos d JOIN cohort c USING(id_pendiente)), 'cierres',(SELECT count(*) FROM public.sgp_pdt_cierres d JOIN cohort c USING(id_pendiente)), 'ncs',(SELECT count(*) FROM public.sgp_aluminio_pendiente_ncs d JOIN cohort c USING(id_pendiente))));
 ROLLBACK;"""
 
+PERMISSIONS_SQL="""BEGIN READ ONLY;
+SELECT jsonb_build_object('pending',true,'novelty',(SELECT jsonb_build_object('rls',c.relrowsecurity,'force_rls',c.relforcerowsecurity,'owner',pg_get_userbyid(c.relowner),'anon_insert',has_table_privilege('anon',c.oid,'INSERT'),'authenticated_insert',has_table_privilege('authenticated',c.oid,'INSERT'),'policies',(SELECT jsonb_agg(jsonb_build_object('name',p.polname,'command',p.polcmd,'roles',p.polroles::text,'using',pg_get_expr(p.polqual,p.polrelid),'check',pg_get_expr(p.polwithcheck,p.polrelid))) FROM pg_policy p WHERE p.polrelid=c.oid)) FROM pg_class c WHERE c.oid='public.sgp_mecanizado_novedades'::regclass));
+ROLLBACK;"""
+
 def main():
  if os.environ.get('GITHUB_ACTIONS')!='true':raise RuntimeError('Protected runner required')
  with tempfile.TemporaryDirectory(prefix='pdt-read-ca-') as d:
@@ -45,7 +49,7 @@ def main():
   ca.write_bytes(pathlib.Path('/etc/ssl/certs/ca-certificates.crt').read_bytes()+b'\n'+(certs/'prod-ca-2021.crt').read_bytes()+b'\n'+(certs/'prod-ca-2025.crt').read_bytes())
   env=os.environ.copy();env['PGPASSWORD']=os.environ['SUPABASE_DB_PASSWORD']
   cmd=['docker','run','--rm','-i','--log-driver=none','--env','PGPASSWORD','--env','PGHOST=aws-0-us-east-2.pooler.supabase.com','--env','PGPORT=5432','--env','PGDATABASE=postgres','--env','PGUSER=postgres.ocvxbwzqxbrfndkvjmfx','--env','PGSSLMODE=verify-full','--env','PGSSLROOTCERT=/etc/pdt-ca.crt','--env','PGCONNECT_TIMEOUT=20','--env','PGOPTIONS=-c default_transaction_read_only=on','--mount','type=bind,source='+str(ca)+',target=/etc/pdt-ca.crt,readonly','postgres:17','psql','-X','-qAt','-v','ON_ERROR_STOP=1']
-  r=subprocess.run(cmd,input=({'--identity-core':CATALOG_SQL,'--identity-guards':GUARDS_SQL,'--identity-cohort':COHORT_SQL}.get(sys.argv[1] if len(sys.argv)>1 else '',SQL)).encode(),env=env,capture_output=True,timeout=90)
+  r=subprocess.run(cmd,input=({'--identity-core':CATALOG_SQL,'--identity-guards':GUARDS_SQL,'--identity-cohort':COHORT_SQL,'--identity-permissions':PERMISSIONS_SQL}.get(sys.argv[1] if len(sys.argv)>1 else '',SQL)).encode(),env=env,capture_output=True,timeout=90)
   if r.returncode:raise RuntimeError('Read-only case comparison failed')
   data=json.loads(r.stdout)
   if not data['pending']:raise RuntimeError('Observed pending no longer matches; stop')
