@@ -2349,3 +2349,34 @@ button.active,[aria-pressed="true"]{border-color:#0865ed}
 .repo-v2-entry:focus-visible{outline:3px solid #dc8d13;outline-offset:3px}
 .repo-flow-notice .repo-v2-entry{flex-shrink:0}
 @media(max-width:600px){.repo-flow-notice{align-items:stretch;flex-direction:column;gap:12px}.repo-flow-notice .repo-v2-entry{width:100%}}
+/* Source identity is per physical PANEL row; never group fabrications in this editor. */
+.pdt-source-table{border:1px solid #c7d7e7;border-radius:8px;overflow:hidden;background:#fff}
+.pdt-source-head,.pdt-source-row{display:grid;grid-template-columns:60px minmax(120px,1.5fr) 1fr 1fr 1fr minmax(100px,1fr);gap:12px;align-items:center;padding:12px}
+.pdt-source-head{background:#e7f0f8;color:#173e5e;font-size:11px;font-weight:800}
+.pdt-source-row+.pdt-source-row{border-top:1px solid #dce6ef}
+.pdt-source-row [role=cell]{min-width:0;font-size:13px;overflow-wrap:anywhere}
+.pdt-source-row small{display:block;margin-top:4px;color:#50677d;font-size:11px}
+#repoWorkModal .pdt-source-row input[type=number]{box-sizing:border-box;width:100%;min-height:40px;padding:8px;border:1px solid #aebfd0;border-radius:6px}
+#repoWorkModal .pdt-source-row input[type=checkbox]{width:20px;height:20px;accent-color:#0753a6}
+.pdt-distribution-total{display:flex;justify-content:space-between;gap:12px;margin:16px 0;padding:12px;border:1px solid #c7d7e7;border-radius:8px;background:#fff;color:#173e5e}
+.pdt-distribution-total[data-valid=true]{border-color:#087443;background:#edf8f1;color:#075632}
+.pdt-distribution-total strong{font-size:12px}
+.pdt-correction-note{display:grid;gap:8px;font-size:13px;font-weight:700}
+.pdt-correction-note span,.pdt-distribution-help{font-size:12px;font-weight:400;color:#50677d}
+.pdt-correction-note textarea{box-sizing:border-box;width:100%;padding:10px;border:1px solid #aebfd0;border-radius:6px;font:inherit}
+.pdt-distribution-actions{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.pdt-distribution-actions button{min-height:42px;padding:10px 14px;border-radius:7px;border:1px solid #aebfd0;cursor:pointer}
+.pdt-distribution-actions [data-operation=validate]{background:#0753a6;color:#fff}
+.pdt-distribution-actions button:disabled{opacity:.55;cursor:not-allowed}
+.pdt-source-error{padding:12px;background:#fff5e6;color:#79420c;border:1px solid #d9b47e;border-radius:8px}
+@media(max-width:640px){.pdt-source-head{display:none}.pdt-source-row{grid-template-columns:1fr 1fr;gap:12px}.pdt-source-row [role=cell]::before{content:attr(data-label);display:block;margin-bottom:6px;color:#50677d;font-size:11px;font-weight:700}.pdt-distribution-total{flex-direction:column}.pdt-distribution-actions button{width:100%}}
+
+#repoWorkModal .pdt-source-head span{color:#173e5e!important}
+
+.pdt-preparation-summary{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:12px;color:#173e5e;font-size:13px}
+.pdt-distribution-footer{width:100%;display:grid;gap:8px}
+.pdt-distribution-footer .pdt-distribution-total{margin:0;padding:10px 12px}
+.pdt-distribution-footer [data-source-status]{margin:0;color:#173e5e;font-size:12px;line-height:1.4}
+.pdt-distribution-footer .pdt-distribution-actions{display:grid;grid-template-columns:1fr 1.4fr auto;gap:8px}
+.pdt-distribution-footer .pdt-distribution-actions button{width:auto;padding:8px 10px;font-size:12px}
+.pdt-distribution-footer .pdt-distribution-total{flex-direction:row;align-items:center;flex-wrap:wrap}

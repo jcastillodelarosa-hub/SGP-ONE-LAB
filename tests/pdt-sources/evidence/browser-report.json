@@ -1,0 +1,32 @@
+[
+  {
+    "viewport": [
+      1440,
+      1000
+    ],
+    "empty_disabled": true,
+    "retry": true,
+    "9_equals_5_plus_4": true,
+    "9_to_8_requires_reason": true,
+    "invalid_identity_or_quantity_disabled": true,
+    "legacy_fallback": false,
+    "pending_request_stays_disabled": true,
+    "original_and_ncs_unchanged": true,
+    "uncaught_errors": 0
+  },
+  {
+    "viewport": [
+      390,
+      844
+    ],
+    "empty_disabled": true,
+    "retry": true,
+    "9_equals_5_plus_4": true,
+    "9_to_8_requires_reason": true,
+    "invalid_identity_or_quantity_disabled": true,
+    "legacy_fallback": false,
+    "pending_request_stays_disabled": true,
+    "original_and_ncs_unchanged": true,
+    "uncaught_errors": 0
+  }
+]

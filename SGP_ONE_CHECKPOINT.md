@@ -348,3 +348,16 @@ La autorización de merge/despliegue está vigente; no pedirla otra vez. La evid
 final de publicación y smoke se registra en el PR91 y la entrega de esta ejecución.
 No restaurar este dump sobre escrituras posteriores: después del commit conservar
 datos/guards y preferir corrección forward; replay automático no demostrado.
+
+## Corrección puntual fuentes PDT v2 — preparada en rama, no publicada
+
+Base main actual e1a5ca5c38456fb746c5954ae4b8e8f127116ea4. Caso reserva8558585,
+reporte9: clave pendiente1265779|FRAMES_2 y cuatro fuentes PANEL1265779|PANELES_2.
+Identidad maestra, nombre, sistema y reserva/acabado compartidos comprobados en
+lectura real (run40256838778). Legacy agrupa y no tiene IDs; no es fallback V2.
+UI nueva de distribución/reintento/totales y SQL REVIEW de contexto común preparados;
+incluye dependencia de validación y guard snapshot Picking, sin cambiar históricos.
+Pruebas limitadas a fuentes/distribución/PC-móvil aprobadas. Evidencia, capturas y
+límites exactos en tests/pdt-sources/README.md. No aplicar propuesta, fusionar ni
+publicar sin nueva autorización; falta ensayo completo de esa nueva instalación.
+No hubo escritura Supabase productivo ni operaciones de prueba sobre datos reales.

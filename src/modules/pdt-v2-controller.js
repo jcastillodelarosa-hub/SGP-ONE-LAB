@@ -1,5 +1,6 @@
+import {distributionState,renderSourceDistribution} from './pdt-source-distribution.js';
 import {executePendingV2} from '../services/aluminum-pending-v2.js';
-import {normalizeNcNumbers,validateFabricationDistribution,ncAvailability} from '../domain/aluminum-pending-balances.js';
+import {normalizeNcNumbers,ncAvailability} from '../domain/aluminum-pending-balances.js';
 
 /** Uses SGP's existing scrollable work modal. Backend is always final authority. */
 export async function openPdtV2({row,client,token,role,capabilities,show,escape:esc,reload,close}) {
@@ -8,12 +9,14 @@ export async function openPdtV2({row,client,token,role,capabilities,show,escape:
   const validator=['ADMINISTRADOR','COORDINADOR','RECEPCION','LIDER LINEA','SUPERVISOR DE PICKING'].includes(role);
   const machinist=['ADMINISTRADOR','COORDINADOR','LIDER MECANIZADO','LIDER'].includes(role);
   const ncEditor=['ADMINISTRADOR','COORDINADOR','PATINADOR'].includes(role);
-  let sources=[];
+  let sources=[],sourceError=null;
   if(!validated && validator){
-    const result=await client.rpc('sgp_pdt_fuentes_v2',{p_token:token,p_id:row.id_pendiente});
-    if(result.error)throw result.error;
-    if(!Array.isArray(result.data))throw new Error('Fuentes PDT inválidas');
-    sources=result.data;
+    try{
+      const result=await client.rpc('sgp_pdt_fuentes_v2',{p_token:token,p_id:row.id_pendiente});
+      if(result.error)throw result.error;
+      if(!Array.isArray(result.data))throw new Error('Respuesta de fuentes V2 inválida');
+      sources=result.data;
+    }catch(error){sourceError=error.message||'Consulta de fuentes no disponible';}
   }
   let picking={entregas:[],lineas:[]};
   const pickRegister=['ADMINISTRADOR','COORDINADOR','PICKING','SUPERVISOR DE PICKING'].includes(role);
@@ -27,9 +30,10 @@ export async function openPdtV2({row,client,token,role,capabilities,show,escape:
   const details=row.detalles||[];
   const moves=(row.movimientos||[]).filter(m=>m.tipo==='AVANCE' && !(row.movimientos||[]).some(x=>x.id_movimiento_revertido===m.id_movimiento));
   const ncSummary=ncAvailability(row.ncs);
-  const summary='<p><span class="repo-contract-badge">Contrato actual: '+(validated?'V2':'LEGACY')+'</span></p><p>Reportada: <b>'+esc(row.cantidad)+'</b> · Validada: <b>'+esc(row.cantidad_validada??'—')+'</b> · Avance neto: <b>'+esc(row.avance_neto??'—')+'</b> · Saldo: <b>'+esc(row.saldo_mecanizado??'—')+'</b></p><p>NC finalizadas: '+ncSummary.finalizadas+'/'+ncSummary.total+(ncSummary.posibleSolucion?' · REPO OK: posible solución, sin acreditar entrega.':'')+'</p>';
+  const summaryBase='<p><span class="repo-contract-badge">Contrato actual: '+(validated?'V2':'LEGACY')+'</span></p><p>Reportada: <b>'+esc(row.cantidad)+'</b> · Validada: <b>'+esc(row.cantidad_validada??'—')+'</b> · Avance neto: <b>'+esc(row.avance_neto??'—')+'</b> · Saldo: <b>'+esc(row.saldo_mecanizado??'—')+'</b></p><p>NC finalizadas: '+ncSummary.finalizadas+'/'+ncSummary.total+(ncSummary.posibleSolucion?' · REPO OK: posible solución, sin acreditar entrega.':'')+'</p>';
+  const summary=!validated&&validator?'<div class="pdt-preparation-summary"><span class="repo-contract-badge">Contrato actual: LEGACY</span><span>Reporte original: <b>'+esc(row.cantidad)+'</b></span><span>NC vinculadas: '+ncSummary.total+'</span></div>':summaryBase;
   let form='';
-  if(!validated && validator)form+='<section class="repo-modal-section"><h3>Distribución PANEL</h3><p>Confirmar la distribución activa el contrato V2. Se conserva el reporte original y no se podrá redistribuir después de validar.</p>'+sources.map((p,i)=>'<label class="repo-pair-field"><span><input type="checkbox" data-source="'+i+'"> '+esc(p.fabricacion)+' · '+esc(p.longitud)+' · '+esc(p.acabado)+' · Marca '+esc(p.marca||'—')+' · Uso '+esc(p.uso||'—')+'</span><input aria-label="Cantidad '+esc(p.fabricacion)+'" data-source-qty="'+i+'" type="number" min="1" step="1" value="'+esc(p.cantidad)+'"></label>').join('')+'<label>Motivo de corrección<textarea data-note rows="2"></textarea></label><button type="button" data-operation="validate">Validar distribución</button></section>';
+  if(!validated && validator)form+=renderSourceDistribution(sources,row.cantidad,sourceError,esc);
   if(validated && machinist)form+='<section class="repo-modal-section"><h3>Avances y reversos</h3><label>Fabricación<select data-detail>'+details.map(d=>'<option value="'+esc(d.id_detalle)+'">'+esc(d.fabricacion)+' · saldo '+esc(d.saldo)+'</option>').join('')+'</select></label><label>Cantidad<input data-qty type="number" min="1" step="1"></label><label>Turno<select data-shift><option>T1</option><option>T2</option></select></label><label>Fecha operativa<input data-date type="date" required></label><label>Observación / motivo<textarea data-note rows="2"></textarea></label><button type="button" data-operation="advance">Registrar avance</button><label>Avance a revertir<select data-movement>'+moves.map(m=>'<option value="'+esc(m.id_movimiento)+'">'+esc(m.cantidad)+' · '+esc(m.fecha_operativa)+' · '+esc(m.usuario)+'</option>').join('')+'</select></label><button type="button" data-operation="reverse" '+(!moves.length?'disabled':'')+'>Revertir avance</button><label>Siguiente etapa<select data-stage>'+({PENDIENTE:['CORTE'],CORTE:['MECANIZADO'],MECANIZADO:['PROCESADO']}[row.estado_repo]||[]).map(x=>'<option>'+x+'</option>').join('')+'</select></label><button type="button" data-operation="stage" '+(row.estado_repo==='PROCESADO'?'disabled':'')+'>Confirmar etapa</button></section>';
   if(ncEditor)form+='<section class="repo-modal-section"><h3>NC vinculadas</h3><p>'+esc((row.ncs||[]).map(n=>(n.referencia||n.consecutivo)+' · '+(n.estado||n.resolucion)).join(' / ')||row.nc||'Sin NC')+'</p><label>Añadir NC (sin reemplazar)<input data-ncs type="text" autocomplete="off"></label><button type="button" data-operation="nc">Añadir NC</button></section>';
   if(validated && capabilities.picking_cuantitativo && (pickRegister||pickValidate)){
@@ -41,19 +45,49 @@ export async function openPdtV2({row,client,token,role,capabilities,show,escape:
     if(pickRegister && capabilities.cierre_v2)form+='<button type="button" data-operation="close">Solicitar cierre con evidencia</button>';
     form+='</section>';
   }
-  const modal=show((validated?'PDT v2 · ':'Preparar PDT v2 · ')+(row.produccion||row.reserva),(row.perfil?esc(row.perfil)+' · ':'')+'Reserva '+esc(row.reserva||''),summary+form+'<p role="status" data-result>'+(capabilities.cierre_v2?'El servidor comprobará la cobertura antes de cerrar.':'Cierre v2 pendiente de evidencia cuantitativa Picking.')+'</p>','<button type="button" data-dismiss>Cerrar</button>');
+  const modal=show((validated?'PDT v2 · ':'Preparar PDT v2 · ')+(row.produccion||row.reserva),(row.perfil?esc(row.perfil)+' · ':'')+'Reserva '+esc(row.reserva||''),summary+form+'<p role="status" data-result>'+(validated?(capabilities.cierre_v2?'El servidor comprobará la cobertura antes de cerrar.':'Cierre v2 pendiente de evidencia cuantitativa Picking.'):'')+'</p>','<button type="button" data-dismiss>Cerrar</button>');
   modal.querySelector('[data-dismiss]').onclick=close;
+  if(!validated&&validator){
+    const footer=modal.querySelector('.repo-work-footer');
+    if(footer){
+      const panel=document.createElement('div');panel.className='pdt-distribution-footer';
+      const total=modal.querySelector('.pdt-distribution-total'),status=modal.querySelector('[data-source-status]'),actions=modal.querySelector('.pdt-distribution-actions');
+      actions.append(modal.querySelector('[data-dismiss]'));panel.append(total,status,actions);footer.replaceChildren(panel);
+    }
+  }
+
+  let operationPending=false;
+  const selectedSources=()=>[...modal.querySelectorAll('[data-source]:checked')].map(input=>({...sources[+input.dataset.source],cantidad:modal.querySelector('[data-source-qty="'+input.dataset.source+'"]')?.value||''}));
+  const updateDistribution=()=>{
+    const button=modal.querySelector('[data-operation="validate"]');if(!button)return;
+    const state=distributionState(sources,selectedSources(),row.cantidad,modal.querySelector('[data-note]')?.value||'');
+    button.disabled=operationPending||!state.valid;
+    const note=modal.querySelector('[data-note]');if(note)note.required=selectedSources().length>0&&state.total!==Number(row.cantidad);
+    modal.querySelector('[data-assigned-total]').textContent=String(state.total);
+    modal.querySelector('[data-distribution-label]').textContent=state.valid?(state.corrected?'Corrección justificada':'Coincide con el reporte'):'Distribución pendiente';
+    modal.querySelector('[data-source-status]').textContent=sourceError?'Consulta fallida. Reintenta para recuperar fuentes verificables.':state.reason;
+    modal.querySelector('.pdt-distribution-total').dataset.valid=String(state.valid);
+  };
+  modal.querySelectorAll('[data-source],[data-source-qty],[data-note]').forEach(input=>input.addEventListener('input',updateDistribution));
+  modal.querySelectorAll('[data-source]').forEach(input=>input.addEventListener('change',updateDistribution));
+  const retry=modal.querySelector('[data-source-retry]');if(retry)retry.onclick=async()=>{
+    operationPending=true;retry.disabled=true;retry.textContent='Consultando…';modal.querySelector('[data-operation=validate]').disabled=true;
+    try{await openPdtV2({row,client,token,role,capabilities,show,escape:esc,reload,close});}
+    catch(error){operationPending=false;updateDistribution();modal.querySelector('[data-source-status]').textContent=error.message;retry.disabled=false;retry.textContent='Reintentar consulta';}
+  };
+  updateDistribution();
+
   const keys={advance:crypto.randomUUID(),reverse:crypto.randomUUID(),delivery:crypto.randomUUID(),assign:crypto.randomUUID(),close:crypto.randomUUID()};
   modal.querySelectorAll('[data-operation]').forEach(button=>button.onclick=async()=>{
-    const buttons=[...modal.querySelectorAll('[data-operation]')];const previous=buttons.map(b=>b.disabled);buttons.forEach(b=>b.disabled=true);
+    const buttons=[...modal.querySelectorAll('[data-operation]')];const previous=buttons.map(b=>b.disabled);operationPending=true;buttons.forEach(b=>b.disabled=true);if(retry)retry.disabled=true;
     const val=s=>modal.querySelector(s)?.value||'';
     let operation,args={p_token:token,p_id:row.id_pendiente};
     try{
       switch(button.dataset.operation){
         case 'validate': {
-          const rows=[...modal.querySelectorAll('[data-source]:checked')].map(input=>({...sources[+input.dataset.source],cantidad:val('[data-source-qty="'+input.dataset.source+'"]')}));
-          validateFabricationDistribution(rows);
-          operation='sgp_aluminio_pendiente_validar_detalles_v1';args={...args,p_detalles:rows,p_reserva:row.reserva,p_observacion:val('[data-note]')||null};break;
+          const state=distributionState(sources,selectedSources(),row.cantidad,val('[data-note]'));
+          if(!state.valid)throw new Error(state.reason);
+          operation='sgp_aluminio_pendiente_validar_detalles_v1';args={...args,p_detalles:state.details,p_reserva:row.reserva,p_observacion:val('[data-note]')||null};break;
         }
         case 'advance':operation='sgp_aluminio_pendiente_registrar_avance_v1';args={...args,p_id_detalle:val('[data-detail]'),p_cantidad:Number(val('[data-qty]')),p_turno:val('[data-shift]'),p_fecha_operativa:val('[data-date]'),p_idempotency_key:keys.advance,p_observacion:val('[data-note]')||null};break;
         case 'reverse':operation='sgp_aluminio_pendiente_revertir_avance_v1';args={...args,p_movimiento:val('[data-movement]'),p_clave:keys.reverse,p_motivo:val('[data-note]')};break;
@@ -67,6 +101,6 @@ export async function openPdtV2({row,client,token,role,capabilities,show,escape:
       }
       await executePendingV2(client,capabilities,operation,args);
       close();await reload();
-    }catch(error){modal.querySelector('[data-result]').textContent=error.message;buttons.forEach((b,i)=>b.disabled=previous[i]);}
+    }catch(error){operationPending=false;modal.querySelector('[data-result]').textContent=error.message;buttons.forEach((b,i)=>b.disabled=previous[i]);if(retry)retry.disabled=false;updateDistribution();}
   });
 }

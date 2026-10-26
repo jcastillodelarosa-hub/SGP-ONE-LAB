@@ -28,6 +28,7 @@ try:
     await window.openPdt('RECEPCION',{id_pendiente:'qa',cantidad:9,reserva:'QA',perfil:'QA',produccion:'QA'});
    }''',url)
    page.locator('[data-source="0"]').check();page.locator('[data-source="1"]').check()
+   page.locator('[data-source-qty="0"]').fill('5');page.locator('[data-source-qty="1"]').fill('4')
    page.locator('[data-operation="validate"]').click();page.wait_for_function('window.reloaded===true')
    call=page.evaluate('window.calls.at(-1)');assert call['name']=='sgp_aluminio_pendiente_validar_detalles_v1'
    assert sum(int(d['cantidad']) for d in call['args']['p_detalles'])==9
