@@ -348,3 +348,40 @@ La autorización de merge/despliegue está vigente; no pedirla otra vez. La evid
 final de publicación y smoke se registra en el PR91 y la entrega de esta ejecución.
 No restaurar este dump sobre escrituras posteriores: después del commit conservar
 datos/guards y preferir corrección forward; replay automático no demostrado.
+
+## Cierre productivo PDT v2 — 25/10/2026 Colombia
+
+**APLICADO EN SUPABASE / PR91 FUSIONADO / PUBLICADO EN FIREBASE.**
+
+- Instalación y nuevo respaldo restaurado: run 40246792417 SUCCESS. Control
+  transaccional de escrituras y aceptación RPC/permisos/guards antes del commit;
+  sin conversión automática de LEGACY ni alteración de cantidades originales.
+- PR91 fusionado en `80db0e0249e1691181bf29f1c0ca8662bc837832`; primera
+  publicación run 40247125643 SUCCESS.
+- Smoke detectó SyntaxError preexistente en mecanizado-weekly-shifts-v349.js,
+  también presente en main anterior al PDT. Corregido únicamente el signo de
+  concatenación; regresión de parseo de scripts servidos incorporada. Corrección
+  y tooling integrados sin otro PR; commit final publicado
+  `31f21752cd6d1973ec8707b142b5661d2efcde82`, run 40247558247 SUCCESS.
+- URL: https://sgp-one-lab.web.app/ . Tests, sintaxis y release del commit final SUCCESS.
+- Login real, sesión y capacidades PDT/Picking verificadas en una transacción
+  productiva con usuario sintético y ROLLBACK (runs 40247181780/40247264502: esa
+  etapa PASS, smoke total falló entonces por el SyntaxError preexistente). No
+  quedó cuenta/sesión de prueba persistente. No se tomaron cuentas operativas.
+- Verificación HTTPS final run 40247642823 SUCCESS: index/app/controlador/servicio
+  coinciden por SHA256; navegador PC 1280x900 y móvil 390x844 sin excepciones JS,
+  login inexistente rechazado mediante Supabase real. Reutiliza evidencia de
+  autenticación positiva; no repite pruebas PDT SQL ni respaldo.
+- **Alcance verificado:** recuperación PostgreSQL, instalación, contratos/permisos,
+  autenticación servidor, capacidades y carga/interacción de acceso del frontend.
+  **No verificado como operación real de planta:** creación/avance/entrega/cierre
+  con órdenes operativas mediante usuarios reales. No se generaron operaciones
+  de negocio ficticias en producción para afirmar esa aceptación.
+- La autorización inmediata sustituyó la espera hasta 22:00. No permanecen
+  bloqueos de mantenimiento; se liberaron al commit. GCS conserva respaldo y
+  manifiestos privados. No usar un dump anterior sobre escrituras posteriores;
+  mantener guards/historial y preferir corrección forward. No se demostró PITR.
+
+Este checkpoint final se conserva en la rama de trabajo para continuidad; no se
+integra otro commit documental en main que active otra publicación. El estado
+final y enlaces están también en la descripción del PR91 fusionado.
