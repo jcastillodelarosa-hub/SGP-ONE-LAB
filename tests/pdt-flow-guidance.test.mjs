@@ -23,3 +23,10 @@ test('release build stamps the exact commit; source preview never claims publica
  assert.match(result,/LAB v354 · PDT v2 · aaaaaaa/);assert.match(result,/data-release-commit="a{40}"/);assert.doesNotMatch(result,/preview/);
  assert.throws(()=>stampRelease(html,'short'));assert.throws(()=>stampRelease('', 'a'.repeat(40)));
 });
+
+test('master-classified FRAME never advertises PANEL V2 operations',()=>{
+ for(const role of ['ADMINISTRADOR','COORDINADOR','RECEPCION','LIDER']){
+  const flow=pendingFlowGuidance({...row,tipo_pieza:'FRAME'},role,caps);
+  assert.equal(flow.action,null);assert.match(flow.explanation,/FRAME/);
+ }
+});

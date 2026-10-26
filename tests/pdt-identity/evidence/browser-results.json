@@ -1,0 +1,32 @@
+[
+  {
+    "viewport": [
+      1440,
+      1100
+    ],
+    "PANEL": "PANELES_2",
+    "FRAME": "FRAMES_2",
+    "same_production_name": true,
+    "shared_reserve_revalidation": true,
+    "unknown_classification_blocks_save": true,
+    "missing_backend_blocks_without_legacy_fallback": true,
+    "busy_stays_disabled": true,
+    "writes": 0,
+    "js_errors": 0
+  },
+  {
+    "viewport": [
+      390,
+      844
+    ],
+    "PANEL": "PANELES_2",
+    "FRAME": "FRAMES_2",
+    "same_production_name": true,
+    "shared_reserve_revalidation": true,
+    "unknown_classification_blocks_save": true,
+    "missing_backend_blocks_without_legacy_fallback": true,
+    "busy_stays_disabled": true,
+    "writes": 0,
+    "js_errors": 0
+  }
+]

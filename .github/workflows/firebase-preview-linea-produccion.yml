@@ -9,6 +9,8 @@ on:
         default: connection
         options:
           - connection
+          - pdt-identity-cohort
+          - pdt-identity-permissions
           - gcs-readiness
           - restore-readiness
           - create-gcs-bucket
@@ -194,3 +196,38 @@ jobs:
         env:
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
         run: python3 tests/pdt-backup/production_smoke.py --browser-only
+
+  pdt-source-case-read:
+    name: PDT case source predicate comparison (read only)
+    if: github.ref == 'refs/heads/fix/lab-v354-pdt-visibility' && (inputs.operation == 'connection' || inputs.operation == 'pdt-identity-cohort' || inputs.operation == 'pdt-identity-permissions')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    environment: supabase-backup
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - run: docker pull postgres:17
+      - name: Read only the observed pending, related PANEL sources and exact RPC definitions
+        if: inputs.operation == 'connection'
+        env:
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: python3 tests/pdt-backup/read_pdt_sources.py --identity-core
+      - name: Read installed pending triggers and references
+        if: inputs.operation == 'connection'
+        env:
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: python3 tests/pdt-backup/read_pdt_sources.py --identity-guards
+      - name: Read backup cohort counts and classifications without updating rows
+        if: inputs.operation != 'pdt-identity-permissions'
+        env:
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: python3 tests/pdt-backup/read_pdt_sources.py --identity-cohort
+
+      - name: Read the existing novelty INSERT policies only
+        if: inputs.operation == 'pdt-identity-permissions'
+        env:
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: python3 tests/pdt-backup/read_pdt_sources.py --identity-permissions

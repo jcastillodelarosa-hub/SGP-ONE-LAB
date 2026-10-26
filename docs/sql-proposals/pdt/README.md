@@ -1,3 +1,7 @@
+> **Regla vigente PANEL/FRAME:** maestro como autoridad, sin contexto cruzado.
+> Implementación y plan de reparación exclusiva de los22 pendientes en [identity/README.md](identity/README.md).
+> SQL solo preparado, sin aplicación productiva; propuestas anteriores de cruces quedan obsoletas.
+
 > Estado posterior: PDT v2 A/B APLICADO EN SUPABASE el 25/10/2026, run 40246792417 SUCCESS.
 > Respaldo actualizado/restauración real y control transaccional de escrituras verificados.
 > Instalación, autorización y bloqueos de las notas históricas siguientes quedan sustituidos

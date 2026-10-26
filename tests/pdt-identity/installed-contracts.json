@@ -1,0 +1,752 @@
+{
+  "provenance": "Read-only GitHub Actions 40260774688; definitions and schema, no operational rows or credentials",
+  "functions": [
+    {
+      "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "md5": "7ac17f1c0e243f1d05d2d9197b592cea",
+      "args": "p_token text, p_reserva text, p_produccion text, p_perfil text, p_cantidad numeric, p_longitud numeric, p_origen text, p_causa text, p_observacion text, p_key_produccion text DEFAULT NULL::text, p_reserva_principal text DEFAULT NULL::text, p_acabado_pendiente text DEFAULT NULL::text",
+      "owner": "postgres",
+      "signature": "sgp_aluminio_pendiente_crear(text,text,text,text,numeric,numeric,text,text,text,text,text,text)",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_aluminio_pendiente_crear(p_token text, p_reserva text, p_produccion text, p_perfil text, p_cantidad numeric, p_longitud numeric, p_origen text, p_causa text, p_observacion text, p_key_produccion text DEFAULT NULL::text, p_reserva_principal text DEFAULT NULL::text, p_acabado_pendiente text DEFAULT NULL::text)\n RETURNS uuid\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\ndeclare u text; id uuid; v_key text; v_principal text; v_shared boolean:=false; v_finish text; v_reserva text;\nbegin\n u:=public.sgp_validar_sesion_rol(p_token,array['ADMINISTRADOR','COORDINADOR','LIDER MECANIZADO','LIDER','LIDER LINEA']);\n v_reserva:=nullif(trim(coalesce(p_reserva,'')),'');\n v_key:=nullif(trim(coalesce(p_key_produccion,'')),'');\n v_principal:=nullif(trim(coalesce(p_reserva_principal,'')),'');\n if v_key is null and p_produccion is not null then\n   select v.key_produccion,v.reserva_principal into v_key,v_principal\n   from public.sgp_produccion_reservas_v v\n   where v.produccion=p_produccion\n     and (v_principal is null or v.reserva_principal=v_principal)\n     and (v_reserva is null or v.reserva=v_reserva or v.reserva_principal=v_reserva)\n   order by v.semana_produccion desc\n   limit 1;\n end if;\n if v_principal is null and v_key is not null then\n   select min(v.reserva_principal) into v_principal from public.sgp_produccion_reservas_v v where v.key_produccion=v_key;\n end if;\n v_principal:=coalesce(v_principal,v_reserva);\n if v_key is not null then\n   select bool_or(v.es_reserva_compartida) into v_shared from public.sgp_produccion_reservas_v v where v.key_produccion=v_key;\n   if v_reserva is null then v_reserva:=v_principal; end if;\n   if not exists(select 1 from public.sgp_produccion_reservas_v v where v.key_produccion=v_key and v.reserva=v_reserva) then\n     raise exception 'La reserva seleccionada no pertenece a esta producción';\n   end if;\n   select v.acabado_reserva into v_finish from public.sgp_produccion_reservas_v v where v.key_produccion=v_key and v.reserva=v_reserva limit 1;\n end if;\n v_finish:=coalesce(nullif(trim(coalesce(p_acabado_pendiente,'')),''),v_finish);\n insert into public.sgp_aluminio_pendientes(\n   reserva,reserva_principal,key_produccion,es_reserva_compartida,acabado_pendiente,\n   produccion,perfil,cantidad,longitud,origen,causa,observacion,usuario_reporte\n ) values(\n   v_reserva,v_principal,v_key,coalesce(v_shared,false),v_finish,\n   p_produccion,p_perfil,greatest(coalesce(p_cantidad,1),1),p_longitud,upper(coalesce(p_origen,'PRODUCCION')),p_causa,p_observacion,u\n ) returning id_pendiente into id;\n return id;\nend $function$\n"
+    },
+    {
+      "acl": "{postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "md5": "fd3c639ad316ddd7b3d0c4ebe14042af",
+      "args": "p_codigos text[]",
+      "owner": "postgres",
+      "signature": "sgp_clasificar_piezas_aluminio(text[])",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_clasificar_piezas_aluminio(p_codigos text[])\n RETURNS TABLE(codigo_sap text, tipo_pieza text, destino_productivo text, observacion text)\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\n  select m.codigo_sap, m.tipo_pieza, m.destino_productivo, m.observacion\n  from public.sgp_maestro_piezas m\n  where m.activo = 'SI'\n    and m.codigo_sap = any(p_codigos)\n    and m.lineas_aplicables = array['PANELES_2','FRAMES_2']::text[];\n$function$\n"
+    },
+    {
+      "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "md5": "726f65168d8d3a8000721375b04a9fc5",
+      "args": "p_token text, p_reserva text",
+      "owner": "postgres",
+      "signature": "sgp_mecanizado_perfiles_reserva(text,text)",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_mecanizado_perfiles_reserva(p_token text, p_reserva text)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\ndeclare u text;\nbegin\n u:=sgp_validar_sesion_rol(p_token,array['ADMINISTRADOR','COORDINADOR','LIDER MECANIZADO','LIDER LINEA','RECEPCION','CONSULTA']);\n return coalesce((select jsonb_agg(to_jsonb(x) order by x.perfil,x.longitud) from(\n   select a.codigo_sap perfil,max(a.descripcion) descripcion,a.longitud,round(sum(coalesce(a.cantidad,a.unidades,0)))::integer cantidad\n   from sgp_aluminio a join sgp_producciones p on p.produccion=a.produccion\n   where p.reserva_al=p_reserva and coalesce(a.codigo_sap,'')<>'' group by a.codigo_sap,a.longitud\n )x),'[]'::jsonb);\nend $function$\n"
+    },
+    {
+      "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "md5": "1593f8b75af879ed8ad80486f8420114",
+      "args": "p_token text, p_reserva text, p_buscar text DEFAULT NULL::text",
+      "owner": "postgres",
+      "signature": "sgp_mecanizado_perfiles_reserva(text,text,text)",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_mecanizado_perfiles_reserva(p_token text, p_reserva text, p_buscar text DEFAULT NULL::text)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\ndeclare u text;\nbegin\n u:=sgp_validar_sesion_rol(p_token,array['ADMINISTRADOR','COORDINADOR','LIDER MECANIZADO','LIDER LINEA','RECEPCION','CONSULTA']);\n return coalesce((select jsonb_agg(to_jsonb(x) order by x.perfil,x.longitud) from(\n   select a.codigo_sap perfil,max(a.descripcion) descripcion,a.longitud,round(sum(coalesce(a.cantidad,a.unidades,0)))::integer cantidad\n   from sgp_aluminio a join sgp_producciones p on p.produccion=a.produccion\n   where p.reserva_al=p_reserva and coalesce(a.codigo_sap,'')<>'' and\n    (p_buscar is null or p_buscar='' or a.codigo_sap ilike '%'||p_buscar||'%' or a.descripcion ilike '%'||p_buscar||'%')\n   group by a.codigo_sap,a.longitud\n )x),'[]'::jsonb);\nend $function$\n"
+    }
+  ],
+  "columns": [
+    {
+      "type": "uuid",
+      "table": "sgp_aluminio_pendientes",
+      "column": "id_pendiente",
+      "default": "gen_random_uuid()",
+      "notnull": true
+    },
+    {
+      "type": "text",
+      "table": "sgp_aluminio_pendientes",
+      "column": "reserva",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "text",
+      "table": "sgp_aluminio_pendientes",
+      "column": "produccion",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "text",
+      "table": "sgp_aluminio_pendientes",
+      "column": "perfil",
+      "default": null,
+      "notnull": true
+    },
+    {
+      "type": "numeric",
+      "table": "sgp_aluminio_pendientes",
+      "column": "cantidad",
+      "default": "1",
+      "notnull": true
+    },
+    {
+      "type": "numeric",
+      "table": "sgp_aluminio_pendientes",
+      "column": "longitud",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "text",
+      "table": "sgp_aluminio_pendientes",
+      "column": "origen",
+      "default": null,
+      "notnull": true
+    },
+    {
+      "type": "text",
+      "table": "sgp_aluminio_pendientes",
+      "column": "causa",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "text",
+      "table": "sgp_aluminio_pendientes",
+      "column": "observacion",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "text",
+      "table": "sgp_aluminio_pendientes",
+      "column": "estado",
+      "default": "'PENDIENTE'::text",
+      "notnull": true
+    },
+    {
+      "type": "text",
+      "table": "sgp_aluminio_pendientes",
+      "column": "usuario_reporte",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "timestamp with time zone",
+      "table": "sgp_aluminio_pendientes",
+      "column": "fecha_reporte",
+      "default": "now()",
+      "notnull": true
+    },
+    {
+      "type": "text",
+      "table": "sgp_aluminio_pendientes",
+      "column": "usuario_cierre",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "timestamp with time zone",
+      "table": "sgp_aluminio_pendientes",
+      "column": "fecha_cierre",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "text",
+      "table": "sgp_aluminio_pendientes",
+      "column": "id_pieza",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "text",
+      "table": "sgp_aluminio_pendientes",
+      "column": "marca",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "text",
+      "table": "sgp_aluminio_pendientes",
+      "column": "fabricacion",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "text",
+      "table": "sgp_aluminio_pendientes",
+      "column": "nc",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "text",
+      "table": "sgp_aluminio_pendientes",
+      "column": "estado_repo",
+      "default": "'PENDIENTE'::text",
+      "notnull": true
+    },
+    {
+      "type": "timestamp with time zone",
+      "table": "sgp_aluminio_pendientes",
+      "column": "fecha_repo_ok",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "text",
+      "table": "sgp_aluminio_pendientes",
+      "column": "usuario_estado",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "timestamp with time zone",
+      "table": "sgp_aluminio_pendientes",
+      "column": "fecha_estado",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "integer",
+      "table": "sgp_aluminio_pendientes",
+      "column": "ventanas_afectadas",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "boolean",
+      "table": "sgp_aluminio_pendientes",
+      "column": "auditado",
+      "default": "false",
+      "notnull": true
+    },
+    {
+      "type": "text",
+      "table": "sgp_aluminio_pendientes",
+      "column": "key_produccion",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "text",
+      "table": "sgp_aluminio_pendientes",
+      "column": "reserva_principal",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "text",
+      "table": "sgp_aluminio_pendientes",
+      "column": "acabado_pendiente",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "boolean",
+      "table": "sgp_aluminio_pendientes",
+      "column": "es_reserva_compartida",
+      "default": "false",
+      "notnull": true
+    },
+    {
+      "type": "text",
+      "table": "sgp_aluminio_pendientes",
+      "column": "validacion_estado",
+      "default": "'POR_VALIDAR'::text",
+      "notnull": true
+    },
+    {
+      "type": "text",
+      "table": "sgp_aluminio_pendientes",
+      "column": "validado_por",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "timestamp with time zone",
+      "table": "sgp_aluminio_pendientes",
+      "column": "fecha_validacion",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "text",
+      "table": "sgp_aluminio_pendientes",
+      "column": "observacion_validacion",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "text",
+      "table": "sgp_aluminio_pendientes",
+      "column": "reserva_solucion_manual",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "text",
+      "table": "sgp_aluminio_pendientes",
+      "column": "contrato_pdt",
+      "default": "'LEGACY'::text",
+      "notnull": true
+    },
+    {
+      "type": "text",
+      "table": "sgp_maestro_piezas",
+      "column": "codigo_sap",
+      "default": null,
+      "notnull": true
+    },
+    {
+      "type": "text",
+      "table": "sgp_maestro_piezas",
+      "column": "tipo_pieza",
+      "default": null,
+      "notnull": true
+    },
+    {
+      "type": "text",
+      "table": "sgp_maestro_piezas",
+      "column": "destino_productivo",
+      "default": null,
+      "notnull": true
+    },
+    {
+      "type": "text",
+      "table": "sgp_maestro_piezas",
+      "column": "observacion",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "text",
+      "table": "sgp_maestro_piezas",
+      "column": "activo",
+      "default": "'SI'::text",
+      "notnull": true
+    },
+    {
+      "type": "timestamp with time zone",
+      "table": "sgp_maestro_piezas",
+      "column": "fecha_actualizacion",
+      "default": "now()",
+      "notnull": true
+    },
+    {
+      "type": "text[]",
+      "table": "sgp_maestro_piezas",
+      "column": "lineas_aplicables",
+      "default": "ARRAY['PANELES_2'::text, 'FRAMES_2'::text]",
+      "notnull": true
+    },
+    {
+      "type": "uuid",
+      "table": "sgp_mecanizado_novedades",
+      "column": "id_novedad",
+      "default": "gen_random_uuid()",
+      "notnull": true
+    },
+    {
+      "type": "uuid",
+      "table": "sgp_mecanizado_novedades",
+      "column": "id_programacion",
+      "default": null,
+      "notnull": true
+    },
+    {
+      "type": "text",
+      "table": "sgp_mecanizado_novedades",
+      "column": "produccion",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "text",
+      "table": "sgp_mecanizado_novedades",
+      "column": "origen",
+      "default": null,
+      "notnull": true
+    },
+    {
+      "type": "text",
+      "table": "sgp_mecanizado_novedades",
+      "column": "tipo",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "text",
+      "table": "sgp_mecanizado_novedades",
+      "column": "perfil",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "integer",
+      "table": "sgp_mecanizado_novedades",
+      "column": "cantidad",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "text",
+      "table": "sgp_mecanizado_novedades",
+      "column": "cortes_afectados",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "text",
+      "table": "sgp_mecanizado_novedades",
+      "column": "numero_nc",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "text",
+      "table": "sgp_mecanizado_novedades",
+      "column": "numero_novedad",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "text",
+      "table": "sgp_mecanizado_novedades",
+      "column": "ticket_mtto",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "text",
+      "table": "sgp_mecanizado_novedades",
+      "column": "acabado_esperado",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "text",
+      "table": "sgp_mecanizado_novedades",
+      "column": "acabado_recibido",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "text",
+      "table": "sgp_mecanizado_novedades",
+      "column": "medida_esperada",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "text",
+      "table": "sgp_mecanizado_novedades",
+      "column": "medida_recibida",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "text",
+      "table": "sgp_mecanizado_novedades",
+      "column": "observacion",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "text",
+      "table": "sgp_mecanizado_novedades",
+      "column": "estado",
+      "default": "'ABIERTA'::text",
+      "notnull": true
+    },
+    {
+      "type": "text",
+      "table": "sgp_mecanizado_novedades",
+      "column": "usuario",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "timestamp with time zone",
+      "table": "sgp_mecanizado_novedades",
+      "column": "creado_en",
+      "default": "now()",
+      "notnull": true
+    },
+    {
+      "type": "timestamp with time zone",
+      "table": "sgp_mecanizado_novedades",
+      "column": "actualizado_en",
+      "default": "now()",
+      "notnull": true
+    },
+    {
+      "type": "numeric",
+      "table": "sgp_mecanizado_novedades",
+      "column": "longitud",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "text",
+      "table": "sgp_mecanizado_novedades",
+      "column": "reserva_solucion",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "uuid",
+      "table": "sgp_pdt_key_backup_20261025",
+      "column": "id_pendiente",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "text",
+      "table": "sgp_pdt_key_backup_20261025",
+      "column": "reserva",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "text",
+      "table": "sgp_pdt_key_backup_20261025",
+      "column": "produccion",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "text",
+      "table": "sgp_pdt_key_backup_20261025",
+      "column": "perfil",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "numeric",
+      "table": "sgp_pdt_key_backup_20261025",
+      "column": "cantidad",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "numeric",
+      "table": "sgp_pdt_key_backup_20261025",
+      "column": "longitud",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "text",
+      "table": "sgp_pdt_key_backup_20261025",
+      "column": "origen",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "text",
+      "table": "sgp_pdt_key_backup_20261025",
+      "column": "causa",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "text",
+      "table": "sgp_pdt_key_backup_20261025",
+      "column": "observacion",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "text",
+      "table": "sgp_pdt_key_backup_20261025",
+      "column": "estado",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "text",
+      "table": "sgp_pdt_key_backup_20261025",
+      "column": "usuario_reporte",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "timestamp with time zone",
+      "table": "sgp_pdt_key_backup_20261025",
+      "column": "fecha_reporte",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "text",
+      "table": "sgp_pdt_key_backup_20261025",
+      "column": "usuario_cierre",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "timestamp with time zone",
+      "table": "sgp_pdt_key_backup_20261025",
+      "column": "fecha_cierre",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "text",
+      "table": "sgp_pdt_key_backup_20261025",
+      "column": "id_pieza",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "text",
+      "table": "sgp_pdt_key_backup_20261025",
+      "column": "marca",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "text",
+      "table": "sgp_pdt_key_backup_20261025",
+      "column": "fabricacion",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "text",
+      "table": "sgp_pdt_key_backup_20261025",
+      "column": "nc",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "text",
+      "table": "sgp_pdt_key_backup_20261025",
+      "column": "estado_repo",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "timestamp with time zone",
+      "table": "sgp_pdt_key_backup_20261025",
+      "column": "fecha_repo_ok",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "text",
+      "table": "sgp_pdt_key_backup_20261025",
+      "column": "usuario_estado",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "timestamp with time zone",
+      "table": "sgp_pdt_key_backup_20261025",
+      "column": "fecha_estado",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "integer",
+      "table": "sgp_pdt_key_backup_20261025",
+      "column": "ventanas_afectadas",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "boolean",
+      "table": "sgp_pdt_key_backup_20261025",
+      "column": "auditado",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "text",
+      "table": "sgp_pdt_key_backup_20261025",
+      "column": "key_produccion",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "text",
+      "table": "sgp_pdt_key_backup_20261025",
+      "column": "reserva_principal",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "text",
+      "table": "sgp_pdt_key_backup_20261025",
+      "column": "acabado_pendiente",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "boolean",
+      "table": "sgp_pdt_key_backup_20261025",
+      "column": "es_reserva_compartida",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "text",
+      "table": "sgp_pdt_key_backup_20261025",
+      "column": "validacion_estado",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "text",
+      "table": "sgp_pdt_key_backup_20261025",
+      "column": "validado_por",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "timestamp with time zone",
+      "table": "sgp_pdt_key_backup_20261025",
+      "column": "fecha_validacion",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "text",
+      "table": "sgp_pdt_key_backup_20261025",
+      "column": "observacion_validacion",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "text",
+      "table": "sgp_pdt_key_backup_20261025",
+      "column": "reserva_solucion_manual",
+      "default": null,
+      "notnull": false
+    },
+    {
+      "type": "text",
+      "table": "sgp_pdt_key_backup_20261025",
+      "column": "contrato_pdt",
+      "default": null,
+      "notnull": false
+    }
+  ],
+  "triggers": [
+    {
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "md5": "30cf521e6c7451074cdb3fbc23edc2c5",
+      "name": "trg_sgp_pdt_contrato",
+      "owner": "postgres",
+      "enabled": "O",
+      "function": "sgp_pdt_guardar_contrato()",
+      "definition": "CREATE TRIGGER trg_sgp_pdt_contrato BEFORE INSERT OR DELETE OR UPDATE ON public.sgp_aluminio_pendientes FOR EACH ROW EXECUTE FUNCTION sgp_pdt_guardar_contrato()",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.sgp_pdt_guardar_contrato()\n RETURNS trigger\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\nDECLARE has_details boolean;\nBEGIN\n IF TG_OP='DELETE' AND OLD.contrato_pdt='LEGACY' THEN RETURN OLD; END IF;\n IF TG_OP='UPDATE' AND OLD.contrato_pdt='V2' AND NEW.contrato_pdt<>'V2' THEN RAISE EXCEPTION 'PDT_NO_DEGRADABLE'; END IF;\n IF TG_OP='UPDATE' AND OLD.contrato_pdt='LEGACY' AND NEW.contrato_pdt='V2' THEN\n  IF OLD.validacion_estado='VALIDADO' OR NEW.validacion_estado<>'VALIDADO' OR NOT EXISTS(\n   SELECT 1 FROM public.sgp_aluminio_pendiente_detalles d JOIN public.sgp_pdt_fuentes f USING(id_detalle)\n   WHERE d.id_pendiente=OLD.id_pendiente) THEN RAISE EXCEPTION 'PDT_CONVERSION_NO_CONCILIADA'; END IF;\n END IF;\n IF TG_OP<>'DELETE' AND NEW.contrato_pdt='LEGACY' THEN RETURN NEW; END IF;\n IF TG_OP='DELETE' THEN\n  RAISE EXCEPTION 'PDT_DELETE_REQUIERE_CONCILIACION';\n END IF;\n IF (TG_OP='INSERT' AND (NEW.estado='RESUELTO' OR NEW.estado_repo='PICKING' OR NEW.fecha_cierre IS NOT NULL)) THEN\n  RAISE EXCEPTION 'PDT_CIERRE_SIN_EVIDENCIA_CUANTITATIVA';\n END IF;\n IF TG_OP='UPDATE' THEN\n  IF (NEW.estado='RESUELTO' AND OLD.estado IS DISTINCT FROM NEW.estado)\n   OR (NEW.estado_repo='PICKING' AND OLD.estado_repo IS DISTINCT FROM NEW.estado_repo)\n   OR (NEW.fecha_cierre IS NOT NULL AND OLD.fecha_cierre IS DISTINCT FROM NEW.fecha_cierre) THEN\n   IF NOT public.sgp_pdt_cierre_acreditado(NEW.id_pendiente) THEN RAISE EXCEPTION 'PDT_CIERRE_SIN_EVIDENCIA_CUANTITATIVA'; END IF;\n  END IF;\n  IF OLD.estado='RESUELTO' OR OLD.fecha_cierre IS NOT NULL OR OLD.estado_repo='PICKING' THEN\n   IF NEW IS DISTINCT FROM OLD THEN RAISE EXCEPTION 'PDT_CERRADO_INMUTABLE'; END IF;\n  END IF;\n  IF NEW.cantidad IS DISTINCT FROM OLD.cantidad THEN\n   RAISE EXCEPTION 'PDT_CANTIDAD_REPORTADA_INMUTABLE';\n  END IF;\n  SELECT EXISTS(SELECT 1 FROM public.sgp_aluminio_pendiente_detalles d\n   WHERE d.id_pendiente=OLD.id_pendiente) INTO has_details;\n  IF OLD.validacion_estado='VALIDADO' AND (\n   NEW.validacion_estado IS DISTINCT FROM OLD.validacion_estado OR\n   ROW(NEW.fabricacion,NEW.longitud,NEW.reserva,NEW.acabado_pendiente,NEW.perfil,NEW.key_produccion,NEW.produccion,NEW.id_pieza)\n   IS DISTINCT FROM ROW(OLD.fabricacion,OLD.longitud,OLD.reserva,OLD.acabado_pendiente,OLD.perfil,OLD.key_produccion,OLD.produccion,OLD.id_pieza)) THEN\n   RAISE EXCEPTION 'PDT_DISTRIBUCION_VALIDADA_INMUTABLE';\n  END IF;\n  IF has_details AND NEW.estado_repo IS DISTINCT FROM OLD.estado_repo THEN\n   IF NOT coalesce((OLD.estado_repo='PENDIENTE' AND NEW.estado_repo='CORTE') OR\n    (OLD.estado_repo='CORTE' AND NEW.estado_repo='MECANIZADO') OR\n    (OLD.estado_repo='MECANIZADO' AND NEW.estado_repo='PROCESADO') OR\n    (OLD.estado_repo='PROCESADO' AND NEW.estado_repo='MECANIZADO' AND EXISTS(SELECT 1 FROM public.sgp_aluminio_pendiente_movimientos m WHERE m.id_pendiente=OLD.id_pendiente AND m.tipo='REVERSO')) OR\n    (OLD.estado_repo='PROCESADO' AND NEW.estado_repo='PICKING' AND public.sgp_pdt_cierre_acreditado(NEW.id_pendiente)),false) THEN\n    RAISE EXCEPTION 'PDT_TRANSICION_NO_PERMITIDA';\n   END IF;\n   IF NEW.estado_repo='PROCESADO' AND EXISTS(\n    SELECT 1 FROM public.sgp_aluminio_pendiente_detalles d\n    WHERE d.id_pendiente=OLD.id_pendiente AND d.cantidad_validada<>(\n     SELECT coalesce(sum(CASE WHEN m.tipo='AVANCE' THEN m.cantidad ELSE -m.cantidad END),0)\n     FROM public.sgp_aluminio_pendiente_movimientos m WHERE m.id_detalle=d.id_detalle)) THEN\n    RAISE EXCEPTION 'PDT_MECANIZADO_CON_SALDO';\n   END IF;\n  END IF;\n END IF;\n RETURN NEW;\nEND $function$\n"
+    }
+  ],
+  "references": [
+    {
+      "relation": "sgp_aluminio_pendientes_historial",
+      "definition": "FOREIGN KEY (id_pendiente) REFERENCES sgp_aluminio_pendientes(id_pendiente) ON DELETE CASCADE"
+    },
+    {
+      "relation": "sgp_pdt_cierres",
+      "definition": "FOREIGN KEY (id_pendiente) REFERENCES sgp_aluminio_pendientes(id_pendiente)"
+    },
+    {
+      "relation": "sgp_aluminio_pendiente_detalles",
+      "definition": "FOREIGN KEY (id_pendiente) REFERENCES sgp_aluminio_pendientes(id_pendiente)"
+    },
+    {
+      "relation": "sgp_aluminio_pendiente_movimientos",
+      "definition": "FOREIGN KEY (id_pendiente) REFERENCES sgp_aluminio_pendientes(id_pendiente)"
+    },
+    {
+      "relation": "sgp_aluminio_pendiente_ncs",
+      "definition": "FOREIGN KEY (id_pendiente) REFERENCES sgp_aluminio_pendientes(id_pendiente)"
+    }
+  ]
+}
