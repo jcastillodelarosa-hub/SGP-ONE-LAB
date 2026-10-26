@@ -1,5 +1,5 @@
 """Actual weekly summary + read bridge + reducer; synthetic state only, external traffic blocked."""
-import pathlib,functools,http.server,threading,json
+import pathlib,functools,http.server,threading,json,re
 from playwright.sync_api import sync_playwright
 ROOT=pathlib.Path(__file__).resolve().parents[2];OUT=ROOT/'tests/issue103/evidence'
 class H(http.server.SimpleHTTPRequestHandler):
@@ -16,7 +16,24 @@ try:
   for width,height in [(1366,1000),(390,844)]:
    page=browser.new_page(viewport={'width':width,'height':height});errors=[];page.on('pageerror',lambda e:errors.append(str(e)));page.route('https://**/*',lambda route:route.abort());page.goto(base+'/__issue103')
    # Isolate from application boot/network; actual summary/bridge run below with explicit fixture clients.
-   page.set_content('<meta charset="utf-8"><link rel="stylesheet" href="'+base+'/styles.css"><header><h1>SGP · LAB v359 · demostración local</h1><p>Datos sintéticos, sin Supabase</p></header><section data-mach-panel="programacion"><div class="prog-summary"></div><div class="toolbar"><select id="progWeek"><option>44</option><option>45</option></select><button id="progRefresh">Actualizar</button></div><div class="prog-layout"><div></div><div id="progAgenda"></div></div></section>')
+   shell=re.sub(r'<script\b[^>]*>.*?</script>','',(ROOT/'index.html').read_text(),flags=re.S|re.I)
+   page.set_content(shell)
+   page.evaluate("""()=>{
+    document.querySelectorAll('[data-view-panel]').forEach(n=>n.hidden=n.dataset.viewPanel!=='mecanizado');
+    document.querySelectorAll('[data-mach-panel]').forEach(n=>n.hidden=n.dataset.machPanel!=='programacion');
+    document.querySelectorAll('[data-mach-tab]').forEach(n=>n.classList.toggle('active',n.dataset.machTab==='programacion'));
+    document.querySelector('#progWeek').innerHTML='<option value="44">44</option><option value="45">45</option>';
+    const note=document.createElement('p');note.textContent='Prueba visual local · datos sintéticos · sin conexión productiva';document.querySelector('.topbar').after(note);
+   }""")
+   assert page.locator('#releaseVersion').inner_text()=='LAB v359'
+   if width<=640:
+    tabs=page.locator('[data-view-panel=mecanizado] .daily-tabs').first
+    assert tabs.evaluate('n=>n.scrollWidth>n.clientWidth')
+    tabs.locator('[data-mach-tab]').last.scroll_into_view_if_needed()
+    assert tabs.evaluate('n=>n.scrollLeft>0')
+    assert tabs.evaluate('n=>n.getBoundingClientRect().right<=window.innerWidth')
+    tabs.locator('[data-mach-tab=programacion]').scroll_into_view_if_needed()
+    assert page.locator('.topbar').evaluate('n=>n.getBoundingClientRect().right<=window.innerWidth')
    page.evaluate('''async args=>{
     const {physicalProgress}=await import(args.base+'/src/domain/mecanizado-operational-load.js');
     window.token='SYNTHETIC';window.queries=[];window.failed=false;window.physicalDelay=0;
@@ -55,6 +72,6 @@ try:
    before=page.evaluate('window.queries.length');page.evaluate("window.token=''");check_week(44,True);page.wait_for_function("document.querySelector('.sgp359-progress [role=alert]')?.textContent.includes('sesión')");assert page.locator('[data-physical-totals]').count()==0;assert page.evaluate('window.queries.length')==before
    assert not errors,errors
    assert page.evaluate('document.documentElement.scrollWidth<=window.innerWidth'), 'page overflow'
-   reports.append({'viewport':[width,height],'week44':{'programmed':75,'processed':62,'pending':13,'workload':132},'multiweek':[95,82,13],'system_filter':[28,23,5],'destination_preserves_origin_week':True,'filter_queries_after_initial_snapshot':0,'failed_read_has_no_zeros':True,'retry':True,'session_change_hides_old_data':True,'responsive_no_page_overflow':True,'external_network_allowed':False,'errors':errors});page.close()
+   reports.append({'viewport':[width,height],'week44':{'programmed':75,'processed':62,'pending':13,'workload':132},'multiweek':[95,82,13],'system_filter':[28,23,5],'destination_preserves_origin_week':True,'filter_queries_after_initial_snapshot':0,'failed_read_has_no_zeros':True,'retry':True,'session_change_hides_old_data':True,'responsive_no_page_overflow':True,'actual_index_shell':True,'release_badge':'LAB v359','pr107_daily_tabs_contained':True,'external_network_allowed':False,'errors':errors});page.close()
   browser.close();(OUT/'browser.json').write_text(json.dumps(reports,indent=2));print(json.dumps(reports))
 finally:server.shutdown()

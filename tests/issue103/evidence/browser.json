@@ -26,6 +26,9 @@
     "retry": true,
     "session_change_hides_old_data": true,
     "responsive_no_page_overflow": true,
+    "actual_index_shell": true,
+    "release_badge": "LAB v359",
+    "pr107_daily_tabs_contained": true,
     "external_network_allowed": false,
     "errors": []
   },
@@ -56,6 +59,9 @@
     "retry": true,
     "session_change_hides_old_data": true,
     "responsive_no_page_overflow": true,
+    "actual_index_shell": true,
+    "release_badge": "LAB v359",
+    "pr107_daily_tabs_contained": true,
     "external_network_allowed": false,
     "errors": []
   }

@@ -20,7 +20,7 @@ test('V2 entry remains visible for authorized read roles only, with backend capa
 test('release build stamps the exact commit; source preview never claims publication',()=>{
  const html='<span class="status" id="releaseVersion" data-release-state="preview">Vista previa</span>';
  const result=stampRelease(html,'a'.repeat(40),'2026-10-26T00:00:00Z');
- assert.match(result,/LAB v359 · PDT v2 · aaaaaaa/);assert.match(result,/data-release-commit="a{40}"/);assert.doesNotMatch(result,/preview/);
+ assert.equal(result.match(/>([^<]+)<\/span>/)[1],'LAB v359');assert.match(result,/data-release-commit="a{40}"/);assert.doesNotMatch(result,/preview/);
  assert.throws(()=>stampRelease(html,'short'));assert.throws(()=>stampRelease('', 'a'.repeat(40)));
 });
 

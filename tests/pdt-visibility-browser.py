@@ -15,7 +15,7 @@ if args.production_url:
   with urllib.request.urlopen(args.production_url+'/'+name+'?visual_check='+args.expected_sha,timeout=30) as response:return response.read()
  release_html=deployed('index.html').decode()
  assert 'data-release-commit="'+args.expected_sha+'"' in release_html
- assert 'LAB v359 · PDT v2 · '+args.expected_sha[:7] in release_html
+ assert re.search(r'id="releaseVersion"[^>]*>LAB v359</span>',release_html)
  badge=r'<span\b[^>]*\bid="releaseVersion"[^>]*>[^<]*</span>'
  assert re.sub(badge,'RELEASE_BADGE',release_html)==re.sub(badge,'RELEASE_BADGE',(ROOT/'index.html').read_text())
  for name in ['app.js','styles.css','src/modules/pdt-flow-guidance.js','src/modules/pdt-v2-controller.js']:
@@ -45,7 +45,7 @@ try:
    page.route('**/*',route_request)
    if args.production_url:
     page.goto(url+'/?visual_check='+args.expected_sha,wait_until='networkidle',timeout=60000)
-    assert page.locator('#releaseVersion').inner_text()=='LAB v359 · PDT v2 · '+args.expected_sha[:7]
+    assert page.locator('#releaseVersion').inner_text()=='LAB v359'
     assert not errors,errors
     page.close();page=browser.new_page(viewport={'width':width,'height':height})
     page.on('pageerror',lambda e:errors.append(e.name));page.route('**/*',route_request)

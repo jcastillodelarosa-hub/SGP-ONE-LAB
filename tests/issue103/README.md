@@ -1,8 +1,31 @@
 # Issue #103 — Avance físico por sistema / LAB v359
 
-Estado: IMPLEMENTADO EN RAMA — VERIFICADO LOCALMENTE. No fusionado ni publicado.
-Base: main `7be93c644ee402f051a237fbd2fb7564faf7bbaa` (PR102/LABv358 fusionado).
+Estado: IMPLEMENTADO EN RAMA — VERIFICADO LOCALMENTE — LISTO PARA REVISIÓN FINAL.
+PR104 sigue Draft, sin fusionar ni publicar.
+Base inicial: `7be93c644ee402f051a237fbd2fb7564faf7bbaa` (PR102/LABv358).
+Base vigente incorporada: main `cc3ef6f11fb5bb4142b494a32483b6cdf4c1fbf5` (PR107 fusionado).
 Rama: `feat/issue-103-weekly-system-progress`. Contrato: Issue103 de GitHub.
+
+
+## Sincronización de PR107 (26/10/2026, Colombia)
+
+Se incorporan completos los hotfixes de main: contención real de `.daily-tabs`,
+app-shell, topbar y tablas; cache-bust CSS359.1 e indicador **solo LAB v359**.
+El SHA de build sigue en data-release-commit y title. El test del generador exige
+texto visible exacto y conserva trazabilidad; el verificador visual opcional se
+adapta al formato simple sin realizar consultas a producción.
+
+Puente app.js y agregado de dominio idénticos al SHA anterior f7ccf42. Índice, CSS
+y generador iguales a main/PR107. Hashes en evidence/pr107-sync.json. Se conservan
+cálculos, filtros, barras, indicadores y prevención de duplicación/ceros ficticios.
+
+Se repiten 287/287JS, verify:release y browser PC1366/móvil390. Ahora la prueba de
+Issue103 usa la estructura real completa de index.html, scripts operativos retirados
+y RPC sintéticas; comprueba badge exacto, anchura de topbar, scroll interno de las
+cinco daily-tabs, tabla/avance y filtros. No hace login ni operaciones productivas.
+Regresiones PDT y calendario también repetidas. Las capturas completas y resultados
+se renuevan conservando evidencia histórica de Issue99. No se repiten las lecturas
+productivas iniciales ni se modifica Supabase. CI del nuevo SHA se registra en PR104.
 
 ## Uso
 
