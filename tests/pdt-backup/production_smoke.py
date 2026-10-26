@@ -20,21 +20,21 @@ def main():
     'postgres:17','psql','-X','-qAt','-v','ON_ERROR_STOP=1']
    env=os.environ.copy();env['PGPASSWORD']=os.environ['SUPABASE_DB_PASSWORD']
    if '--inspect-pdt-case' in sys.argv:
-   query="""BEGIN READ ONLY; SET LOCAL statement_timeout='15s';
-SELECT coalesce(jsonb_agg(jsonb_build_object('id_pendiente',p.id_pendiente,
- 'produccion',p.produccion,'reserva',p.reserva,'cantidad',p.cantidad,
- 'contrato_pdt',p.contrato_pdt,'estado',p.estado,'estado_repo',p.estado_repo,
- 'validacion_estado',p.validacion_estado,'semana',coalesce(to_jsonb(p)->>'semana',to_jsonb(p)->>'semana_programacion'))),'[]'::jsonb)
-FROM public.sgp_aluminio_pendientes p WHERE p.reserva::text='8558585' AND p.cantidad=9
-AND (p.produccion ILIKE '%172539%' OR p.produccion ILIKE '%1039864%');
-ROLLBACK;
-"""
-   r=subprocess.run(args,input=query.encode(),env=env,capture_output=True,timeout=60)
-   if r.returncode:raise RuntimeError('READ_ONLY_OBSERVED_PDT_QUERY_FAILED')
-   rows=json.loads(r.stdout)
-   print('::notice title=PDT observed contract::'+json.dumps(rows,ensure_ascii=False))
-   return 0
-  query="""BEGIN; SET LOCAL lock_timeout='3s'; SET LOCAL statement_timeout='20s';
+    query="""BEGIN READ ONLY; SET LOCAL statement_timeout='15s';
+ SELECT coalesce(jsonb_agg(jsonb_build_object('id_pendiente',p.id_pendiente,
+  'produccion',p.produccion,'reserva',p.reserva,'cantidad',p.cantidad,
+  'contrato_pdt',p.contrato_pdt,'estado',p.estado,'estado_repo',p.estado_repo,
+  'validacion_estado',p.validacion_estado,'semana',coalesce(to_jsonb(p)->>'semana',to_jsonb(p)->>'semana_programacion'))),'[]'::jsonb)
+ FROM public.sgp_aluminio_pendientes p WHERE p.reserva::text='8558585' AND p.cantidad=9
+ AND (p.produccion ILIKE '%172539%' OR p.produccion ILIKE '%1039864%');
+ ROLLBACK;
+ """
+    r=subprocess.run(args,input=query.encode(),env=env,capture_output=True,timeout=60)
+    if r.returncode:raise RuntimeError('READ_ONLY_OBSERVED_PDT_QUERY_FAILED')
+    rows=json.loads(r.stdout)
+    print('::notice title=PDT observed contract::'+json.dumps(rows,ensure_ascii=False))
+    return 0
+   query="""BEGIN; SET LOCAL lock_timeout='3s'; SET LOCAL statement_timeout='20s';
  DO $smoke$ DECLARE col text; username text:='991'||floor(random()*100000000000000)::bigint::text;
   password text:=gen_random_uuid()::text||gen_random_uuid()::text; response jsonb; session jsonb; caps jsonb; definition text;
  BEGIN
