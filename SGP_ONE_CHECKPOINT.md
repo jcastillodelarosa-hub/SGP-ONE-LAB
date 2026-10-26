@@ -461,3 +461,7 @@ en Supabase/Firebase/workflows/main, fusión ni publicación. PR94/96 intactos. 
 intervinieron GOOGLE/LAC ni se descartaron cambios de otros worktrees.
 Siguiente paso único: revisar el PR Draft de esta rama y sus capturas con ChatGPT.
 Detenerse antes de fusionar/desplegar; no repetir pruebas ya aprobadas sin cambios.
+
+Protección final Issue97: el puente de calendario rechaza sesión SGP ausente antes
+de consultar DB/caché. Prueba dirigida del código real añadida:16/16 aprobadas; la
+suite completa previa fue254/254. CI vuelve a validar el commit completo.

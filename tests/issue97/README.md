@@ -43,8 +43,8 @@ Las respuestas viejas no reemplazan otra fecha/turno; se conserva el preview de 
 
 ## Pruebas
 
-- `node --test tests/mecanizado-operational-load.test.mjs`:15 casos aprobados.
-- `npm test`:254/254 aprobadas en el cierre funcional (CI vuelve a comprobar el commit).
+- `node --test tests/mecanizado-operational-load.test.mjs`:16 casos aprobados (incluye guard de sesión previo a cualquier consulta).
+- `npm test`:254/254 aprobadas en el cierre funcional; guard adicional comprobado en las16 dirigidas. CI vuelve a comprobar el commit completo.
 - `python tests/issue97/browser.py`: PC1366×1000 y móvil390×844 aprobados.
   Monta el script real de Resumen y ejecuta el loader real de Producción con cliente
   sintético. Ambos dan65. Segundo calendario reutiliza las14 consultas de arrastre.

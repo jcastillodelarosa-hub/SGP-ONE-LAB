@@ -1976,11 +1976,12 @@ let progRows=[],progSchedule=[],progCoverage=[],progOrderCoverage=[],progConfirm
 // Read-only bridge for weekly system/shift summary; no direct backend access.
 let progMoves=[],progMovesError='';
 window.SGPOperationalLoad=async dates=>{
+ const token=getAppToken();if(!token)throw new Error('Se requiere una sesión SGP para consultar la carga operativa');
  if(progMovesError)throw new Error(progMovesError);
- const db=await getSupabaseClient(),carry=await machiningCarry.week(db,getAppToken(),dates);
+ const db=await getSupabaseClient(),carry=await machiningCarry.week(db,token,dates);
  const ids=progSchedule.filter(row=>dates.includes(row.fecha_programacion)).map(row=>row.id_programacion);
  let states=[];if(ids.length){const result=await db.from('sgp_mecanizado_ejecucion').select('id_programacion,estado').in('id_programacion',ids);if(result.error)throw result.error;states=result.data||[];}
- const enriched=await enrichMoveSources(db,getAppToken(),progSchedule,progMoves,dates);
+ const enriched=await enrichMoveSources(db,token,progSchedule,progMoves,dates);
  return operationalLoad(enriched.map(row=>({...row,estado_ejecucion:states.find(e=>e.id_programacion===row.id_programacion)?.estado||'SIN INICIAR'})),carry,progMoves,dates);
 };
 window.SGPOperationalCanManage=()=>['ADMINISTRADOR','COORDINADOR','LIDER MECANIZADO','LIDER','LIDER LINEA'].includes(repoRole());

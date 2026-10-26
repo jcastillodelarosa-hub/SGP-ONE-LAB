@@ -1,3 +1,4 @@
+import {readFileSync} from 'node:fs';
 import test from 'node:test';import assert from 'node:assert/strict';
 import {operationalLoad,workloadTotals,normalizeCarry,applyScheduleMoves,normalizeShift} from '../src/domain/mecanizado-operational-load.js';
 import {createCarryReader,enrichMoveSources} from '../src/services/mecanizado-carry.js';
@@ -23,3 +24,5 @@ test('partial source already adjusted is never subtracted twice',()=>{const sour
 test('partial move uses canonical remaining-order RPC once per source, never guesses header subtraction',async()=>{let calls=0;const client={rpc:async(name,args)=>{assert.equal(name,'sgp_mecanizado_ordenes_programacion');calls++;return {data:[{produccion:'OTHER',cantidad:12}]}}},source={...schedule[0],id_programacion:'partial',produccion:null,cantidad_programada:12},moves=[{id_origen:'partial',id_destino:'target',produccion:'MOVED'}];const first=await enrichMoveSources(client,'QA_PARTIAL',[source],moves,[date]);await enrichMoveSources(client,'QA_PARTIAL',[source],moves,[date]);assert.equal(calls,1);assert.equal(applyScheduleMoves(first,moves).rows[0].cantidad_programada,12);assert.equal(source._ordenes_operativas,undefined);});
 
 test('view scope excludes unrelated historical shifts without losing explicit destination lookup',()=>{const old={...schedule[0],id_programacion:'old',fecha_programacion:'2026-10-20',turno:'UNKNOWN'},current={...schedule[0],id_programacion:'current'};const result=operationalLoad([old,current],[],[],[date]);assert.equal(result.rows.length,1);assert.equal(result.warnings.length,0);});
+
+test('actual calendar bridge rejects missing SGP session before database/cache requests',async()=>{const app=readFileSync(new URL('../app.js',import.meta.url),'utf8'),source=app.slice(app.indexOf('window.SGPOperationalLoad='),app.indexOf('window.SGPOperationalCanManage=')),window={};let reads=0;new Function('window','getAppToken','getSupabaseClient','progMovesError',source)(window,()=>null,()=>{reads++;throw new Error('must not query')},'');await assert.rejects(window.SGPOperationalLoad([date]),/sesión SGP/);assert.equal(reads,0);});
