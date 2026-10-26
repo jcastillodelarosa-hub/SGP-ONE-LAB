@@ -5,7 +5,9 @@ const app=readFileSync(new URL('../app.js',import.meta.url),'utf8');
 const index=readFileSync(new URL('../index.html',import.meta.url),'utf8');
 test('programación individual identifica la producción canónica antes de RPC',()=>{
  assert.match(app,/eligible\.length===1\)args\.p_produccion=eligible\[0\]\.produccion/);
- assert.match(app,/Esta parte contiene varias órdenes/);
+ assert.match(app,/const fullPartQty=pendingOrders/);
+ assert.match(app,/args\.p_cantidad!==fullPartQty/);
+ assert.match(app,/args\.p_produccion=null/);
  assert.match(app,/p_produccion:progSelection\.produccion/);
 });
 test('pendientes muestran semana y acabado con fuente de recepción',()=>{
