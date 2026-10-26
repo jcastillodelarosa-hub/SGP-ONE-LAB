@@ -30,7 +30,7 @@ def main():
   data=json.loads(r.stdout)
   if not data['pending']:raise RuntimeError('Observed pending no longer matches; stop')
   payload=json.dumps(data,ensure_ascii=False)
-  parts=[payload[i:i+1200] for i in range(0,len(payload),1200)]
+  parts=[payload[i:i+1700] for i in range(0,len(payload),1700)]
   for index,chunk in enumerate(parts):
    print('::notice title=PDT source part::'+json.dumps({'index':index,'parts':len(parts),'chunk':chunk},ensure_ascii=False).replace('%','%25'))
 if __name__=='__main__':
