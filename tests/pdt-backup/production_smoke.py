@@ -2,8 +2,10 @@
 import hashlib,json,os,pathlib,re,subprocess,tempfile,urllib.request,urllib.error,uuid
 ROOT=pathlib.Path(__file__).resolve().parents[2]
 BASE='https://sgp-one-lab.web.app'
+STAGE='START'
 
 def main():
+ global STAGE
  if os.environ.get('GITHUB_ACTIONS')!='true':raise RuntimeError('PROTECTED_RUNNER_REQUIRED')
  # Real authentication/capabilities, using one synthetic account entirely rolled back.
  with tempfile.TemporaryDirectory(prefix='sgp-smoke-ca-') as folder:
@@ -47,23 +49,30 @@ SELECT 'REAL_LOGIN_SESSION_PDT_PICKING_ROLLBACK_OK';
   if r.stdout.strip()!=b'REAL_LOGIN_SESSION_PDT_PICKING_ROLLBACK_OK':raise RuntimeError('AUTH_SMOKE_RESULT_UNEXPECTED')
  print('::notice title=PDT live verification::Real SGP login/session and PDT v2/Picking capabilities passed inside rolled-back transaction; no persistent QA account/session/business writes.')
  # Verify the independently fetched deployed source, not a local preview or mock.
+ STAGE='HTTPS_RESOURCES'
  for name in ['index.html','app.js','src/modules/pdt-v2-controller.js','src/services/aluminum-pending-v2.js']:
+  STAGE='HTTPS_RESOURCE_'+name.replace('/','_')
   req=urllib.request.Request(BASE+'/'+name+'?pdt_check='+uuid.uuid4().hex,headers={'Cache-Control':'no-cache'})
   with urllib.request.urlopen(req,timeout=25) as r:
    remote=r.read()
    if r.status!=200 or hashlib.sha256(remote).digest()!=hashlib.sha256((ROOT/name).read_bytes()).digest():raise RuntimeError('DEPLOYED_RESOURCE_DIFFERS')
+ print('::notice title=PDT live verification::Deployed index/app/PDT controller/service match release SHA256 over HTTPS.')
+ STAGE='BROWSER_START'
  from playwright.sync_api import sync_playwright
  with sync_playwright() as p:
   browser=p.chromium.launch(executable_path='/usr/bin/google-chrome',headless=True,args=['--no-sandbox'])
   for width,height in [(1280,900),(390,844)]:
+   STAGE='BROWSER_LOAD_'+str(width)
    page=browser.new_page(viewport={'width':width,'height':height})
    errors=[];page.on('pageerror',lambda e:errors.append(type(e).__name__))
    r=page.goto(BASE+'/?pdt_check='+uuid.uuid4().hex,wait_until='networkidle',timeout=60000)
    if not r or r.status!=200:raise RuntimeError('LIVE_PAGE_UNAVAILABLE')
+   STAGE='BROWSER_LOGIN_FORM_'+str(width)
    page.locator('#authUser').wait_for(state='visible',timeout=20000)
    page.locator('#authUser').fill('pdt_nonexistent_'+uuid.uuid4().hex)
    page.locator('#authPassword').fill(uuid.uuid4().hex)
    page.locator('#authLogin').click()
+   STAGE='BROWSER_REJECT_LOGIN_'+str(width)
    page.wait_for_function("document.querySelector('#authStatus').textContent.includes('Error de acceso')",timeout=25000)
    if errors:raise RuntimeError('LIVE_PAGE_JAVASCRIPT_ERROR')
    page.close()
@@ -72,4 +81,6 @@ SELECT 'REAL_LOGIN_SESSION_PDT_PICKING_ROLLBACK_OK';
  return 0
 if __name__=='__main__':
  try:raise SystemExit(main())
- except Exception:print('::error title=PDT live verification::LIVE_SMOKE_NOT_VERIFIED; no business transactions submitted');raise SystemExit(1)
+ except Exception as e:
+  code=str(e) if isinstance(e,RuntimeError) else type(e).__name__
+  print('::error title=PDT live verification::'+STAGE+': '+code+'; no business transactions submitted');raise SystemExit(1)
