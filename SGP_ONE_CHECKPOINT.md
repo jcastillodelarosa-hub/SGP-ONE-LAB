@@ -1,3 +1,74 @@
+# Continuidad vigente — PR104 sincronizado con PR107
+
+Fecha Colombia (UTC−5): 2026-10-26T15:00:50.980709-05:00. Rama existente:
+`feat/issue-103-weekly-system-progress`, PR104 **OPEN/DRAFT**.
+Main vigente incorporado: `cc3ef6f11fb5bb4142b494a32483b6cdf4c1fbf5`.
+PR107 **FUSIONADO**: contención móvil de daily-tabs, app-shell/topbar y tablas;
+indicador muestra exclusivamente **LAB v359**. SHA/fecha de compilación conservados
+en atributo/title del build, no texto adicional visible. CSS cache-bust359.1.
+No se incrementa versión ni se vuelve al indicador antiguo con sufijo PDT/SHA.
+
+Implementación Issue103 preservada: puente app.js y cálculo de avance físico por
+sistema idénticos al SHA anterior `f7ccf425859c3130a7051278343fe9bb4b771f88`.
+Índice, styles.css y generador de release idénticos a main/PR107; sin sobrescribir
+las correcciones móviles. Prueba por hashes en tests/issue103/evidence/pr107-sync.json.
+
+Validación local: **287/287JS**, verify:release359, sintaxis y diff aprobados.
+Browser PC1366/móvil390 sobre **index.html real sin ejecutar scripts operativos**,
+cliente sintético; badge exacto359, tabs con scroll interno, sin overflow de página,
+avance/filtros/barras/errores/reintentos y cantidades anteriores conservados.
+Regresiones PDT358 y calendario26/10T1=8+57=65 repetidas y aprobadas en PC/móvil.
+Capturas/resultados renovados en tests/issue103/evidence. CI del SHA final en PR104.
+
+No consultas ni modificaciones de Supabase en esta sincronización. No cambios de
+Firebase, GOOGLE, LAC, SQL o datos; no publicación ni fusión del PR104. Los registros
+inferiores con base7be93c6 corresponden al desarrollo previo, no a la base vigente.
+Pendientes originales: sesión SGP real/roles y dispositivo físico/planta; no se
+presentan fixtures ni merge de PR107 como aceptación o despliegue de este PR.
+Estado: **IMPLEMENTADO EN RAMA — VERIFICADO LOCALMENTE — LISTO PARA REVISIÓN FINAL**.
+Siguiente paso único: revisión final de ChatGPT del mismo PR104. No fusionar/publicar.
+
+---
+
+# Continuidad vigente — Issue #103 / LAB v359
+
+Fecha UTC: 2026-10-26T19:18:43.824681+00:00.
+Repositorio: SGP-ONE-LAB. Rama: `feat/issue-103-weekly-system-progress`.
+Base main verificada: `7be93c644ee402f051a237fbd2fb7564faf7bbaa`.
+**PR102 FUSIONADO / LABv358 en main**, conservando PR101/LABv357: programación
+individual y Semana/Acabado; PDT sin cerrar y mejoras de rendimiento. Las entradas
+inferiores que describen PR102 Draft/no fusionado son históricas, no estado vigente.
+Publicación358 no revalidada aquí; no inferirla del merge.
+
+Issue103 implementa el avance físico por sistema directamente en el Resumen semanal:
+indicadores, tabla ordenable/barras y tarjetas móviles; semanas/sistema existentes,
+lecturas autorizadas agrupadas y paginadas. Carga operativa por fecha/turno intacta y
+separada. No suma arrastres como ventanas nuevas; traslados conservan semana origen.
+Ambigüedades se excluyen con aviso de cobertura incompleta. Lectura fallida muestra
+error/reintento, no ceros ni datos anteriores. Versión propuesta359 no publicada.
+
+Fuentes exactas/reglas/límites: `tests/issue103/README.md`. Lectura real de tablas
+55ejecuciones/76programaciones/163estadospororden; sin exportar identidades/usuarios.
+Ejemplo PROCESADO43/43 confirma regla de encabezado, no totales semanales completos.
+Las RPC protegidas reutilizan contratos vigentes; no había sesión SGP para probarlas
+con rol real en este entorno. Tabla de detalles privada no se usa ni se abre.
+Sin modificaciones de Supabase, SQL, RLS, Firebase, GOOGLE ni LAC.
+
+Evidencias: `tests/issue103/evidence/`: **287/287JS**,16nuevas, visual PC1366/móvil390,
+4consultas de snapshot y0adicionales al filtrar dentro de TTL30s; regresiónPDT358 y
+26/10T1=8+57=65 aprobadas. Datos de navegador sintéticos; pruebas no equivalen a
+aceptación productiva. `verify:release`359/sintaxis/diff aprobados; CI final en PR.
+Se conservan las evidencias anteriores válidas; no se repiten migraciones ni SQL.
+
+Estado: **IMPLEMENTADO EN RAMA — VERIFICADO LOCALMENTE**. No APLICADO nuevamente,
+FUSIONADO ni PUBLICADO359. Pendiente lectura autenticada con roles y aceptación en
+hardware de planta, conciliación de orígenes históricos ambiguos si fuera necesaria.
+No hay nueva persistencia de semana ni gráfico diario de ejecución no demostrable.
+Siguiente paso único: revisión ChatGPT del único PR Draft de Issue103; detenerse
+antes de fusión/publicación. Consultar SHA final/CI del PR al recuperar continuidad.
+
+---
+
 > Sincronización de PR #102 tras revisión ChatGPT del 26/10/2026:
 > main LAB v357 / PR #101 **FUSIONADO**, SHA
 > `f073202416f9624fe2eee485c828e80c58e98bec`, incorporado a la rama existente.

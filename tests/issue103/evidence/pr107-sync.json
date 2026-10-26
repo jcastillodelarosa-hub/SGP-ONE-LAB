@@ -1,0 +1,144 @@
+{
+  "date_colombia": "2026-10-26T15:00:09.803020-05:00",
+  "base_main": "cc3ef6f11fb5bb4142b494a32483b6cdf4c1fbf5",
+  "previous_pr_head": "f7ccf425859c3130a7051278343fe9bb4b771f88",
+  "checks": {
+    "app.js": {
+      "identical_to_previous_pr_head": true,
+      "sha256": "35ea4e92c911676eae682bcb182b4163dc2f5cd2ee8a05ab5698cd8df086987b"
+    },
+    "src/domain/mecanizado-operational-load.js": {
+      "identical_to_previous_pr_head": true,
+      "sha256": "02f3780a2c48292b2e13935ece769234f661d7cb918882602336c3d35fe03366"
+    },
+    "tests/issue103-progress.test.mjs": {
+      "identical_to_previous_pr_head": true,
+      "sha256": "b8c26c04cb07639da483490e9145885a46d7d2e7544b73a2e870154575aefa86"
+    },
+    "styles.css": {
+      "identical_to_main_PR107": true,
+      "sha256": "47156e7a769f35ca60974e41affe3a94aace7e5d2b909ee02bc0bee9e5aada57"
+    },
+    "scripts/build-release-info.mjs": {
+      "identical_to_main_PR107": true,
+      "sha256": "d32b47497e86fcab8da99c2eb6a6338d9a29f89c56483de6107b0573075e570d"
+    },
+    "index.html": {
+      "identical_to_main_PR107": true,
+      "sha256": "b30e5da56185991529c310f4da73645a5c61f9167ee90c0e9ced4889156b8c5e"
+    }
+  },
+  "tests": {
+    "javascript": {
+      "total": 287,
+      "passed": 287,
+      "failed": 0
+    },
+    "verify_release": "LAB v359 PASS",
+    "visual": [
+      {
+        "viewport": [
+          1366,
+          1000
+        ],
+        "week44": {
+          "programmed": 75,
+          "processed": 62,
+          "pending": 13,
+          "workload": 132
+        },
+        "multiweek": [
+          95,
+          82,
+          13
+        ],
+        "system_filter": [
+          28,
+          23,
+          5
+        ],
+        "destination_preserves_origin_week": true,
+        "filter_queries_after_initial_snapshot": 0,
+        "failed_read_has_no_zeros": true,
+        "retry": true,
+        "session_change_hides_old_data": true,
+        "responsive_no_page_overflow": true,
+        "actual_index_shell": true,
+        "release_badge": "LAB v359",
+        "pr107_daily_tabs_contained": true,
+        "external_network_allowed": false,
+        "errors": []
+      },
+      {
+        "viewport": [
+          390,
+          844
+        ],
+        "week44": {
+          "programmed": 75,
+          "processed": 62,
+          "pending": 13,
+          "workload": 132
+        },
+        "multiweek": [
+          95,
+          82,
+          13
+        ],
+        "system_filter": [
+          28,
+          23,
+          5
+        ],
+        "destination_preserves_origin_week": true,
+        "filter_queries_after_initial_snapshot": 0,
+        "failed_read_has_no_zeros": true,
+        "retry": true,
+        "session_change_hides_old_data": true,
+        "responsive_no_page_overflow": true,
+        "actual_index_shell": true,
+        "release_badge": "LAB v359",
+        "pr107_daily_tabs_contained": true,
+        "external_network_allowed": false,
+        "errors": []
+      }
+    ],
+    "pdt_navigation_and_contrast": [
+      {
+        "width": 1440,
+        "legacy_entry": true,
+        "v2_row_navigation": true,
+        "role_and_validated_legacy_gates": true,
+        "contrast_colors": [
+          "rgb(23, 62, 94)",
+          "rgb(23, 62, 94)",
+          "rgb(23, 62, 94)",
+          "rgb(23, 62, 94)",
+          "rgb(23, 62, 94)",
+          "rgb(23, 62, 94)",
+          "rgb(23, 62, 94)"
+        ],
+        "writes": 0,
+        "uncaught_errors": 0
+      },
+      {
+        "width": 390,
+        "legacy_entry": true,
+        "v2_row_navigation": true,
+        "role_and_validated_legacy_gates": true,
+        "contrast_colors": [
+          "rgb(23, 62, 94)",
+          "rgb(23, 62, 94)",
+          "rgb(23, 62, 94)",
+          "rgb(23, 62, 94)",
+          "rgb(23, 62, 94)",
+          "rgb(23, 62, 94)",
+          "rgb(23, 62, 94)"
+        ],
+        "writes": 0,
+        "uncaught_errors": 0
+      }
+    ],
+    "production_writes": 0
+  }
+}
