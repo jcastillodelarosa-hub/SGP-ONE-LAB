@@ -419,3 +419,45 @@ es histórico; el PR94 ya forma parte de la base de este hito.
 Siguiente paso único: revisar el PR Draft de esta rama y las capturas. Detenerse
 antes de fusión/despliegue; requieren autorización posterior. No reejecutar SQL94
 ni crear otro PR por recuperar continuidad.
+
+
+## Issue97 — carga operativa de Mecanizado, lista para revisión
+
+Registro UTC: 2026-10-26T15:01:29.686448+00:00. SGP-ONE-LAB únicamente.
+Rama `feat/issue-97-operational-calendar`; base main
+`eb0e1dc197d67072d556c226af318f5cd28a800e`, incluye PR94 y PR96.
+Implementación preservada en `24edbde58a72dbe63a0837387d795f219556d940`.
+Fuente: Issue97 de GitHub; no se repitió la auditoría general PDT ni consultas de datos.
+
+Componente real: Resumen 7días×2turnos en programacion-subtabs-v350.js montado por
+index.html. src/modules/mecanizado.js solo es una tabla auxiliar. Se corrigen Resumen,
+renderProgCalendar y la carga compartida de Producción. Estado SIN INICIAR gris;
+origen movido informativo sin ejecución/doble conteo; carga NUEVA/ARRASTRE separada
+respecto del histórico/avance; detalle accesible por fecha/turno PC/móvil.
+
+Fuente compartida: RPC existente sgp_mecanizado_pendientes_turno y normalización
+común. Semana14pares fijos, máximo4concurrentes, caché30s/sesión/coalescencia; no
+consulta por cada orden. Traslado parcial consulta órdenes restantes canónicas por
+origen, con caché/lotes4; no resta otra vez un encabezado previamente ajustado.
+Conserva contratos/RPC/roles, programación por reserva y orden, prioridad e historial.
+
+Pruebas:254/254 JS y15dirigidas; browser Chromium PC1366×1000/móvil390×844, ambos
+calendarios y loader real Producción con fixtures:26/10/2026 T1=8+16+41=65,72,2%de90.
+Traslado de12 al27/10 en fixture adicional explica total semanal77; origen26/T2=0
+con aviso. Sin escrituras ni red externa. Capturas, resultados y límites exactos en
+`tests/issue97/README.md` y `tests/issue97/evidence/`. Sintaxis, releaseLAB354 y
+diff --check aprobados. Dos tests estáticos se adaptan a invalidación de caché y
+cuarta consulta auxiliar; mantienen el preview no interactivo y seguridad de guardado.
+
+Pendiente antes de integrar: contrastar en catálogo real permisos de SELECT de
+sgp_mecanizado_reprogramaciones y vínculo id_destino; id_origen/produccion sí están
+en SQL versionado. Metadatos remotos no disponibles desde este entorno. Si el nombre
+difiere, adaptar mapeo explícito, no inferir por nombre de producción. Ante errores
+se informa carga incompleta; no se presume arrastre0 ni cantidad restante. Verificar
+roles reales en entorno autorizado: las fixtures no certifican producción ni móvil físico.
+
+Estado: IMPLEMENTADO EN RAMA / VERIFICADO LOCALMENTE. No SQL nuevo/aplicado, cambios
+en Supabase/Firebase/workflows/main, fusión ni publicación. PR94/96 intactos. No se
+intervinieron GOOGLE/LAC ni se descartaron cambios de otros worktrees.
+Siguiente paso único: revisar el PR Draft de esta rama y sus capturas con ChatGPT.
+Detenerse antes de fusionar/desplegar; no repetir pruebas ya aprobadas sin cambios.
