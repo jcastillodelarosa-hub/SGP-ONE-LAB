@@ -29,7 +29,10 @@ def main():
   if r.returncode:raise RuntimeError('Read-only case comparison failed')
   data=json.loads(r.stdout)
   if not data['pending']:raise RuntimeError('Observed pending no longer matches; stop')
-  print('::notice title=PDT source predicates::'+json.dumps(data,ensure_ascii=False).replace('%','%25'))
+  payload=json.dumps(data,ensure_ascii=False)
+  parts=[payload[i:i+1200] for i in range(0,len(payload),1200)]
+  for index,chunk in enumerate(parts):
+   print('::notice title=PDT source part::'+json.dumps({'index':index,'parts':len(parts),'chunk':chunk},ensure_ascii=False).replace('%','%25'))
 if __name__=='__main__':
  try:main()
  except Exception:print('::error title=PDT source predicates::Read-only comparison not verified; no writes');raise SystemExit(1)
