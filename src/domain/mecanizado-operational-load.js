@@ -101,6 +101,7 @@ export function physicalProgress({schedule,executions,orderExecutions,moves,link
     if(!quantities.size||!(header===before||header===after))throw new Error('Detalle por orden no conciliado con la programación');
     quantity=after;for(const order of completed){if(!remaining.some(([production])=>production===order.produccion))throw new Error('Ejecución por orden sin cantidad verificable');orderDone+=quantities.get(order.produccion);}
    }else if(row.produccion&&completed.some(e=>e.produccion===row.produccion))orderDone=quantity;
+   if(outgoing.length&&state&&state.estado!=='PROCESADO'&&n(state.cantidad_procesada??0)>0)throw new Error('Avance agregado de origen parcialmente trasladado requiere conciliación por orden');
    let processed=state?.estado==='PROCESADO'?quantity:Math.min(quantity,Math.max(0,state?n(state.cantidad_procesada??0):0));
    if(processed>0&&processed<quantity&&orderDone>0&&processed!==orderDone)throw new Error('Ejecución parcial agregada y por orden requieren conciliación');
    processed=Math.max(processed,Math.min(quantity,orderDone));

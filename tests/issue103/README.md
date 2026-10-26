@@ -41,6 +41,8 @@ Detalles de deduplicación:
   encabezado original o ya reducido únicamente si las sumas coinciden exactamente;
   no se resta dos veces. Se suma el destino una sola vez. Un origen faltante, ciclo,
   identidad contradictoria o detalle no verificable queda excluido con advertencia.
+- Un agregado parcial en un origen parcialmente trasladado no permite saber qué
+  unidades quedaron allí; se excluye con advertencia, no se distribuye por suposición.
 - No se suman contadores agregados y por orden: cuando ambos indican cantidades
   parciales distintas que no pueden conciliarse, se excluye esa asignación. Si el
   agregado es cero, las órdenes PROCESADO verificadas sí aportan avance parcial.
@@ -86,7 +88,7 @@ no se presenta el ejemplo real como prueba end-to-end. No se solicitaron secreto
 
 ## Pruebas ejecutadas
 
-- `npm test`: **286/286** aprobadas, incluidas15 nuevas: agregación, parciales,
+- `npm test`: **287/287** aprobadas, incluidas16 nuevas: agregación, parciales,
   PROCESADO, cero/sin datos, semanas múltiples, sistemas, duplicados, arrastres,
   traslado completo/cadena/parcial y fuente ya reducida, ambigüedad, errores,
   paginación501filas y sesión ausente. Conserva las pruebas de PR101/102.

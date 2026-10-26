@@ -36,3 +36,8 @@ test('actual physical bridge rejects missing session before any client request',
  new Function('window','getAppToken','getMecanizadoReadClient','progSchedule','progMoves','progMovesError','physicalProgress',source)(window,()=>null,()=>{queries++;throw Error('must not query');},[],[],'',physicalProgress);
  await assert.rejects(window.SGPWeeklyPhysicalProgress({weeks:[44]}),/sesión/);assert.equal(queries,0);
 });
+
+test('a partial aggregate on a partly moved group cannot be allocated to remaining orders by assumption',()=>{
+ const s=snapshot({schedule:[row('A',{produccion:null,cantidad_programada:10,prioridad_semanal:1}),row('B',{produccion:'B',cantidad_programada:4})],moves:[{id_origen:'A',id_destino:'B',produccion:'B'}],links:[{id_linea:'PANELES_2',reserva:'R',produccion:'A',key_produccion:'KA'},{id_linea:'PANELES_2',reserva:'R',produccion:'B',key_produccion:'KB'}],coverage:[{reserva:'R',prioridad_semanal:1,produccion:'A',cantidad:6,estado_orden:'PROGRAMADA'},{reserva:'R',prioridad_semanal:1,produccion:'B',cantidad:4,estado_orden:'PROGRAMADA'}],executions:[{id_programacion:'A',estado:'MECANIZADO',cantidad_procesada:3}]});
+ const result=run(s);assert.equal(result.complete,false);assert.equal(result.excluded,1);assert.match(result.warnings.join(' '),/parcialmente trasladado/);
+});

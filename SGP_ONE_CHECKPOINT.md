@@ -22,7 +22,7 @@ Las RPC protegidas reutilizan contratos vigentes; no había sesión SGP para pro
 con rol real en este entorno. Tabla de detalles privada no se usa ni se abre.
 Sin modificaciones de Supabase, SQL, RLS, Firebase, GOOGLE ni LAC.
 
-Evidencias: `tests/issue103/evidence/`: **286/286JS**,15nuevas, visual PC1366/móvil390,
+Evidencias: `tests/issue103/evidence/`: **287/287JS**,16nuevas, visual PC1366/móvil390,
 4consultas de snapshot y0adicionales al filtrar dentro de TTL30s; regresiónPDT358 y
 26/10T1=8+57=65 aprobadas. Datos de navegador sintéticos; pruebas no equivalen a
 aceptación productiva. `verify:release`359/sintaxis/diff aprobados; CI final en PR.
