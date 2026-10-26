@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SGP ONE LAB</title>
   <link rel="icon" type="image/svg+xml" href="favicon-sgp.svg" />
-  <link rel="stylesheet" href="styles.css?v=356" />
+  <link rel="stylesheet" href="styles.css?v=357" />
   <link rel="stylesheet" href="navigation-preferences.css?v=4" />
   <link rel="stylesheet" href="design-center.css?v=2" />
   <link rel="stylesheet" href="production-line-visual-v327.css?v=1" />
@@ -63,7 +63,7 @@
           <input id="authPassword" type="password" placeholder="Contraseña" autocomplete="current-password" />
           <button id="authLogin">Ingresar</button>
           <button id="authLogout" hidden>Cerrar sesión</button>
-          <span class="status" id="releaseVersion" data-release-state="preview" title="LAB v356 · selector compacto de semanas">LAB v356 · Programación</span>
+          <span class="status" id="releaseVersion" data-release-state="preview" title="LAB v357 · selector compacto de semanas">LAB v357 · Programación</span>
         </div>
       </header>
 
@@ -154,7 +154,7 @@
 <section data-mach-panel="faltantes" hidden>
 <section class="summary missing-summary"><div class="metric"><span>Reservas con pendientes</span><strong id="missReservations">0</strong></div><div class="metric"><span>Pendientes por resolver</span><strong id="missOpen">0</strong></div><div class="metric"><span>Pendientes resueltos</span><strong id="missResolved">0</strong></div><div class="metric miss-light"><span>Semáforo</span><div class="traffic-summary"><b class="traffic green" id="missGreen">0</b><b class="traffic amber" id="missAmber">0</b><b class="traffic red" id="missRed">0</b></div></div></section>
 <div class="missing-section-head"><div><h3>Pendientes por resolver</h3><p>Ordenados desde la recepción más antigua. El semáforo se calcula desde la fecha de recepción de la reserva.</p></div><button id="generateMissingReport" class="report-button">Generar reporte a Bodega</button></div>
-<section class="table-wrap"><table><thead><tr><th>Reserva</th><th>Perfil</th><th>Cantidad</th><th>Longitud</th><th>Observación</th><th>Fecha recepción</th><th>Turno</th><th>Días</th><th>Estado</th><th>Acción</th></tr></thead><tbody id="missingBody"></tbody></table></section>
+<section class="table-wrap"><table><thead><tr><th>Reserva</th><th>Semana</th><th>Acabado</th><th>Perfil</th><th>Cantidad</th><th>Longitud</th><th>Observación</th><th>Fecha recepción</th><th>Turno</th><th>Días</th><th>Estado</th><th>Acción</th></tr></thead><tbody id="missingBody"></tbody></table></section>
 <div class="missing-section-head resolved-head"><div><h3>Histórico de pendientes resueltos</h3><p>Material recibido y cerrado, conservando fecha, turno y usuarios.</p></div></div>
 <section class="table-wrap resolved-wrap"><table><thead><tr><th>Reserva</th><th>Perfil</th><th>Cantidad</th><th>Longitud</th><th>Reportado por</th><th>Recibido por</th><th>Fecha recibido</th><th>Turno</th><th>Estado</th></tr></thead><tbody id="missingResolvedBody"></tbody></table></section>
 <div id="missingReceiveModal" class="modal-backdrop rec-overlay" hidden><div class="modal-card missing-receive-card"><div class="modal-header"><div><strong>Registrar recepción del pendiente</strong><small id="missingReceiveTitle">Complete fecha y turno reales de recepción.</small></div><button id="missingReceiveClose" class="modal-close">✕</button></div><div class="rec-form"><div class="rec-grid"><label>Fecha de recepción<input id="missingReceiveDate" type="date"></label><label>Turno<select id="missingReceiveShift"><option value="">Seleccionar…</option><option value="TURNO 1">Turno 1</option><option value="TURNO 2">Turno 2</option></select></label></div><div class="missing-receive-note">Esta acción cerrará el pendiente como material recibido y guardará el usuario que realiza el cierre.</div></div><div class="modal-actions"><button id="missingReceiveCancel">Cancelar</button><button id="missingReceiveSave" class="primary">Confirmar recepción</button></div></div></div>
@@ -389,7 +389,7 @@
     </div>
   </div>
 
-  <script type="module" src="app.js?v=356"></script>
+  <script type="module" src="app.js?v=357"></script>
   <script defer src="navigation-preferences.js?v=4"></script>
   <script defer src="design-center.js?v=2"></script>
 <div id="userModal" class="modal-backdrop rec-overlay" hidden><div class="modal-card user-modal-card"><div class="modal-header"><div><strong id="userModalTitle">Nuevo usuario</strong><small>Cuenta y permisos de acceso</small></div><button id="userModalClose" class="modal-close">×</button></div><div class="user-form"><div class="rec-grid"><label>Usuario<input id="userName" autocomplete="off"></label><label>Nombre completo<input id="userFullName"></label><label>Rol<select id="userRole"><option>COORDINADOR</option><option>LIDER MECANIZADO</option><option>LIDER LINEA</option><option>RECEPCION</option><option>PATINADOR</option><option>PICKING</option><option>SUPERVISOR DE PICKING</option><option>CONSULTA</option><option>ADMINISTRADOR</option></select></label><label>Contraseña<input id="userPassword" type="password" placeholder="Vacío = conservar contraseña"></label><div class="password-reset-wrap"><button id="resetPasswordBtn" type="button" hidden>↻ Restablecer contraseña</button><small>Asigna una nueva contraseña temporal al usuario.</small></div></div><label class="user-active"><input id="userActive" type="checkbox" checked> Usuario activo</label><div class="access-title"><b>Ventanas permitidas</b><span>El usuario solo verá las opciones seleccionadas.</span></div><div id="userAccessGrid" class="access-grid"></div></div><div class="modal-actions"><button id="userCancel">Cancelar</button><button id="userSave" class="primary">Guardar usuario</button></div></div></div>
