@@ -194,3 +194,21 @@ jobs:
         env:
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
         run: python3 tests/pdt-backup/production_smoke.py --browser-only
+
+  pdt-source-case-read:
+    name: PDT case source predicate comparison (read only)
+    if: github.ref == 'refs/heads/fix/lab-v354-pdt-visibility' && inputs.operation == 'connection'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    environment: supabase-backup
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - run: docker pull postgres:17
+      - name: Read only the observed pending, related PANEL sources and exact RPC definitions
+        env:
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: python3 tests/pdt-backup/read_pdt_sources.py
