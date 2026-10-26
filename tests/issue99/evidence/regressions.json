@@ -1,0 +1,127 @@
+{
+  "recorded_utc": "2026-10-26T17:29:55.213216+00:00",
+  "synthetic_only": true,
+  "production_writes": 0,
+  "reports": {
+    "existing_controller": {
+      "viewport": [
+        390,
+        844
+      ],
+      "validation": true,
+      "partial_advance": true,
+      "positive_picking": true,
+      "dismiss_reachable": true
+    },
+    "existing_ux": [
+      {
+        "viewport": [
+          1366,
+          1000
+        ],
+        "metrics": [
+          9,
+          9,
+          0,
+          9
+        ],
+        "distribution": [
+          4,
+          5
+        ],
+        "NC": [
+          1006163,
+          1006164,
+          1006165
+        ],
+        "repo_ok_not_delivery": true,
+        "all_11_write_RPC_contracts": true,
+        "reception_no_machining": true,
+        "audit_not_creditable": true,
+        "closed_readonly": true,
+        "keyboard_scroll_no_horizontal_overflow": true,
+        "external_requests_allowed": false,
+        "js_errors": []
+      },
+      {
+        "viewport": [
+          390,
+          844
+        ],
+        "metrics": [
+          9,
+          9,
+          0,
+          9
+        ],
+        "distribution": [
+          4,
+          5
+        ],
+        "NC": [
+          1006163,
+          1006164,
+          1006165
+        ],
+        "repo_ok_not_delivery": true,
+        "all_11_write_RPC_contracts": true,
+        "reception_no_machining": true,
+        "audit_not_creditable": true,
+        "closed_readonly": true,
+        "keyboard_scroll_no_horizontal_overflow": true,
+        "external_requests_allowed": false,
+        "js_errors": []
+      }
+    ],
+    "calendar_latest_main_v358": [
+      {
+        "viewport": [
+          1366,
+          1000
+        ],
+        "active_component": "programacion-subtabs-v350.js Resumen 7days x2shifts",
+        "production_total": 65,
+        "calendar_total": 65,
+        "new": 8,
+        "carry": 57,
+        "systems": {
+          "ES-MX4000_carry": 16,
+          "ES-EL400_carry": 41
+        },
+        "occupancy": "72.2% of90",
+        "shared_RPC_queries": 14,
+        "no_per_order_N_plus_1": true,
+        "origin_informational_only": true,
+        "modal_scroll_close": true,
+        "SIN_INICIAR_background": "rgb(229, 231, 235)",
+        "backend_writes": 0,
+        "external_network_allowed": false,
+        "errors": []
+      },
+      {
+        "viewport": [
+          390,
+          844
+        ],
+        "active_component": "programacion-subtabs-v350.js Resumen 7days x2shifts",
+        "production_total": 65,
+        "calendar_total": 65,
+        "new": 8,
+        "carry": 57,
+        "systems": {
+          "ES-MX4000_carry": 16,
+          "ES-EL400_carry": 41
+        },
+        "occupancy": "72.2% of90",
+        "shared_RPC_queries": 14,
+        "no_per_order_N_plus_1": true,
+        "origin_informational_only": true,
+        "modal_scroll_close": true,
+        "SIN_INICIAR_background": "rgb(229, 231, 235)",
+        "backend_writes": 0,
+        "external_network_allowed": false,
+        "errors": []
+      }
+    ]
+  }
+}

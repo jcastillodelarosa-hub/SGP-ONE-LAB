@@ -15,5 +15,5 @@ test('absent session, malformed payload or missing destination fail closed',asyn
  assert.deepEqual(await readReprogramming(client,'QA'),{data:[],error:null});
 });
 test('both production and programming consume RPC adapter without direct-table queries',()=>{
- const app=readFileSync(new URL('../app.js',import.meta.url),'utf8');assert.doesNotMatch(app,/\.from\(['"]sgp_mecanizado_reprogramaciones['"]\)/);assert.match(app,/readReprogramming\(c,token\)/);assert.match(app,/readReprogramming\(db,getAppToken\(\)\)/);
+ const app=readFileSync(new URL('../app.js',import.meta.url),'utf8');assert.doesNotMatch(app,/\.from\(['"]sgp_mecanizado_reprogramaciones['"]\)/);assert.match(app,/readReprogramming\(c,token\)/);assert.match(app,/readReprogramming\(db,token\)/);
 });

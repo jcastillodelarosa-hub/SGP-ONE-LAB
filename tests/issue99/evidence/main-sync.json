@@ -1,0 +1,147 @@
+{
+  "recorded_utc": "2026-10-26T18:19:19.925476+00:00",
+  "main_integrated": "f073202416f9624fe2eee485c828e80c58e98bec",
+  "previous_pr_head": "47d09cccf17e99decf35f33157c722fcb5d74ff9",
+  "review_comment": "https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/pull/102#issuecomment-6423399929",
+  "version": "LAB v358",
+  "v357_functions": {
+    "saveProgramming": {
+      "identical_to_main": true,
+      "sha256": "300a91ea2aabd672121b2e75fefa6cb232a973da18083a6809e3365358401cc0"
+    },
+    "loadMissing": {
+      "identical_to_main": true,
+      "sha256": "5e2fa3fa9d11ca0082bfd7f75fd8c53c3e38b6b6bb8494459f0a66f6eda7bb9a"
+    }
+  },
+  "performance_functions": {
+    "programming_loader": {
+      "identical_to_previous_pr_head": true,
+      "sha256": "af69b6bf3d98a80bfa078a0cd85af7d8fe1ce8e883fcb30177c19a0d15da9170"
+    },
+    "programming_renderer": {
+      "identical_to_previous_pr_head": true,
+      "sha256": "790a6993875c854b276080ea27c4d4af6b8797480ae74357aeaf8fb31f591a09"
+    },
+    "production_loader": {
+      "identical_to_previous_pr_head": true,
+      "sha256": "c01e6244321e24964833aaafeae4abd17c3439e72695f84cb1465f349d3f31f6"
+    },
+    "production_renderer": {
+      "identical_to_previous_pr_head": true,
+      "sha256": "3f5581a15e643e4d74bb98973863eb502ba9773982ea49c05eecce6f5b54a56c"
+    }
+  },
+  "weekly_selector_identical_to_main": true,
+  "pdt_modules_and_sql_archive_unchanged": true,
+  "production_writes": 0,
+  "tests": {
+    "javascript": {
+      "tests": 271,
+      "passed": 271,
+      "failed": 0
+    },
+    "release": "verify:release LAB v358 PASS",
+    "pdt_browser": [
+      {
+        "viewport": [
+          1366,
+          1000
+        ],
+        "initial_show_calls": 1,
+        "automatic_close": false,
+        "fresh_E17_advance": 2,
+        "fresh_E17_saldo": 2,
+        "same_dialog": true,
+        "stages_without_reopen": [
+          "CORTE",
+          "MECANIZADO",
+          "PROCESADO"
+        ],
+        "date_shift_scroll_focus_preserved": true,
+        "picking_register_validate_assign": true,
+        "double_click_single_write": true,
+        "committed_write_read_failure_no_resubmit": true,
+        "uncertain_retry_same_uuid_once": true,
+        "parent_refresh_only_on_explicit_close": true,
+        "external_network": false,
+        "errors": []
+      },
+      {
+        "viewport": [
+          390,
+          844
+        ],
+        "initial_show_calls": 1,
+        "automatic_close": false,
+        "fresh_E17_advance": 2,
+        "fresh_E17_saldo": 2,
+        "same_dialog": true,
+        "stages_without_reopen": [
+          "CORTE",
+          "MECANIZADO",
+          "PROCESADO"
+        ],
+        "date_shift_scroll_focus_preserved": true,
+        "picking_register_validate_assign": true,
+        "double_click_single_write": true,
+        "committed_write_read_failure_no_resubmit": true,
+        "uncertain_retry_same_uuid_once": true,
+        "parent_refresh_only_on_explicit_close": true,
+        "external_network": false,
+        "errors": []
+      }
+    ],
+    "calendar_browser": [
+      {
+        "viewport": [
+          1366,
+          1000
+        ],
+        "active_component": "programacion-subtabs-v350.js Resumen 7days x2shifts",
+        "production_total": 65,
+        "calendar_total": 65,
+        "new": 8,
+        "carry": 57,
+        "systems": {
+          "ES-MX4000_carry": 16,
+          "ES-EL400_carry": 41
+        },
+        "occupancy": "72.2% of90",
+        "shared_RPC_queries": 14,
+        "no_per_order_N_plus_1": true,
+        "origin_informational_only": true,
+        "modal_scroll_close": true,
+        "SIN_INICIAR_background": "rgb(229, 231, 235)",
+        "backend_writes": 0,
+        "external_network_allowed": false,
+        "errors": []
+      },
+      {
+        "viewport": [
+          390,
+          844
+        ],
+        "active_component": "programacion-subtabs-v350.js Resumen 7days x2shifts",
+        "production_total": 65,
+        "calendar_total": 65,
+        "new": 8,
+        "carry": 57,
+        "systems": {
+          "ES-MX4000_carry": 16,
+          "ES-EL400_carry": 41
+        },
+        "occupancy": "72.2% of90",
+        "shared_RPC_queries": 14,
+        "no_per_order_N_plus_1": true,
+        "origin_informational_only": true,
+        "modal_scroll_close": true,
+        "SIN_INICIAR_background": "rgb(229, 231, 235)",
+        "backend_writes": 0,
+        "external_network_allowed": false,
+        "errors": []
+      }
+    ],
+    "sql": "unchanged; existing 23 isolated assertions reused; no execution"
+  }
+}

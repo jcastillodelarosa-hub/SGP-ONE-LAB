@@ -1,0 +1,2169 @@
+{
+  "baseline_commit": "c6d759751ea7a8e879233ad7d3df9f1c8876321e",
+  "candidate_app_sha256": "c141d70e188effef65ec2eb4ed4adaca53e107bc4d1e3c2c652c6f0c25a8e289",
+  "environment": "Chromium, 45ms controlled latency per synthetic read, actual loadProgramming/renderProgramming/loadProductionBoard source; actual Production renderer with 24 synthetic program rows",
+  "not_live_supabase": true,
+  "no_external_network": true,
+  "results": [
+    {
+      "viewport": [
+        1366,
+        1000
+      ],
+      "variant": "before",
+      "measurements": {
+        "programming": {
+          "wall_ms": 228.59999999403954,
+          "runs_ms": [
+            247.5,
+            228.59999999403954,
+            222.30000001192093
+          ],
+          "requests": 8,
+          "samples": [
+            {
+              "kind": "rpc",
+              "name": "sgp_reservas_asociadas_listar",
+              "ms": 45.5,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_disponibles",
+              "ms": 45.20000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_programacion_listar",
+              "ms": 45.20000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_cobertura_programacion",
+              "ms": 45.20000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_cobertura_ordenes",
+              "ms": 45.20000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_reprogramaciones_listar",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_conciliaciones_listar",
+              "ms": 46.099999994039536,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion",
+              "ms": 67.5,
+              "status": "ok"
+            }
+          ]
+        },
+        "rapid": {
+          "wall_ms": 353.30000001192093,
+          "requests": 24,
+          "samples": [
+            {
+              "kind": "rpc",
+              "name": "sgp_reservas_asociadas_listar",
+              "ms": 48.69999998807907,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_reservas_asociadas_listar",
+              "ms": 48.10000002384186,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_reservas_asociadas_listar",
+              "ms": 48.10000002384186,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_disponibles",
+              "ms": 45.400000005960464,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_programacion_listar",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_cobertura_programacion",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_cobertura_ordenes",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_reprogramaciones_listar",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_disponibles",
+              "ms": 45.39999997615814,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_programacion_listar",
+              "ms": 45.39999997615814,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_cobertura_programacion",
+              "ms": 45.39999997615814,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_cobertura_ordenes",
+              "ms": 45.39999997615814,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_reprogramaciones_listar",
+              "ms": 45.39999997615814,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_disponibles",
+              "ms": 45.39999997615814,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_programacion_listar",
+              "ms": 45.39999997615814,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_cobertura_programacion",
+              "ms": 45.39999997615814,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_cobertura_ordenes",
+              "ms": 45.39999997615814,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_reprogramaciones_listar",
+              "ms": 45.39999997615814,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_conciliaciones_listar",
+              "ms": 45.80000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_conciliaciones_listar",
+              "ms": 148.7000000178814,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_conciliaciones_listar",
+              "ms": 179,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion",
+              "ms": 55.099999994039536,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion",
+              "ms": 55.099999994039536,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion",
+              "ms": 55.099999994039536,
+              "status": "ok"
+            }
+          ]
+        },
+        "search": {
+          "wall_ms": 82.09999999403954,
+          "requests": 3,
+          "render_ms": 36.29999998211861,
+          "samples": [
+            {
+              "kind": "render",
+              "name": "filter-render",
+              "ms": 12.399999976158142,
+              "status": "ok"
+            },
+            {
+              "kind": "render",
+              "name": "filter-render",
+              "ms": 20.900000005960464,
+              "status": "ok"
+            },
+            {
+              "kind": "render",
+              "name": "filter-render",
+              "ms": 3,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion",
+              "ms": 45.19999998807907,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion",
+              "ms": 45.19999998807907,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion",
+              "ms": 45.19999998807907,
+              "status": "ok"
+            }
+          ]
+        },
+        "dates": {
+          "wall_ms": 236.2000000178814,
+          "requests": 74,
+          "render_samples_ms": [
+            7.199999988079071,
+            4.0999999940395355
+          ],
+          "samples": [
+            {
+              "kind": "rpc",
+              "name": "sgp_pdt_capacidades_v2",
+              "ms": 45.29999998211861,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_pdt_capacidades_v2",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_pdt_capacidades_v2",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_reservas_asociadas_listar",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_programacion_listar",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_reprogramaciones_listar",
+              "ms": 45.20000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_reservas_asociadas_listar",
+              "ms": 45.20000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_programacion_listar",
+              "ms": 45.20000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_reprogramaciones_listar",
+              "ms": 45.20000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_reservas_asociadas_listar",
+              "ms": 45.20000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_programacion_listar",
+              "ms": 45.20000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_reprogramaciones_listar",
+              "ms": 45.20000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_programacion",
+              "ms": 45.10000002384186,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_programacion",
+              "ms": 45.10000002384186,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_programacion",
+              "ms": 45.20000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_aluminio_pendientes_listar",
+              "ms": 45.20000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_aluminio_pendientes_listar",
+              "ms": 45.29999998211861,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_aluminio_pendientes_listar",
+              "ms": 45.29999998211861,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_semanas_programacion",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_pendientes_turno",
+              "ms": 45.19999998807907,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion",
+              "ms": 45.099999994039536,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_novedades",
+              "ms": 45.099999994039536,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_historial_orden",
+              "ms": 45.099999994039536,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_aluminio_pendientes_listar_v2",
+              "ms": 45.400000005960464,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_aluminio_pendientes_listar_v2",
+              "ms": 45.20000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_aluminio_pendientes_listar_v2",
+              "ms": 45.20000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_ordenes_programacion",
+              "ms": 45.099999994039536,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_ordenes_programacion",
+              "ms": 45.19999998807907,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_ordenes_programacion",
+              "ms": 45.20000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_ordenes_programacion",
+              "ms": 45.20000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_ordenes_programacion",
+              "ms": 45.20000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_ordenes_programacion",
+              "ms": 45.20000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_ordenes_programacion",
+              "ms": 45.20000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_ordenes_programacion",
+              "ms": 45.20000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_ordenes_programacion",
+              "ms": 45.20000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_ordenes_programacion",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_ordenes_programacion",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_ordenes_programacion",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_ordenes_programacion",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_ordenes_programacion",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_ordenes_programacion",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_ordenes_programacion",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_ordenes_programacion",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_ordenes_programacion",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_ordenes_programacion",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_ordenes_programacion",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_ordenes_programacion",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_ordenes_programacion",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_ordenes_programacion",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_ordenes_programacion",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion_orden",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion_orden",
+              "ms": 46.099999994039536,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion_orden",
+              "ms": 46.400000005960464,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion_orden",
+              "ms": 46.70000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion_orden",
+              "ms": 48.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion_orden",
+              "ms": 49.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion_orden",
+              "ms": 49.70000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion_orden",
+              "ms": 50.400000005960464,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion_orden",
+              "ms": 50.80000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion_orden",
+              "ms": 51.099999994039536,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion_orden",
+              "ms": 51.599999994039536,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion_orden",
+              "ms": 52.20000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion_orden",
+              "ms": 52.400000005960464,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion_orden",
+              "ms": 52.599999994039536,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion_orden",
+              "ms": 53.5,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion_orden",
+              "ms": 53.80000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion_orden",
+              "ms": 54.5,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion_orden",
+              "ms": 55,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion_orden",
+              "ms": 55.70000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion_orden",
+              "ms": 56.099999994039536,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion_orden",
+              "ms": 56.5,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion_orden",
+              "ms": 56.900000005960464,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion_orden",
+              "ms": 57.099999994039536,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion_orden",
+              "ms": 58.400000005960464,
+              "status": "ok"
+            }
+          ]
+        },
+        "emptyDate": {
+          "wall_ms": 92,
+          "requests": 8,
+          "samples": [
+            {
+              "kind": "rpc",
+              "name": "sgp_pdt_capacidades_v2",
+              "ms": 45.20000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_reservas_asociadas_listar",
+              "ms": 45.20000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_programacion_listar",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_reprogramaciones_listar",
+              "ms": 45.099999994039536,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_programacion",
+              "ms": 45.099999994039536,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_aluminio_pendientes_listar",
+              "ms": 45.19999998807907,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_pendientes_turno",
+              "ms": 45.099999994039536,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_aluminio_pendientes_listar_v2",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            }
+          ]
+        },
+        "detail": {
+          "requests": 0,
+          "save": true,
+          "state": true,
+          "novelty": true,
+          "reprogram": true,
+          "reopen_requests": 0
+        }
+      }
+    },
+    {
+      "viewport": [
+        1366,
+        1000
+      ],
+      "variant": "after",
+      "measurements": {
+        "programming": {
+          "wall_ms": 102.09999999403954,
+          "runs_ms": [
+            100.90000000596046,
+            102.09999999403954,
+            102.7999999821186
+          ],
+          "requests": 8,
+          "samples": [
+            {
+              "kind": "rpc",
+              "name": "sgp_reservas_asociadas_listar",
+              "ms": 45.29999998211861,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_disponibles",
+              "ms": 45.19999998807907,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_programacion_listar",
+              "ms": 45.19999998807907,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_cobertura_programacion",
+              "ms": 45.19999998807907,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_cobertura_ordenes",
+              "ms": 45.19999998807907,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_reprogramaciones_listar",
+              "ms": 45.19999998807907,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_conciliaciones_listar",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "render",
+              "name": "programming",
+              "ms": 12,
+              "status": "ok"
+            },
+            {
+              "kind": "load",
+              "name": "programming",
+              "ms": 57.400000005960464,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion",
+              "ms": 45.19999998807907,
+              "status": "ok"
+            }
+          ]
+        },
+        "rapid": {
+          "wall_ms": 144.69999998807907,
+          "requests": 8,
+          "samples": [
+            {
+              "kind": "rpc",
+              "name": "sgp_reservas_asociadas_listar",
+              "ms": 45.29999998211861,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_disponibles",
+              "ms": 45.29999998211861,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_programacion_listar",
+              "ms": 45.39999997615814,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_cobertura_programacion",
+              "ms": 45.39999997615814,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_cobertura_ordenes",
+              "ms": 45.39999997615814,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_reprogramaciones_listar",
+              "ms": 45.39999997615814,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_conciliaciones_listar",
+              "ms": 45.39999997615814,
+              "status": "ok"
+            },
+            {
+              "kind": "render",
+              "name": "programming",
+              "ms": 12.800000011920929,
+              "status": "ok"
+            },
+            {
+              "kind": "load",
+              "name": "programming",
+              "ms": 58.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            }
+          ]
+        },
+        "search": {
+          "wall_ms": 21.900000005960464,
+          "requests": 0,
+          "render_ms": 21.5,
+          "samples": [
+            {
+              "kind": "render",
+              "name": "filter-render",
+              "ms": 9.199999988079071,
+              "status": "ok"
+            },
+            {
+              "kind": "render",
+              "name": "filter-render",
+              "ms": 9.400000005960464,
+              "status": "ok"
+            },
+            {
+              "kind": "render",
+              "name": "filter-render",
+              "ms": 2.9000000059604645,
+              "status": "ok"
+            }
+          ]
+        },
+        "dates": {
+          "wall_ms": 270.90000000596046,
+          "requests": 9,
+          "render_samples_ms": [
+            4.4000000059604645,
+            2.0999999940395355
+          ],
+          "samples": [
+            {
+              "kind": "rpc",
+              "name": "sgp_reservas_asociadas_listar",
+              "ms": 45.400000005960464,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_pendientes_turno",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_programacion_listar",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_reprogramaciones_listar",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_programacion",
+              "ms": 45.400000005960464,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_semanas_programacion",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_novedades",
+              "ms": 45.400000005960464,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_historial_orden",
+              "ms": 45.400000005960464,
+              "status": "ok"
+            },
+            {
+              "kind": "render",
+              "name": "production",
+              "ms": 2.0999999940395355,
+              "status": "ok"
+            },
+            {
+              "kind": "load",
+              "name": "production",
+              "ms": 94.2999999821186,
+              "status": "ok"
+            }
+          ]
+        },
+        "emptyDate": {
+          "wall_ms": 46.60000002384186,
+          "requests": 5,
+          "samples": [
+            {
+              "kind": "rpc",
+              "name": "sgp_reservas_asociadas_listar",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_pendientes_turno",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_programacion_listar",
+              "ms": 45.20000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_reprogramaciones_listar",
+              "ms": 45.20000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_programacion",
+              "ms": 45.20000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "render",
+              "name": "production",
+              "ms": 0.20000001788139343,
+              "status": "ok"
+            },
+            {
+              "kind": "load",
+              "name": "production",
+              "ms": 46.60000002384186,
+              "status": "ok"
+            }
+          ]
+        },
+        "detail": {
+          "requests": 2,
+          "save": true,
+          "state": true,
+          "novelty": true,
+          "reprogram": true,
+          "reopen_requests": 2
+        }
+      }
+    },
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "variant": "before",
+      "measurements": {
+        "programming": {
+          "wall_ms": 192.10000002384186,
+          "runs_ms": [
+            191.40000000596046,
+            192.10000002384186,
+            197
+          ],
+          "requests": 8,
+          "samples": [
+            {
+              "kind": "rpc",
+              "name": "sgp_reservas_asociadas_listar",
+              "ms": 45.400000005960464,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_disponibles",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_programacion_listar",
+              "ms": 45.400000005960464,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_cobertura_programacion",
+              "ms": 45.400000005960464,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_cobertura_ordenes",
+              "ms": 45.400000005960464,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_reprogramaciones_listar",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_conciliaciones_listar",
+              "ms": 45.400000005960464,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            }
+          ]
+        },
+        "rapid": {
+          "wall_ms": 245.30000001192093,
+          "requests": 24,
+          "samples": [
+            {
+              "kind": "rpc",
+              "name": "sgp_reservas_asociadas_listar",
+              "ms": 45.39999997615814,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_reservas_asociadas_listar",
+              "ms": 45.400000005960464,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_reservas_asociadas_listar",
+              "ms": 45.400000005960464,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_disponibles",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_programacion_listar",
+              "ms": 45.400000005960464,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_cobertura_programacion",
+              "ms": 45.400000005960464,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_cobertura_ordenes",
+              "ms": 45.400000005960464,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_reprogramaciones_listar",
+              "ms": 45.400000005960464,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_disponibles",
+              "ms": 45.29999998211861,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_programacion_listar",
+              "ms": 45.29999998211861,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_cobertura_programacion",
+              "ms": 45.29999998211861,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_cobertura_ordenes",
+              "ms": 45.29999998211861,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_reprogramaciones_listar",
+              "ms": 45.29999998211861,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_disponibles",
+              "ms": 45.39999997615814,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_programacion_listar",
+              "ms": 45.39999997615814,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_cobertura_programacion",
+              "ms": 45.39999997615814,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_cobertura_ordenes",
+              "ms": 45.39999997615814,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_reprogramaciones_listar",
+              "ms": 45.39999997615814,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_conciliaciones_listar",
+              "ms": 45.400000005960464,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_conciliaciones_listar",
+              "ms": 87,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_conciliaciones_listar",
+              "ms": 99,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion",
+              "ms": 45.20000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion",
+              "ms": 45.20000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion",
+              "ms": 45.20000001788139,
+              "status": "ok"
+            }
+          ]
+        },
+        "search": {
+          "wall_ms": 64.19999998807907,
+          "requests": 3,
+          "render_ms": 18.299999982118607,
+          "samples": [
+            {
+              "kind": "render",
+              "name": "filter-render",
+              "ms": 9.699999988079071,
+              "status": "ok"
+            },
+            {
+              "kind": "render",
+              "name": "filter-render",
+              "ms": 6,
+              "status": "ok"
+            },
+            {
+              "kind": "render",
+              "name": "filter-render",
+              "ms": 2.5999999940395355,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion",
+              "ms": 45.19999998807907,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion",
+              "ms": 45.19999998807907,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion",
+              "ms": 45.19999998807907,
+              "status": "ok"
+            }
+          ]
+        },
+        "dates": {
+          "wall_ms": 233,
+          "requests": 74,
+          "render_samples_ms": [
+            5.199999988079071,
+            4.5
+          ],
+          "samples": [
+            {
+              "kind": "rpc",
+              "name": "sgp_pdt_capacidades_v2",
+              "ms": 45.39999997615814,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_pdt_capacidades_v2",
+              "ms": 45.29999998211861,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_pdt_capacidades_v2",
+              "ms": 45.400000005960464,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_reservas_asociadas_listar",
+              "ms": 45.20000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_programacion_listar",
+              "ms": 45.20000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_reprogramaciones_listar",
+              "ms": 45.20000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_reservas_asociadas_listar",
+              "ms": 45.20000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_programacion_listar",
+              "ms": 45.20000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_reprogramaciones_listar",
+              "ms": 45.20000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_reservas_asociadas_listar",
+              "ms": 45.10000002384186,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_programacion_listar",
+              "ms": 45.10000002384186,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_reprogramaciones_listar",
+              "ms": 45.10000002384186,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_programacion",
+              "ms": 45.20000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_programacion",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_programacion",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_aluminio_pendientes_listar",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_aluminio_pendientes_listar",
+              "ms": 45.19999998807907,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_aluminio_pendientes_listar",
+              "ms": 45.19999998807907,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_semanas_programacion",
+              "ms": 45.20000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_pendientes_turno",
+              "ms": 45.099999994039536,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion",
+              "ms": 45.29999998211861,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_novedades",
+              "ms": 45.29999998211861,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_historial_orden",
+              "ms": 45.29999998211861,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_aluminio_pendientes_listar_v2",
+              "ms": 45.19999998807907,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_aluminio_pendientes_listar_v2",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_aluminio_pendientes_listar_v2",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_ordenes_programacion",
+              "ms": 45.099999994039536,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_ordenes_programacion",
+              "ms": 45.099999994039536,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_ordenes_programacion",
+              "ms": 45.099999994039536,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_ordenes_programacion",
+              "ms": 45.19999998807907,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_ordenes_programacion",
+              "ms": 45.19999998807907,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_ordenes_programacion",
+              "ms": 45.099999994039536,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_ordenes_programacion",
+              "ms": 45.099999994039536,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_ordenes_programacion",
+              "ms": 45.099999994039536,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_ordenes_programacion",
+              "ms": 45.099999994039536,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_ordenes_programacion",
+              "ms": 45.099999994039536,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_ordenes_programacion",
+              "ms": 45.099999994039536,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_ordenes_programacion",
+              "ms": 45.099999994039536,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_ordenes_programacion",
+              "ms": 45.099999994039536,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_ordenes_programacion",
+              "ms": 45.099999994039536,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_ordenes_programacion",
+              "ms": 45.099999994039536,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_ordenes_programacion",
+              "ms": 45.099999994039536,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_ordenes_programacion",
+              "ms": 45.099999994039536,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_ordenes_programacion",
+              "ms": 45.099999994039536,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_ordenes_programacion",
+              "ms": 45.19999998807907,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_ordenes_programacion",
+              "ms": 45.19999998807907,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_ordenes_programacion",
+              "ms": 45.19999998807907,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_ordenes_programacion",
+              "ms": 45.19999998807907,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_ordenes_programacion",
+              "ms": 45.19999998807907,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_ordenes_programacion",
+              "ms": 45.19999998807907,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion_orden",
+              "ms": 45.29999998211861,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion_orden",
+              "ms": 45.69999998807907,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion_orden",
+              "ms": 45.900000005960464,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion_orden",
+              "ms": 46.099999994039536,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion_orden",
+              "ms": 46,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion_orden",
+              "ms": 46.099999994039536,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion_orden",
+              "ms": 46.20000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion_orden",
+              "ms": 46.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion_orden",
+              "ms": 46.400000005960464,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion_orden",
+              "ms": 46.5,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion_orden",
+              "ms": 46.599999994039536,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion_orden",
+              "ms": 46.70000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion_orden",
+              "ms": 46.80000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion_orden",
+              "ms": 47,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion_orden",
+              "ms": 47.099999994039536,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion_orden",
+              "ms": 47.20000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion_orden",
+              "ms": 47.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion_orden",
+              "ms": 47.400000005960464,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion_orden",
+              "ms": 47.599999994039536,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion_orden",
+              "ms": 47.599999994039536,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion_orden",
+              "ms": 47.70000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion_orden",
+              "ms": 47.80000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion_orden",
+              "ms": 47.900000005960464,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion_orden",
+              "ms": 48.099999994039536,
+              "status": "ok"
+            }
+          ]
+        },
+        "emptyDate": {
+          "wall_ms": 92.59999999403954,
+          "requests": 8,
+          "samples": [
+            {
+              "kind": "rpc",
+              "name": "sgp_pdt_capacidades_v2",
+              "ms": 45.400000005960464,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_reservas_asociadas_listar",
+              "ms": 45.400000005960464,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_programacion_listar",
+              "ms": 45.400000005960464,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_reprogramaciones_listar",
+              "ms": 45.400000005960464,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_programacion",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_aluminio_pendientes_listar",
+              "ms": 45.29999998211861,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_pendientes_turno",
+              "ms": 45.20000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_aluminio_pendientes_listar_v2",
+              "ms": 45.5,
+              "status": "ok"
+            }
+          ]
+        },
+        "detail": {
+          "requests": 0,
+          "save": true,
+          "state": true,
+          "novelty": true,
+          "reprogram": true,
+          "reopen_requests": 0
+        }
+      }
+    },
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "variant": "after",
+      "measurements": {
+        "programming": {
+          "wall_ms": 111.69999998807907,
+          "runs_ms": [
+            100.5,
+            112.19999998807907,
+            111.69999998807907
+          ],
+          "requests": 8,
+          "samples": [
+            {
+              "kind": "rpc",
+              "name": "sgp_reservas_asociadas_listar",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_disponibles",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_programacion_listar",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_cobertura_programacion",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_cobertura_ordenes",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_reprogramaciones_listar",
+              "ms": 45.20000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_conciliaciones_listar",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "render",
+              "name": "programming",
+              "ms": 13.600000023841858,
+              "status": "ok"
+            },
+            {
+              "kind": "load",
+              "name": "programming",
+              "ms": 60.20000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion",
+              "ms": 51.29999998211861,
+              "status": "ok"
+            }
+          ]
+        },
+        "rapid": {
+          "wall_ms": 141.7999999821186,
+          "requests": 8,
+          "samples": [
+            {
+              "kind": "rpc",
+              "name": "sgp_reservas_asociadas_listar",
+              "ms": 45.19999998807907,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_disponibles",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_programacion_listar",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_cobertura_programacion",
+              "ms": 45.20000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_cobertura_ordenes",
+              "ms": 45.20000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_reprogramaciones_listar",
+              "ms": 45.20000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_conciliaciones_listar",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "render",
+              "name": "programming",
+              "ms": 8.900000005960464,
+              "status": "ok"
+            },
+            {
+              "kind": "load",
+              "name": "programming",
+              "ms": 54.400000005960464,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion",
+              "ms": 45.5,
+              "status": "ok"
+            }
+          ]
+        },
+        "search": {
+          "wall_ms": 24.700000017881393,
+          "requests": 0,
+          "render_ms": 23.5,
+          "samples": [
+            {
+              "kind": "render",
+              "name": "filter-render",
+              "ms": 13.5,
+              "status": "ok"
+            },
+            {
+              "kind": "render",
+              "name": "filter-render",
+              "ms": 7.199999988079071,
+              "status": "ok"
+            },
+            {
+              "kind": "render",
+              "name": "filter-render",
+              "ms": 2.800000011920929,
+              "status": "ok"
+            }
+          ]
+        },
+        "dates": {
+          "wall_ms": 271.09999999403954,
+          "requests": 9,
+          "render_samples_ms": [
+            3.9000000059604645,
+            2
+          ],
+          "samples": [
+            {
+              "kind": "rpc",
+              "name": "sgp_reservas_asociadas_listar",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_pendientes_turno",
+              "ms": 45.10000002384186,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_programacion_listar",
+              "ms": 45.10000002384186,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_reprogramaciones_listar",
+              "ms": 45.10000002384186,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_programacion",
+              "ms": 45.20000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_semanas_programacion",
+              "ms": 45.20000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_ejecucion",
+              "ms": 45.30000001192093,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_novedades",
+              "ms": 45.400000005960464,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_historial_orden",
+              "ms": 45.400000005960464,
+              "status": "ok"
+            },
+            {
+              "kind": "render",
+              "name": "production",
+              "ms": 2,
+              "status": "ok"
+            },
+            {
+              "kind": "load",
+              "name": "production",
+              "ms": 93.90000000596046,
+              "status": "ok"
+            }
+          ]
+        },
+        "emptyDate": {
+          "wall_ms": 46.5,
+          "requests": 5,
+          "samples": [
+            {
+              "kind": "rpc",
+              "name": "sgp_reservas_asociadas_listar",
+              "ms": 45.29999998211861,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_pendientes_turno",
+              "ms": 45.099999994039536,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_programacion_listar",
+              "ms": 45.20000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "rpc",
+              "name": "sgp_mecanizado_reprogramaciones_listar",
+              "ms": 45.20000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "query",
+              "name": "sgp_mecanizado_programacion",
+              "ms": 45.20000001788139,
+              "status": "ok"
+            },
+            {
+              "kind": "render",
+              "name": "production",
+              "ms": 0.09999999403953552,
+              "status": "ok"
+            },
+            {
+              "kind": "load",
+              "name": "production",
+              "ms": 46.5,
+              "status": "ok"
+            }
+          ]
+        },
+        "detail": {
+          "requests": 2,
+          "save": true,
+          "state": true,
+          "novelty": true,
+          "reprogram": true,
+          "reopen_requests": 2
+        }
+      }
+    }
+  ]
+}
