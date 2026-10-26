@@ -1,11 +1,12 @@
-> Cambio concurrente detectado al cierre: main avanzó a
-> `eca84e06b19d7e43e5caf1b4d01e1e0805489158` (selector de semanas, LAB v356),
-> incorporado a esta rama sin modificar su lógica. PR #101 reserva LAB v357;
-> esta entrega utiliza **LAB v358**, siguiente número disponible. Firebase live
-> run `40364911753` del nuevo main terminó FAILURE; no se declara v356 publicado.
-> El baseline de rendimiento sigue siendo c6d7597, cuyo app.js no cambió en ese
-> avance de main. El selector heredado es trabajo de ChatGPT, fuera del diff de
-> este PR. PR101 continúa independiente, sin incorporar sus cambios.
+> Revisión ChatGPT resuelta: main LAB v357 / PR #101 fusionado,
+> `f073202416f9624fe2eee485c828e80c58e98bec`, incorporado al mismo PR Draft #102.
+> La entrega sigue en LAB v358. No se modificaron las funciones de programación
+> individual ni las columnas Semana/Acabado de v357. No se fusionó ni publicó PR102.
+> El baseline de rendimiento c6d7597 y los resultados previos se conservan como
+> evidencia histórica del SHA47d09cc: las cuatro funciones medidas son idénticas
+> tras la sincronización (hashes en evidence/main-sync.json), aunque el hash del
+> app.js completo cambió por las funciones de PR101. No se repitió el benchmark.
+
 
 # Issue #99 — LAB v358: evidencia local
 
@@ -13,7 +14,8 @@
 
 IMPLEMENTADO EN RAMA; VERIFICADO LOCALMENTE con datos sintéticos. No fusionado,
 no publicado, sin consultas ni escrituras de Supabase productivo en este encargo.
-Base: `c6d759751ea7a8e879233ad7d3df9f1c8876321e` (main LAB v355, PR #98).
+Base inicial: `c6d759751ea7a8e879233ad7d3df9f1c8876321e` (LAB v355, PR #98).
+Base actual incorporada: `f073202416f9624fe2eee485c828e80c58e98bec` (LAB v357, PR #101).
 Rama: `feat/issue-99-pdt-refresh-performance`. El SHA final se obtiene del PR/git,
 no del propio archivo que se incorpora a ese commit.
 
@@ -79,13 +81,17 @@ La aceptación con red, sesión real y hardware de planta sigue PENDIENTE.
 
 ## Pruebas y reproducción
 
-- `npm test`: **265/265** aprobadas; incluye seis nuevas de métricas/privacidad,
+- `npm test`: **271/271** aprobadas tras incorporar v357; incluye seis nuevas de métricas/privacidad,
   lecturas simultáneas, sesiones, errores, no agrupar escrituras, filtros y refresco.
+- `tests/issue102-main-sync.test.mjs`: cuatro regresiones ejecutan el código real:
+  producción única por cantidad, rechazo de ambigüedad/orden ya programada sin
+  RPC de escritura, producción explícita y agregación de semanas/acabados múltiples.
+  Son casos sintéticos; no escrituras operativas.
 - `node --check app.js` y `npm run verify:release`: aprobadas, LAB v358 autocontenido.
 - `python tests/issue99/browser-pdt.py`: ambos tamaños aprobados con controlador
   real y RPC sintéticas con estado; red externa bloqueada, sin errores JS.
   CORTE→MECANIZADO→PROCESADO sin reabrir, avance2/saldo2, reverso, Picking,
-  conservación de contexto, doble clic y fallos/reintentos. `evidence/pdt-browser.json`.
+  conservación de contexto, doble clic y fallos/reintentos. `evidence/pdt-browser.json` (repetida sobre el árbol sincronizado).
 - `python tests/issue99/performance-browser.py`: comparativa anterior y
   comprobación de acciones del detalle. Red externa bloqueada.
 - `python tests/issue99/history-sql.py`: **23 aserciones** aprobadas en PostgreSQL
@@ -97,6 +103,7 @@ La aceptación con red, sesión real y hardware de planta sigue PENDIENTE.
 - Regresiones `python tests/pdt-v2-browser.py`, `python tests/pdt-v2-ux/browser.py`
   y `python tests/issue97/browser.py`: PC/móvil aprobados; once contratos RPC,
   Recepción sin mecanizado, auditoría no acreditable y **26/10/2026 T1=8+57=65**.
+  Calendario repetido tras sincronizar main y preservando 8+57=65 en PC/móvil.
   Son fixtures. La actualización de tests permite la nueva lectura tras escribir,
   espera la terminación asíncrona y nunca simula un despliegue.
 - `git diff --check`: sin errores. CI remoto se registra en el PR final.
@@ -111,8 +118,8 @@ Ver `../../docs/sql-applied/README.md`: archivo histórico equivalente a la corr
 ya aplicada por ChatGPT según Issue #99. **No ejecutarlo nuevamente en producción**.
 No se introducen migraciones automáticas ni instalaciones productivas.
 
-Fuera de alcance y sin implementación: selector desplegable de semanas, indicadores
-de avance por sistema e investigación de los 53 registros sin semana. No se modifica
-`programacion-subtabs-v350.js`, Supabase productivo, GOOGLE, LAC ni Firebase live.
+Fuera de alcance y sin implementación propia: selector desplegable de semanas, indicadores
+de avance por sistema e investigación de los 53 registros sin semana. Se hereda sin cambios respecto a main
+`programacion-subtabs-v350.js`. No se modifica Supabase productivo, GOOGLE, LAC ni Firebase live.
 Siguiente paso único: revisión del mismo PR Draft por ChatGPT; fusionar/publicar y
 la validación con sesión real requieren autorización posterior.
