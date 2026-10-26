@@ -39,7 +39,7 @@ Solo las reservas/partes con traslado parcial en fechas visibles requieren la RP
 existente `sgp_mecanizado_ordenes_programacion`, una vez por origen (no por orden),
 con caché y lotes de4. Conserva autorización del servidor. Si no puede verificarse
 la cantidad restante, se marca incompleta; nunca se inventa ni se descuenta dos veces.
-Las respuestas viejas no reemplazan otra fecha/turno; se conserva el preview de carga.
+Las respuestas viejas no reemplazan otra fecha/turno ni el encabezado de una semana nueva; regresión de dos semanas concurrentes probada en el navegador. Se conserva el preview de carga.
 
 ## Pruebas
 

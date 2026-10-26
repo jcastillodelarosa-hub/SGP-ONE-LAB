@@ -465,3 +465,7 @@ Detenerse antes de fusionar/desplegar; no repetir pruebas ya aprobadas sin cambi
 Protección final Issue97: el puente de calendario rechaza sesión SGP ausente antes
 de consultar DB/caché. Prueba dirigida del código real añadida:16/16 aprobadas; la
 suite completa previa fue254/254. CI vuelve a validar el commit completo.
+
+Regresión final de navegación Issue97: una respuesta tardía de la semana anterior
+no puede sustituir el encabezado de la semana nueva. Comprobada en Chromium PC/móvil
+con el renderer real de app.js; resultados anteriores se conservan aprobados.

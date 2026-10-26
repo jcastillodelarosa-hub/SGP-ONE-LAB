@@ -61,6 +61,18 @@ try:
    page.evaluate("window.denied=true;document.querySelector('#progRefresh').click()")
    page.wait_for_function("document.querySelector('#sgpProgView [role=alert]')?.textContent.includes('denegada')")
    assert page.locator('.sgp351-board').is_hidden();assert 'No se presume arrastre cero' in page.locator('#sgpProgView').inner_text()
+   # Late response for an old calendar week cannot overwrite the new header.
+   calendar=app[app.index('function renderProgCalendar(){'):app.index('function renderProgramming(){')]
+   page.evaluate('''async args=>{
+    const {renderWorkloadCalendar}=await import(args.base+'/src/modules/mecanizado-operational-calendar.js');const {workloadTotals}=await import(args.base+'/src/domain/mecanizado-operational-load.js');
+    const iso=d=>[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');
+    window.SGPOperationalCanManage=()=>false;window.SGPOperationalLoad=dates=>dates[0]==='2026-10-26'?new Promise(resolve=>window.resolveOldCalendar=resolve):Promise.resolve({rows:[{...window.schedule[0],tipo:'NUEVA',fecha_programacion:dates[0]}],notes:[],warnings:[]});
+    const deps={progSchedule:window.schedule,progDateISO:iso,progWeekStart:value=>{const d=new Date(value+'T12:00:00');d.setDate(d.getDate()-(d.getDay()+6)%7);return d;},escapeHtml:value=>String(value??''),openProgDay:()=>{},renderWorkloadCalendar,workloadTotals};
+    const render=new Function('deps','const {'+Object.keys(deps).join(',')+'}=deps;let progCalendarAnchor="2026-10-26";'+args.source+';return renderProgCalendar;')(deps);render();document.querySelector('#progAgenda [data-cal-next]').click();
+   }''',{'source':calendar,'base':base})
+   page.wait_for_function("document.querySelector('#progAgenda .prog-week-summary').textContent.includes('8')")
+   page.evaluate("window.resolveOldCalendar({rows:[],notes:[],warnings:[]})");page.wait_for_timeout(30)
+   assert '8' in page.locator('#progAgenda .prog-week-summary').inner_text()
    assert not errors,errors
    results.append({'viewport':[width,height],'active_component':'programacion-subtabs-v350.js Resumen 7days x2shifts','production_total':65,'calendar_total':65,'new':8,'carry':57,'systems':{'ES-MX4000_carry':16,'ES-EL400_carry':41},'occupancy':'72.2% of90','shared_RPC_queries':14,'no_per_order_N_plus_1':True,'origin_informational_only':True,'modal_scroll_close':True,'SIN_INICIAR_background':color,'backend_writes':0,'external_network_allowed':False,'errors':errors})
    page.close()
