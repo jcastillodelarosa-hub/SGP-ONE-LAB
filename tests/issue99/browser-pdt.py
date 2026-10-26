@@ -68,7 +68,7 @@ try:
    page.screenshot(path=str(OUT/f'pdt-refreshed-{width}.png'))
    stage('CORTE');stage('MECANIZADO');assert page.locator('[data-operation=stage]').is_disabled()
    advance(0,2);advance(1,5);stage('PROCESADO')
-   section('history');assert 'sgp_pdt_estado_v2' in page.locator('[data-pdt-history]').inner_text();section('advances')
+   section('history');page.wait_for_function("document.querySelector('[data-pdt-history]').textContent.includes('sgp_pdt_estado_v2')");section('advances')
    last=page.evaluate("window.state.movimientos.filter(m=>m.tipo==='AVANCE').at(-1).id_movimiento");page.locator('[data-movement]').select_option(last);page.locator('[data-note]').fill('Reverso sintético');page.once('dialog',lambda dialog:dialog.accept());page.locator('[data-operation=reverse]').click();ready()
    assert 'MECANIZADO' in page.locator('.pdt-detail-header').inner_text();assert page.locator('.pdt-metrics strong').all_text_contents()[-1]=='5'
    assert page.locator('[data-date]').input_value()=='2026-10-26';assert page.locator('[data-shift]').input_value()=='T2'

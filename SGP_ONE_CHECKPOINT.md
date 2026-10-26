@@ -1,3 +1,45 @@
+## Estado ejecutivo vigente — Issue #99 / LAB v356 en rama
+
+Actualizado UTC: 2026-10-26T17:28:07.513655+00:00. Esta entrada prevalece sobre estados históricos inferiores.
+Repositorio exclusivo: SGP-ONE-LAB. Base main comprobada para el encargo:
+`c6d759751ea7a8e879233ad7d3df9f1c8876321e`; volver a consultar antes de integrar.
+Rama independiente: `feat/issue-99-pdt-refresh-performance`. Primer checkpoint de
+código guardado y subido: `beb6e80`; consultar el SHA final del PR para la entrega.
+
+| Hito | Estado y evidencia |
+|---|---|
+| PR #94 — identidad PANEL/FRAME y reparación protegida | FUSIONADO en main, `89c2bbf4713082167961df22d82e511eccfd5f0e`; no repetir corrección de datos. No revalidada aplicación SQL en este encargo. |
+| PR #96 — detalle PDT responsive, REPO OK | FUSIONADO, `eb0e1dc197d67072d556c226af318f5cd28a800e`. Contratos preservados. |
+| PR #98 — carga por turno, RPC segura y LAB v355 | FUSIONADO, `c6d759751ea7a8e879233ad7d3df9f1c8876321e`. Workflow Firebase live run `40354206607` SUCCESS sobre ese SHA: evidencia de PUBLICACIÓN v355; no prueba funcional autenticada. |
+| RPC `sgp_mecanizado_reprogramaciones_listar` | Código/SQL versionados por PR98; instalación efectiva no reconsultada aquí. No inferir aplicación a partir de merge o despliegue. No volver a SELECT directo/RLS abierto. |
+| Hotfix historial PDT v2 | APLICADO y definiciones VERIFICADAS según evidencia de ChatGPT en Issue99: tres funciones con estado_nuevo y guard de rol real. Archivo equivalente en docs/sql-applied; NO reaplicar. E2E real pendiente. |
+| LAB v356, Issue99 | IMPLEMENTADO EN RAMA, VERIFICADO LOCALMENTE con fixtures. No APLICADO nuevamente en Supabase, no FUSIONADO ni PUBLICADO. |
+
+PDT: mismo modal tras escribir, datos leídos otra vez del servidor, contexto conservado,
+prevención de duplicados y reintento seguro. Mecanizado: lecturas independientes en
+paralelo, agrupamiento40ms/sesión, filtros locales sin recarga de calendario, carga de
+órdenes solo al expandir y PDT global sin recarga por cada filtro. Sin cambios de reglas.
+
+Evidencias actuales: `tests/issue99/README.md` y `tests/issue99/evidence/`: 265/265 JS,
+23 aserciones SQL aisladas PG17.11, PC1366/móvil390 con RPC sintéticas, regresiones de
+once contratos y caso26/10 T1=8+57=65; sintaxis y verify:release LABv356 aprobados.
+Medición controlada45ms/lectura: semanas rápidas24→8, búsqueda3→0 y fecha/turno74→9
+solicitudes. Tiempos exactos/muestras antes/después y límites en el README/JSON;
+no representan latencia productiva. CI del SHA final debe comprobarse en el PR.
+
+PENDIENTE: revisión ChatGPT del único PR Draft, CI remoto final, medición/aceptación
+con sesión y móvil reales tras autorización de publicación. No se modificaron datos,
+Supabase, Firebase live, GOOGLE ni LAC; no hubo fusión/despliegue en este encargo.
+Las entradas antiguas «PR98 OPEN/DRAFT», «v355 no publicado» y bloqueos de lectura
+son HISTÓRICAS, superadas solo en lo expresamente evidenciado en esta tabla.
+
+Tareas reservadas a ChatGPT, NO incluidas aquí: selector desplegable de semanas,
+indicadores de avance por sistema e investigación de53 registros sin semana.
+Siguiente acción única: revisar el PR Draft de Issue99. No fusionar ni desplegar
+sin autorización; mantener las propuestas SQL fuera de aplicación automática.
+
+---
+
 # SGP_ONE — CHECKPOINT OPERATIVO (Continuity v2.1)
 
 Fecha de conciliación: 2026-10-22 (fecha documental; comprobar fecha/hora de GitHub al recuperar)

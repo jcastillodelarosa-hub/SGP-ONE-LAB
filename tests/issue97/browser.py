@@ -1,7 +1,7 @@
 """Real mounted Resumen script + calendar/Production loader, synthetic read-only fixtures."""
-import functools,http.server,json,pathlib,threading
+import functools,http.server,json,pathlib,threading,os
 from playwright.sync_api import sync_playwright
-ROOT=pathlib.Path(__file__).resolve().parents[2];OUT=ROOT/'tests/issue97/evidence'
+ROOT=pathlib.Path(__file__).resolve().parents[2];OUT=pathlib.Path(os.environ.get('SGP_QA_OUT',ROOT/'tests/issue97/evidence'));OUT.mkdir(parents=True,exist_ok=True)
 class H(http.server.SimpleHTTPRequestHandler):
  def log_message(self,*args):pass
  def do_GET(self):
@@ -51,7 +51,7 @@ try:
    assert modal.evaluate('node=>node.scrollWidth<=node.clientWidth+1')
    bounds=modal.bounding_box();assert bounds['y']>=-1 and bounds['y']+bounds['height']<=height+1,bounds
    page.screenshot(path=str(OUT/f'detail-{width}.png'),full_page=False)
-   modal.locator('[data-close]').click();assert page.locator('.mec-workload-modal').count()==0
+   modal.locator('[data-close]').click();page.locator('.mec-workload-modal').wait_for(state='detached')
    origin=page.locator('[data-sgp351-day="2026-10-26"][data-sgp351-shift="2"]');assert 'Movida a 2026-10-27 / TURNO 2' in origin.locator('..').inner_text();assert 'Total: 0' in origin.inner_text();origin.click()
    assert 'Movida a 2026-10-27 / TURNO 2' in page.locator('.mec-workload-modal').inner_text();assert page.locator('.mec-workload-modal article').count()==0
    page.screenshot(path=str(OUT/f'moved-origin-{width}.png'),full_page=False);page.keyboard.press('Escape');page.locator('.mec-workload-modal').wait_for(state='detached')
