@@ -33,7 +33,7 @@ COHORT_SQL="""BEGIN READ ONLY; SET LOCAL statement_timeout='20s';
 WITH b AS (SELECT to_jsonb(x) data FROM public.sgp_pdt_key_backup_20261025 x),
  cohort AS (SELECT p.*,m.tipo_pieza AS master_tipo,m.destino_productivo AS master_destino,m.activo AS master_activo FROM b JOIN public.sgp_aluminio_pendientes p ON p.id_pendiente::text=b.data->>'id_pendiente' LEFT JOIN public.sgp_maestro_piezas m ON btrim(m.codigo_sap)=btrim(p.perfil))
 SELECT jsonb_build_object('pending',true,'backup_count',(SELECT count(*) FROM b),'matched_count',(SELECT count(*) FROM cohort),
- 'groups',(SELECT jsonb_agg(to_jsonb(g)) FROM (SELECT split_part(key_produccion,'|',2) line,validacion_estado,estado,estado_repo,master_tipo,master_destino,master_activo,count(*) n FROM cohort GROUP BY 1,2,3,4,5,6,7) g),
+ 'groups',(SELECT jsonb_agg(to_jsonb(g)) FROM (SELECT split_part(key_produccion,'|',2) line,contrato_pdt,validacion_estado,estado,estado_repo,master_tipo,master_destino,master_activo,count(*) n FROM cohort GROUP BY 1,2,3,4,5,6,7,8) g),
  'classifications',(SELECT jsonb_agg(to_jsonb(g)) FROM (SELECT tipo_pieza,destino_productivo,activo,count(*) n FROM public.sgp_maestro_piezas WHERE codigo_sap IN (SELECT perfil FROM cohort) GROUP BY 1,2,3)g),
  'dependent_counts',jsonb_build_object('detalles',(SELECT count(*) FROM public.sgp_aluminio_pendiente_detalles d JOIN cohort c USING(id_pendiente)), 'movimientos',(SELECT count(*) FROM public.sgp_aluminio_pendiente_movimientos d JOIN cohort c USING(id_pendiente)), 'cierres',(SELECT count(*) FROM public.sgp_pdt_cierres d JOIN cohort c USING(id_pendiente)), 'ncs',(SELECT count(*) FROM public.sgp_aluminio_pendiente_ncs d JOIN cohort c USING(id_pendiente))));
 ROLLBACK;"""
@@ -52,7 +52,7 @@ def main():
   payload=base64.b64encode(zlib.compress(json.dumps(data,ensure_ascii=False).encode())).decode()
   parts=[payload[i:i+1700] for i in range(0,len(payload),1700)]
   for index,chunk in enumerate(parts):
-   print('::notice title=PDT identity part::'+json.dumps({'index':index,'parts':len(parts),'chunk':chunk},ensure_ascii=False).replace('%','%25'))
+   print('::notice title=PDT identity part::'+json.dumps({'index':index,'parts':len(parts),'chunk':chunk,'section':sys.argv[1] if len(sys.argv)>1 else 'case'},ensure_ascii=False).replace('%','%25'))
 if __name__=='__main__':
  try:main()
  except Exception:print('::error title=PDT source predicates::Read-only comparison not verified; no writes');raise SystemExit(1)
