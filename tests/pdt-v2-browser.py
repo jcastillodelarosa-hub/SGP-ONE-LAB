@@ -24,7 +24,7 @@ try:
       if(name==='sgp_pdt_fuentes_v2')return {data:[{id_pieza:'qa:1',fabricacion:'E17',longitud:'109.9375',acabado:'DS',cantidad:5},{id_pieza:'qa:2',fabricacion:'E17-1',longitud:'109.9375',acabado:'DS',cantidad:4}]};
       if(name==='sgp_pdt_picking_v2')return {data:{ok:true,entregas:[{id_entrega:'qa-event',produccion:'QA',estado:'VALIDADA',completa:false}],lineas:[]}};
       return {data:{ok:true}};
-    }},token:'SYNTHETIC_ONLY',capabilities:{contract_version:2,operations:['sgp_aluminio_pendiente_validar_detalles_v1','sgp_aluminio_pendiente_registrar_avance_v1','sgp_aluminio_pendiente_nc_vincular_v1','sgp_pdt_entrega_registrar_v2'],...extra},show:window.show,escape:window.esc,reload:async()=>{window.reloaded=true;},close:()=>{window.closed=true;}});
+    }},token:'SYNTHETIC_ONLY',initialSection:role==='LIDER MECANIZADO'?'advances':role==='PICKING'?'picking':'distribution',capabilities:{contract_version:2,operations:['sgp_aluminio_pendiente_validar_detalles_v1','sgp_aluminio_pendiente_registrar_avance_v1','sgp_aluminio_pendiente_nc_vincular_v1','sgp_pdt_entrega_registrar_v2'],...extra},show:window.show,escape:window.esc,reload:async()=>{window.reloaded=true;},close:()=>{window.closed=true;}});
     await window.openPdt('RECEPCION',{id_pendiente:'qa',cantidad:9,reserva:'QA',perfil:'QA',produccion:'QA'});
    }''',url)
    page.locator('[data-source="0"]').check();page.locator('[data-source="1"]').check()
@@ -33,7 +33,7 @@ try:
    call=page.evaluate('window.calls.at(-1)');assert call['name']=='sgp_aluminio_pendiente_validar_detalles_v1'
    assert sum(int(d['cantidad']) for d in call['args']['p_detalles'])==9
    page.evaluate('''async()=>{window.calls=[];window.reloaded=false;await window.openPdt('LIDER MECANIZADO',{id_pendiente:'qa',contrato_pdt:'V2',cantidad:9,cantidad_validada:9,saldo_mecanizado:9,estado_repo:'MECANIZADO',detalles:[{id_detalle:'qa-detail',fabricacion:'E17',saldo:5}],movimientos:[]});}''')
-   page.locator('[data-qty]').fill('2');page.locator('[data-date]').fill('2026-10-25')
+   page.locator('[data-advance-qty="0"]').fill('2');page.locator('[data-date]').fill('2026-10-25')
    page.locator('[data-operation="advance"]').click();page.wait_for_function('window.reloaded===true')
    assert page.evaluate('window.calls.at(-1).args.p_cantidad')==2
    assert page.locator('[data-operation="reverse"]').is_disabled()
