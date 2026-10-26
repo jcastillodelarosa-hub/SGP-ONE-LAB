@@ -1163,3 +1163,14 @@ Un registro puede pertenecer a la semana de programación 44 y ejecutarse en la 
 **Rama:** `feat/pdt-multifabricacion-avances-nc`; **PR:** #91 (draft). Documento de diseño `docs/PDT_MULTIFABRICACION_IMPLEMENTACION.md`. Migración `supabase/migrations/20261024_pdt_multifabricacion_avances_nc_DRAFT.sql` es BORRADOR, NO APLICADA.
 
 **Estado:** REGLAS APROBADAS; DISEÑO EN RAMA; RPC, frontend y pruebas de integración PENDIENTES. No afirmar que se implementó ni publicó.
+
+
+## 2026-10-26 — LABv355 preparada en PR98, NO publicada
+
+Continuación en rama feat/issue-97-operational-calendar: reemplazo de SELECT directo
+de reprogramaciones por RPC SGP segura propuesta, sin cambiar RLS ni permisos de tabla.
+SQL/inversa en docs/sql-proposals/mecanizado; NO aplicados a Supabase. Interfaz y build
+se incrementan de354 a355. Caso8+57=65 y controles de Issue97 conservados;259 pruebas JS,
+34 aserciones SQL aisladas y PC/móvil aprobados. Ver checkpoint y tests/issue97/README.md.
+No fusionado/desplegado; publicación y aplicación productiva requieren autorización
+posterior. Este hito no sustituye la versión actualmente publicada.

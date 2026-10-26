@@ -3,7 +3,7 @@ No production RPC, session or write; screenshots clearly identify local preview.
 """
 import functools,http.server,json,pathlib,threading,argparse,urllib.request,re,hashlib,os,sys
 from playwright.sync_api import sync_playwright
-sys.excepthook=lambda kind,error,trace:print('::error title=LAB v354 visual::'+kind.__name__+': '+str(error).replace('\n',' ')[:220])
+sys.excepthook=lambda kind,error,trace:print('::error title=LAB v355 visual::'+kind.__name__+': '+str(error).replace('\n',' ')[:220])
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 OUT=pathlib.Path('/tmp/sgp-pdt-visibility');OUT.mkdir(exist_ok=True)
 parser=argparse.ArgumentParser();parser.add_argument('--production-url');parser.add_argument('--expected-sha');args=parser.parse_args()
@@ -15,7 +15,7 @@ if args.production_url:
   with urllib.request.urlopen(args.production_url+'/'+name+'?visual_check='+args.expected_sha,timeout=30) as response:return response.read()
  release_html=deployed('index.html').decode()
  assert 'data-release-commit="'+args.expected_sha+'"' in release_html
- assert 'LAB v354 · PDT v2 · '+args.expected_sha[:7] in release_html
+ assert 'LAB v355 · PDT v2 · '+args.expected_sha[:7] in release_html
  badge=r'<span\b[^>]*\bid="releaseVersion"[^>]*>[^<]*</span>'
  assert re.sub(badge,'RELEASE_BADGE',release_html)==re.sub(badge,'RELEASE_BADGE',(ROOT/'index.html').read_text())
  for name in ['app.js','styles.css','src/modules/pdt-flow-guidance.js','src/modules/pdt-v2-controller.js']:
@@ -45,12 +45,12 @@ try:
    page.route('**/*',route_request)
    if args.production_url:
     page.goto(url+'/?visual_check='+args.expected_sha,wait_until='networkidle',timeout=60000)
-    assert page.locator('#releaseVersion').inner_text()=='LAB v354 · PDT v2 · '+args.expected_sha[:7]
+    assert page.locator('#releaseVersion').inner_text()=='LAB v355 · PDT v2 · '+args.expected_sha[:7]
     assert not errors,errors
     page.close();page=browser.new_page(viewport={'width':width,'height':height})
     page.on('pageerror',lambda e:errors.append(e.name));page.route('**/*',route_request)
    page.goto(url+'/styles.css')
-   page.set_content('<link rel="stylesheet" href="'+url+'/styles.css"><header style="padding:16px;background:#113f67;color:white"><b>SGP_ONE · LAB v354 · PDT v2 · VISTA PREVIA LOCAL</b><p style="margin:6px 0 0">Sin publicar · rol Coordinador · piezas de prueba simuladas · ninguna escritura</p></header><main style="padding:16px"><h2>Pendientes de aluminio</h2><div id="repoSummary"></div><div style="overflow:auto"><table><tbody id="repoBody"></tbody></table></div></main>')
+   page.set_content('<link rel="stylesheet" href="'+url+'/styles.css"><header style="padding:16px;background:#113f67;color:white"><b>SGP_ONE · LAB v355 · PDT v2 · VISTA PREVIA LOCAL</b><p style="margin:6px 0 0">Sin publicar · rol Coordinador · piezas de prueba simuladas · ninguna escritura</p></header><main style="padding:16px"><h2>Pendientes de aluminio</h2><div id="repoSummary"></div><div style="overflow:auto"><table><tbody id="repoBody"></tbody></table></div></main>')
    page.evaluate('''async source=>{
     const {pendingFlowGuidance}=await import(source.base+'/src/modules/pdt-flow-guidance.js');
     const {openPdtV2}=await import(source.base+'/src/modules/pdt-v2-controller.js');
@@ -99,6 +99,6 @@ try:
   browser.close()
  (OUT/'report.json').write_text(json.dumps(report,indent=2))
  print(json.dumps(report))
- if args.production_url:print('::notice title=LAB v354 visual::Verified exact published SHA '+args.expected_sha+' and LAB v354 badge; desktop/mobile static assets and isolated LEGACY preparation/V2 row navigation passed; no Supabase requests or operational writes.')
+ if args.production_url:print('::notice title=LAB v355 visual::Verified exact published SHA '+args.expected_sha+' and LAB v355 badge; desktop/mobile static assets and isolated LEGACY preparation/V2 row navigation passed; no Supabase requests or operational writes.')
 finally:
  if server:server.shutdown()

@@ -1,0 +1,56 @@
+{
+  "status": "PASS",
+  "postgres": "PostgreSQL 17.11 (Debian 17.11-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
+  "database": "sgp_pdt_qa_91_reprogramming_1793028515294939252",
+  "network": "none",
+  "production_access": false,
+  "auth_definitions": [
+    {
+      "signature": "sgp_validar_sesion_rol(text,text[])",
+      "md5": "951943ae26baccc4797eea5fed57fcb6"
+    },
+    {
+      "signature": "sgp_sesion_actual(text)",
+      "md5": "e964ea0d6f9af2c88010542cd3c84f9e"
+    }
+  ],
+  "sql_sha256": "46457d87c93aa8721146872ee2472f0251b829332d3920de3a2b7f45c90f89a0",
+  "assertions": 34,
+  "results": [
+    "transactional installation rollback removes RPC",
+    "rollback preserves rows/table ACL/RLS/policies",
+    "ADMINISTRADOR through anon returns exactly four minimal linked rows",
+    "ADMINISTRADOR through authenticated returns exactly four minimal linked rows",
+    "COORDINADOR through anon returns exactly four minimal linked rows",
+    "COORDINADOR through authenticated returns exactly four minimal linked rows",
+    "LIDER MECANIZADO through anon returns exactly four minimal linked rows",
+    "LIDER MECANIZADO through authenticated returns exactly four minimal linked rows",
+    "LIDER through anon returns exactly four minimal linked rows",
+    "LIDER through authenticated returns exactly four minimal linked rows",
+    "LIDER LINEA through anon returns exactly four minimal linked rows",
+    "LIDER LINEA through authenticated returns exactly four minimal linked rows",
+    "CONSULTA through anon returns exactly four minimal linked rows",
+    "CONSULTA through authenticated returns exactly four minimal linked rows",
+    "RECEPCION denied",
+    "PATINADOR denied",
+    "PICKING denied",
+    "SUPERVISOR DE PICKING denied",
+    "UNKNOWN denied",
+    "invalid session NULL denied",
+    "invalid session '' denied",
+    "invalid session 'EXPIRED' denied",
+    "invalid session 'REVOKED' denied",
+    "invalid session 'NOT_A_SESSION' denied",
+    "legacy RECEPCION to LIDER equivalence unchanged",
+    "direct SELECT remains denied",
+    "PUBLIC has no EXECUTE",
+    "service_role not granted this RPC",
+    "stable definer owned by postgres with empty search_path",
+    "rows/ACL/RLS/policies preserved after installation and reads",
+    "auth definitions unchanged",
+    "unexpected existing RPC blocks reinstallation",
+    "inverse refuses a subsequently modified function",
+    "guarded inverse removes only RPC"
+  ],
+  "limits": "Supplied auth function bodies; synthetic users/sessions/table. Not an entire Supabase replica."
+}

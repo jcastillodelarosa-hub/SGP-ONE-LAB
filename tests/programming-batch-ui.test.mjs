@@ -9,5 +9,5 @@ test('programacion: seleccion multiple y cobertura',()=>{
  for(const phrase of ['Programar órdenes seleccionadas','prog-completed-orders','Órdenes pendientes por programar','sgp_mecanizado_reconciliar_programacion_legacy'])assert.ok(body.includes(phrase),phrase);
 });
 test('programacion: guardado seguro',()=>{
- for(const phrase of ['if(saving)return','Number.isInteger(x.qty)','for(const item of selected)','if(error){failed=','await loadProgramming()'])assert.ok(body.includes(phrase),phrase);
+ for(const phrase of ['if(saving)return','Number.isInteger(x.qty)','for(const item of selected)','if(error){failed=','await loadProgramming({invalidateCarry:true})'])assert.ok(body.includes(phrase),phrase);
 });
