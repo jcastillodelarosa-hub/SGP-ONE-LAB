@@ -61,11 +61,11 @@ export async function discoverPendingV2(client, token) {
 
 export async function loadPendingRows(client,token,role) {
   const capabilities=await discoverPendingV2(client,token);
-  const {data,error}=capabilities && ['RECEPCION','PICKING'].includes(role) ? {data:[],error:null} : await client.rpc('sgp_aluminio_pendientes_listar',{p_token:token,p_solo_abiertos:false});
+  const [legacy,modern]=await Promise.all([capabilities && ['RECEPCION','PICKING'].includes(role)?Promise.resolve({data:[],error:null}):client.rpc('sgp_aluminio_pendientes_listar',{p_token:token,p_solo_abiertos:false}),capabilities?client.rpc('sgp_aluminio_pendientes_listar_v2',{p_token:token,p_solo_abiertos:false}):Promise.resolve(null)]);
+  const {data,error}=legacy;
   if(error)throw error;
   if(!Array.isArray(data))throw new Error('Lista legacy inválida');
   if(!capabilities)return {rows:data,capabilities:null};
-  const modern=await client.rpc('sgp_aluminio_pendientes_listar_v2',{p_token:token,p_solo_abiertos:false});
   if(modern.error)throw modern.error;
   const adapted=adaptPendingListV2(modern.data);
   const original=new Map(data.map(r=>[r.id_pendiente,r]));
@@ -74,4 +74,15 @@ export async function loadPendingRows(client,token,role) {
   const present=new Set(rows.map(r=>r.id_pendiente));
   for(const r of data)if(!present.has(r.id_pendiente))rows.push(r);
   return {rows,capabilities};
+}
+
+/** Fresh authoritative read after a mutation; no legacy fallback or optimistic balance. */
+export async function refreshPendingV2(client,token,id){
+ const result=await client.rpc('sgp_aluminio_pendientes_listar_v2',{p_token:token,p_solo_abiertos:false});
+ if(result.error)throw result.error;
+ const data=result.data;
+ if(data?.ok!==true||data.contract_version!==2||!Array.isArray(data.pendientes))throw new Error('No se pudo comprobar el estado actualizado del PDT');
+ const matches=data.pendientes.filter(row=>String(row.id_pendiente)===String(id));
+ if(matches.length!==1)throw new Error('PDT no disponible o ambiguo en la consulta actualizada');
+ return adaptPendingListV2({...data,pendientes:matches})[0];
 }

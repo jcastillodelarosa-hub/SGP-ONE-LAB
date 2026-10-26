@@ -23,7 +23,7 @@ try:
     window.carry=[{id_programacion_origen:'old16',key_produccion:'16|PANELES_2',produccion:'Arrastre MX QA',reserva:'R16',sistema:'ES-MX4000',cantidad:16,estado:'SIN INICIAR',fecha_origen:'2026-10-24',turno_origen:'TURNO 2',semana:44},{id_programacion_origen:'old41',key_produccion:'41|PANELES_2',produccion:'Arrastre EL QA',reserva:'R41',sistema:'ES-EL400',cantidad:41,estado:'CORTE',fecha_origen:'2026-10-25',turno_origen:'TURNO 2',semana:44}];
     window.client={rpc:async(name,params)=>{window.calls.push({name,date:params.p_fecha,shift:params.p_turno});if(name==='sgp_mecanizado_pendientes_turno'){if(window.denied)return {error:new Error('Consulta denegada simulada')};return {data:params.p_fecha==='2026-10-26'&&params.p_turno==='TURNO 1'?window.carry:[]};}if(name==='sgp_mecanizado_reprogramaciones_listar')return {data:window.moves};if(name==='sgp_mecanizado_programacion_listar')return {data:window.schedule};if(name==='sgp_mecanizado_semanas_programacion')return {data:[]};throw new Error('RPC inesperada: '+name);},from:name=>{if(name==='sgp_mecanizado_reprogramaciones')throw new Error('Direct-table access prohibited');let rows=name==='sgp_mecanizado_programacion'?window.schedule:name==='sgp_mecanizado_reprogramaciones'?window.moves:[];const query={select:()=>query,eq:(key,value)=>{rows=rows.filter(row=>row[key]===value);return query;},neq:(key,value)=>{rows=rows.filter(row=>row[key]!==value);return query;},in:()=>query,order:()=>query,then:(resolve,reject)=>Promise.resolve({data:rows}).then(resolve,reject)};return query;}};
     window.reader=createCarryReader();
-    const deps={getSupabaseClient:async()=>window.client,getAppToken:()=> 'SYNTHETIC',loadAluminumPending:()=>{},ensureSharedReservations:async()=>{},machiningCarry:window.reader,readReprogramming,enrichMoveSources,operationalLoad,applyScheduleMoves,escapeHtml:x=>String(x??'')};
+    const deps={deferredProductionLoad:{cancel(){}},refreshProductionPending:()=>{},machiningMetrics:{measure:async(k,n,task)=>task(),sync:(n,task)=>task()},getMecanizadoReadClient:async()=>window.client,getSupabaseClient:async()=>window.client,getAppToken:()=> 'SYNTHETIC',loadAluminumPending:()=>{},ensureSharedReservations:async()=>{},machiningCarry:window.reader,readReprogramming,enrichMoveSources,operationalLoad,applyScheduleMoves,escapeHtml:x=>String(x??'')};
     window.loadProduction=new Function('deps','const {'+Object.keys(deps).join(',')+'}=deps;let prodRows=[];const renderProductionBoard=()=>{window.prodSnapshot=structuredClone(prodRows)};'+args.production+';return loadProductionBoard;')(deps);
     await window.loadProduction();
     window.SGPWeeklySchedule=()=>window.schedule;window.SGPWeeklyDemand=()=>window.schedule.map(x=>({reserva:x.reserva,sistema:x.sistema,cantidad:x.cantidad_programada,semana:44}));window.SGPWeeklyDemandForWeeks=async()=>window.SGPWeeklyDemand();window.SGPWeeklyAnchor=()=> '2026-10-26';
@@ -31,7 +31,7 @@ try:
     window.SGPOpenOperationalDetail=openWorkloadDetail;window.renderCalendar=()=>renderWorkloadCalendar({host:document.querySelector('#legacyCalendar'),dates:['2026-10-26','2026-10-27','2026-10-28','2026-10-29','2026-10-30','2026-10-31','2026-11-01'],load:window.SGPOperationalLoad});
     document.querySelector('#progRefresh').onclick=()=>{window.reader.clear();window.dispatchEvent(new Event('sgp:programming-loaded'));};
    }''',{'base':base,'production':production})
-   assert 'LAB v355' in page.locator('#releaseVersion').inner_text()
+   assert 'LAB v356' in page.locator('#releaseVersion').inner_text()
    assert page.evaluate('window.prodSnapshot.reduce((n,row)=>n+row.cantidad_programada,0)')==65
    page.locator('#prodBoard').evaluate('node=>node.remove()')
    page.add_script_tag(url=base+'/programacion-subtabs-v350.js')
@@ -63,7 +63,7 @@ try:
    page.wait_for_function("document.querySelector('#sgpProgView [role=alert]')?.textContent.includes('denegada')")
    assert page.locator('.sgp351-board').is_hidden();assert 'No se presume arrastre cero' in page.locator('#sgpProgView').inner_text()
    # Late response for an old calendar week cannot overwrite the new header.
-   calendar=app[app.index('function renderProgCalendar(){'):app.index('function renderProgramming(){')]
+   calendar=app[app.index('function renderProgCalendar(){'):app.index('function renderProgramming(')]
    page.evaluate('''async args=>{
     const {renderWorkloadCalendar}=await import(args.base+'/src/modules/mecanizado-operational-calendar.js');const {workloadTotals}=await import(args.base+'/src/domain/mecanizado-operational-load.js');
     const iso=d=>[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');
