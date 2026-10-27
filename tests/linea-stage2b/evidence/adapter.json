@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "database": "sgp_linea_b2_qa_1793104480106682078",
+  "real_persistent_pg_sessions": true,
+  "checks": [
+    "approved JS121 resolver reads real PG normalized snapshot through new repository",
+    "two concurrent adapter retries commit one real SQL event",
+    "functional CONSULTA role cannot consume",
+    "unsafe quantity rolls back without event",
+    "SQL and JS availability/revision checked after native cumulative RPC"
+  ],
+  "limitations": [
+    "Test driver only; production driver/pool not configured",
+    "Normalized source data and scope are synthetic; no Supabase installation"
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "status": "PASS",
+  "node": {
+    "tests": 387,
+    "pass": 387,
+    "fail": 0
+  },
+  "verify_release": "PASS LAB v362 unchanged",
+  "syntax": "PASS new server adapter and integration runner",
+  "protected_sha256": {
+    "app.js": "a7ff0321faa2a79c67a06aa87ce6bf7f4c3b84f66c3b94634b5bdf8a05e148a6",
+    "index.html": "6abc5d8554311bfa87741aa42ddc0af808ddd757c8265bab913d2b229b69717b",
+    "styles.css": "5a4041af2967f82ea552cce81868f31375ca533ec9116001495152dcd2b70c1f",
+    "src/server/packing-resolver.js": "ceda48844828e34d90e9dde3296ed4514af1530634204d8ad9eb057880c2f847",
+    "src/domain/linea-stage1.js": "25941a43bda2156e42a18b2610347862cb2f1851a292856d0d68f2e819f6722a"
+  },
+  "secret_scan": "No configured credential/private-key patterns found in changed/new text files; not a mathematical guarantee",
+  "workflows": "live push main only / manual dispatch; preview manual branch-restricted; no workflow edits; no dispatch",
+  "production": "No SQL applied, no frontend runtime integration, no merge or deploy",
+  "captured_utc": "2026-10-27T12:41:37.985737+00:00"
+}
