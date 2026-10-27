@@ -1614,3 +1614,14 @@ se incrementan de354 a355. Caso8+57=65 y controles de Issue97 conservados;259 pr
 34 aserciones SQL aisladas y PC/móvil aprobados. Ver checkpoint y tests/issue97/README.md.
 No fusionado/desplegado; publicación y aplicación productiva requieren autorización
 posterior. Este hito no sustituye la versión actualmente publicada.
+
+
+## 2026-10-27T13:33:13.240091+00:00 — Etapa 2C aislada, dependiente de PR122
+
+IMPLEMENTADO/VERIFICADO AISLADO: lectores servidor con huellas/generaciones,
+conciliación explícita, invalidación Export/PDT/permisos y adaptador sin runtime.
+393 pruebas Node y comprobaciones PG reales documentadas en evidencia2C.
+Integración real PARCIAL: no cuerpos/ledger Export, unidades PDT ni fuentes de
+ámbitos/escritores contrastados; no se registra lector real. SIN_CONCILIAR bloquea.
+No APLICADO/PUBLICADO; no frontend ni cambios a contratos legacy. Revisar checkpoint
+y docs/linea-etapa2c antes de avanzar; no inferir publicación por pruebas o Draft.

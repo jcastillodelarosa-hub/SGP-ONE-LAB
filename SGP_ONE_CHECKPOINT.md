@@ -1,3 +1,23 @@
+# Etapa 2C — checkpoint de entrega aislada (2026-10-27T13:33:13.240091+00:00)
+
+Rama feat/linea-stage2c-source-bridges; base122 8888981d74bbd485cf07e1dea2ee11b3c6a20463.
+Stack117→121→122→Draft2C. Main observado b228ab2977ee29fa8c3db1db2ec2c2b594e3dc2d.
+IMPLEMENTADO / VERIFICADO AISLADO; integración real PARCIAL, NO APLICADO / NO PUBLICADO.
+Puentes privados exigen lectores certificados y fuentes versionadas; inclusión
+Export explícita y mapa PDT por unidades. Falta de evidencia = SIN_CONCILIAR,
+available=null, sin incremento. No convertir piezas en ventanas.
+393/393 Node; PG2C18 + seguridad6 + recuperación2 + adaptador4; regresión2B16;
+release LABv362/sintaxis/hashes PASS. Código y evidencia detallados en
+`docs/linea-etapa2c/CONTRATOS_Y_LIMITES.md` y `tests/linea-stage2c/evidence`.
+Fuentes/scopes QA sintéticos, auth capturada: NO prueba productiva. Sin lector
+real registrado: faltan cuerpos Export, ledger inclusión, impacto unidad PDT,
+ámbito real, pool mínimo y coordinación de todos los escritores.
+No frontend/vidrio/Mecanizado/Picking/legacy/Supabase/Firebase/otros repositorios.
+Siguiente paso: revisión ChatGPT del único Draft2C dependiente122. No siguiente
+etapa, aplicación SQL, merge ni deploy automático. SHA final queda en PR.
+
+---
+
 # Etapa 2B — checkpoint final aislado (2026-10-27)
 
 Rama feat/linea-stage2b-postgres-adapter, basada en PR121 2164227ae23fefc923ad81fcef74da47ba549ba0;

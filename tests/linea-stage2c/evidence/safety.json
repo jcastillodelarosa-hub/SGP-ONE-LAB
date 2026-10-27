@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "database": "sgp_linea_b2_qa_1793108128146486044",
+  "checks": [
+    "Catalog-only query parsed/executed READ ONLY on QA; no operational rows exported and no writes",
+    "Rollback with evidence refused, schema and history retained",
+    "Sealed official load mutation is rejected without changing official source rows or old cuts",
+    "REAL PG: scope revocation writer vs execution serialized, future unauthorized operation denied",
+    "anon and authenticated cannot call private bridge or alter/read certified reader registry",
+    "Raw B2 cut activation cannot substitute a non-certified cut on C2-managed production"
+  ],
+  "productive_catalog": "PREPARED ONLY; no productive read or mutation",
+  "limitations": [
+    "All readers/source writes/scopes synthetic; no claim of installed writer compatibility"
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "status": "PASS",
+  "empty_database": "sgp_linea_c2_empty_1793108186624631372",
+  "contained_database": "sgp_linea_b2_qa_1793108128146486044",
+  "checks": [
+    "Empty C2 rollback removes only its new objects; B2 function fingerprint unchanged",
+    "Persistent C2 containment survives reconciliation/retry and preserves events, source history and old reports"
+  ],
+  "limitations": [
+    "Isolated QA only; not a productive restore or a backup verification"
+  ]
+}
