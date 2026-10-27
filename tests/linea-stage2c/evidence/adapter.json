@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "database": "sgp_linea_b2_qa_1793108128146486044",
+  "production": "C2-NODE-99bb24b5-498d-40bd-ab73-cf20821dadcf",
+  "real_persistent_pg_sessions": true,
+  "checks": [
+    "C2 private reader preparation + approved JS121 resolver + SQL B2 share SAME outer PG transaction/savepoint",
+    "Two real concurrent mixed-case UUID C2 retries create exactly one packing event",
+    "CONSULTA/RECEPCION and caller actor flags cannot acquire operation permissions",
+    "Changed Export without explicit event inclusion commits SIN_CONCILIAR invalidation and no consumption"
+  ],
+  "limitations": [
+    "Sources and scopes are synthetic QA; production pool not configured",
+    "No productive reader, source writer coordination or PDT unit relation verified"
+  ]
+}

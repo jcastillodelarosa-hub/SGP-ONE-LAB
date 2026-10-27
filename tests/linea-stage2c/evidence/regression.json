@@ -1,0 +1,33 @@
+{
+  "status": "PASS",
+  "captured_utc": "2026-10-27T13:37:33.347600+00:00",
+  "base_pr122": "8888981d74bbd485cf07e1dea2ee11b3c6a20463",
+  "main_observed": "b228ab2977ee29fa8c3db1db2ec2c2b594e3dc2d",
+  "node": {
+    "tests": 393,
+    "pass": 393,
+    "fail": 0
+  },
+  "postgres_grouped_checks": {
+    "postgres": 18,
+    "adapter": 4,
+    "safety": 6,
+    "recovery": 2,
+    "regression-b2": 16
+  },
+  "release": "PASS LAB v362 unchanged",
+  "protected_sha256": {
+    "app.js": "a7ff0321faa2a79c67a06aa87ce6bf7f4c3b84f66c3b94634b5bdf8a05e148a6",
+    "index.html": "6abc5d8554311bfa87741aa42ddc0af808ddd757c8265bab913d2b229b69717b",
+    "styles.css": "5a4041af2967f82ea552cce81868f31375ca533ec9116001495152dcd2b70c1f",
+    "config.js": "23abed136b67fb9f30b3acbfd07d59cd43940b29bd3acc3027f651b8ca09cac9",
+    "src/domain/linea-stage1.js": "25941a43bda2156e42a18b2610347862cb2f1851a292856d0d68f2e819f6722a",
+    "src/server/packing-resolver.js": "ceda48844828e34d90e9dde3296ed4514af1530634204d8ad9eb057880c2f847",
+    "src/server/linea-postgres-repository.js": "2f323d0b3178491f16fa1aa4bd0003b72f2ab25ff6c8bd2b7f02753a4eea6e1d"
+  },
+  "protected_trees": "All files under src/, supabase/, .github/ in base122 unchanged; only new isolated src/server/linea-source-bridge.js added",
+  "integration_real": "PARTIAL/BLOCKED: no live Export/PDT/scope readers or source-writer protocol verified",
+  "production": "No productive query executed, no SQL applied, no frontend, no merge/deploy",
+  "secret_scan": "No configured private-key/token/credential-URL patterns found in changed text; no credentials introduced",
+  "workflow_review": "No workflow changed. Firebase live push main/manual; preview/manual branch-restricted; no dispatch. Stacked PR triggers syntax; Tests workflow filters main."
+}
