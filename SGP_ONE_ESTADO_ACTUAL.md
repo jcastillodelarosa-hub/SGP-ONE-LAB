@@ -1767,3 +1767,45 @@ tras guardar; no exigir autorreferencia del commit en este archivo.
 Siguiente paso único: revisión de ChatGPT del DraftE2 y de la matriz de fuentes;
 contrastar SOLO la información real faltante antes de certificar lectores/escritores.
 No solicitar otra vez los siete cuerpos entregados ni identificadores de ventanas.
+
+
+# Etapa 2F — checkpoint final (2026-10-27T17:52:10.604387-05:00, Colombia)
+
+Rama feat/linea-stage2f-source-certification; único Draft dependiente de PR130,
+base bfdb3097a47c7886e9422eba4c7f557b36b1ab48. Cadena117→121→122→124→127→130 intacta.
+Main observado6b96aa387765693ab94b1542280b408a5097b325:125/128 y131 preservados.
+Sin merge/rebase de código ni modificaciones a PR padres o frontend.
+
+IMPLEMENTADO: archivo de confirmaciones reales reportadas, adaptador de revisión
+por alcance (NO autorización/certificado operativo), reporte trazable por SHA256,
+consulta delta READ ONLY y matrices de semántica/roles/escritores/adaptación mínima.
+VERIFICADO EN AISLAMIENTO:434/434 Node (12 nuevas),3 comprobaciones PG17 READ ONLY.
+Fuentes2D/2E intactas por hash; se reutiliza su concurrencia REAL PG9 y lector4, no
+repetida porque no cambió escritor/esquema/lector. No nueva certificación productiva.
+
+VERIFICADO CON FUENTE REAL — REPORTADO POR CHATGPT: cuatro RPC existen y son
+SECURITY DEFINER con EXECUTE anon/authenticated; historial tiene seis nombres de
+columnas confirmados; estructura de sgp_pdt_entrega_lineas confirmada. No se hizo
+consulta Supabase directa aquí. No concluir inseguridad por esos grants, ni seguridad
+completa sin controles internos. Firmas/cuerpos actuales/tipos no entregados aquí.
+Evidencia preservada en docs/linea-etapa2f/CONFIRMACIONES_CHATGPT.json y
+ tests/linea-stage2f/evidence/summary.json,review.json,readonly.json.
+
+Se detuvo SOLO integración operativa sin información indispensable: cuerpos vigentes
+Export, contraste de huellas auth/Picking, semántica bruta/neta/diaria/acumulada,
+inclusión explícita corte/evento, cobertura PDT/key/reserva/parte, bindings cargo/rol/
+ámbito y protocolo de TODOS los escritores. No se fabrican mapas, estados READY o
+IDs físicos. Contratos D2 y manifiesto2E conservados, no reimplementados.
+
+Usar resultados completos ya disponibles en ChatGPT antes de repetir consultas.
+CONTRASTE_DELTA_READONLY.sql pide lo faltante y huellas, no los siete cuerpos previos
+ni existencia/DEFINER/grants conocidos. Muestra100 solo claves/tipos, no valores,
+ni cobertura certificada. No pedir claves, tokens o contraseñas.
+
+NO APLICADO EN SUPABASE / NO PUBLICADO / NO FUSIONADO. No frontend/Picking/
+Mecanizado/Export/Gateway/Firebase/main/otros repositorios, permisos productivos,
+RLS o saldos oficiales modificados. Integración real PARCIAL/BLOQUEADA por evidencia,
+no por falta de identificadores individuales. No iniciar otra etapa automáticamente.
+Siguiente paso único: revisión de ChatGPT y aportar/contrastar SOLO las definiciones,
+huellas y relaciones faltantes para decidir qué adaptación operativa puede aprobarse.
+El SHA/enlace finales se obtienen en Git/PR después de guardar este checkpoint.

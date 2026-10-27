@@ -1,0 +1,47 @@
+{
+  "capturedAtUtc": "2026-10-27T22:52:10.609158+00:00",
+  "branch": "feat/linea-stage2f-source-certification",
+  "parentPr": 130,
+  "base": "bfdb3097a47c7886e9422eba4c7f557b36b1ab48",
+  "mainObserved": "6b96aa387765693ab94b1542280b408a5097b325",
+  "state": "IMPLEMENTADO / VERIFICADO EN AISLAMIENTO / VERIFICADO CON FUENTE REAL SOLO METADATA REPORTADA / PENDIENTE INTEGRACION REAL",
+  "realVerificationMode": "CHATGPT_REPORTED_PRODUCTION_READ_ONLY, not a direct query in this session",
+  "realVerifiedScope": [
+    "Four function names/existence, reported SECURITY DEFINER and EXECUTE anon/authenticated",
+    "History structure reported with six column names, not types or semantics",
+    "PDT delivery-lines structure reported, no full result received"
+  ],
+  "securityConclusion": "No insecurity or complete safety concluded from SECURITY DEFINER/EXECUTE alone",
+  "node": {
+    "tests": 434,
+    "pass": 434,
+    "fail": 0,
+    "newTests": 12
+  },
+  "postgresReadonlyChecks": 3,
+  "reusedRealPostgres2EChecks": 9,
+  "reusedPostgresAdapterChecks": 4,
+  "reusedEvidenceSha256": {
+    "tests/linea-stage2e/evidence/postgres.json": "ae144c9a4b42ba46d6138c01ce32a836f24ed99f14ed315d8482848c30f5f2b0",
+    "tests/linea-stage2e/evidence/adapter.json": "d65894a89d83bde0d75c0abb140e08f8cd4b5344e35c961cc98bebcdedee4858",
+    "tests/linea-stage2e/evidence/summary.json": "a906fc7be6611cef49454b0e640514a43af8954e55fd7f49ca8fa63b28b6a3d2"
+  },
+  "sourceSha256": {
+    "src/server/linea-source-evidence-review.js": "06f77e4918055b3483aaf8e5fee79bbf2f8a0839d45b7a7addfe76f06c7049e9",
+    "docs/linea-etapa2f/CONTRASTE_DELTA_READONLY.sql": "1d943e9ca1f3b461158ed3b4d378c3b6d9b5065e4021de62fb6af4db57e83a86",
+    "docs/linea-etapa2f/CONFIRMACIONES_CHATGPT.json": "45bfe2e3f45d77e3993411bf8ff8c0e176c7bf60b19f3a9bcd1e33ea91b058d8"
+  },
+  "certificationComplete": false,
+  "available": null,
+  "productionWrites": false,
+  "deployed": false,
+  "parentImplementationChanged": false,
+  "remainingBlockers": [
+    "EXPORT_CURRENT_BODIES_AND_OVERLOAD_SIGNATURES",
+    "AUTH_PICKING_CURRENT_HASH_CONTRAST",
+    "EXPORT_SEMANTICS_AND_EXPLICIT_EVENT_INCLUSION",
+    "PDT_COVERAGE_PRODUCTION_RESERVE_PART",
+    "FUNCTIONAL_CARGO_BINDINGS_AND_SCOPES",
+    "ALL_EFFECTIVE_WRITERS_LOCK_PROTOCOL"
+  ]
+}
