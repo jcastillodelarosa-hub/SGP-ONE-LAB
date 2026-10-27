@@ -36,3 +36,16 @@ instalados. No se deducen ventanas desde piezas ni nombres. Leer matriz completa
 en TRAZABILIDAD_Y_EXPORT.md. NO APLICADO / NO PUBLICADO.
 Siguiente paso exacto: revisión ChatGPT del único Draft dependiente124. Sin nueva
 etapa, frontend, SQL productivo, merge o despliegue automático. SHA final en PR.
+
+## Cambio concurrente de main detectado al entregar
+
+Main avanzó de b228ab2977ee29fa8c3db1db2ec2c2b594e3dc2d a ae76b3729184ff802d7adc83d8867662230d438c
+por PR125 (Issue123, fecha operativa Picking). Comparación GitHub: solo app.js y
+supabase/migrations/20261027090000_picking_fecha_turno_guard_123.sql. La migración
+versionada agrega BEFORE INSERT sobre entregas y no reemplaza validar_recepcion.
+Su instalación productiva no se comprobó. El complemento D2 no inserta entregas
+operativas y no elude el guard. El esquema QA mínimo de esta entrega no reproduce
+ese trigger concurrente: NO se declara compatibilidad productiva completa.
+Se conserva base124 autorizada sin rebase/merge, protegiendo estos cambios de main
+para la revisión futura de la cadena. No se alteró main ni se repitieron pruebas
+de código por esta actualización exclusivamente documental.

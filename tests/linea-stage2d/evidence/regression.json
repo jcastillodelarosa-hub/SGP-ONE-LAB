@@ -29,5 +29,7 @@
   "protected_trees": "All baseline src/,supabase/,.github/ byte-for-byte unchanged; one new isolated server source",
   "secret_scan": "No configured private-key/token/credential-URL patterns found in changed text; no credentials introduced",
   "source_limits": "Captured real validator executed on compatible minimal SYNTHETIC schema; live Supabase not queried, physical source and Export linkage unverified",
-  "production": "NO APPLIED SQL / NO MERGE / NO DEPLOY / NO FRONTEND OR OPERATIVE PICKING CHANGES"
+  "production": "NO APPLIED SQL / NO MERGE / NO DEPLOY / NO FRONTEND OR OPERATIVE PICKING CHANGES",
+  "main_observed_at_close": "ae76b3729184ff802d7adc83d8867662230d438c",
+  "concurrent_main_limit": "PR125 adds operative-date BEFORE INSERT guard, reviewed versioned source only; not included in minimal QA schema, not applied/merged by this task"
 }

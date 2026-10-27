@@ -1,7 +1,7 @@
 # Etapa2D — checkpoint de entrega aislada (2026-10-27T10:06:59.319338-05:00)
 
 Rama feat/linea-stage2d-picking-unit-evidence; base124 111f0cb46921198f790b6cafc0336e0ca449136c.
-Stack117→121→122→124→Draft2D. Main observado b228ab2977ee29fa8c3db1db2ec2c2b594e3dc2d.
+Stack117→121→122→124→Draft2D. Main inicial b228ab2977ee29fa8c3db1db2ec2c2b594e3dc2d; cierre ae76b3729184ff802d7adc83d8867662230d438c (PR125 concurrente).
 IMPLEMENTADO / VERIFICADO EN AISLAMIENTO; PENDIENTE DE EVIDENCIA REAL.
 El validador capturado persiste ventanas_afectadas entero; no identidad individual.
 Complemento privado guarda vínculos explícitos por unidad/etapa, snapshot/versión,
@@ -13,14 +13,14 @@ Bloqueos: IDs físicos/cobertura real, nuevas diferencias→PDT, Export instalad
 inclusión por UUID, scopes/pool/locks reales. Sin evidencia = SIN_CONCILIAR.
 No Supabase productivo/frontend/Picking operativo/Mecanizado/vidrio/Gateway/Firebase.
 NO APLICADO / NO PUBLICADO; no fusión ni otros repositorios. Siguiente paso:
-revisión ChatGPT del único Draft2D dependiente124. No continuar automáticamente.
+revisión ChatGPT del PR Draft127 dependiente124; preservar PR125 al integrar. No continuar automáticamente.
 
 ---
 
 # Etapa 2C — checkpoint de entrega aislada (2026-10-27T13:33:13.240091+00:00)
 
 Rama feat/linea-stage2c-source-bridges; base122 8888981d74bbd485cf07e1dea2ee11b3c6a20463.
-Stack117→121→122→Draft2C. Main observado b228ab2977ee29fa8c3db1db2ec2c2b594e3dc2d.
+Stack117→121→122→Draft2C. Main inicial b228ab2977ee29fa8c3db1db2ec2c2b594e3dc2d; cierre ae76b3729184ff802d7adc83d8867662230d438c (PR125 concurrente).
 IMPLEMENTADO / VERIFICADO AISLADO; integración real PARCIAL, NO APLICADO / NO PUBLICADO.
 Puentes privados exigen lectores certificados y fuentes versionadas; inclusión
 Export explícita y mapa PDT por unidades. Falta de evidencia = SIN_CONCILIAR,

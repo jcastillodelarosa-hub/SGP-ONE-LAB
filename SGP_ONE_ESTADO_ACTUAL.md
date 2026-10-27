@@ -1635,3 +1635,6 @@ sin modificar en esquema mínimo compatible sintético. 396 Node, PG D2 12/adapt
 recuperación6 y regresiones C2/B2. Fuentes reales/Export siguen pendientes; ACK
 propuesto no conectado a importador. NO APLICADO/PUBLICADO; no contratos legacy,
 frontend ni Picking operativo modificados. Siguiente: revisión Draft2D, ver checkpoint.
+
+Nota de cierre2D: main avanzó concurrentemente a ae76b3729184ff802d7adc83d8867662230d438c (PR125).
+La rama2D conserva base124 autorizada; no incorpora ni sobrescribe ese cambio.
