@@ -4,7 +4,8 @@ const quantity=value=>{
  if(value===null||value===undefined||value===''||!Number.isSafeInteger(Number(value))||Number(value)<0)throw new Error('Cantidad inválida o ausente');
  return Number(value);
 };
-const weekOf=row=>Number(row.semana_actual??row.semana_base);
+/** The protected weekly-base RPC scopes rows by semana_base, not semana_actual. */
+const weekOf=row=>Number(row.semana_base);
 const primary=row=>text(row.reserva_al??row.reserva).split(',')[0].trim();
 const pct=(value,total)=>value===null||!total?null:100*value/total;
 function deduplicate(rows,key,signature){
