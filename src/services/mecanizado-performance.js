@@ -21,7 +21,7 @@ export function latestTask(task,delay=40){
  run.cancel=()=>{clearTimeout(timer);timer=null;pending.splice(0).forEach(w=>w.resolve());};return run;
 }
 
-const READ_RPCS=new Set(['sgp_consultar_programacion_semana','sgp_recepcion_listar','sgp_mecanizado_disponibles','sgp_mecanizado_programacion_listar','sgp_mecanizado_cobertura_programacion','sgp_mecanizado_cobertura_ordenes','sgp_mecanizado_conciliaciones_listar','sgp_mecanizado_reprogramaciones_listar','sgp_mecanizado_semanas_programacion','sgp_mecanizado_pendientes_turno','sgp_mecanizado_ordenes_programacion','sgp_reservas_asociadas_listar']);
+const READ_RPCS=new Set(['sgp_consultar_programacion_semana','sgp_mecanizado_recepcion_resumen_listar','sgp_mecanizado_disponibles','sgp_mecanizado_programacion_listar','sgp_mecanizado_cobertura_programacion','sgp_mecanizado_cobertura_ordenes','sgp_mecanizado_conciliaciones_listar','sgp_mecanizado_reprogramaciones_listar','sgp_mecanizado_semanas_programacion','sgp_mecanizado_pendientes_turno','sgp_mecanizado_ordenes_programacion','sgp_reservas_asociadas_listar']);
 export function scopedReadClient(client,token,metrics,inFlight){
  const observed=observeReadClient(client,metrics);
  return new Proxy(observed,{get(target,key){if(key==='rpc')return (name,args)=>{if(args?.p_token!==token)return Promise.reject(new Error('La sesión cambió durante la consulta'));if(!READ_RPCS.has(name))return target.rpc(name,args);const {p_token,...parameters}=args;return inFlight(token,name+JSON.stringify(parameters),()=>target.rpc(name,args));};const value=Reflect.get(target,key);return typeof value==='function'?value.bind(target):value;}});
