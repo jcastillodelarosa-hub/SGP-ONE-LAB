@@ -31,18 +31,32 @@ sql("UPDATE sgp_sesiones_app SET expira_en=now()+interval '1 day';")
 sql("UPDATE qa_reservas SET semana_produccion=45 WHERE key_produccion='QA|FRAMES_2';")
 old="SELECT sgp_pdt_compat_91.sgp_picking_entrega_orden('PATINADOR','00000000-0000-0000-0000-000000000001','QA ORDER',false,NULL,'[{\"id_pieza\":\"P1\",\"perfil\":\"PANEL-REF\",\"fabricacion\":\"E17\",\"longitud\":100,\"cantidad\":1,\"reserva\":\"R\",\"acabado\":\"DS\"}]','2026-10-26','TURNO 1');"
 r=psql(db,'BEGIN;'+old+'ROLLBACK;');assert r.returncode and 'PDT_CLAVE_NO_CORRESPONDE_A_MAESTRO' in r.stderr,r.stderr
+import importlib.util
+spec=importlib.util.spec_from_file_location('legacy_matrix',ROOT/'tests/pdt-multiorigin/legacy-regression.py');legacy=importlib.util.module_from_spec(spec);spec.loader.exec_module(legacy)
+legacy_ids=legacy.seed(ROOT,sql,functions)
+before_legacy=legacy.results(sql,legacy_ids)
+legacy.unchanged(sql)
 baseline=sql('SELECT count(*) FROM sgp_aluminio_pendientes');assert sql('SELECT count(*) FROM sgp_picking_entregas')=='0'
 install=(D/'01_multiorigin_REVIEW.sql').read_text()
 r=psql(db,install.replace('COMMIT;','SELECT 1/0;COMMIT;'));assert r.returncode
 assert sql("SELECT to_regnamespace('sgp_pdt_multiorigen') IS NULL")=='t'
 sql(install)
 cycle=(D/'02_canonical_lifecycle_REVIEW.sql').read_text()
+# Incompatible real/body/config must stop installation, never be overwritten.
+changed=cycle.replace('BEGIN;',"BEGIN;ALTER FUNCTION public.sgp_aluminio_pendiente_validar_detalles_v1(text,uuid,jsonb,text,text) SECURITY INVOKER;",1)
+r=psql(db,changed);assert r.returncode and 'PDT_CICLO_SEGURIDAD_DISTINTA' in r.stderr
+changed=cycle.replace('BEGIN;',"BEGIN;DO $change$ DECLARE f text;BEGIN SELECT pg_get_functiondef('public.sgp_aluminio_pendiente_validar_detalles_v1(text,uuid,jsonb,text,text)'::regprocedure) INTO f;EXECUTE replace(f,'DECLARE',E'DECLARE -- QA different real body\\n');END $change$;",1)
+r=psql(db,changed);assert r.returncode and 'PDT_CICLO_DEFINICION_CAMBIADA' in r.stderr
 r=psql(db,cycle.replace('COMMIT;','SELECT 1/0;COMMIT;'));assert r.returncode
 assert sql('SELECT count(*) FROM sgp_pdt_multiorigen.funciones_previas')=='0'
 sql(cycle)
+after_legacy=legacy.results(sql,legacy_ids)
+assert before_legacy==after_legacy,'LEGACY lifecycle changed'
+legacy.unchanged(sql)
+(ROOT/'tests/pdt-multiorigin/evidence/legacy.json').write_text(json.dumps({'status':'PASS','states':list(after_legacy),'operations_per_state':8,'before_equals_after':True,'rows_and_history_unchanged':True,'actual_production_validator_available':False,'matrix':after_legacy},indent=2)+'\n')
 rollback=(D/'ROLLBACK_REVIEW.sql').read_text()
 sql(rollback.replace('COMMIT;','ROLLBACK;'))
-report=['Old name/week-only delivery reproduces PDT_CLAVE_NO_CORRESPONDE_A_MAESTRO and rolls back','Installation failure rolls back all new objects']
+report=['Old name/week-only delivery reproduces PDT_CLAVE_NO_CORRESPONDE_A_MAESTRO and rolls back','Installation failure rolls back all new objects','LEGACY open/validated/with movements/closed: 32 operations identical before/after; rows and history unchanged','Different validator body or SECURITY INVOKER rejected before any lifecycle replacement']
 ctx={'id_programacion':'00000000-0000-0000-0000-000000000001','produccion':'QA ORDER','completa':False,'fecha_entrega':'2026-10-26','turno':'TURNO 1','key_produccion':'QA|PANELES_2','reserva':'SHARED'}
 source={'id_pieza':'P1','key_produccion':'QA|PANELES_2','reserva':'SHARED','reserva_principal':'R','perfil':'PANEL-REF','fabricacion':'E17','longitud':100,'acabado':'DS','cantidad':1,'nc':''}
 def lit(x):return "'"+json.dumps(x).replace("'","''")+"'::jsonb"

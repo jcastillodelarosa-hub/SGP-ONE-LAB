@@ -1,11 +1,13 @@
 {
   "status": "PASS",
   "postgres": "17.11 (Debian 17.11-1.pgdg13+2)",
-  "database": "sgp_multiorigin_qa_1793076148521405275",
+  "database": "sgp_multiorigin_qa_1793094837789612511",
   "network": "none; no exposed ports",
   "checks": [
     "Old name/week-only delivery reproduces PDT_CLAVE_NO_CORRESPONDE_A_MAESTRO and rolls back",
     "Installation failure rolls back all new objects",
+    "LEGACY open/validated/with movements/closed: 32 operations identical before/after; rows and history unchanged",
+    "Different validator body or SECURITY INVOKER rejected before any lifecycle replacement",
     "PATINADOR: valid shared PANEL -> V2, no NC, real source/key/principal preserved",
     "ENSAMBLE rejects blank NC",
     "ENSAMBLE rejects blank NC",

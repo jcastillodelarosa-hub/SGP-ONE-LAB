@@ -8,13 +8,19 @@
     "fail": 13
   },
   "branch": {
-    "tests": 326,
-    "pass": 326,
+    "tests": 327,
+    "pass": 327,
     "fail": 0
   },
   "baseline_corrections": [
     "11 release assertions now follow releaseLabel instead of fossilized v360",
     "partialReceiptBase initialized to zero in total reducer; quantities and business rules unchanged"
   ],
-  "sql_checks": 25
+  "sql_checks": 27,
+  "legacy": {
+    "states": 4,
+    "comparisons": 32,
+    "unchanged": true,
+    "production_validator_comparison": "BLOCKED: definition not available"
+  }
 }

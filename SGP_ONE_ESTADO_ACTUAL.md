@@ -1,3 +1,34 @@
+# PR116 — refuerzo de convivencia LEGACY/V2
+
+Fecha Colombia: 2026-10-27T04:55:39.448247-05:00.
+Rama `feat/pdt-v2-multiorigin`; PR116 Draft; LAB v362 propuesta.
+Base main sin cambios `1a0deae41e3446efde3901932cda90ed73ab4d0d`.
+
+01 continúa aditivo: nuevos PDT V2, ningún histórico migrado. 02 queda separado,
+opcional y BLOQUEADO para aplicación hasta comparar la definición productiva
+actual del validador de detalles. Ahora despacha la lógica canónica solo a V2 del
+ledger de nuevos registros; LEGACY y V2 preexistentes delegan a cuerpos originales
+clonados íntegros. Sin cambios a resolver, estado, guards ni validación tradicional.
+Filtro e informe CSV distinguen contratos, sin convertirlos ni alterar cantidades.
+
+Pruebas: 327/327 JS, 27 comprobaciones PG17 aisladas; matriz adicional
+32 operaciones LEGACY abierto/validado/con historial/cerrado idénticas antes/después,
+filas/historial preservados. Fixtures, no verificación productiva. Fuentes reales
+suministradas para estado/resolver; validador tradicional versionado en fixture.
+PC/tableta/móvil y verify:release aprobados. Evidencia tests/pdt-multiorigin/evidence.
+
+Bloqueo exacto: falta `PDT_VALIDAR_DETALLES_REAL.json` con la definición productiva
+completa y metadatos de sgp_aluminio_pendiente_validar_detalles_v1(text,uuid,jsonb,text,text).
+No está entre las siete funciones ni el complemento disponibles. No hay herramienta
+Supabase autenticada en esta sesión. Huella prosrc del repositorio no equivale a
+huella de definición real. No cambiar preflight para forzar instalación.
+
+IMPLEMENTADO EN RAMA / VERIFICADO LOCALMENTE. NO SQL productivo, fusión ni publicación.
+Siguiente paso: revisión del mismo PR116 y aportar la definición ya obtenida para
+cerrar el contraste antes de autorizar 02. No reiniciar auditorías generales.
+
+---
+
 # Continuidad vigente — PDT v2 multiorigen / LAB v362 propuesta
 
 Fecha Colombia: 2026-10-26T23:41:28.628629-05:00.

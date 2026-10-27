@@ -171,7 +171,7 @@ CREATE FUNCTION public.sgp_pdt_registro_metadatos_v4(p_token text)
 RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path TO '' AS $fn$
 BEGIN
  PERFORM public.sgp_pdt_validar_rol_real(p_token,ARRAY['ADMINISTRADOR','COORDINADOR','PATINADOR','PICKING','SUPERVISOR DE PICKING','LIDER','LIDER LINEA','LIDER MECANIZADO','RECEPCION','CONSULTA']);
- RETURN coalesce((SELECT jsonb_agg(jsonb_build_object('id_pendiente',p.id_pendiente,'origen',p.origen,'usuario_reporte',p.usuario_reporte,'fecha_reporte',p.fecha_reporte,'nc',p.nc)) FROM public.sgp_aluminio_pendientes p),'[]'::jsonb);
+ RETURN coalesce((SELECT jsonb_agg(jsonb_build_object('id_pendiente',p.id_pendiente,'contrato_pdt',p.contrato_pdt,'origen',p.origen,'usuario_reporte',p.usuario_reporte,'fecha_reporte',p.fecha_reporte,'nc',p.nc)) FROM public.sgp_aluminio_pendientes p),'[]'::jsonb);
 END $fn$;
 REVOKE ALL ON ALL FUNCTIONS IN SCHEMA sgp_pdt_multiorigen FROM PUBLIC,anon,authenticated;
 REVOKE ALL ON FUNCTION public.sgp_pdt_registro_fuentes_v4(text,text,jsonb),public.sgp_pdt_registrar_v4(text,text,jsonb,jsonb,uuid),public.sgp_pdt_registro_metadatos_v4(text) FROM PUBLIC;

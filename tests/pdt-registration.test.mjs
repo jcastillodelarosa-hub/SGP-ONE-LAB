@@ -15,3 +15,10 @@ test('save uses one transactional RPC, explicit event id and full canonical piec
 test('complete delivery has zero invented PDT rows; metadata read missing is compatible',async()=>{let args;await saveRegistration({rpc:async(n,a)=>{args=a;return {data:{ok:true}};}},'QA',{origin:'PICKING',context:{completa:true},idempotencyKey:'event'});assert.deepEqual(args.p_piezas,[]);assert.equal(await registrationMetadata({rpc:async()=>({error:{code:'PGRST202'}})},'QA'),null);});
 test('same physical piece cannot be added twice in one event; independent calls remain allowed',()=>{assert.throws(()=>registrationPieces('PICKING',[source],[entry(),entry()]),/repetida/);assert.equal(registrationPieces('PICKING',[source],[entry()]).length,1);assert.equal(registrationPieces('PICKING',[source],[entry()]).length,1);});
 test('unknown reference quantity cannot become an unbounded allocation',()=>{const s={...source,cantidad_referencia:null};assert.throws(()=>registrationPieces('PICKING',[s],[entry(s)]),/Cantidad/);});
+test('LEGACY/V2 coexist, filter independently and retain the explicit contract in reports',async()=>{
+ const {pdtReportCsv}=await import('../src/domain/pdt-registration.js');
+ const rows=['LEGACY','V2'].map((contrato_pdt,i)=>({id_pendiente:String(i),contrato_pdt,produccion:'=QA',cantidad:9,estado:'PENDIENTE'}));const copy=structuredClone(rows);
+ assert.deepEqual(filterPdtRegistrations(rows,{contract:'LEGACY'}),[rows[0]]);assert.deepEqual(filterPdtRegistrations(rows,{contract:'V2'}),[rows[1]]);
+ const csv=pdtReportCsv(rows);assert.match(csv,/"Contrato"/);assert.match(csv,/"LEGACY"/);assert.match(csv,/"V2"/);assert.match(csv,/"'=QA"/);assert.deepEqual(rows,copy);
+ assert.match(pdtReportCsv([{produccion:'QA'}]),/NO INFORMADO/);
+});

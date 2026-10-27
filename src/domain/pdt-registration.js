@@ -26,5 +26,11 @@ export function ncAssignment(row){
  return 'PENDIENTE';
 }
 export function filterPdtRegistrations(rows,filters={}){
- return rows.filter(r=>(!filters.origen||r.origen===filters.origen)&&(!filters.nc||ncAssignment(r)===filters.nc)&&(!filters.desde||String(r.fecha_reporte||'').slice(0,10)>=filters.desde)&&(!filters.hasta||String(r.fecha_reporte||'').slice(0,10)<=filters.hasta));
+ return rows.filter(r=>(!filters.contract||r.contrato_pdt===filters.contract)&&(!filters.origen||r.origen===filters.origen)&&(!filters.nc||ncAssignment(r)===filters.nc)&&(!filters.desde||String(r.fecha_reporte||'').slice(0,10)>=filters.desde)&&(!filters.hasta||String(r.fecha_reporte||'').slice(0,10)<=filters.hasta));
+}
+/** Explicit contract in locally generated reports; never infer missing metadata. */
+export function pdtReportCsv(rows){
+ const columns=[['Contrato','contrato_pdt'],['PDT','id_pendiente'],['Producción','produccion'],['Reserva','reserva'],['Referencia','perfil'],['Origen','origen'],['Cantidad reportada','cantidad'],['Validación','validacion_estado'],['Estado','estado'],['Reposición','estado_repo'],['NC','nc'],['Fecha','fecha_reporte']];
+ const cell=value=>{let text=String(value??'');if(/^[\s]*[=+@-]/.test(text))text="'"+text;return '"'+text.replaceAll('"','""')+'"';};
+ return '\ufeff'+[columns.map(c=>c[0]),...rows.map(r=>columns.map(([,key])=>key==='contrato_pdt'?r.contrato_pdt||'NO INFORMADO':key==='nc'?r.nc||r.nc_historica||'':r[key]))].map(row=>row.map(cell).join(';')).join('\r\n');
 }

@@ -1,16 +1,35 @@
--- REVIEW ONLY: preserve physical source IDs/snapshots; validate target line via master.
+-- OPTIONAL REVIEW ONLY — BLOCKED pending current productive validator definition.
+-- Scoped to new V4-ledger V2 only; LEGACY and pre-existing V2 delegate unchanged.
 BEGIN;
 DO $preflight$ BEGIN
+ IF EXISTS(SELECT 1 FROM pg_proc p WHERE p.oid IN (
+ 'public.sgp_pdt_fuentes_v2(text,uuid)'::regprocedure,
+ 'public.sgp_aluminio_pendiente_validar_detalles_v1(text,uuid,jsonb,text,text)'::regprocedure,
+ 'public.sgp_pdt_entrega_registrar_v2(text,uuid,uuid,integer,uuid)'::regprocedure,
+ 'public.sgp_pdt_cierre_acreditado(uuid)'::regprocedure,
+ 'public.sgp_pdt_picking_v2(text,uuid)'::regprocedure)
+ AND (p.prosecdef IS DISTINCT FROM true OR pg_get_userbyid(p.proowner)<>'postgres' OR p.proconfig IS DISTINCT FROM ARRAY['search_path=""']))
+ THEN RAISE EXCEPTION 'PDT_CICLO_SEGURIDAD_DISTINTA'; END IF;
  IF (SELECT md5(prosrc) FROM pg_proc WHERE oid='public.sgp_pdt_fuentes_v2(text,uuid)'::regprocedure)<>'c20c8f375798982befd91a67cc0c0de4' THEN RAISE EXCEPTION 'PDT_CICLO_DEFINICION_CAMBIADA: sgp_pdt_fuentes_v2'; END IF;
  IF (SELECT md5(prosrc) FROM pg_proc WHERE oid='public.sgp_aluminio_pendiente_validar_detalles_v1(text,uuid,jsonb,text,text)'::regprocedure)<>'f07b67e8cf194181310928b672946f8f' THEN RAISE EXCEPTION 'PDT_CICLO_DEFINICION_CAMBIADA: sgp_aluminio_pendiente_validar_detalles_v1'; END IF;
  IF (SELECT md5(prosrc) FROM pg_proc WHERE oid='public.sgp_pdt_entrega_registrar_v2(text,uuid,uuid,integer,uuid)'::regprocedure)<>'ae9345ecee5dc46195774dbbce58468c' THEN RAISE EXCEPTION 'PDT_CICLO_DEFINICION_CAMBIADA: sgp_pdt_entrega_registrar_v2'; END IF;
  IF (SELECT md5(prosrc) FROM pg_proc WHERE oid='public.sgp_pdt_cierre_acreditado(uuid)'::regprocedure)<>'e7106b3fb8b5c78d8eca938556352bd1' THEN RAISE EXCEPTION 'PDT_CICLO_DEFINICION_CAMBIADA: sgp_pdt_cierre_acreditado'; END IF;
  IF (SELECT md5(prosrc) FROM pg_proc WHERE oid='public.sgp_pdt_picking_v2(text,uuid)'::regprocedure)<>'656af05b7edba188cca0003074ac2ea2' THEN RAISE EXCEPTION 'PDT_CICLO_DEFINICION_CAMBIADA: sgp_pdt_picking_v2'; END IF;
 END $preflight$;
+-- No shared replacement body applies to LEGACY or previously installed V2.
+-- Only freshly reported V2 rows in this feature's private ledger opt into it.
+CREATE FUNCTION sgp_pdt_multiorigen.es_registro_v4(p_id uuid) RETURNS boolean
+LANGUAGE sql STABLE SECURITY DEFINER SET search_path TO '' AS $fn$
+ SELECT EXISTS(SELECT 1 FROM sgp_pdt_multiorigen.detalles e
+ JOIN public.sgp_aluminio_pendientes p USING(id_pendiente)
+ WHERE p.id_pendiente=p_id AND p.contrato_pdt='V2');
+$fn$;
 INSERT INTO sgp_pdt_multiorigen.funciones_previas(firma,definicion) VALUES('public.sgp_pdt_fuentes_v2(text,uuid)',pg_get_functiondef('public.sgp_pdt_fuentes_v2(text,uuid)'::regprocedure));
-INSERT INTO sgp_pdt_multiorigen.funciones_previas(firma,definicion) VALUES('public.sgp_aluminio_pendiente_validar_detalles_v1(text,uuid,jsonb,text,text)',pg_get_functiondef('public.sgp_aluminio_pendiente_validar_detalles_v1(text,uuid,jsonb,text,text)'::regprocedure));
-INSERT INTO sgp_pdt_multiorigen.funciones_previas(firma,definicion) VALUES('public.sgp_pdt_entrega_registrar_v2(text,uuid,uuid,integer,uuid)',pg_get_functiondef('public.sgp_pdt_entrega_registrar_v2(text,uuid,uuid,integer,uuid)'::regprocedure));
-CREATE OR REPLACE FUNCTION public.sgp_pdt_fuentes_v2(p_token text,p_id uuid)
+DO $clone$ DECLARE original text; BEGIN
+ original:=pg_get_functiondef('public.sgp_pdt_fuentes_v2(text,uuid)'::regprocedure);
+ EXECUTE replace(original,'FUNCTION public.sgp_pdt_fuentes_v2(','FUNCTION sgp_pdt_multiorigen.original_sgp_pdt_fuentes_v2(');
+END $clone$;
+CREATE OR REPLACE FUNCTION sgp_pdt_multiorigen.nuevo_sgp_pdt_fuentes_v2(p_token text,p_id uuid)
 RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path TO '' AS $fn$
 DECLARE p public.sgp_aluminio_pendientes%rowtype; result jsonb;
 BEGIN
@@ -23,7 +42,20 @@ BEGIN
  WHERE x->>'key_produccion'=p.key_produccion AND x->>'codigo_sap'=p.perfil AND x->>'tipo_pieza'='PANEL' AND x->>'id_linea'='PANELES_2';
  RETURN result;
 END $fn$;
-CREATE OR REPLACE FUNCTION public.sgp_aluminio_pendiente_validar_detalles_v1(p_token text, p_id uuid, p_detalles jsonb, p_reserva text DEFAULT NULL::text, p_observacion text DEFAULT NULL::text)
+CREATE OR REPLACE FUNCTION public.sgp_pdt_fuentes_v2(p_token text,p_id uuid)
+RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path TO '' AS $dispatch$
+BEGIN
+ IF sgp_pdt_multiorigen.es_registro_v4(p_id) THEN
+ RETURN sgp_pdt_multiorigen.nuevo_sgp_pdt_fuentes_v2(p_token,p_id);
+ END IF;
+ RETURN sgp_pdt_multiorigen.original_sgp_pdt_fuentes_v2(p_token,p_id);
+END $dispatch$;
+INSERT INTO sgp_pdt_multiorigen.funciones_previas(firma,definicion) VALUES('public.sgp_aluminio_pendiente_validar_detalles_v1(text,uuid,jsonb,text,text)',pg_get_functiondef('public.sgp_aluminio_pendiente_validar_detalles_v1(text,uuid,jsonb,text,text)'::regprocedure));
+DO $clone$ DECLARE original text; BEGIN
+ original:=pg_get_functiondef('public.sgp_aluminio_pendiente_validar_detalles_v1(text,uuid,jsonb,text,text)'::regprocedure);
+ EXECUTE replace(original,'FUNCTION public.sgp_aluminio_pendiente_validar_detalles_v1(','FUNCTION sgp_pdt_multiorigen.original_sgp_aluminio_pendiente_validar_detalles_v1(');
+END $clone$;
+CREATE OR REPLACE FUNCTION sgp_pdt_multiorigen.nuevo_sgp_aluminio_pendiente_validar_detalles_v1(p_token text, p_id uuid, p_detalles jsonb, p_reserva text DEFAULT NULL::text, p_observacion text DEFAULT NULL::text)
  RETURNS jsonb
  LANGUAGE plpgsql
  SECURITY DEFINER
@@ -116,7 +148,20 @@ BEGIN
   jsonb_build_object('cantidad_validada',v_total,'correccion',v_correction,'detalles',p_detalles));
  RETURN jsonb_build_object('ok',true,'cantidad_reportada',v_p.cantidad,'cantidad_validada',v_total,'detalles',v_count);
 END $function$;
-CREATE OR REPLACE FUNCTION public.sgp_pdt_entrega_registrar_v2(p_token text,p_detalle uuid,p_entrega uuid,p_cantidad integer,p_clave uuid)
+CREATE OR REPLACE FUNCTION public.sgp_aluminio_pendiente_validar_detalles_v1(p_token text,p_id uuid,p_detalles jsonb,p_reserva text DEFAULT NULL::text,p_observacion text DEFAULT NULL::text)
+RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path TO '' AS $dispatch$
+BEGIN
+ IF sgp_pdt_multiorigen.es_registro_v4(p_id) THEN
+ RETURN sgp_pdt_multiorigen.nuevo_sgp_aluminio_pendiente_validar_detalles_v1(p_token,p_id,p_detalles,p_reserva,p_observacion);
+ END IF;
+ RETURN sgp_pdt_multiorigen.original_sgp_aluminio_pendiente_validar_detalles_v1(p_token,p_id,p_detalles,p_reserva,p_observacion);
+END $dispatch$;
+INSERT INTO sgp_pdt_multiorigen.funciones_previas(firma,definicion) VALUES('public.sgp_pdt_entrega_registrar_v2(text,uuid,uuid,integer,uuid)',pg_get_functiondef('public.sgp_pdt_entrega_registrar_v2(text,uuid,uuid,integer,uuid)'::regprocedure));
+DO $clone$ DECLARE original text; BEGIN
+ original:=pg_get_functiondef('public.sgp_pdt_entrega_registrar_v2(text,uuid,uuid,integer,uuid)'::regprocedure);
+ EXECUTE replace(original,'FUNCTION public.sgp_pdt_entrega_registrar_v2(','FUNCTION sgp_pdt_multiorigen.original_sgp_pdt_entrega_registrar_v2(');
+END $clone$;
+CREATE OR REPLACE FUNCTION sgp_pdt_multiorigen.nuevo_sgp_pdt_entrega_registrar_v2(p_token text,p_detalle uuid,p_entrega uuid,p_cantidad integer,p_clave uuid)
 RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path TO '' AS $fn$
 DECLARE d public.sgp_aluminio_pendiente_detalles%rowtype; p public.sgp_aluminio_pendientes%rowtype;
  e public.sgp_pdt_entrega_lineas%rowtype; u text; nuevo uuid; neto bigint;
@@ -157,8 +202,20 @@ BEGIN
  VALUES(p_entrega,p_detalle,d.id_pieza,p_cantidad,p_clave,u) RETURNING id_linea INTO nuevo;
  RETURN jsonb_build_object('ok',true,'id_linea',nuevo);
 END $fn$;
+CREATE OR REPLACE FUNCTION public.sgp_pdt_entrega_registrar_v2(p_token text,p_detalle uuid,p_entrega uuid,p_cantidad integer,p_clave uuid)
+RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path TO '' AS $dispatch$
+BEGIN
+ IF sgp_pdt_multiorigen.es_registro_v4((SELECT id_pendiente FROM public.sgp_aluminio_pendiente_detalles WHERE id_detalle=p_detalle)) THEN
+ RETURN sgp_pdt_multiorigen.nuevo_sgp_pdt_entrega_registrar_v2(p_token,p_detalle,p_entrega,p_cantidad,p_clave);
+ END IF;
+ RETURN sgp_pdt_multiorigen.original_sgp_pdt_entrega_registrar_v2(p_token,p_detalle,p_entrega,p_cantidad,p_clave);
+END $dispatch$;
 INSERT INTO sgp_pdt_multiorigen.funciones_previas(firma,definicion) VALUES('public.sgp_pdt_cierre_acreditado(uuid)',pg_get_functiondef('public.sgp_pdt_cierre_acreditado(uuid)'::regprocedure));
-CREATE OR REPLACE FUNCTION public.sgp_pdt_cierre_acreditado(p_id uuid)
+DO $clone$ DECLARE original text; BEGIN
+ original:=pg_get_functiondef('public.sgp_pdt_cierre_acreditado(uuid)'::regprocedure);
+ EXECUTE replace(original,'FUNCTION public.sgp_pdt_cierre_acreditado(','FUNCTION sgp_pdt_multiorigen.original_sgp_pdt_cierre_acreditado(');
+END $clone$;
+CREATE OR REPLACE FUNCTION sgp_pdt_multiorigen.nuevo_sgp_pdt_cierre_acreditado(p_id uuid)
 RETURNS boolean LANGUAGE sql SECURITY DEFINER SET search_path TO '' AS $fn$
  SELECT EXISTS(SELECT 1 FROM public.sgp_pdt_cierres WHERE id_pendiente=p_id)
  AND EXISTS(SELECT 1 FROM public.sgp_aluminio_pendiente_detalles WHERE id_pendiente=p_id)
@@ -174,8 +231,20 @@ RETURNS boolean LANGUAGE sql SECURITY DEFINER SET search_path TO '' AS $fn$
  AND upper(btrim(mp.sistema))=upper(btrim(f.snapshot->>'sistema'))
  AND upper(btrim(mp.acabado))=upper(btrim(d.acabado)))));
 $fn$;
+CREATE OR REPLACE FUNCTION public.sgp_pdt_cierre_acreditado(p_id uuid)
+RETURNS boolean LANGUAGE plpgsql SECURITY DEFINER SET search_path TO '' AS $dispatch$
+BEGIN
+ IF sgp_pdt_multiorigen.es_registro_v4(p_id) THEN
+ RETURN sgp_pdt_multiorigen.nuevo_sgp_pdt_cierre_acreditado(p_id);
+ END IF;
+ RETURN sgp_pdt_multiorigen.original_sgp_pdt_cierre_acreditado(p_id);
+END $dispatch$;
 INSERT INTO sgp_pdt_multiorigen.funciones_previas(firma,definicion) VALUES('public.sgp_pdt_picking_v2(text,uuid)',pg_get_functiondef('public.sgp_pdt_picking_v2(text,uuid)'::regprocedure));
-CREATE OR REPLACE FUNCTION public.sgp_pdt_picking_v2(p_token text,p_id uuid)
+DO $clone$ DECLARE original text; BEGIN
+ original:=pg_get_functiondef('public.sgp_pdt_picking_v2(text,uuid)'::regprocedure);
+ EXECUTE replace(original,'FUNCTION public.sgp_pdt_picking_v2(','FUNCTION sgp_pdt_multiorigen.original_sgp_pdt_picking_v2(');
+END $clone$;
+CREATE OR REPLACE FUNCTION sgp_pdt_multiorigen.nuevo_sgp_pdt_picking_v2(p_token text,p_id uuid)
 RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path TO '' AS $fn$
 DECLARE p public.sgp_aluminio_pendientes%rowtype;
 BEGIN
@@ -193,6 +262,15 @@ BEGIN
  FROM public.sgp_pdt_entrega_lineas l JOIN public.sgp_aluminio_pendiente_detalles d USING(id_detalle)
  WHERE d.id_pendiente=p_id),'[]'::jsonb));
 END $fn$;
+CREATE OR REPLACE FUNCTION public.sgp_pdt_picking_v2(p_token text,p_id uuid)
+RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path TO '' AS $dispatch$
+BEGIN
+ IF sgp_pdt_multiorigen.es_registro_v4(p_id) THEN
+ RETURN sgp_pdt_multiorigen.nuevo_sgp_pdt_picking_v2(p_token,p_id);
+ END IF;
+ RETURN sgp_pdt_multiorigen.original_sgp_pdt_picking_v2(p_token,p_id);
+END $dispatch$;
+REVOKE ALL ON ALL FUNCTIONS IN SCHEMA sgp_pdt_multiorigen FROM PUBLIC,anon,authenticated;
 UPDATE sgp_pdt_multiorigen.funciones_previas f SET huella_posterior=(SELECT md5(prosrc) FROM pg_proc WHERE oid=f.firma::regprocedure);
 NOTIFY pgrst,'reload schema';
 COMMIT;

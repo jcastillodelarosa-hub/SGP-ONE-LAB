@@ -167,3 +167,58 @@ fixtures, nunca clona producción. No es un respaldo ni un instalador productivo
 Pendiente antes de producción: contraste autenticado de cuerpos instalados y
 listado PANEL, aprobación SQL, aplicación controlada, publicación autorizada y
 recorrido real PATINADOR. Ninguno se declara ejecutado por tener CI verde.
+
+## Revisión crítica PR116 — convivencia LEGACY/V2 (2026-10-27)
+
+Esta sección prevalece sobre el orden inicial de instalación descrito arriba.
+
+**01 es aditivo e independiente de 02.** Permite registrar nuevos V2; no necesita
+convertir ningún LEGACY ni reemplaza sus RPC. Instalar 01 no equivale a validar
+el ciclo completo de todos los nuevos pendientes: los casos con claves de carga
+remapeadas/compartidas pueden necesitar 02 para su tratamiento posterior.
+No publicar el ciclo completo hasta resolver la compatibilidad real pendiente.
+
+**02 es opcional, separado y BLOQUEADO para instalación pendiente del contraste
+productivo del validador.** La versión original del PR reemplazaba una función
+compartida capaz de convertir individualmente un LEGACY. Ese riesgo se elimina
+mediante despacho por propiedad del registro:
+
+- Solo `contrato_pdt='V2'` MÁS una fila en el ledger privado de registro v4
+  seleccionan las implementaciones canónicas nuevas.
+- Todos los LEGACY y los V2 previos sin ese marcador ejecutan una copia exacta
+  de su cuerpo instalado original, obtenida transaccionalmente antes del cambio.
+- Los cinco entrypoints mantienen firmas/ACL; sus copias y nuevas implementaciones
+  son privadas, sin EXECUTE al navegador. Preflight exige cuerpos/seguridad
+  esperados. No adaptar automáticamente una definición distinta.
+- No se modifican los guards globales, validador tradicional, resolver ni cambio
+  de estado LEGACY. No hay UPDATE masivo ni conversión durante instalación/lectura.
+- La preparación individual existente sigue siendo una acción explícita de un
+  rol autorizado; no es requisito de registro, listado, cierre ni publicación.
+
+Regresión: cuatro LEGACY sintéticos (abierto, validado, con historial de cambio de
+etapa y cerrado), ocho operaciones cada uno, antes/después: 32 resultados iguales,
+con éxitos y rechazos esperados contrastados; filas e historial idénticos. Resolver
+y estado usan cuerpos reales suministrados; el validador tradicional procede del
+SQL versionado, **no se presenta como su definición productiva vigente**.
+Evidencia: `tests/pdt-multiorigin/evidence/legacy.json`. Nuevas discrepancias de
+cuerpo o SECURITY INVOKER se rechazan antes de instalar 02.
+
+Listados muestran contrato y filtro LEGACY/V2; informe CSV incluye Contrato,
+ID, origen, estado/validación y cantidad original. No se infiere contrato si falta
+el dato. La exportación usa solo filas ya consultadas y neutraliza fórmulas CSV.
+
+### Definición real que falta (no confundir con los siete contratos suministrados)
+
+Se necesitan los resultados YA disponibles, si el propietario los conserva, en
+`PDT_VALIDAR_DETALLES_REAL.json`: definición completa actual de
+`public.sgp_aluminio_pendiente_validar_detalles_v1(text,uuid,jsonb,text,text)`,
+fecha/proyecto, firma, owner, SECURITY DEFINER, search_path, ACL y huellas.
+No hacen falta datos operativos, sesiones, tokens, claves ni volver a exportar las
+siete funciones anteriores. Esa función no aparece en esos siete contratos ni en
+el complemento de sesión/programación ni en el inventario de creación de PR94.
+No se dispone de acceso Supabase autenticado para recuperarla en esta sesión.
+
+La huella `f07b67e8cf194181310928b672946f8f` de 02 es MD5 de **prosrc** del SQL
+versionado reproducido en QA; NO es MD5 de pg_get_functiondef ni evidencia de
+igualdad con producción. No cambiarla ni eludir el preflight para forzar instalación.
+Solo al recibir la definición real podrá cerrarse la discrepancia del punto 9.
