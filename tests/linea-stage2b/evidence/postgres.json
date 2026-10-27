@@ -1,6 +1,6 @@
 {
   "status": "PASS",
-  "database": "sgp_linea_b2_qa_1793103936325849740",
+  "database": "sgp_linea_b2_qa_1793104480106682078",
   "postgres": "17.11 (Debian 17.11-1.pgdg13+2)",
   "network": "none; no published ports",
   "checks": [
@@ -13,6 +13,12 @@
     "REAL PG: close vs execution serialized by actual turn lock",
     "REAL PG: carry vs source correction idempotent, source revision protected",
     "Verified private Export cut + explicit event inclusion avoids double counting; official tables untouched",
+    "REAL PG: concurrent Export cut changes serialize reconciliation; included local events counted once",
+    "PDT evidence UNKNOWN without unit proof; mapped units excluded; resolving assembly never resolves packing",
+    "REAL PG: assembly downward correction vs packing serialized without unsupported units",
+    "Client proof flags rejected and private evidence inaccessible",
+    "REAL PG: native concurrent exact UUID retries insert one event",
+    "Empty-code rollback tested; rollback with data refused; containment stops writes and preserves historical report",
     "Legacy auth body unchanged; RLS/private tables inaccessible to browser roles"
   ],
   "limitations": [

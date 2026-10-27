@@ -3,6 +3,8 @@
 BEGIN;
 CREATE SCHEMA sgp_linea_b2;
 REVOKE ALL ON SCHEMA sgp_linea_b2 FROM PUBLIC,anon,authenticated;
+CREATE TABLE sgp_linea_b2.config(id integer PRIMARY KEY CHECK(id=1),escrituras boolean NOT NULL);
+INSERT INTO sgp_linea_b2.config VALUES(1,true);
 CREATE TABLE sgp_linea_b2.producciones(
  key text PRIMARY KEY REFERENCES public.sgp_producciones(key_produccion),revision bigint NOT NULL DEFAULT 0,
  corte uuid,unit_revision bigint,pdt_completo boolean NOT NULL DEFAULT false,pdt_prueba jsonb
@@ -79,9 +81,11 @@ BEGIN
  IF jsonb_typeof(p_cmd)<>'object' OR op NOT IN ('ABRIR','SALE','EJECUTAR','CERRAR','REABRIR','ARRASTRAR','CONCILIAR','INFORME') OR op IS NULL THEN RAISE EXCEPTION 'COMANDO_INVALIDO';END IF;
  IF EXISTS(SELECT 1 FROM jsonb_object_keys(p_cmd) x WHERE x NOT IN ('op','key','stage','date','shift','id','revision','quantity','observation','reasons','cut_id','close_id')) THEN RAISE EXCEPTION 'CAMPOS_NO_PERMITIDOS';END IF;
  s:=sgp_linea_b2.autorizar(p_token,et,k);u:=s->>'usuario';
+ IF op<>'INFORME' AND NOT coalesce((SELECT escrituras FROM sgp_linea_b2.config WHERE id=1),false) THEN RAISE EXCEPTION 'ESCRITURAS_CONTENIDAS';END IF;
  IF op<>'INFORME' AND (request_id IS NULL OR rev IS NULL OR rev<0 OR s->>'rol'='CONSULTA') THEN RAISE EXCEPTION 'PERMISO_O_REVISION_INVALIDA';END IF;
  IF op IN ('ABRIR','SALE','REABRIR','CONCILIAR') AND s->>'rol' NOT IN ('COORDINADOR','ADMINISTRADOR') THEN RAISE EXCEPTION 'REQUIERE_COORDINADOR';END IF;
  IF op IN ('SALE','EJECUTAR','ARRASTRAR','CONCILIAR') AND k IS NULL THEN RAISE EXCEPTION 'PRODUCCION_REQUERIDA';END IF;
+ IF op='CONCILIAR' THEN PERFORM sgp_linea_b2.autorizar(p_token,'ENSAMBLE',k);PERFORM sgp_linea_b2.autorizar(p_token,'EMPAQUE',k);END IF;
  IF op='INFORME' THEN
  SELECT snapshot INTO res FROM sgp_linea_b2.cierres WHERE sgp_linea_b2.cierres.id=(p_cmd->>'close_id')::uuid AND etapa=et;
  IF NOT FOUND THEN RAISE EXCEPTION 'CIERRE_NO_EXISTE';END IF;
@@ -90,7 +94,7 @@ BEGIN
  END IF;
  PERFORM pg_advisory_xact_lock(hashtextextended(request_id::text,123));
  SELECT * INTO prior FROM sgp_linea_b2.solicitudes WHERE sgp_linea_b2.solicitudes.id=request_id;
- IF FOUND THEN IF prior.usuario<>u OR prior.payload<>p_cmd THEN RAISE EXCEPTION 'IDEMPOTENCIA_REUTILIZADA';END IF;RETURN prior.respuesta||jsonb_build_object('duplicate',true);END IF;
+ IF FOUND THEN IF prior.usuario<>u OR prior.payload<>p_cmd THEN RAISE EXCEPTION 'IDEMPOTENCIA_REUTILIZADA';END IF;IF op='CERRAR' THEN FOR r IN SELECT value FROM jsonb_array_elements(prior.respuesta->'rows') LOOP PERFORM sgp_linea_b2.autorizar(p_token,et,r.value->>'key');END LOOP;END IF;RETURN prior.respuesta||jsonb_build_object('duplicate',true);END IF;
  -- Source/CAS lock shared by every shift and every writer in this new engine.
  IF k IS NOT NULL THEN SELECT revision INTO p_rev FROM sgp_linea_b2.producciones WHERE key=k FOR UPDATE;IF NOT FOUND THEN RAISE EXCEPTION 'PRODUCCION_NO_EXISTE';END IF;END IF;
  IF op='CONCILIAR' THEN
@@ -157,6 +161,8 @@ BEGIN
  UPDATE sgp_linea_b2.arrastres SET cantidad=greatest(0,(CASE WHEN op='SALE' THEN v ELSE o.sale END)-CASE WHEN op='EJECUTAR' THEN v ELSE o.ejecutado END),revision_origen=o.revision+1,validado=false WHERE key=k AND etapa=et AND fecha=d AND turno=t;
  ELSE
  IF o.sale IS NULL THEN RAISE EXCEPTION 'SALE_NO_VALIDADO';END IF;
+ PERFORM 1 FROM sgp_linea_b2.turnos WHERE etapa=et AND fecha=CASE WHEN t=1 THEN d ELSE d+1 END AND turno=CASE WHEN t=1 THEN 2 ELSE 1 END FOR SHARE;
+ IF EXISTS(SELECT 1 FROM sgp_linea_b2.turnos WHERE etapa=et AND fecha=CASE WHEN t=1 THEN d ELSE d+1 END AND turno=CASE WHEN t=1 THEN 2 ELSE 1 END AND estado='CERRADO') THEN RAISE EXCEPTION 'DESTINO_CERRADO';END IF;
  INSERT INTO sgp_linea_b2.arrastres VALUES(k,et,d,t,CASE WHEN t=1 THEN d ELSE d+1 END,CASE WHEN t=1 THEN 2 ELSE 1 END,greatest(o.sale-o.ejecutado,0),o.revision+1,false)
  ON CONFLICT(key,etapa,fecha,turno) DO UPDATE SET cantidad=excluded.cantidad,revision_origen=excluded.revision_origen,validado=false;
  UPDATE sgp_linea_b2.ordenes SET revision=revision+1 WHERE etapa=et AND fecha=d AND turno=t AND key=k;

@@ -1,3 +1,20 @@
+# Etapa 2B — checkpoint final aislado (2026-10-27)
+
+Rama feat/linea-stage2b-postgres-adapter, basada en PR121 2164227ae23fefc923ad81fcef74da47ba549ba0;
+dependencia PR117 → PR121 → Draft2B. No fusionar el stack automáticamente.
+IMPLEMENTADO EN RAMA / VERIFICADO AISLADO. NO APLICADO / NO PUBLICADO.
+Motor SQL nuevo, adaptador Node al resolvedor121 y pruebas con sesiones PG17 reales.
+16 comprobaciones SQL + cinco integración adaptador; suite general en evidencia
+regression.json. Documentación y riesgos: docs/linea-etapa2b/README.md.
+SQL REVIEW/contención/reversión fuera de migraciones automáticas.
+No cambios frontend, vidrio, Mecanizado, Picking, legacy, Supabase/Firebase ni otros repositorios.
+BLOQUEO PRODUCTIVO: feed real Export/eventos e impacto PDT por unidades no demostrado;
+scopes/driver productivo pendientes. Disponibilidad desconocida bloquea incremento.
+Siguiente paso: revisión ChatGPT del único Draft2B apilado sobre121; no nueva etapa,
+no runtime ni instalación productiva. SHA final queda en PR para evitar autorreferencia.
+
+---
+
 # PR121 — checkpoint correctivo: turno explícito
 
 Fecha Colombia: 2026-10-27T07:02:56.597510-05:00.

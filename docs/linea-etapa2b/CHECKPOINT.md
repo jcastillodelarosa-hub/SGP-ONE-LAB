@@ -30,3 +30,11 @@ Tablas de fuentes/cortes/PDT normalizadas son fixtures privadas; bridge producti
 pendiente. Nunca habilitar empaque con esa falta de evidencia.
 Pendiente en 2B.3: carrera de cambio de corte/conciliación, PDT por unidad/etapa,
 corrección Ensamble concurrente, rollback versionado, pruebas Node y documento final.
+
+## Checkpoint 2B.3 — cierre aislado
+
+16 comprobaciones PostgreSQL17 PASS y cinco del adaptador con sesiones reales.
+Rollback instalación, reversión vacía, rechazo con datos y contención verificados.
+Detalles de fuentes, contratos, carreras, riesgos y límites en README.md.
+No se declara bridge productivo ni compatibilidad completa de RPC no disponibles.
+Siguiente paso: revisión del Draft dependiente121. Sin siguiente etapa automática.

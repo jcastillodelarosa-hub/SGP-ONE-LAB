@@ -22,6 +22,8 @@ install=(R/'docs/sql-proposals/linea-etapa2b/01_motor_REVIEW.sql').read_text()
 r=run(install.replace('COMMIT;','SELECT 1/0;COMMIT;'));assert r.returncode
 assert sql("SELECT to_regnamespace('sgp_linea_b2') IS NULL")=='t'
 sql(install)
+undo=(R/'docs/sql-proposals/linea-etapa2b/ROLLBACK_REVIEW.sql').read_text()
+sql(undo.replace('COMMIT;','ROLLBACK;'))
 checks=['Installation failure rolls back all new schema/RPC objects']
 def call(token,cmd):return 'SELECT public.sgp_linea_motor_b2('+literal(token)+','+js(cmd)+');'
 def execute(cmd,token='COORDINADOR'):return json.loads(sql('SET ROLE anon;'+call(token,cmd)))
@@ -99,6 +101,55 @@ sql("INSERT INTO sgp_linea_b2.cortes VALUES('"+cut2+"','QA-CARRY','QA-new-load',
 rv=int(sql("SELECT revision FROM sgp_linea_b2.producciones WHERE key='QA-CARRY'"));execute(cmd('CONCILIAR','QA-CARRY',revision=rv,cut_id=cut2))
 assert json.loads(sql("SELECT public.sgp_linea_disponible_b2('LIDER','QA-CARRY')"))['assembled']==10+int(sql("SELECT ejecutado FROM sgp_linea_b2.ordenes WHERE key='QA-CARRY' AND etapa='ENSAMBLE'"))
 checks.append('Verified private Export cut + explicit event inclusion avoids double counting; official tables untouched')
+# Two concurrent cut activations with same source revision: only one can win.
+cut3=str(uuid.uuid4());cut4=str(uuid.uuid4());current=int(sql("SELECT ejecutado FROM sgp_linea_b2.ordenes WHERE key='QA-CARRY' AND etapa='ENSAMBLE'"))
+for cid in [cut3,cut4]:
+ sql("INSERT INTO sgp_linea_b2.cortes VALUES('"+cid+"','QA-CARRY','QA-load-"+cid+"',"+str(10+current)+",0,true,'{\"QA\":true}',now());INSERT INTO sgp_linea_b2.incluidos SELECT '"+cid+"',id FROM sgp_linea_b2.eventos WHERE key='QA-CARRY';")
+rv=int(sql("SELECT revision FROM sgp_linea_b2.producciones WHERE key='QA-CARRY'"));a=concurrent([call('COORDINADOR',cmd('CONCILIAR','QA-CARRY',revision=rv,cut_id=x)) for x in [cut3,cut4]])
+assert sum(x.returncode==0 for x in a)==1 and any('CONFLICTO_REVISION' in x.stderr for x in a)
+assert json.loads(sql("SELECT public.sgp_linea_disponible_b2('LIDER','QA-CARRY')"))['assembled']==10+current
+checks.append('REAL PG: concurrent Export cut changes serialize reconciliation; included local events counted once')
+# PDT evidence is stage-specific and physical-unit quantitative, never piece count.
+seed('QA-PDT');sale('QA-PDT','EMPAQUE')
+pack_pdt=str(uuid.uuid4());assembly_pdt=str(uuid.uuid4())
+sql("INSERT INTO sgp_linea_b2.bloqueos VALUES('QA-PDT','"+pack_pdt+"','EMPAQUE',true,NULL,NULL);")
+assert json.loads(sql("SELECT public.sgp_linea_disponible_b2('LIDER','QA-PDT')"))['status']=='UNKNOWN'
+sql("UPDATE sgp_linea_b2.producciones SET pdt_completo=true,pdt_prueba='{\"QA\":true}' WHERE key='QA-PDT';")
+assert json.loads(sql("SELECT public.sgp_linea_disponible_b2('LIDER','QA-PDT')"))['available']==10
+sql("INSERT INTO sgp_linea_b2.bloqueos VALUES('QA-PDT','"+assembly_pdt+"','ENSAMBLE',true,NULL,'{\"QA\":true}');UPDATE sgp_linea_b2.producciones SET pdt_completo=true,pdt_prueba='{\"QA\":true}' WHERE key='QA-PDT';")
+reject(cmd('EJECUTAR','QA-PDT','EMPAQUE',revision=rev_order('QA-PDT','EMPAQUE'),quantity=1),'EVIDENCIA_INSUFICIENTE','LIDER')
+sql("INSERT INTO sgp_linea_b2.unidades SELECT 'QA-PDT','u'||n,false FROM generate_series(1,10)n;UPDATE sgp_linea_b2.bloqueos SET unidades=ARRAY['u1','u2'] WHERE pdt='"+assembly_pdt+"';UPDATE sgp_linea_b2.producciones SET pdt_completo=true,pdt_prueba='{\"QA\":true}',unit_revision=revision WHERE key='QA-PDT';")
+assert json.loads(sql("SELECT public.sgp_linea_disponible_b2('LIDER','QA-PDT')"))['available']==8
+work('QA-PDT',2,'EMPAQUE');assert json.loads(sql("SELECT public.sgp_linea_disponible_b2('LIDER','QA-PDT')"))['available']==6
+assert sql("SELECT count(*) FROM sgp_linea_b2.unidades WHERE key='QA-PDT' AND id IN ('u1','u2') AND empacada")=='0'
+sql("UPDATE sgp_linea_b2.bloqueos SET activo=false WHERE pdt='"+assembly_pdt+"';UPDATE sgp_linea_b2.producciones SET pdt_completo=true,pdt_prueba='{\"QA\":true}' WHERE key='QA-PDT';")
+assert sql("SELECT activo FROM sgp_linea_b2.bloqueos WHERE pdt='"+pack_pdt+"'")=='t'
+assert json.loads(sql("SELECT public.sgp_linea_disponible_b2('LIDER','QA-PDT')"))['available']==8
+checks.append('PDT evidence UNKNOWN without unit proof; mapped units excluded; resolving assembly never resolves packing')
+# A downward assembly correction competing with packing cannot leave it unsupported.
+seed('QA-DOWN',0,0);sale('QA-DOWN');sale('QA-DOWN','EMPAQUE');work('QA-DOWN',5,token='COORDINADOR',observation='QA approved')
+a=concurrent([call('COORDINADOR',cmd('EJECUTAR','QA-DOWN',revision=rev_order('QA-DOWN'),quantity=3,observation='QA correction')),call('LIDER',cmd('EJECUTAR','QA-DOWN','EMPAQUE',revision=rev_order('QA-DOWN','EMPAQUE'),quantity=4))])
+assert sum(x.returncode==0 for x in a)==1,[x.stderr for x in a]
+assert all(x.returncode==0 or any(c in x.stderr for c in ['CORRECCION_SIN_RESPALDO','SALDO_INSUFICIENTE']) for x in a)
+assert json.loads(sql("SELECT public.sgp_linea_disponible_b2('LIDER','QA-DOWN')"))['status']=='READY'
+checks.append('REAL PG: assembly downward correction vs packing serialized without unsupported units')
+# Browser cannot send source proof/actor fields or write any evidence table.
+reject({**cmd('EJECUTAR','QA-A',quantity=1),'verified':True},'CAMPOS_NO_PERMITIDOS')
+r=run("SET ROLE anon;INSERT INTO sgp_linea_b2.cortes(id,key,id_carga_diaria,ensamblado,empacado,prueba) VALUES(gen_random_uuid(),'QA-A','fake',999,0,'{}')");assert r.returncode and 'permission denied' in r.stderr
+checks.append('Client proof flags rejected and private evidence inaccessible')
+# Native concurrent exact retries, not just Node adapter retry.
+seed('QA-RETRY');sale('QA-RETRY','EMPAQUE')
+c=cmd('EJECUTAR','QA-RETRY','EMPAQUE',revision=rev_order('QA-RETRY','EMPAQUE'),quantity=1)
+a=concurrent([call('LIDER',c),call('LIDER',c)]);assert all(x.returncode==0 for x in a)
+assert sql("SELECT count(*) FROM sgp_linea_b2.eventos WHERE key='QA-RETRY'")=='1'
+checks.append('REAL PG: native concurrent exact UUID retries insert one event')
+# Read-only reports survive containment and unsafe full rollback refuses data.
+r=run(undo);assert r.returncode and 'ROLLBACK_CON_DATOS' in r.stderr
+sql((R/'docs/sql-proposals/linea-etapa2b/CONTENER_REVIEW.sql').read_text())
+reject(cmd('SALE','QA-RETRY','EMPAQUE',quantity=1,observation='QA'),'ESCRITURAS_CONTENIDAS')
+assert json.loads(sql(call('LIDER',{'op':'INFORME','stage':'ENSAMBLE','close_id':closed['id']})))==old
+sql('UPDATE sgp_linea_b2.config SET escrituras=true WHERE id=1;') # QA only, no deploy/job.
+checks.append('Empty-code rollback tested; rollback with data refused; containment stops writes and preserves historical report')
 assert sql("SELECT md5(pg_get_functiondef('sgp_sesion_actual(text)'::regprocedure))")==baseline
 assert sql("SELECT has_schema_privilege('anon','sgp_linea_b2','USAGE') OR has_table_privilege('anon','sgp_linea_b2.ordenes','UPDATE')")=='f'
 checks.append('Legacy auth body unchanged; RLS/private tables inaccessible to browser roles')
