@@ -4,22 +4,26 @@
  */
 const validQty=n=>Number.isSafeInteger(n)&&n>=0;
 const text=x=>typeof x==='string'&&x.trim().length>0;
-const fail=code=>{throw Object.assign(new Error(code),{code});};
+class ResolverError extends Error{constructor(code){super(code);this.code=code;}}
+const fail=code=>{throw new ResolverError(code);};
 const assert=(ok,code)=>{if(!ok)fail(code);};
 const stable=x=>JSON.stringify(normalize(x));
 function normalize(x){return Array.isArray(x)?x.map(normalize):x&&typeof x==='object'?Object.fromEntries(Object.keys(x).sort().map(k=>[k,normalize(x[k])])):x;}
 const unknown=(s,reason,status='UNKNOWN')=>({contractVersion:1,status,available:null,revision:s?.revision??null,cutId:s?.cut?.id??null,reasons:[reason]});
 /** Internal only: must never be used with browser-supplied snapshots. */
 export function evaluateServerSnapshot(s){
- if(!s||!text(s.production)||!validQty(s.revision)||!['production','cut','events','pdts'].every(k=>s.complete?.[k]===true))return unknown(s,'INCOMPLETE_SERVER_SOURCES');
+ if(!s||!text(s.production)||!validQty(s.revision)||!['production','cut','events','pdts','turns'].every(k=>s.complete?.[k]===true))return unknown(s,'INCOMPLETE_SERVER_SOURCES');
  const {cut,events,pdts}=s;
+ if(s.unit!=='UNIDAD_PRODUCCION'||cut?.unit!==s.unit)return unknown(s,'QUANTITATIVE_UNIT_UNKNOWN');
  if(!cut||!text(cut.id)||!validQty(cut.assembled)||!validQty(cut.packed)||cut.inclusionComplete!==true||!Array.isArray(cut.includedEventIds))return unknown(s,'EXPORT_RECONCILIATION_INCOMPLETE');
- if(!Array.isArray(events)||!Array.isArray(pdts)||!Array.isArray(s.relations))return unknown(s,'INVALID_SOURCE_CONTRACT');
+ if(!Array.isArray(events)||!Array.isArray(pdts)||!Array.isArray(s.relations)||!Array.isArray(s.turns))return unknown(s,'INVALID_SOURCE_CONTRACT');
+ if(s.turns.some(t=>!t||!['ENSAMBLE','EMPAQUE'].includes(t.stage)||!['ABIERTO','CERRADO','EN_REVISION'].includes(t.state)||![1,2].includes(t.shift)||!text(t.date)||(t.production!==undefined&&t.production!==s.production)))return unknown(s,'SHIFT_STATE_UNKNOWN');
+ if(new Set(s.turns.map(t=>JSON.stringify([t.stage,t.date,t.shift]))).size!==s.turns.length)return unknown(s,'DUPLICATE_SHIFT_STATE','DISCREPANCY');
  if(new Set(events.map(e=>e.id)).size!==events.length||new Set(cut.includedEventIds).size!==cut.includedEventIds.length)return unknown(s,'DUPLICATE_EVIDENCE','DISCREPANCY');
  if(cut.includedEventIds.some(id=>!events.some(e=>e.id===id)))return unknown(s,'UNKNOWN_EXPORT_INCLUSION');
  let assembled=cut.assembled,packed=cut.packed;
  for(const e of events){
-  if(!text(e.id)||e.production!==s.production||!['ENSAMBLE','EMPAQUE'].includes(e.stage)||!Number.isSafeInteger(e.delta))return unknown(s,'EVENT_IDENTITY_OR_QUANTITY_INVALID','DISCREPANCY');
+  if(!text(e.id)||e.unit!==s.unit||e.production!==s.production||!['ENSAMBLE','EMPAQUE'].includes(e.stage)||!Number.isSafeInteger(e.delta))return unknown(s,'EVENT_IDENTITY_OR_QUANTITY_INVALID','DISCREPANCY');
   if(e.reserve!==undefined||e.part!==undefined){if(!s.relations.some(r=>r.production===s.production&&r.reserve===e.reserve&&r.part===e.part))return unknown(s,'RESERVE_PART_RELATION_UNPROVEN');}
   if(!cut.includedEventIds.includes(e.id)){if(e.stage==='ENSAMBLE')assembled+=e.delta;else packed+=e.delta;}
  }
@@ -32,7 +36,7 @@ export function evaluateServerSnapshot(s){
  let blocked=0,eligibleUnitIds=null;
  if(blocks.length){
   const map=s.unitMap;
-  if(!map||map.revision!==s.revision||!Array.isArray(map.assembledIds)||!Array.isArray(map.packedIds)||map.production!==s.production)return unknown(s,'UNIT_MAPPING_UNAVAILABLE');
+  if(!map||map.revision!==s.revision||!Array.isArray(map.assembledIds)||!Array.isArray(map.packedIds)||map.production!==s.production||map.unit!==s.unit)return unknown(s,'UNIT_MAPPING_UNAVAILABLE');
   const a=new Set(map.assembledIds),p=new Set(map.packedIds);
   if(a.size!==map.assembledIds.length||p.size!==map.packedIds.length||a.size!==assembled||p.size!==packed||[...a].some(id=>!text(id))||[...p].some(id=>!a.has(id)))return unknown(s,'UNIT_MAPPING_COUNTS_DISAGREE','DISCREPANCY');
   const affected=new Set();
@@ -42,7 +46,7 @@ export function evaluateServerSnapshot(s){
   }
   blocked=affected.size;eligibleUnitIds=[...a].filter(id=>!p.has(id)&&!affected.has(id)).sort();
  }
- return {contractVersion:1,status:'READY',available:assembled-packed-blocked,assembled,packed,blocked,eligibleUnitIds,revision:s.revision,cutId:cut.id,reasons:[]};
+ return {contractVersion:1,status:'READY',unit:s.unit,available:assembled-packed-blocked,assembled,packed,blocked,eligibleUnitIds,revision:s.revision,cutId:cut.id,reasons:[]};
 }
 function authorize(session,production,operation){
  assert(session?.active===true&&text(session.user),'AUTH_REQUIRED');
@@ -60,9 +64,10 @@ function requestFields(r,kind){
  * sessionId is only a lookup handle; authentication/scope come from repository.
  */
 export function createPackingResolver(repository){
+ async function transaction(key,work){try{return await repository.transaction(key,work);}catch(error){if(error instanceof ResolverError)throw error;fail('SERVER_TRANSACTION_FAILED');}}
  async function execute(operation,sessionId,r){
   requestFields(r,operation);
-  return repository.transaction(r.production,async tx=>{
+  return transaction(r.production,async tx=>{
    const session=await tx.session(sessionId);authorize(session,r.production,operation);
    const signature=stable({operation,request:r,user:session.user});const prior=await tx.request(r.id);
    if(prior){assert(prior.signature===signature,'IDEMPOTENCY_REUSED');return {...prior.response,duplicate:true};}
@@ -84,7 +89,7 @@ export function createPackingResolver(repository){
     assert(!s.pdts.some(p=>p.active&&(p.origin==='ENSAMBLE'||p.assemblyImpact==='BLOCKS')),'CORRECTION_NEEDS_UNIT_RECONCILIATION');
     delta=r.total-evaluated.assembled;
    }
-   const event={id:r.id,production:r.production,stage,delta,date:r.date,shift:r.shift,user:session.user,observation:r.observation||null,unitIds};
+   const event={id:r.id,production:r.production,unit:s.unit,stage,delta,date:r.date,shift:r.shift,user:session.user,observation:r.observation||null,unitIds};
    const response={ok:true,operation,eventId:r.id,revision:s.revision+1,cutId:s.cut.id,available:operation==='consume'?evaluated.available-r.quantity:r.total-evaluated.packed,duplicate:false};
    await tx.commit({expectedRevision:s.revision,event,request:{id:r.id,signature,response}});return response;
   });
@@ -92,7 +97,7 @@ export function createPackingResolver(repository){
  return Object.freeze({
   async resolve(sessionId,production){
    assert(text(production),'INVALID_REQUEST');
-   return repository.transaction(production,async tx=>{
+   return transaction(production,async tx=>{
     authorize(await tx.session(sessionId),production,'resolve');
     try{const s=await tx.snapshot();if(s?.production!==production)return unknown(null,'SOURCE_IDENTITY_MISMATCH','DISCREPANCY');return evaluateServerSnapshot(s);}catch{return unknown(null,'SERVER_SOURCE_UNAVAILABLE');}
    });
