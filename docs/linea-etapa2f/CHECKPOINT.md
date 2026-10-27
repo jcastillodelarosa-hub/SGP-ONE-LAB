@@ -1,3 +1,9 @@
+> Actualización vigente de PR132: [AMPLIACION_EVIDENCIA.md](AMPLIACION_EVIDENCIA.md)
+> cierra firmas, propietario/search_path, seis tipos, FK y restricciones reportadas.
+> Los pendientes de metadatos descritos debajo corresponden al corte anterior;
+> no deben solicitarse otra vez. Semántica, inclusión, cobertura, ámbitos y locks
+> siguen sin certificar. Paquete original conservado para trazabilidad.
+
 # Etapa 2F — checkpoint final (2026-10-27T17:52:10.604387-05:00, Colombia)
 
 Rama feat/linea-stage2f-source-certification; único Draft dependiente de PR130,

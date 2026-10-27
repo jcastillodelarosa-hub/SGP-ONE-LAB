@@ -1,3 +1,9 @@
+> Actualización vigente de PR132: [AMPLIACION_EVIDENCIA.md](AMPLIACION_EVIDENCIA.md)
+> cierra firmas, propietario/search_path, seis tipos, FK y restricciones reportadas.
+> Los pendientes de metadatos descritos debajo corresponden al corte anterior;
+> no deben solicitarse otra vez. Semántica, inclusión, cobertura, ámbitos y locks
+> siguen sin certificar. Paquete original conservado para trazabilidad.
+
 # Etapa 2F — certificación por alcance y semántica Export
 
 Base PR130 `bfdb3097a47c7886e9422eba4c7f557b36b1ab48`. Main observado

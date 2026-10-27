@@ -1,3 +1,20 @@
+# Etapa 2F — ampliación documental de PR #132
+
+Rama feat/linea-stage2f-source-certification; main observado6b96aa387765693ab94b1542280b408a5097b325.
+Firmas exactas de cuatro RPC, propietario postgres/search_path public, seis tipos
+historial y FK a cargas diarias, FK/estados/cantidad/UUID líneas PDT confirmados por
+ChatGPT en lectura. Muestra30 JSONB solo prueba claves presentes. Valores MD5 y
+cuerpos vigentes no recibidos. Ver docs/linea-etapa2f/AMPLIACION_EVIDENCIA.md y
+CONFIRMACIONES_COMPLEMENTO_CHATGPT.json. Primer paquete/pruebas conservados intactos.
+Ningún adaptador operativo nuevo seguro: bloqueados bruto/neto/diario/acumulado,
+inclusión corte/evento, cobertura key/reserva/parte, bindings y cooperación escritores.
+Solo documentación; pruebas previas reutilizadas, sin nueva certificación productiva.
+NO APLICADO/NO PUBLICADO/NO FUSIONADO. No SQL productivo, main o lógica modificados.
+Siguiente paso: revisión ChatGPT de matriz y contraste de resultados faltantes ya
+obtenidos; no volver a pedir firmas/tipos/relaciones ni IDs físicos de ventanas.
+
+---
+
 # Etapa 2F — checkpoint final (2026-10-27T17:52:10.604387-05:00, Colombia)
 
 Rama feat/linea-stage2f-source-certification; único Draft dependiente de PR130,

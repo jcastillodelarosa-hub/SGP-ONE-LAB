@@ -1,3 +1,9 @@
+> Actualización vigente de PR132: [AMPLIACION_EVIDENCIA.md](AMPLIACION_EVIDENCIA.md)
+> cierra firmas, propietario/search_path, seis tipos, FK y restricciones reportadas.
+> Los pendientes de metadatos descritos debajo corresponden al corte anterior;
+> no deben solicitarse otra vez. Semántica, inclusión, cobertura, ámbitos y locks
+> siguen sin certificar. Paquete original conservado para trazabilidad.
+
 # Etapa 2F — permisos, escritores y adaptación mínima
 
 ## SECURITY DEFINER: evaluación acotada, no diagnóstico por grants
