@@ -1,3 +1,22 @@
+# Etapa2D — checkpoint de entrega aislada (2026-10-27T10:06:59.319338-05:00)
+
+Rama feat/linea-stage2d-picking-unit-evidence; base124 111f0cb46921198f790b6cafc0336e0ca449136c.
+Stack117→121→122→124→Draft2D. Main observado b228ab2977ee29fa8c3db1db2ec2c2b594e3dc2d.
+IMPLEMENTADO / VERIFICADO EN AISLAMIENTO; PENDIENTE DE EVIDENCIA REAL.
+El validador capturado persiste ventanas_afectadas entero; no identidad individual.
+Complemento privado guarda vínculos explícitos por unidad/etapa, snapshot/versión,
+rol real, revisiones y trazabilidad. Sin asociaciones históricas automáticas.
+396/396 Node; PG D2 12 + adaptador3 + recuperación6; baseC2 18/B2 16 PASS;
+release LABv362/sintaxis/hashes PASS. Ver tests/linea-stage2d/evidence y
+`docs/linea-etapa2d/TRAZABILIDAD_Y_EXPORT.md` para matriz/fuentes/límites.
+Bloqueos: IDs físicos/cobertura real, nuevas diferencias→PDT, Export instalado e
+inclusión por UUID, scopes/pool/locks reales. Sin evidencia = SIN_CONCILIAR.
+No Supabase productivo/frontend/Picking operativo/Mecanizado/vidrio/Gateway/Firebase.
+NO APLICADO / NO PUBLICADO; no fusión ni otros repositorios. Siguiente paso:
+revisión ChatGPT del único Draft2D dependiente124. No continuar automáticamente.
+
+---
+
 # Etapa 2C — checkpoint de entrega aislada (2026-10-27T13:33:13.240091+00:00)
 
 Rama feat/linea-stage2c-source-bridges; base122 8888981d74bbd485cf07e1dea2ee11b3c6a20463.

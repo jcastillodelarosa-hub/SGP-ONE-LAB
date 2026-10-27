@@ -1625,3 +1625,13 @@ Integración real PARCIAL: no cuerpos/ledger Export, unidades PDT ni fuentes de
 ámbitos/escritores contrastados; no se registra lector real. SIN_CONCILIAR bloquea.
 No APLICADO/PUBLICADO; no frontend ni cambios a contratos legacy. Revisar checkpoint
 y docs/linea-etapa2c antes de avanzar; no inferir publicación por pruebas o Draft.
+
+
+## 2026-10-27T10:06:59.319338-05:00 — Etapa2D aislada, dependiente de PR124
+
+IMPLEMENTADO/VERIFICADO AISLADO complemento explícito PDT→unidades y lector servidor,
+sin inferir IDs desde ventanas_afectadas agregado. Captura del validador probada
+sin modificar en esquema mínimo compatible sintético. 396 Node, PG D2 12/adaptador3/
+recuperación6 y regresiones C2/B2. Fuentes reales/Export siguen pendientes; ACK
+propuesto no conectado a importador. NO APLICADO/PUBLICADO; no contratos legacy,
+frontend ni Picking operativo modificados. Siguiente: revisión Draft2D, ver checkpoint.

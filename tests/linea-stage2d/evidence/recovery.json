@@ -1,0 +1,17 @@
+{
+  "status": "PASS",
+  "database": "sgp_linea_d2_qa_1793113430336195010",
+  "empty_database": "sgp_linea_d2_empty_1793113462656863386",
+  "checks": [
+    "Proposed ACK binds immutable event hash/key; foreign production rejected, no official cut changed",
+    "Targeted Picking catalog query parses under READ ONLY in QA, no operational rows exported",
+    "Rollback with source/mapping/history evidence refused, no deletion",
+    "Structural source mismatch stops installation atomically before creating D2 objects",
+    "Empty rollback removes only D2 objects; captured Picking validator fingerprint unchanged",
+    "Persistent per-production containment survives retry and preserves immutable links/history"
+  ],
+  "limits": [
+    "ACK is proposed, not a certified real Export ingestion",
+    "Schema-only QA copy is NOT a productive backup or restore verification"
+  ]
+}

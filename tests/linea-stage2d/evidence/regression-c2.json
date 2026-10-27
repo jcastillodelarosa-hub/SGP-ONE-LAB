@@ -1,0 +1,33 @@
+{
+  "status": "PASS",
+  "database": "sgp_linea_b2_qa_1793113079254857106",
+  "postgres": "17.11 (Debian 17.11-1.pgdg13+2)",
+  "network": "none; no published ports",
+  "checks": [
+    "Installation error rolls back new C2 schema and triggers; B2 regression 16 PASS",
+    "No certified real readers => SIN_CONCILIAR, null availability and scope removed",
+    "SQL-certified readers only, stable source replay does not advance production revision",
+    "Changed reader content blocks raw B2 write; explicit new cut reconciles under production lock",
+    "Successive official cut explicitly includes local event once; source balances never overwritten",
+    "Missing inclusion evidence stays SIN_CONCILIAR; no timestamp/quantity inference",
+    "Older official generation cannot replace a newer reconciliation",
+    "Duplicates, contradictory quantities and source revision reuse fail closed",
+    "Shared reserve does not merge production/part/line identities or foreign events",
+    "No piece-to-unit conversion; independent EMPAQUE PDT does not block ENSAMBLE eligible units",
+    "Synthetic proven per-unit PDT mapping blocks only affected units and preserves independent stage",
+    "Server permission-source revocation invalidates grants; anon cannot manufacture scope",
+    "Installed reader body MD5 drift invalidates certified source contract",
+    "Reader ownership/ACL/definer/config signature enforced; ACL drift invalidates evidence",
+    "REAL PG: two shifts share one eligible balance with C2 freshness guards",
+    "REAL PG: source PDT writer invalidation vs packing serializes and blocks future unsupported consumption",
+    "REAL PG: official cut update vs reconciliation uses same lock, no mixed cut/event snapshot",
+    "Browser cannot register readers, provide proofs or call private reconciliation"
+  ],
+  "production_integration": "NOT VERIFIED; no productive readers, source writer hooks or unit mapping certified",
+  "limitations": [
+    "Readers/sources/scopes are synthetic; real auth body captured in base tests",
+    "Real Export function definitions and inclusion records unavailable",
+    "No real piece->unit equivalence; active assembly PDT without explicit units blocks",
+    "No SQL applied to Supabase, no frontend, no official source updates"
+  ]
+}

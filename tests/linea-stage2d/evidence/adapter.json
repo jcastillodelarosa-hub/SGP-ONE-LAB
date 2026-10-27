@@ -1,0 +1,12 @@
+{
+  "status": "PASS",
+  "database": "sgp_linea_d2_qa_1793113430336195010",
+  "checks": [
+    "Server D2 reader feeds C2/approved resolver without caller unit data",
+    "Real concurrent retry consumes once; already-packed unit reduces18 to17",
+    "Missing individual difference evidence rolls back failed SELECT to savepoint and commits source invalidation"
+  ],
+  "limitations": [
+    "Synthetic units, coverage and physical clearance only; no productive data or runtime route"
+  ]
+}
