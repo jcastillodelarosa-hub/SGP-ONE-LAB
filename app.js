@@ -2074,7 +2074,7 @@ window.SGPWeeklyPhysicalProgress=async({weeks,year=new Date().getFullYear(),line
  const [base]=await Promise.all([readBase(),physicalPending||Promise.resolve()]);
  if(token!==getAppToken()||revision!==physicalRevision)throw new Error('Datos de avance obsoletos');
  const data=physicalSnapshot.data;
- if(!base.some(p=>p.id_linea===line&&Number(p.anio)===year&&weeks.includes(Number(p.semana_actual??p.semana_base)))&&data.schedule.some(s=>Number(String(s.fecha_programacion||'').slice(0,4))===year&&data.links.some(l=>l.id_linea===line&&String(l.reserva)===String(s.reserva)&&weeks.includes(Number(l.semana_produccion)))))throw new Error('La base devolvió cero pese a relaciones productivas del alcance; revisar acceso y contrato de la RPC');
+ if(!base.some(p=>p.id_linea===line&&Number(p.anio)===year&&weeks.includes(Number(p.semana_base)))&&data.schedule.some(s=>Number(String(s.fecha_programacion||'').slice(0,4))===year&&data.links.some(l=>l.id_linea===line&&String(l.reserva)===String(s.reserva)&&weeks.includes(Number(l.semana_produccion)))))throw new Error('La base devolvió cero pese a relaciones productivas del alcance; revisar acceso y contrato de la RPC');
  return basePhysicalProgress({...data,base},{weeks,year,line,system});
 };
 window.SGPWeeklyAnchor=()=>progCalendarAnchor;
