@@ -2,11 +2,11 @@
   "status": "PASS",
   "baseline": "06b1794b6d83574742f152b2873821830b41cf15",
   "node": {
-    "tests": 346,
-    "pass": 346,
+    "tests": 348,
+    "pass": 348,
     "fail": 0
   },
-  "new_domain_tests": 18,
+  "new_domain_tests": 20,
   "release": "LAB v362 unchanged; verify:release PASS",
   "protected_sha256": {
     "app.js": "a7ff0321faa2a79c67a06aa87ce6bf7f4c3b84f66c3b94634b5bdf8a05e148a6",

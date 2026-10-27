@@ -16,7 +16,7 @@ Sale por etapa, acumulado sustituible, correcciones auditadas, cierres/snapshots
 arrastres previos a cierre no aditivos, conciliación explícita con Export y
 bloqueos PDT independientes. No convertir piezas PDT en ventanas.
 
-Pruebas: 346/346 Node (18 nuevas), verify:release v362;
+Pruebas: 348/348 Node (20 nuevas), verify:release v362;
 PG17.11 aislado sin red/puertos: instalación fallida atómica, 7 tablas RLS,
 sin acceso navegador, etapas independientes y reversión vacía/con datos.
 Los hashes de rutas protegidas demuestran que no se cambia app/reportes/grafo,

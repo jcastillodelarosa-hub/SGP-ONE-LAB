@@ -104,3 +104,12 @@ export function reconcileExport({officialBalance,officialAccumulated,cutId,movem
  requireThat(officialBalance-pendingDelta>=0,'DISCREPANCIA_SALDO');
  return {officialBalance,officialAccumulated,cutId,projectedBalance:officialBalance-pendingDelta,status:'CONCILIADO',pendingDelta};
 }
+/** Individual report from immutable close event, never current Export or totals. */
+export function closureReport(state,slot,eventId=null){
+ slotKey(slot);const key=turnKey(slot);
+ const closures=state.events.filter(e=>e.type==='CLOSE'&&turnKey(e.command.slot)===key&&(!eventId||e.id===eventId));
+ requireThat(closures.length>0,'CIERRE_NO_ENCONTRADO');
+ const event=closures.at(-1),snapshot=event.closedSnapshots[key].snapshot;
+ return {stage:slot.stage,date:slot.date,shift:slot.shift,closeEvent:event.id,actor:{...snapshot.actor},observation:snapshot.observation,
+ rows:snapshot.rows.map(([id,s])=>({production:s.production,sale:s.sale,executed:s.execution,remaining:Math.max(0,s.sale-s.execution),variance:s.execution-s.sale,reason:snapshot.reasons[id]||''}))};
+}
