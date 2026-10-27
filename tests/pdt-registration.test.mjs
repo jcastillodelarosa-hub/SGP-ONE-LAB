@@ -22,3 +22,11 @@ test('LEGACY/V2 coexist, filter independently and retain the explicit contract i
  const csv=pdtReportCsv(rows);assert.match(csv,/"Contrato"/);assert.match(csv,/"LEGACY"/);assert.match(csv,/"V2"/);assert.match(csv,/"'=QA"/);assert.deepEqual(rows,copy);
  assert.match(pdtReportCsv([{produccion:'QA'}]),/NO INFORMADO/);
 });
+test('new V4 validator preserves direct identity checks and required audit states',async()=>{
+ const {readFile}=await import('node:fs/promises');const sql=await readFile(new URL('../docs/sql-proposals/pdt/multiorigin/02_canonical_lifecycle_REVIEW.sql',import.meta.url),'utf8');
+ const start=sql.indexOf('CREATE OR REPLACE FUNCTION sgp_pdt_multiorigen.nuevo_sgp_aluminio_pendiente_validar_detalles_v1');const end=sql.indexOf('CREATE OR REPLACE FUNCTION public.sgp_aluminio_pendiente_validar_detalles_v1',start);const validator=sql.slice(start,end);
+ assert.match(sql,/641227c7727bd9586b2ef20323a23791/);assert.doesNotMatch(sql,/f07b67e8cf194181310928b672946f8f/);
+ assert.match(validator,/FROM public.sgp_aluminio a/);assert.match(validator,/JOIN public.sgp_producciones/);assert.match(validator,/public.sgp_produccion_reservas_v/);assert.doesNotMatch(validator,/sgp_pdt_origenes_internal_v3/);
+ assert.equal((validator.match(/estado_anterior,estado_nuevo,tipo_evento/g)||[]).length,2);assert.equal((validator.match(/p_observacion,v_p.estado_repo,v_p.estado_repo,/g)||[]).length,2);
+ assert.match(sql,/es_registro_v4\(p_id\)/);assert.match(sql,/original_sgp_aluminio_pendiente_validar_detalles_v1/);
+});

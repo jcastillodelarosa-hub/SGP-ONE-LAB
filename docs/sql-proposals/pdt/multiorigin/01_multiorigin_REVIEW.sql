@@ -17,6 +17,13 @@ DO $preflight$ BEGIN
  IF (SELECT count(*) FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='public' AND p.proname='sgp_pdt_proteger_identidad_v3' AND md5(replace(p.prosrc,E'\r\n',E'\n'))='de5f18fce4ed182660170000802e6b26')<>1 THEN RAISE EXCEPTION 'PDT_DEFINICION_NO_COMPATIBLE: sgp_pdt_proteger_identidad_v3'; END IF;
  IF (SELECT count(*) FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='sgp_pdt_compat_91' AND p.proname='sgp_picking_entrega_orden' AND md5(replace(p.prosrc,E'\r\n',E'\n'))='fa56f3c686ced0b3b77c55f50daa83ac')<>1 THEN RAISE EXCEPTION 'PDT_DEFINICION_NO_COMPATIBLE: sgp_picking_entrega_orden'; END IF;
  IF to_regnamespace('sgp_pdt_multiorigen') IS NOT NULL THEN RAISE EXCEPTION 'PDT_MULTIORIGEN_YA_INSTALADO'; END IF;
+ IF (SELECT count(*) FROM pg_attribute WHERE attrelid='public.sgp_aluminio_pendientes_historial'::regclass AND attname IN ('estado_anterior','estado_nuevo') AND atttypid='text'::regtype AND NOT attisdropped)<>2 THEN RAISE EXCEPTION 'PDT_HISTORIAL_CONTRATO_INCOMPATIBLE'; END IF;
+ -- Unknown mandatory audit columns must not be discovered after deployment.
+ IF EXISTS(SELECT 1 FROM pg_attribute a WHERE a.attrelid='public.sgp_aluminio_pendientes_historial'::regclass
+ AND a.attnum>0 AND NOT a.attisdropped AND a.attnotnull AND NOT a.atthasdef
+ AND a.attidentity='' AND a.attgenerated=''
+ AND a.attname NOT IN ('id_pendiente','usuario','observacion','estado_anterior','estado_nuevo','tipo_evento','datos_anteriores','datos_nuevos'))
+ THEN RAISE EXCEPTION 'PDT_HISTORIAL_COLUMNA_OBLIGATORIA_DESCONOCIDA'; END IF;
 END $preflight$;
 CREATE SCHEMA sgp_pdt_multiorigen;
 REVOKE ALL ON SCHEMA sgp_pdt_multiorigen FROM PUBLIC,anon,authenticated;
@@ -117,8 +124,8 @@ BEGIN
  INSERT INTO public.sgp_aluminio_pendiente_ncs(id_pendiente,consecutivo,enlazado_por,snapshot) VALUES(id,snap->>'consecutivo',actor,snap);
  END IF;
  END IF;
- INSERT INTO public.sgp_aluminio_pendientes_historial(id_pendiente,usuario,tipo_evento,datos_nuevos)
- VALUES(id,actor,'REGISTRO_MULTIORIGEN_V4',jsonb_build_object('origen',p_origen,'id_evento',p_evento,'id_entrega',p_entrega,'fuente',ctx,'nc',nc));
+ INSERT INTO public.sgp_aluminio_pendientes_historial(id_pendiente,usuario,estado_anterior,estado_nuevo,tipo_evento,datos_nuevos)
+ VALUES(id,actor,NULL,'PENDIENTE','REGISTRO_MULTIORIGEN_V4',jsonb_build_object('origen',p_origen,'id_evento',p_evento,'id_entrega',p_entrega,'fuente',ctx,'nc',nc));
  ids:=ids||jsonb_build_array(id);
  END LOOP;
  RETURN jsonb_build_object('ok',true,'contract_version',4,'ids_pendientes',ids);

@@ -35,7 +35,7 @@ def results(sql,ids):
   out[state]={}
   for name,call in calls.items():
    # Subtransaction always rolled back, including successful explicit preparation.
-   query="""BEGIN;CREATE FUNCTION pg_temp.qa_capture() RETURNS jsonb LANGUAGE plpgsql AS $body$
+   query="""BEGIN;ALTER TABLE sgp_aluminio_pendientes_historial ALTER COLUMN estado_nuevo SET NOT NULL;CREATE FUNCTION pg_temp.qa_capture() RETURNS jsonb LANGUAGE plpgsql AS $body$
 DECLARE result jsonb; snapshot jsonb; BEGIN
  BEGIN
  SELECT to_jsonb(q.v) INTO result FROM (SELECT """+call+""" v) q;

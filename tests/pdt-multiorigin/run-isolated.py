@@ -41,12 +41,25 @@ install=(D/'01_multiorigin_REVIEW.sql').read_text()
 r=psql(db,install.replace('COMMIT;','SELECT 1/0;COMMIT;'));assert r.returncode
 assert sql("SELECT to_regnamespace('sgp_pdt_multiorigen') IS NULL")=='t'
 sql(install)
-cycle=(D/'02_canonical_lifecycle_REVIEW.sql').read_text()
+production_script=(D/'02_canonical_lifecycle_REVIEW.sql').read_text()
+production_hash='641227c7727bd9586b2ef20323a23791'
+assert production_hash in production_script and 'f07b67e8cf194181310928b672946f8f' not in production_script
+# The complete productive body was not attached. Never label a reconstruction
+# as the real function or forge its digest. The unchanged production installer
+# MUST reject this synthetic function. Inject its own pin only in memory for QA.
+r=psql(db,production_script);assert r.returncode and 'PDT_CICLO_DEFINICION_CAMBIADA' in r.stderr
+fixture_hash=sql("SELECT md5(prosrc) FROM pg_proc WHERE oid='public.sgp_aluminio_pendiente_validar_detalles_v1(text,uuid,jsonb,text,text)'::regprocedure")
+cycle=production_script.replace(production_hash,fixture_hash)
+
 # Incompatible real/body/config must stop installation, never be overwritten.
 changed=cycle.replace('BEGIN;',"BEGIN;ALTER FUNCTION public.sgp_aluminio_pendiente_validar_detalles_v1(text,uuid,jsonb,text,text) SECURITY INVOKER;",1)
 r=psql(db,changed);assert r.returncode and 'PDT_CICLO_SEGURIDAD_DISTINTA' in r.stderr
 changed=cycle.replace('BEGIN;',"BEGIN;DO $change$ DECLARE f text;BEGIN SELECT pg_get_functiondef('public.sgp_aluminio_pendiente_validar_detalles_v1(text,uuid,jsonb,text,text)'::regprocedure) INTO f;EXECUTE replace(f,'DECLARE',E'DECLARE -- QA different real body\\n');END $change$;",1)
 r=psql(db,changed);assert r.returncode and 'PDT_CICLO_DEFINICION_CAMBIADA' in r.stderr
+changed=cycle.replace('BEGIN;',"BEGIN;ALTER TABLE sgp_aluminio_pendientes_historial ADD COLUMN qa_obligatoria text NOT NULL DEFAULT 'QA';ALTER TABLE sgp_aluminio_pendientes_historial ALTER COLUMN qa_obligatoria DROP DEFAULT;",1)
+r=psql(db,changed);assert r.returncode and 'PDT_HISTORIAL_COLUMNA_OBLIGATORIA_DESCONOCIDA' in r.stderr
+changed=cycle.replace('BEGIN;',"BEGIN;ALTER TABLE sgp_aluminio_pendientes_historial RENAME COLUMN estado_nuevo TO qa_estado;",1)
+r=psql(db,changed);assert r.returncode and 'PDT_HISTORIAL_CONTRATO_INCOMPATIBLE' in r.stderr
 r=psql(db,cycle.replace('COMMIT;','SELECT 1/0;COMMIT;'));assert r.returncode
 assert sql('SELECT count(*) FROM sgp_pdt_multiorigen.funciones_previas')=='0'
 sql(cycle)
@@ -56,7 +69,7 @@ legacy.unchanged(sql)
 (ROOT/'tests/pdt-multiorigin/evidence/legacy.json').write_text(json.dumps({'status':'PASS','states':list(after_legacy),'operations_per_state':8,'before_equals_after':True,'rows_and_history_unchanged':True,'actual_production_validator_available':False,'matrix':after_legacy},indent=2)+'\n')
 rollback=(D/'ROLLBACK_REVIEW.sql').read_text()
 sql(rollback.replace('COMMIT;','ROLLBACK;'))
-report=['Old name/week-only delivery reproduces PDT_CLAVE_NO_CORRESPONDE_A_MAESTRO and rolls back','Installation failure rolls back all new objects','LEGACY open/validated/with movements/closed: 32 operations identical before/after; rows and history unchanged','Different validator body or SECURITY INVOKER rejected before any lifecycle replacement']
+report=['Old name/week-only delivery reproduces PDT_CLAVE_NO_CORRESPONDE_A_MAESTRO and rolls back','Installation failure rolls back all new objects','LEGACY open/validated/with movements/closed: 32 operations identical before/after; rows and history unchanged','Different validator body or SECURITY INVOKER rejected before any lifecycle replacement','Missing estado_nuevo or unknown mandatory audit column aborts installation atomically']
 ctx={'id_programacion':'00000000-0000-0000-0000-000000000001','produccion':'QA ORDER','completa':False,'fecha_entrega':'2026-10-26','turno':'TURNO 1','key_produccion':'QA|PANELES_2','reserva':'SHARED'}
 source={'id_pieza':'P1','key_produccion':'QA|PANELES_2','reserva':'SHARED','reserva_principal':'R','perfil':'PANEL-REF','fabricacion':'E17','longitud':100,'acabado':'DS','cantidad':1,'nc':''}
 def lit(x):return "'"+json.dumps(x).replace("'","''")+"'::jsonb"
@@ -79,6 +92,13 @@ check('Same piece in independent origins remains independent',"PERFORM "+call()+
 check('Complete deliveries preserve existing RPC/duplicate trigger and have no PDT',"r:="+call(context={**ctx,'completa':True},pieces=[])+";"+reject(call(context={**ctx,'completa':True},pieces=[],key='10000000-0000-0000-0000-000000000002'),'ENTREGA_COMPLETA_YA_REGISTRADA')+"IF (SELECT count(*) FROM sgp_aluminio_pendientes)<>"+baseline+" THEN RAISE EXCEPTION 'FAKE_PDT';END IF;")
 check('Existing NC can be linked later using unchanged RPC',"INSERT INTO sgp_nc_aluminio(consecutivo,cod_nc,activo) VALUES('QA-NC','ALIAS',true);r:="+call()+";id:=(r->'ids_pendientes'->>0)::uuid;PERFORM sgp_aluminio_pendiente_nc_vincular_v1('PATINADOR',id,ARRAY['ALIAS']);IF NOT EXISTS(SELECT 1 FROM sgp_aluminio_pendiente_ncs WHERE id_pendiente=id AND consecutivo='QA-NC') THEN RAISE EXCEPTION 'LINK_FAILED';END IF;")
 check('LEGACY creation and historical annotation stay unchanged',"id:=sgp_aluminio_pendiente_crear('COORDINADOR','R','QA ORDER','PANEL-REF',1,100,'PRODUCCION','QA','QA','QA|PANELES_2','R','DS');UPDATE sgp_aluminio_pendientes SET observacion='QA unchanged legacy path' WHERE id_pendiente=id;IF (SELECT contrato_pdt FROM sgp_aluminio_pendientes WHERE id_pendiente=id)<>'LEGACY' THEN RAISE EXCEPTION 'LEGACY_MIGRATED';END IF;")
+check('Registration and both validation history events satisfy real estado_nuevo NOT NULL',"""UPDATE sgp_aluminio_pendientes_historial SET estado_nuevo='QA historical state' WHERE estado_nuevo IS NULL;
+ ALTER TABLE sgp_aluminio_pendientes_historial ALTER COLUMN estado_nuevo SET NOT NULL;
+ r:="""+call()+""";id:=(r->'ids_pendientes'->>0)::uuid;
+ PERFORM sgp_aluminio_pendiente_validar_detalles_v1('COORDINADOR',id,'[{"id_pieza":"P1","fabricacion":"E17","longitud":100,"acabado":"DS","cantidad":1}]','SHARED',NULL);
+ IF (SELECT count(*) FROM sgp_aluminio_pendientes_historial WHERE id_pendiente=(r->'ids_pendientes'->>0)::uuid AND tipo_evento IN ('REGISTRO_MULTIORIGEN_V4','VALIDACION_PDT','VALIDACION_DETALLES_PDT') AND estado_nuevo='PENDIENTE')<>3 THEN RAISE EXCEPTION 'HISTORY_MISSING_STATE';END IF;
+ IF (SELECT estado_repo FROM sgp_aluminio_pendientes WHERE id_pendiente=id)<>'PENDIENTE' THEN RAISE EXCEPTION 'VALIDATION_CHANGED_PHYSICAL_STATE';END IF;
+""")
 check('New V2 remains compatible with existing distribution and guards',"r:="+call()+";id:=(r->'ids_pendientes'->>0)::uuid;PERFORM sgp_aluminio_pendiente_validar_detalles_v1('COORDINADOR',id,'[{\"id_pieza\":\"P1\",\"fabricacion\":\"E17\",\"longitud\":100,\"acabado\":\"DS\",\"cantidad\":1}]','SHARED',NULL);IF (SELECT validacion_estado FROM sgp_aluminio_pendientes WHERE id_pendiente=id)<>'VALIDADO' THEN RAISE EXCEPTION 'VALIDATION_FAILED';END IF;")
 check('Same reference/fabrication in another production is never a global collision',"INSERT INTO sgp_producciones(key_produccion,id,id_linea,produccion,sistema) VALUES('OTHER|PANELES_2','OTHER','PANELES_2','OTHER ORDER','ES');INSERT INTO qa_reservas VALUES('OTHER|PANELES_2','SHARED','DS','OTHER ORDER','R',true,44);INSERT INTO sgp_aluminio SELECT 'OTHER-P1',id_carga,fila_origen,'OTHER|PANELES_2','OTHER ORDER',codigo_sap,sistema,activo,tipo_pieza,fabricacion,longitud,acabado,cantidad,marca,uso FROM sgp_aluminio WHERE id_pieza='P1';r:="+call()+";"+reject(call(pieces=[{**source,'id_pieza':'OTHER-P1'}],key='10000000-0000-0000-0000-000000000002'),'PDT_PIEZA_NO_CORRESPONDE_AL_CONTEXTO'))
 check('Canonical remapped PANEL can validate/process/assign/close within a partially delivered order',"""UPDATE sgp_aluminio SET key_produccion='QA|FRAMES_2' WHERE id_pieza='P1';
@@ -114,5 +134,5 @@ assert sql('SELECT count(*) FROM sgp_pdt_multiorigen.eventos')=='1'
 assert sql('SELECT count(*) FROM sgp_picking_entregas')=='1'
 assert sql("SELECT has_function_privilege('anon','sgp_pdt_registrar_v4(text,text,jsonb,jsonb,uuid)','EXECUTE')")=='f'
 report.append('Code rollback proven before events; later rollback rejects downgrade, containment blocks new registration preserving events/PDTs/deliveries')
-output={'status':'PASS','postgres':sql('SHOW server_version'),'database':db,'network':'none; no exposed ports','checks':report,'limitations':['PANEL underlying listing is a fixture, not a live Supabase call','Captured source/auth definitions reused in fresh synthetic schema; current productive fingerprints pending review','No production data or migration executed']}
+output={'status':'PASS','postgres':sql('SHOW server_version'),'database':db,'network':'none; no exposed ports','checks':report,'limitations':['PANEL underlying listing is a fixture, not a live Supabase call','Captured source/auth definitions reused in fresh synthetic schema; current productive fingerprints pending review','Official installer rejects synthetic fingerprint; only in-memory fixture pin used for positive isolated tests','Production fingerprint and functional differences supplied by owner/ChatGPT; full productive validator body not attached','No production data or migration executed']}
 (ROOT/'tests/pdt-multiorigin/evidence/sql.json').write_text(json.dumps(output,indent=2)+'\n');print(json.dumps(output,indent=2))

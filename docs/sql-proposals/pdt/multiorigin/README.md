@@ -1,5 +1,60 @@
 # PDT v2 multiorigen — revisión antes de instalar
 
+## Corrección final PR116 — contrato productivo reportado (2026-10-27)
+
+**Estado vigente: corregido y pendiente de revisión final, sin aplicación ni publicación.**
+La huella productiva `641227c7727bd9586b2ef20323a23791` y las diferencias funcionales
+fueron confirmadas por el propietario/ChatGPT mediante consulta directa. Esta nota
+supera las solicitudes de archivo y el bloqueo por ausencia de huella indicados
+más abajo; NO se solicita otra consulta ni reexportar los siete contratos.
+El cuerpo completo no se adjuntó: no se presenta la reconstrucción QA como export
+productivo exacto ni se afirma haber consultado Supabase desde esta sesión.
+
+Corrección funcional (no solo de huella):
+
+- El validador para nuevos V2 multiorigen comprueba la fuente **directamente** en
+  sgp_aluminio, sgp_producciones, sgp_produccion_reservas_v y maestro PANEL activo.
+  No depende de sgp_pdt_origenes_internal_v3 para validar el detalle. Preserva ID
+  físico, producción/reserva, acabado, referencia, fabricación, longitud y sistema.
+- Una clave de carga FRAME solo puede corresponder al destino PANEL si comparten
+  ID base verificable y existe un único PANEL canónico; no se cruza por nombre.
+  El caso normal de clave PANEL mantiene la misma comprobación directa.
+- Ambos eventos VALIDACION_PDT y VALIDACION_DETALLES_PDT insertan estado_anterior
+  y estado_nuevo iguales a la etapa física previa: validar no mueve el PDT.
+  El registro inicial v4 también informa estado_nuevo=PENDIENTE.
+- 01/02 comprueban las columnas de auditoría y abortan ante una columna NOT NULL
+  desconocida sin default. No se elimina NOT NULL ni se relajan triggers/políticas.
+- El preflight de 02 exige la huella suministrada, aceptando coincidencia exacta
+  de MD5(prosrc) o MD5(pg_get_functiondef), porque no se indicó su dominio. No
+  acepta la huella antigua del repositorio. Conserva los checks de seguridad y
+  captura/copias del cuerpo realmente instalado y sus ACL de entrada.
+- LEGACY y V2 anteriores sin ledger v4 siguen delegando al cuerpo instalado
+  original; solo los nuevos V2 multiorigen usan la implementación corregida.
+  No hay migración histórica ni preparación individual automática.
+
+Pruebas vigentes: **328/328 Node**, **29 comprobaciones SQL PG17.11 aisladas**,
+**32 operaciones LEGACY antes/después**, con estado_nuevo NOT NULL durante la
+matriz. Los LEGACY abiertos/validados/con historial/cerrados conservan datos,
+resultados y rechazos. Se prueba registro + ambas validaciones con NOT NULL,
+rollback de instalación, columna ausente/obligatoria desconocida, aislamiento
+LEGACY/V2, concurrencia, reversión/contención y ciclo nuevo hasta cierre.
+PC/tableta/móvil anteriores se reutilizan: este ajuste no cambia interfaz.
+
+La prueba positiva aislada usa una huella **solo en memoria** de la reconstrucción
+QA (consulta directa y auditoría corregida). El archivo de instalación versionado
+mantiene la huella productiva intacta y se demuestra que rechaza el cuerpo
+sintético. Esto no es prueba de que el preflight ya pasó en producción.
+
+Instalación futura, solo tras aprobación: comprobar destino LAB y preflight,
+instalar 01/02 en una transacción revisada, verificar historial/contratos, publicar
+frontend después y realizar recorrido controlado. Ante discrepancia: ROLLBACK.
+Las copias previas permiten reversión de código sin eventos; con eventos nuevos,
+no degradar lectores/cierre: usar contención y corrección hacia delante. No
+restaurar datos sobre escrituras posteriores. Las pruebas no aplicaron SQL real.
+
+Las cifras y solicitudes anteriores se conservan como historial del PR.
+
+
 Estado: IMPLEMENTADO EN RAMA / VERIFICADO LOCALMENTE con datos sintéticos.
 NO APLICADO EN SUPABASE por este trabajo; NO PUBLICADO.
 Base: main `1a0deae41e3446efde3901932cda90ed73ab4d0d` (LAB v361).

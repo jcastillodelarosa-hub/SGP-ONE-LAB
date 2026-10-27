@@ -1,3 +1,38 @@
+# PR116 — corrección final de historial y contrato productivo reportado
+
+Fecha Colombia: 2026-10-27T05:15:13.387476-05:00.
+Rama feat/pdt-v2-multiorigin / PR116 Draft / LAB v362 propuesta.
+Main de referencia 1a0deae41e3446efde3901932cda90ed73ab4d0d, sin modificación.
+
+El propietario/ChatGPT confirmó huella 641227c7727bd9586b2ef20323a23791 y diferencias
+reales: validación directa de fuentes y estado_nuevo en historial. Se corrigieron
+ambos puntos en 02; el registro inicial de 01 también informa estado_nuevo.
+Validador nuevo usa tablas directas y maestro PANEL con identidad exacta; las
+cargas de clave FRAME requieren ID base común y destino PANEL único verificable.
+Ambas validaciones conservan la etapa física en estado_anterior/estado_nuevo.
+Preflight revisa columnas obligatorias, seguridad y huella reportada; captura
+el cuerpo instalado original, sin sustituirlo para LEGACY ni V2 preexistentes.
+No migración masiva ni individual automática. Reversión y contención preservadas.
+
+328/328 Node, verify:release y 29 comprobaciones PG17.11 aisladas; matriz LEGACY
+32 operaciones idénticas antes/después con estado_nuevo NOT NULL, datos/historial
+intactos. Instalación falla atómicamente ante cuerpo/seguridad/columnas distintos.
+No se repite visual PC/tableta/móvil: no hay cambio de interfaz en este ajuste.
+
+Se supera el bloqueo histórico por falta de huella; no volver a solicitar las
+consultas anteriores. No se adjuntó cuerpo productivo íntegro ni se consultó
+Supabase en esta sesión: QA reconstruye los contratos reportados, nunca falsifica
+su hash. El instalador oficial rechaza la fixture; el pin QA positivo se inyecta
+solo en memoria. No afirmar que el preflight pasó ya en producción.
+
+IMPLEMENTADO EN RAMA / VERIFICADO LOCALMENTE / PENDIENTE REVISIÓN FINAL.
+NO APLICADO EN SUPABASE, NO FUSIONADO, NO PUBLICADO por este trabajo.
+Siguiente paso: revisión de ChatGPT del mismo PR116 y los SQL antes de autorizar
+aplicación/publicación. Evidencias: tests/pdt-multiorigin/evidence; contrato y orden
+actualizados en docs/sql-proposals/pdt/multiorigin/README.md.
+
+---
+
 # PR116 — refuerzo de convivencia LEGACY/V2
 
 Fecha Colombia: 2026-10-27T04:55:39.448247-05:00.

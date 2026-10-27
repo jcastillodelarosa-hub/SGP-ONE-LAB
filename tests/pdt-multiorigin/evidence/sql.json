@@ -1,13 +1,14 @@
 {
   "status": "PASS",
   "postgres": "17.11 (Debian 17.11-1.pgdg13+2)",
-  "database": "sgp_multiorigin_qa_1793094837789612511",
+  "database": "sgp_multiorigin_qa_1793096046581767027",
   "network": "none; no exposed ports",
   "checks": [
     "Old name/week-only delivery reproduces PDT_CLAVE_NO_CORRESPONDE_A_MAESTRO and rolls back",
     "Installation failure rolls back all new objects",
     "LEGACY open/validated/with movements/closed: 32 operations identical before/after; rows and history unchanged",
     "Different validator body or SECURITY INVOKER rejected before any lifecycle replacement",
+    "Missing estado_nuevo or unknown mandatory audit column aborts installation atomically",
     "PATINADOR: valid shared PANEL -> V2, no NC, real source/key/principal preserved",
     "ENSAMBLE rejects blank NC",
     "ENSAMBLE rejects blank NC",
@@ -24,6 +25,7 @@
     "Complete deliveries preserve existing RPC/duplicate trigger and have no PDT",
     "Existing NC can be linked later using unchanged RPC",
     "LEGACY creation and historical annotation stay unchanged",
+    "Registration and both validation history events satisfy real estado_nuevo NOT NULL",
     "New V2 remains compatible with existing distribution and guards",
     "Same reference/fabrication in another production is never a global collision",
     "Canonical remapped PANEL can validate/process/assign/close within a partially delivered order",
@@ -35,6 +37,8 @@
   "limitations": [
     "PANEL underlying listing is a fixture, not a live Supabase call",
     "Captured source/auth definitions reused in fresh synthetic schema; current productive fingerprints pending review",
+    "Official installer rejects synthetic fingerprint; only in-memory fixture pin used for positive isolated tests",
+    "Production fingerprint and functional differences supplied by owner/ChatGPT; full productive validator body not attached",
     "No production data or migration executed"
   ]
 }

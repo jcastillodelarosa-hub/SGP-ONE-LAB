@@ -1,4 +1,5 @@
--- OPTIONAL REVIEW ONLY — BLOCKED pending current productive validator definition.
+-- OPTIONAL REVIEW ONLY — productive validator fingerprint supplied by owner/ChatGPT.
+-- 641227c7727bd9586b2ef20323a23791 is checked against definition/body, never trusted as a fixture hash.
 -- Scoped to new V4-ledger V2 only; LEGACY and pre-existing V2 delegate unchanged.
 BEGIN;
 DO $preflight$ BEGIN
@@ -11,10 +12,22 @@ DO $preflight$ BEGIN
  AND (p.prosecdef IS DISTINCT FROM true OR pg_get_userbyid(p.proowner)<>'postgres' OR p.proconfig IS DISTINCT FROM ARRAY['search_path=""']))
  THEN RAISE EXCEPTION 'PDT_CICLO_SEGURIDAD_DISTINTA'; END IF;
  IF (SELECT md5(prosrc) FROM pg_proc WHERE oid='public.sgp_pdt_fuentes_v2(text,uuid)'::regprocedure)<>'c20c8f375798982befd91a67cc0c0de4' THEN RAISE EXCEPTION 'PDT_CICLO_DEFINICION_CAMBIADA: sgp_pdt_fuentes_v2'; END IF;
- IF (SELECT md5(prosrc) FROM pg_proc WHERE oid='public.sgp_aluminio_pendiente_validar_detalles_v1(text,uuid,jsonb,text,text)'::regprocedure)<>'f07b67e8cf194181310928b672946f8f' THEN RAISE EXCEPTION 'PDT_CICLO_DEFINICION_CAMBIADA: sgp_aluminio_pendiente_validar_detalles_v1'; END IF;
+ IF NOT EXISTS(SELECT 1 FROM pg_proc WHERE oid='public.sgp_aluminio_pendiente_validar_detalles_v1(text,uuid,jsonb,text,text)'::regprocedure
+ AND '641227c7727bd9586b2ef20323a23791' IN (md5(prosrc),md5(pg_get_functiondef(oid))))
+ THEN RAISE EXCEPTION 'PDT_CICLO_DEFINICION_CAMBIADA: sgp_aluminio_pendiente_validar_detalles_v1'; END IF;
+ -- Required history columns/types are checked before changing any function.
+ IF (SELECT count(*) FROM pg_attribute WHERE attrelid='public.sgp_aluminio_pendientes_historial'::regclass
+ AND attname IN ('estado_anterior','estado_nuevo') AND atttypid='text'::regtype AND NOT attisdropped)<>2
+ THEN RAISE EXCEPTION 'PDT_HISTORIAL_CONTRATO_INCOMPATIBLE'; END IF;
  IF (SELECT md5(prosrc) FROM pg_proc WHERE oid='public.sgp_pdt_entrega_registrar_v2(text,uuid,uuid,integer,uuid)'::regprocedure)<>'ae9345ecee5dc46195774dbbce58468c' THEN RAISE EXCEPTION 'PDT_CICLO_DEFINICION_CAMBIADA: sgp_pdt_entrega_registrar_v2'; END IF;
  IF (SELECT md5(prosrc) FROM pg_proc WHERE oid='public.sgp_pdt_cierre_acreditado(uuid)'::regprocedure)<>'e7106b3fb8b5c78d8eca938556352bd1' THEN RAISE EXCEPTION 'PDT_CICLO_DEFINICION_CAMBIADA: sgp_pdt_cierre_acreditado'; END IF;
  IF (SELECT md5(prosrc) FROM pg_proc WHERE oid='public.sgp_pdt_picking_v2(text,uuid)'::regprocedure)<>'656af05b7edba188cca0003074ac2ea2' THEN RAISE EXCEPTION 'PDT_CICLO_DEFINICION_CAMBIADA: sgp_pdt_picking_v2'; END IF;
+ -- Unknown mandatory audit columns must not be discovered after deployment.
+ IF EXISTS(SELECT 1 FROM pg_attribute a WHERE a.attrelid='public.sgp_aluminio_pendientes_historial'::regclass
+ AND a.attnum>0 AND NOT a.attisdropped AND a.attnotnull AND NOT a.atthasdef
+ AND a.attidentity='' AND a.attgenerated=''
+ AND a.attname NOT IN ('id_pendiente','usuario','observacion','estado_anterior','estado_nuevo','tipo_evento','datos_anteriores','datos_nuevos'))
+ THEN RAISE EXCEPTION 'PDT_HISTORIAL_COLUMNA_OBLIGATORIA_DESCONOCIDA'; END IF;
 END $preflight$;
 -- No shared replacement body applies to LEGACY or previously installed V2.
 -- Only freshly reported V2 rows in this feature's private ledger opt into it.
@@ -97,10 +110,27 @@ BEGIN
   IF v_total>2147483647 THEN RAISE EXCEPTION 'Cantidad fuera de rango'; END IF;
  PERFORM public.sgp_pdt_exigir_panel_v3(p_id);
   IF nullif(btrim(v_p.key_produccion),'') IS NULL THEN RAISE EXCEPTION 'Identidad producción no resuelta'; END IF;
-  SELECT count(*) INTO v_source FROM public.sgp_pdt_origenes_internal_v3(
-   coalesce(nullif(btrim(p_reserva),''),v_p.reserva),v_p.perfil,v_p.produccion,v_acab,v_key) x
-  WHERE x->>'key_produccion'=v_p.key_produccion AND x->>'tipo_pieza'='PANEL' AND x->>'id_linea'='PANELES_2'
-  AND x->>'codigo_sap'=v_p.perfil AND lower(btrim(x->>'fabricacion'))=lower(v_fab) AND (x->>'longitud')::numeric=v_long;
+  -- Direct, physical-source validation as in production. A legacy imported
+  -- source key may point at FRAME, but its base ID and PANEL master must prove
+  -- ONE matching PANEL target. No name-only match and no generic source helper.
+  SELECT count(*) INTO v_source FROM public.sgp_aluminio a
+  JOIN public.sgp_producciones origin ON origin.key_produccion=a.key_produccion
+  JOIN public.sgp_producciones prod ON prod.id=origin.id AND nullif(btrim(origin.id),'') IS NOT NULL
+  JOIN public.sgp_maestro_piezas m ON m.codigo_sap=a.codigo_sap
+  WHERE a.id_pieza=v_key AND a.activo='SI' AND a.tipo_pieza='PANEL'
+   AND m.activo='SI' AND m.tipo_pieza='PANEL' AND m.destino_productivo='PANEL'
+   AND origin.id_linea IN ('PANELES_2','FRAMES_2') AND prod.id_linea='PANELES_2'
+   AND prod.key_produccion=v_p.key_produccion
+   AND btrim(a.produccion)=btrim(v_p.produccion) AND btrim(origin.produccion)=btrim(prod.produccion)
+   AND upper(btrim(a.sistema))=upper(btrim(prod.sistema)) AND upper(btrim(origin.sistema))=upper(btrim(prod.sistema))
+   AND btrim(a.codigo_sap)=btrim(v_p.perfil)
+   AND lower(btrim(a.fabricacion))=lower(v_fab) AND a.longitud=v_long AND upper(btrim(a.acabado))=upper(v_acab)
+   AND (nullif(btrim(v_p.acabado_pendiente),'') IS NULL OR upper(btrim(a.acabado))=upper(btrim(v_p.acabado_pendiente)))
+   AND EXISTS(SELECT 1 FROM public.sgp_produccion_reservas_v r
+    WHERE r.key_produccion=prod.key_produccion AND r.reserva=coalesce(nullif(btrim(p_reserva),''),v_p.reserva)
+    AND (NOT coalesce(r.es_reserva_compartida,false) OR nullif(btrim(r.reserva_principal),'') IS NOT NULL)
+    AND (r.acabado_reserva IS NULL OR upper(btrim(r.acabado_reserva))=upper(btrim(a.acabado))))
+   AND (SELECT count(*) FROM public.sgp_producciones other WHERE other.id=origin.id AND other.id_linea='PANELES_2')=1;
   IF v_source<>1 THEN RAISE EXCEPTION 'Fuente PANEL inexistente o ambigua'; END IF;
  END LOOP;
  v_correction := v_total IS DISTINCT FROM v_p.cantidad;
@@ -119,8 +149,8 @@ BEGIN
   WHERE upper(btrim(d->>'acabado'))<>upper(v_acab_res))
  THEN RAISE EXCEPTION 'Acabado distinto al de la reserva'; END IF;
  INSERT INTO public.sgp_aluminio_pendientes_historial
- (id_pendiente,usuario,observacion,tipo_evento,datos_anteriores,datos_nuevos)
- VALUES(p_id,v_usuario,p_observacion,'VALIDACION_PDT',
+ (id_pendiente,usuario,observacion,estado_anterior,estado_nuevo,tipo_evento,datos_anteriores,datos_nuevos)
+ VALUES(p_id,v_usuario,p_observacion,v_p.estado_repo,v_p.estado_repo,'VALIDACION_PDT',
   jsonb_build_object('fabricacion',v_p.fabricacion,'longitud',v_p.longitud,
    'reserva',v_p.reserva,'acabado',v_p.acabado_pendiente,'validacion_estado',v_p.validacion_estado),
   jsonb_build_object('fabricacion',v_first->>'fabricacion','reserva',v_res,
@@ -142,8 +172,8 @@ BEGIN
   observacion_validacion=nullif(btrim(coalesce(p_observacion,'')),'')
  WHERE id_pendiente=p_id;
  INSERT INTO public.sgp_aluminio_pendientes_historial
- (id_pendiente,usuario,observacion,tipo_evento,datos_anteriores,datos_nuevos)
- VALUES(p_id,v_usuario,p_observacion,'VALIDACION_DETALLES_PDT',
+ (id_pendiente,usuario,observacion,estado_anterior,estado_nuevo,tipo_evento,datos_anteriores,datos_nuevos)
+ VALUES(p_id,v_usuario,p_observacion,v_p.estado_repo,v_p.estado_repo,'VALIDACION_DETALLES_PDT',
   jsonb_build_object('cantidad_reportada',v_p.cantidad,'fabricacion_reportada',v_p.fabricacion),
   jsonb_build_object('cantidad_validada',v_total,'correccion',v_correction,'detalles',p_detalles));
  RETURN jsonb_build_object('ok',true,'cantidad_reportada',v_p.cantidad,'cantidad_validada',v_total,'detalles',v_count);

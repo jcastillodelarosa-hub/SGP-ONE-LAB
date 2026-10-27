@@ -30,6 +30,15 @@ def prepare(root,sql):
   text=(root/'docs/sql-proposals/pdt'/path).read_text();a=text.index('CREATE OR REPLACE FUNCTION public.'+name);b=text.index('END $fn$;',a)+len('END $fn$;');sql(text[a:b])
  sql((root/'docs/sql-proposals/pdt/identity/01_creation_and_source_identity_REVIEW.sql').read_text())
  sql((root/'docs/sql-proposals/pdt/identity/02_panel_v2_identity_REVIEW.sql').read_text())
+ # Reconstruct the reported production contract features, NOT its exact body/hash.
+ # The reference validator already joins physical source/production/reserve tables.
+ # Add the two required audit states as confirmed by the owner/ChatGPT.
+ sql("""DO $fixture$ DECLARE f text;BEGIN
+ f:=pg_get_functiondef('public.sgp_aluminio_pendiente_validar_detalles_v1(text,uuid,jsonb,text,text)'::regprocedure);
+ f:=replace(f,'(id_pendiente,usuario,observacion,tipo_evento,datos_anteriores,datos_nuevos)','(id_pendiente,usuario,observacion,estado_anterior,estado_nuevo,tipo_evento,datos_anteriores,datos_nuevos)');
+ f:=replace(f,'VALUES(p_id,v_usuario,p_observacion,','VALUES(p_id,v_usuario,p_observacion,v_p.estado_repo,v_p.estado_repo,');
+ EXECUTE f;END $fixture$;""")
+
  sql("""INSERT INTO sgp_producciones(key_produccion,id,id_linea,produccion,sistema) VALUES('QA|FRAMES_2','QA','FRAMES_2','QA ORDER','ES'),('QA|PANELES_2','QA','PANELES_2','QA ORDER','ES');
  INSERT INTO qa_reservas VALUES('QA|FRAMES_2','R','DS','QA ORDER','R',true,44),('QA|PANELES_2','R','DS','QA ORDER','R',true,44),('QA|FRAMES_2','SHARED','DS','QA ORDER','R',true,44),('QA|PANELES_2','SHARED','DS','QA ORDER','R',true,44);
  INSERT INTO sgp_maestro_piezas(codigo_sap,tipo_pieza,destino_productivo,activo) VALUES('PANEL-REF','PANEL','PANEL','SI'),('FRAME-REF','FRAME','FRAME','SI');
