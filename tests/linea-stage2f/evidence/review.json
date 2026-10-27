@@ -1,0 +1,160 @@
+{
+  "generatedAtUtc": "2026-10-27T22:45:01.751Z",
+  "input": "docs/linea-etapa2f/CONFIRMACIONES_CHATGPT.json",
+  "inputSha256": "45bfe2e3f45d77e3993411bf8ff8c0e176c7bf60b19f3a9bcd1e33ea91b058d8",
+  "result": {
+    "status": "SIN_CONCILIAR",
+    "available": null,
+    "reasons": [
+      "CONTABILIDAD_PRODUCCION_NO_CERTIFICADA",
+      "VALIDACION_CONSOLIDADA_NO_CERTIFICADA",
+      "INCLUSION_EXPORT_NO_CERTIFICADA",
+      "ESCRITORES_NO_CERTIFICADOS",
+      "AMBITOS_NO_CERTIFICADOS",
+      "REGISTRO_SERVIDOR_PRODUCTIVO_NO_IMPLEMENTADO"
+    ],
+    "certificationComplete": false,
+    "authorizationDecision": null,
+    "verificationByThisSession": false,
+    "functions": [
+      {
+        "name": "sgp_previsualizar_export_diario",
+        "status": "VERIFICADO_CON_FUENTE_REAL",
+        "method": "REPORTADO_POR_CHATGPT",
+        "scope": "EXISTENCIA_Y_METADATA_REPORTADA_POR_NOMBRE",
+        "securityDefiner": true,
+        "knownExecuteGrantees": [
+          "anon",
+          "authenticated"
+        ],
+        "grantListExhaustive": false,
+        "signatureVerified": false,
+        "currentControlReview": "PENDIENTE_CUERPO_O_HUELLA_VIGENTE",
+        "securityConclusion": "NO_DEDUCIBLE_DE_SECURITY_DEFINER_O_EXECUTE"
+      },
+      {
+        "name": "sgp_aplicar_export_diario",
+        "status": "VERIFICADO_CON_FUENTE_REAL",
+        "method": "REPORTADO_POR_CHATGPT",
+        "scope": "EXISTENCIA_Y_METADATA_REPORTADA_POR_NOMBRE",
+        "securityDefiner": true,
+        "knownExecuteGrantees": [
+          "anon",
+          "authenticated"
+        ],
+        "grantListExhaustive": false,
+        "signatureVerified": false,
+        "currentControlReview": "PENDIENTE_CUERPO_O_HUELLA_VIGENTE",
+        "securityConclusion": "NO_DEDUCIBLE_DE_SECURITY_DEFINER_O_EXECUTE"
+      },
+      {
+        "name": "sgp_picking_validar_recepcion",
+        "status": "VERIFICADO_CON_FUENTE_REAL",
+        "method": "REPORTADO_POR_CHATGPT",
+        "scope": "EXISTENCIA_Y_METADATA_REPORTADA_POR_NOMBRE",
+        "securityDefiner": true,
+        "knownExecuteGrantees": [
+          "anon",
+          "authenticated"
+        ],
+        "grantListExhaustive": false,
+        "signatureVerified": false,
+        "currentControlReview": "PENDIENTE_CUERPO_O_HUELLA_VIGENTE",
+        "securityConclusion": "NO_DEDUCIBLE_DE_SECURITY_DEFINER_O_EXECUTE"
+      },
+      {
+        "name": "sgp_sesion_actual",
+        "status": "VERIFICADO_CON_FUENTE_REAL",
+        "method": "REPORTADO_POR_CHATGPT",
+        "scope": "EXISTENCIA_Y_METADATA_REPORTADA_POR_NOMBRE",
+        "securityDefiner": true,
+        "knownExecuteGrantees": [
+          "anon",
+          "authenticated"
+        ],
+        "grantListExhaustive": false,
+        "signatureVerified": false,
+        "currentControlReview": "PENDIENTE_CUERPO_O_HUELLA_VIGENTE",
+        "securityConclusion": "NO_DEDUCIBLE_DE_SECURITY_DEFINER_O_EXECUTE"
+      }
+    ],
+    "relations": [
+      {
+        "name": "sgp_export_diario_historial",
+        "status": "VERIFICADO_CON_FUENTE_REAL",
+        "method": "REPORTADO_POR_CHATGPT",
+        "confirmedColumnNames": [
+          "id_carga_diaria",
+          "key_produccion",
+          "saldo_ensamble",
+          "saldo_empaque",
+          "datos",
+          "fecha_hora"
+        ],
+        "fullDefinitionReviewed": false,
+        "typesVerified": false,
+        "foreignKeysVerified": false,
+        "pdtCoverageCertified": false
+      },
+      {
+        "name": "sgp_pdt_entrega_lineas",
+        "status": "VERIFICADO_CON_FUENTE_REAL",
+        "method": "REPORTADO_POR_CHATGPT",
+        "confirmedColumnNames": null,
+        "fullDefinitionReviewed": false,
+        "typesVerified": false,
+        "foreignKeysVerified": false,
+        "pdtCoverageCertified": false
+      }
+    ],
+    "pending": [
+      "EXPORT_CURRENT_BODIES_AND_OVERLOAD_SIGNATURES",
+      "AUTH_PICKING_CURRENT_HASH_CONTRAST",
+      "EXPORT_SEMANTICS_AND_EXPLICIT_EVENT_INCLUSION",
+      "PDT_COVERAGE_PRODUCTION_RESERVE_PART",
+      "FUNCTIONAL_CARGO_BINDINGS_AND_SCOPES",
+      "ALL_EFFECTIVE_WRITERS_LOCK_PROTOCOL"
+    ],
+    "roleProposals": [
+      {
+        "cargo": "LIDER_PICKING",
+        "versionedCandidates": [
+          "SUPERVISOR DE PICKING",
+          "LIDER LINEA",
+          "LIDER"
+        ],
+        "installedBinding": null,
+        "requiredScope": [
+          "production",
+          "stage"
+        ],
+        "source": "CODIGO_Y_CAPTURA_PREVIA_NO_EQUIVALENCIA_AUTOMATICA"
+      },
+      {
+        "cargo": "LIDER_ENSAMBLE",
+        "versionedCandidates": [
+          "LIDER LINEA",
+          "LIDER"
+        ],
+        "installedBinding": null,
+        "requiredScope": [
+          "production",
+          "stage"
+        ],
+        "source": "CODIGO_Y_CAPTURA_PREVIA_NO_EQUIVALENCIA_AUTOMATICA"
+      },
+      {
+        "cargo": "COORDINADOR",
+        "versionedCandidates": [
+          "COORDINADOR"
+        ],
+        "installedBinding": null,
+        "requiredScope": [
+          "production",
+          "stage"
+        ],
+        "source": "CODIGO_Y_CAPTURA_PREVIA_NO_AMBITO_VERIFICADO"
+      }
+    ]
+  }
+}

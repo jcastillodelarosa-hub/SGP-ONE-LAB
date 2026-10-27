@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "receivedAtUtc": "2026-10-27T22:42:03.023561+00:00",
+  "evidenceKind": "CHATGPT_REPORTED_PRODUCTION_READ_ONLY",
+  "provenance": "Confirmaciones expresas del propietario en el encargo Etapa2F; no consulta directa de esta sesión",
+  "functions": [
+    {
+      "name": "sgp_previsualizar_export_diario",
+      "exists": true,
+      "securityDefiner": true,
+      "executeGrantees": [
+        "anon",
+        "authenticated"
+      ],
+      "signature": null,
+      "currentDefinition": null,
+      "currentDefinitionMd5": null
+    },
+    {
+      "name": "sgp_aplicar_export_diario",
+      "exists": true,
+      "securityDefiner": true,
+      "executeGrantees": [
+        "anon",
+        "authenticated"
+      ],
+      "signature": null,
+      "currentDefinition": null,
+      "currentDefinitionMd5": null
+    },
+    {
+      "name": "sgp_picking_validar_recepcion",
+      "exists": true,
+      "securityDefiner": true,
+      "executeGrantees": [
+        "anon",
+        "authenticated"
+      ],
+      "signature": null,
+      "currentDefinition": null,
+      "currentDefinitionMd5": null
+    },
+    {
+      "name": "sgp_sesion_actual",
+      "exists": true,
+      "securityDefiner": true,
+      "executeGrantees": [
+        "anon",
+        "authenticated"
+      ],
+      "signature": null,
+      "currentDefinition": null,
+      "currentDefinitionMd5": null
+    }
+  ],
+  "relations": [
+    {
+      "name": "sgp_export_diario_historial",
+      "structureConfirmed": true,
+      "confirmedColumnNames": [
+        "id_carga_diaria",
+        "key_produccion",
+        "saldo_ensamble",
+        "saldo_empaque",
+        "datos",
+        "fecha_hora"
+      ],
+      "types": null,
+      "completeColumnList": false
+    },
+    {
+      "name": "sgp_pdt_entrega_lineas",
+      "structureConfirmed": true,
+      "confirmedColumnNames": null,
+      "types": null,
+      "completeColumnList": false
+    }
+  ],
+  "unverified": [
+    "grossNetSemantics",
+    "eventExportInclusion",
+    "completePdtCoverage",
+    "allWriterConcurrency",
+    "functionalCargoScopeBindings"
+  ],
+  "supabaseReadByThisSession": false
+}

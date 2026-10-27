@@ -1,0 +1,12 @@
+{
+  "status": "PASS",
+  "database": "sgp_linea_f2_qa_1793141102038578877",
+  "checks": [
+    "Delta query runs READ ONLY, bounds100 and exports keys/types only; no row values or manufactured complete coverage",
+    "Captured auth/Picking bodies not requested twice; missing Export fixture function not invented",
+    "READ ONLY forbids synthetic write; all history row hashes unchanged"
+  ],
+  "querySha256": "1d943e9ca1f3b461158ed3b4d378c3b6d9b5065e4021de62fb6af4db57e83a86",
+  "scope": "Real networkless PG17, synthetic history fields/keys/types. NOT a current Supabase query, source semantics or certification.",
+  "productionWrites": false
+}

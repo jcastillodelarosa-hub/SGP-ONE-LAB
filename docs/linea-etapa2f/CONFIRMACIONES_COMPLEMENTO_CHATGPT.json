@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "evidenceKind": "CHATGPT_REPORTED_PRODUCTION_READ_ONLY",
+  "provenance": "Ampliación comunicada por el propietario en continuación de PR132. No consulta directa de esta sesión ni export original recibido.",
+  "supabaseReadByThisSession": false,
+  "functions": [
+    {
+      "signature": "sgp_aplicar_export_diario(text,text,text,jsonb)",
+      "owner": "postgres",
+      "searchPath": "public",
+      "prosrcMd5ReportedObtained": true,
+      "prosrcMd5Value": null,
+      "currentDefinition": null,
+      "internalControlsCertified": false
+    },
+    {
+      "signature": "sgp_previsualizar_export_diario(text,text,jsonb)",
+      "owner": "postgres",
+      "searchPath": "public",
+      "prosrcMd5ReportedObtained": true,
+      "prosrcMd5Value": null,
+      "currentDefinition": null,
+      "internalControlsCertified": false
+    },
+    {
+      "signature": "sgp_picking_validar_recepcion(text,uuid,jsonb,jsonb,text)",
+      "owner": "postgres",
+      "searchPath": "public",
+      "prosrcMd5ReportedObtained": true,
+      "prosrcMd5Value": null,
+      "currentDefinition": null,
+      "internalControlsCertified": false
+    },
+    {
+      "signature": "sgp_sesion_actual(text)",
+      "owner": "postgres",
+      "searchPath": "public",
+      "prosrcMd5ReportedObtained": true,
+      "prosrcMd5Value": null,
+      "currentDefinition": null,
+      "internalControlsCertified": false
+    }
+  ],
+  "exportHistory": {
+    "name": "sgp_export_diario_historial",
+    "confirmedTypes": {
+      "id_carga_diaria": "uuid",
+      "key_produccion": "text",
+      "saldo_ensamble": "numeric",
+      "saldo_empaque": "numeric",
+      "datos": "jsonb",
+      "fecha_hora": "timestamptz"
+    },
+    "foreignKey": {
+      "column": "id_carga_diaria",
+      "referencesRelation": "sgp_cargas_diarias",
+      "referencedColumn": null
+    },
+    "completeColumnList": false
+  },
+  "pdtDeliveryLines": {
+    "name": "sgp_pdt_entrega_lineas",
+    "foreignKeyTargetRelations": [
+      "sgp_picking_entregas",
+      "sgp_aluminio_pendiente_detalles"
+    ],
+    "states": [
+      "REGISTRADA",
+      "VALIDADA",
+      "ANULADA"
+    ],
+    "positiveQuantity": true,
+    "uniqueUuidKey": true,
+    "exactConstraintDefinitionsReceived": false
+  },
+  "exportJsonSample": {
+    "sampleSize": 30,
+    "reportedKeys": [
+      "ensamblado",
+      "empacado",
+      "saldo_ensamble",
+      "saldo_empaque",
+      "cantidad",
+      "key_produccion"
+    ],
+    "rawValuesReceived": false,
+    "coverageCertified": false,
+    "accountingSemanticsCertified": false,
+    "eventInclusionCertified": false
+  },
+  "operationalAdapterAuthorizedByEvidence": false
+}
