@@ -38,7 +38,7 @@ export function basePhysicalProgress(input,{year,weeks,line='PANELES_2',system='
   if(!row.id_linea||!Number.isInteger(Number(row.anio))||!Number.isInteger(weekOf(row)))throw new Error('La base no acredita línea/año/semana');
   if(row.id_linea!==line||Number(row.anio)!==year||!chosen.has(weekOf(row)))continue;
   const key=text(row.key_produccion),q=quantity(row.cantidad);
-  records.set(key,{...row,key,system:text(row.sistema)||'SIN SISTEMA',programmed:q,received:null,processed:0,assigned:0,allocationInvalid:false});
+  records.set(key,{...row,key,system:text(row.sistema)||'SIN SISTEMA',programmed:q,received:null,partialReceiptBase:0,processed:0,assigned:0,allocationInvalid:false});
  }
  const relation=key=>shared.filter(row=>text(row.key_produccion)===key);
  const requiredReserves=p=>{
@@ -73,7 +73,7 @@ export function basePhysicalProgress(input,{year,weeks,line='PANELES_2',system='
    if(statuses.every(s=>s==='complete'))p.received=p.programmed;
    else if(statuses.every(s=>s==='pending'))p.received=0;
    else throw new Error('Material compartido con recepciones distintas: cantidad de ventanas sin conciliar');
-  }catch(error){warn(p.key,error.message);}
+  }catch(error){if(error.message.includes('Recepción parcial sin cantidad'))p.partialReceiptBase=p.programmed;warn(p.key,error.message);}
  }
  const schedules=deduplicate(schedule.filter(r=>r.tipo!=='ARRASTRE'&&!r.arrastre),r=>text(r.id_programacion),r=>JSON.stringify([r.reserva,r.sistema,r.produccion,r.cantidad_programada,r.estado,r.prioridad_semanal]));
  const byId=new Map(schedules.map(r=>[text(r.id_programacion),r]));
@@ -142,8 +142,8 @@ export function basePhysicalProgress(input,{year,weeks,line='PANELES_2',system='
  const grouped=new Map();
  for(const p of records.values()){
   if(system&&p.system!==system)continue;
-  const r=grouped.get(p.system)||{system:p.system,programmed:0,received:0,processed:0,receivedKnown:0,processedKnown:0,unresolved:0,warnings:new Set()};
-  r.programmed+=p.programmed;r.receivedKnown+=p.received??0;r.processedKnown+=p.processed??0;
+  const r=grouped.get(p.system)||{system:p.system,programmed:0,received:0,processed:0,receivedKnown:0,partialReceiptBase:0,processedKnown:0,unresolved:0,warnings:new Set()};
+  r.programmed+=p.programmed;r.receivedKnown+=p.received??0;r.partialReceiptBase+=p.partialReceiptBase;r.processedKnown+=p.processed??0;
   r.received=r.received===null||p.received===null?null:r.received+p.received;
   r.processed=r.processed===null||p.processed===null?null:r.processed+p.processed;
   if(issues.has(p.key)){r.unresolved++;for(const message of issues.get(p.key))r.warnings.add(message);}
@@ -151,6 +151,6 @@ export function basePhysicalProgress(input,{year,weeks,line='PANELES_2',system='
  }
  const finish=r=>({...r,pending:r.processed===null?null:r.programmed-r.processed,receivedPercent:pct(r.received,r.programmed),percent:pct(r.processed,r.programmed),consistent:r.unresolved===0&&r.received!==null&&r.processed!==null&&r.programmed>=r.received&&r.received>=r.processed,warnings:[...r.warnings]});
  const rows=[...grouped.values()].sort((a,b)=>a.system.localeCompare(b.system)).map(finish);
- const t=rows.reduce((a,r)=>({programmed:a.programmed+r.programmed,received:a.received===null||r.received===null?null:a.received+r.received,processed:a.processed===null||r.processed===null?null:a.processed+r.processed,receivedKnown:a.receivedKnown+r.receivedKnown,processedKnown:a.processedKnown+r.processedKnown,unresolved:a.unresolved+r.unresolved,warnings:new Set([...a.warnings,...r.warnings])}),{programmed:0,received:0,processed:0,receivedKnown:0,processedKnown:0,unresolved:0,warnings:new Set()});
+ const t=rows.reduce((a,r)=>({programmed:a.programmed+r.programmed,received:a.received===null||r.received===null?null:a.received+r.received,processed:a.processed===null||r.processed===null?null:a.processed+r.processed,receivedKnown:a.receivedKnown+r.receivedKnown,partialReceiptBase:a.partialReceiptBase+r.partialReceiptBase,processedKnown:a.processedKnown+r.processedKnown,unresolved:a.unresolved+r.unresolved,warnings:new Set([...a.warnings,...r.warnings])}),{programmed:0,received:0,processed:0,receivedKnown:0,processedKnown:0,unresolved:0,warnings:new Set()});
  const total=finish(t);return {rows,total,warnings:[...t.warnings],complete:rows.every(r=>r.consistent&&r.unresolved===0),baseCount:[...records.values()].filter(p=>!system||p.system===system).length};
 }
