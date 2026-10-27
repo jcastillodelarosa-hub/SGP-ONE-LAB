@@ -1,0 +1,37 @@
+{
+  "status": "PASS",
+  "baseline": "06b1794b6d83574742f152b2873821830b41cf15",
+  "node": {
+    "tests": 351,
+    "pass": 351,
+    "fail": 0
+  },
+  "new_domain_tests": 23,
+  "release": "LAB v362 unchanged; verify:release PASS",
+  "protected_sha256": {
+    "app.js": "a7ff0321faa2a79c67a06aa87ce6bf7f4c3b84f66c3b94634b5bdf8a05e148a6",
+    "index.html": "6abc5d8554311bfa87741aa42ddc0af808ddd757c8265bab913d2b229b69717b",
+    "styles.css": "5a4041af2967f82ea552cce81868f31375ca533ec9116001495152dcd2b70c1f",
+    "planner-operations-v326.js": "3d817d5f5d452b09296ef5877e485ac50a510dce2fdeffc9543d373312932345",
+    "planner-readonly-v326.js": "17bfc1d03a3225ab445850e1ad81d0df00defa8fea801c03163590544276c278",
+    "production-line-tabs.js": "e98e6fd68dfcbca822dc7d664a92217cc075bfa49b49ef2a61c0f53eb0af4ec3",
+    "src/domain/glass-relations-graph.js": "16770dd92f72cbaff083e34b4faaf67fd85a9a3a1377da2be0fbb3967a8f840b",
+    "src/domain/glass-explorer-insights.js": "b30117d91df1065ed87712b7e557cd70663dafb18d11a49ac87a4afb43ac0042",
+    "src/domain/glass-location-importer.js": "a1c2b961a7db50450598609c666d82b6dea712bd568ff747b7ebe0aec7761406",
+    "src/domain/production-importer.js": "ee14e558ffe77015c85392c398d18d6b8fcdbdd4d039b6ed96d71da0ee839e76",
+    "src/modules/pdt-registration-form.js": "0843cd93f6791143a3bb89dd6aa149873c10b649a045bceedec108281017604b"
+  },
+  "ui_or_runtime_integration": false,
+  "supabase_changes": false,
+  "limitations": [
+    "No authenticated Supabase metadata available; exact installed authorization/ACL not verified",
+    "Serial revision tests are not actual multi-session SQL concurrency tests",
+    "No UI or Etapa2 started",
+    "Packing quantitative evidence is synthetic; server resolver not implemented"
+  ],
+  "corrective_review": {
+    "postclosure": "explicit authorized REOPEN -> EN_REVISION -> coordinator correction with reason -> leader CLOSE; original snapshot retained",
+    "negative_projection": "preserved as DISCREPANCIA_SALDO",
+    "packing_server_resolver": "NOT IMPLEMENTED; runtime integration forbidden"
+  }
+}
