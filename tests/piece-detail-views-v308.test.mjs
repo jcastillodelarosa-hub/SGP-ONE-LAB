@@ -1,3 +1,4 @@
+import {releaseLabel} from '../scripts/build-release-info.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -63,8 +64,8 @@ test('scroll se limita al modal de piezas y no altera otros modales',()=>{
  assert.match(css,/#pieceModal \.table-wrap thead th\{position:sticky;top:0/);
  assert.match(css,/@media\(max-width:700px\)/);
  assert.ok(Number(html.match(/LAB v(\d+)/)?.[1])>=309);
- assert.match(html,/app\.js\?v=360/);
- assert.match(html,/styles\.css\?v=360/);
+ assert.match(html,new RegExp('app\\.js\\?v='+releaseLabel.match(/v(\d+)/)[1]));
+ assert.match(html,new RegExp('styles\\.css\\?v='+releaseLabel.match(/v(\d+)/)[1]));
 });
 
 test('v309 compacta Cantidad en cada vista sin alterar Detallado ni el scroll',()=>{

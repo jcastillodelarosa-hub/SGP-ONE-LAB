@@ -1,0 +1,814 @@
+{
+  "status": "PASS",
+  "states": [
+    "open",
+    "validated",
+    "with_movements",
+    "closed"
+  ],
+  "operations_per_state": 8,
+  "before_equals_after": true,
+  "rows_and_history_unchanged": true,
+  "actual_production_validator_available": false,
+  "matrix": {
+    "open": {
+      "sources": {
+        "ok": true,
+        "result": [
+          {
+            "uso": null,
+            "marca": null,
+            "acabado": "DS",
+            "cantidad": 5,
+            "id_carga": "QA",
+            "id_pieza": "P1",
+            "longitud": "100",
+            "fabricacion": "E17",
+            "fila_origen": 1
+          },
+          {
+            "uso": null,
+            "marca": null,
+            "acabado": "DS",
+            "cantidad": 4,
+            "id_carga": "QA",
+            "id_pieza": "P2",
+            "longitud": "100",
+            "fabricacion": "E17-1",
+            "fila_origen": 2
+          }
+        ],
+        "snapshot": {
+          "estado": "PENDIENTE",
+          "cantidad": 1,
+          "contrato": "LEGACY",
+          "validacion": "POR_VALIDAR",
+          "estado_repo": "PENDIENTE"
+        }
+      },
+      "traditional_validation": {
+        "ok": true,
+        "result": {
+          "ok": true,
+          "validado_por": "COORDINADOR",
+          "validacion_estado": "VALIDADO"
+        },
+        "snapshot": {
+          "estado": "PENDIENTE",
+          "cantidad": 1,
+          "contrato": "LEGACY",
+          "validacion": "VALIDADO",
+          "estado_repo": "PENDIENTE"
+        }
+      },
+      "individual_v2_preparation": {
+        "ok": true,
+        "result": {
+          "ok": true,
+          "detalles": 1,
+          "cantidad_validada": 1,
+          "cantidad_reportada": 1
+        },
+        "snapshot": {
+          "estado": "PENDIENTE",
+          "cantidad": 1,
+          "contrato": "V2",
+          "validacion": "VALIDADO",
+          "estado_repo": "PENDIENTE"
+        }
+      },
+      "followup": {
+        "ok": true,
+        "result": {
+          "ok": true,
+          "pendientes": [
+            {
+              "ncs": [],
+              "estado": "RESUELTO",
+              "perfil": "PANEL-REF",
+              "semana": "44",
+              "acabado": "DS",
+              "picking": {
+                "cobertura": "NO_VERIFICADA"
+              },
+              "reserva": "R",
+              "detalles": [],
+              "produccion": "QA ORDER",
+              "tipo_pieza": "PANEL",
+              "estado_repo": "PENDIENTE",
+              "movimientos": [],
+              "contrato_pdt": "LEGACY",
+              "id_pendiente": "01777a9a-9b51-4aae-b03c-71799c7f9c23",
+              "nc_historica": null,
+              "fecha_reporte": "2026-10-27T10:14:14.156593+00:00",
+              "key_produccion": "QA|PANELES_2",
+              "cierre_habilitado": false,
+              "validacion_estado": "VALIDADO",
+              "cantidad_reportada": 1
+            },
+            {
+              "ncs": [],
+              "estado": "PENDIENTE",
+              "perfil": "PANEL-REF",
+              "semana": "44",
+              "acabado": "DS",
+              "picking": {
+                "cobertura": "NO_VERIFICADA"
+              },
+              "reserva": "R",
+              "detalles": [],
+              "produccion": "QA ORDER",
+              "tipo_pieza": "PANEL",
+              "estado_repo": "PENDIENTE",
+              "movimientos": [],
+              "contrato_pdt": "LEGACY",
+              "id_pendiente": "3bd10584-2611-47a4-8cb1-46d436d08e05",
+              "nc_historica": null,
+              "fecha_reporte": "2026-10-27T10:14:14.156593+00:00",
+              "key_produccion": "QA|PANELES_2",
+              "cierre_habilitado": false,
+              "validacion_estado": "POR_VALIDAR",
+              "cantidad_reportada": 1
+            },
+            {
+              "ncs": [],
+              "estado": "PENDIENTE",
+              "perfil": "PANEL-REF",
+              "semana": "44",
+              "acabado": "DS",
+              "picking": {
+                "cobertura": "NO_VERIFICADA"
+              },
+              "reserva": "R",
+              "detalles": [],
+              "produccion": "QA ORDER",
+              "tipo_pieza": "PANEL",
+              "estado_repo": "CORTE",
+              "movimientos": [],
+              "contrato_pdt": "LEGACY",
+              "id_pendiente": "7570a9c7-f343-41e7-ad69-027ba296e3b9",
+              "nc_historica": null,
+              "fecha_reporte": "2026-10-27T10:14:14.156593+00:00",
+              "key_produccion": "QA|PANELES_2",
+              "cierre_habilitado": false,
+              "validacion_estado": "VALIDADO",
+              "cantidad_reportada": 1
+            },
+            {
+              "ncs": [],
+              "estado": "PENDIENTE",
+              "perfil": "PANEL-REF",
+              "semana": "44",
+              "acabado": "DS",
+              "picking": {
+                "cobertura": "NO_VERIFICADA"
+              },
+              "reserva": "R",
+              "detalles": [],
+              "produccion": "QA ORDER",
+              "tipo_pieza": "PANEL",
+              "estado_repo": "PENDIENTE",
+              "movimientos": [],
+              "contrato_pdt": "LEGACY",
+              "id_pendiente": "bd938a95-2ab2-4bda-b6bf-428852a6d39e",
+              "nc_historica": null,
+              "fecha_reporte": "2026-10-27T10:14:14.156593+00:00",
+              "key_produccion": "QA|PANELES_2",
+              "cierre_habilitado": false,
+              "validacion_estado": "VALIDADO",
+              "cantidad_reportada": 1
+            }
+          ],
+          "contract_version": 2
+        },
+        "snapshot": {
+          "estado": "PENDIENTE",
+          "cantidad": 1,
+          "contrato": "LEGACY",
+          "validacion": "POR_VALIDAR",
+          "estado_repo": "PENDIENTE"
+        }
+      },
+      "picking_reader": {
+        "ok": false,
+        "code": "P0001",
+        "error": "PDT no V2"
+      },
+      "closure_certificate": {
+        "ok": true,
+        "result": false,
+        "snapshot": {
+          "estado": "PENDIENTE",
+          "cantidad": 1,
+          "contrato": "LEGACY",
+          "validacion": "POR_VALIDAR",
+          "estado_repo": "PENDIENTE"
+        }
+      },
+      "state": {
+        "ok": false,
+        "code": "P0001",
+        "error": "PDT POR VALIDAR: debe ser validado antes de avanzar a PROCESADO"
+      },
+      "resolve": {
+        "ok": true,
+        "result": "PENDIENTE",
+        "snapshot": {
+          "estado": "RESUELTO",
+          "cantidad": 1,
+          "contrato": "LEGACY",
+          "validacion": "POR_VALIDAR",
+          "estado_repo": "PENDIENTE"
+        }
+      }
+    },
+    "validated": {
+      "sources": {
+        "ok": true,
+        "result": [
+          {
+            "uso": null,
+            "marca": null,
+            "acabado": "DS",
+            "cantidad": 5,
+            "id_carga": "QA",
+            "id_pieza": "P1",
+            "longitud": "100",
+            "fabricacion": "E17",
+            "fila_origen": 1
+          },
+          {
+            "uso": null,
+            "marca": null,
+            "acabado": "DS",
+            "cantidad": 4,
+            "id_carga": "QA",
+            "id_pieza": "P2",
+            "longitud": "100",
+            "fabricacion": "E17-1",
+            "fila_origen": 2
+          }
+        ],
+        "snapshot": {
+          "estado": "PENDIENTE",
+          "cantidad": 1,
+          "contrato": "LEGACY",
+          "validacion": "VALIDADO",
+          "estado_repo": "PENDIENTE"
+        }
+      },
+      "traditional_validation": {
+        "ok": false,
+        "code": "P0001",
+        "error": "El pendiente ya est\u00e1 VALIDADO"
+      },
+      "individual_v2_preparation": {
+        "ok": false,
+        "code": "P0001",
+        "error": "Pendiente no activo o ya validado"
+      },
+      "followup": {
+        "ok": true,
+        "result": {
+          "ok": true,
+          "pendientes": [
+            {
+              "ncs": [],
+              "estado": "RESUELTO",
+              "perfil": "PANEL-REF",
+              "semana": "44",
+              "acabado": "DS",
+              "picking": {
+                "cobertura": "NO_VERIFICADA"
+              },
+              "reserva": "R",
+              "detalles": [],
+              "produccion": "QA ORDER",
+              "tipo_pieza": "PANEL",
+              "estado_repo": "PENDIENTE",
+              "movimientos": [],
+              "contrato_pdt": "LEGACY",
+              "id_pendiente": "01777a9a-9b51-4aae-b03c-71799c7f9c23",
+              "nc_historica": null,
+              "fecha_reporte": "2026-10-27T10:14:14.156593+00:00",
+              "key_produccion": "QA|PANELES_2",
+              "cierre_habilitado": false,
+              "validacion_estado": "VALIDADO",
+              "cantidad_reportada": 1
+            },
+            {
+              "ncs": [],
+              "estado": "PENDIENTE",
+              "perfil": "PANEL-REF",
+              "semana": "44",
+              "acabado": "DS",
+              "picking": {
+                "cobertura": "NO_VERIFICADA"
+              },
+              "reserva": "R",
+              "detalles": [],
+              "produccion": "QA ORDER",
+              "tipo_pieza": "PANEL",
+              "estado_repo": "PENDIENTE",
+              "movimientos": [],
+              "contrato_pdt": "LEGACY",
+              "id_pendiente": "3bd10584-2611-47a4-8cb1-46d436d08e05",
+              "nc_historica": null,
+              "fecha_reporte": "2026-10-27T10:14:14.156593+00:00",
+              "key_produccion": "QA|PANELES_2",
+              "cierre_habilitado": false,
+              "validacion_estado": "POR_VALIDAR",
+              "cantidad_reportada": 1
+            },
+            {
+              "ncs": [],
+              "estado": "PENDIENTE",
+              "perfil": "PANEL-REF",
+              "semana": "44",
+              "acabado": "DS",
+              "picking": {
+                "cobertura": "NO_VERIFICADA"
+              },
+              "reserva": "R",
+              "detalles": [],
+              "produccion": "QA ORDER",
+              "tipo_pieza": "PANEL",
+              "estado_repo": "CORTE",
+              "movimientos": [],
+              "contrato_pdt": "LEGACY",
+              "id_pendiente": "7570a9c7-f343-41e7-ad69-027ba296e3b9",
+              "nc_historica": null,
+              "fecha_reporte": "2026-10-27T10:14:14.156593+00:00",
+              "key_produccion": "QA|PANELES_2",
+              "cierre_habilitado": false,
+              "validacion_estado": "VALIDADO",
+              "cantidad_reportada": 1
+            },
+            {
+              "ncs": [],
+              "estado": "PENDIENTE",
+              "perfil": "PANEL-REF",
+              "semana": "44",
+              "acabado": "DS",
+              "picking": {
+                "cobertura": "NO_VERIFICADA"
+              },
+              "reserva": "R",
+              "detalles": [],
+              "produccion": "QA ORDER",
+              "tipo_pieza": "PANEL",
+              "estado_repo": "PENDIENTE",
+              "movimientos": [],
+              "contrato_pdt": "LEGACY",
+              "id_pendiente": "bd938a95-2ab2-4bda-b6bf-428852a6d39e",
+              "nc_historica": null,
+              "fecha_reporte": "2026-10-27T10:14:14.156593+00:00",
+              "key_produccion": "QA|PANELES_2",
+              "cierre_habilitado": false,
+              "validacion_estado": "VALIDADO",
+              "cantidad_reportada": 1
+            }
+          ],
+          "contract_version": 2
+        },
+        "snapshot": {
+          "estado": "PENDIENTE",
+          "cantidad": 1,
+          "contrato": "LEGACY",
+          "validacion": "VALIDADO",
+          "estado_repo": "PENDIENTE"
+        }
+      },
+      "picking_reader": {
+        "ok": false,
+        "code": "P0001",
+        "error": "PDT no V2"
+      },
+      "closure_certificate": {
+        "ok": true,
+        "result": false,
+        "snapshot": {
+          "estado": "PENDIENTE",
+          "cantidad": 1,
+          "contrato": "LEGACY",
+          "validacion": "VALIDADO",
+          "estado_repo": "PENDIENTE"
+        }
+      },
+      "state": {
+        "ok": true,
+        "result": {
+          "ok": true,
+          "estado": "PROCESADO"
+        },
+        "snapshot": {
+          "estado": "PENDIENTE",
+          "cantidad": 1,
+          "contrato": "LEGACY",
+          "validacion": "VALIDADO",
+          "estado_repo": "PROCESADO"
+        }
+      },
+      "resolve": {
+        "ok": true,
+        "result": "PENDIENTE",
+        "snapshot": {
+          "estado": "RESUELTO",
+          "cantidad": 1,
+          "contrato": "LEGACY",
+          "validacion": "VALIDADO",
+          "estado_repo": "PENDIENTE"
+        }
+      }
+    },
+    "with_movements": {
+      "sources": {
+        "ok": true,
+        "result": [
+          {
+            "uso": null,
+            "marca": null,
+            "acabado": "DS",
+            "cantidad": 5,
+            "id_carga": "QA",
+            "id_pieza": "P1",
+            "longitud": "100",
+            "fabricacion": "E17",
+            "fila_origen": 1
+          },
+          {
+            "uso": null,
+            "marca": null,
+            "acabado": "DS",
+            "cantidad": 4,
+            "id_carga": "QA",
+            "id_pieza": "P2",
+            "longitud": "100",
+            "fabricacion": "E17-1",
+            "fila_origen": 2
+          }
+        ],
+        "snapshot": {
+          "estado": "PENDIENTE",
+          "cantidad": 1,
+          "contrato": "LEGACY",
+          "validacion": "VALIDADO",
+          "estado_repo": "CORTE"
+        }
+      },
+      "traditional_validation": {
+        "ok": false,
+        "code": "P0001",
+        "error": "El pendiente ya est\u00e1 VALIDADO"
+      },
+      "individual_v2_preparation": {
+        "ok": false,
+        "code": "P0001",
+        "error": "Pendiente no activo o ya validado"
+      },
+      "followup": {
+        "ok": true,
+        "result": {
+          "ok": true,
+          "pendientes": [
+            {
+              "ncs": [],
+              "estado": "RESUELTO",
+              "perfil": "PANEL-REF",
+              "semana": "44",
+              "acabado": "DS",
+              "picking": {
+                "cobertura": "NO_VERIFICADA"
+              },
+              "reserva": "R",
+              "detalles": [],
+              "produccion": "QA ORDER",
+              "tipo_pieza": "PANEL",
+              "estado_repo": "PENDIENTE",
+              "movimientos": [],
+              "contrato_pdt": "LEGACY",
+              "id_pendiente": "01777a9a-9b51-4aae-b03c-71799c7f9c23",
+              "nc_historica": null,
+              "fecha_reporte": "2026-10-27T10:14:14.156593+00:00",
+              "key_produccion": "QA|PANELES_2",
+              "cierre_habilitado": false,
+              "validacion_estado": "VALIDADO",
+              "cantidad_reportada": 1
+            },
+            {
+              "ncs": [],
+              "estado": "PENDIENTE",
+              "perfil": "PANEL-REF",
+              "semana": "44",
+              "acabado": "DS",
+              "picking": {
+                "cobertura": "NO_VERIFICADA"
+              },
+              "reserva": "R",
+              "detalles": [],
+              "produccion": "QA ORDER",
+              "tipo_pieza": "PANEL",
+              "estado_repo": "PENDIENTE",
+              "movimientos": [],
+              "contrato_pdt": "LEGACY",
+              "id_pendiente": "3bd10584-2611-47a4-8cb1-46d436d08e05",
+              "nc_historica": null,
+              "fecha_reporte": "2026-10-27T10:14:14.156593+00:00",
+              "key_produccion": "QA|PANELES_2",
+              "cierre_habilitado": false,
+              "validacion_estado": "POR_VALIDAR",
+              "cantidad_reportada": 1
+            },
+            {
+              "ncs": [],
+              "estado": "PENDIENTE",
+              "perfil": "PANEL-REF",
+              "semana": "44",
+              "acabado": "DS",
+              "picking": {
+                "cobertura": "NO_VERIFICADA"
+              },
+              "reserva": "R",
+              "detalles": [],
+              "produccion": "QA ORDER",
+              "tipo_pieza": "PANEL",
+              "estado_repo": "CORTE",
+              "movimientos": [],
+              "contrato_pdt": "LEGACY",
+              "id_pendiente": "7570a9c7-f343-41e7-ad69-027ba296e3b9",
+              "nc_historica": null,
+              "fecha_reporte": "2026-10-27T10:14:14.156593+00:00",
+              "key_produccion": "QA|PANELES_2",
+              "cierre_habilitado": false,
+              "validacion_estado": "VALIDADO",
+              "cantidad_reportada": 1
+            },
+            {
+              "ncs": [],
+              "estado": "PENDIENTE",
+              "perfil": "PANEL-REF",
+              "semana": "44",
+              "acabado": "DS",
+              "picking": {
+                "cobertura": "NO_VERIFICADA"
+              },
+              "reserva": "R",
+              "detalles": [],
+              "produccion": "QA ORDER",
+              "tipo_pieza": "PANEL",
+              "estado_repo": "PENDIENTE",
+              "movimientos": [],
+              "contrato_pdt": "LEGACY",
+              "id_pendiente": "bd938a95-2ab2-4bda-b6bf-428852a6d39e",
+              "nc_historica": null,
+              "fecha_reporte": "2026-10-27T10:14:14.156593+00:00",
+              "key_produccion": "QA|PANELES_2",
+              "cierre_habilitado": false,
+              "validacion_estado": "VALIDADO",
+              "cantidad_reportada": 1
+            }
+          ],
+          "contract_version": 2
+        },
+        "snapshot": {
+          "estado": "PENDIENTE",
+          "cantidad": 1,
+          "contrato": "LEGACY",
+          "validacion": "VALIDADO",
+          "estado_repo": "CORTE"
+        }
+      },
+      "picking_reader": {
+        "ok": false,
+        "code": "P0001",
+        "error": "PDT no V2"
+      },
+      "closure_certificate": {
+        "ok": true,
+        "result": false,
+        "snapshot": {
+          "estado": "PENDIENTE",
+          "cantidad": 1,
+          "contrato": "LEGACY",
+          "validacion": "VALIDADO",
+          "estado_repo": "CORTE"
+        }
+      },
+      "state": {
+        "ok": true,
+        "result": {
+          "ok": true,
+          "estado": "PROCESADO"
+        },
+        "snapshot": {
+          "estado": "PENDIENTE",
+          "cantidad": 1,
+          "contrato": "LEGACY",
+          "validacion": "VALIDADO",
+          "estado_repo": "PROCESADO"
+        }
+      },
+      "resolve": {
+        "ok": true,
+        "result": "PENDIENTE",
+        "snapshot": {
+          "estado": "RESUELTO",
+          "cantidad": 1,
+          "contrato": "LEGACY",
+          "validacion": "VALIDADO",
+          "estado_repo": "CORTE"
+        }
+      }
+    },
+    "closed": {
+      "sources": {
+        "ok": true,
+        "result": [
+          {
+            "uso": null,
+            "marca": null,
+            "acabado": "DS",
+            "cantidad": 5,
+            "id_carga": "QA",
+            "id_pieza": "P1",
+            "longitud": "100",
+            "fabricacion": "E17",
+            "fila_origen": 1
+          },
+          {
+            "uso": null,
+            "marca": null,
+            "acabado": "DS",
+            "cantidad": 4,
+            "id_carga": "QA",
+            "id_pieza": "P2",
+            "longitud": "100",
+            "fabricacion": "E17-1",
+            "fila_origen": 2
+          }
+        ],
+        "snapshot": {
+          "estado": "RESUELTO",
+          "cantidad": 1,
+          "contrato": "LEGACY",
+          "validacion": "VALIDADO",
+          "estado_repo": "PENDIENTE"
+        }
+      },
+      "traditional_validation": {
+        "ok": false,
+        "code": "P0001",
+        "error": "El pendiente ya no est\u00e1 activo"
+      },
+      "individual_v2_preparation": {
+        "ok": false,
+        "code": "P0001",
+        "error": "Pendiente no activo o ya validado"
+      },
+      "followup": {
+        "ok": true,
+        "result": {
+          "ok": true,
+          "pendientes": [
+            {
+              "ncs": [],
+              "estado": "RESUELTO",
+              "perfil": "PANEL-REF",
+              "semana": "44",
+              "acabado": "DS",
+              "picking": {
+                "cobertura": "NO_VERIFICADA"
+              },
+              "reserva": "R",
+              "detalles": [],
+              "produccion": "QA ORDER",
+              "tipo_pieza": "PANEL",
+              "estado_repo": "PENDIENTE",
+              "movimientos": [],
+              "contrato_pdt": "LEGACY",
+              "id_pendiente": "01777a9a-9b51-4aae-b03c-71799c7f9c23",
+              "nc_historica": null,
+              "fecha_reporte": "2026-10-27T10:14:14.156593+00:00",
+              "key_produccion": "QA|PANELES_2",
+              "cierre_habilitado": false,
+              "validacion_estado": "VALIDADO",
+              "cantidad_reportada": 1
+            },
+            {
+              "ncs": [],
+              "estado": "PENDIENTE",
+              "perfil": "PANEL-REF",
+              "semana": "44",
+              "acabado": "DS",
+              "picking": {
+                "cobertura": "NO_VERIFICADA"
+              },
+              "reserva": "R",
+              "detalles": [],
+              "produccion": "QA ORDER",
+              "tipo_pieza": "PANEL",
+              "estado_repo": "PENDIENTE",
+              "movimientos": [],
+              "contrato_pdt": "LEGACY",
+              "id_pendiente": "3bd10584-2611-47a4-8cb1-46d436d08e05",
+              "nc_historica": null,
+              "fecha_reporte": "2026-10-27T10:14:14.156593+00:00",
+              "key_produccion": "QA|PANELES_2",
+              "cierre_habilitado": false,
+              "validacion_estado": "POR_VALIDAR",
+              "cantidad_reportada": 1
+            },
+            {
+              "ncs": [],
+              "estado": "PENDIENTE",
+              "perfil": "PANEL-REF",
+              "semana": "44",
+              "acabado": "DS",
+              "picking": {
+                "cobertura": "NO_VERIFICADA"
+              },
+              "reserva": "R",
+              "detalles": [],
+              "produccion": "QA ORDER",
+              "tipo_pieza": "PANEL",
+              "estado_repo": "CORTE",
+              "movimientos": [],
+              "contrato_pdt": "LEGACY",
+              "id_pendiente": "7570a9c7-f343-41e7-ad69-027ba296e3b9",
+              "nc_historica": null,
+              "fecha_reporte": "2026-10-27T10:14:14.156593+00:00",
+              "key_produccion": "QA|PANELES_2",
+              "cierre_habilitado": false,
+              "validacion_estado": "VALIDADO",
+              "cantidad_reportada": 1
+            },
+            {
+              "ncs": [],
+              "estado": "PENDIENTE",
+              "perfil": "PANEL-REF",
+              "semana": "44",
+              "acabado": "DS",
+              "picking": {
+                "cobertura": "NO_VERIFICADA"
+              },
+              "reserva": "R",
+              "detalles": [],
+              "produccion": "QA ORDER",
+              "tipo_pieza": "PANEL",
+              "estado_repo": "PENDIENTE",
+              "movimientos": [],
+              "contrato_pdt": "LEGACY",
+              "id_pendiente": "bd938a95-2ab2-4bda-b6bf-428852a6d39e",
+              "nc_historica": null,
+              "fecha_reporte": "2026-10-27T10:14:14.156593+00:00",
+              "key_produccion": "QA|PANELES_2",
+              "cierre_habilitado": false,
+              "validacion_estado": "VALIDADO",
+              "cantidad_reportada": 1
+            }
+          ],
+          "contract_version": 2
+        },
+        "snapshot": {
+          "estado": "RESUELTO",
+          "cantidad": 1,
+          "contrato": "LEGACY",
+          "validacion": "VALIDADO",
+          "estado_repo": "PENDIENTE"
+        }
+      },
+      "picking_reader": {
+        "ok": false,
+        "code": "P0001",
+        "error": "PDT no V2"
+      },
+      "closure_certificate": {
+        "ok": true,
+        "result": false,
+        "snapshot": {
+          "estado": "RESUELTO",
+          "cantidad": 1,
+          "contrato": "LEGACY",
+          "validacion": "VALIDADO",
+          "estado_repo": "PENDIENTE"
+        }
+      },
+      "state": {
+        "ok": false,
+        "code": "P0001",
+        "error": "Pendiente no encontrado"
+      },
+      "resolve": {
+        "ok": true,
+        "result": "RESUELTO",
+        "snapshot": {
+          "estado": "RESUELTO",
+          "cantidad": 1,
+          "contrato": "LEGACY",
+          "validacion": "VALIDADO",
+          "estado_repo": "PENDIENTE"
+        }
+      }
+    }
+  }
+}

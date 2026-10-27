@@ -1,3 +1,4 @@
+import {releaseLabel} from '../scripts/build-release-info.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -32,9 +33,9 @@ test('controles evitan exportaciones concurrentes y recuperan estado tras fallar
  assert.match(css,/\.shift-report-actions button:disabled/);
 });
 test('LAB v317 identifica los recursos de la misma versión',()=>{
- assert.match(html,/LAB v360/);
- assert.match(html,/app\.js\?v=360/);
- assert.match(html,/styles\.css\?v=360/);
+ assert.match(html,new RegExp(releaseLabel));
+ assert.match(html,new RegExp('app\\.js\\?v='+releaseLabel.match(/v(\d+)/)[1]));
+ assert.match(html,new RegExp('styles\\.css\\?v='+releaseLabel.match(/v(\d+)/)[1]));
 });
 
 test('imagen no requiere biblioteca PDF y los scripts son locales',()=>{

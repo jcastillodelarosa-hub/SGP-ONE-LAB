@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {pendingFlowGuidance} from '../src/modules/pdt-flow-guidance.js';
-import {stampRelease} from '../scripts/build-release-info.mjs';
+import {stampRelease,releaseLabel} from '../scripts/build-release-info.mjs';
 const caps={contract_version:2};
 const row={contrato_pdt:'LEGACY',estado:'PENDIENTE',estado_repo:'PENDIENTE',validacion_estado:'POR_VALIDAR'};
 test('LEGACY preparation is an explicit role-scoped entry, without changing the row',()=>{
@@ -20,7 +20,7 @@ test('V2 entry remains visible for authorized read roles only, with backend capa
 test('release build stamps the exact commit; source preview never claims publication',()=>{
  const html='<span class="status" id="releaseVersion" data-release-state="preview">Vista previa</span>';
  const result=stampRelease(html,'a'.repeat(40),'2026-10-26T00:00:00Z');
- assert.equal(result.match(/>([^<]+)<\/span>/)[1],'LAB v360');assert.match(result,/data-release-commit="a{40}"/);assert.doesNotMatch(result,/preview/);
+ assert.equal(result.match(/>([^<]+)<\/span>/)[1],releaseLabel);assert.match(result,/data-release-commit="a{40}"/);assert.doesNotMatch(result,/preview/);
  assert.throws(()=>stampRelease(html,'short'));assert.throws(()=>stampRelease('', 'a'.repeat(40)));
 });
 

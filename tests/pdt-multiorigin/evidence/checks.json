@@ -1,0 +1,34 @@
+{
+  "baseline": "1a0deae41e3446efde3901932cda90ed73ab4d0d",
+  "production_changes": false,
+  "release": "LAB v362 proposed",
+  "main": {
+    "tests": 314,
+    "pass": 301,
+    "fail": 13
+  },
+  "branch": {
+    "tests": 328,
+    "pass": 328,
+    "fail": 0
+  },
+  "baseline_corrections": [
+    "11 release assertions now follow releaseLabel instead of fossilized v360",
+    "partialReceiptBase initialized to zero in total reducer; quantities and business rules unchanged"
+  ],
+  "sql_checks": 29,
+  "legacy": {
+    "states": 4,
+    "comparisons": 32,
+    "unchanged": true,
+    "production_validator_comparison": "Functional differences and fingerprint confirmed by owner/ChatGPT; full body not attached; installed original cloned by installer"
+  },
+  "production_validator": {
+    "reported_md5": "641227c7727bd9586b2ef20323a23791",
+    "provenance": "owner/ChatGPT read-only Supabase query",
+    "full_body_attached": false,
+    "official_pin_preserved": true,
+    "qa_pin": "in-memory reconstructed fixture only",
+    "history_not_null": true
+  }
+}

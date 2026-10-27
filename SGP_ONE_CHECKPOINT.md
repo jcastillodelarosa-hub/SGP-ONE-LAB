@@ -1,3 +1,106 @@
+# PR116 — corrección final de historial y contrato productivo reportado
+
+Fecha Colombia: 2026-10-27T05:15:13.387476-05:00.
+Rama feat/pdt-v2-multiorigin / PR116 Draft / LAB v362 propuesta.
+Main de referencia 1a0deae41e3446efde3901932cda90ed73ab4d0d, sin modificación.
+
+El propietario/ChatGPT confirmó huella 641227c7727bd9586b2ef20323a23791 y diferencias
+reales: validación directa de fuentes y estado_nuevo en historial. Se corrigieron
+ambos puntos en 02; el registro inicial de 01 también informa estado_nuevo.
+Validador nuevo usa tablas directas y maestro PANEL con identidad exacta; las
+cargas de clave FRAME requieren ID base común y destino PANEL único verificable.
+Ambas validaciones conservan la etapa física en estado_anterior/estado_nuevo.
+Preflight revisa columnas obligatorias, seguridad y huella reportada; captura
+el cuerpo instalado original, sin sustituirlo para LEGACY ni V2 preexistentes.
+No migración masiva ni individual automática. Reversión y contención preservadas.
+
+328/328 Node, verify:release y 29 comprobaciones PG17.11 aisladas; matriz LEGACY
+32 operaciones idénticas antes/después con estado_nuevo NOT NULL, datos/historial
+intactos. Instalación falla atómicamente ante cuerpo/seguridad/columnas distintos.
+No se repite visual PC/tableta/móvil: no hay cambio de interfaz en este ajuste.
+
+Se supera el bloqueo histórico por falta de huella; no volver a solicitar las
+consultas anteriores. No se adjuntó cuerpo productivo íntegro ni se consultó
+Supabase en esta sesión: QA reconstruye los contratos reportados, nunca falsifica
+su hash. El instalador oficial rechaza la fixture; el pin QA positivo se inyecta
+solo en memoria. No afirmar que el preflight pasó ya en producción.
+
+IMPLEMENTADO EN RAMA / VERIFICADO LOCALMENTE / PENDIENTE REVISIÓN FINAL.
+NO APLICADO EN SUPABASE, NO FUSIONADO, NO PUBLICADO por este trabajo.
+Siguiente paso: revisión de ChatGPT del mismo PR116 y los SQL antes de autorizar
+aplicación/publicación. Evidencias: tests/pdt-multiorigin/evidence; contrato y orden
+actualizados en docs/sql-proposals/pdt/multiorigin/README.md.
+
+---
+
+# PR116 — refuerzo de convivencia LEGACY/V2
+
+Fecha Colombia: 2026-10-27T04:55:39.448247-05:00.
+Rama `feat/pdt-v2-multiorigin`; PR116 Draft; LAB v362 propuesta.
+Base main sin cambios `1a0deae41e3446efde3901932cda90ed73ab4d0d`.
+
+01 continúa aditivo: nuevos PDT V2, ningún histórico migrado. 02 queda separado,
+opcional y BLOQUEADO para aplicación hasta comparar la definición productiva
+actual del validador de detalles. Ahora despacha la lógica canónica solo a V2 del
+ledger de nuevos registros; LEGACY y V2 preexistentes delegan a cuerpos originales
+clonados íntegros. Sin cambios a resolver, estado, guards ni validación tradicional.
+Filtro e informe CSV distinguen contratos, sin convertirlos ni alterar cantidades.
+
+Pruebas: 327/327 JS, 27 comprobaciones PG17 aisladas; matriz adicional
+32 operaciones LEGACY abierto/validado/con historial/cerrado idénticas antes/después,
+filas/historial preservados. Fixtures, no verificación productiva. Fuentes reales
+suministradas para estado/resolver; validador tradicional versionado en fixture.
+PC/tableta/móvil y verify:release aprobados. Evidencia tests/pdt-multiorigin/evidence.
+
+Bloqueo exacto: falta `PDT_VALIDAR_DETALLES_REAL.json` con la definición productiva
+completa y metadatos de sgp_aluminio_pendiente_validar_detalles_v1(text,uuid,jsonb,text,text).
+No está entre las siete funciones ni el complemento disponibles. No hay herramienta
+Supabase autenticada en esta sesión. Huella prosrc del repositorio no equivale a
+huella de definición real. No cambiar preflight para forzar instalación.
+
+IMPLEMENTADO EN RAMA / VERIFICADO LOCALMENTE. NO SQL productivo, fusión ni publicación.
+Siguiente paso: revisión del mismo PR116 y aportar la definición ya obtenida para
+cerrar el contraste antes de autorizar 02. No reiniciar auditorías generales.
+
+---
+
+# Continuidad vigente — PDT v2 multiorigen / LAB v362 propuesta
+
+Fecha Colombia: 2026-10-26T23:41:28.628629-05:00.
+Base main `1a0deae41e3446efde3901932cda90ed73ab4d0d` LAB v361; PR108 y PR115
+FUSIONADOS según API. Los hitos anteriores que los muestran pendientes son históricos.
+Rama independiente `feat/pdt-v2-multiorigin`; único PR Draft de esta tarea.
+
+Objetivo: corregir Picking `PDT_CLAVE_NO_CORRESPONDE_A_MAESTRO` y reutilizar un
+registro PDT en PICKING/ENSAMBLE/EMPAQUE, sin cambios productivos.
+Implementado: editor compartido, accesos por producción en los tres módulos,
+identidad canónica/maestro PANEL, NC opcional en Picking y obligatoria en los otros,
+registro transaccional con idempotencia, metadatos/filtros de seguimiento y SQL
+REVIEW fuera de migraciones automáticas. LEGACY y firmas antiguas preservados;
+la nueva ruta no retorna a sus INSERT defectuosos. READ/validación/acreditación
+conciliados por identidad y relación verificada de reserva compartida.
+
+Evidencias: 326/326 Node; 25 comprobaciones PG17.11 aislado/sintético con funciones
+suministradas, error anterior reproducido y ciclo nuevo hasta cierre, concurrencia,
+rollback y datos preservados; browser PC1440/tableta768/móvil390 con handlers reales
++ RPC sintéticas; verify:release v362 y sintaxis. Main base reproducía 13 fallos:
+se corrige inicialización de partialReceiptBase y assertions de versión fosilizadas.
+Detalle, contratos, permisos, orden/reversión: docs/sql-proposals/pdt/multiorigin/README.md.
+
+Riesgos: no acceso Supabase autenticado de planta en esta sesión; snapshots reales
+suministrados no prueban cuerpos productivos actuales. La RPC subyacente PANEL es
+fixture en QA. Preflight SQL aborta ante huellas/dependencias distintas. Revisar
+compatibilidad real antes de aplicar. Publicar frontend sin RPC nueva bloquearía
+entregas; aplicar backend validado antes de autorizar publicación. Revertir código
+no debe bloquear PDT nuevos activos; preferir corrección hacia delante.
+
+Estado: IMPLEMENTADO EN RAMA / VERIFICADO LOCALMENTE; SQL PROPUESTO PARA APLICACIÓN,
+NO APLICADO, NO PUBLICADO ni VERIFICADO EN PRODUCCIÓN por esta tarea.
+No migración productiva, Firebase, fusión, datos históricos, GOOGLE/LAC ni workflow
+manual. Único siguiente paso: revisión de ChatGPT del PR Draft y del SQL preparado.
+
+---
+
 # Continuidad vigente — Issue111 / PR108 único / estilo5 definitivo
 
 Fecha Colombia: 2026-10-26T20:01:24.255375-05:00.

@@ -2464,3 +2464,19 @@ button.active,[aria-pressed="true"]{border-color:#0865ed}
   }
   [data-mach-panel] .table-wrap { max-width: 100%; overflow-x: auto; }
 }
+
+/* Shared PDT editor; uses existing SGP dialog, form and button tokens. */
+.pdt-registration{display:grid;gap:12px;min-width:0;color:#173759}
+.pdt-registration fieldset{display:grid;gap:12px;border:1px solid #cbd8e8;border-radius:12px;padding:16px;margin:12px 0;min-width:0;background:#fff}
+.pdt-registration label{display:grid;gap:6px;min-width:0;font-weight:600}
+.pdt-registration input,.pdt-registration select,.pdt-registration textarea{width:100%;min-width:0;box-sizing:border-box;min-height:44px;color:#173759;background:#fff;border:1px solid #b7c9df;border-radius:8px;padding:10px;font:inherit}
+.pdt-registration [data-status]{padding:10px;background:#eff6ff;border-radius:8px}
+.pdt-registration button{min-height:44px}.pdt-registration small{color:#475569}
+.pdt-registration [data-remove]{justify-self:start}.pdt-registration :focus-visible{outline:3px solid #2563eb;outline-offset:2px}
+@media(max-width:600px){.pdt-registration .rec-grid{grid-template-columns:1fr}.pdt-registration fieldset{padding:10px}.pdt-registration select{max-width:100%}}
+/* Keep delivery context/actions visible while scrolling multiple PDT pieces. */
+#pickDeliveryModal .pick-delivery-card{display:flex;flex-direction:column;overflow:hidden!important}
+#pickDeliveryModal .modal-header,#pickDeliveryModal .modal-actions{flex:0 0 auto;background:#f7faff}
+#pickDeliveryModal .rec-form{min-height:0;overflow-y:auto;overscroll-behavior:contain;flex:1 1 auto}
+#pickDeliveryModal .modal-header strong,#pickDeliveryModal .modal-header small{display:block;overflow-wrap:anywhere}
+#pickDeliveryModal .modal-header small{font-size:12px;line-height:1.45;margin-top:6px}
