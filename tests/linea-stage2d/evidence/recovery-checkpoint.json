@@ -1,0 +1,25 @@
+{
+  "recoveredAtUtc": "2026-10-27T20:48:28.183259+00:00",
+  "functionalSha": "2fc09ea50fa6acb58733f25def7edd466b1acbc6",
+  "mainObserved": "ae76b3729184ff802d7adc83d8867662230d438c",
+  "pr": 127,
+  "sourceHashesMatched": {
+    "src/server/packing-resolver.js": "db91c6a8951261541b8f308519e24fae9c20704a43fe45d615c96860ffec5703",
+    "src/server/consolidated-pdt-impact.js": "f649ae977f3ae9eee56e61bfe7176ae516add90d3c6443996de6d9e059811665",
+    "src/server/consolidated-pdt-source.js": "bbe4a688eb9ee973c5285cc61462df4dca11e17aa1b2971e145bdaecc9310b3a",
+    "docs/sql-proposals/linea-etapa2d/03_consolidated_quantities_REVIEW.sql": "76a8643ce134dd9844a4a4aec9657f69acb7b9a66ef421b25ab90fe495eff8f6"
+  },
+  "testsReexecuted": false,
+  "priorResults": {
+    "node": 407,
+    "postgres": 14,
+    "adapter": 4,
+    "recovery": 3
+  },
+  "priorCiRun": 40544798563,
+  "directive31": "NO DISPONIBLE; no aplicación declarada",
+  "stage2EUncommittedFiles": "No disponibles en el /tmp anterior; no se declaran recuperados",
+  "functionalChanges": false,
+  "productionWrites": false,
+  "nextAction": "Revisión PR127; recibir Directiva v3.1 y fuentes reales pendientes"
+}

@@ -1,0 +1,35 @@
+{
+  "status": "PASS",
+  "captured_colombia": "2026-10-27T10:06:59.319338-05:00",
+  "base_pr124": "111f0cb46921198f790b6cafc0336e0ca449136c",
+  "node": {
+    "tests": 396,
+    "pass": 396,
+    "fail": 0
+  },
+  "sql_grouped_checks": {
+    "postgres": 12,
+    "adapter": 3,
+    "recovery": 6,
+    "regression-c2": 18,
+    "regression-b2": 16
+  },
+  "release": "PASS LAB v362 unchanged",
+  "syntax": "PASS new server source/PG adapter",
+  "protected_sha256": {
+    "app.js": "a7ff0321faa2a79c67a06aa87ce6bf7f4c3b84f66c3b94634b5bdf8a05e148a6",
+    "index.html": "6abc5d8554311bfa87741aa42ddc0af808ddd757c8265bab913d2b229b69717b",
+    "styles.css": "5a4041af2967f82ea552cce81868f31375ca533ec9116001495152dcd2b70c1f",
+    "config.js": "23abed136b67fb9f30b3acbfd07d59cd43940b29bd3acc3027f651b8ca09cac9",
+    "src/domain/linea-stage1.js": "25941a43bda2156e42a18b2610347862cb2f1851a292856d0d68f2e819f6722a",
+    "src/server/packing-resolver.js": "ceda48844828e34d90e9dde3296ed4514af1530634204d8ad9eb057880c2f847",
+    "src/server/linea-postgres-repository.js": "2f323d0b3178491f16fa1aa4bd0003b72f2ab25ff6c8bd2b7f02753a4eea6e1d",
+    "src/server/linea-source-bridge.js": "89f50cbcf8fdccfb0afc97f1c640cd2c5bc6d7ef9821d081a9906c1fc841135f"
+  },
+  "protected_trees": "All baseline src/,supabase/,.github/ byte-for-byte unchanged; one new isolated server source",
+  "secret_scan": "No configured private-key/token/credential-URL patterns found in changed text; no credentials introduced",
+  "source_limits": "Captured real validator executed on compatible minimal SYNTHETIC schema; live Supabase not queried, physical source and Export linkage unverified",
+  "production": "NO APPLIED SQL / NO MERGE / NO DEPLOY / NO FRONTEND OR OPERATIVE PICKING CHANGES",
+  "main_observed_at_close": "ae76b3729184ff802d7adc83d8867662230d438c",
+  "concurrent_main_limit": "PR125 adds operative-date BEFORE INSERT guard, reviewed versioned source only; not included in minimal QA schema, not applied/merged by this task"
+}

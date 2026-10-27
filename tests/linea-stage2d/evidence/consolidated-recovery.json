@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "database": "sgp_linea_d2q_qa_1793119507883140037",
+  "emptyRollbackDatabase": "sgp_linea_d2q_empty_1793119587212210645",
+  "checks": [
+    "Rollback refuses to delete source/validation/audit evidence",
+    "Containment affects only opted-in productions, preserves all validations",
+    "Empty-only rollback restores exact original B2 function definitions/hashes and removes new schema"
+  ],
+  "scope": "Local networkless PostgreSQL17; no productive recovery asserted"
+}

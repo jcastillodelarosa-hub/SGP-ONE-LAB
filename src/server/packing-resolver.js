@@ -1,3 +1,4 @@
+import {evaluateConsolidatedImpact} from './consolidated-pdt-impact.js';
 /** Isolated SERVER reference. No browser imports, Supabase adapter or HTTP route.
  * Repository supplies authenticated sessions and a consistent production snapshot.
  * Transactions/CAS/idempotency must be implemented by PostgreSQL in Etapa2B.
@@ -34,6 +35,12 @@ export function evaluateServerSnapshot(s){
  if(legacyActive.some(p=>!['NONE','BLOCKS'].includes(p.assemblyImpact)))return unknown(s,'LEGACY_PDT_STAGE_IMPACT_UNKNOWN');
  const blocks=pdts.filter(p=>p.active&&(p.origin==='ENSAMBLE'||p.assemblyImpact==='BLOCKS'));
  let blocked=0,eligibleUnitIds=null;
+ if(s.consolidatedImpact!==undefined){
+  if(blocks.length)return unknown(s,'MIXED_IMPACT_MODES');
+  const q=evaluateConsolidatedImpact(s.consolidatedImpact,{production:s.production,assembled,packed});
+  if(q.status!=='READY')return unknown(s,q.reason);
+  return {contractVersion:1,status:'READY',unit:s.unit,available:q.available,assembled,packed,blocked:q.blocked,deduction:q.deduction,assemblyCeiling:q.assemblyCeiling,eligibleAssembled:q.eligibleAssembled,impactMode:'CONSOLIDATED',eligibleUnitIds:null,revision:s.revision,cutId:cut.id,reasons:[]};
+ }
  if(blocks.length){
   const map=s.unitMap;
   if(!map||map.revision!==s.revision||!Array.isArray(map.assembledIds)||!Array.isArray(map.packedIds)||map.production!==s.production||map.unit!==s.unit)return unknown(s,'UNIT_MAPPING_UNAVAILABLE');
@@ -92,13 +99,13 @@ export function createPackingResolver(repository){
     if(evaluated.eligibleUnitIds)unitIds=evaluated.eligibleUnitIds.slice(0,r.quantity);
    }else{
     assert(r.total<=evaluated.assembled,'ASSEMBLY_CORRECTION_NOT_DOWNWARD');
-    assert(r.total>=evaluated.packed,'CORRECTION_LEAVES_PACKING_UNBACKED');
+    assert(r.total>=evaluated.packed+(evaluated.deduction||0),'CORRECTION_LEAVES_PACKING_UNBACKED');
     // A count-only correction cannot decide which mapped physical unit is undone.
     assert(!s.pdts.some(p=>p.active&&(p.origin==='ENSAMBLE'||p.assemblyImpact==='BLOCKS')),'CORRECTION_NEEDS_UNIT_RECONCILIATION');
     delta=r.total-evaluated.assembled;
    }
    const event={id:r.id,production:r.production,unit:s.unit,stage,delta,date:r.date,shift:r.shift,user:session.user,observation:r.observation||null,unitIds};
-   const response={ok:true,operation,eventId:r.id,revision:s.revision+1,cutId:s.cut.id,available:operation==='consume'?evaluated.available-r.quantity:r.total-evaluated.packed,duplicate:false};
+   const response={ok:true,operation,eventId:r.id,revision:s.revision+1,cutId:s.cut.id,available:operation==='consume'?evaluated.available-r.quantity:r.total-evaluated.packed-(evaluated.deduction||0),duplicate:false};
    await tx.commit({expectedRevision:s.revision,event,request:{id:r.id,signature,response}});return response;
   });
  }

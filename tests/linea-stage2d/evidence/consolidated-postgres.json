@@ -1,0 +1,24 @@
+{
+  "status": "PASS",
+  "database": "sgp_linea_d2q_qa_1793119507883140037",
+  "base": "sgp_linea_d2_qa_1793113430336195010",
+  "postgres": "17.11 (Debian 17.11-1.pgdg13+2)",
+  "checks": [
+    "PG17 install transactional: forced failure restores schema/functions; no public RPC bodies changed",
+    "Global20 minus human-validated3=17; two PDT each count3 not summed; estimate6 unused; retry immutable once",
+    "NC closed/PDT solution/status change requires reviewed quantity; uncoordinated edit detected but not proof of race-safe productive writers",
+    "Shared reserve R-SHARED under principal R-MAIN; difference/complement positive7 pieces invalidates without auto-credit even VALIDADA",
+    "Ensamble and Empaque quantities independent; deliberate correction revises only current consolidated count, never sums stage blocks",
+    "REAL PG: two separate sessions, distinct UUID edits at revision0 -> one commit, one CAS reject",
+    "NET17 already excludes3 from total20; packed5 ->12, no repeated subtraction; inconsistent reduction rejected",
+    "REAL PG: two shifts each consume10 from17 -> exactly one succeeds,7 remain; no fabricated unit IDs",
+    "Closed shift rejected; future/open-shift consolidated correction preserves prior immutable close hash",
+    "Native assembly correction cannot orphan packed10 plus blocked3; entire event/order write rolls back",
+    "Export source revision invalidates validation even if totals match; official sources never overwritten by engine",
+    "Initially0 NET assembled: validate3 affected, assemble5 unaffected, pack3 partially ->2 remain; cannot assemble18 above17 ceiling",
+    "REAL PG: source writer vs consumer serialized by production lock; resulting validation stale and future availability blocked",
+    "Unit path fallback intact, captured/public RPC and auth hashes unchanged, anon/authenticated denied, audit immutable"
+  ],
+  "scope": "Synthetic counts/identities/certified QA readers; real networkless PG17 sessions. NOT integration proof for productive writers/readers.",
+  "noProductionOperations": true
+}

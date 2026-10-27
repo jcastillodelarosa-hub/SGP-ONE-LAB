@@ -1,0 +1,30 @@
+{
+  "status": "PASS",
+  "database": "sgp_linea_d2_qa_1793113430336195010",
+  "postgres": "17.11 (Debian 17.11-1.pgdg13+2)",
+  "checks": [
+    "Captured real reception validation/authorization installed unchanged; new D2 install failure rolls back",
+    "Complete order without PDT: 20 assembled, 0 packed => 20 available; no inferred impact",
+    "Actual captured validator persists integer3 beside 7 pieces; without explicit unit links blocked, with QA links20-3=17",
+    "Overlapping PDT unit union counts once, EMPAQUE pending remains independent",
+    "Shared reserve/production/part identity and actual role+server stage scope enforced, no fabricated units",
+    "Closed NC is not physical replenishment; source change requires explicit reviewed re-link and keeps blocks",
+    "Complement VALIDADA + per-unit physical proof releases only explicit unit; AUDITADA_DIFERENCIA cannot credit or release",
+    "Validation with differences creates aggregated PDT; uncovered new difference blocks, no guessed historical link",
+    "REAL PG: concurrent identical UUID inserts one immutable link; distinct edits CAS rejects stale revision",
+    "REAL PG: two shifts cannot double-consume 18 eligible units; already packed included in remaining6",
+    "REAL PG: Picking source correction vs reconciliation invalidates previously mapped evidence",
+    "Browser has no unit registry access, no source proof writes and no RLS bypass"
+  ],
+  "captured_function_hashes": {
+    "validation": "7ad6768683ff7511f2b10e091353cd8a",
+    "legacy_authorization": "951943ae26baccc4797eea5fed57fcb6"
+  },
+  "real_source_status": "PENDING: no live Supabase access, no physical unit register or trusted coverage source certified",
+  "limits": [
+    "Captured function body executed against minimal compatible SYNTHETIC schema, not production clone",
+    "New difference to PDT FK unverified: that integration intentionally blocked",
+    "Complement physical source proof is synthetic; not proof of plant delivery",
+    "No legacy/Picking operative functions changed; no SQL applied productively"
+  ]
+}

@@ -1,7 +1,116 @@
+# Recuperación Etapa 2D — 2026-10-27T20:48:28.183259+00:00
+
+Repositorio SGP-ONE-LAB; rama feat/linea-stage2d-picking-unit-evidence; único PR127
+OPEN/DRAFT sobre feat/linea-stage2c-source-bridges. SHA funcional y evidencias
+recuperados de GitHub: 2fc09ea50fa6acb58733f25def7edd466b1acbc6. Main remoto sigue
+ae76b3729184ff802d7adc83d8867662230d438c, incluido PR125, sin tocarlo.
+
+## Completado, no repetir
+
+Motor aislado de cantidades consolidadas, sin requisito de IDs físicos;
+estimación/validación/revisión separadas; trazabilidad inmutable, permisos reales
+más ámbito, CAS, UUID idempotente, invalidación de fuentes y descuento único
+bruto/neto; Empaque parcial y preservación de cierres. SQL REVIEW fuera de migraciones.
+Los cuatro SHA256 de fuentes en consolidated-summary.json coinciden exactamente.
+Se reutilizan pruebas aprobadas:407/407 Node,14 PG17,4 adaptador y3 recuperación.
+No se reejecutaron pruebas ni se declaró nueva validación de Supabase o planta.
+CI de sintaxis del SHA funcional: éxito, run40544798563.
+
+## Estado recuperado y límites del entorno
+
+Worktree limpio recuperado en /workspace/sgp-linea-stage2d; los directorios /tmp
+anteriores no estaban disponibles. Se conservó el worktree principal con sus
+cambios preexistentes. No se descartaron ni sobrescribieron archivos del usuario.
+Los commits de2D y sus evidencias sí están persistidos en GitHub.
+El trabajo no versionado de2E en el /tmp anterior no aparece en el sistema de
+archivos actual. No se afirma recuperado ni se mezcla con este PR. Su rama Git
+local conserva el SHA2fc09ea, sin commit técnico de2E. El encargo vigente pide2D;
+no se continúa automáticamente2E ni se crea otro PR.
+
+## Pendiente y bloqueo real
+
+- Productor/cobertura de fuentes reales y evidencia de contabilidad bruta/neta.
+- Relación verificable de cortes Export con inclusión/exclusión de eventos locales.
+- Ámbitos efectivos y correspondencia de cargos autorizados con roles instalados;
+  no ampliar permisos por equivalencia de nombres.
+- Colaboración de todos los escritores en el protocolo de locks/revisiones.
+- Pool y compatibilidad de instalación con main/guard125; no hay acceso Supabase
+  autenticado disponible para certificarlo en esta recuperación.
+
+La Directiva Maestra SGP v3.1 solicitada no se localizó entre instrucciones,
+documentos/adjuntos disponibles ni código del repositorio consultado. Se aplican
+AGENTS.md y las restricciones explícitas del usuario; NO se declara aplicada una
+Directiva cuyo texto no se pudo leer. Hace falta su texto o enlace exacto.
+
+IMPLEMENTADO EN RAMA / VERIFICADO EN AISLAMIENTO (evidencia previa intacta) /
+PENDIENTE DE EVIDENCIA REAL / NO APLICADO / NO PUBLICADO.
+Checkpoint documental, sin cambios funcionales, ejecución de SQL, fusión o despliegue.
+Siguiente paso único: revisión de ChatGPT del mismo PR127 y aportar la Directiva
+v3.1 y las fuentes reales pendientes antes de continuar integración. No reiniciar
+etapas anteriores ni habilitar producción por contar con pruebas aisladas.
+
+---
+
+# Etapa 2D — ajuste funcional por cantidades consolidadas (2026-10-27T16:47:50.736010+00:00)
+
+PR único Draft #127; rama feat/linea-stage2d-picking-unit-evidence, base de ajuste
+979421354f8115126fff823975e67bef646f3c7c; dependiente de #124, SHA111f0cb46921198f790b6cafc0336e0ca449136c.
+Main observado ae76b3729184ff802d7adc83d8867662230d438c incluido PR125, sin modificación.
+IMPLEMENTADO EN RAMA / VERIFICADO EN AISLAMIENTO. NO APLICADO / NO PUBLICADO.
+
+Se elimina el requisito de ID físico para la nueva vía: cantidad consolidada por
+producción/etapa, estimación separada de validación humana vigente, CAS/idempotencia,
+rol real Picking/Ensamble/coordinador más ámbito servidor y turno explícito.
+Se conserva el complemento por unidad como opcional; no se mezclan descuentos.
+Captura bruta/neta servidor evita restar dos veces; sin evidencia de base o cobertura
+se bloquea. NC/VALIDADA/piezas/estado no acreditan cantidades automáticamente.
+Cambios de PDT/Picking/Export/permisos invalidan; nueva validación registra historial
+inmutable y no reescribe cierres anteriores. No conversión piezas→ventanas.
+
+Pruebas:407/407 Node (11 nuevas), PG17.11 real:14 comprobaciones, adaptador4,
+contención/reversión3; sesiones concurrentes reales para CAS, dos turnos, source writer
+vs consumo y reintento UUID. verify:release LABv362 y sintaxis PASS; sin cambiar versión.
+Regresiones previas2B16/2C18/D2 y capturas originales conservadas; nuevos tests usan
+clon de la base D2 ya verificada y hash de funciones públicas/auth sin cambios.
+Evidencia: tests/linea-stage2d/evidence/consolidated-*.json.
+
+PENDIENTE DE EVIDENCIA REAL: productor servidor de captura/contabilidad/cobertura,
+clasificación explícita de eventos Export, ámbitos efectivos y locks de TODOS los
+escritores instalados, pool mínimo y compatibilidad final con main. No faltan IDs
+individuales para el nuevo contrato. No hay conector/pool productivo instalado.
+SQL REVIEW03 y scripts de contención/reversión, fuera de migraciones automáticas.
+No frontend/Picking/Mecanizado/Export/vidrio/Gateway/Firebase/otros repositorios.
+Siguiente paso único: revisión de ChatGPT del mismo PR127 y de los límites de fuentes
+antes de cualquier instalación; no comenzar otra etapa, aplicar, fusionar o desplegar.
+El SHA final se obtiene en Git/PR tras guardar este checkpoint.
+
+---
+
+## Historial previo (no requisito vigente de IDs individuales)
+
+# Etapa2D — checkpoint de entrega aislada (2026-10-27T10:06:59.319338-05:00)
+
+Rama feat/linea-stage2d-picking-unit-evidence; base124 111f0cb46921198f790b6cafc0336e0ca449136c.
+Stack117→121→122→124→Draft2D. Main inicial b228ab2977ee29fa8c3db1db2ec2c2b594e3dc2d; cierre ae76b3729184ff802d7adc83d8867662230d438c (PR125 concurrente).
+IMPLEMENTADO / VERIFICADO EN AISLAMIENTO; PENDIENTE DE EVIDENCIA REAL.
+El validador capturado persiste ventanas_afectadas entero; no identidad individual.
+Complemento privado guarda vínculos explícitos por unidad/etapa, snapshot/versión,
+rol real, revisiones y trazabilidad. Sin asociaciones históricas automáticas.
+396/396 Node; PG D2 12 + adaptador3 + recuperación6; baseC2 18/B2 16 PASS;
+release LABv362/sintaxis/hashes PASS. Ver tests/linea-stage2d/evidence y
+`docs/linea-etapa2d/TRAZABILIDAD_Y_EXPORT.md` para matriz/fuentes/límites.
+Bloqueos: IDs físicos/cobertura real, nuevas diferencias→PDT, Export instalado e
+inclusión por UUID, scopes/pool/locks reales. Sin evidencia = SIN_CONCILIAR.
+No Supabase productivo/frontend/Picking operativo/Mecanizado/vidrio/Gateway/Firebase.
+NO APLICADO / NO PUBLICADO; no fusión ni otros repositorios. Siguiente paso:
+revisión ChatGPT del PR Draft127 dependiente124; preservar PR125 al integrar. No continuar automáticamente.
+
+---
+
 # Etapa 2C — checkpoint de entrega aislada (2026-10-27T13:33:13.240091+00:00)
 
 Rama feat/linea-stage2c-source-bridges; base122 8888981d74bbd485cf07e1dea2ee11b3c6a20463.
-Stack117→121→122→Draft2C. Main observado b228ab2977ee29fa8c3db1db2ec2c2b594e3dc2d.
+Stack117→121→122→Draft2C. Main inicial b228ab2977ee29fa8c3db1db2ec2c2b594e3dc2d; cierre ae76b3729184ff802d7adc83d8867662230d438c (PR125 concurrente).
 IMPLEMENTADO / VERIFICADO AISLADO; integración real PARCIAL, NO APLICADO / NO PUBLICADO.
 Puentes privados exigen lectores certificados y fuentes versionadas; inclusión
 Export explícita y mapa PDT por unidades. Falta de evidencia = SIN_CONCILIAR,
