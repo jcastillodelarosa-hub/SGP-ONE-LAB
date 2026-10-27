@@ -67,13 +67,13 @@ export function basePhysicalProgress(input,{year,weeks,line='PANELES_2',system='
     const r=rows[0];
     if(text(r.estado).toUpperCase()!=='RECIBIDA')return 'pending';
     const date=r.fecha_recepcion??r.fecha_recepcion_operativa;if(!date||Number.isNaN(Date.parse(date)))throw new Error('Recepción sin fecha verificable');
-    if(r.completa!==true)throw new Error('Recepción parcial sin cantidad de ventanas por producción: pendiente de conciliación');
+    if(r.completa===false)p.partialReceiptBase=p.programmed; // Physical arrival counts all base windows, even with missing profiles.
     return 'complete';
    });
    if(statuses.every(s=>s==='complete'))p.received=p.programmed;
    else if(statuses.every(s=>s==='pending'))p.received=0;
    else throw new Error('Material compartido con recepciones distintas: cantidad de ventanas sin conciliar');
-  }catch(error){if(error.message.includes('Recepción parcial sin cantidad'))p.partialReceiptBase=p.programmed;warn(p.key,error.message);}
+  }catch(error){warn(p.key,error.message);}
  }
  const schedules=deduplicate(schedule.filter(r=>r.tipo!=='ARRASTRE'&&!r.arrastre),r=>text(r.id_programacion),r=>JSON.stringify([r.reserva,r.sistema,r.produccion,r.cantidad_programada,r.estado,r.prioridad_semanal]));
  const byId=new Map(schedules.map(r=>[text(r.id_programacion),r]));
