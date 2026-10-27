@@ -15,3 +15,18 @@ cantidades oficiales o flags de navegador; falta vincularlo al catálogo real an
 de producción. PDT sin impacto cuantitativo probado sigue UNKNOWN.
 Próximo paso en esta ejecución: schema/RPC aisladas, adaptador al resolvedor121,
 pruebas de seguridad y sesiones reales PG17, checkpoint final y PR único sobre121.
+
+## Checkpoint 2B.2 — implementación aislada recuperable
+
+SQL nuevo en docs/sql-proposals/linea-etapa2b/01_motor_REVIEW.sql; esquema privado,
+RPC nuevas, RLS y ledger inmutable. Sin ALTER de tablas o funciones legacy.
+Adaptador src/server/linea-postgres-repository.js reutiliza createPackingResolver
+sin tocar121. Driver PG se inyecta; driver psql de tests no es para producción.
+
+Primer pase PG real PASS: 10 comprobaciones motor + 5 adaptador, incluyendo scopes,
+correcciones/cierre/reapertura, idempotencia y tres carreras SQL. Auth usa cuerpo
+sgp_sesion_actual capturado, no autorización simulada por flags del navegador.
+Tablas de fuentes/cortes/PDT normalizadas son fixtures privadas; bridge productivo
+pendiente. Nunca habilitar empaque con esa falta de evidencia.
+Pendiente en 2B.3: carrera de cambio de corte/conciliación, PDT por unidad/etapa,
+corrección Ensamble concurrente, rollback versionado, pruebas Node y documento final.
