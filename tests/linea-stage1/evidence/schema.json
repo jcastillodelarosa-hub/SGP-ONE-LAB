@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "database": "sgp_linea_stage1_qa_1793097193899805825",
+  "postgres": "17.11 (Debian 17.11-1.pgdg13+2)",
+  "network": "none; no published ports",
+  "checks": [
+    "failed install rolls back entire schema",
+    "seven new tables have RLS",
+    "no browser schema access",
+    "independent stages accepted",
+    "rollback with data refused atomically",
+    "empty rollback succeeds"
+  ],
+  "sha256": {
+    "01_schema_REVIEW.sql": "c3d177d2556c5623a7bd2780afce06fa799ae65e856d144fd7cb1794a9772531",
+    "ROLLBACK_REVIEW.sql": "183cfd2a49e67563c0d8dad185a3a54f3a15fc74b08f58eb4e53ed469d00364a"
+  },
+  "limitations": [
+    "DDL shape only; no RPC implemented or tested",
+    "No Supabase installation or concurrency verification"
+  ]
+}
