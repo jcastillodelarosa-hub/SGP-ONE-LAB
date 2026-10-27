@@ -1,0 +1,41 @@
+{
+  "status": "PASS",
+  "parent_pr": 117,
+  "parent_sha": "b923b2496d63de28fb562803a21474028ad88f97",
+  "node": {
+    "tests": 383,
+    "pass": 383,
+    "fail": 0
+  },
+  "new_resolver_tests": 32,
+  "protected_sha256": {
+    "app.js": "a7ff0321faa2a79c67a06aa87ce6bf7f4c3b84f66c3b94634b5bdf8a05e148a6",
+    "index.html": "6abc5d8554311bfa87741aa42ddc0af808ddd757c8265bab913d2b229b69717b",
+    "styles.css": "5a4041af2967f82ea552cce81868f31375ca533ec9116001495152dcd2b70c1f",
+    "planner-operations-v326.js": "3d817d5f5d452b09296ef5877e485ac50a510dce2fdeffc9543d373312932345",
+    "planner-readonly-v326.js": "17bfc1d03a3225ab445850e1ad81d0df00defa8fea801c03163590544276c278",
+    "production-line-tabs.js": "e98e6fd68dfcbca822dc7d664a92217cc075bfa49b49ef2a61c0f53eb0af4ec3",
+    "src/domain/linea-stage1.js": "25941a43bda2156e42a18b2610347862cb2f1851a292856d0d68f2e819f6722a",
+    "tests/linea-stage1.test.mjs": "46c62641c81ba2f0817cc344b7eb927b23be8079e5ec44200e22a83214c610af",
+    "src/domain/glass-relations-graph.js": "16770dd92f72cbaff083e34b4faaf67fd85a9a3a1377da2be0fbb3967a8f840b",
+    "src/domain/glass-explorer-insights.js": "b30117d91df1065ed87712b7e557cd70663dafb18d11a49ac87a4afb43ac0042",
+    "src/domain/glass-location-importer.js": "a1c2b961a7db50450598609c666d82b6dea712bd568ff747b7ebe0aec7761406",
+    "src/domain/production-importer.js": "ee14e558ffe77015c85392c398d18d6b8fcdbdd4d039b6ed96d71da0ee839e76",
+    "src/modules/pdt-registration-form.js": "0843cd93f6791143a3bb89dd6aa149873c10b649a045bceedec108281017604b"
+  },
+  "release": "LAB v362 unchanged, verify:release PASS",
+  "server_module_syntax": "PASS",
+  "runtime_integration": false,
+  "production_metadata": "NOT independently read; no authenticated Supabase tool available",
+  "postgres": "see postgres.json; lock mechanism harness only",
+  "no_production_writes": true,
+  "no_stage2b": true,
+  "latest_main_observed": "b228ab2977ee29fa8c3db1db2ec2c2b594e3dc2d",
+  "regression_scope": "validated PR117 parent, not latest main hotfixes",
+  "shift_correction": {
+    "explicit_target_shift_required": true,
+    "missing_closed_review_open_cases": "PASS",
+    "duplicate_retry_missing_target": "rejected without writes",
+    "cas_idempotency_scope": "preserved"
+  }
+}

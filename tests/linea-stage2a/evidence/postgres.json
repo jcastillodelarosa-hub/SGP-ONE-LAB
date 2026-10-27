@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "database": "sgp_linea_2a_qa_1793101445296986215",
+  "postgres": "17.11 (Debian 17.11-1.pgdg13+2)",
+  "network": "none; no published ports",
+  "actual_pg_sessions": true,
+  "scenarios": [
+    "two different turns share production lock; one stale revision rejected",
+    "concurrent identical retry commits exactly once",
+    "assembly downward correction races consumption without unbacked packing"
+  ],
+  "additional_checks": [
+    "insufficient availability rejected after fresh revision",
+    "same UUID changed payload rejected",
+    "unsafe assembly correction rolls back without writes"
+  ],
+  "limitations": [
+    "Mechanism harness ONLY; not full resolver SQL or production RPC",
+    "Role/scope, Export/PDT mappings and real source locks still need Etapa2B",
+    "No Supabase changes or deployment"
+  ]
+}
