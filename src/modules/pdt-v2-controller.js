@@ -16,13 +16,14 @@ export async function openPdtV2({row,client,token,role,capabilities,show,escape:
     m.querySelector('.repo-work-body').innerHTML=body;m.querySelector('.repo-work-footer').innerHTML=footer;return m;
   };
   if(!capabilities)throw new Error('Backend PDT v2 no disponible');
-  const validated=row.contrato_pdt==='V2';
+  const validated=row.contrato_pdt==='V2' && row.validacion_estado==='VALIDADO' && Array.isArray(row.detalles) && row.detalles.length>0;
+  const needsValidation=row.validacion_estado!=='VALIDADO' && Array.isArray(row.detalles) && row.detalles.length===0;
   const editable=row.estado!=='RESUELTO'&&row.estado_repo!=='PICKING';
   const validator=['ADMINISTRADOR','COORDINADOR','RECEPCION','LIDER LINEA','SUPERVISOR DE PICKING'].includes(role);
   const machinist=['ADMINISTRADOR','COORDINADOR','LIDER MECANIZADO','LIDER'].includes(role);
   const ncEditor=['ADMINISTRADOR','COORDINADOR','PATINADOR'].includes(role);
   let sources=[],sourceError=null;
-  if(!validated && validator){
+  if(needsValidation && editable && validator){
     try{
       const result=await client.rpc('sgp_pdt_fuentes_v2',{p_token:token,p_id:row.id_pendiente});
       if(result.error)throw result.error;
@@ -44,7 +45,7 @@ export async function openPdtV2({row,client,token,role,capabilities,show,escape:
   const details=row.detalles||[];
   const moves=(row.movimientos||[]).filter(m=>m.tipo==='AVANCE' && !(row.movimientos||[]).some(x=>x.id_movimiento_revertido===m.id_movimiento));
   let form='';
-  if(!validated && validator)form+=renderSourceDistribution(sources,row.cantidad,sourceError,esc);
+  if(needsValidation && editable && validator)form+=renderSourceDistribution(sources,row.cantidad,sourceError,esc);
   if(validated && editable && machinist)form+=advancesForm(details,moves,row,esc);
   if(editable && ncEditor)form+='<section class="repo-modal-section"><h3>NC vinculadas</h3><p>'+esc((row.ncs||[]).map(n=>(n.referencia||n.consecutivo)+' · '+(n.estado||n.resolucion)).join(' / ')||row.nc||'Sin NC')+'</p><label>Añadir NC (sin reemplazar)<input data-ncs type="text" autocomplete="off"></label><button type="button" data-operation="nc">Añadir NC</button></section>';
   if(validated && editable && capabilities.picking_cuantitativo && (pickRegister||pickValidate) && !picking.error){
@@ -78,7 +79,7 @@ export async function openPdtV2({row,client,token,role,capabilities,show,escape:
   modal.onkeydown=e=>{if(e.key==='Escape'){e.preventDefault();close();}if(e.key==='Tab'){const items=[...modal.querySelectorAll('button,input,select,textarea,summary,[tabindex="0"]')].filter(n=>!n.disabled&&n.getClientRects().length);const first=items[0],last=items.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus();}}};
   modal.querySelector('[data-dismiss]').onclick=close;
   const headerClose=modal.querySelector('#repoWorkClose');if(headerClose)headerClose.onclick=close;
-  if(!validated&&validator){
+  if(needsValidation&&editable&&validator){
     const footer=modal.querySelector('.repo-work-footer');
     if(footer){
       const panel=document.createElement('div');panel.className='pdt-distribution-footer';
