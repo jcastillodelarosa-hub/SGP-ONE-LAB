@@ -19,3 +19,16 @@ Se bloquea solo integración sin evidencia; no se fabrican certificaciones o dis
 Pendiente cierre: único Draft dependiente130 si hay implementación, checkpoint y evidencias.
 Sin Supabase productivo, frontend operativo, Picking/Mecanizado/Export/Gateway,
 Firebase/main, fusión, migración productiva o publicación; no otra etapa automática.
+
+## Hito de contraste aislado
+
+Archivadas confirmaciones por nombre/columnas con procedencia ChatGPT, sin marcar
+consulta directa ni interpretación bruta/neta. Nuevo adaptador de revisión mantiene
+SIN_CONCILIAR/null y no autoriza operaciones. Se proponen tres bindings funcionales
+con candidatos de código, sin registrar ni conceder un rol/ámbito instalado.
+Consulta delta solicita cuerpos Export, huellas de capturas conocidas y relaciones
+faltantes; no repite existencia/SECURITY DEFINER/EXECUTE ya confirmados ni devuelve
+filas operativas. Pruebas434/434 Node (12 nuevas),3 comprobaciones PG READ ONLY PASS.
+Los hashes de2D/2E siguen intactos: reutilizar su concurrencia real9/lector4 en vez
+de repetirla por este cambio sin escritores. Pendiente informe/matrices/checkpoint
+final y único DraftF2 sobre130. Integraciones reales sin evidencia siguen bloqueadas.
