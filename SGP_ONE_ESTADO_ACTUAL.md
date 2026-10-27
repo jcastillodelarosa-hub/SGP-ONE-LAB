@@ -1,3 +1,40 @@
+# Continuidad vigente — PDT v2 multiorigen / LAB v362 propuesta
+
+Fecha Colombia: 2026-10-26T23:41:28.628629-05:00.
+Base main `1a0deae41e3446efde3901932cda90ed73ab4d0d` LAB v361; PR108 y PR115
+FUSIONADOS según API. Los hitos anteriores que los muestran pendientes son históricos.
+Rama independiente `feat/pdt-v2-multiorigin`; único PR Draft de esta tarea.
+
+Objetivo: corregir Picking `PDT_CLAVE_NO_CORRESPONDE_A_MAESTRO` y reutilizar un
+registro PDT en PICKING/ENSAMBLE/EMPAQUE, sin cambios productivos.
+Implementado: editor compartido, accesos por producción en los tres módulos,
+identidad canónica/maestro PANEL, NC opcional en Picking y obligatoria en los otros,
+registro transaccional con idempotencia, metadatos/filtros de seguimiento y SQL
+REVIEW fuera de migraciones automáticas. LEGACY y firmas antiguas preservados;
+la nueva ruta no retorna a sus INSERT defectuosos. READ/validación/acreditación
+conciliados por identidad y relación verificada de reserva compartida.
+
+Evidencias: 326/326 Node; 25 comprobaciones PG17.11 aislado/sintético con funciones
+suministradas, error anterior reproducido y ciclo nuevo hasta cierre, concurrencia,
+rollback y datos preservados; browser PC1440/tableta768/móvil390 con handlers reales
++ RPC sintéticas; verify:release v362 y sintaxis. Main base reproducía 13 fallos:
+se corrige inicialización de partialReceiptBase y assertions de versión fosilizadas.
+Detalle, contratos, permisos, orden/reversión: docs/sql-proposals/pdt/multiorigin/README.md.
+
+Riesgos: no acceso Supabase autenticado de planta en esta sesión; snapshots reales
+suministrados no prueban cuerpos productivos actuales. La RPC subyacente PANEL es
+fixture en QA. Preflight SQL aborta ante huellas/dependencias distintas. Revisar
+compatibilidad real antes de aplicar. Publicar frontend sin RPC nueva bloquearía
+entregas; aplicar backend validado antes de autorizar publicación. Revertir código
+no debe bloquear PDT nuevos activos; preferir corrección hacia delante.
+
+Estado: IMPLEMENTADO EN RAMA / VERIFICADO LOCALMENTE; SQL PROPUESTO PARA APLICACIÓN,
+NO APLICADO, NO PUBLICADO ni VERIFICADO EN PRODUCCIÓN por esta tarea.
+No migración productiva, Firebase, fusión, datos históricos, GOOGLE/LAC ni workflow
+manual. Único siguiente paso: revisión de ChatGPT del PR Draft y del SQL preparado.
+
+---
+
 # Continuidad vigente — Issue111 / PR108 único / estilo5 definitivo
 
 Fecha Colombia: 2026-10-26T20:01:24.255375-05:00.

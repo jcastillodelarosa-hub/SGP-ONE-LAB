@@ -1,3 +1,4 @@
+import {releaseLabel} from '../scripts/build-release-info.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -99,7 +100,7 @@ test('estilo proporcional y móvil, sin modificar selectores de Entrega de órde
 });
 
 test('versión y archivos de publicación sincronizados',()=>{
- assert.match(html,/LAB v360/);
- assert.match(html,/app\.js\?v=360/);
- assert.match(html,/styles\.css\?v=360/);
+ assert.match(html,new RegExp(releaseLabel));
+ assert.match(html,new RegExp('app\\.js\\?v='+releaseLabel.match(/v(\d+)/)[1]));
+ assert.match(html,new RegExp('styles\\.css\\?v='+releaseLabel.match(/v(\d+)/)[1]));
 });

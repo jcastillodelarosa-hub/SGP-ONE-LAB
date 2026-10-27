@@ -1,3 +1,4 @@
+import {releaseLabel} from '../scripts/build-release-info.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -6,8 +7,8 @@ const app=readFileSync('app.js','utf8');
 const controller=readFileSync('src/modules/picking-delivery-report-controller.js','utf8');
 test('LAB v321 report integrated with Picking tabs',()=>{
  for(const id of ['pickReportTab','pickReportPanel','pickReportFrom','pickReportTo','pickReportShift','pickReportSystem','pickReportRun','pickReportPdf','pickReportImage'])assert.ok(html.includes('id="'+id+'"'),id);
- assert.match(html,/LAB v360/);
- assert.match(html,/app\.js\?v=360/);
+ assert.match(html,new RegExp(releaseLabel));
+ assert.match(html,new RegExp('app\\.js\\?v='+releaseLabel.match(/v(\d+)/)[1]));
  assert.match(app,/initPickingDeliveryReport\(\{getSupabaseClient,getAppToken\}\)/);
 });
 test('historical report consumes authorized read-only RPC and complete pagination',()=>{

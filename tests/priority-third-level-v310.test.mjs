@@ -1,3 +1,4 @@
+import {releaseLabel} from '../scripts/build-release-info.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -79,8 +80,8 @@ test('módulos preservan subnivel y Picking/Ensamble usan orden jerárquico',()=
  assert.match(css,/#priorityProductionBody tr\.priority-row-locked/);
  assert.match(css,/\.priority-level3-chip/);
  assert.ok(Number(html.match(/LAB v(\d+)/)?.[1])>=310);
- assert.match(html,/styles\.css\?v=360/);
- assert.match(html,/app\.js\?v=360/);
+ assert.match(html,new RegExp('styles\\.css\\?v='+releaseLabel.match(/v(\d+)/)[1]));
+ assert.match(html,new RegExp('app\\.js\\?v='+releaseLabel.match(/v(\d+)/)[1]));
 });
 
 test('migración aplicada preserva contratos y protege programación',()=>{

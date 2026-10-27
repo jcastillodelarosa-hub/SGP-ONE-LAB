@@ -1,3 +1,4 @@
+import {releaseLabel} from '../scripts/build-release-info.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -24,9 +25,9 @@ test('9 controles XLSX compactos, sin etiquetas anidadas ni cambios en entradas 
  assert.match(html,/id="programmingFiles"[^>]*multiple/);
  assert.match(html,/id="recPhotos" type="file" accept="image\/\*" multiple hidden/);
  assert.match(html,/id="recCameraPhotos" type="file" accept="image\/\*" capture="environment" multiple hidden/);
- assert.match(html,/LAB v360/);
- assert.match(html,/app\.js\?v=360/);
- assert.match(html,/styles\.css\?v=360/);
+ assert.match(html,new RegExp(releaseLabel));
+ assert.match(html,new RegExp('app\\.js\\?v='+releaseLabel.match(/v(\d+)/)[1]));
+ assert.match(html,new RegExp('styles\\.css\\?v='+releaseLabel.match(/v(\d+)/)[1]));
 });
 
 test('estados compactos: icono Excel, tarjetas proporcionales y quitar accesible',()=>{

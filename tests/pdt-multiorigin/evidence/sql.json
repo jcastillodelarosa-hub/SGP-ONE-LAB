@@ -1,0 +1,38 @@
+{
+  "status": "PASS",
+  "postgres": "17.11 (Debian 17.11-1.pgdg13+2)",
+  "database": "sgp_multiorigin_qa_1793076148521405275",
+  "network": "none; no exposed ports",
+  "checks": [
+    "Old name/week-only delivery reproduces PDT_CLAVE_NO_CORRESPONDE_A_MAESTRO and rolls back",
+    "Installation failure rolls back all new objects",
+    "PATINADOR: valid shared PANEL -> V2, no NC, real source/key/principal preserved",
+    "ENSAMBLE rejects blank NC",
+    "ENSAMBLE rejects blank NC",
+    "ENSAMBLE saves required NC independently",
+    "EMPAQUE rejects blank NC",
+    "EMPAQUE rejects blank NC",
+    "EMPAQUE saves required NC independently",
+    "Roles: RECEPCION cannot act via legacy equivalence; PATINADOR cannot register assembly damage",
+    "Invalid source/key/reserve/finish do not weaken strict identity or leave delivery behind",
+    "Multiple PDTs + missing lines + delivery atomic; failed second row rolls back ALL",
+    "Idempotent retry returns same event; changed payload with same UUID rejects",
+    "Invalid quantity and duplicate physical piece reject the whole delivery",
+    "Same piece in independent origins remains independent",
+    "Complete deliveries preserve existing RPC/duplicate trigger and have no PDT",
+    "Existing NC can be linked later using unchanged RPC",
+    "LEGACY creation and historical annotation stay unchanged",
+    "New V2 remains compatible with existing distribution and guards",
+    "Same reference/fabrication in another production is never a global collision",
+    "Canonical remapped PANEL can validate/process/assign/close within a partially delivered order",
+    "No direct grants or private helper execution to anon",
+    "Actual anon transport executes the secured RPC with SGP PATINADOR; no private grants",
+    "Two concurrent retries yield exactly one delivery and PDT",
+    "Code rollback proven before events; later rollback rejects downgrade, containment blocks new registration preserving events/PDTs/deliveries"
+  ],
+  "limitations": [
+    "PANEL underlying listing is a fixture, not a live Supabase call",
+    "Captured source/auth definitions reused in fresh synthetic schema; current productive fingerprints pending review",
+    "No production data or migration executed"
+  ]
+}

@@ -1,0 +1,56 @@
+[
+  {
+    "viewport": [
+      1440,
+      1100
+    ],
+    "actual_picking_handlers": true,
+    "shared_editor_all_origins": true,
+    "multiple_pieces": true,
+    "optional_required_nc": true,
+    "retry_same_id": true,
+    "double_click_one_write": true,
+    "complete_delivery_no_pdt": true,
+    "empty_missing_sources_block": true,
+    "no_horizontal_overflow": true,
+    "external_network": "blocked",
+    "data": "synthetic",
+    "js_errors": []
+  },
+  {
+    "viewport": [
+      768,
+      1024
+    ],
+    "actual_picking_handlers": true,
+    "shared_editor_all_origins": true,
+    "multiple_pieces": true,
+    "optional_required_nc": true,
+    "retry_same_id": true,
+    "double_click_one_write": true,
+    "complete_delivery_no_pdt": true,
+    "empty_missing_sources_block": true,
+    "no_horizontal_overflow": true,
+    "external_network": "blocked",
+    "data": "synthetic",
+    "js_errors": []
+  },
+  {
+    "viewport": [
+      390,
+      844
+    ],
+    "actual_picking_handlers": true,
+    "shared_editor_all_origins": true,
+    "multiple_pieces": true,
+    "optional_required_nc": true,
+    "retry_same_id": true,
+    "double_click_one_write": true,
+    "complete_delivery_no_pdt": true,
+    "empty_missing_sources_block": true,
+    "no_horizontal_overflow": true,
+    "external_network": "blocked",
+    "data": "synthetic",
+    "js_errors": []
+  }
+]

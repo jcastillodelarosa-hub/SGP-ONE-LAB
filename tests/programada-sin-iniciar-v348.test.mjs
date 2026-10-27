@@ -1,3 +1,4 @@
+import {releaseLabel} from '../scripts/build-release-info.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -84,9 +85,9 @@ test('v348: Picking y reportes normalizan etiquetas, sin cambiar cobertura',()=>
 
 test('v348: interfaz y recursos reportan versión coincidente',()=>{
  assert.match(css,/\.state-sin-iniciar\{background:#f3e81b!important;color:#202020!important\}/);
- assert.match(html,/LAB v360/);
+ assert.match(html,new RegExp(releaseLabel));
  for(const asset of ['styles.css','app.js']){
-  assert.ok(html.includes(asset+'?v=360'));
+  assert.ok(html.includes(asset+'?v='+releaseLabel.match(/v(\d+)/)[1]));
  }
  assert.ok(html.includes('picking-delivery-report.css?v=348'));
 });
