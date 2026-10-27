@@ -2063,7 +2063,7 @@ window.SGPWeeklyPhysicalProgress=async({weeks,year=new Date().getFullYear(),line
      readPhysicalRows(client,'sgp_mecanizado_ejecucion_orden','id_programacion,produccion,estado',ids,['id_programacion','produccion']),
      readPhysicalRows(client,'sgp_produccion_reservas_v','key_produccion,id_linea,reserva,produccion,semana_produccion,acabado_reserva',reserves,['key_produccion','reserva']),
      client.rpc('sgp_mecanizado_cobertura_ordenes',{p_token:token,p_semana:null}),
-     client.rpc('sgp_recepcion_listar',{p_token:token,p_semana:null}),
+     client.rpc('sgp_mecanizado_recepcion_resumen_listar',{p_token:token,p_semana:null}),
      client.rpc('sgp_reservas_asociadas_listar',{p_token:token,p_semana:null,p_linea:line})]);
     for(const response of [cov,reception,relations])if(response.error)throw response.error;
     if(token!==getAppToken()||revision!==physicalRevision)throw new Error('La sesión o programación cambió durante la lectura');
