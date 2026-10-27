@@ -3,11 +3,11 @@
   "parent_pr": 117,
   "parent_sha": "b923b2496d63de28fb562803a21474028ad88f97",
   "node": {
-    "tests": 378,
-    "pass": 378,
+    "tests": 383,
+    "pass": 383,
     "fail": 0
   },
-  "new_resolver_tests": 27,
+  "new_resolver_tests": 32,
   "protected_sha256": {
     "app.js": "a7ff0321faa2a79c67a06aa87ce6bf7f4c3b84f66c3b94634b5bdf8a05e148a6",
     "index.html": "6abc5d8554311bfa87741aa42ddc0af808ddd757c8265bab913d2b229b69717b",
@@ -31,5 +31,11 @@
   "no_production_writes": true,
   "no_stage2b": true,
   "latest_main_observed": "b228ab2977ee29fa8c3db1db2ec2c2b594e3dc2d",
-  "regression_scope": "validated PR117 parent, not latest main hotfixes"
+  "regression_scope": "validated PR117 parent, not latest main hotfixes",
+  "shift_correction": {
+    "explicit_target_shift_required": true,
+    "missing_closed_review_open_cases": "PASS",
+    "duplicate_retry_missing_target": "rejected without writes",
+    "cas_idempotency_scope": "preserved"
+  }
 }

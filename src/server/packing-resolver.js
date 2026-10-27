@@ -60,6 +60,13 @@ function requestFields(r,kind){
  assert(/^\d{4}-\d{2}-\d{2}$/.test(r.date)&&!Number.isNaN(Date.parse(r.date+'T00:00:00Z'))&&new Date(r.date+'T00:00:00Z').toISOString().slice(0,10)===r.date&&[1,2].includes(r.shift),'INVALID_SHIFT');
  assert(kind==='consume'?validQty(r.quantity)&&r.quantity>0:validQty(r.total)&&text(r.observation),'INVALID_QUANTITY_OR_REASON');
 }
+function requiredTurn(snapshot,request,stage){
+ assert(snapshot?.complete?.turns===true&&Array.isArray(snapshot.turns),'SHIFT_EVIDENCE_UNAVAILABLE');
+ const turn=snapshot.turns.find(t=>t?.stage===stage&&t.date===request.date&&t.shift===request.shift);
+ assert(turn,'SHIFT_NOT_FOUND');
+ assert(['ABIERTO','CERRADO','EN_REVISION'].includes(turn.state),'SHIFT_STATE_UNKNOWN');
+ return turn;
+}
 /** No API accepts snapshot, actor, available, verified flags or unit selections.
  * sessionId is only a lookup handle; authentication/scope come from repository.
  */
@@ -70,14 +77,15 @@ export function createPackingResolver(repository){
   return transaction(r.production,async tx=>{
    const session=await tx.session(sessionId);authorize(session,r.production,operation);
    const signature=stable({operation,request:r,user:session.user});const prior=await tx.request(r.id);
-   if(prior){assert(prior.signature===signature,'IDEMPOTENCY_REUSED');return {...prior.response,duplicate:true};}
+   if(prior)assert(prior.signature===signature,'IDEMPOTENCY_REUSED');
    const s=await tx.snapshot();assert(s?.production===r.production,'SOURCE_IDENTITY_MISMATCH');
+   const stage=operation==='correctAssembly'?'ENSAMBLE':'EMPAQUE';
+   if(prior){requiredTurn(s,r,stage);return {...prior.response,duplicate:true};}
    assert(s.revision===r.revision,'REVISION_CONFLICT');const evaluated=evaluateServerSnapshot(s);
    assert(evaluated.status==='READY',evaluated.reasons[0]||'EVIDENCE_UNAVAILABLE');
-   const stage=operation==='correctAssembly'?'ENSAMBLE':'EMPAQUE';
-   const turn=s.turns?.find(t=>t.stage===stage&&t.date===r.date&&t.shift===r.shift);
-   assert(turn?.state!=='CERRADO','AUTHORIZED_REOPEN_REQUIRED');
-   if(turn?.state==='EN_REVISION')assert(['COORDINADOR','ADMINISTRADOR'].includes(session.role)&&text(r.observation),'REVIEW_CORRECTION_DENIED');
+   const turn=requiredTurn(s,r,stage);
+   assert(turn.state!=='CERRADO','AUTHORIZED_REOPEN_REQUIRED');
+   if(turn.state==='EN_REVISION')assert(['COORDINADOR','ADMINISTRADOR'].includes(session.role)&&text(r.observation),'REVIEW_CORRECTION_DENIED');
    let delta,unitIds=[];
    if(operation==='consume'){
     assert(r.quantity<=evaluated.available,'INSUFFICIENT_ELIGIBLE_UNITS');delta=r.quantity;

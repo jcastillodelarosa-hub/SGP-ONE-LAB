@@ -178,3 +178,23 @@ en tests/linea-stage2a/evidence. No hay pruebas visuales nuevas porque no hay UI
 PROPUESTO: contratos de repositorio/locks PostgreSQL y adaptador productivo.
 IMPLEMENTADO: referencia servidor aislada y pruebas. VERIFICADO: solo evidencia
 local descrita. NO APLICADO en Supabase / NO PUBLICADO / NO FUSIONADO.
+
+## Corrección PR121 — turno explícito obligatorio
+
+consume y correctAssembly exigen un turno existente para etapa+fecha operativa+
+turno dentro del snapshot de la producción autorizada. complete.turns=true y una
+lista vacía NO autorizan una mutación. Ausencia -> SHIFT_NOT_FOUND, sin evento,
+consumo o cambio de revisión. No hay default ABIERTO ni creación implícita.
+La autorización de sesión/rol/etapa/producción sigue siendo del servidor.
+
+CERRADO exige reapertura autorizada. EN_REVISION conserva coordinador/administrador
++ motivo. ABIERTO válido conserva CAS, límites cuantitativos e idempotencia.
+Un reintento exacto no escribe y devuelve su respuesta histórica solo si su turno
+sigue explícitamente disponible y válido; no vuelve a aplicar consumo ni revisión.
+El cálculo resolve es agregado por producción: READY no implica autorización para
+un turno solicitado; esa comprobación adicional pertenece a cada mutación.
+
+Fixtures positivos ahora declaran sus turnos abiertos, incluida la fecha nocturna;
+no se debilitan controles para hacer pasar pruebas anteriores. Nuevos casos:
+turno ausente, fecha/turno/etapa distintos, cerrado, revisión, abierto autorizado y
+reintento cuyo turno desapareció. Sin cambios a SQL/PG, interfaces ni Etapa2B.

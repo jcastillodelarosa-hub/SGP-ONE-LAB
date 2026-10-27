@@ -1,3 +1,27 @@
+# PR121 — checkpoint correctivo: turno explícito
+
+Fecha Colombia: 2026-10-27T07:02:56.597510-05:00.
+Rama feat/linea-stage2a-packing-resolver; mismo PR121 Draft apilado sobre117.
+HEAD previo ce9d01d2dacbd2a4de805806e9b06867d569f3f4; SHA final en PR.
+
+Consumo y corrección exigen turno explícito etapa/fecha/turno del snapshot servidor.
+Ausencia (incluso lista completa vacía) -> SHIFT_NOT_FOUND sin cambios. No default
+ABIERTO ni creación implícita. CERRADO exige reapertura; EN_REVISION mantiene rol
+coordinador/motivo; ABIERTO mantiene CAS/seguridad/idempotencia. Reintento exacto
+consulta existencia del turno, no registra otro consumo ni avanza revisión.
+
+VERIFICADO AISLADO: 383/383 Node; 32 pruebas resolvedor (cinco nuevas), sintaxis,
+verify:release LABv362 y diff. Hashes de rutas protegidas sin cambios. Fixtures
+positivos declaran turnos abiertos y fecha nocturna explícitos. Evidencia domain.json.
+Se reutiliza evidencia de arnés PG sin modificaciones; no se repite batería SQL.
+No Supabase/frontend/legacy/vidrio/Gateway/otros repositorios. No fusión/publicación.
+Etapa2B NO iniciada; adaptador productivo y fuentes reales siguen pendientes.
+
+Siguiente paso único: revisión de ChatGPT del mismo PR121; no integrar runtime ni
+iniciar Etapa2B sin autorización nueva.
+
+---
+
 # Etapa2A — checkpoint final de revisión
 
 Fecha Colombia: 2026-10-27T06:49:49.071705-05:00.

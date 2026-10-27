@@ -2,7 +2,7 @@ import test from 'node:test';import assert from 'node:assert/strict';
 import {createPackingResolver,evaluateServerSnapshot} from '../src/server/packing-resolver.js';
 import {memoryRepository} from './linea-stage2a/memory-repository.mjs';
 const key='QA|PANELES_2';
-const rawSnapshot=(extra={})=>({production:key,revision:0,complete:{production:true,cut:true,events:true,pdts:true,turns:true},cut:{id:'QA-cut',assembled:10,packed:2,inclusionComplete:true,includedEventIds:[]},events:[],pdts:[],relations:[{production:key,reserve:'R',part:'1.1'},{production:key,reserve:'SHARED',part:'1.2'}],turns:[],...extra});
+const rawSnapshot=(extra={})=>({production:key,revision:0,complete:{production:true,cut:true,events:true,pdts:true,turns:true},cut:{id:'QA-cut',assembled:10,packed:2,inclusionComplete:true,includedEventIds:[]},events:[],pdts:[],relations:[{production:key,reserve:'R',part:'1.1'},{production:key,reserve:'SHARED',part:'1.2'}],turns:['ENSAMBLE','EMPAQUE'].flatMap(stage=>[1,2].map(shift=>({stage,date:'2026-10-27',shift,state:'ABIERTO'}))),...extra});
 const snapshot=(extra={})=>{const s=rawSnapshot(extra);s.unit='UNIDAD_PRODUCCION';s.cut.unit=s.unit;s.events=s.events.map(e=>({unit:s.unit,...e}));return s;};
 const sessions={leader:{active:true,user:'QA leader',role:'LIDER',stages:['EMPAQUE'],productions:[key]},coord:{active:true,user:'QA coordinator',role:'COORDINADOR',stages:['EMPAQUE','ENSAMBLE'],productions:[key]},read:{active:true,user:'QA read',role:'CONSULTA',stages:['EMPAQUE'],productions:[key]}};
 const setup=(s=snapshot(),auth=sessions)=>{const repo=memoryRepository(s,auth);return {repo,api:createPackingResolver(repo)};};
@@ -27,7 +27,7 @@ test('PDT affecting packed unit or invalid unit registry is discrepancy',()=>{co
 test('duplicate events, unknown cut inclusions and missing source completeness fail closed',()=>{const s=snapshot({events:[{id:'a',production:key,stage:'ENSAMBLE',delta:1},{id:'a',production:key,stage:'ENSAMBLE',delta:1}]});assert.equal(evaluateServerSnapshot(s).status,'DISCREPANCY');s.events=[];s.cut.includedEventIds=['a'];assert.equal(evaluateServerSnapshot(s).status,'UNKNOWN');assert.equal(evaluateServerSnapshot(null).available,null);});
 test('closed shifts require authorized reopening; review restricts leader consumption',async()=>{for(const state of ['CERRADO','EN_REVISION']){const {api}=setup(snapshot({turns:[{stage:'EMPAQUE',date:'2026-10-27',shift:1,state}]}));await assert.rejects(()=>api.consume('leader',request()),state==='CERRADO'?/REOPEN/:/REVIEW/);}});
 test('unavailable server source returns unknown without leaking or inventing counts',async()=>{const api=createPackingResolver({transaction:async(k,f)=>f({session:async()=>sessions.leader,snapshot:async()=>{throw new Error('backend failed');}})});assert.equal((await api.resolve('leader',key)).status,'UNKNOWN');});
-test('operational date accepts night-shift day boundary and rejects impossible dates',async()=>{const {api}=setup();await assert.rejects(()=>api.consume('leader',request({date:'2026-02-30'})),/INVALID_SHIFT/);await api.consume('leader',request({date:'2026-12-31',shift:2}));});
+test('operational date accepts night-shift day boundary and rejects impossible dates',async()=>{const {api}=setup(snapshot({turns:[{stage:'EMPAQUE',date:'2026-12-31',shift:2,state:'ABIERTO'}]}));await assert.rejects(()=>api.consume('leader',request({date:'2026-02-30'})),/INVALID_SHIFT/);await api.consume('leader',request({date:'2026-12-31',shift:2}));});
 test('active legacy/Picking pending needs explicit server mapping of stage impact',()=>{const s=snapshot({pdts:[{id:'LEGACY',production:key,origin:'PICKING',active:true,pieces:99}]});assert.equal(evaluateServerSnapshot(s).status,'UNKNOWN');s.pdts[0].assemblyImpact='NONE';assert.equal(evaluateServerSnapshot(s).available,8);s.pdts[0].assemblyImpact='BLOCKS';assert.equal(evaluateServerSnapshot(s).status,'UNKNOWN');});
 test('correction and read scope cannot be expanded by coordinator role or false frontend actor',async()=>{const {api}=setup();await assert.rejects(()=>api.correctAssembly('leader',{id:'c',production:key,revision:0,total:9,date:'2026-10-27',shift:1,observation:'QA'}),/SCOPE/);await assert.rejects(()=>api.correctAssembly('coord',{id:'c',production:'WRONG',revision:0,total:9,date:'2026-10-27',shift:1,observation:'QA'}),/SCOPE/);});
 test('unexpected transaction or write failures are sanitized and no success is returned',async()=>{const api=createPackingResolver({transaction:async()=>{throw new Error('private database diagnostics');}});await assert.rejects(()=>api.consume('leader',request()),e=>e.message==='SERVER_TRANSACTION_FAILED');await assert.rejects(()=>api.resolve('leader',key),e=>e.message==='SERVER_TRANSACTION_FAILED');});
@@ -35,3 +35,35 @@ test('Export and unit-map read inputs are never mutated by evaluation',()=>{cons
 test('quantitative evidence must identify production units, never pieces or percentages',()=>{const s=snapshot();s.cut.unit='PIEZA';assert.equal(evaluateServerSnapshot(s).status,'UNKNOWN');s.cut.unit='UNIDAD_PRODUCCION';s.events=[{id:'piece',production:key,unit:'PIEZA',stage:'ENSAMBLE',delta:99}];assert.equal(evaluateServerSnapshot(s).status,'DISCREPANCY');});
 test('missing closure state evidence never defaults to an open shift',async()=>{const s=snapshot();s.complete.turns=false;const {api}=setup(s);assert.equal((await api.resolve('leader',key)).status,'UNKNOWN');await assert.rejects(()=>api.consume('leader',request()),/INCOMPLETE_SERVER_SOURCES/);});
 test('unknown or conflicting shift states cannot enable consumption',async()=>{const t={stage:'EMPAQUE',date:'2026-10-27',shift:1,state:'UNKNOWN'};let x=setup(snapshot({turns:[t]}));await assert.rejects(()=>x.api.consume('leader',request()),/SHIFT_STATE_UNKNOWN/);x=setup(snapshot({turns:[{...t,state:'ABIERTO'},{...t,state:'CERRADO'}]}));assert.equal((await x.api.resolve('leader',key)).status,'DISCREPANCY');});
+test('consumption and correction require explicit matching server shift, absence is never ABIERTO',async()=>{
+ for(const turns of [[],[{stage:'EMPAQUE',date:'2026-10-28',shift:1,state:'ABIERTO'}],[{stage:'EMPAQUE',date:'2026-10-27',shift:2,state:'ABIERTO'}]]){
+  const {api,repo}=setup(snapshot({turns}));const before=repo.inspect();
+  await assert.rejects(()=>api.consume('leader',request()),/SHIFT_NOT_FOUND/);
+  await assert.rejects(()=>api.correctAssembly('coord',{id:'c',production:key,revision:0,total:9,date:'2026-10-27',shift:1,observation:'QA'}),/SHIFT_NOT_FOUND/);
+  assert.deepEqual(repo.inspect(),before);
+ }
+});
+test('explicit closed shift rejects consumption and assembly correction without writes',async()=>{
+ const turns=['ENSAMBLE','EMPAQUE'].map(stage=>({stage,date:'2026-10-27',shift:1,state:'CERRADO'}));const {api,repo}=setup(snapshot({turns}));const before=repo.inspect();
+ await assert.rejects(()=>api.consume('coord',request({observation:'QA'})),/AUTHORIZED_REOPEN_REQUIRED/);
+ await assert.rejects(()=>api.correctAssembly('coord',{id:'c',production:key,revision:0,total:9,date:'2026-10-27',shift:1,observation:'QA'}),/AUTHORIZED_REOPEN_REQUIRED/);assert.deepEqual(repo.inspect(),before);
+});
+test('explicit review shift keeps coordinator/reason rule for consumption and correction',async()=>{
+ const turns=['ENSAMBLE','EMPAQUE'].map(stage=>({stage,date:'2026-10-27',shift:1,state:'EN_REVISION'}));const {api,repo}=setup(snapshot({turns}));
+ await assert.rejects(()=>api.consume('leader',request({observation:'QA'})),/REVIEW_CORRECTION_DENIED/);
+ await assert.rejects(()=>api.consume('coord',request()),/REVIEW_CORRECTION_DENIED/);
+ const r=await api.consume('coord',request({observation:'QA authorized review'}));assert.equal(r.revision,1);
+ const c=await api.correctAssembly('coord',{id:'c',production:key,revision:1,total:9,date:'2026-10-27',shift:1,observation:'QA authorized correction'});assert.equal(c.revision,2);assert.equal(repo.inspect().events.length,2);
+});
+test('explicit open authorized shifts preserve revision checks and exact retry idempotency',async()=>{
+ const {api,repo}=setup();const first=await api.consume('leader',request());assert.equal(first.available,5);
+ assert.equal((await api.consume('leader',request())).duplicate,true);assert.equal(repo.inspect().events.length,1);
+ await assert.rejects(()=>api.consume('leader',request({id:'stale'})),/REVISION_CONFLICT/);
+ const c=await api.correctAssembly('coord',{id:'correction',production:key,revision:1,total:9,date:'2026-10-27',shift:1,observation:'QA'});assert.equal(c.available,4);
+});
+test('committed request retry still rejects a server snapshot without its target shift',async()=>{
+ const base=memoryRepository(snapshot(),sessions);let omit=false;
+ const api=createPackingResolver({transaction:(key,work)=>base.transaction(key,tx=>work({...tx,snapshot:async()=>{const s=await tx.snapshot();if(omit)s.turns=[];return s;}}))});
+ await api.consume('leader',request());omit=true;
+ await assert.rejects(()=>api.consume('leader',request()),/SHIFT_NOT_FOUND/);assert.equal(base.inspect().events.length,1);
+});
