@@ -1638,3 +1638,37 @@ frontend ni Picking operativo modificados. Siguiente: revisión Draft2D, ver che
 
 Nota de cierre2D: main avanzó concurrentemente a ae76b3729184ff802d7adc83d8867662230d438c (PR125).
 La rama2D conserva base124 autorizada; no incorpora ni sobrescribe ese cambio.
+
+
+# Etapa 2D — ajuste funcional por cantidades consolidadas (2026-10-27T16:47:50.736010+00:00)
+
+PR único Draft #127; rama feat/linea-stage2d-picking-unit-evidence, base de ajuste
+979421354f8115126fff823975e67bef646f3c7c; dependiente de #124, SHA111f0cb46921198f790b6cafc0336e0ca449136c.
+Main observado ae76b3729184ff802d7adc83d8867662230d438c incluido PR125, sin modificación.
+IMPLEMENTADO EN RAMA / VERIFICADO EN AISLAMIENTO. NO APLICADO / NO PUBLICADO.
+
+Se elimina el requisito de ID físico para la nueva vía: cantidad consolidada por
+producción/etapa, estimación separada de validación humana vigente, CAS/idempotencia,
+rol real Picking/Ensamble/coordinador más ámbito servidor y turno explícito.
+Se conserva el complemento por unidad como opcional; no se mezclan descuentos.
+Captura bruta/neta servidor evita restar dos veces; sin evidencia de base o cobertura
+se bloquea. NC/VALIDADA/piezas/estado no acreditan cantidades automáticamente.
+Cambios de PDT/Picking/Export/permisos invalidan; nueva validación registra historial
+inmutable y no reescribe cierres anteriores. No conversión piezas→ventanas.
+
+Pruebas:407/407 Node (11 nuevas), PG17.11 real:14 comprobaciones, adaptador4,
+contención/reversión3; sesiones concurrentes reales para CAS, dos turnos, source writer
+vs consumo y reintento UUID. verify:release LABv362 y sintaxis PASS; sin cambiar versión.
+Regresiones previas2B16/2C18/D2 y capturas originales conservadas; nuevos tests usan
+clon de la base D2 ya verificada y hash de funciones públicas/auth sin cambios.
+Evidencia: tests/linea-stage2d/evidence/consolidated-*.json.
+
+PENDIENTE DE EVIDENCIA REAL: productor servidor de captura/contabilidad/cobertura,
+clasificación explícita de eventos Export, ámbitos efectivos y locks de TODOS los
+escritores instalados, pool mínimo y compatibilidad final con main. No faltan IDs
+individuales para el nuevo contrato. No hay conector/pool productivo instalado.
+SQL REVIEW03 y scripts de contención/reversión, fuera de migraciones automáticas.
+No frontend/Picking/Mecanizado/Export/vidrio/Gateway/Firebase/otros repositorios.
+Siguiente paso único: revisión de ChatGPT del mismo PR127 y de los límites de fuentes
+antes de cualquier instalación; no comenzar otra etapa, aplicar, fusionar o desplegar.
+El SHA final se obtiene en Git/PR tras guardar este checkpoint.

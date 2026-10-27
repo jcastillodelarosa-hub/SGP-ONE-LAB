@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "database": "sgp_linea_d2q_qa_1793119507883140037",
+  "checks": [
+    "Real captured authentication + synthetic leader grant validates global quantity; duplicate once; Reception denied",
+    "Approved C2/2A/B2 adapter resolves NET without unit IDs or double deduction",
+    "REAL PostgreSQL duplicate requests concurrently consume once,12 ->9",
+    "Stale Export source blocks increment/availability, no fabricated zero"
+  ],
+  "scope": "Real PG sessions with synthetic captures/roles, not production integration"
+}

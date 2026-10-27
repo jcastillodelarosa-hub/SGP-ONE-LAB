@@ -1,3 +1,5 @@
+> Ajuste vigente: [CANTIDADES_CONSOLIDADAS.md](CANTIDADES_CONSOLIDADAS.md). Las referencias siguientes a IDs físicos como condición obligatoria corresponden al diseño anterior/opcional. La vía aprobada usa cantidades consolidadas validadas, no requiere IDs ni reconstrucción histórica. Las observaciones de ausencia de esos IDs siguen siendo hechos de la captura, pero ya no son bloqueo de este nuevo contrato.
+
 # Etapa 2D — trazabilidad Picking/PDT y cierre de contratos
 
 ## Estado y alcance

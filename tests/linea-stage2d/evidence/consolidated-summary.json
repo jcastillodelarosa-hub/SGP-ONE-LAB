@@ -1,0 +1,39 @@
+{
+  "timestampUtc": "2026-10-27T16:47:50.736010+00:00",
+  "branch": "feat/linea-stage2d-picking-unit-evidence",
+  "pr": 127,
+  "base": "979421354f8115126fff823975e67bef646f3c7c",
+  "mainObserved": "ae76b3729184ff802d7adc83d8867662230d438c",
+  "state": "IMPLEMENTADO / VERIFICADO EN AISLAMIENTO / PENDIENTE DE EVIDENCIA REAL / NO APLICADO / NO PUBLICADO",
+  "node": {
+    "tests": 407,
+    "pass": 407,
+    "fail": 0
+  },
+  "postgresChecks": 14,
+  "adapterChecks": 4,
+  "recoveryChecks": 3,
+  "release": "PASS LAB v362 unchanged",
+  "protectedFilesUnchanged": [
+    "app.js",
+    "index.html",
+    "styles.css",
+    "firebase.json",
+    "src/server/linea-source-bridge.js",
+    "src/server/linea-postgres-repository.js"
+  ],
+  "sourceSha256": {
+    "src/server/packing-resolver.js": "db91c6a8951261541b8f308519e24fae9c20704a43fe45d615c96860ffec5703",
+    "src/server/consolidated-pdt-impact.js": "f649ae977f3ae9eee56e61bfe7176ae516add90d3c6443996de6d9e059811665",
+    "src/server/consolidated-pdt-source.js": "bbe4a688eb9ee973c5285cc61462df4dca11e17aa1b2971e145bdaecc9310b3a",
+    "docs/sql-proposals/linea-etapa2d/03_consolidated_quantities_REVIEW.sql": "76a8643ce134dd9844a4a4aec9657f69acb7b9a66ef421b25ab90fe495eff8f6"
+  },
+  "productionWrites": false,
+  "individualWindowIdsRequired": false,
+  "limitations": [
+    "Synthetic server captures; no real production writer/pool connected",
+    "Actual source accounting basis/coverage and roles must be certified",
+    "Export event inclusion and all writer locks still require real evidence",
+    "PR125 remains untouched; installed trigger not reproduced by QA"
+  ]
+}
