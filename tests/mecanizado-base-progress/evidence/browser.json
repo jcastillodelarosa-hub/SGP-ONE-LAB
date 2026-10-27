@@ -1,0 +1,144 @@
+[
+  {
+    "viewport": [
+      1366,
+      1000
+    ],
+    "base_reference_2026_week44": 1106,
+    "source_of_reference": "owner supplied Supabase aggregate, reproduced as fixture, not a live authenticated comparison",
+    "synthetic_received": 650,
+    "synthetic_processed": 440,
+    "no_base_assignment_required": true,
+    "unassigned_NC300": 14,
+    "one_nested_bar_per_system": true,
+    "orange_ratio": 0.6082036775106082,
+    "lilac_ratio": 0.4243281471004243,
+    "approved_style5_700_600_280": true,
+    "tiny_labels_external_without_min_width": true,
+    "exact_colors_gray_orange_lilac": true,
+    "programmed_total_outside_no_percent": true,
+    "inside_label_contrast_ratios": [
+      6.504216021372676,
+      8.440961381076075
+    ],
+    "resize_repositions_labels_only": true,
+    "approved_geometry": {
+      "track": {
+        "x": 1066,
+        "width": 215.6875,
+        "right": 1281.6875
+      },
+      "received": {
+        "x": 1066,
+        "width": 184.875,
+        "right": 1250.875
+      },
+      "processed": {
+        "x": 1066,
+        "width": 86.265625,
+        "right": 1152.265625
+      },
+      "label": {
+        "x": 1098.828125,
+        "width": 20.59375,
+        "right": 1119.421875
+      },
+      "receivedLabel": {
+        "x": 1191.265625,
+        "width": 20.59375,
+        "right": 1211.859375
+      },
+      "total": {
+        "x": 1291.6875,
+        "width": 22.3125,
+        "right": 1314
+      },
+      "totalText": "700",
+      "labelVisible": true
+    },
+    "tiny_received_ratio": 0.001376412634019125,
+    "tiny_processed_ratio": 0.001376412634019125,
+    "totals_weighted": true,
+    "units_percentage_chart": true,
+    "year_week_system_filters": true,
+    "partial_reception_unknown_not_zero": true,
+    "processed_above_received_not_clamped": true,
+    "failed_query_no_stale_totals": true,
+    "late_response_discarded": true,
+    "session_change_protected": true,
+    "external_network": false,
+    "horizontal_page_overflow": false,
+    "errors": []
+  },
+  {
+    "viewport": [
+      390,
+      844
+    ],
+    "base_reference_2026_week44": 1106,
+    "source_of_reference": "owner supplied Supabase aggregate, reproduced as fixture, not a live authenticated comparison",
+    "synthetic_received": 650,
+    "synthetic_processed": 440,
+    "no_base_assignment_required": true,
+    "unassigned_NC300": 14,
+    "one_nested_bar_per_system": true,
+    "orange_ratio": 0.6082036775106082,
+    "lilac_ratio": 0.4243281471004243,
+    "approved_style5_700_600_280": true,
+    "tiny_labels_external_without_min_width": true,
+    "exact_colors_gray_orange_lilac": true,
+    "programmed_total_outside_no_percent": true,
+    "inside_label_contrast_ratios": [
+      6.504216021372676,
+      8.440961381076075
+    ],
+    "resize_repositions_labels_only": true,
+    "approved_geometry": {
+      "track": {
+        "x": 47,
+        "width": 265.6875,
+        "right": 312.6875
+      },
+      "received": {
+        "x": 47,
+        "width": 227.71875,
+        "right": 274.71875
+      },
+      "processed": {
+        "x": 47,
+        "width": 106.265625,
+        "right": 153.265625
+      },
+      "label": {
+        "x": 89.828125,
+        "width": 20.59375,
+        "right": 110.421875
+      },
+      "receivedLabel": {
+        "x": 203.6875,
+        "width": 20.59375,
+        "right": 224.28125
+      },
+      "total": {
+        "x": 320.6875,
+        "width": 22.3125,
+        "right": 343
+      },
+      "totalText": "700",
+      "labelVisible": true
+    },
+    "tiny_received_ratio": 0.0014114326040931546,
+    "tiny_processed_ratio": 0.0014114326040931546,
+    "totals_weighted": true,
+    "units_percentage_chart": true,
+    "year_week_system_filters": true,
+    "partial_reception_unknown_not_zero": true,
+    "processed_above_received_not_clamped": true,
+    "failed_query_no_stale_totals": true,
+    "late_response_discarded": true,
+    "session_change_protected": true,
+    "external_network": false,
+    "horizontal_page_overflow": false,
+    "errors": []
+  }
+]

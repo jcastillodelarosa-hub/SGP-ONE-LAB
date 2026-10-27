@@ -1,3 +1,83 @@
+# Continuidad vigente — Issue111 / PR108 único / estilo5 definitivo
+
+Fecha Colombia: 2026-10-26T20:01:24.255375-05:00.
+Rama existente `fix/mecanizado-base-received-progress`; PR108 OPEN/DRAFT reutilizado
+para Issue111, sin crear rama o PR duplicado. Main incorporado:
+`d4e794f0145db21051035d86703c94fa3337693e` (restauración de parte completa preservada).
+Versión propuestaLABv360; badge simple y PR107 móvil conservados. No publicación.
+
+Aprobación final: Issue111 comentarios6430858301/6430873803. **Gris, naranja y lila**,
+no azul/verde. Un carril; recibidas/base naranja, procesadas/base lila superpuesto;
+total fuera derecha sin porcentaje, procesadas centrada, recibidas en naranja libre.
+Etiquetas que no caben se llevan fuera, sin inflar rellenos. ResizeObserver actualiza
+solo etiquetas. Leyenda inferior y cinco indicadores, tabla/totales/filtros/tres vistas.
+Las entradas anteriores de colores azul/verde son históricas y quedan superadas.
+
+Reglas y fuentes de base/recepción/ejecución del candidato anterior se conservan
+sin cambios: no asignaciones como denominador, no sumar R+P, no recortar discrepancias,
+no convertir perfiles incompletos a ventanas sin evidencia. Base de referencia facilitada
+707+158+227+14=1106, externo1107; unidad pendiente no añadida. 694/577 no validados.
+Se mantiene el bloqueo de aceptación productiva: definición/payload de RPC base y
+recepción no contrastados con sesión SGP real disponible. Consulta READ ONLY anterior
+se conserva sin ejecutarla; no se genera otra auditoría ni se modifica Supabase.
+
+Evidencia local: **313/313JS**, verify:release360 y sintaxis; visualPC1366/móvil390
+sobre index/resumen/puente reales y datos sintéticos. Ejemplo aprobado700/600/280
+medido85,7%/40%, etiquetas dentro/fuera, mínimo1unidad yresize; contraste6,50/8,44:1.
+Se conservan NC-300 y referencia1106, filtros, contradicciones, errores/reintentos,
+PDT y calendario26/10T1=8+57=65. Prueba de parte completa65/individual57restante añadida.
+Capturas/reportes renovados: tests/mecanizado-base-progress/evidence; hashes preservan
+saveProgramming del main, Recepción, Ensamble/Picking, PDT, CSSglobal y cálculo base.
+
+Estado: **IMPLEMENTADO — PENDIENTE DE REVISIÓN**. No PUBLICADO ni VERIFICADO en
+producción. Sin datos/tablas/RPC/migraciones productivas, RLS, Firebase, GOOGLE/LAC,
+fusión, despliegue ni conciliación Export/base. SHA/CI final en PR108.
+Siguiente paso único: revisión de ChatGPT del mismo PR108/Issue111, incluida la
+aceptación de fuentes pendientes antes de autorizar integración/publicación.
+
+---
+
+# Continuidad vigente — corrección de base/recibidas/procesadas
+
+Fecha Colombia: 2026-10-26T17:18:45.278283-05:00.
+Repositorio SGP-ONE-LAB; base main `275e5dc127609869d5174ab41cb9baadd24d3b0c`.
+**PR104 FUSIONADO**, conservando PR107 móvil y badge simple. Nuevo trabajo separado
+`fix/mecanizado-base-received-progress`, LABv360 propuesta, un único PR Draft.
+Las entradas inferiores PR104 OPEN/DRAFT son históricas.
+
+Cambio implementado: denominador de programación base por año/semana/línea/clave,
+no asignaciones de mecanizado. Recibidas por auditoría real completa y relaciones
+materiales; incompletas sin ventanas cuantificadas quedan pendientes. Ejecución real
+conciliada por producción, sin recortes para aparentar programadas≥recibidas≥procesadas.
+Una barra gris/azul/verde anidada por sistema; unidades/porcentaje/gráfico, totales
+ponderados, filtros y advertencias. No inventar694/577 del boceto ni añadir la unidad
+externa. Referencia facilitada: semana44/PANELES2=707+158+227+14=1106, externo1107.
+Diferencia1 visible como referencia de revisión, no ajuste. Antes636 era universo de
+asignaciones; diferencia aritmética470, sin afirmar desglose no demostrado.
+
+Estado **IMPLEMENTADO / VERIFICADO LOCALMENTE**, no PUBLICADO ni VERIFICADO en
+producción. 312/312JS,25 nuevas; browser PC1366/móvil390 con datos sintéticos,
+nesting y filtros, contradicciones/parciales, error/reintento; PDT y65ventanas de
+26/10T1 preservados. Capturas marcadas como pruebas locales. verify:release360 y
+sintaxis/diff aprobados. Detalles: tests/mecanizado-base-progress/README.md y evidence/.
+
+**Validación de datos pendiente y necesaria antes de integrar:** comprobar definición
+/payload reales de RPC semanal (base sgp_producciones) y recepción con sesión SGP;
+no disponible en esta ejecución. La lectura directa protegida devolvió0 y no se
+interpreta como base vacía. No se revalidaron1106/R/P en una nueva consulta autenticada.
+Consulta únicamente READ ONLY preparada en docs/sql-proposals/mecanizado/
+BASE_PROGRESS_READONLY_PREFLIGHT.sql, no ejecutada ni migración. No volver a pedir
+las funciones PDT ya recibidas. Recibidas incompletas sin asignación cuantitativa no
+se convierten de perfiles a ventanas. Sin fallback al denominador incorrecto.
+
+Sin Supabase/Firebase productivo, SQL aplicado, datos, RLS, fusión ni despliegue.
+Ensamble/Empaque/Picking y GOOGLE/LAC intactos; no conciliación Export/base ni nuevos
+permisos para aprobar incorporaciones. SHA final y CI se consultan en el PR Draft.
+Siguiente paso único: revisión ChatGPT del único PR, resolviendo la aceptación de
+fuentes antes de cualquier integración/publicación autorizada por separado.
+
+---
+
 # Continuidad vigente — PR104 sincronizado con PR107
 
 Fecha Colombia (UTC−5): 2026-10-26T15:00:50.980709-05:00. Rama existente:

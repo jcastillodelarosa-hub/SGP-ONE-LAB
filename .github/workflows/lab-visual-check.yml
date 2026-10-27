@@ -1,4 +1,4 @@
-name: LAB v359 visual verification (read only)
+name: LAB v360 visual verification (read only)
 on:
   workflow_dispatch:
 permissions:

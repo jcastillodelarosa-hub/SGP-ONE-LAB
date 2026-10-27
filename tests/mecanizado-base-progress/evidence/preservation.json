@@ -1,0 +1,47 @@
+{
+  "date_colombia": "2026-10-26T19:59:38.302862-05:00",
+  "base": "d4e794f0145db21051035d86703c94fa3337693e",
+  "previous_candidate": "6fbb02e760d7349e907ff308d55aa59d15ac7072",
+  "checks": {
+    "async function saveProgramming()": {
+      "unchanged_from_main": true,
+      "sha256": "15b65469b9d9e86d69ff3a67dcb81f912356d60b220d67dc4fcb76d33e9de17a"
+    },
+    "async function loadMissing()": {
+      "unchanged_from_main": true,
+      "sha256": "5e2fa3fa9d11ca0082bfd7f75fd8c53c3e38b6b6bb8494459f0a66f6eda7bb9a"
+    },
+    "async function loadReception()": {
+      "unchanged_from_main": true,
+      "sha256": "e3452dade21cf8fcd36f9448eacfd60f0ce0a66c6239b5b89a3951d0d686f45f"
+    },
+    "renderAssembly": {
+      "unchanged_from_main": true,
+      "sha256": "f9d2e6135237565af4ad6a11f595211337e1208bec1a07fc934db1a4c2779f3f"
+    },
+    "renderPicking": {
+      "unchanged_from_main": true,
+      "sha256": "c6b37825eb41a5f0d2122aa9850bced30aa49ef745dff124f9ff284456185e20"
+    },
+    "src/domain/mecanizado-base-progress.js": {
+      "unchanged": true,
+      "reference": "HEAD",
+      "sha256": "d91a8bf3616423572b401eab77203ed39a831c3e8915ab542ea1c26a2572ad94"
+    },
+    "src/modules/pdt-v2-controller.js": {
+      "unchanged": true,
+      "reference": "origin/main",
+      "sha256": "337a9092945c01f203b49e6ab119bb62f606557f0b1bba7771cada3cf7cb9f58"
+    },
+    "src/modules/pdt-v2-view-state.js": {
+      "unchanged": true,
+      "reference": "origin/main",
+      "sha256": "ff9ba34ca9cbb1375a9eba142b917cd63659ab8b412d10c7c2d39a6b1e545db3"
+    },
+    "styles.css": {
+      "unchanged": true,
+      "reference": "origin/main",
+      "sha256": "47156e7a769f35ca60974e41affe3a94aace7e5d2b909ee02bc0bee9e5aada57"
+    }
+  }
+}
