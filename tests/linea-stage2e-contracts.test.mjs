@@ -17,3 +17,12 @@ test('ACL/DEFINER and caller certification flags never enable the motor',()=>{fo
 test('private manifest reader READ ONLY and bound parameters cannot upgrade proof',async()=>{const calls=[];let released=false;const api=createLineaExportManifestReader({connect:async()=>({query:async(sql,params)=>{calls.push([sql,params]);return {rows:sql.startsWith('SELECT')?[{data:{status:'PENDIENTE_CERTIFICACION_EXPORT',available:null}}]:[]};},release(){released=true;}})});assert.equal((await api.read('QA','K','L')).available,null);assert.equal(calls[0][0],'BEGIN TRANSACTION READ ONLY');assert.deepEqual(calls.find(x=>x[0].startsWith('SELECT'))[1],['QA','K','L']);assert.equal(released,true);});
 test('backend errors and fabricated READY data roll back without leaking',async()=>{for(const failed of [true,false]){const calls=[];const api=createLineaExportManifestReader({connect:async()=>({query:async sql=>{calls.push(sql);if(sql.startsWith('SELECT')){if(failed)throw Error('private connection diagnostics');return {rows:[{data:{status:'READY',available:20}}]};}return {rows:[]};},release(){}})});await assert.rejects(api.read('QA','K','L'),/EXPORT_SOURCE_NOT_VERIFIED/);assert.ok(calls.includes('ROLLBACK'));}});
 test('missing session/key/load rejected before connecting',async()=>{const api=createLineaExportManifestReader({connect:()=>{throw Error('must not connect');}});await assert.rejects(api.read('','K','L'),/INVALID_REQUEST/);});
+test('connection, rollback and release failures cannot expose private driver diagnostics',async()=>{
+ for(const failure of ['connect','rollback','release']){
+  const api=createLineaExportManifestReader({connect:async()=>{
+   if(failure==='connect')throw Error('private connection details');
+   return {query:async sql=>{if(failure==='rollback')throw Error('private rollback details');return {rows:sql.startsWith('SELECT')?[{data:{status:'PENDIENTE_CERTIFICACION_EXPORT',available:null}}]:[]};},release:async()=>{if(failure==='release')throw Error('private release details');}};
+  }});
+  await assert.rejects(api.read('QA','K','L'),e=>e.message==='EXPORT_SOURCE_NOT_VERIFIED');
+ }
+});

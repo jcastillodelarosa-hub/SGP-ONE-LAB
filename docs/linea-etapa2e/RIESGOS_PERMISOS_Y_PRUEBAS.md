@@ -54,7 +54,7 @@ Se bloquea toda ampliación pendiente de esa evidencia, sin pedir contraseñas.
 
 ## Evidencia ejecutada y reproducción
 
-- `npm test`: **421/421**,14 nuevas. Incluye regresión de etapas anteriores y D2.
+- `npm test`: **422/422**,15 nuevas. Incluye regresión de etapas anteriores y D2.
 - `python tests/linea-stage2e/run-postgres.py`: **9 comprobaciones PostgreSQL17 reales**.
 - `node tests/linea-stage2e/manifest-adapter.mjs`: **4 comprobaciones** sobre PG.
 - `bootstrap.py`: reconstruyó la fixture sintética B2 (16 comprobaciones), solo
@@ -74,6 +74,7 @@ Reproducir: si no existe la base QA registrada, `python .../bootstrap.py`; despu
 `run-postgres.py`, `manifest-adapter.mjs` y `npm test`. No cambiar nombres para apuntar
 a otra base. Los scripts validan prefijos QA/aislamiento. La suite heredada D2 y
 sus evidencias permanecen sin modificar; no se repite una auditoría general.
+Los fallos de conexión, rollback o liberación del lector no exponen diagnósticos privados.
 No hay cambios visuales y no se requieren capturas PC/móvil nuevas en esta fase.
 
 ## Instalación propuesta / reversión, no ejecutadas en producción

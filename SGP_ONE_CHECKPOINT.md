@@ -1,6 +1,6 @@
 # Etapa 2E — checkpoint final (2026-10-27T17:12:40.820882-05:00, Colombia)
 
-Rama feat/linea-stage2e-real-source-contracts; único Draft dependiente de PR127.
+Rama feat/linea-stage2e-real-source-contracts; único Draft #130 dependiente de PR127.
 Base funcional aprobada2D 2fc09ea50fa6acb58733f25def7edd466b1acbc6, más checkpoint
 a716bdaf8fc23bf757d808369ba48f86e1463b63. No cambios a padres117/121/122/124/127.
 Main observado 0a1a5fd53cf622817f164e4031e6c83e7ab0ac56:125 guard de fecha/turno y
@@ -10,7 +10,7 @@ PROPUESTO: vínculo atómico importador real↔historial↔ACK/manifiesto.
 IMPLEMENTADO EN RAMA: intérpretes seguros de campos versionados y validación de
 faltantes, lector privado READ ONLY, propuesta de manifiesto inmutable del ACK
 existente, consulta de catálogos faltantes, matrices de fuentes/permisos/escritores.
-VERIFICADO EN AISLAMIENTO:421/421 Node (14 nuevas),9 comprobaciones PG17 real y4
+VERIFICADO EN AISLAMIENTO:422/422 Node (15 nuevas),9 comprobaciones PG17 real y4
 lector PG. Bootstrap sintético B2 (16) reconstruyó entorno tras pérdida de /tmp,
 conservando evidencia previa byte a byte. Verify:release LABv362 y sintaxis/diff PASS,
 sin publicación. No se afirma que los archivos /tmp anteriores fueran recuperados:

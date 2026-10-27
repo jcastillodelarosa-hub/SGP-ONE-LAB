@@ -1,5 +1,5 @@
 {
-  "timestampUtc": "2026-10-27T22:12:40.820909+00:00",
+  "timestampUtc": "2026-10-27T22:18:12.349650+00:00",
   "branch": "feat/linea-stage2e-real-source-contracts",
   "functionalBase2D": "2fc09ea50fa6acb58733f25def7edd466b1acbc6",
   "parentCheckpoint": "a716bdaf8fc23bf757d808369ba48f86e1463b63",
@@ -12,10 +12,10 @@
   "deployed": false,
   "individualWindowIdsRequired": false,
   "node": {
-    "tests": 421,
-    "pass": 421,
+    "tests": 422,
+    "pass": 422,
     "fail": 0,
-    "newTests": 14
+    "newTests": 15
   },
   "postgresChecks": 9,
   "adapterChecks": 4,
@@ -40,7 +40,7 @@
     "docs/sql-proposals/linea-etapa2d/03_consolidated_quantities_REVIEW.sql": "76a8643ce134dd9844a4a4aec9657f69acb7b9a66ef421b25ab90fe495eff8f6"
   },
   "sourceSha256": {
-    "src/server/linea-export-manifest-reader.js": "fe8c72211bb7c51c11c2e2df13c4eeb3782cce8a970de7698134d870957e5d36",
+    "src/server/linea-export-manifest-reader.js": "8c206579dbc3266b3ce4f9b50cc73c58e3d1b30e5634b0a01c7c74b6fa8747d0",
     "src/server/linea-real-source-contracts.js": "f6bebb0574be3d9763afae62d6e331169f993dd80afc2ca7cf816058acecf610",
     "docs/sql-proposals/linea-etapa2e/01_export_manifest_REVIEW.sql": "82bd6d88530f72c048a35ea232eb90e8db3b296a6dce045286f78d9441c584c4"
   },
@@ -50,5 +50,7 @@
     "Functional cargo to installed role/production/stage binding",
     "All real writers sharing lock/invalidation protocol and least-privilege pool"
   ],
-  "noRealSourceCertificateIssued": true
+  "noRealSourceCertificateIssued": true,
+  "pr": 130,
+  "connectionCleanupErrorsSanitized": true
 }
