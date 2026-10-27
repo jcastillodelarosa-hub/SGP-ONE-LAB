@@ -2504,7 +2504,7 @@ async function deliverPickingOrder(id,production){
  document.querySelector('#pickDeliveryTitle').textContent='Entrega · '+production;
  document.querySelector('#pickDeliveryMeta').innerHTML='PICKING · Reserva '+escapeHtml(x.reserva||'—')+' · Parte '+escapeHtml(x.parte||'—')+' · '+escapeHtml(x.sistema||'')+' · '+escapeHtml(x.acabado||'')+(meta?sharedBadgeHtml(meta)+sharedDetailsHtml(meta):'');
  document.querySelector('#pickDeliveryObs').value='';
- const fd=document.querySelector('#pickDeliveryDate'),ts=document.querySelector('#pickDeliveryShift');if(fd)fd.value=new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);if(ts)ts.value=x.turno||'';
+ const fd=document.querySelector('#pickDeliveryDate'),ts=document.querySelector('#pickDeliveryShift');if(fd&&ts){const vigente=sgpPickingCurrentShift();fd.value=vigente?.fecha||'';ts.value=vigente?.turno||'';}
  document.querySelector('#pickDeliveryMissing').hidden=true;document.querySelector('#pickMissingForms').innerHTML='';document.querySelector('#pickDeliverySave').disabled=true;document.querySelector('#pickDeliveryModal').hidden=false;document.querySelectorAll('[data-pick-complete]').forEach(b=>b.classList.remove('active'))
 }
 let pickPdtEditor=null,pickPdtSaving=false,pickPdtRequest=null,pickPdtSignature=null,pickPdtGeneration=0;
@@ -2521,6 +2521,26 @@ async function pickDeliverySetComplete(value,btn){
  if(generation===pickPdtGeneration)pickPdtEditor=editor;
 }
 function addPickMissingForm(){document.querySelector('#pickMissingForms [data-add]')?.click();}
+// Picking: Colombia operational date follows the shift START, not calendar midnight.
+function sgpPickingCurrentShift(at=new Date()){
+ const parts=Object.fromEntries(new Intl.DateTimeFormat('en-CA',{timeZone:'America/Bogota',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23',weekday:'short'}).formatToParts(at).filter(p=>p.type!=='literal').map(p=>[p.type,p.value]));
+ const date=parts.year+'-'+parts.month+'-'+parts.day,h=Number(parts.hour)+Number(parts.minute)/60;
+ const weekday=parts.weekday;
+ // Sunday has configured special hours 07-18 and 18-05; other days 07-19 and 19-07.
+ if(h>=7)return {fecha:date,turno:h<(weekday==='Sun'?18:19)?'TURNO 1':'TURNO 2'};
+ const previous=new Date(Date.UTC(Number(parts.year),Number(parts.month)-1,Number(parts.day)-1,12));
+ const prevParts=Object.fromEntries(new Intl.DateTimeFormat('en-CA',{timeZone:'America/Bogota',year:'numeric',month:'2-digit',day:'2-digit',weekday:'short'}).formatToParts(previous).filter(p=>p.type!=='literal').map(p=>[p.type,p.value]));
+ if(prevParts.weekday==='Sun'&&h>=5)return null; // Unconfigured Monday 05:00-07:00: fail closed.
+ return {fecha:prevParts.year+'-'+prevParts.month+'-'+prevParts.day,turno:'TURNO 2'};
+}
+function sgpPickingFutureShift(fecha,turno,at=new Date()){
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(fecha)||!['TURNO 1','TURNO 2'].includes(turno))return true;
+ const [y,m,d]=fecha.split('-').map(Number),day=new Date(Date.UTC(y,m-1,d,12));
+ if(day.getUTCFullYear()!==y||day.getUTCMonth()!==m-1||day.getUTCDate()!==d)return true;
+ const weekday=new Intl.DateTimeFormat('en-US',{timeZone:'America/Bogota',weekday:'short'}).format(day);
+ const hour=turno==='TURNO 1'?7:(weekday==='Sun'?18:19);
+ return Date.UTC(y,m-1,d,hour+5)>at.getTime();
+}
 async function savePickingDelivery(){
  if(!pickDeliveryTarget||pickDeliveryComplete===null||pickPdtSaving)return;
  const save=document.querySelector('#pickDeliverySave');
@@ -2528,6 +2548,7 @@ async function savePickingDelivery(){
   const context=pickPdtContext(),pieces=pickDeliveryComplete?[]:pickPdtEditor?.value();
   if(!pieces)throw new Error('Actualiza y selecciona las piezas verificadas.');
   if(!context.fecha_entrega||!context.turno)throw new Error('Selecciona fecha y turno.');
+  if(sgpPickingFutureShift(context.fecha_entrega,context.turno))throw new Error('No se permite registrar una entrega en una fecha o turno futuro. Selecciona un turno ya iniciado.');
   const signature=JSON.stringify([context,pieces]);
   if(!pickPdtRequest||pickPdtSignature!==signature){pickPdtRequest=crypto.randomUUID();pickPdtSignature=signature;}
   pickPdtSaving=true;save.disabled=true;pickPdtEditor?.setDisabled(true);
