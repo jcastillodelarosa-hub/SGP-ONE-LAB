@@ -1,3 +1,42 @@
+# Continuidad vigente — Issue111 / PR108 único / estilo5 definitivo
+
+Fecha Colombia: 2026-10-26T20:01:24.255375-05:00.
+Rama existente `fix/mecanizado-base-received-progress`; PR108 OPEN/DRAFT reutilizado
+para Issue111, sin crear rama o PR duplicado. Main incorporado:
+`d4e794f0145db21051035d86703c94fa3337693e` (restauración de parte completa preservada).
+Versión propuestaLABv360; badge simple y PR107 móvil conservados. No publicación.
+
+Aprobación final: Issue111 comentarios6430858301/6430873803. **Gris, naranja y lila**,
+no azul/verde. Un carril; recibidas/base naranja, procesadas/base lila superpuesto;
+total fuera derecha sin porcentaje, procesadas centrada, recibidas en naranja libre.
+Etiquetas que no caben se llevan fuera, sin inflar rellenos. ResizeObserver actualiza
+solo etiquetas. Leyenda inferior y cinco indicadores, tabla/totales/filtros/tres vistas.
+Las entradas anteriores de colores azul/verde son históricas y quedan superadas.
+
+Reglas y fuentes de base/recepción/ejecución del candidato anterior se conservan
+sin cambios: no asignaciones como denominador, no sumar R+P, no recortar discrepancias,
+no convertir perfiles incompletos a ventanas sin evidencia. Base de referencia facilitada
+707+158+227+14=1106, externo1107; unidad pendiente no añadida. 694/577 no validados.
+Se mantiene el bloqueo de aceptación productiva: definición/payload de RPC base y
+recepción no contrastados con sesión SGP real disponible. Consulta READ ONLY anterior
+se conserva sin ejecutarla; no se genera otra auditoría ni se modifica Supabase.
+
+Evidencia local: **313/313JS**, verify:release360 y sintaxis; visualPC1366/móvil390
+sobre index/resumen/puente reales y datos sintéticos. Ejemplo aprobado700/600/280
+medido85,7%/40%, etiquetas dentro/fuera, mínimo1unidad yresize; contraste6,50/8,44:1.
+Se conservan NC-300 y referencia1106, filtros, contradicciones, errores/reintentos,
+PDT y calendario26/10T1=8+57=65. Prueba de parte completa65/individual57restante añadida.
+Capturas/reportes renovados: tests/mecanizado-base-progress/evidence; hashes preservan
+saveProgramming del main, Recepción, Ensamble/Picking, PDT, CSSglobal y cálculo base.
+
+Estado: **IMPLEMENTADO — PENDIENTE DE REVISIÓN**. No PUBLICADO ni VERIFICADO en
+producción. Sin datos/tablas/RPC/migraciones productivas, RLS, Firebase, GOOGLE/LAC,
+fusión, despliegue ni conciliación Export/base. SHA/CI final en PR108.
+Siguiente paso único: revisión de ChatGPT del mismo PR108/Issue111, incluida la
+aceptación de fuentes pendientes antes de autorizar integración/publicación.
+
+---
+
 # Continuidad vigente — corrección de base/recibidas/procesadas
 
 Fecha Colombia: 2026-10-26T17:18:45.278283-05:00.

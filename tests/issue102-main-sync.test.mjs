@@ -3,9 +3,9 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 const app=readFileSync(new URL('../app.js',import.meta.url),'utf8');
 const saveSource=app.slice(app.indexOf('async function saveProgramming()'),app.indexOf("document.querySelector('#progRefresh')"));
-function programming({produccion=null,orders=[{produccion:'PANEL-A',cantidad:8},{produccion:'PANEL-B',cantidad:57}],coverage=[]}={}){
+function programming({produccion=null,orders=[{produccion:'PANEL-A',cantidad:8},{produccion:'PANEL-B',cantidad:57}],coverage=[],quantity=8}={}){
  const calls=[],alerts=[],reloads=[];let closed=0;
- const values={'#progQty':8,'#progDate':'2026-10-26','#progShift':'TURNO 1','#progPriority':1,'#progObs':'QA','#progOrderObs':''};
+ const values={'#progQty':quantity,'#progDate':'2026-10-26','#progShift':'TURNO 1','#progPriority':1,'#progObs':'QA','#progOrderObs':''};
  const deps={progSelection:{reserva:'8707142',produccion,maxQty:65,part:{prioridad:1,ordenes:orders}},progOrderCoverage:coverage,getAppToken:()=> 'SYNTHETIC',document:{querySelector:s=>({value:values[s]}),querySelectorAll:()=>[]},alert:m=>alerts.push(m),getSupabaseClient:async()=>({rpc:async(name,args)=>{calls.push({name,args});return {error:null};}}),closeProgModal:()=>closed++,loadProgramming:async args=>reloads.push(args)};
  const save=new Function(...Object.keys(deps),saveSource+';return saveProgramming;')(...Object.values(deps));
  return {save,calls,alerts,reloads,closed:()=>closed};
@@ -29,4 +29,9 @@ test('PR101 preserved: missing material aggregates weeks/finishes without invent
  const source=app.slice(app.indexOf('async function loadMissing()'),app.indexOf('function openMissingReceive('));
  await new Function(...Object.keys(deps),'let missingReportRows=[];'+source+';return loadMissing;')(...Object.values(deps))();
  assert.deepEqual(calls.map(x=>x.name),['sgp_recepcion_faltantes_listar','sgp_recepcion_listar']);assert.equal(calls[1].args.p_semana,null);assert.match(node('#missingBody').innerHTML,/<td>8707142<\/td><td>44 \/ 45<\/td><td>BL \/ DS<\/td><td>PANEL<\/td>/);assert.equal(node('#missOpen').textContent,1);
+});
+
+test('current main preserves full-part programming while individual selection remains canonical',async()=>{
+ const full=programming({quantity:65});await full.save();assert.equal(full.calls.length,1);assert.equal(full.calls[0].args.p_produccion,null);assert.equal(full.calls[0].args.p_cantidad,65);assert.deepEqual(full.alerts,[]);
+ const remaining=programming({quantity:57,coverage:[{reserva:'8707142',prioridad_semanal:1,produccion:'PANEL-A',estado_orden:'PROGRAMADA'}]});await remaining.save();assert.equal(remaining.calls[0].args.p_produccion,'PANEL-B');assert.equal(remaining.calls[0].args.p_cantidad,57);
 });

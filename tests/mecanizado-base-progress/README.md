@@ -1,9 +1,12 @@
-# Corrección de indicadores de mecanizado — LAB v360 propuesta
+# Issue #111 — avance de mecanizado y estilo5 aprobado — LAB v360 propuesta
 
 Estado: **IMPLEMENTADO EN RAMA**, probado localmente; no PUBLICADO ni VERIFICADO en
-producción. Especificación: texto adjunto del propietario, 26/10/2026.
-Base: main `275e5dc127609869d5174ab41cb9baadd24d3b0c`, PR104 fusionado.
-Rama independiente: `fix/mecanizado-base-received-progress`. Un único PR Draft.
+producción. Especificación: Issue111 y comentarios de aprobación final6430858301/6430873803;
+el gris/naranja/lila aprobado después prevalece sobre el azul/verde inicial del Issue.
+Base vigente incorporada: main `d4e794f0145db21051035d86703c94fa3337693e`,
+incluida restauración de programación de partes. PR104 ya fusionado.
+Rama existente: `fix/mecanizado-base-received-progress`. **Único PR Draft108**,
+reutilizado para Issue111 por contener el mismo alcance; no se abre otro PR equivalente.
 
 ## Causa del error y nuevo denominador
 
@@ -50,15 +53,20 @@ No hay min()/recortes silenciosos de recepción o ejecución para forzar consist
 
 ## Barra aprobada y métricas
 
-Una barra por sistema: contenedor gris100%, azul de recibidas/programadas y verde
-anidado dentro del azul. El verde ocupa procesadas/recibidas del contenedor azul,
+Una barra por sistema: contenedor gris100%, naranja de recibidas/programadas y lila
+anidado dentro del naranja. El lila ocupa procesadas/recibidas del contenedor naranja,
 equivalente a procesadas/programadas respecto al gris. No son segmentos acumulados.
-Cantidades y porcentajes quedan fuera de los rellenos para ser legibles aun pequeños.
+El total programado queda fuera del extremo derecho, como número sin porcentaje.
+Procesadas se centra dentro del lila; recibidas se centra en el naranja que sigue
+visible después del lila. Un ResizeObserver mide espacio real y texto: si una etiqueta
+no cabe, pasa fuera sin min-width ni cambios de cantidades/proporciones. La leyenda
+gris/naranja/lila queda debajo. No se dibujan tres barras independientes.
 Solo se dibujan colores con datos conciliados: programadas≥recibidas≥procesadas.
 
 Unidades / Porcentaje / Gráfico comparten exactamente los mismos datos. Todos
 incluyen sistema, base, recibidas, procesadas, pendientes, % recibido y % procesado.
-Indicadores superiores y totales usan sumas, no promedios de porcentajes. Pendientes
+Cinco indicadores superiores: Programadas, Recibidas, Procesadas, Pendientes y Avance.
+Los totales usan sumas, no promedios de porcentajes. Pendientes
 = base − procesadas; desconocido no equivale a cero. Cero base → porcentaje «—».
 No se agrega barra redundante de totales. Responsive PC/móvil, con scroll local de
 las pestañas de PR107 y sin overflow de página.
@@ -117,13 +125,18 @@ adaptar a la fuente real autorizada o resolver ese contrato separadamente.
 
 ## Pruebas y evidencia
 
-- `npm test`: **312/312** aprobadas;25 nuevas de base no asignada, recepción completa
+- `npm test`: **313/313** aprobadas;25 nuevas de base no asignada, recepción completa
   /parcial/desconocida, ejecución completa/parcial, compartidas, MULTI-RESERVA,
   año/semana/línea/sistema, duplicados, traslados completos/parciales, encabezado
   reducido, contradicciones, no recortes y referencia1106 con NC-300.
+- Regresión dinámica adicional: programación de parte completa65 y programación
+  individual canónica57 restante conservadas conforme al main vigente.
 - `python tests/mecanizado-base-progress/browser.py`: PC1366×1000 y móvil390×844.
   Estructura real de index.html, resumen, puente y agregador; RPC/REST sintéticas y
-  todo tráfico externo bloqueado. Prueba geometría de capas, tres modos, totales,
+  todo tráfico externo bloqueado. Estilo5 aprobado700/600/280: naranja85,7%,
+  lila40%,280centrado,600en naranja,700fuera sin porcentaje. Colores exactos
+  #e5e7eb/#fb923c/#c4b5fd; contraste interior6,50:1/8,44:1. Etiquetas pequeñas
+  y resize no alteran proporciones. También prueba geometría, tres modos, totales,
   año/multisemana/sistema, lectura fallida sin resultados antiguos, reintento,
   respuestas tardías, sesión cambiada y casos contradictorio/incompleto.
   Siete solicitudes iniciales del nuevo puente (tres REST + cuatro RPC, una de base);
@@ -138,7 +151,10 @@ adaptar a la fuente real autorizada o resolver ese contrato separadamente.
   Ensamble/Picking, PDT y CSS global de PR107 sin cambios funcionales.
 - Capturas: `units-{1366,390}.png`, `chart-{1366,390}.png`,
   `partial-{1366,390}.png`, `inconsistent-{1366,390}.png`, `shell-{1366,390}.png`.
-  Resultados en `evidence/browser.json`; CI y SHA final se registran en el PR.
+  Resultados en `evidence/browser.json`; Capturas específicas de aprobación: `approved-style5-{1366,390}.png`,
+  `tiny-processed-{1366,390}.png` y `tiny-segments-{1366,390}.png`.
+  El ejemplo700/600/280 usa un año ficticio de prueba; no es información productiva.
+  CI y SHA final se registran en el mismo PR108 asociado al Issue111.
 
 Cache30s aislada por sesión y revisión, base además por año/semana. Lecturas agrupadas
 /paginadas existentes, hasta tres semanas en paralelo. Se rechaza una respuesta global

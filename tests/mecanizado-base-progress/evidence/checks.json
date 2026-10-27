@@ -1,12 +1,15 @@
 {
   "javascript": {
-    "total": 312,
-    "passed": 312,
+    "total": 313,
+    "passed": 313,
     "failed": 0
   },
   "release": "LAB v360",
   "sql_file": "READ ONLY; metadata/aggregates only; ROLLBACK; not executed in production",
   "yaml_python_syntax": "PASS",
   "credentials_signature_scan": "PASS",
-  "production_writes": 0
+  "production_writes": 0,
+  "issue": 111,
+  "single_pr": 108,
+  "visual_approval": "style5: gray/orange/lilac; total outside; inside labels with external fallback"
 }
