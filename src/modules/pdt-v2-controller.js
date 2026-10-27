@@ -16,7 +16,7 @@ export async function openPdtV2({row,client,token,role,capabilities,show,escape:
     m.querySelector('.repo-work-body').innerHTML=body;m.querySelector('.repo-work-footer').innerHTML=footer;return m;
   };
   if(!capabilities)throw new Error('Backend PDT v2 no disponible');
-  const validated=row.contrato_pdt==='V2';
+  const validated=row.contrato_pdt==='V2' && row.validacion_estado==='VALIDADO' && Array.isArray(row.detalles) && row.detalles.length>0;
   const editable=row.estado!=='RESUELTO'&&row.estado_repo!=='PICKING';
   const validator=['ADMINISTRADOR','COORDINADOR','RECEPCION','LIDER LINEA','SUPERVISOR DE PICKING'].includes(role);
   const machinist=['ADMINISTRADOR','COORDINADOR','LIDER MECANIZADO','LIDER'].includes(role);
