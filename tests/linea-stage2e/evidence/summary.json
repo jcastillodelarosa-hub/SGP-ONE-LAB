@@ -1,0 +1,56 @@
+{
+  "timestampUtc": "2026-10-27T22:18:12.349650+00:00",
+  "branch": "feat/linea-stage2e-real-source-contracts",
+  "functionalBase2D": "2fc09ea50fa6acb58733f25def7edd466b1acbc6",
+  "parentCheckpoint": "a716bdaf8fc23bf757d808369ba48f86e1463b63",
+  "dependsOnPr": 127,
+  "mainObserved": "0a1a5fd53cf622817f164e4031e6c83e7ab0ac56",
+  "state": "IMPLEMENTADO EN RAMA / VERIFICADO EN AISLAMIENTO / PENDIENTE DE EVIDENCIA REAL",
+  "realIntegration": "PARCIAL, FUENTES NO CERTIFICADAS",
+  "supabaseReadPerformed": false,
+  "productionWrites": false,
+  "deployed": false,
+  "individualWindowIdsRequired": false,
+  "node": {
+    "tests": 422,
+    "pass": 422,
+    "fail": 0,
+    "newTests": 15
+  },
+  "postgresChecks": 9,
+  "adapterChecks": 4,
+  "fixtureBootstrapB2Checks": 16,
+  "releaseVerification": "PASS local LAB v362 unchanged, generated from existing pinned dependencies; no deployment",
+  "protectedPathsUnchanged": [
+    "app.js",
+    "index.html",
+    "styles.css",
+    "config.js",
+    ".github",
+    "supabase",
+    "src/modules",
+    "src/domain",
+    "planner-operations-v326.js",
+    "planner-readonly-v326.js"
+  ],
+  "prior2DSourceHashesUnchanged": {
+    "src/server/packing-resolver.js": "db91c6a8951261541b8f308519e24fae9c20704a43fe45d615c96860ffec5703",
+    "src/server/consolidated-pdt-impact.js": "f649ae977f3ae9eee56e61bfe7176ae516add90d3c6443996de6d9e059811665",
+    "src/server/consolidated-pdt-source.js": "bbe4a688eb9ee973c5285cc61462df4dca11e17aa1b2971e145bdaecc9310b3a",
+    "docs/sql-proposals/linea-etapa2d/03_consolidated_quantities_REVIEW.sql": "76a8643ce134dd9844a4a4aec9657f69acb7b9a66ef421b25ab90fe495eff8f6"
+  },
+  "sourceSha256": {
+    "src/server/linea-export-manifest-reader.js": "8c206579dbc3266b3ce4f9b50cc73c58e3d1b30e5634b0a01c7c74b6fa8747d0",
+    "src/server/linea-real-source-contracts.js": "f6bebb0574be3d9763afae62d6e331169f993dd80afc2ca7cf816058acecf610",
+    "docs/sql-proposals/linea-etapa2e/01_export_manifest_REVIEW.sql": "82bd6d88530f72c048a35ea232eb90e8db3b296a6dce045286f78d9441c584c4"
+  },
+  "blockers": [
+    "Installed preview/apply/historial definitions and cut/event linkage",
+    "Verified gross/net/accumulated semantics and key/reserve/part coverage",
+    "Functional cargo to installed role/production/stage binding",
+    "All real writers sharing lock/invalidation protocol and least-privilege pool"
+  ],
+  "noRealSourceCertificateIssued": true,
+  "pr": 130,
+  "connectionCleanupErrorsSanitized": true
+}

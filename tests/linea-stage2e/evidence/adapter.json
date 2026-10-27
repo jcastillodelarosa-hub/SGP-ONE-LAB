@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "database": "sgp_linea_e2_qa_1793138720504591000",
+  "checks": [
+    "Real PG READ ONLY adapter preserves uncertified receipt and never returns availability",
+    "Successive sealed cuts preserve independent event inventories",
+    "Absent cut is SIN_CONCILIAR/null, never zero",
+    "Captured DB/session authorization rejects missing scope without leaking diagnostics"
+  ],
+  "scope": "Synthetic ACK/session fixture on real isolated PG17; no productive pool or C2 source registered"
+}

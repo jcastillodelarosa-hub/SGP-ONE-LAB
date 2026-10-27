@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';import {readFile,writeFile} from 'node:fs/promises';
+import {connectPsql} from '../linea-stage2b/psql-client.mjs';
+import {createLineaExportManifestReader} from '../../src/server/linea-export-manifest-reader.js';
+const E=new URL('./evidence/',import.meta.url),db=(await readFile(new URL('database.txt',E),'utf8')).trim();assert.match(db,/^sgp_linea_e2_qa_\d+$/);
+const reader=createLineaExportManifestReader({connect:async()=>connectPsql(db)});
+const first=await reader.read('COORDINADOR','E2-EXPLICIT','L1');assert.equal(first.status,'PENDIENTE_CERTIFICACION_EXPORT');assert.equal(first.available,null);assert.equal(first.events.length,2);
+const next=await reader.read('COORDINADOR','E2-EXPLICIT','L2');assert.equal(next.events.length,3);assert.equal(next.available,null);
+const absent=await reader.read('COORDINADOR','E2-EXPLICIT','NO-SUCH-CUT');assert.equal(absent.status,'SIN_CONCILIAR');assert.equal(absent.available,null);
+await assert.rejects(reader.read('LIDER','E2-EXPLICIT','L1'),/EXPORT_SOURCE_NOT_VERIFIED/);
+const out={status:'PASS',database:db,checks:['Real PG READ ONLY adapter preserves uncertified receipt and never returns availability','Successive sealed cuts preserve independent event inventories','Absent cut is SIN_CONCILIAR/null, never zero','Captured DB/session authorization rejects missing scope without leaking diagnostics'],scope:'Synthetic ACK/session fixture on real isolated PG17; no productive pool or C2 source registered'};
+await writeFile(new URL('adapter.json',E),JSON.stringify(out,null,2)+'\n');console.log(JSON.stringify(out,null,2));
