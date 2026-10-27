@@ -1672,3 +1672,55 @@ No frontend/Picking/Mecanizado/Export/vidrio/Gateway/Firebase/otros repositorios
 Siguiente paso único: revisión de ChatGPT del mismo PR127 y de los límites de fuentes
 antes de cualquier instalación; no comenzar otra etapa, aplicar, fusionar o desplegar.
 El SHA final se obtiene en Git/PR tras guardar este checkpoint.
+
+
+# Recuperación Etapa 2D — 2026-10-27T20:48:28.183259+00:00
+
+Repositorio SGP-ONE-LAB; rama feat/linea-stage2d-picking-unit-evidence; único PR127
+OPEN/DRAFT sobre feat/linea-stage2c-source-bridges. SHA funcional y evidencias
+recuperados de GitHub: 2fc09ea50fa6acb58733f25def7edd466b1acbc6. Main remoto sigue
+ae76b3729184ff802d7adc83d8867662230d438c, incluido PR125, sin tocarlo.
+
+## Completado, no repetir
+
+Motor aislado de cantidades consolidadas, sin requisito de IDs físicos;
+estimación/validación/revisión separadas; trazabilidad inmutable, permisos reales
+más ámbito, CAS, UUID idempotente, invalidación de fuentes y descuento único
+bruto/neto; Empaque parcial y preservación de cierres. SQL REVIEW fuera de migraciones.
+Los cuatro SHA256 de fuentes en consolidated-summary.json coinciden exactamente.
+Se reutilizan pruebas aprobadas:407/407 Node,14 PG17,4 adaptador y3 recuperación.
+No se reejecutaron pruebas ni se declaró nueva validación de Supabase o planta.
+CI de sintaxis del SHA funcional: éxito, run40544798563.
+
+## Estado recuperado y límites del entorno
+
+Worktree limpio recuperado en /workspace/sgp-linea-stage2d; los directorios /tmp
+anteriores no estaban disponibles. Se conservó el worktree principal con sus
+cambios preexistentes. No se descartaron ni sobrescribieron archivos del usuario.
+Los commits de2D y sus evidencias sí están persistidos en GitHub.
+El trabajo no versionado de2E en el /tmp anterior no aparece en el sistema de
+archivos actual. No se afirma recuperado ni se mezcla con este PR. Su rama Git
+local conserva el SHA2fc09ea, sin commit técnico de2E. El encargo vigente pide2D;
+no se continúa automáticamente2E ni se crea otro PR.
+
+## Pendiente y bloqueo real
+
+- Productor/cobertura de fuentes reales y evidencia de contabilidad bruta/neta.
+- Relación verificable de cortes Export con inclusión/exclusión de eventos locales.
+- Ámbitos efectivos y correspondencia de cargos autorizados con roles instalados;
+  no ampliar permisos por equivalencia de nombres.
+- Colaboración de todos los escritores en el protocolo de locks/revisiones.
+- Pool y compatibilidad de instalación con main/guard125; no hay acceso Supabase
+  autenticado disponible para certificarlo en esta recuperación.
+
+La Directiva Maestra SGP v3.1 solicitada no se localizó entre instrucciones,
+documentos/adjuntos disponibles ni código del repositorio consultado. Se aplican
+AGENTS.md y las restricciones explícitas del usuario; NO se declara aplicada una
+Directiva cuyo texto no se pudo leer. Hace falta su texto o enlace exacto.
+
+IMPLEMENTADO EN RAMA / VERIFICADO EN AISLAMIENTO (evidencia previa intacta) /
+PENDIENTE DE EVIDENCIA REAL / NO APLICADO / NO PUBLICADO.
+Checkpoint documental, sin cambios funcionales, ejecución de SQL, fusión o despliegue.
+Siguiente paso único: revisión de ChatGPT del mismo PR127 y aportar la Directiva
+v3.1 y las fuentes reales pendientes antes de continuar integración. No reiniciar
+etapas anteriores ni habilitar producción por contar con pruebas aisladas.
