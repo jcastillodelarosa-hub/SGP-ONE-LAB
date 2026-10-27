@@ -51,13 +51,17 @@ Nunca nombre de producción ni reserva como identidad única; PANEL/FRAME separa
   ejecución, ni recálculo desde Picking/vidrio. Cada cambio requiere motivo/auditoría.
 - Ejecución: valor acumulado reemplazable, no incremento repetible. Historial
   conserva valor anterior/nuevo y delta derivado. Antes del cierre el Líder
-  corrige (reducción exige motivo); después solo Coordinador con motivo.
+  corrige (reducción exige motivo); después exige reapertura autorizada y
+  corrección por Coordinador/Administrador con motivo.
 - Turno: abierto/cerrado/en revisión. Líder cierra etapa independientemente,
   observación general obligatoria y justificación por cada orden bajo Sale.
   Sale pendiente impide cierre. Snapshot congelado y versionado por revisión.
-- Corrección postcierre: snapshot previo no se reescribe; queda EN_REVISION y se
-  registra autorización. Reapertura Coordinador + motivo, nuevo cierre Líder
-  produce una nueva revisión y reporte. El informe previo permanece reproducible.
+- Corrección postcierre: mientras CERRADO se rechaza toda edición, incluso por
+  Coordinador. REOPEN por Coordinador/Administrador + motivo registra autorización
+  y deja EN_REVISION; el snapshot previo no cambia. Solo ese rol corrige con motivo
+  durante la revisión. Un nuevo CLOSE del Líder exige otra vez observación/razones,
+  crea nueva revisión/reporte y termina la revisión. Los informes previos siguen
+  siendo reproducibles por el ID del evento de cierre.
 - Arrastre: propuesta del remanente max(Sale-ejecutado,0) al turno siguiente,
   incluso sin cierre. Un enlace por origen/destino; reintentar actualiza el
   mismo enlace. No se añade nuevamente como ejecución, ni crea Sale validado.
@@ -85,7 +89,7 @@ sin escrituras parciales. No hay fallback a una escritura legacy al fallar.
 |---|---|
 | Sale validar/cambiar | Coordinador/Administrador, motivo, turno abierto |
 | Acumulado sustituir | Líder autorizado para etapa; revisión esperada; motivo si disminuye |
-| Corregir postcierre | Coordinador/Administrador, motivo, nueva revisión sin borrar cierre |
+| Corregir postcierre | REOPEN autorizado previo; Coordinador/Administrador + motivo; nuevo CLOSE del Líder sin borrar cierre |
 | Cerrar | Líder con scope de etapa, snapshot completo, observación y razones por faltante |
 | Reabrir | Coordinador/Administrador, motivo y vínculo al cierre anterior |
 | Arrastrar | worker autorizado o rol operativo según contrato confirmado; destino siguiente y propuesta sin validar |
@@ -118,7 +122,9 @@ SIN_CONCILIAR. Con mapeo completo:
 saldo_proyectado = saldo_oficial - suma(deltas locales NO incluidos en ese corte).
 
 Corrección negativa aumenta proyección; delta incluido no se descuenta dos veces.
-Una proyección negativa es discrepancia, no se recorta a cero. Reconciliar una
+Una proyección negativa se conserva con status=DISCREPANCIA_SALDO y su valor
+negativo exacto: no arroja excepción ni se recorta a cero. Con mapeo incompleto
+continúa SIN_CONCILIAR/proyección NULL; son situaciones distintas. Reconciliar una
 corrección y su original por separado cuando pertenezcan a cortes distintos.
 No identificar eventos solo por fecha de pared: se requiere marca de corte,
 watermark o conciliación explícita auditada. Selección del corte y mapeo se guardan
@@ -161,3 +167,19 @@ no cambian; sin nueva importación runtime del módulo puro. Verificar comparaci
 Git por rutas, no solo tests verdes. Reportes de cierre futuros se generan desde
 snapshot y no consultas actuales; no sustituir ni alterar descargas de vidrio.
 No pruebas visuales nuevas: no hay cambios de interfaz en esta etapa.
+
+## Revisión correctiva PR117
+
+El resolvedor servidor de evidencia cuantitativa para Empaque **NO está implementado**.
+Las propiedades supply.verified, available, blockersReconciled, blockRevision y
+correctionProof son entradas sintéticas confiables de la referencia aislada, NO
+prueba material ni autorización que pueda suministrar el navegador. Falta resolver
+cantidades ensambladas elegibles, inclusión en Export, consumo de todos los turnos,
+impacto/unidades de PDT, vigencia y bloqueo transaccional en servidor.
+
+**No importar ni conectar linea-stage1.js al runtime.** No habilitar Empaque con
+estos flags hasta implementar y verificar ese resolvedor en una etapa autorizada.
+Esta corrección no implementa RPC, adaptadores, UI, migraciones o Etapa2.
+Pruebas nuevas verifican rechazo postcierre incluso a coordinador, autorización y
+motivo de reapertura, restricción del líder durante revisión, nuevo cierre con
+razones y conservación del informe anterior, y proyección negativa sin mutación.

@@ -46,11 +46,11 @@ export function command(input,cmd,actor){
   const rows=Object.entries(state.slots).filter(([,s])=>turnKey(s)===key);
   requireThat(rows.length>0,'TURNO_SIN_ORDENES');
   for(const [id,s] of rows){requireThat(s.saleValidated,'SALE_PENDIENTE_VALIDACION');if(s.execution<s.sale)requireThat(nonblank(cmd.reasons?.[id]),'JUSTIFICACION_ORDEN_REQUERIDA');}
-  state.turns[key]={closed:true,snapshot:{rows:structuredClone(rows),observation:cmd.observation,reasons:structuredClone(cmd.reasons||{}),actor:{...actor},event:cmd.id}};
+  state.turns[key]={closed:true,status:'CERRADO',needsReview:false,snapshot:{rows:structuredClone(rows),observation:cmd.observation,reasons:structuredClone(cmd.reasons||{}),actor:{...actor},event:cmd.id}};
  }else if(cmd.type==='REOPEN'){
   requireThat(coordinator&&nonblank(cmd.observation),'REAPERTURA_NO_AUTORIZADA');slotKey(cmd.slot);const key=turnKey(cmd.slot);
   requireThat(isClosed(state,cmd.slot),'TURNO_NO_CERRADO');
-  state.turns[key]={...state.turns[key],closed:false}; // Prior snapshot remains immutable, also in event audit.
+  state.turns[key]={...state.turns[key],closed:false,status:'EN_REVISION',needsReview:true,reviewAuthorization:{event:cmd.id,actor:{...actor},observation:cmd.observation}}; // Previous snapshot stays immutable.
  }else{
   const {slot}=cmd;const key=slotKey(slot);const s=state.slots[key]||initialSlot(slot);const closed=isClosed(state,slot);
   requireThat(integer(cmd.expectedRevision)&&cmd.expectedRevision===s.revision,'CONFLICTO_REVISION');
@@ -59,7 +59,8 @@ export function command(input,cmd,actor){
    requireThat(nonblank(cmd.observation),'MOTIVO_REQUERIDO');s.sale=cmd.quantity;s.saleValidated=true;
   }else if(cmd.type==='EXECUTION'){
    requireThat(integer(cmd.quantity),'CANTIDAD_INVALIDA');
-   requireThat(!closed||(coordinator&&nonblank(cmd.observation)),'CORRECCION_POSTCIERRE_NO_AUTORIZADA');
+   requireThat(!closed,'CORRECCION_POSTCIERRE_REQUIERE_REAPERTURA');
+   if(state.turns[turnKey(slot)]?.needsReview)requireThat(coordinator&&nonblank(cmd.observation),'CORRECCION_POSTCIERRE_NO_AUTORIZADA');
    if(cmd.quantity<s.execution)requireThat(nonblank(cmd.observation),'MOTIVO_CORRECCION_REQUERIDO');
    // Sale is a commitment, not an implicit cap on physically reported execution.
    if(slot.stage==='EMPAQUE'&&cmd.quantity>s.execution){
@@ -77,7 +78,6 @@ export function command(input,cmd,actor){
     if(consumed>0){const proof=cmd.correctionProof;requireThat(proof?.verified===true&&nonblank(proof.evidenceId)&&integer(proof.eligibleAfter)&&proof.eligibleAfter>=consumed,'CORRECCION_ENSAMBLE_SIN_SOPORTE_EMPAQUE');}
    }
    s.execution=cmd.quantity;
-   if(closed){state.turns[turnKey(slot)]={...state.turns[turnKey(slot)],needsReview:true};}
   }else if(cmd.type==='CARRY'){
    requireThat(s.saleValidated,'SALE_PENDIENTE_VALIDACION');const target=nextShift(slot);const dest=slotKey(target);
    requireThat(!isClosed(state,target),'DESTINO_CERRADO');
@@ -101,8 +101,8 @@ export function reconcileExport({officialBalance,officialAccumulated,cutId,movem
  requireThat(includedIds.every(id=>movements.some(x=>x.id===id)),'INCLUSION_DESCONOCIDA');
  if(!completeMapping)return {officialBalance,officialAccumulated,cutId,projectedBalance:null,status:'SIN_CONCILIAR'};
  const pendingDelta=movements.filter(x=>!includedIds.includes(x.id)).reduce((n,x)=>n+x.delta,0);
- requireThat(officialBalance-pendingDelta>=0,'DISCREPANCIA_SALDO');
- return {officialBalance,officialAccumulated,cutId,projectedBalance:officialBalance-pendingDelta,status:'CONCILIADO',pendingDelta};
+ const projectedBalance=officialBalance-pendingDelta;
+ return {officialBalance,officialAccumulated,cutId,projectedBalance,status:projectedBalance<0?'DISCREPANCIA_SALDO':'CONCILIADO',pendingDelta};
 }
 /** Individual report from immutable close event, never current Export or totals. */
 export function closureReport(state,slot,eventId=null){

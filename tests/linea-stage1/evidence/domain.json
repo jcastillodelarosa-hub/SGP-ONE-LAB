@@ -2,11 +2,11 @@
   "status": "PASS",
   "baseline": "06b1794b6d83574742f152b2873821830b41cf15",
   "node": {
-    "tests": 348,
-    "pass": 348,
+    "tests": 351,
+    "pass": 351,
     "fail": 0
   },
-  "new_domain_tests": 20,
+  "new_domain_tests": 23,
   "release": "LAB v362 unchanged; verify:release PASS",
   "protected_sha256": {
     "app.js": "a7ff0321faa2a79c67a06aa87ce6bf7f4c3b84f66c3b94634b5bdf8a05e148a6",
@@ -26,6 +26,12 @@
   "limitations": [
     "No authenticated Supabase metadata available; exact installed authorization/ACL not verified",
     "Serial revision tests are not actual multi-session SQL concurrency tests",
-    "No UI or Etapa2 started"
-  ]
+    "No UI or Etapa2 started",
+    "Packing quantitative evidence is synthetic; server resolver not implemented"
+  ],
+  "corrective_review": {
+    "postclosure": "explicit authorized REOPEN -> EN_REVISION -> coordinator correction with reason -> leader CLOSE; original snapshot retained",
+    "negative_projection": "preserved as DISCREPANCIA_SALDO",
+    "packing_server_resolver": "NOT IMPLEMENTED; runtime integration forbidden"
+  }
 }
