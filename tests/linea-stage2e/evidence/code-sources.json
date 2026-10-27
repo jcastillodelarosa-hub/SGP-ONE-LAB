@@ -1,0 +1,335 @@
+{
+  "capturedAtUtc": "2026-10-27T22:03:30.959915+00:00",
+  "main": "0a1a5fd53cf622817f164e4031e6c83e7ab0ac56",
+  "base": "a716bdaf8fc23bf757d808369ba48f86e1463b63",
+  "supabaseReadPerformed": false,
+  "files": [
+    {
+      "path": "app.js",
+      "commit": "0a1a5fd53cf622817f164e4031e6c83e7ab0ac56",
+      "sha256": "774f918ee8d7101f03277c97ad5188d1f08bdc770869f568a41f81dfbb70705e",
+      "classification": "VERIFICADO EN CÓDIGO",
+      "matches": [
+        {
+          "line": 1148,
+          "excerpt": " try{const client=await getSupabaseClient();const week=els.assemblyWeek.value?Number(els.assemblyWeek.value):null;const {data,error}=await client.rpc(\"sgp_consultar_ensamble\",{p_token:token,p_semana:week,p_linea:els.assemblyLine.value});if(error)throw error;assemblyRows=data.filas||[];renderAssembly();els.assemblyStatus.textContent=`Actualizado ✓ ${assemblyR"
+        },
+        {
+          "line": 1199,
+          "excerpt": "  const {data,error}=await client.rpc('sgp_consultar_ensamble',{p_token:token,p_semana:week,p_linea:line});"
+        },
+        {
+          "line": 1233,
+          "excerpt": "    const {data,error}=await client.rpc('sgp_previsualizar_export_diario',{p_token:token,p_linea:line,p_datos:dailyExportRows});"
+        },
+        {
+          "line": 1250,
+          "excerpt": "    const {data,error}=await client.rpc('sgp_aplicar_export_diario',{p_token:token,p_linea:p.line,p_nombre_archivo:p.fileName,p_datos:dailyExportRows});"
+        },
+        {
+          "line": 1257,
+          "excerpt": "      const {data:chg,error:chgErr}=await client.rpc('sgp_resumen_eventos_actualizacion',{p_token:token,p_id_lote:data.id_carga_diaria,p_fuente:'EXPORT'});"
+        },
+        {
+          "line": 1696,
+          "excerpt": "function repoCanValidate(){return ['COORDINADOR','LIDER LINEA','SUPERVISOR DE PICKING','ADMINISTRADOR'].includes(repoRole())}"
+        },
+        {
+          "line": 2022,
+          "excerpt": "window.SGPOperationalCanManage=()=>['ADMINISTRADOR','COORDINADOR','LIDER MECANIZADO','LIDER','LIDER LINEA'].includes(repoRole());"
+        },
+        {
+          "line": 2023,
+          "excerpt": "window.SGPOpenOperationalDetail=args=>openWorkloadDetail({...args,onManage:openProgDay,canManage:window.SGPOperationalCanManage()});"
+        },
+        {
+          "line": 2193,
+          "excerpt": " const workloadHost=host.querySelector('.prog-calendar-grid');host.querySelector('.prog-week-summary').textContent='Consultando carga operativa…';renderWorkloadCalendar({host:workloadHost,dates:days.map(progDateISO),load:window.SGPOperationalLoad,onManage:openProgDay,canManage:window.SGPOperationalCanManage()}).then(snapshot=>{if(!workloadHost?.isConnected)r"
+        },
+        {
+          "line": 2455,
+          "excerpt": " const faltantes=[...document.querySelectorAll('.pick-audit-missing')].map(w=>({id_faltante:w.dataset.fid,id_pieza:(pickAuditTarget.faltantes||[]).find(f=>f.id_faltante===w.dataset.fid)?.id_pieza||'',ventanas_afectadas:Number(w.querySelector('[data-audit-windows]').value||0)}));"
+        },
+        {
+          "line": 2458,
+          "excerpt": " try{const db=await getSupabaseClient(),{error}=await db.rpc('sgp_picking_validar_recepcion',{p_token:getAppToken(),p_id_entrega:pickAuditTarget.id_entrega,p_faltantes:faltantes,p_diferencias:pickAuditDifferences,p_observacion:document.querySelector('#pickAuditObs').value||null});if(error)throw error;document.querySelector('#pickAuditModal').hidden=true;awai"
+        }
+      ]
+    },
+    {
+      "path": "src/domain/production-importer.js",
+      "commit": "0a1a5fd53cf622817f164e4031e6c83e7ab0ac56",
+      "sha256": "ee14e558ffe77015c85392c398d18d6b8fcdbdd4d039b6ed96d71da0ee839e76",
+      "classification": "VERIFICADO EN CÓDIGO",
+      "matches": [
+        {
+          "line": 15,
+          "excerpt": "  \"Ens.\": \"ensamblado\","
+        },
+        {
+          "line": 16,
+          "excerpt": "  \"Emp.\": \"empacado\","
+        },
+        {
+          "line": 20,
+          "excerpt": "  \"Saldo Ens.\": \"saldo_ensamble\","
+        },
+        {
+          "line": 21,
+          "excerpt": "  \"Saldo Emp.\": \"saldo_empaque\","
+        },
+        {
+          "line": 107,
+          "excerpt": "      key_produccion: id + \"|\" + idLinea,"
+        }
+      ]
+    },
+    {
+      "path": "supabase/migrations/001_core_schema.sql",
+      "commit": "0a1a5fd53cf622817f164e4031e6c83e7ab0ac56",
+      "sha256": "76fa523d126964eb586a4dabbd2add4bb35c1a238c715fa43c5f1a98d285c3e6",
+      "classification": "VERIFICADO EN CÓDIGO",
+      "matches": [
+        {
+          "line": 46,
+          "excerpt": "  key_produccion text primary key,"
+        },
+        {
+          "line": 58,
+          "excerpt": "  cantidad numeric,"
+        },
+        {
+          "line": 61,
+          "excerpt": "  ensamblado numeric,"
+        },
+        {
+          "line": 62,
+          "excerpt": "  empacado numeric,"
+        },
+        {
+          "line": 66,
+          "excerpt": "  saldo_ensamble numeric,"
+        },
+        {
+          "line": 67,
+          "excerpt": "  saldo_empaque numeric,"
+        },
+        {
+          "line": 77,
+          "excerpt": "  reserva_al text,"
+        },
+        {
+          "line": 79,
+          "excerpt": "  estado_reserva_al text,"
+        },
+        {
+          "line": 120,
+          "excerpt": "  key_produccion text primary key references public.sgp_producciones(key_produccion),"
+        },
+        {
+          "line": 147,
+          "excerpt": "  cantidad numeric,"
+        }
+      ]
+    },
+    {
+      "path": "supabase/migrations/20261018_pdt_validation_workflow.sql",
+      "commit": "0a1a5fd53cf622817f164e4031e6c83e7ab0ac56",
+      "sha256": "497b8d73cfd73fe6574d9ea2b12aec92622284e874102602c979b61a5320d4e0",
+      "classification": "VERIFICADO EN CÓDIGO",
+      "matches": [
+        {
+          "line": 294,
+          "excerpt": "CREATE OR REPLACE FUNCTION public.sgp_consultar_ensamble(p_token text, p_semana integer DEFAULT NULL::integer, p_linea text DEFAULT 'PANELES_2'::text)"
+        },
+        {
+          "line": 322,
+          "excerpt": "      where ap.produccion=p.produccion and ap.estado='PENDIENTE' and coalesce(ap.estado_repo,'PENDIENTE')<>'PICKING'"
+        }
+      ]
+    },
+    {
+      "path": "planner-operations-v326.js",
+      "commit": "0a1a5fd53cf622817f164e4031e6c83e7ab0ac56",
+      "sha256": "3d817d5f5d452b09296ef5877e485ac50a510dce2fdeffc9543d373312932345",
+      "classification": "VERIFICADO EN CÓDIGO",
+      "matches": [
+        {
+          "line": 18,
+          "excerpt": "async function load(){try{const d=date.value;if(!d)throw Error('Selecciona una fecha');const next=new Date(d+'T12:00:00');next.setDate(next.getDate()+6);items=await rpc('sgp_linea_plan_consultar',{p_desde:d,p_hasta:next.toLocaleDateString('en-CA'),p_linea:$('assemblyLine')?.value||null});render();renderViews();document.dispatchEvent(new CustomEvent('sgp:line"
+        },
+        {
+          "line": 19,
+          "excerpt": "function render(){const el=$('sgpPlanAssignments');el.replaceChildren();if(!items.length){el.textContent='Sin asignaciones para el rango seleccionado.';return}items.forEach(a=>{const node=document.createElement('div');node.className='sgp-plan-row';node.innerHTML='<strong>'+escape(a.produccion)+'</strong> · '+escape(a.sistema)+' · '+escape(a.fecha)+' T'+escap"
+        },
+        {
+          "line": 71,
+          "excerpt": "$('sgpPlanSave').onclick=async()=>{const key=$('sgpPlanProduction').value;const qty=Number($('sgpPlanQuantity').value);if(!key||!Number.isInteger(qty)||qty<1){notify('Selecciona producción y cantidad entera positiva');return}try{await rpc('sgp_linea_plan_programar',{p_key_produccion:key,p_fecha:date.value,p_turno:Number($('sgpPlanShift').value),p_cantidad:qt"
+        }
+      ]
+    },
+    {
+      "path": "supabase/migrations/20261022190000_sgp_carga_semanal_stage_timings.sql",
+      "commit": "0a1a5fd53cf622817f164e4031e6c83e7ab0ac56",
+      "sha256": "0db5033f737e61c48a416c688d9808b593097a78baa0f4a189e95ebaa5752ada",
+      "classification": "VERIFICADO EN CÓDIGO",
+      "matches": [
+        {
+          "line": 19,
+          "excerpt": " if not pg_try_advisory_xact_lock(hashtext('SGP_CARGA_SEMANAL'),p_anio*100+p_semana) then"
+        },
+        {
+          "line": 32,
+          "excerpt": " insert into sgp_lotes_carga(id_lote_carga,usuario,tipo_carga,id_unidad_carga,anio,semana_base,estado,archivos_esperados,archivos_recibidos,archivos_validos,registros_recibidos,insertados,actualizados,inconsistencias,detalle)"
+        },
+        {
+          "line": 37,
+          "excerpt": " insert into sgp_producciones("
+        },
+        {
+          "line": 61,
+          "excerpt": " insert into sgp_aluminio(id_pieza,id_carga,fila_origen,id,key_produccion,id_linea_origen,id_linea_destino,estado_relacion_produccion,descripcion,acabado,longitud,marca,fabricacion,semana,anio,order_co,produccion,id_orden_produccion,proyecto,cantidad,codigo_sap,sistema,id_sistema,unidades,uso,tipo_pieza,destino_productivo,estado_clasificacion)"
+        }
+      ]
+    },
+    {
+      "path": "supabase/migrations/20261023_picking_no_duplicar_entrega_completa.sql",
+      "commit": "0a1a5fd53cf622817f164e4031e6c83e7ab0ac56",
+      "sha256": "88fce6babad7a085e7e6d771dc10c451fd7d678319cf356c3c714590ceaa37c4",
+      "classification": "VERIFICADO EN CÓDIGO",
+      "matches": [
+        {
+          "line": 6,
+          "excerpt": "returns trigger"
+        },
+        {
+          "line": 15,
+          "excerpt": "  perform pg_advisory_xact_lock(hashtextextended(new.id_programacion::text || '|' || new.produccion, 0));"
+        },
+        {
+          "line": 18,
+          "excerpt": "    where e.id_programacion = new.id_programacion"
+        },
+        {
+          "line": 29,
+          "excerpt": "drop trigger if exists trg_sgp_picking_no_duplicar_completa on public.sgp_picking_entregas;"
+        },
+        {
+          "line": 30,
+          "excerpt": "create trigger trg_sgp_picking_no_duplicar_completa"
+        },
+        {
+          "line": 33,
+          "excerpt": "-- Rollback: drop trigger if exists trg_sgp_picking_no_duplicar_completa on public.sgp_picking_entregas;"
+        }
+      ]
+    },
+    {
+      "path": "supabase/migrations/20261027090000_picking_fecha_turno_guard_123.sql",
+      "commit": "0a1a5fd53cf622817f164e4031e6c83e7ab0ac56",
+      "sha256": "d277724287027fd0d504de872440fb271b7e06af2c8e5cc251f9f692d108a3f2",
+      "classification": "VERIFICADO EN CÓDIGO",
+      "matches": [
+        {
+          "line": 7,
+          "excerpt": "  v_now timestamptz := statement_timestamp();"
+        },
+        {
+          "line": 35,
+          "excerpt": "      RAISE EXCEPTION 'PICKING_SIN_TURNO_ACTIVO';"
+        },
+        {
+          "line": 40,
+          "excerpt": "    RAISE EXCEPTION 'PICKING_FECHA_TURNO_REQUERIDOS';"
+        },
+        {
+          "line": 45,
+          "excerpt": "    RAISE EXCEPTION 'PICKING_TURNO_INVALIDO';"
+        },
+        {
+          "line": 55,
+          "excerpt": "    RAISE EXCEPTION 'PICKING_TURNO_FUTURO';"
+        },
+        {
+          "line": 62,
+          "excerpt": "BEFORE INSERT ON public.sgp_picking_entregas"
+        }
+      ]
+    },
+    {
+      "path": "src/modules/pdt-v2-controller.js",
+      "commit": "0a1a5fd53cf622817f164e4031e6c83e7ab0ac56",
+      "sha256": "6a0db62be0d3ecb058e889dbf3b2943af1ec25132b1b8ae6a1c808c1b3cd0ff9",
+      "classification": "VERIFICADO EN CÓDIGO",
+      "matches": [
+        {
+          "line": 19,
+          "excerpt": "  const validated=row.contrato_pdt==='V2' && row.validacion_estado==='VALIDADO' && Array.isArray(row.detalles) && row.detalles.length>0;"
+        },
+        {
+          "line": 20,
+          "excerpt": "  const needsValidation=row.validacion_estado!=='VALIDADO' && Array.isArray(row.detalles) && row.detalles.length===0;"
+        },
+        {
+          "line": 26,
+          "excerpt": "  if(needsValidation && editable && validator){"
+        },
+        {
+          "line": 48,
+          "excerpt": "  if(needsValidation && editable && validator)form+=renderSourceDistribution(sources,row.cantidad,sourceError,esc);"
+        }
+      ]
+    }
+  ],
+  "priorCapturedFunctions": [
+    {
+      "signature": "sgp_aluminio_pendiente_estado(text,uuid,text,text)",
+      "definitionSha256": "b993fff3f72bd0788e9c74e5ac849c7c79611ee0885b56a6adaffc81d9e7cdd5",
+      "provenance": "CAPTURA_PREVIA_NO_RECONSULTADA",
+      "currentInstallation": "NO DISPONIBLE"
+    },
+    {
+      "signature": "sgp_aluminio_pendiente_resolver(text,uuid)",
+      "definitionSha256": "c799650dd0a511406ec4ad55c7edb8ad2876023d1f12397e0e19bfad8fab37cd",
+      "provenance": "CAPTURA_PREVIA_NO_RECONSULTADA",
+      "currentInstallation": "NO DISPONIBLE"
+    },
+    {
+      "signature": "sgp_picking_entrega_orden(text,uuid,text,boolean,text,jsonb,date,text)",
+      "definitionSha256": "147697805df87fd021eb88725fc32779ce8683ddc1dad9f7b5639115d595f347",
+      "provenance": "CAPTURA_PREVIA_NO_RECONSULTADA",
+      "currentInstallation": "NO DISPONIBLE"
+    },
+    {
+      "signature": "sgp_picking_entrega_orden(text,uuid,text,boolean,text,jsonb)",
+      "definitionSha256": "badef67c86998e56d118cd5e76babec57e87d9456b839258b212bf8f4f764402",
+      "provenance": "CAPTURA_PREVIA_NO_RECONSULTADA",
+      "currentInstallation": "NO DISPONIBLE"
+    },
+    {
+      "signature": "sgp_picking_rechazar_entrega_completa_duplicada()",
+      "definitionSha256": "1f6bc47af6c0248b0eb912639705d7b05f385c9835309afabdfbb0db5dfc033b",
+      "provenance": "CAPTURA_PREVIA_NO_RECONSULTADA",
+      "currentInstallation": "NO DISPONIBLE"
+    },
+    {
+      "signature": "sgp_picking_validar_recepcion(text,uuid,jsonb,jsonb,text)",
+      "definitionSha256": "4e67d9beafbbc3162bf1680ad2bba4c87ca5c9bd6179b58fa30aa5cee4c2dff4",
+      "provenance": "CAPTURA_PREVIA_NO_RECONSULTADA",
+      "currentInstallation": "NO DISPONIBLE"
+    },
+    {
+      "signature": "sgp_validar_sesion_rol(text,text[])",
+      "definitionSha256": "9843ae27b4954ca7a6aa5e44728d3cca897ed935d385ec2418a45d289ddd2447",
+      "provenance": "CAPTURA_PREVIA_NO_RECONSULTADA",
+      "currentInstallation": "NO DISPONIBLE"
+    }
+  ],
+  "exportDefinitionsFoundInMainSql": [],
+  "limits": [
+    "Code is not installed Supabase metadata",
+    "No real Supabase connector/pool available",
+    "Reconstructed prior complement is not original SQL Editor export",
+    "No source availability or physical identity inferred"
+  ]
+}

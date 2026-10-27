@@ -1,0 +1,23 @@
+{
+  "status": "PASS",
+  "database": "sgp_linea_b2_qa_1793138632166596741",
+  "inheritedB2Checks": [
+    "Installation failure rolls back all new schema/RPC objects",
+    "Captured sgp_sesion_actual validates actual hashed sessions; anon functional role/scope denials",
+    "Packing partial/cumulative correction uses deltas once, all turns share balance",
+    "Idempotent anon RPC retry and reused UUID rejection",
+    "Independent shift close/reopen/review and immutable prior report",
+    "REAL PG: simultaneous different shifts cannot consume same units",
+    "REAL PG: close vs execution serialized by actual turn lock",
+    "REAL PG: carry vs source correction idempotent, source revision protected",
+    "Verified private Export cut + explicit event inclusion avoids double counting; official tables untouched",
+    "REAL PG: concurrent Export cut changes serialize reconciliation; included local events counted once",
+    "PDT evidence UNKNOWN without unit proof; mapped units excluded; resolving assembly never resolves packing",
+    "REAL PG: assembly downward correction vs packing serialized without unsupported units",
+    "Client proof flags rejected and private evidence inaccessible",
+    "REAL PG: native concurrent exact UUID retries insert one event",
+    "Empty-code rollback tested; rollback with data refused; containment stops writes and preserves historical report",
+    "Legacy auth body unchanged; RLS/private tables inaccessible to browser roles"
+  ],
+  "scope": "Synthetic B2/auth fixture rebuilt for E2 tests; existing D2 ACK proposal only, NOT full D2 productive schema; prior evidence restored byte-for-byte"
+}

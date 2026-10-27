@@ -24,3 +24,16 @@ D2 sin tocar importador; pruebas PG17 y regresiones proporcionales; único Draft
 sobre127 con evidencia y checkpoint final. Reutilizar datos/evidencias válidas.
 No frontend/legacy/Mecanizado/Picking operativo/Export/vidrio/Supabase/Firebase/
 Gateway/otros repositorios, fusión, publicación ni nueva etapa automática.
+
+## Hito técnico guardado antes del informe final
+
+Implementados contratos de observación de campos reales versionados y bloqueo
+seguro, lector privado READ ONLY con sesión/ámbitos, propuesta de sellado inmutable
+del ACK existente, consulta de metadatos faltantes y evidencia de código main exacto.
+Pruebas reconstruidas en entorno persistente:421/421 Node,9 comprobaciones PG17
+y4 del adaptador, todas PASS. Baseline sintética B2 reconstruida (16 comprobaciones),
+preservando byte a byte la evidencia anterior. No se afirma recuperado el /tmp: se
+reconstruyeron archivos y se probaron de nuevo los contratos nuevos.
+Pendiente de esta ejecución: matriz final de fuentes, permisos/escritores/riesgos,
+checkpoint raíz, comprobaciones de alcance y único Draft sobre127. Fuentes reales
+Export/roles/locks aún no certificadas; NO APLICADO / NO PUBLICADO.
