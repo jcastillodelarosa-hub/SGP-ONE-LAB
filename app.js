@@ -2534,7 +2534,7 @@ function sgpPickingCurrentShift(at=new Date()){
  return {fecha:prevParts.year+'-'+prevParts.month+'-'+prevParts.day,turno:'TURNO 2'};
 }
 function sgpPickingFutureShift(fecha,turno,at=new Date()){
- if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(fecha)||!['TURNO 1','TURNO 2'].includes(turno))return true;
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(fecha)||!['TURNO 1','TURNO 2'].includes(turno))return true;
  const [y,m,d]=fecha.split('-').map(Number),day=new Date(Date.UTC(y,m-1,d,12));
  if(day.getUTCFullYear()!==y||day.getUTCMonth()!==m-1||day.getUTCDate()!==d)return true;
  const weekday=new Intl.DateTimeFormat('en-US',{timeZone:'America/Bogota',weekday:'short'}).format(day);
@@ -2547,7 +2547,8 @@ async function savePickingDelivery(){
  try{
   const context=pickPdtContext(),pieces=pickDeliveryComplete?[]:pickPdtEditor?.value();
   if(!pieces)throw new Error('Actualiza y selecciona las piezas verificadas.');
-  if(!context.fecha_entrega||!context.turno)throw new Error('Selecciona fecha y turno.');\n  if(sgpPickingFutureShift(context.fecha_entrega,context.turno))throw new Error('No se permite registrar una entrega en una fecha o turno futuro. Selecciona un turno ya iniciado.');
+  if(!context.fecha_entrega||!context.turno)throw new Error('Selecciona fecha y turno.');
+  if(sgpPickingFutureShift(context.fecha_entrega,context.turno))throw new Error('No se permite registrar una entrega en una fecha o turno futuro. Selecciona un turno ya iniciado.');
   const signature=JSON.stringify([context,pieces]);
   if(!pickPdtRequest||pickPdtSignature!==signature){pickPdtRequest=crypto.randomUUID();pickPdtSignature=signature;}
   pickPdtSaving=true;save.disabled=true;pickPdtEditor?.setDisabled(true);
