@@ -1218,7 +1218,7 @@ function renderDailyExportMetrics(p){
   if(els.dailyExportWeeks)els.dailyExportWeeks.innerHTML='<table><thead><tr><th>Semana</th><th>Export<br><small>(Registros)</small></th><th>Base SGP<br><small>(Registros)</small></th><th>Coinciden</th><th>Fuera de base</th><th>Ausentes</th><th>Acción / estado</th></tr></thead><tbody>'+weeks.map(w=>{const cls=w.accion==='FUERA_BASE'?'week-out':w.accion==='NO_INCLUIDA_NO_TOCAR'?'week-safe':'week-update';const label=w.accion==='NO_INCLUIDA_NO_TOCAR'?'No incluida · no tocar':w.accion==='FUERA_BASE'?'Fuera de base':'Se actualizará';return `<tr class="${cls}"><td><strong>${w.semana}</strong></td><td class="cell-export">${w.registros_export}</td><td class="cell-base">${w.registros_base}</td><td class="cell-match">${w.coinciden}</td><td class="cell-out">${w.fuera_base}</td><td class="cell-absent">${w.ausentes}</td><td><span class="week-status">${label}</span></td></tr>`}).join('')+'</tbody></table>';
 }
 async function previewDailyExport(){
-  const token=sessionStorage.getItem(APP_SESSION_KEY),file=els.dailyExportFile?.files?.[0],line=els.dailyExportLine?.value;
+  const token=getAppToken(),file=els.dailyExportFile?.files?.[0],line=els.dailyExportLine?.value;
   resetDailyExport();
   if(!token){els.dailyExportStatus.textContent='Inicia sesión para validar el Export.';return}
   if(!file){els.dailyExportStatus.textContent='Selecciona el archivo Export XLSX.';return}
@@ -1241,7 +1241,7 @@ async function previewDailyExport(){
 }
 async function applyDailyExport(){
   if(!dailyExportPreview||!dailyExportRows.length)return;
-  const token=sessionStorage.getItem(APP_SESSION_KEY),p=dailyExportPreview;
+  const token=getAppToken(),p=dailyExportPreview;
   const msg=`APLICAR EXPORT DIARIO\n\nLínea: ${p.line}\nArchivo: ${p.fileName}\nRecibidos: ${p.recibidos}\nCoinciden: ${p.coinciden}\nFuera de base: ${p.nuevos}\nLa ausencia se aplica únicamente a semanas incluidas en el Export.\n\nLa programación base semanal no se elimina. ¿Aplicar actualización?`;
   if(!window.confirm(msg))return;
   els.applyDailyExport.disabled=true;els.dailyExportStatus.textContent='Aplicando actualización diaria…';
