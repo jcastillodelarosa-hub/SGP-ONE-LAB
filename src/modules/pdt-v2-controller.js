@@ -45,7 +45,7 @@ export async function openPdtV2({row,client,token,role,capabilities,show,escape:
   const details=row.detalles||[];
   const moves=(row.movimientos||[]).filter(m=>m.tipo==='AVANCE' && !(row.movimientos||[]).some(x=>x.id_movimiento_revertido===m.id_movimiento));
   let form='';
-  if(needsValidation && editable && validator)form+=renderSourceDistribution(sources,row.cantidad,sourceError,esc);
+  if(needsValidation && editable && validator)form+=renderSourceDistribution(sources,row.cantidad,sourceError,esc,row.perfil);
   if(validated && editable && machinist)form+=advancesForm(details,moves,row,esc);
   if(editable && ncEditor)form+='<section class="repo-modal-section"><h3>NC vinculadas</h3><p>'+esc((row.ncs||[]).map(n=>(n.referencia||n.consecutivo)+' · '+(n.estado||n.resolucion)).join(' / ')||row.nc||'Sin NC')+'</p><label>Añadir NC (sin reemplazar)<input data-ncs type="text" autocomplete="off"></label><button type="button" data-operation="nc">Añadir NC</button></section>';
   if(validated && editable && capabilities.picking_cuantitativo && (pickRegister||pickValidate) && !picking.error){
