@@ -28,3 +28,16 @@ test('source fields, empty reason and retry exist; confirm starts disabled',()=>
  assert.match(html,/data-operation="validate" disabled/);
  assert.ok(renderSourceDistribution([],9,'Network <error>',escape).includes('Network &lt;error>'));
 });
+
+
+test('approved modal shows a prominent escaped reference without changing physical identity',()=>{
+ const esc=s=>String(s??'').replaceAll('&','&amp;').replaceAll('<','&lt;');
+ const html=renderSourceDistribution(sources,9,null,esc,'ES-SGD2020-088');
+ assert.match(html,/role="columnheader">Referencia<\/span>/);
+ assert.match(html,/class="pdt-source-reference">ES-SGD2020-088<\/strong>/);
+ assert.match(html,/data-source="0"/);
+ assert.match(html,/data-source-qty="1"/);
+ const withOwn=renderSourceDistribution([{...sources[0],codigo_sap:'ES-EL400-011'}],9,null,esc,'fallback');
+ assert.match(withOwn,/ES-EL400-011<\/strong>/);
+ assert.doesNotMatch(withOwn,/fallback<\/strong>/);
+});

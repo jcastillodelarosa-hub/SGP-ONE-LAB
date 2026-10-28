@@ -25,12 +25,13 @@ export function distributionState(sources,selected,reported,note=''){
   return {valid:true,...result,corrected,reason:corrected?'Corrección justificada: el reporte original se conserva.':'Distribución completa: coincide con la cantidad reportada.'};
  }catch(error){return reject(error.message);}
 }
-export function renderSourceDistribution(sources,reported,error,esc){
+export function renderSourceDistribution(sources,reported,error,esc,reference=''){
  const rows=sources.map((p,i)=>{
   const usable=sourceUsable(p,sources);
   return '<div class="pdt-source-row" role="row">'+
    '<div data-label="Seleccionar" role="cell"><input type="checkbox" data-source="'+i+'" aria-label="Seleccionar '+esc(p.fabricacion)+'" '+(!usable?'disabled':'')+'></div>'+
    '<div data-label="Fabricación" role="cell"><b>'+esc(p.fabricacion||'—')+'</b><small>'+(!usable?'Identidad no disponible':'Fuente '+esc(String(p.id_pieza).split(':').slice(-2).join(':'))+(p.marca?' · '+esc(p.marca):'')+(p.uso?' · '+esc(p.uso):''))+'</small></div>'+
+   '<div data-label="Referencia" role="cell"><strong class="pdt-source-reference">'+esc(p.codigo_sap||p.perfil||reference||'—')+'</strong></div>'+ 
    '<div data-label="Longitud (in)" role="cell">'+esc(p.longitud??'—')+'</div>'+
    '<div data-label="Acabado" role="cell">'+esc(p.acabado||'—')+'</div>'+
    '<div data-label="Cant. referencia" role="cell">'+esc(p.cantidad??'—')+'</div>'+
@@ -38,7 +39,7 @@ export function renderSourceDistribution(sources,reported,error,esc){
  }).join('');
  return '<section class="repo-modal-section pdt-distribution"><h3>Distribución PANEL</h3><p>Selecciona las fabricaciones e indica cuánto asignar a cada una. La cantidad de referencia pertenece a la fuente; no es una entrega ni una asignación automática.</p>'+
   (error?'<p class="pdt-source-error" role="alert">No se pudieron consultar las fuentes: '+esc(error)+'</p>':'')+
-  (rows?'<div class="pdt-source-table" role="table" aria-label="Fuentes PANEL por pieza"><div class="pdt-source-head" role="row">'+['Selección','Fabricación','Longitud (in)','Acabado','Cant. referencia','A asignar'].map(x=>'<span role="columnheader">'+x+'</span>').join('')+'</div>'+rows+'</div>':'<p class="pdt-source-error">No hay filas disponibles en la consulta V2. El listado tradicional no sustituye la identidad real requerida.</p>')+
+  (rows?'<div class="pdt-source-table" role="table" aria-label="Fuentes PANEL por pieza"><div class="pdt-source-head" role="row">'+['Selección','Fabricación','Referencia','Longitud (in)','Acabado','Cant. referencia','A asignar'].map(x=>'<span role="columnheader">'+x+'</span>').join('')+'</div>'+rows+'</div>':'<p class="pdt-source-error">No hay filas disponibles en la consulta V2. El listado tradicional no sustituye la identidad real requerida.</p>')+
   '<div class="pdt-distribution-total" aria-live="polite"><span>Asignado <b data-assigned-total>0</b> / reportado <b>'+esc(reported)+'</b></span><strong data-distribution-label>Sin selección</strong></div>'+
   '<label class="pdt-correction-note">Motivo de corrección <span>(obligatorio si cambia el total)</span><textarea data-note rows="2" placeholder="Explica por qué la cantidad validada difiere de la reportada"></textarea></label>'+
   '<p data-source-status role="status"></p><div class="pdt-distribution-actions"><button type="button" data-source-retry>Reintentar consulta</button><button type="button" class="repo-v2-entry" data-operation="validate" disabled>Confirmar distribución</button></div>'+
