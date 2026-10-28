@@ -2480,3 +2480,45 @@ button.active,[aria-pressed="true"]{border-color:#0865ed}
 #pickDeliveryModal .rec-form{min-height:0;overflow-y:auto;overscroll-behavior:contain;flex:1 1 auto}
 #pickDeliveryModal .modal-header strong,#pickDeliveryModal .modal-header small{display:block;overflow-wrap:anywhere}
 #pickDeliveryModal .modal-header small{font-size:12px;line-height:1.45;margin-top:6px}
+
+
+/* PDT V2 modal: approved blue/white design; visual-only, preserves existing controls. */
+#repoWorkModal.pdt-v2-modal .pdt-source-head,
+#repoWorkModal.pdt-v2-modal .pdt-source-row{
+ grid-template-columns:52px minmax(145px,1.45fr) minmax(140px,1.15fr) minmax(88px,.65fr) minmax(150px,1.15fr) minmax(92px,.75fr) minmax(116px,.8fr);
+ gap:12px;
+ align-items:center;
+}
+#repoWorkModal.pdt-v2-modal .pdt-source-head{
+ background:#e8f2fd;color:#123866;font-size:12px;padding:14px 12px;
+}
+#repoWorkModal.pdt-v2-modal .pdt-source-row{padding:12px;background:#fff}
+#repoWorkModal.pdt-v2-modal .pdt-source-row:hover{background:#f5f9ff}
+#repoWorkModal.pdt-v2-modal .pdt-source-reference{
+ display:block;font-size:16px;font-weight:800;line-height:1.3;letter-spacing:.005em;color:#082e63;overflow-wrap:anywhere;
+}
+#repoWorkModal.pdt-v2-modal .pdt-distribution{
+ background:#fff;border:1px solid #cbdff5;border-radius:12px;padding:16px;
+}
+#repoWorkModal.pdt-v2-modal .pdt-distribution h3{font-size:19px;font-weight:800;color:#092f64}
+#repoWorkModal.pdt-v2-modal .pdt-source-table{border-radius:10px;border-color:#cbdff5}
+#repoWorkModal.pdt-v2-modal .pdt-distribution-footer .pdt-distribution-total{
+ border-radius:9px;border-color:#cbdff5;font-size:15px;
+}
+#repoWorkModal.pdt-v2-modal .pdt-distribution-footer [data-assigned-total]{font-size:19px;color:#075bd6}
+@media(max-width:800px){
+ #repoWorkModal.pdt-v2-modal .pdt-source-head{display:none}
+ #repoWorkModal.pdt-v2-modal .pdt-source-row{
+  grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;
+ }
+ #repoWorkModal.pdt-v2-modal .pdt-source-row [role=cell]::before{
+  content:attr(data-label);display:block;font-size:11px;font-weight:700;color:#526d8d;margin-bottom:5px;
+ }
+ #repoWorkModal.pdt-v2-modal .pdt-source-row [data-label="Seleccionar"]::before{display:none}
+ #repoWorkModal.pdt-v2-modal .pdt-source-row [data-label="Fabricación"]{grid-column:2}
+ #repoWorkModal.pdt-v2-modal .pdt-source-reference{font-size:17px}
+}
+@media(max-width:480px){
+ #repoWorkModal.pdt-v2-modal .pdt-distribution{padding:10px}
+ #repoWorkModal.pdt-v2-modal .pdt-source-row{gap:9px;padding:10px}
+}
