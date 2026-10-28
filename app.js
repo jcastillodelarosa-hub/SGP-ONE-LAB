@@ -1,4 +1,5 @@
 import {mountPdtRegistration,openPdtRegistration} from './src/modules/pdt-registration-form.js';
+import {openManualPdt} from './src/modules/pdt-manual-form.js';
 import {saveRegistration,registrationMetadata} from './src/services/pdt-registration.js';
 import {filterPdtRegistrations,ncAssignment,pdtReportCsv} from './src/domain/pdt-registration.js';
 import {basePhysicalProgress} from './src/domain/mecanizado-base-progress.js';
@@ -1739,6 +1740,11 @@ async function openRepoHistory(r){let history;try{history=await repoFetchHistory
 function openRepoState(r){if(!repoCanState()||!repoIsActive(r)||!repoIsValidated(r))return;const states=['PENDIENTE','REPO_OK','CORTE','MECANIZADO','PROCESADO','PICKING'];const m=repoShowWorkModal('Actualizar estado · '+(r.produccion||r.reserva||'—'),'PDT VALIDADO · Estado actual '+escapeHtml(r.estado_repo||'PENDIENTE'),'<section class="repo-modal-section"><div class="repo-section-head"><div><span>FLUJO FÍSICO</span><h3>Estado de la reposición</h3></div></div><label class="repo-pair-field">Nuevo estado<select id="repoStateSelect">'+states.map(x=>'<option value="'+x+'" '+(String(r.estado_repo||'PENDIENTE')===x?'selected':'')+'>'+(x==='REPO_OK'?'REPO OK':x)+'</option>').join('')+'</select></label><label class="repo-observation-field">Observación (opcional)<textarea id="repoStateObservation" rows="2"></textarea></label></section>','<button type="button" data-repo-cancel>Cancelar</button><button id="repoStateSave" class="primary" type="button">Guardar estado</button>');m.querySelector('[data-repo-cancel]').onclick=repoCloseWorkModal;m.querySelector('#repoStateSave').onclick=async()=>{const btn=m.querySelector('#repoStateSave');btn.disabled=true;try{const db=await getSupabaseClient(),{error}=await db.rpc('sgp_aluminio_pendiente_estado',{p_token:getAppToken(),p_id:r.id_pendiente,p_estado:m.querySelector('#repoStateSelect').value,p_observacion:m.querySelector('#repoStateObservation').value||null});if(error)throw error;repoCloseWorkModal();await loadRepoPending()}catch(e){alert(e.message);btn.disabled=false}}}
 document.querySelector('[data-view="pendientes-aluminio"]')?.addEventListener('click',loadRepoPending);
 document.querySelector('#repoRefresh')?.addEventListener('click',loadRepoPending);
+document.querySelector('#repoNewManual')?.addEventListener('click',async()=>{
+ if(!['ADMINISTRADOR','COORDINADOR','LIDER LINEA'].includes(repoRole())){alert('El registro manual PDT requiere Coordinador, Administrador o Líder de Línea.');return;}
+ try{await openManualPdt({client:await getSupabaseClient(),token:getAppToken(),onSaved:loadRepoPending});}
+ catch(error){alert('No fue posible abrir el registro PDT: '+error.message);}
+});
 document.querySelector('#repoSearch')?.addEventListener('input',renderRepoPending);
 document.querySelector('#repoState')?.addEventListener('change',renderRepoPending);
 document.querySelector('#repoWeek')?.addEventListener('change',renderRepoPending);

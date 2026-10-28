@@ -2473,7 +2473,18 @@ button.active,[aria-pressed="true"]{border-color:#0865ed}
 .pdt-registration [data-status]{padding:10px;background:#eff6ff;border-radius:8px}
 .pdt-registration button{min-height:44px}.pdt-registration small{color:#475569}
 .pdt-registration [data-remove]{justify-self:start}.pdt-registration :focus-visible{outline:3px solid #2563eb;outline-offset:2px}
+.pdt-manual-modal .piece-modal-card{width:min(1120px,96vw);max-height:94vh;display:flex;flex-direction:column}
+.pdt-manual-body{overflow:auto;min-height:0;display:grid;gap:14px;padding-bottom:16px;overscroll-behavior:contain}
+.pdt-manual-body label{display:grid;gap:6px;color:#173759;font-weight:600}
+.pdt-manual-body input,.pdt-manual-body select,.pdt-manual-body textarea{box-sizing:border-box;width:100%;min-height:44px;padding:9px;color:#173759;background:#fff;border:1px solid #b7c9df;border-radius:8px;font:inherit}
+.pdt-manual-filters{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.pdt-manual-body fieldset{min-width:0;display:grid;gap:12px;margin:0;padding:14px;border:1px solid #cbd8e8;border-radius:12px;background:#fff}
+.pdt-manual-body [data-status]{padding:10px;background:#eaf2fb;border-radius:8px}
+.pdt-manual-table{width:100%;min-width:720px}.pdt-manual-table th{background:#eaf2fb;color:#103b73}.pdt-manual-table td{background:#fff}.pdt-manual-table tr:nth-child(even) td{background:#f7f9fc}
+.pdt-manual-table input[type=radio]{width:22px;min-height:22px}.pdt-manual-body :focus-visible{outline:3px solid #1264c8;outline-offset:2px}
+.pdt-registration .pdt-manual-table input[type=radio]{width:22px;min-height:22px}
 @media(max-width:600px){.pdt-registration .rec-grid{grid-template-columns:1fr}.pdt-registration fieldset{padding:10px}.pdt-registration select{max-width:100%}}
+@media(max-width:600px){.pdt-manual-modal .piece-modal-card{width:100vw;max-height:100dvh;height:100dvh;border-radius:0}.pdt-manual-filters{grid-template-columns:repeat(2,minmax(0,1fr))}.pdt-manual-body fieldset{padding:10px}.pdt-manual-body .rec-grid{grid-template-columns:1fr}}
 /* Keep delivery context/actions visible while scrolling multiple PDT pieces. */
 #pickDeliveryModal .pick-delivery-card{display:flex;flex-direction:column;overflow:hidden!important}
 #pickDeliveryModal .modal-header,#pickDeliveryModal .modal-actions{flex:0 0 auto;background:#f7faff}

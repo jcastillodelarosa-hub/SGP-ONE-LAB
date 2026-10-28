@@ -1,3 +1,13 @@
+# Issue #140 — PDT manual unificado, Fase 1 (rama de revisión)
+
+Fecha Colombia: 2026-10-28. Base `main` `55a309729bb3166cce98e24eb7e840169f4b7890`; rama `feature/pdt-manual-unificado`. Alcance: botón `+ Nuevo PDT`, filtros de programación, selector PANEL con combinaciones y múltiples piezas, NC opcional, observaciones, tabla visual de fuentes en Picking, SQL REVIEW aditivo de cabeceras/detalles/fuentes y RPC con sesión/roles. Sin archivado histórico ni cambios a V4/PR #139.
+
+Estado: IMPLEMENTADO EN RAMA / VERIFICADO EN AISLAMIENTO. No aplicado en Supabase, no fusionado ni publicado. Pruebas: Node 340/340, PostgreSQL 17.11 sintético (instalación y casos transaccionales revertidos), PC 1440 y móvil 390 con RPC simuladas, `verify:release` tras `build:vendor`. Evidencias en `tests/pdt-manual/` y contrato/reversión en `docs/sql-proposals/pdt/manual/README.md`.
+
+Bloqueos para instalación: confirmar columna productiva de año programado en `sgp_produccion_reservas_v`; restauración compatible y respaldo; Fase 2 debe resolver validación de PDT manual agrupado antes de exponerlo al flujo operativo. Siguiente paso: revisión del PR Draft de Fase 1 y de esos contratos; no iniciar Fase 2 ni aplicar SQL sin autorización.
+
+---
+
 # PR116 — corrección final de historial y contrato productivo reportado
 
 Fecha Colombia: 2026-10-27T05:15:13.387476-05:00.
