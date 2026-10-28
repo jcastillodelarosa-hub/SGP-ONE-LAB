@@ -2,7 +2,8 @@ import {validateFabricationDistribution} from '../domain/aluminum-pending-balanc
 
 export function sourceUsable(source,sources){
  const id=String(source.id_pieza??'').trim();
- return !!id&&sources.filter(s=>String(s.id_pieza??'').trim()===id).length===1
+ const group=source.grouped===true&&Array.isArray(source.source_ids)&&source.source_ids.length>0&&source.source_ids.every(Boolean);
+ return (group||!!id&&sources.filter(s=>String(s.id_pieza??'').trim()===id).length===1)
   &&!!String(source.fabricacion??'').trim()&&!!String(source.acabado??'').trim()
   &&Number.isFinite(Number(source.longitud))&&Number(source.longitud)>0;
 }
@@ -16,7 +17,7 @@ export function distributionState(sources,selected,reported,note=''){
  if(!selected.length)return reject('Selecciona al menos una fabricación e indica la cantidad a asignar.');
  try{
   for(const s of selected){
-   const original=sources.find(p=>p.id_pieza===s.id_pieza);
+   const original=sources.find(p=>s.grouped===true?p.grouped===true&&p.fabricacion===s.fabricacion&&Number(p.longitud)===Number(s.longitud)&&p.acabado===s.acabado:p.id_pieza===s.id_pieza);
    if(!original||!sourceUsable(original,sources))return reject('La selección no tiene una identidad de pieza única y verificable.');
   }
   const result=validateFabricationDistribution(selected);
@@ -30,18 +31,31 @@ export function renderSourceDistribution(sources,reported,error,esc,reference=''
   const usable=sourceUsable(p,sources);
   return '<div class="pdt-source-row" role="row">'+
    '<div data-label="Seleccionar" role="cell"><input type="checkbox" data-source="'+i+'" aria-label="Seleccionar '+esc(p.fabricacion)+'" '+(!usable?'disabled':'')+'></div>'+
-   '<div data-label="Fabricación" role="cell"><b>'+esc(p.fabricacion||'—')+'</b><small>'+(!usable?'Identidad no disponible':'Fuente '+esc(String(p.id_pieza).split(':').slice(-2).join(':'))+(p.marca?' · '+esc(p.marca):'')+(p.uso?' · '+esc(p.uso):''))+'</small></div>'+
+   '<div data-label="Fabricación" role="cell"><b>'+esc(p.fabricacion||'—')+'</b><small>'+(!usable?'Identidad no disponible':(p.grouped?'Fuentes de origen '+esc(p.source_ids.length):'Fuente '+esc(String(p.id_pieza).split(':').slice(-2).join(':')))+(p.marca?' · '+esc(p.marca):'')+(p.uso?' · '+esc(p.uso):''))+'</small></div>'+
    '<div data-label="Referencia" role="cell"><strong class="pdt-source-reference">'+esc(p.codigo_sap||p.perfil||reference||'—')+'</strong></div>'+ 
    '<div data-label="Longitud (in)" role="cell">'+esc(p.longitud??'—')+'</div>'+
    '<div data-label="Acabado" role="cell">'+esc(p.acabado||'—')+'</div>'+
    '<div data-label="Cant. referencia" role="cell">'+esc(p.cantidad??'—')+'</div>'+
    '<div data-label="A asignar" role="cell"><input aria-label="Cantidad a asignar '+esc(p.fabricacion)+'" data-source-qty="'+i+'" type="number" min="1" step="1" inputmode="numeric" placeholder="Cantidad" '+(!usable?'disabled':'')+'></div></div>';
  }).join('');
- return '<section class="repo-modal-section pdt-distribution"><h3>Distribución PANEL</h3><p>Selecciona las fabricaciones e indica cuánto asignar a cada una. La cantidad de referencia pertenece a la fuente; no es una entrega ni una asignación automática.</p>'+
+ return '<section class="repo-modal-section pdt-distribution"><h3>Distribución PANEL</h3><p>Selecciona fabricación y longitud; asigna cantidad al detalle, no a una pieza individual. Las fuentes originales se conservan para trazabilidad.</p>'+
   (error?'<p class="pdt-source-error" role="alert">No se pudieron consultar las fuentes: '+esc(error)+'</p>':'')+
   (rows?'<div class="pdt-source-table" role="table" aria-label="Fuentes PANEL por pieza"><div class="pdt-source-head" role="row">'+['Selección','Fabricación','Referencia','Longitud (in)','Acabado','Cant. referencia','A asignar'].map(x=>'<span role="columnheader">'+x+'</span>').join('')+'</div>'+rows+'</div>':'<p class="pdt-source-error">No hay filas disponibles en la consulta V2. El listado tradicional no sustituye la identidad real requerida.</p>')+
   '<div class="pdt-distribution-total" aria-live="polite"><span>Asignado <b data-assigned-total>0</b> / reportado <b>'+esc(reported)+'</b></span><strong data-distribution-label>Sin selección</strong></div>'+
   '<label class="pdt-correction-note">Motivo de corrección <span>(obligatorio si cambia el total)</span><textarea data-note rows="2" placeholder="Explica por qué la cantidad validada difiere de la reportada"></textarea></label>'+
   '<p data-source-status role="status"></p><div class="pdt-distribution-actions"><button type="button" data-source-retry>Reintentar consulta</button><button type="button" class="repo-v2-entry" data-operation="validate" disabled>Confirmar distribución</button></div>'+
   '<p class="pdt-distribution-help">Solo confirmar una distribución válida activa V2. El reporte original y las NC se conservan.</p></section>';
+}
+
+export function groupPdtSources(sources){
+ if(!Array.isArray(sources))throw new Error('Fuentes inválidas');
+ const groups=new Map();
+ for(const source of sources){
+  const id=String(source.id_pieza??'').trim(),fab=String(source.fabricacion??'').trim(),finish=String(source.acabado??'').trim(),length=Number(source.longitud);
+  if(!id||!fab||!finish||!Number.isFinite(length)||length<=0)continue;
+  const key=JSON.stringify([fab.toLowerCase(),length,finish.toUpperCase()]);
+  if(!groups.has(key))groups.set(key,{...source,id_pieza:'',grouped:true,source_ids:[],cantidad:null});
+  const group=groups.get(key);if(!group.source_ids.includes(id))group.source_ids.push(id);
+ }
+ return [...groups.values()].sort((a,b)=>String(a.fabricacion).localeCompare(String(b.fabricacion))||Number(a.longitud)-Number(b.longitud));
 }

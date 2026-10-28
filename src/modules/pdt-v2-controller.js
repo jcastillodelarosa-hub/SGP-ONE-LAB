@@ -1,6 +1,6 @@
 import {capturePdtView,restorePdtView} from './pdt-v2-view-state.js';
 import {advancesForm,renderPdtWorkspace,bindPdtNavigation} from './pdt-v2-presentation.js';
-import {distributionState,renderSourceDistribution} from './pdt-source-distribution.js';
+import {distributionState,renderSourceDistribution,groupPdtSources} from './pdt-source-distribution.js';
 import {executePendingV2,refreshPendingV2} from '../services/aluminum-pending-v2.js';
 import {normalizeNcNumbers} from '../domain/aluminum-pending-balances.js';
 
@@ -28,7 +28,7 @@ export async function openPdtV2({row,client,token,role,capabilities,show,escape:
       const result=await client.rpc('sgp_pdt_fuentes_v2',{p_token:token,p_id:row.id_pendiente});
       if(result.error)throw result.error;
       if(!Array.isArray(result.data))throw new Error('Respuesta de fuentes V2 inválida');
-      sources=result.data;
+      sources=groupPdtSources(result.data);
     }catch(error){sourceError=error.message||'Consulta de fuentes no disponible';}
   }
   let picking={entregas:[],lineas:[]};
