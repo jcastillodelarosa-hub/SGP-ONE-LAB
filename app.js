@@ -1203,6 +1203,46 @@ async function loadPackingSheet(){
   renderPackingSheet();
  }catch(error){if(requestSequence!==packingRequestSequence||getAppToken()!==requestedToken)return;packingRows=[];if(status)status.textContent='Consulta rechazada: '+error.message;if(body)body.innerHTML='<tr><td colspan="9">No fue posible cargar Empaque.</td></tr>';}
 }
+// E2: vistas de consulta sobre el contrato autenticado ya usado por Ensamble.
+let linePlanningRows=[];
+function lineE2Esc(value){return escapeHtml(String(value??'—'))}
+function lineE2Tabs(tab){
+ for(const [name,id] of [['planning','Planning'],['assembly','Assembly'],['packing','Packing'],['close','Close']]){
+  const button=document.getElementById('production'+id+'Tab'),panel=document.getElementById('production'+id+'Panel');
+  if(button){button.classList.toggle('active',name===tab);button.setAttribute('aria-selected',String(name===tab))}
+  if(panel)panel.hidden=name!==tab;
+ }
+}
+function lineE2Render(){
+ const body=document.getElementById('linePlanningBody');if(!body)return;
+ const q=(document.getElementById('linePlanningSearch')?.value||'').trim().toLowerCase();
+ const rows=linePlanningRows.filter(r=>!q||[r.produccion,r.reserva_al,r.sistema,r.id].some(v=>String(v??'').toLowerCase().includes(q)));
+ const sort=document.getElementById('linePlanningSort')?.value;
+ rows.sort((a,b)=>sort==='production'?String(a.produccion??'').localeCompare(String(b.produccion??''),undefined,{numeric:true}):comparePriority(a.prioridad,b.prioridad));
+ body.innerHTML=rows.length?rows.map(r=>'<tr>'+[r.prioridad,r.produccion,r.reserva_al,r.sistema,r.acabado,r.cantidad,r.estado_produccion,r.observacion_mecanizado].map(v=>'<td>'+lineE2Esc(v)+'</td>').join('')+'</tr>').join(''):'<tr><td colspan="8">Sin órdenes para estos filtros.</td></tr>';
+}
+async function lineE2Load(){
+ const status=document.getElementById('linePlanningStatus'),token=getAppToken();
+ if(!token){status.textContent='Inicia sesión para consultar.';return}
+ status.textContent='Consultando órdenes…';
+ try{const client=await getSupabaseClient(),week=document.getElementById('linePlanningWeek')?.value;
+  const {data,error}=await client.rpc('sgp_consultar_ensamble',{p_token:token,p_semana:week?Number(week):null,p_linea:document.getElementById('linePlanningLine').value});
+  if(error)throw error;linePlanningRows=Array.isArray(data?.filas)?data.filas:[];lineE2Render();status.textContent=linePlanningRows.length+' órdenes consultadas en SGP.';
+ }catch(error){linePlanningRows=[];lineE2Render();status.textContent='Consulta rechazada: '+error.message}
+}
+function lineE2Close(){
+ const rows=linePlanningRows,number=k=>rows.reduce((sum,r)=>sum+(Number.isFinite(Number(r[k]))?Number(r[k]):0),0);
+ for(const [id,value] of [['lineCloseOrders',rows.length],['lineCloseUnits',number('cantidad')],['lineCloseAssembly',number('saldo_ensamble')],['lineClosePacking',number('saldo_empaque')]])document.getElementById(id).textContent=String(value);
+ document.getElementById('lineCloseStatus').textContent=rows.length?'Resumen de las órdenes consultadas; no constituye cierre oficial.':'Consulta Programación para ver el resumen.';
+}
+function lineE2SyncWeeks(){const source=document.getElementById('assemblyWeek'),target=document.getElementById('linePlanningWeek');if(!source||!target)return;const current=target.value;target.replaceChildren(...Array.from(source.options).map(o=>new Option(o.text,o.value)));target.value=Array.from(target.options).some(o=>o.value===current)?current:source.value}
+document.getElementById('productionPlanningTab')?.addEventListener('click',()=>{lineE2Tabs('planning');lineE2SyncWeeks();void lineE2Load()});
+document.getElementById('productionAssemblyTab')?.addEventListener('click',()=>lineE2Tabs('assembly'));
+document.getElementById('productionPackingTab')?.addEventListener('click',()=>lineE2Tabs('packing'));
+document.getElementById('productionCloseTab')?.addEventListener('click',()=>{lineE2Tabs('close');lineE2Close()});
+for(const id of ['linePlanningWeek','linePlanningLine'])document.getElementById(id)?.addEventListener('change',()=>void lineE2Load());
+for(const id of ['linePlanningSearch','linePlanningSort'])document.getElementById(id)?.addEventListener('input',lineE2Render);
+document.getElementById('linePlanningRefresh')?.addEventListener('click',()=>void lineE2Load());
 document.getElementById('productionPackingTab')?.addEventListener('click',()=>{void loadPackingSheet();});
 for(const id of ['packingWeek','packingLine'])document.getElementById(id)?.addEventListener('change',()=>{void loadPackingSheet();});
 for(const id of ['packingPreviewSearch','packingPreviewFilter','packingPreviewSort'])document.getElementById(id)?.addEventListener('input',renderPackingSheet);
