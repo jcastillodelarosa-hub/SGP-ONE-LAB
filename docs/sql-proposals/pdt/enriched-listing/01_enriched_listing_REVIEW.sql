@@ -51,32 +51,43 @@ FROM resolved r WHERE p.id_pendiente=r.id_pendiente
  AND (p.key_produccion IS NULL OR p.reserva_principal IS NULL OR p.acabado_pendiente IS NULL OR p.semana_pdt IS NULL);
 CREATE OR REPLACE FUNCTION public.sgp_pdt_enrich_on_insert_20261028()
 RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path TO 'public','extensions' AS $fn$
-DECLARE rel record; fin record; sem record;
+DECLARE rel record; fin record; sem record; identity_changed boolean;
 BEGIN
+ identity_changed:=TG_OP='INSERT';
+ IF TG_OP='UPDATE' THEN
+  identity_changed:=NEW.reserva IS DISTINCT FROM OLD.reserva OR NEW.produccion IS DISTINCT FROM OLD.produccion OR NEW.key_produccion IS DISTINCT FROM OLD.key_produccion;
+  IF NOT identity_changed THEN RETURN NEW; END IF;
+ END IF;
  SELECT v.key_produccion,v.reserva_principal,v.acabado_reserva,v.semana_reserva,v.es_reserva_compartida
  INTO rel FROM public.sgp_produccion_reservas_v v
  WHERE (NEW.key_produccion IS NOT NULL AND v.key_produccion=NEW.key_produccion AND v.reserva=NEW.reserva)
  OR (NEW.key_produccion IS NULL AND NEW.produccion IS NOT NULL AND v.produccion=NEW.produccion AND v.reserva=NEW.reserva)
  ORDER BY v.semana_produccion DESC LIMIT 1;
  SELECT coalesce(
-   (SELECT string_agg(distinct sp.acabado,' / ') FROM public.sgp_producciones sp WHERE sp.produccion=NEW.produccion AND NEW.reserva=any(regexp_split_to_array(coalesce(sp.reserva_al,''),'\s*,\s*')) AND sp.acabado IS NOT NULL),
-   (SELECT CASE WHEN count(distinct sp.acabado)=1 THEN min(sp.acabado) END FROM public.sgp_producciones sp WHERE NEW.reserva=any(regexp_split_to_array(coalesce(sp.reserva_al,''),'\s*,\s*')) AND sp.acabado IS NOT NULL),
+   (SELECT string_agg(distinct sp.acabado,' / ') FROM public.sgp_producciones sp WHERE sp.produccion=NEW.produccion AND NEW.reserva=any(regexp_split_to_array(coalesce(sp.reserva_al,''),'\\s*,\\s*')) AND sp.acabado IS NOT NULL),
+   (SELECT CASE WHEN count(distinct sp.acabado)=1 THEN min(sp.acabado) END FROM public.sgp_producciones sp WHERE NEW.reserva=any(regexp_split_to_array(coalesce(sp.reserva_al,''),'\\s*,\\s*')) AND sp.acabado IS NOT NULL),
    (SELECT max(sa.acabado) FROM public.sgp_seguimiento_aluminio sa WHERE sa.reserva=NEW.reserva AND sa.acabado IS NOT NULL)
  ) acabado INTO fin;
  SELECT coalesce(rel.semana_reserva,
-   (SELECT max(coalesce(sp.semana_actual,sp.semana_base)) FROM public.sgp_producciones sp WHERE sp.produccion=NEW.produccion AND NEW.reserva=any(regexp_split_to_array(coalesce(sp.reserva_al,''),'\s*,\s*'))),
-   (SELECT max(coalesce(sp.semana_actual,sp.semana_base)) FROM public.sgp_producciones sp WHERE NEW.reserva=any(regexp_split_to_array(coalesce(sp.reserva_al,''),'\s*,\s*'))),
+   (SELECT max(coalesce(sp.semana_actual,sp.semana_base)) FROM public.sgp_producciones sp WHERE sp.produccion=NEW.produccion AND NEW.reserva=any(regexp_split_to_array(coalesce(sp.reserva_al,''),'\\s*,\\s*'))),
+   (SELECT max(coalesce(sp.semana_actual,sp.semana_base)) FROM public.sgp_producciones sp WHERE NEW.reserva=any(regexp_split_to_array(coalesce(sp.reserva_al,''),'\\s*,\\s*'))),
    (SELECT max(coalesce(sa.semana_prog,sa.semana)) FROM public.sgp_seguimiento_aluminio sa WHERE sa.reserva=NEW.reserva),
    (SELECT max(pr.semana) FROM public.sgp_prioridades pr WHERE pr.reserva=NEW.reserva)
  ) semana INTO sem;
  NEW.key_produccion:=coalesce(NEW.key_produccion,rel.key_produccion);
- NEW.reserva_principal:=coalesce(NEW.reserva_principal,rel.reserva_principal,NEW.reserva);
- NEW.acabado_pendiente:=coalesce(NEW.acabado_pendiente,rel.acabado_reserva,fin.acabado);
+ IF TG_OP='UPDATE' THEN
+  -- Identity changed: dependent values must follow the new source, while an explicitly changed key stays intact.
+  NEW.reserva_principal:=coalesce(rel.reserva_principal,NEW.reserva);
+  NEW.acabado_pendiente:=coalesce(rel.acabado_reserva,fin.acabado);
+ ELSE
+  NEW.reserva_principal:=coalesce(NEW.reserva_principal,rel.reserva_principal,NEW.reserva);
+  NEW.acabado_pendiente:=coalesce(NEW.acabado_pendiente,rel.acabado_reserva,fin.acabado);
+ END IF;
  NEW.semana_pdt:=sem.semana;
  RETURN NEW;
 END $fn$;
 REVOKE ALL ON FUNCTION public.sgp_pdt_enrich_on_insert_20261028() FROM PUBLIC,anon,authenticated;
-CREATE TRIGGER trg_sgp_pdt_enrich_insert_20261028 BEFORE INSERT ON public.sgp_aluminio_pendientes
+CREATE TRIGGER trg_sgp_pdt_enrich_insert_20261028 BEFORE INSERT OR UPDATE OF reserva,produccion,key_produccion ON public.sgp_aluminio_pendientes
  FOR EACH ROW EXECUTE FUNCTION public.sgp_pdt_enrich_on_insert_20261028();
 CREATE OR REPLACE FUNCTION public.sgp_aluminio_pendientes_listar(p_token text, p_solo_abiertos boolean DEFAULT true)
  RETURNS jsonb

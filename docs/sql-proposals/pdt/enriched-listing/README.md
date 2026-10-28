@@ -16,3 +16,11 @@ Guardar definición original real. En transacción controlada: restaurar `sgp_al
 ## Riesgos pendientes
 
 No se pudo medir el tiempo productivo en esta sesión ni ejecutar la migración en restauración compatible. El guard de validados puede impedir el backfill, y la instalación debe abortar si ocurre. La prueba de igualdad sobre los 101 registros y el estado de NC es una condición, no un resultado certificado. PR #119 modifica el listado frontend y debe contrastarse antes de fusionar. No aplicar sin completar estas verificaciones.
+
+## Corrección de revisión PR #138
+
+`es_reserva_compartida` no aparece en el SET histórico ni en el trigger: se conserva cada valor almacenado. El listado usa el mismo `coalesce(p.es_reserva_compartida,false)` de la definición productiva. La comprobación de los 101 valores reales requiere ejecutar solamente `SHARED_RESERVATION_READONLY.sql` antes y después en una ventana de instalación autorizada; el digest de ID+boolean detecta alteraciones sin revelar registros. En esta sesión no existe acceso SQL productivo y no se declara verificado ese digest.
+
+La expresión literal `regexp_split_to_array(...,'\\s*,\\s*')` se copió exactamente de la RPC productiva versionada para backfill y trigger; una prueba compara las apariciones. El trigger se ejecuta también al cambiar `reserva`, `produccion` o `key_produccion`, recalculando reserva principal, acabado y semana de la identidad nueva. Cambios que no alteran identidad retornan sin tocar datos enriquecidos. `es_reserva_compartida` y cantidades/estados/historial permanecen intactos. Revisar el orden con otros triggers instalados antes de aplicación.
+
+`equality-isolated.sql` compara los arreglos JSONB completos para ambos filtros; esto incluye campos, cantidad y orden exacto. Con dos PDT empatados en prioridad y fecha, el orden original puede ser no determinista: si la comparación falla solo por empate, no ocultarlo ni reordenar la prueba; documentar IDs y decidir un desempate compatible antes de instalar.

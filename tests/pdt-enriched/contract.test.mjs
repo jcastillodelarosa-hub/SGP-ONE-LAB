@@ -21,3 +21,18 @@ test('no repeated reservation/production lookups in listing, original non-null i
  assert.ok(proposal.includes('coalesce(p.key_produccion,r.key_produccion)'));
  assert.ok(proposal.includes('PDT_LISTAR_DEFINITION_CHANGED'));
 });
+
+test('shared-reservation history is untouched, regex agrees with original, update refreshes identity',()=>{
+ const pattern=original.match(/regexp_split_to_array\(coalesce\(sp\.reserva_al,''\),('(?:\\\\s\*,\\\\s\*)')\)/)?.[1];
+ assert.ok(pattern,'original reservation separator must be found');
+ const patterns=[...proposal.matchAll(/regexp_split_to_array\(coalesce\(sp\.reserva_al,''\),('[^']+')\)/g)].map(x=>x[1]);
+ assert.ok(patterns.length>=8);assert.ok(patterns.every(x=>x===pattern));
+ assert.ok(!proposal.includes('es_reserva_compartida='));
+ assert.ok(proposal.includes('BEFORE INSERT OR UPDATE OF reserva,produccion,key_produccion'));
+ assert.ok(proposal.includes('NEW.reserva_principal:=coalesce(rel.reserva_principal,NEW.reserva)'));
+});
+test('isolated equality compares complete ordered arrays',()=>{
+ const sql=readFileSync('tests/pdt-enriched/equality-isolated.sql','utf8');
+ assert.ok(sql.includes('before_all IS DISTINCT FROM after_all'));
+ assert.ok(sql.includes('before_open IS DISTINCT FROM after_open'));
+});
