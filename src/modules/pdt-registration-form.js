@@ -8,7 +8,25 @@ export async function mountPdtRegistration(host,{client,token,origin,context,onC
  host.innerHTML='<div class="pdt-registration"><div role="status" data-status></div><button type="button" data-retry>Actualizar piezas</button><div data-entries></div><button type="button" data-add>+ Agregar otra pieza</button></div>';
  const root=host.firstElementChild,status=root.querySelector('[data-status]'),list=root.querySelector('[data-entries]');
  function value(){return registrationPieces(origin,sources,entries);}
- function notify(){let valid=false;try{value();valid=loaded&&!busy;}catch{}onChange(valid);}
+ function notify(){
+  let valid=false,message='';
+  if(!loaded)message=busy?'Consultando piezas verificadas…':'No hay piezas verificables. Pulsa Actualizar piezas.';
+  else if(busy)message='Procesando entrega…';
+  else if(!entries.length)message='Agrega al menos una pieza faltante.';
+  else {
+    const index=entries.findIndex(e=>!e.ref||!e.source||!Number.isInteger(Number(e.cantidad))||Number(e.cantidad)<1||(origin!=='PICKING'&&!String(e.nc||'').trim()));
+    if(index>=0){
+      const e=entries[index];
+      message=!e.ref?'Pieza '+(index+1)+': selecciona la referencia.':!e.source?'Pieza '+(index+1)+': selecciona la fabricación, longitud, acabado y reserva.':!Number.isInteger(Number(e.cantidad))||Number(e.cantidad)<1?'Pieza '+(index+1)+': indica una cantidad válida.':'Pieza '+(index+1)+': indica la NC.';
+    }else{
+      try{value();valid=true;message='Datos completos. Ya puedes guardar la entrega.';}
+      catch(e){message=e.message||'Revisa los datos de las piezas.';}
+    }
+  }
+  status.textContent=message;
+  status.dataset.ready=String(valid);
+  onChange(valid);
+ }
  function draw(){
   list.innerHTML=entries.map((e,i)=>{
    const refs=[...new Set(sources.map(p=>p.codigo_sap))].sort();
@@ -27,7 +45,7 @@ export async function mountPdtRegistration(host,{client,token,origin,context,onC
  root.querySelector('[data-add]').onclick=()=>{entries.push({ref:'',source:'',cantidad:1,nc:'',observacion:''});draw();notify();};
  async function load(){
   busy=true;loaded=false;notify();status.textContent='Consultando piezas verificadas…';
-  try{sources=await registrationSources(client,token,origin,context);loaded=true;status.textContent=sources.length?'Piezas PANEL verificadas · PANELES_2':'No hay piezas verificables para esta producción. No se puede guardar.';draw();}
+  try{sources=await registrationSources(client,token,origin,context);loaded=true;draw();}
   catch(e){status.textContent=e.message;}
   finally{busy=false;notify();}
  }
