@@ -1,11 +1,23 @@
 -- PostgreSQL 17 fixture only. The runner inserts 05_export_year_REVIEW.sql
--- between the two marked blocks and replaces its guard with the fixture hash.
+-- at the marker and substitutes BOTH production-body hashes with fixture hashes
+-- in a temporary QA copy. The REVIEW file remains pinned to production bodies.
 BEGIN;
+CREATE FUNCTION public.sgp_previsualizar_export_diario(
+ p_token text,p_linea text,p_datos jsonb) RETURNS jsonb
+LANGUAGE plpgsql SECURITY DEFINER SET search_path TO public AS $fn$
+BEGIN
+ IF jsonb_typeof(p_datos) IS DISTINCT FROM 'array' OR jsonb_array_length(p_datos)=0
+ THEN RAISE EXCEPTION 'QA_EMPTY_EXPORT'; END IF;
+ RETURN '{"ok":true}'::jsonb;
+END $fn$;
 CREATE FUNCTION public.sgp_aplicar_export_diario(
  p_token text,p_linea text,p_nombre_archivo text,p_datos jsonb) RETURNS jsonb
 LANGUAGE plpgsql SECURITY DEFINER SET search_path TO public AS $fn$
 DECLARE item jsonb;
 BEGIN
+ PERFORM public.sgp_previsualizar_export_diario(p_token,p_linea,p_datos);
+ IF p_nombre_archivo='reject.xlsx' THEN RETURN '{"ok":false,"error":"QA_REJECTED"}'::jsonb; END IF;
+ IF p_nombre_archivo='raise.xlsx' THEN RAISE EXCEPTION 'QA_EXPORT_ERROR'; END IF;
  FOR item IN SELECT value FROM jsonb_array_elements(p_datos) LOOP
   UPDATE public.sgp_producciones SET semana_actual=(item->>'semana_actual')::integer
    WHERE key_produccion=item->>'key_produccion';
@@ -27,10 +39,11 @@ BEGIN
  SELECT r.anio,r.semana INTO STRICT original_year,original_week
  FROM sgp_pdt_manual.reportes r JOIN sgp_pdt_manual.detalles d ON d.id_reporte=r.id_reporte
  WHERE d.id_pendiente=pending;
- PERFORM public.sgp_aplicar_export_diario('QA','PANELES_2','qa.xlsx',
+ result:=public.sgp_aplicar_export_diario('QA','PANELES_2','qa.xlsx',
   '[{"key_produccion":"QA|PANELES_2","id_linea":"PANELES_2","anio":2027,"semana_actual":1}]'::jsonb);
  EXECUTE 'SET CONSTRAINTS trg_pdt_manual_auditar_programacion IMMEDIATE';
- IF (SELECT anio::text||'/'||semana_actual::text FROM public.sgp_producciones
+ IF result IS DISTINCT FROM '{"ok":true}'::jsonb
+ OR (SELECT anio::text||'/'||semana_actual::text FROM public.sgp_producciones
   WHERE key_produccion='QA|PANELES_2')<>'2027/1'
  OR (SELECT count(*) FROM sgp_pdt_manual.programacion_cambios
   WHERE id_pendiente=pending AND anio_anterior=2026 AND semana_anterior=41
@@ -52,6 +65,27 @@ BEGIN
  THEN RAISE EXCEPTION 'SAME_YEAR_IMPORT_FAILED'; END IF;
  RAISE NOTICE 'QA EXPORT YEAR PASS: cross-year, original immutable, repeated load, same-year value';
 END $qa$;
+DO $errors$ DECLARE rejected boolean; BEGIN
+ rejected:=false;
+ BEGIN
+  PERFORM public.sgp_aplicar_export_diario('QA','PANELES_2','reject.xlsx',
+   '[{"key_produccion":"QA|PANELES_2","id_linea":"PANELES_2","anio":2028,"semana_actual":2}]'::jsonb);
+ EXCEPTION WHEN OTHERS THEN
+  IF SQLERRM='PDT_EXPORT_YEAR_DELEGATED_NOT_OK' THEN rejected:=true; ELSE RAISE; END IF;
+ END;
+ IF NOT rejected OR (SELECT anio FROM public.sgp_producciones WHERE key_produccion='QA|PANELES_2')<>2027
+ THEN RAISE EXCEPTION 'JSON_REJECTION_CHANGED_YEAR'; END IF;
+ rejected:=false;
+ BEGIN
+  PERFORM public.sgp_aplicar_export_diario('QA','PANELES_2','raise.xlsx',
+   '[{"key_produccion":"QA|PANELES_2","id_linea":"PANELES_2","anio":2028,"semana_actual":2}]'::jsonb);
+ EXCEPTION WHEN OTHERS THEN
+  IF SQLERRM='QA_EXPORT_ERROR' THEN rejected:=true; ELSE RAISE; END IF;
+ END;
+ IF NOT rejected OR (SELECT anio FROM public.sgp_producciones WHERE key_produccion='QA|PANELES_2')<>2027
+ THEN RAISE EXCEPTION 'SQL_EXCEPTION_CHANGED_YEAR'; END IF;
+ RAISE NOTICE 'QA EXPORT YEAR PASS: JSON rejection and SQL exception leave year unchanged';
+END $errors$;
 SAVEPOINT missing_year;
 DO $reject$ BEGIN
  PERFORM public.sgp_aplicar_export_diario('QA','PANELES_2','qa.xlsx',

@@ -28,17 +28,9 @@ El guard de Fase 2 exige `md5(prosrc)=51bed910a19ee368c2584e2b7ececc17` para `sg
 
 **Export entre años.** El libro diario contiene `Año prog.` y `Sem prog.`; `production-importer.js` los valida y transmite como `anio` y `semana_actual` a previsualización y aplicación. ChatGPT verificó que `sgp_aplicar_export_diario(text,text,text,jsonb)` cambia `semana_actual` pero no `anio`; tampoco hay un trigger de usuario que lo complete. El año inicial de `sgp_cargar_paquete_semanal` no resuelve una reprogramación posterior. `05_export_year_REVIEW.sql` propone delegar al escritor instalado y, en la misma transacción, sincronizar el año **explícito** de cada fila solo si la producción y semana resultantes coinciden. Rechaza año ausente, período inválido, claves duplicadas y línea incompatible; no calcula año desde el número de semana. `04` difiere la auditoría hasta el estado final de la transacción y conserva año/semana originales del reporte.
 
-**Bloqueo de instalación:** la definición íntegra y huella `md5(prosrc)` del escritor productivo no están en esta rama. `05` contiene deliberadamente `REPLACE_WITH_VERIFIED_EXPORT_PROSRC_MD5` y se detendrá hasta comparar el cuerpo real, incluidos sus retornos de error, autorización y permisos, en un respaldo restaurado. Si el origen Export deja de aportar un año explícito, corregir el origen y bloquear ese lote; jamás inferir 2026/2027 a partir de semana 1/52. Consulta de lectura mínima pendiente (sin filas operativas):
+**Preflight Export:** el usuario adjuntó las definiciones completas de aplicar y previsualizar; sus cuerpos coinciden con las huellas fijadas por `05`. El escritor termina con `ok=true`; los rechazos observados son excepciones, sin captura interna. El wrapper comprueba además `ok=true` antes de cambiar `anio` para fallar de forma segura si el contrato futuro devuelve un JSON de error. Si el origen deja de aportar un año explícito, corregir el origen y bloquear ese lote; jamás inferir 2026/2027 a partir de semana 1/52. Contraste y riesgo residual de snapshots de eventos: [integración Export](../integration/EXPORT_BODY_CONTRAST.md).
 
-```sql
-SELECT p.oid::regprocedure AS firma, md5(p.prosrc) AS huella,
-       pg_get_functiondef(p.oid) AS definicion
-FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
-WHERE n.nspname='public' AND p.oid='public.sgp_aplicar_export_diario(text,text,text,jsonb)'::regprocedure
-ORDER BY firma::text;
-```
-
-El `md5(prosrc)` del validador instalado `sgp_aluminio_pendiente_validar_detalles_v1` fue confirmado como `51bed910a19ee368c2584e2b7ececc17`, igual al guard de Fase 2. **PR #139 sigue Draft** y propone sustituir ese despachador y el acreditador de cierre; si se instala antes, el guard 02 debe detener la instalación. Conciliar los cuerpos y la secuencia en un esquema restaurado; no aceptar una huella nueva sin comparar la función.
+El `md5(prosrc)` del validador productivo original fue confirmado como `51bed910a19ee368c2584e2b7ececc17`. En esta rama de integración, **#139 se instala primero** y el guard 02 fija el despachador resultante de #139; el guard 03 fija su cierre. El orden, pruebas y reversión están en [integración PDT](../integration/README.md). No aceptar una huella nueva sin comparar cuerpos.
 
 ## Evidencia y preflight
 
