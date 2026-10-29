@@ -249,7 +249,7 @@ jobs:
       - name: Checkout approved candidate at immutable SHA
         uses: actions/checkout@v4
         with:
-          ref: b7e7908f822789e3315b2f222f7eda680a13590c
+          ref: f830dd48459146d6d2dfeb9173ecd9824c1c93c4
           path: candidate
           persist-credentials: false
       - uses: actions/setup-node@v4
@@ -260,7 +260,8 @@ jobs:
       - name: Verify candidate and release without cloud credentials
         working-directory: candidate
         run: |
-          test "$(git rev-parse HEAD)" = b7e7908f822789e3315b2f222f7eda680a13590c
+          test "$(git rev-parse HEAD)" = f830dd48459146d6d2dfeb9173ecd9824c1c93c4
+          python3 -m unittest discover -s tests/pdt-manual -p 'test_*.py'
           npm install --no-audit --no-fund
           npm run build:vendor
           npm run verify:release

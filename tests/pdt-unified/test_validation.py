@@ -102,6 +102,18 @@ class ValidationSecurity(unittest.TestCase):
   self.assertTrue(sql.rstrip().endswith('ROLLBACK;'))
   for name in v.TESTS[:-1]:self.assertIn('PASS:'+name,sql)
 
+ def test_five_manual_history_events_are_checked_in_isolated_cycle(self):
+  sql=(ROOT/'tests/pdt-unified/contracts.sql').read_text()
+  cycle=sql.split('DO $cycle$',1)[1].split('END $cycle$;',1)[0]
+  for event in ('ENTREGA_MANUAL_PDT','VALIDACION_ENTREGA_MANUAL_PDT',
+                'ASIGNACION_ENTREGA_MANUAL_PDT','ANULACION_ENTREGA_MANUAL_PDT'):
+   self.assertIn("h.tipo_evento='"+event+"'",cycle)
+  self.assertGreaterEqual(cycle.count("h.estado_anterior='PENDIENTE' AND h.estado_nuevo='PENDIENTE'"),4)
+  self.assertIn("h.tipo_evento='CIERRE_MANUAL_PDT'",cycle)
+  self.assertIn("h.estado_anterior='PENDIENTE' AND h.estado_nuevo='RESUELTO'",cycle)
+  self.assertIn('QA_EXPECTED_ANNULMENT_ROLLBACK',cycle)
+  self.assertIn('public.sgp_pdt_manual_entrega_anular_v1',cycle)
+
  def test_clone_removed_on_restore_failure_without_gcs_write_or_production_client(self):
   class Storage:
    def verify_boundary(self):pass

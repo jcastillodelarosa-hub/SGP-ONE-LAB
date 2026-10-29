@@ -14,7 +14,7 @@ import urllib.parse
 from gcs_storage import PrivateStorage, SafeFailure, BUCKET, PREFIX, request
 import backup_and_restore as recovery
 
-CANDIDATE = 'b7e7908f822789e3315b2f222f7eda680a13590c'
+CANDIDATE = 'f830dd48459146d6d2dfeb9173ecd9824c1c93c4'
 RECORD = PREFIX + '20261029T103434Z-0567ffc8929b47a49cdb3745b1285f1e/recovery-verified.json'
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 REPORT = ROOT / 'work/pdt-unified/report.json'

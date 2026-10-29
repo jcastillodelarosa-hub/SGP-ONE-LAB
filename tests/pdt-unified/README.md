@@ -8,7 +8,7 @@ En **Run workflow**, seleccionar esta rama y operación **validate-pdt-unified**
 El job usa el entorno protegido `supabase-backup`; sus revisores pueden tener que
 aprobar el acceso. Ningún otro job coincide con esta rama/operación.
 
-El candidato se fija a `b7e7908f822789e3315b2f222f7eda680a13590c` (PR142 comprobado).
+El candidato se fija a `f830dd48459146d6d2dfeb9173ecd9824c1c93c4` (PR142 comprobado).
 El recuperador lee exclusivamente el `recovery-verified.json` del 29/10/2026,
 run40 `40858549034`, prefijo terminado en
 `20261029T103434Z-0567ffc8929b47a49cdb3745b1285f1e/`.
@@ -244,3 +244,16 @@ Verificación local: 19/19 pruebas del validador, 24/24 de respaldo,
 fijan la clave y cardinalidad del selector, y comprueban que un fallo manual
 bloquea solo los dependientes y deja ejecutar corte y despacho. La ejecución
 real de los contratos requiere un nuevo Run workflow en el clon protegido.
+
+## Historial fase 3: cinco eventos
+
+PR142 incorpora la corrección de las cinco inserciones de historial de la fase 3.
+Entrega, validación, asignación y anulación escriben el estado anterior y nuevo
+obtenido del pendiente bloqueado, que permanece `PENDIENTE`. El cierre toma
+`estado_anterior` de la fila bloqueada y `estado_nuevo` del `UPDATE ... RETURNING
+estado`, cuyo resultado esperado es `RESUELTO`. Ninguna inserción depende de un
+valor predeterminado inexistente. La regresión del candidato comprueba la
+estructura de las cinco inserciones. Este validador comprueba los cinco eventos
+en el clon; la anulación se prueba en una subtransacción revertida antes de
+continuar con validación, asignación y cierre. El rollback exterior preserva
+el historial previo.

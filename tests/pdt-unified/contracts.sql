@@ -202,21 +202,49 @@ BEGIN
  RAISE NOTICE 'PDT_QA_STEP:cycle.delivery';
  result:=pg_temp.rpc(q);line:=(result->>'id_linea')::uuid;
  IF line IS NULL OR (pg_temp.rpc(q)->>'duplicado') IS DISTINCT FROM 'true' THEN RAISE EXCEPTION 'QA_PICKING_RETRY'; END IF;
+ IF NOT EXISTS(SELECT 1 FROM public.sgp_aluminio_pendientes_historial h
+  WHERE h.id_pendiente=c.pending AND h.tipo_evento='ENTREGA_MANUAL_PDT'
+   AND h.estado_anterior='PENDIENTE' AND h.estado_nuevo='PENDIENTE')
+ THEN RAISE EXCEPTION 'QA_DELIVERY_HISTORY_STATE'; END IF;
+ -- Exercise annulment without changing the line needed by the closure path.
+ BEGIN
+  PERFORM pg_temp.rpc(format('SELECT public.sgp_pdt_manual_entrega_anular_v1(%L,%L::uuid,%L)',
+   token,line,'QA aislada reversible'));
+  IF NOT EXISTS(SELECT 1 FROM public.sgp_aluminio_pendientes_historial h
+   WHERE h.id_pendiente=c.pending AND h.tipo_evento='ANULACION_ENTREGA_MANUAL_PDT'
+    AND h.estado_anterior='PENDIENTE' AND h.estado_nuevo='PENDIENTE')
+  THEN RAISE EXCEPTION 'QA_ANNULMENT_HISTORY_STATE'; END IF;
+  RAISE EXCEPTION 'QA_EXPECTED_ANNULMENT_ROLLBACK';
+ EXCEPTION WHEN OTHERS THEN
+  IF SQLERRM IS DISTINCT FROM 'QA_EXPECTED_ANNULMENT_ROLLBACK' THEN RAISE; END IF;
+ END;
  -- Source state is altered only inside this rollback transaction in the clone.
  RAISE NOTICE 'PDT_QA_STEP:cycle.source-state';
  UPDATE public.sgp_picking_entregas SET estado='VALIDADA' WHERE id_entrega=c.event;
  RAISE NOTICE 'PDT_QA_STEP:cycle.delivery-validate';
  PERFORM pg_temp.rpc(format('SELECT public.sgp_pdt_manual_entrega_validar_v1(%L,%L::uuid)',reception,line));
+ IF NOT EXISTS(SELECT 1 FROM public.sgp_aluminio_pendientes_historial h
+  WHERE h.id_pendiente=c.pending AND h.tipo_evento='VALIDACION_ENTREGA_MANUAL_PDT'
+   AND h.estado_anterior='PENDIENTE' AND h.estado_nuevo='PENDIENTE')
+ THEN RAISE EXCEPTION 'QA_VALIDATION_HISTORY_STATE'; END IF;
  key:=gen_random_uuid();q:=format('SELECT public.sgp_pdt_manual_asignar_v1(%L,%L::uuid,%L::uuid)',reception,line,key);
  RAISE NOTICE 'PDT_QA_STEP:cycle.assign';
  PERFORM pg_temp.rpc(q);
  IF (pg_temp.rpc(q)->>'duplicado') IS DISTINCT FROM 'true' THEN RAISE EXCEPTION 'QA_ASSIGNMENT_RETRY'; END IF;
+ IF NOT EXISTS(SELECT 1 FROM public.sgp_aluminio_pendientes_historial h
+  WHERE h.id_pendiente=c.pending AND h.tipo_evento='ASIGNACION_ENTREGA_MANUAL_PDT'
+   AND h.estado_anterior='PENDIENTE' AND h.estado_nuevo='PENDIENTE')
+ THEN RAISE EXCEPTION 'QA_ASSIGNMENT_HISTORY_STATE'; END IF;
  key:=gen_random_uuid();q:=format('SELECT public.sgp_pdt_manual_cerrar_v1(%L,%L::uuid,%L::uuid)',token,c.pending,key);
  RAISE NOTICE 'PDT_QA_STEP:cycle.close';
  PERFORM pg_temp.rpc(q);
  IF (pg_temp.rpc(q)->>'duplicado') IS DISTINCT FROM 'true'
  OR NOT EXISTS(SELECT 1 FROM public.sgp_aluminio_pendientes WHERE id_pendiente=c.pending AND estado='RESUELTO' AND estado_repo='PICKING')
  THEN RAISE EXCEPTION 'QA_CLOSURE_FAILED'; END IF;
+ IF NOT EXISTS(SELECT 1 FROM public.sgp_aluminio_pendientes_historial h
+  WHERE h.id_pendiente=c.pending AND h.tipo_evento='CIERRE_MANUAL_PDT'
+   AND h.estado_anterior='PENDIENTE' AND h.estado_nuevo='RESUELTO')
+ THEN RAISE EXCEPTION 'QA_CLOSURE_HISTORY_STATE'; END IF;
 END $cycle$;
 SELECT 'PASS:validation-partial-advance-picking-close';
 
