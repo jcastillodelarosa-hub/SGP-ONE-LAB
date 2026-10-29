@@ -22,12 +22,14 @@ sections.forEach(([id,name,description])=>{
 const btn=document.createElement('button');btn.type='button';btn.className='lp-rebuild-tab';btn.textContent=name;btn.dataset.lpSection=id;btn.setAttribute('aria-controls','lp-section-'+id);nav.append(btn);
 const panel=document.createElement('section');panel.id='lp-section-'+id;panel.className='lp-rebuild-panel';panel.hidden=true;
 const heading=document.createElement('header');heading.className='lp-rebuild-heading';const eyebrow=document.createElement('span');eyebrow.textContent=id;const title=document.createElement('h3');title.textContent=name;const subtitle=document.createElement('p');subtitle.textContent=description;heading.append(eyebrow,title,subtitle);panel.append(heading);
-if(id==='LP-04'){const sub=document.createElement('h4');sub.textContent='Reporte de ubicaciones';panel.append(sub);panel.append(report);}else{const empty=document.createElement('p');empty.className='lp-rebuild-empty';empty.textContent='Sección preparada para la siguiente etapa funcional. No hay operaciones nuevas habilitadas.';panel.append(empty);}
+if(id==='LP-04'){const sub=document.createElement('h4');sub.textContent='Reporte de ubicaciones';panel.append(sub);const denied=document.createElement('p');denied.className='lp-rebuild-empty';denied.id='lp-location-access';denied.textContent='Tu usuario no tiene habilitado Reporte de ubicaciones.';denied.hidden=true;panel.append(denied);panel.append(report);}else{const empty=document.createElement('p');empty.className='lp-rebuild-empty';empty.textContent='Sección preparada para la siguiente etapa funcional. No hay operaciones nuevas habilitadas.';panel.append(empty);}
 content.append(panel);panels.set(id,{panel,btn});
 btn.addEventListener('click',()=>activate(id));
 });
 shell.append(nav,content);legacyTabs.before(shell);
 legacyTabs.hidden=true;legacyAssembly.hidden=true;legacyPacking.hidden=true;
-function activate(id){for(const [key,{panel,btn}] of panels){const active=key===id;panel.hidden=!active;btn.classList.toggle('active',active);btn.setAttribute('aria-current',active?'page':'false');}if(id==='LP-04')reportTrigger.click();}
+function syncLocationAccess(){const allowed=!reportTrigger.hidden;const denied=document.getElementById('lp-location-access');if(denied)denied.hidden=allowed;if(!allowed)report.hidden=true;return allowed;}
+const accessObserver=new MutationObserver(()=>{if(panels.get('LP-04').panel.hidden)return;syncLocationAccess();});accessObserver.observe(reportTrigger,{attributes:true,attributeFilter:['hidden']});
+function activate(id){for(const [key,{panel,btn}] of panels){const active=key===id;panel.hidden=!active;btn.classList.toggle('active',active);btn.setAttribute('aria-current',active?'page':'false');}if(id==='LP-04'&&syncLocationAccess())reportTrigger.click();}
 activate('LP-01');
 })();
