@@ -68,13 +68,13 @@ test('capabilities transport/auth error never silently degrades',async()=>{
   assert.equal(calls,1);
 });
 test('Reception reads dedicated v2 without requesting forbidden legacy list',async()=>{
-  const calls=[];const client={rpc:async(name)=>{calls.push(name);return {data:name==='sgp_pdt_capacidades_v2'?{ok:true,contract_version:2,operations:[]}:payload()};}};
+  const calls=[];const client={rpc:async(name)=>{calls.push(name);return name==='sgp_pdt_manual_ids_v1'?{error:{code:'PGRST202'}}:{data:name==='sgp_pdt_capacidades_v2'?{ok:true,contract_version:2,operations:[]}:payload()};}};
   const loaded=await loadPendingRows(client,'synthetic','RECEPCION');
   assert.equal(loaded.rows[0].cantidad,9);
-  assert.deepEqual(calls,['sgp_pdt_capacidades_v2','sgp_aluminio_pendientes_listar_v2']);
+  assert.deepEqual(calls,['sgp_pdt_capacidades_v2','sgp_aluminio_pendientes_listar_v2','sgp_pdt_manual_ids_v1']);
 });
 test('v2 enriches metadata without reinterpreting original quantities',async()=>{
-  const client={rpc:async(name)=>({data:name==='sgp_pdt_capacidades_v2'?{ok:true,contract_version:2,operations:[]}:
+  const client={rpc:async(name)=>name==='sgp_pdt_manual_ids_v1'?{error:{code:'PGRST202'}}:({data:name==='sgp_pdt_capacidades_v2'?{ok:true,contract_version:2,operations:[]}:
     name==='sgp_aluminio_pendientes_listar'?[{id_pendiente:'p',semana:44,acabado:'DS',cantidad:9}]:payload()})};
   const {rows}=await loadPendingRows(client,'synthetic','COORDINADOR');
   assert.equal(rows[0].semana,44);assert.equal(rows[0].cantidad,9);assert.equal(rows[0].cantidad_validada,8);

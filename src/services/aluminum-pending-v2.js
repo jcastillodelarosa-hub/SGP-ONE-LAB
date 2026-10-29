@@ -68,9 +68,13 @@ export async function loadPendingRows(client,token,role) {
   if(!capabilities)return {rows:data,capabilities:null};
   if(modern.error)throw modern.error;
   const adapted=adaptPendingListV2(modern.data);
+  const manualResponse=await client.rpc('sgp_pdt_manual_ids_v1',{p_token:token});
+  if(manualResponse.error&&!['PGRST202','42883'].includes(manualResponse.error.code))throw manualResponse.error;
+  if(!manualResponse.error&&(manualResponse.data?.ok!==true||!Array.isArray(manualResponse.data.ids)))throw new Error('Identidades PDT manual inválidas');
+  const manualIds=new Set(manualResponse.error?[]:manualResponse.data.ids.map(String));
   const original=new Map(data.map(r=>[r.id_pendiente,r]));
   const rows=adapted.map(r=>({...original.get(r.id_pendiente),...r,
-    semana:r.semana??original.get(r.id_pendiente)?.semana}));
+    semana:r.semana??original.get(r.id_pendiente)?.semana,manual_pdt:manualIds.has(String(r.id_pendiente))}));
   const present=new Set(rows.map(r=>r.id_pendiente));
   for(const r of data)if(!present.has(r.id_pendiente))rows.push(r);
   return {rows,capabilities};

@@ -1,6 +1,7 @@
 import {capturePdtView,restorePdtView} from './pdt-v2-view-state.js';
 import {advancesForm,renderPdtWorkspace,bindPdtNavigation} from './pdt-v2-presentation.js';
-import {distributionState,renderSourceDistribution} from './pdt-source-distribution.js';
+import {distributionState,renderSourceDistribution,manualDistributionState,renderManualDistribution} from './pdt-source-distribution.js';
+import {groupPanelSources} from '../domain/pdt-manual.js';
 import {executePendingV2,refreshPendingV2} from '../services/aluminum-pending-v2.js';
 import {normalizeNcNumbers} from '../domain/aluminum-pending-balances.js';
 
@@ -16,25 +17,26 @@ export async function openPdtV2({row,client,token,role,capabilities,show,escape:
     m.querySelector('.repo-work-body').innerHTML=body;m.querySelector('.repo-work-footer').innerHTML=footer;return m;
   };
   if(!capabilities)throw new Error('Backend PDT v2 no disponible');
+  const manual=row.manual_pdt===true;
   const validated=row.contrato_pdt==='V2' && row.validacion_estado==='VALIDADO' && Array.isArray(row.detalles) && row.detalles.length>0;
   const needsValidation=row.validacion_estado!=='VALIDADO';
   const editable=row.estado!=='RESUELTO'&&row.estado_repo!=='PICKING';
   const validator=['ADMINISTRADOR','COORDINADOR','RECEPCION','LIDER LINEA','SUPERVISOR DE PICKING'].includes(role);
   const machinist=['ADMINISTRADOR','COORDINADOR','LIDER MECANIZADO','LIDER'].includes(role);
   const ncEditor=['ADMINISTRADOR','COORDINADOR','PATINADOR'].includes(role);
-  let sources=[],sourceError=null;
+  let sources=[],sourceError=null,manualOriginal=null,manualGroups=[];
   if(needsValidation && editable && validator){
     try{
-      const result=await client.rpc('sgp_pdt_fuentes_v2',{p_token:token,p_id:row.id_pendiente});
+      const result=await client.rpc(manual?'sgp_pdt_manual_fuentes_validacion_v1':'sgp_pdt_fuentes_v2',{p_token:token,p_id:row.id_pendiente});
       if(result.error)throw result.error;
-      if(!Array.isArray(result.data))throw new Error('Respuesta de fuentes V2 inválida');
-      sources=result.data;
+      if(manual){if(result.data?.ok!==true||!Array.isArray(result.data.fuentes)||!result.data.original)throw new Error('Fuentes manuales inválidas');manualOriginal=result.data.original;sources=result.data.fuentes;manualGroups=groupPanelSources(sources);}
+      else{if(!Array.isArray(result.data))throw new Error('Respuesta de fuentes V2 inválida');sources=result.data;}
     }catch(error){sourceError=error.message||'Consulta de fuentes no disponible';}
   }
   let picking={entregas:[],lineas:[]};
   const pickRegister=['ADMINISTRADOR','COORDINADOR','PICKING','SUPERVISOR DE PICKING'].includes(role);
   const pickValidate=['ADMINISTRADOR','COORDINADOR','RECEPCION','SUPERVISOR DE PICKING'].includes(role);
-  if(validated && capabilities.picking_cuantitativo && (pickRegister||pickValidate||machinist)){
+  if(validated && !manual && capabilities.picking_cuantitativo && (pickRegister||pickValidate||machinist)){
     try{
     const result=await client.rpc('sgp_pdt_picking_v2',{p_token:token,p_id:row.id_pendiente});
     if(result.error)throw result.error;
@@ -45,10 +47,10 @@ export async function openPdtV2({row,client,token,role,capabilities,show,escape:
   const details=row.detalles||[];
   const moves=(row.movimientos||[]).filter(m=>m.tipo==='AVANCE' && !(row.movimientos||[]).some(x=>x.id_movimiento_revertido===m.id_movimiento));
   let form='';
-  if(needsValidation && editable && validator)form+=renderSourceDistribution(sources,row.cantidad,sourceError,esc,row.perfil);
-  if(validated && editable && machinist)form+=advancesForm(details,moves,row,esc);
+  if(needsValidation && editable && validator)form+=manual?renderManualDistribution(manualGroups,manualOriginal,sourceError,esc):renderSourceDistribution(sources,row.cantidad,sourceError,esc,row.perfil);
+  if(validated && editable && machinist && !manual)form+=advancesForm(details,moves,row,esc);
   if(editable && ncEditor)form+='<section class="repo-modal-section"><h3>NC vinculadas</h3><p>'+esc((row.ncs||[]).map(n=>(n.referencia||n.consecutivo)+' · '+(n.estado||n.resolucion)).join(' / ')||row.nc||'Sin NC')+'</p><label>Añadir NC (sin reemplazar)<input data-ncs type="text" autocomplete="off"></label><button type="button" data-operation="nc">Añadir NC</button></section>';
-  if(validated && editable && capabilities.picking_cuantitativo && (pickRegister||pickValidate) && !picking.error){
+  if(validated && editable && !manual && capabilities.picking_cuantitativo && (pickRegister||pickValidate) && !picking.error){
     form+='<section class="repo-modal-section"><h3>Entrega Picking por detalle</h3><p>Registrar cantidades efectivamente entregadas. Los faltantes de la orden no calculan estas cantidades.</p>';
     if(pickRegister)form+='<label>Entrega<select data-pick-event>'+picking.entregas.map((e,i)=>'<option value="'+esc(e.id_entrega)+'">Entrega '+(i+1)+' · '+esc(e.produccion)+' · '+esc(e.estado)+' · '+(e.completa?'Orden completa':'Orden parcial')+'</option>').join('')+'</select></label><label>Detalle<select data-pick-detail>'+details.map(d=>'<option value="'+esc(d.id_detalle)+'">'+esc(d.fabricacion)+' · '+esc(d.longitud)+' · '+esc(d.acabado)+'</option>').join('')+'</select></label><label>Cantidad entregada<input type="number" min="1" step="1" data-pick-qty></label><button type="button" data-operation="delivery" '+(!picking.entregas.length?'disabled':'')+'>Registrar cantidad entregada</button>';
     form+='<label>Línea registrada<select data-pick-line>'+picking.lineas.filter(l=>l.estado!=='ANULADA').map(l=>'<option value="'+esc(l.id_linea)+'">'+esc(details.find(d=>d.id_detalle===l.id_detalle)?.fabricacion||'Detalle')+' · '+esc(l.cantidad)+' · '+esc(l.estado)+(l.asignada?' · acreditada':'')+'</option>').join('')+'</select></label>';
@@ -90,12 +92,12 @@ export async function openPdtV2({row,client,token,role,capabilities,show,escape:
   }
 
   let operationPending=false;
-  const selectedSources=()=>[...modal.querySelectorAll('[data-source]:checked')].map(input=>({...sources[+input.dataset.source],cantidad:modal.querySelector('[data-source-qty="'+input.dataset.source+'"]')?.value||''}));
+  const selectedSources=()=>[...modal.querySelectorAll('[data-source]:checked')].map(input=>({...(manual?manualGroups:sources)[+input.dataset.source],cantidad:modal.querySelector('[data-source-qty="'+input.dataset.source+'"]')?.value||''}));
   const updateDistribution=()=>{
     const button=modal.querySelector('[data-operation="validate"]');if(!button)return;
-    const state=distributionState(sources,selectedSources(),row.cantidad,modal.querySelector('[data-note]')?.value||'');
+    const state=manual?manualDistributionState(manualGroups,selectedSources(),manualOriginal,modal.querySelector('[data-note]')?.value||''):distributionState(sources,selectedSources(),row.cantidad,modal.querySelector('[data-note]')?.value||'');
     button.disabled=operationPending||button.dataset.unavailable==='true'||!state.valid;
-    const note=modal.querySelector('[data-note]');if(note)note.required=selectedSources().length>0&&state.total!==Number(row.cantidad);
+    const note=modal.querySelector('[data-note]');if(note)note.required=selectedSources().length>0&&state.corrected;
     modal.querySelector('[data-assigned-total]').textContent=String(state.total);
     modal.querySelector('[data-distribution-label]').textContent=state.valid?(state.corrected?'Corrección justificada':'Coincide con el reporte'):'Distribución pendiente';
     modal.querySelector('[data-source-status]').textContent=sourceError?'Consulta fallida. Reintenta para recuperar fuentes verificables.':state.reason;
@@ -140,7 +142,7 @@ export async function openPdtV2({row,client,token,role,capabilities,show,escape:
     try{
       switch(button.dataset.operation){
         case 'validate': {
-          const state=distributionState(sources,selectedSources(),row.cantidad,val('[data-note]'));
+          const state=manual?manualDistributionState(manualGroups,selectedSources(),manualOriginal,val('[data-note]')):distributionState(sources,selectedSources(),row.cantidad,val('[data-note]'));
           if(!state.valid)throw new Error(state.reason);
           operation='sgp_aluminio_pendiente_validar_detalles_v1';args={...args,p_detalles:state.details,p_reserva:row.reserva,p_observacion:val('[data-note]')||null};break;
         }

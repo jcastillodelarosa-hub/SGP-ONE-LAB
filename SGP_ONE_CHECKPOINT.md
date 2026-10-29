@@ -1,10 +1,10 @@
-# Issue #140 — PDT manual unificado, Fase 1 (rama de revisión)
+# Issue #140 — PDT manual unificado, Fases 1 y 2 (rama de revisión)
 
 Fecha Colombia: 2026-10-28. Base `main` `55a309729bb3166cce98e24eb7e840169f4b7890`; rama `feature/pdt-manual-unificado`. Alcance: botón `+ Nuevo PDT`, filtros de programación, selector PANEL con combinaciones y múltiples piezas, NC opcional, observaciones, tabla visual de fuentes en Picking, SQL REVIEW aditivo de cabeceras/detalles/fuentes y RPC con sesión/roles. Sin archivado histórico ni cambios a V4/PR #139.
 
-Estado: IMPLEMENTADO EN RAMA / VERIFICADO EN AISLAMIENTO. No aplicado en Supabase, no fusionado ni publicado. Pruebas: Node 340/340, PostgreSQL 17.11 sintético (instalación y casos transaccionales revertidos), PC 1440 y móvil 390 con RPC simuladas, `verify:release` tras `build:vendor`. Evidencias en `tests/pdt-manual/` y contrato/reversión en `docs/sql-proposals/pdt/manual/README.md`.
+Estado: IMPLEMENTADO EN RAMA / VERIFICADO EN AISLAMIENTO. No aplicado en Supabase, no fusionado ni publicado. Fase 2: `POR_VALIDAR` manual se valida con fuentes PANEL verificadas, reporte original inmutable, observación obligatoria para corregir y auditoría original/validado. LEGACY/V2 ajenos se despachan a la función original capturada. Avances, Picking y cierre de registros manuales siguen pendientes de Fase 3 y se ocultan en la UI. SQL REVIEW y reversión separados; ningún SQL aplicado a producción. Pruebas focalizadas Node y PostgreSQL 17.11 sintético con transacción revertida; PC 1440 y móvil 390 de Fase 1 sin nueva captura de Fase 2. Evidencias en `tests/pdt-manual/` y contrato/reversión en `docs/sql-proposals/pdt/manual/README.md`.
 
-Bloqueos para instalación: confirmar columna productiva de año programado en `sgp_produccion_reservas_v`; restauración compatible y respaldo; Fase 2 debe resolver validación de PDT manual agrupado antes de exponerlo al flujo operativo. Siguiente paso: revisión del PR Draft de Fase 1 y de esos contratos; no iniciar Fase 2 ni aplicar SQL sin autorización.
+Bloqueos para instalación/publicación: confirmar fuente oficial del año programado en `sgp_produccion_reservas_v`; respaldar y probar en restauración compatible; reconciliar el guard del validador si PR #139 cambia su cuerpo; completar protección RPC y contratos de avances/Picking/cierre de Fase 3 antes de exponer PDT manual validado al flujo operativo. Siguiente paso: revisión de Fase 2 en el mismo PR Draft #141; no iniciar Fase 3 ni aplicar SQL sin autorización.
 
 ---
 

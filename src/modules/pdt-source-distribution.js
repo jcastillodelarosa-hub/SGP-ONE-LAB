@@ -1,5 +1,31 @@
 import {validateFabricationDistribution} from '../domain/aluminum-pending-balances.js';
 
+export function manualDistributionState(groups,selected,original,note=''){
+ const total=selected.reduce((n,s)=>n+(Number(s.cantidad)||0),0);
+ const reject=reason=>({valid:false,total,reason,details:[],corrected:false});
+ if(!original||!groups.length)return reject('No hay fuentes PANEL verificables para este PDT manual. Reintenta la consulta.');
+ if(!selected.length||selected.length>100)return reject('Selecciona entre 1 y 100 combinaciones PANEL.');
+ const seen=new Set();for(const row of selected){const group=groups.find(g=>g.key===row.key);
+  if(!group||seen.has(row.key)||!Number.isSafeInteger(Number(row.cantidad))||Number(row.cantidad)<1||Number(row.cantidad)>group.cantidad_referencia)return reject('Combinación o cantidad inválida.');seen.add(row.key);
+ }
+ const first=selected[0],corrected=selected.length!==1||total!==Number(original.cantidad)
+  ||String(first.fabricacion).trim().toLowerCase()!==String(original.fabricacion).trim().toLowerCase()
+  ||Number(first.longitud)!==Number(original.longitud)
+  ||String(first.marca||'').trim().toLowerCase()!==String(original.marca||'').trim().toLowerCase()
+  ||String(first.acabado).trim().toUpperCase()!==String(original.acabado).trim().toUpperCase();
+ if(corrected&&!String(note).trim())return {...reject('La corrección requiere observación. El reporte original no se modifica.'),corrected:true};
+ return {valid:true,total,corrected,reason:corrected?'Corrección justificada y auditable.':'Coincide con el reporte original.',
+  details:selected.map(({fabricacion,marca,longitud,acabado,cantidad})=>({fabricacion,marca,longitud,acabado,cantidad:Number(cantidad)}))};
+}
+export function renderManualDistribution(groups,original,error,esc){
+ const rows=groups.map((g,i)=>'<div class="pdt-source-row" role="row"><div data-label="Seleccionar" role="cell"><input type="checkbox" data-source="'+i+'" aria-label="Seleccionar '+esc(g.fabricacion)+'"></div><div data-label="Fabricación" role="cell"><b>'+esc(g.fabricacion)+'</b><small>'+esc(g.marca||'Sin marca')+' · '+g.sourceIds.length+' fuentes</small></div><div data-label="Referencia" role="cell">'+esc(g.codigo_sap)+'</div><div data-label="Longitud" role="cell">'+esc(g.longitud)+'</div><div data-label="Acabado" role="cell">'+esc(g.acabado)+'</div><div data-label="Cant. referencia" role="cell">'+esc(g.cantidad_referencia)+'</div><div data-label="A asignar" role="cell"><input data-source-qty="'+i+'" type="number" min="1" max="'+esc(g.cantidad_referencia)+'" step="1" aria-label="Cantidad para '+esc(g.fabricacion)+'"></div></div>').join('');
+ return '<section class="repo-modal-section pdt-distribution"><h3>Validación PDT manual · PANEL</h3><p>Reporte original inmutable: <b>'+esc(original?.fabricacion||'—')+' · '+esc(original?.longitud||'—')+' · '+esc(original?.marca||'—')+' · '+esc(original?.cantidad??'—')+'</b>. Selecciona fuentes verificadas de la misma referencia; la cantidad corresponde al detalle, no a cada pieza.</p>'+
+  (error?'<p class="pdt-source-error" role="alert">'+esc(error)+'</p>':'')+
+  (rows?'<div class="pdt-source-table" role="table" aria-label="Combinaciones PANEL"><div class="pdt-source-head" role="row">'+['Selección','Fabricación','Referencia','Longitud','Acabado','Cant. referencia','A asignar'].map(x=>'<span role="columnheader">'+x+'</span>').join('')+'</div>'+rows+'</div>':'<p role="alert">Sin fuentes PANEL verificadas. Reintenta.</p>')+
+  '<div class="pdt-distribution-total" aria-live="polite"><span>Validado <b data-assigned-total>0</b> / original <b>'+esc(original?.cantidad??'—')+'</b></span><strong data-distribution-label>Sin selección</strong></div>'+
+  '<label class="pdt-correction-note">Observación de corrección<textarea data-note rows="2" placeholder="Obligatoria al cambiar fabricación, marca, longitud o cantidad"></textarea></label><p data-source-status role="status"></p><div class="pdt-distribution-actions"><button type="button" data-source-retry>Reintentar consulta</button><button type="button" data-operation="validate" disabled>Confirmar distribución</button></div></section>';
+}
+
 export function sourceUsable(source,sources){
  const id=String(source.id_pieza??'').trim();
  return !!id&&sources.filter(s=>String(s.id_pieza??'').trim()===id).length===1
