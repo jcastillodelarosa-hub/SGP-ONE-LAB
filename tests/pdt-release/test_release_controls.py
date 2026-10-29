@@ -192,9 +192,7 @@ class ReleaseControls(unittest.TestCase):
         compare = workflow.split('- name: Compare live RPC', 1)[1].split('- name: Production release interlock', 1)[0]
         for key in ('BACKUP_OBJECT', 'BACKUP_SHA256', 'RECOVERY_GENERATION',
                     'RECOVERY_BYTES', 'RECOVERY_SHA256'):
-            line = key + ': ' + '
-    unittest.main()
- + '{{ inputs.' + key.lower() + ' }}'
+            line = key + ': ' + '$' + '{{ inputs.' + key.lower() + ' }}'
             self.assertIn(line, verify)
             self.assertIn(line, compare)
         self.assertIn('run: python3 tests/pdt-release/verify_recovery.py', verify)
