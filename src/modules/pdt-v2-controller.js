@@ -1,7 +1,8 @@
 import {capturePdtView,restorePdtView} from './pdt-v2-view-state.js';
 import {advancesForm,renderPdtWorkspace,bindPdtNavigation} from './pdt-v2-presentation.js';
-import {distributionState,renderSourceDistribution} from './pdt-source-distribution.js';
-import {executePendingV2,refreshPendingV2} from '../services/aluminum-pending-v2.js';
+import {distributionState,renderSourceDistribution,groupPdtSources,manualDistributionState,renderManualDistribution} from './pdt-source-distribution.js';
+import {groupPanelSources} from '../domain/pdt-manual.js';
+import {executePendingV2,executeManualPdt,refreshPendingV2,refreshManualHeader} from '../services/aluminum-pending-v2.js';
 import {normalizeNcNumbers} from '../domain/aluminum-pending-balances.js';
 
 /** Uses SGP's existing scrollable work modal. Backend is always final authority. */
@@ -16,19 +17,20 @@ export async function openPdtV2({row,client,token,role,capabilities,show,escape:
     m.querySelector('.repo-work-body').innerHTML=body;m.querySelector('.repo-work-footer').innerHTML=footer;return m;
   };
   if(!capabilities)throw new Error('Backend PDT v2 no disponible');
+  const manual=row.manual_pdt===true;
   const validated=row.contrato_pdt==='V2' && row.validacion_estado==='VALIDADO' && Array.isArray(row.detalles) && row.detalles.length>0;
   const needsValidation=row.validacion_estado!=='VALIDADO';
   const editable=row.estado!=='RESUELTO'&&row.estado_repo!=='PICKING';
   const validator=['ADMINISTRADOR','COORDINADOR','RECEPCION','LIDER LINEA','SUPERVISOR DE PICKING'].includes(role);
   const machinist=['ADMINISTRADOR','COORDINADOR','LIDER MECANIZADO','LIDER'].includes(role);
   const ncEditor=['ADMINISTRADOR','COORDINADOR','PATINADOR'].includes(role);
-  let sources=[],sourceError=null;
+  let sources=[],sourceError=null,manualOriginal=null,manualGroups=[];
   if(needsValidation && editable && validator){
     try{
-      const result=await client.rpc('sgp_pdt_fuentes_v2',{p_token:token,p_id:row.id_pendiente});
+      const result=await client.rpc(manual?'sgp_pdt_manual_fuentes_validacion_v1':'sgp_pdt_fuentes_v2',{p_token:token,p_id:row.id_pendiente});
       if(result.error)throw result.error;
-      if(!Array.isArray(result.data))throw new Error('Respuesta de fuentes V2 inválida');
-      sources=result.data;
+      if(manual){if(result.data?.ok!==true||!Array.isArray(result.data.fuentes)||!result.data.original)throw new Error('Fuentes manuales inválidas');manualOriginal=result.data.original;sources=result.data.fuentes;manualGroups=groupPanelSources(sources);}
+      else{if(!Array.isArray(result.data))throw new Error('Respuesta de fuentes V2 inválida');sources=groupPdtSources(result.data);}
     }catch(error){sourceError=error.message||'Consulta de fuentes no disponible';}
   }
   let picking={entregas:[],lineas:[]};
@@ -36,7 +38,7 @@ export async function openPdtV2({row,client,token,role,capabilities,show,escape:
   const pickValidate=['ADMINISTRADOR','COORDINADOR','RECEPCION','SUPERVISOR DE PICKING'].includes(role);
   if(validated && capabilities.picking_cuantitativo && (pickRegister||pickValidate||machinist)){
     try{
-    const result=await client.rpc('sgp_pdt_picking_v2',{p_token:token,p_id:row.id_pendiente});
+    const result=await client.rpc(manual?'sgp_pdt_manual_picking_v1':'sgp_pdt_picking_v2',{p_token:token,p_id:row.id_pendiente});
     if(result.error)throw result.error;
     if(result.data?.ok!==true || !Array.isArray(result.data.entregas) || !Array.isArray(result.data.lineas))throw new Error('Evidencia Picking inválida');
     picking=result.data;
@@ -45,8 +47,9 @@ export async function openPdtV2({row,client,token,role,capabilities,show,escape:
   const details=row.detalles||[];
   const moves=(row.movimientos||[]).filter(m=>m.tipo==='AVANCE' && !(row.movimientos||[]).some(x=>x.id_movimiento_revertido===m.id_movimiento));
   let form='';
-  if(needsValidation && editable && validator)form+=renderSourceDistribution(sources,row.cantidad,sourceError,esc,row.perfil);
+  if(needsValidation && editable && validator)form+=manual?renderManualDistribution(manualGroups,manualOriginal,sourceError,esc):renderSourceDistribution(sources,row.cantidad,sourceError,esc,row.perfil);
   if(validated && editable && machinist)form+=advancesForm(details,moves,row,esc);
+  if(manual)form+='<section class="repo-modal-section" data-pdt-section="distribution"><h3>Reporte manual</h3><p>Programación vigente: '+esc(row.anio||'—')+' · semana '+esc(row.semana||'—')+' · Reserva '+esc(row.reserva||'—')+' · PANEL '+esc(row.perfil||'—')+'</p><p>Período original del reporte: '+esc(row.anio_original??row.anio??'—')+' · semana '+esc(row.semana_original??row.semana??'—')+'</p><p>Original: '+esc(row.fabricacion_original||'—')+' · '+esc(row.marca_original||'—')+' · '+esc(row.longitud_original||'—')+' · '+esc(row.cantidad_original??row.cantidad??'—')+'. Validado: '+esc(row.cantidad_validada??'Pendiente')+'. Procesado: '+esc(row.avance_neto??'—')+'. Saldo: '+esc(row.saldo_mecanizado??'—')+'.</p><p>NC: '+esc(row.nc||'Sin NC')+' · Observación: '+esc(row.observacion_general||'Sin observación')+'</p></section>';
   if(editable && ncEditor)form+='<section class="repo-modal-section"><h3>NC vinculadas</h3><p>'+esc((row.ncs||[]).map(n=>(n.referencia||n.consecutivo)+' · '+(n.estado||n.resolucion)).join(' / ')||row.nc||'Sin NC')+'</p><label>Añadir NC (sin reemplazar)<input data-ncs type="text" autocomplete="off"></label><button type="button" data-operation="nc">Añadir NC</button></section>';
   if(validated && editable && capabilities.picking_cuantitativo && (pickRegister||pickValidate) && !picking.error){
     form+='<section class="repo-modal-section"><h3>Entrega Picking por detalle</h3><p>Registrar cantidades efectivamente entregadas. Los faltantes de la orden no calculan estas cantidades.</p>';
@@ -90,12 +93,12 @@ export async function openPdtV2({row,client,token,role,capabilities,show,escape:
   }
 
   let operationPending=false;
-  const selectedSources=()=>[...modal.querySelectorAll('[data-source]:checked')].map(input=>({...sources[+input.dataset.source],cantidad:modal.querySelector('[data-source-qty="'+input.dataset.source+'"]')?.value||''}));
+  const selectedSources=()=>[...modal.querySelectorAll('[data-source]:checked')].map(input=>({...(manual?manualGroups:sources)[+input.dataset.source],cantidad:modal.querySelector('[data-source-qty="'+input.dataset.source+'"]')?.value||''}));
   const updateDistribution=()=>{
     const button=modal.querySelector('[data-operation="validate"]');if(!button)return;
-    const state=distributionState(sources,selectedSources(),row.cantidad,modal.querySelector('[data-note]')?.value||'');
+    const state=manual?manualDistributionState(manualGroups,selectedSources(),manualOriginal,modal.querySelector('[data-note]')?.value||''):distributionState(sources,selectedSources(),row.cantidad,modal.querySelector('[data-note]')?.value||'');
     button.disabled=operationPending||button.dataset.unavailable==='true'||!state.valid;
-    const note=modal.querySelector('[data-note]');if(note)note.required=selectedSources().length>0&&state.total!==Number(row.cantidad);
+    const note=modal.querySelector('[data-note]');if(note)note.required=selectedSources().length>0&&state.corrected;
     modal.querySelector('[data-assigned-total]').textContent=String(state.total);
     modal.querySelector('[data-distribution-label]').textContent=state.valid?(state.corrected?'Corrección justificada':'Coincide con el reporte'):'Distribución pendiente';
     modal.querySelector('[data-source-status]').textContent=sourceError?'Consulta fallida. Reintenta para recuperar fuentes verificables.':state.reason;
@@ -110,8 +113,8 @@ export async function openPdtV2({row,client,token,role,capabilities,show,escape:
   };
   updateDistribution();
 
-  const rpcByAction={validate:'sgp_aluminio_pendiente_validar_detalles_v1',advance:'sgp_aluminio_pendiente_registrar_avance_v1',reverse:'sgp_aluminio_pendiente_revertir_avance_v1',stage:'sgp_pdt_estado_v2',nc:'sgp_aluminio_pendiente_nc_vincular_v1',delivery:'sgp_pdt_entrega_registrar_v2',deliveryValidate:'sgp_pdt_entrega_validar_v2',assign:'sgp_pdt_asignar_v2',annul:'sgp_pdt_entrega_anular_v2',close:'sgp_pdt_cerrar_v2'};
-  modal.querySelectorAll('[data-operation]').forEach(button=>{if(!capabilities.operations?.includes(rpcByAction[button.dataset.operation])){button.disabled=true;button.dataset.unavailable='true';button.title='Operación no disponible en este backend';}});
+  const rpcByAction={validate:'sgp_aluminio_pendiente_validar_detalles_v1',advance:'sgp_aluminio_pendiente_registrar_avance_v1',reverse:'sgp_aluminio_pendiente_revertir_avance_v1',stage:'sgp_pdt_estado_v2',nc:'sgp_aluminio_pendiente_nc_vincular_v1',delivery:manual?'sgp_pdt_manual_entrega_registrar_v1':'sgp_pdt_entrega_registrar_v2',deliveryValidate:manual?'sgp_pdt_manual_entrega_validar_v1':'sgp_pdt_entrega_validar_v2',assign:manual?'sgp_pdt_manual_asignar_v1':'sgp_pdt_asignar_v2',annul:manual?'sgp_pdt_manual_entrega_anular_v1':'sgp_pdt_entrega_anular_v2',close:manual?'sgp_pdt_manual_cerrar_v1':'sgp_pdt_cerrar_v2'};
+  modal.querySelectorAll('[data-operation]').forEach(button=>{if(!(manual&&['delivery','deliveryValidate','assign','annul','close'].includes(button.dataset.operation))&&!capabilities.operations?.includes(rpcByAction[button.dataset.operation])){button.disabled=true;button.dataset.unavailable='true';button.title='Operación no disponible en este backend';}});
   const lineInput=modal.querySelector('[data-pick-line]');
   const updateLineActions=()=>{const line=picking.lineas.find(l=>l.id_linea===lineInput?.value);for(const action of ['deliveryValidate','assign','annul']){const button=modal.querySelector('[data-operation="'+action+'"]');if(button)button.disabled=operationPending||button.dataset.unavailable==='true'||!line||line.estado==='ANULADA'||(action==='assign'&&(line.estado!=='VALIDADA'||line.asignada));}};
   lineInput?.addEventListener('change',updateLineActions);updateLineActions();
@@ -122,10 +125,10 @@ export async function openPdtV2({row,client,token,role,capabilities,show,escape:
     if(session.closed||modal.hidden)return;
     if(session.clearAfterWrite?.detail)delete view.quantities[session.clearAfterWrite.detail];if(session.clearAfterWrite?.delivery)view.values['data-pick-qty']='';
     session.busy=true;session.modal?.setAttribute('aria-busy','true');setFeedback(session.dirty?'Operación confirmada. Actualizando PDT…':'Actualizando PDT…');freeze();modal.querySelector('[data-refresh-pdt]').disabled=true;
-    try{const fresh=await refreshPendingV2(client,token,row.id_pendiente);if(session.closed||modal.hidden)return;
+    try{const fresh=await refreshPendingV2(client,token,row.id_pendiente);const header=manual&&fresh.estado==='PENDIENTE'?await refreshManualHeader(client,token,row.id_pendiente):null;if(session.closed||modal.hidden)return;
       const pending=session.pending;if(pending&&!pending.args.p_idempotency_key&&!pending.args.p_clave){session.pending=null;session.feedback='Datos actualizados. Revisa el historial: la operación anterior no tuvo confirmación.';}
       session.needsRefresh=Boolean(session.pending);
-      await openPdtV2({row:{...row,...fresh},client,token,role,capabilities,show,escape:esc,reload,close:session.close,initialSection:view.section,_session:session,_restore:view});session.clearAfterWrite=null;
+      await openPdtV2({row:{...row,...fresh,...header},client,token,role,capabilities,show,escape:esc,reload,close:session.close,initialSection:view.section,_session:session,_restore:view});session.clearAfterWrite=null;
     }catch(error){session.needsRefresh=true;freeze();setFeedback((session.dirty?'Operación guardada. No la repitas. ':'')+'No se pudo actualizar: '+error.message+'. Usa Actualizar PDT.',true);modal.querySelector('[data-refresh-pdt]').disabled=false;}
     finally{session.busy=false;session.modal?.setAttribute('aria-busy','false');if(session.closed&&session.reloadOnFinish)notifyParent();}
   };
@@ -140,24 +143,24 @@ export async function openPdtV2({row,client,token,role,capabilities,show,escape:
     try{
       switch(button.dataset.operation){
         case 'validate': {
-          const state=distributionState(sources,selectedSources(),row.cantidad,val('[data-note]'));
+          const state=manual?manualDistributionState(manualGroups,selectedSources(),manualOriginal,val('[data-note]')):distributionState(sources,selectedSources(),row.cantidad,val('[data-note]'));
           if(!state.valid)throw new Error(state.reason);
           operation='sgp_aluminio_pendiente_validar_detalles_v1';args={...args,p_detalles:state.details,p_reserva:row.reserva,p_observacion:val('[data-note]')||null};break;
         }
         case 'advance':operation='sgp_aluminio_pendiente_registrar_avance_v1';args={...args,p_id_detalle:details[Number(button.dataset.detailIndex)]?.id_detalle,p_cantidad:Number(val('[data-advance-qty="'+button.dataset.detailIndex+'"]')),p_turno:val('[data-shift]'),p_fecha_operativa:val('[data-date]'),p_idempotency_key:keys.advance,p_observacion:val('[data-note]')||null};break;
         case 'reverse':operation='sgp_aluminio_pendiente_revertir_avance_v1';args={...args,p_movimiento:val('[data-movement]'),p_clave:keys.reverse,p_motivo:val('[data-note]')};break;
-        case 'delivery':operation='sgp_pdt_entrega_registrar_v2';args={p_token:token,p_detalle:val('[data-pick-detail]'),p_entrega:val('[data-pick-event]'),p_cantidad:Number(val('[data-pick-qty]')),p_clave:keys.delivery};break;
-        case 'deliveryValidate':operation='sgp_pdt_entrega_validar_v2';args={p_token:token,p_linea:val('[data-pick-line]')};break;
-        case 'assign':operation='sgp_pdt_asignar_v2';args={p_token:token,p_linea:val('[data-pick-line]'),p_clave:keys.assign};break;
-        case 'annul':operation='sgp_pdt_entrega_anular_v2';args={p_token:token,p_linea:val('[data-pick-line]'),p_motivo:val('[data-annul-note]')};break;
-        case 'close':operation='sgp_pdt_cerrar_v2';args={...args,p_clave:keys.close};break;
+        case 'delivery':operation=rpcByAction.delivery;args={p_token:token,p_detalle:val('[data-pick-detail]'),p_entrega:val('[data-pick-event]'),p_cantidad:Number(val('[data-pick-qty]')),p_clave:keys.delivery};break;
+        case 'deliveryValidate':operation=rpcByAction.deliveryValidate;args={p_token:token,p_linea:val('[data-pick-line]')};break;
+        case 'assign':operation=rpcByAction.assign;args={p_token:token,p_linea:val('[data-pick-line]'),p_clave:keys.assign};break;
+        case 'annul':operation=rpcByAction.annul;args={p_token:token,p_linea:val('[data-pick-line]'),p_motivo:val('[data-annul-note]')};break;
+        case 'close':operation=rpcByAction.close;args={...args,p_clave:keys.close};break;
         case 'nc':operation='sgp_aluminio_pendiente_nc_vincular_v1';args={...args,p_ncs:normalizeNcNumbers(val('[data-ncs]'))};break;
         case 'stage':operation='sgp_pdt_estado_v2';args={...args,p_estado:val('[data-stage]')};break;
       }
       if(button.dataset.operation==='advance'){const detail=details[Number(button.dataset.detailIndex)];if(!detail||!Number.isSafeInteger(args.p_cantidad)||args.p_cantidad<=0||args.p_cantidad>Number(detail.saldo))throw new Error('Cantidad de avance inválida o superior al saldo');if(!args.p_fecha_operativa)throw new Error('Selecciona la fecha operativa');}
       if(button.dataset.operation==='reverse'&&!args.p_motivo.trim())throw new Error('Indica el motivo del reverso');
       const view=capturePdtView(modal,details);
-      setFeedback('Guardando operación…');writeStarted=true;const outcome=await executePendingV2(client,capabilities,operation,args);
+      setFeedback('Guardando operación…');writeStarted=true;const outcome=await (manual&&operation.startsWith('sgp_pdt_manual_')?executeManualPdt(client,operation,args):executePendingV2(client,capabilities,operation,args));
       session.dirty=true;session.pending=null;session.needsRefresh=true;
       session.feedback=outcome.duplicado?'Operación ya registrada; estado actualizado.':({advance:'Avance guardado.',reverse:'Reverso guardado.',stage:'Etapa actualizada.',delivery:'Entrega registrada.',deliveryValidate:'Línea validada.',assign:'Acreditación guardada.',annul:'Línea anulada.',close:'Cierre confirmado.',nc:'NC vinculadas.',validate:'Distribución validada.'}[button.dataset.operation]);
       session.clearAfterWrite={detail:button.dataset.operation==='advance'?args.p_id_detalle:null,delivery:button.dataset.operation==='delivery'};if(button.dataset.operation==='advance')view.focus={detail:args.p_id_detalle};
@@ -172,7 +175,7 @@ export async function openPdtV2({row,client,token,role,capabilities,show,escape:
   });
   modal.querySelector('[data-repeat-pdt]').onclick=async()=>{
     if(session.busy||!session.pending)return;session.busy=true;session.modal?.setAttribute('aria-busy','true');const repeat=modal.querySelector('[data-repeat-pdt]');repeat.disabled=true;modal.querySelector('[data-refresh-pdt]').disabled=true;
-    try{const pending=session.pending;await executePendingV2(client,capabilities,pending.operation,pending.args);session.dirty=true;session.pending=null;session.feedback='Operación confirmada sin duplicar; datos actualizados.';session.clearAfterWrite={detail:pending.args.p_id_detalle,delivery:pending.operation==='sgp_pdt_entrega_registrar_v2'};const view=capturePdtView(modal,details);if(pending.args.p_id_detalle)delete view.quantities[pending.args.p_id_detalle];if(pending.operation==='sgp_pdt_entrega_registrar_v2')view.values['data-pick-qty']='';await refresh(view);}
+    try{const pending=session.pending;await (manual&&pending.operation.startsWith('sgp_pdt_manual_')?executeManualPdt(client,pending.operation,pending.args):executePendingV2(client,capabilities,pending.operation,pending.args));session.dirty=true;session.pending=null;session.feedback='Operación confirmada sin duplicar; datos actualizados.';session.clearAfterWrite={detail:pending.args.p_id_detalle,delivery:pending.operation===rpcByAction.delivery};const view=capturePdtView(modal,details);if(pending.args.p_id_detalle)delete view.quantities[pending.args.p_id_detalle];if(pending.operation===rpcByAction.delivery)view.values['data-pick-qty']='';await refresh(view);}
     catch(error){setFeedback('No se pudo confirmar la operación pendiente: '+error.message,true);repeat.disabled=false;modal.querySelector('[data-refresh-pdt]').disabled=false;}
     finally{session.busy=false;session.modal?.setAttribute('aria-busy','false');if(session.closed&&session.reloadOnFinish)notifyParent();}
   };

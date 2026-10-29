@@ -1,3 +1,23 @@
+# Integración PDT manual + fuentes múltiples (rama independiente)
+
+**Cierre PDT unificado — corte operativo (2026-10-29):** decisión funcional nueva: año de producción inmutable; SQL REVIEW 05 rechaza Export con año distinto y protege `UPDATE anio`, sin alterar eventos/historial. 06 configura un instante UTC de publicación; el listado único filtra por `fecha_reporte` para ocultar históricos operativos sin borrarlos. Manuales nuevos aportan `reportes.fecha`; fallos de RPC/fecha bloquean la visualización. QA PostgreSQL 17 aislado: semana ordinaria, rechazo 2026→2027, rollback 05, instalación/corte/rollback 06. Node dirigido: listado único, filtro y fallo cerrado. Pendiente antes de autorización productiva: restauración compatible, ciclo completo con roles reales y fecha efectiva coordinada. Plan: `docs/sql-proposals/pdt/integration/README.md`.
+
+**Hito anterior de Export:** ambos cuerpos productivos fueron contrastados y sus `md5(prosrc)` fijados en 05. La propuesta anterior permitía cambiar el año; queda sustituida por la regla de año inmutable documentada arriba. Evidencia: `docs/sql-proposals/pdt/integration/EXPORT_BODY_CONTRAST.md`.
+
+Se combinaron las bases de PR #139 y #141 sin cambiar sus ramas. Orden REVIEW: #139 → manual 01 → manual 02 → manual 03 → manual 04 → manual 05. Los preflights 02/03 fijan los cuerpos resultantes de #139 y delegan al contrato agrupado/V4/LEGACY para todo PDT que no sea manual. PostgreSQL 17 aislado: siete regresiones SQL transaccionales, prueba de año Export sintético y rollback 04→01 aprobados; Node focalizado 33/33. Los cuerpos Export ya están contrastados; no hay instalación productiva, fusión ni despliegue. Continuación exacta y riesgos: `docs/sql-proposals/pdt/integration/README.md`.
+
+# Issue #140 — PDT manual unificado, Fases 1–4 (rama de revisión)
+
+Fecha Colombia: 2026-10-28. Base `main` `55a309729bb3166cce98e24eb7e840169f4b7890`; rama `feature/pdt-manual-unificado`. Alcance: botón `+ Nuevo PDT`, filtros de programación, selector PANEL con combinaciones y múltiples piezas, NC opcional, observaciones, tabla visual de fuentes en Picking, SQL REVIEW aditivo de cabeceras/detalles/fuentes y RPC con sesión/roles. Sin archivado histórico ni cambios a V4/PR #139.
+
+Estado: IMPLEMENTADO EN RAMA / VERIFICADO EN AISLAMIENTO. No aplicado en Supabase, no fusionado ni publicado. Fase 2: `POR_VALIDAR` manual se valida con fuentes PANEL verificadas, reporte original inmutable, observación obligatoria para corregir y auditoría original/validado. LEGACY/V2 ajenos se despachan a la función original capturada. SQL REVIEW y reversión separados; ningún SQL aplicado a producción. Evidencias en `tests/pdt-manual/` y contrato/reversión en `docs/sql-proposals/pdt/manual/README.md`.
+
+Fase 3 IMPLEMENTADA EN RAMA y VERIFICADA EN AISLAMIENTO: SQL REVIEW 03 con líneas cuantitativas consolidadas por detalle/evento de Picking, asignación y cierre acreditado; funciones originales delegadas para LEGACY/V2 ajenos. El controlador existente habilita avances y Picking manuales y lee la cabecera indexada. Sin tablero nuevo ni cambio a los 101 históricos. QA: PostgreSQL 17.11 aislado, instalación/reversión y escenario transaccional de alta→validación→2 avances→entrega→validación→asignación→cierre; rechazos de sobreavance, diferencia auditada, permisos, duplicados y cambio de fuente. Navegador PC 1366 y móvil 390 con datos sintéticos; capturas en `tests/pdt-manual/`. No se ejecutó SQL productivo, no hay fusión ni publicación.
+
+Fases 4/5: el reporte conserva año/semana originales; el listado toma el período vigente de `sgp_producciones`. El escritor diario cambia `semana_actual` sin cambiar `anio`; el importador envía ambos en `p_datos`. La propuesta de sincronizar un año nuevo fue reemplazada por el guard de año inmutable. `04` audita una transición neta de semana por PDT/transacción. No aplicar SQL, fusionar ni desplegar sin restauración compatible y aprobación separada.
+
+---
+
 # PR116 — corrección final de historial y contrato productivo reportado
 
 Fecha Colombia: 2026-10-27T05:15:13.387476-05:00.

@@ -1,0 +1,26 @@
+# PDT unificado — instalación y reversión REVIEW
+
+Estado: **implementado en rama y probado con fixtures PostgreSQL 17; no aplicado ni publicado**. Integra los contratos de PR #139 y #141 sin modificar sus ramas, datos históricos ni `main`.
+
+## Contratos
+
+El despacho manual de validación y cierre se ejecuta solo para `id_pendiente` presentes en `sgp_pdt_manual.detalles`; el resto delega al despacho de #139 para agrupados, V4 y LEGACY. Los guards de 02 y 03 fijan los cuerpos de #139 contrastados en aislamiento. Se conservan autorizaciones, avances, Picking, cierre e idempotencia. El listado actual combina PDT manuales y los nuevos de todas las fuentes; la fecha de creación manual procede de `sgp_pdt_manual.reportes.fecha`.
+
+El año de `sgp_producciones` es inmutable. SQL REVIEW 05 rechaza un año de Export diferente al de una producción existente y añade protección para cualquier `UPDATE anio`. Permite cambiar `semana_actual` dentro del mismo año. El reporte original de un PDT manual conserva su período. Ambos cuerpos productivos de Export y sus huellas se documentan en [EXPORT_BODY_CONTRAST.md](EXPORT_BODY_CONTRAST.md).
+
+El corte operativo es un instante UTC único, no deducido de la semana: `06_operational_cutover_REVIEW.sql` crea una configuración privada y una RPC de lectura con sesión/rol. El frontend filtra los listados operativos por `fecha_reporte >= desde`, tanto PDT manuales como los nuevos de otras fuentes. Una fecha ausente no pasa el filtro. Los históricos siguen físicamente en Supabase para auditoría. Si la RPC de corte falla, el listado falla cerrado.
+
+## Secuencia propuesta
+
+1. En una restauración productiva compatible, cotejar huellas, permisos, columnas y contratos. Probar el ciclo creación → validación → avances → Picking → cierre, con LEGACY históricos aún presentes y roles reales.
+2. En una ventana de publicación aprobada, instalar #139 `01_grouped_sources_REVIEW.sql`, seguido de manual `01`, `02`, `03`, `04`, `05`, y `06_operational_cutover_REVIEW.sql`. Detenerse ante cualquier preflight fallido.
+3. Registrar el instante efectivo de publicación y el administrador en `06_ACTIVAR_REVIEW.sql`, reemplazando sus dos marcadores; ejecutar solo con autorización productiva y control de operaciones. Publicar el frontend coordinadamente.
+4. Verificar desde PC y móvil que solo figuren PDT desde el corte, que el alta manual aparezca, y que los PDT históricos sigan disponibles por vía de auditoría. Confirmar Export de semana dentro del mismo año y rechazo de año distinto. No migrar ni archivar PDT anteriores.
+
+## Reversión
+
+Antes de activar el corte, `06_ROLLBACK_REVIEW.sql` lo elimina. Después de activarlo, ese rollback aborta para evitar que reaparezcan históricos; requiere reparación hacia delante o reversión de frontend coordinada. `05_ROLLBACK_REVIEW.sql` restaura el escritor Export y retira el guard de año; seguir con 04→03→02→01 solo si sus guards permiten retirar datos nuevos. #139 solo puede restaurar PK/índice antiguos si no existen detalles agrupados nuevos. Si hubo escrituras, conservar contratos y conciliar transacciones posteriores; no sobrescribirlas con un backup completo.
+
+## Evidencias y pendientes
+
+PostgreSQL 17 sintético: siete regresiones SQL de manuales, agrupados, V4, LEGACY y programación; pruebas focalizadas de rechazo 2026→2027, semana ordinaria, repetición, rechazo JSON, excepción SQL, año ausente, protección ante `UPDATE anio` y rollback. La RPC de corte se instaló en QA; una activación de prueba leyó el instante configurado y revirtió la transacción. Node: listado único, corte y fallo cerrado. **Pendiente antes de solicitar publicación:** restauración productiva compatible, prueba funcional con roles reales y fecha efectiva acordada con planta. No se ha aplicado SQL ni desplegado.

@@ -11,12 +11,12 @@ const sources=[
 
 test('unvalidated PDT is not hidden by absent, null or populated details',()=>{
  assert.match(controller,/const needsValidation=row\.validacion_estado!=='VALIDADO';/);
- assert.match(controller,/if\(needsValidation && editable && validator\)form\+=renderSourceDistribution/);
+ assert.match(controller,/if\(needsValidation && editable && validator\)form\+=manual\?renderManualDistribution/);
  assert.match(controller,/if\(needsValidation && editable && validator\)\{/);
  assert.match(controller,/row\.validacion_estado==='VALIDADO' && Array\.isArray\(row\.detalles\) && row\.detalles\.length>0/);
 });
 test('PDT source query and validation use the selected physical identity',()=>{
- assert.match(controller,/client\.rpc\('sgp_pdt_fuentes_v2'/);
+ assert.match(controller,/manual\?'sgp_pdt_manual_fuentes_validacion_v1':'sgp_pdt_fuentes_v2'/);
  assert.match(controller,/distributionState\(sources,selectedSources\(\),row\.cantidad/);
  assert.match(controller,/sgp_aluminio_pendiente_validar_detalles_v1/);
 });
