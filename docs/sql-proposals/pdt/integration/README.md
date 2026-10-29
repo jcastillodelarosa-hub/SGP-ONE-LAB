@@ -24,3 +24,15 @@ Antes de activar el corte, `06_ROLLBACK_REVIEW.sql` lo elimina. Después de acti
 ## Evidencias y pendientes
 
 PostgreSQL 17 sintético: siete regresiones SQL de manuales, agrupados, V4, LEGACY y programación; pruebas focalizadas de rechazo 2026→2027, semana ordinaria, repetición, rechazo JSON, excepción SQL, año ausente, protección ante `UPDATE anio` y rollback. La RPC de corte se instaló en QA; una activación de prueba leyó el instante configurado y revirtió la transacción. Node: listado único, corte y fallo cerrado. **Pendiente antes de solicitar publicación:** restauración productiva compatible, prueba funcional con roles reales y fecha efectiva acordada con planta. No se ha aplicado SQL ni desplegado.
+
+## Publicación directa — decisión operativa 2026-10-29
+
+Por solicitud expresa del responsable funcional se preparó el workflow independiente `.github/workflows/pdt-unified-direct-release.yml` (PR #151). No solicita seis campos de respaldo, no crea respaldo y no comprueba recuperación aislada ni vigencia de seis horas. Este procedimiento reemplaza, para esta publicación, el intento manual con `pdt-unified-production-release.yml`; no elimina el workflow histórico.
+
+La ejecución directa requiere `main`, aprobación del entorno protegido `pdt-unified-production`, variable de entorno `PDT_PUBLISH_ENABLED=true`, secreto `SUPABASE_DB_PASSWORD` válido en ese mismo entorno, validación de candidato SQL fijado y preflight de lectura. Después instala las siete fases SQL, activa el corte operativo, despliega Firebase Hosting `sgp-one-lab` y verifica backend. No cambia RLS ni utiliza `service_role`.
+
+**Bloqueo observado:** run 40939589210 falló en `PDT_PREFLIGHT_AUTHENTICATION_FAILED` al autenticar PostgreSQL desde `pdt-unified-production`. El nuevo workflow no corrige ese secreto: comprobarlo sin mostrar, copiar ni sustituir credenciales sin autorización. No reintentar una publicación sabiendo que la autenticación falla.
+
+**Riesgo aceptado expresamente:** sin respaldo ni recuperación verificada, una interrupción entre fases SQL puede dejar cambios parcialmente aplicados; la activación y el despliegue pueden requerir reparación coordinada. No ejecutar automáticamente un rollback sobre datos nuevos. El responsable pidió priorizar implementación sin respaldo adicional. El merge del workflow no ejecuta SQL ni despliega por sí solo.
+
+**Estados a registrar por separado:** workflow implementado en rama, fusionado en `main`, publicación ejecutada, verificación real de Supabase y Firebase. No declarar `PUBLICADO` por CI estática o por merge.
