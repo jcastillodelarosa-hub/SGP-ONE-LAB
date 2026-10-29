@@ -31,6 +31,15 @@ TESTS = ('real-role-authentication', 'manual-three-origins-nc-idempotency',
  'validation-partial-advance-picking-close', 'reception-mecanizado-unified-list',
  'export-week-year-guard-audit', 'utc-cutover-historical-preservation',
  'legacy-v2-dispatch', 'rollback-before-activation')
+DEPENDENCIES = {
+ 'real-role-authentication': (),
+ 'manual-three-origins-nc-idempotency': ('real-role-authentication',),
+ 'validation-partial-advance-picking-close': ('manual-three-origins-nc-idempotency',),
+ 'reception-mecanizado-unified-list': ('validation-partial-advance-picking-close',),
+ 'export-week-year-guard-audit': ('validation-partial-advance-picking-close',),
+ 'utc-cutover-historical-preservation': ('real-role-authentication',),
+ 'legacy-v2-dispatch': ('real-role-authentication',),
+}
 
 CONTRACT_IDS = frozenset((
  'setup.session-authorization',
@@ -240,6 +249,61 @@ class Validation:
    raise SafeFailure('ISOLATED_SQL_REJECTED')
   return result.stdout
 
+ def run_contracts(self, pg, source):
+  # Each probe owns a transaction. Recreate only prerequisite fixtures; a
+  # failed dependent contract cannot hide cutover or legacy dispatch results.
+  blocks = {}
+  marker = None
+  for line in source.splitlines(keepends=True):
+   if line.startswith('\\echo CONTRACT:'):
+    marker = line.removeprefix('\\echo CONTRACT:').strip()
+    blocks[marker] = line
+   elif marker is not None:
+    blocks[marker] += line
+  setup = ('setup.transaction', 'setup.rpc-helper', 'setup.denied-helper', 'setup.temp-tables')
+  selected = {
+   'real-role-authentication': (),
+   'manual-three-origins-nc-idempotency': (),
+   'validation-partial-advance-picking-close': ('manual-three-origins-nc-idempotency',),
+   'reception-mecanizado-unified-list': ('manual-three-origins-nc-idempotency', 'validation-partial-advance-picking-close'),
+   'export-week-year-guard-audit': ('manual-three-origins-nc-idempotency', 'validation-partial-advance-picking-close'),
+   'utc-cutover-historical-preservation': (),
+   'legacy-v2-dispatch': ('setup.outcome-helper',),
+  }
+  for name in TESTS[:-1]:
+   test = next(t for t in self.report['tests'] if t['name'] == name)
+   blocked_by = [dep for dep in DEPENDENCIES[name]
+                 if next(t for t in self.report['tests'] if t['name'] == dep)['status'] != 'PASS']
+   if blocked_by:
+    test.update(status='BLOCKED', blocked_by=blocked_by)
+    continue
+   parts = ['\\echo CONTRACT:setup.session-authorization\nSET SESSION AUTHORIZATION postgres;\n']
+   parts.extend(blocks[k] for k in setup)
+   parts.append(blocks['real-role-authentication'])
+   parts.extend(blocks[k] for k in selected[name])
+   if name != 'real-role-authentication':
+    parts.append(blocks[name])
+   parts.append(blocks['setup.transaction-rollback'])
+   try:
+    output = self.sql(pg, ''.join(parts), 'contracts')
+    passed = [line for line in output.decode().splitlines() if line.startswith('PASS:')]
+    expected = ['PASS:real-role-authentication']
+    expected += ['PASS:' + k for k in selected[name] if not k.startswith('setup.')]
+    if name != 'real-role-authentication':
+     expected.append('PASS:' + name)
+    if passed != expected:
+     raise SafeFailure('INCOMPLETE_CONTRACT_EVIDENCE')
+    test['status'] = 'PASS'
+   except SafeFailure:
+    test['status'] = 'FAIL'
+    detail = self.report.pop('failure', {'phase': 'contracts', 'code': 'INCOMPLETE_CONTRACT_EVIDENCE'})
+    test['failure'] = detail
+  failed = [t for t in self.report['tests'][:-1] if t['status'] != 'PASS']
+  if failed:
+   self.report['tests'][-1].update(status='BLOCKED', blocked_by=[t['name'] for t in failed])
+   self.report['failure'] = {'phase': 'contracts', 'code': 'FUNCTIONAL_CONTRACTS_INCOMPLETE'}
+   raise SafeFailure('INCOMPLETE_CONTRACT_EVIDENCE')
+
  def run(self, pg, manifest):
   self.report['restore'] = 'HASH_COUNTS_CATALOG_VERIFIED'
   version = self.sql(pg, 'SHOW server_version_num;', 'engine').strip()
@@ -256,14 +320,16 @@ class Validation:
    phase['status'] = 'PASS'
   if self.sql(pg, history_query, 'post-install-history').strip() != baseline:
    raise SafeFailure('HISTORICAL_ROWS_CHANGED_BY_INSTALL')
-  tests = (ROOT / 'tests/pdt-unified/contracts.sql').read_text()
-  output = self.sql(pg, '\\echo CONTRACT:setup.session-authorization\nSET SESSION AUTHORIZATION postgres;\n' + tests, 'contracts')
-  passed = [line for line in output.decode().splitlines() if line.startswith('PASS:')]
-  if passed != ['PASS:' + name for name in TESTS[:-1]]:
-   raise SafeFailure('INCOMPLETE_CONTRACT_EVIDENCE')
+  contract_error = None
+  try:
+   self.run_contracts(pg, (ROOT / 'tests/pdt-unified/contracts.sql').read_text())
+  except SafeFailure as error:
+   contract_error = error
   if self.sql(pg, history_query, 'post-test-history').strip() != baseline:
    raise SafeFailure('QA_ROLLBACK_DID_NOT_PRESERVE_HISTORY')
   self.report['historical_rows_preserved'] = True
+  if contract_error is not None:
+   raise contract_error
   # Before-activation rollback must pass on the still-empty installation.
   for path in ('docs/sql-proposals/pdt/integration/06_ROLLBACK_REVIEW.sql',
                'docs/sql-proposals/pdt/manual/05_ROLLBACK_REVIEW.sql',

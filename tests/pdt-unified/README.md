@@ -207,3 +207,40 @@ Repetir con **Run workflow**, rama `feat/issue-144-pdt-isolated-validation`, ope
 `auth.role-check`, la matriz `authentication` y los contratos siguientes.
 No usar Re-run del run43 porque reutilizaría el código anterior. NO-GO productivo
 hasta completar la validación aislada.
+
+## Selección de programación y diagnóstico agregado
+
+La ejecución posterior a `1122b19` confirmó restauración, siete fases y
+autenticación PASS; `manual.sources` recibió `PDT_MANUAL_PROGRAMACION_AMBIGUA`.
+La función versionada `sgp_pdt_manual.programacion(p_key,p_reserva)` obtiene la
+pertenencia desde `sgp_produccion_reservas_v` y el período desde
+`sgp_producciones`. `catalogo_v1` expone su resultado, que **no incluye**
+`key_produccion`. El validador anterior leía esa clave ausente del JSON y la
+pasaba como NULL a `fuentes_v1`. Su guard exige exactamente una programación
+válida; con la clave NULL considera varias producciones de la reserva y rechaza
+el caso. La consulta productiva de solo lectura aportada por el usuario halló
+558 parejas con una programación válida y ninguna ambigua. El error se debe a
+la selección del caso de prueba; no evidencia ambigüedad de datos ni ausencia
+general de programación. No se modifica la función ni sus restricciones.
+
+El selector usa ahora `key_produccion` de la unión de producción y reserva,
+consulta `programacion(key,reserva)` y exige cardinalidad exactamente uno bajo
+el mismo filtro de año/semana que `fuentes_v1`. Solo entonces llama la RPC. Si no
+encuentra PANEL, cantidad y evento Picking compatibles, conserva el rechazo
+explícito de precondición, sin fabricar relaciones.
+
+Los siete contratos funcionales se ejecutan como transacciones reversibles
+separadas. Autenticación alimenta los demás; manual alimenta ciclo; ciclo
+alimenta listas y período. Corte UTC y despacho LEGACY/V2 dependen solo de la
+autenticación y siguen ejecutándose aunque falle el caso manual. Cada prueba
+incluye únicamente las precondiciones necesarias, captura su fallo sanitizado
+y deja dependientes como `BLOCKED` con `blocked_by`. La fase de rollback queda
+`BLOCKED` si algún contrato funcional falla. El resultado agregado permanece
+NO-GO hasta que todos pasen. Las conexiones con error se cierran y revierten
+automáticamente la transacción; las exitosas terminan con `ROLLBACK` explícito.
+
+Verificación local: 19/19 pruebas del validador, 24/24 de respaldo,
+`verify:release`, compilación Python y `git diff --check`. Las nuevas regresiones
+fijan la clave y cardinalidad del selector, y comprueban que un fallo manual
+bloquea solo los dependientes y deja ejecutar corte y despacho. La ejecución
+real de los contratos requiere un nuevo Run workflow en el clon protegido.

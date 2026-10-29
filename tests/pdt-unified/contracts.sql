@@ -106,8 +106,20 @@ BEGIN
  -- Pick an actual restored source with a matching Picking event; never fabricate
  -- relationships or replace origin/context helpers to make a case succeed.
  RAISE NOTICE 'PDT_QA_STEP:manual.catalog';
- FOR p IN SELECT value FROM jsonb_array_elements(pg_temp.rpc(format(
-  'SELECT public.sgp_pdt_manual_catalogo_v1(%L)',token))->'producciones') LOOP
+ -- catalogo_v1 projects programacion's public fields, which omit key_produccion.
+ -- Select the key from the same reserve membership and require exactly one
+ -- valid programacion for that key/reserve before asking fuentes_v1.
+ FOR p IN SELECT to_jsonb(x) FROM (
+  SELECT DISTINCT prod.key_produccion, prog.*
+  FROM public.sgp_produccion_reservas_v rel
+  JOIN public.sgp_producciones prod USING(key_produccion)
+  CROSS JOIN LATERAL sgp_pdt_manual.programacion(prod.key_produccion,rel.reserva) prog
+  WHERE prod.id_linea='PANELES_2' AND prog.anio IS NOT NULL
+   AND prog.semana BETWEEN 1 AND 53 AND prog.acabado<>''
+   AND (SELECT count(*) FROM sgp_pdt_manual.programacion(prod.key_produccion,rel.reserva) valid
+        WHERE valid.anio IS NOT NULL AND valid.semana BETWEEN 1 AND 53)=1
+  ORDER BY prod.key_produccion LIMIT 3000
+ ) x LOOP
   RAISE NOTICE 'PDT_QA_STEP:manual.sources';
   FOR source IN SELECT value FROM jsonb_array_elements(pg_temp.rpc(format(
    'SELECT public.sgp_pdt_manual_fuentes_v1(%L,%L,%L)',token,p->>'key_produccion',p->>'reserva'))->'fuentes') LOOP

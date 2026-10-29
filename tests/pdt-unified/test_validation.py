@@ -239,6 +239,43 @@ class ValidationSecurity(unittest.TestCase):
   self.assertEqual(val.report['authentication'],{'real_login_roles':9,
    'schema_denied_roles':['LIDER'],'role_check':'sgp_usuarios_rol_check','total_role_cases':10})
 
+ def test_manual_selector_supplies_key_and_checks_exact_programacion_cardinality(self):
+  sql=(ROOT/'tests/pdt-unified/contracts.sql').read_text()
+  selector=sql.split('FOR p IN SELECT to_jsonb(x)',1)[1].split(') x LOOP',1)[0]
+  self.assertIn('prod.key_produccion',selector)
+  self.assertIn('sgp_pdt_manual.programacion(prod.key_produccion,rel.reserva)',selector)
+  self.assertIn('WHERE valid.anio IS NOT NULL AND valid.semana BETWEEN 1 AND 53)=1',selector)
+  self.assertIn("token,p->>'key_produccion',p->>'reserva'",sql)
+  self.assertNotIn("FOR p IN SELECT value FROM jsonb_array_elements(pg_temp.rpc",sql)
+
+ def test_failed_manual_blocks_dependents_but_runs_independent_contracts(self):
+  val=object.__new__(v.Validation)
+  val.report={'tests':[{'name':name,'status':'NOT_EXECUTED'} for name in v.TESTS]}
+  calls=[]
+  def sql(pg,script,name):
+   selected=[k for k in v.TESTS[:-1] if '\\echo CONTRACT:'+k+'\n' in script]
+   target=selected[-1]
+   calls.append(target)
+   if target=='manual-three-origins-nc-idempotency':
+    val.report['failure']={'phase':'contracts','code':'PDT_MANUAL_PROGRAMACION_AMBIGUA',
+     'contract':target,'check':'manual.sources'}
+    raise gcs.SafeFailure('ISOLATED_SQL_REJECTED')
+   return ('PASS:real-role-authentication\n'+
+           ('' if target=='real-role-authentication' else 'PASS:'+target+'\n')).encode()
+  with patch.object(val,'sql',side_effect=sql):
+   with self.assertRaises(gcs.SafeFailure):
+    val.run_contracts(['docker','exec','-i'],(ROOT/'tests/pdt-unified/contracts.sql').read_text())
+  self.assertEqual(calls,['real-role-authentication','manual-three-origins-nc-idempotency',
+   'utc-cutover-historical-preservation','legacy-v2-dispatch'])
+  states={t['name']:t['status'] for t in val.report['tests']}
+  self.assertEqual(states['manual-three-origins-nc-idempotency'],'FAIL')
+  for name in ('validation-partial-advance-picking-close','reception-mecanizado-unified-list',
+               'export-week-year-guard-audit','rollback-before-activation'):
+   self.assertEqual(states[name],'BLOCKED')
+  self.assertEqual(states['utc-cutover-historical-preservation'],'PASS')
+  self.assertEqual(states['legacy-v2-dispatch'],'PASS')
+  self.assertEqual(val.report['tests'][1]['failure']['check'],'manual.sources')
+
  def test_restore_integrity_vs_validator_failure_retains_code_and_cleans_clone(self):
   # Exercise the real orchestration through restore verification into the hook.
   # Do not use cloud data: inject only subprocess outputs and archived metadata.
