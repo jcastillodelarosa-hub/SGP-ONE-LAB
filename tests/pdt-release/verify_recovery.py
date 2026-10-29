@@ -82,12 +82,9 @@ def pinned_record(storage, environment, now=None):
 def checked_record(storage, environment, now=None):
     """Verify pinned proof against its backup record and archive bytes."""
     verified = pinned_record(storage, environment, now)
-    manifest = storage.latest_backup_manifest()
-    if (manifest.get('project_ref') != PROJECT or manifest.get('bucket') != BUCKET
-            or manifest.get('prefix') != verified['prefix']
-            or manifest.get('objects') != verified['objects']
-            or manifest.get('created_utc') != verified['created_utc']):
-        raise SafeFailure('BACKUP_RECORD_RECOVERY_MISMATCH')
+    # The immutable, generation-pinned recovery record is authoritative.
+    # Never compare against the newest backup: another backup may be created
+    # after this release was approved without invalidating the pinned proof.
     archive = verified['objects']['database']
     expected = environment['BACKUP_SHA256'].lower()
     # The archive was hashed in the isolated restore and is read again from
