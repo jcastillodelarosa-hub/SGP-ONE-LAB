@@ -1,3 +1,7 @@
+# Integración PDT manual + fuentes múltiples (rama independiente)
+
+Se combinaron las bases de PR #139 y #141 sin cambiar sus ramas. Orden REVIEW: #139 → manual 01 → manual 02 → manual 03 → manual 04 → manual 05. Los preflights 02/03 fijan los cuerpos resultantes de #139 y delegan al contrato agrupado/V4/LEGACY para todo PDT que no sea manual. PostgreSQL 17 aislado: siete regresiones SQL transaccionales, prueba de año Export sintético y rollback 04→01 aprobados; Node focalizado 33/33. El cuerpo íntegro de `sgp_aplicar_export_diario` no está disponible: la huella productiva reportada `efc52bdbd29ed89efa87a71fa74a2852` no basta para certificar su semántica; el guard 05 permanece incompleto a propósito. No hay instalación productiva, fusión ni despliegue. Continuación exacta y riesgos: `docs/sql-proposals/pdt/integration/README.md`.
+
 # Issue #140 — PDT manual unificado, Fases 1–4 (rama de revisión)
 
 Fecha Colombia: 2026-10-28. Base `main` `55a309729bb3166cce98e24eb7e840169f4b7890`; rama `feature/pdt-manual-unificado`. Alcance: botón `+ Nuevo PDT`, filtros de programación, selector PANEL con combinaciones y múltiples piezas, NC opcional, observaciones, tabla visual de fuentes en Picking, SQL REVIEW aditivo de cabeceras/detalles/fuentes y RPC con sesión/roles. Sin archivado histórico ni cambios a V4/PR #139.

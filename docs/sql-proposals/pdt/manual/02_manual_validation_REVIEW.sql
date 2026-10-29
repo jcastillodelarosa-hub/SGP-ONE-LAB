@@ -1,4 +1,4 @@
--- REVIEW ONLY. Phase 2 depends on 01_manual_phase1_REVIEW.sql and the pinned installed validator.
+-- REVIEW ONLY. Integration order: grouped-source #139, manual 01, then manual 02.
 -- Never run against production without compatible restored-backup tests and approval.
 BEGIN;
 SET LOCAL lock_timeout='5s';
@@ -9,8 +9,11 @@ DO $preflight$ BEGIN
  OR to_regprocedure('public.sgp_pdt_origenes_internal_v3(text,text,text,text,text)') IS NULL
  THEN RAISE EXCEPTION 'PDT_MANUAL_PHASE1_OR_VALIDATOR_MISSING'; END IF;
  IF (SELECT md5(prosrc) FROM pg_proc WHERE oid='public.sgp_aluminio_pendiente_validar_detalles_v1(text,uuid,jsonb,text,text)'::regprocedure)
- IS DISTINCT FROM '51bed910a19ee368c2584e2b7ececc17'
+ IS DISTINCT FROM 'e63bd39e5c7cb891a7834e8c30eef428'
  THEN RAISE EXCEPTION 'PDT_MANUAL_VALIDATOR_BODY_CHANGED'; END IF;
+ IF to_regprocedure('sgp_pdt_multiorigen.grouped_original_validar(text,uuid,jsonb,text,text)') IS NULL
+ OR to_regprocedure('sgp_pdt_multiorigen.grouped_nuevo_validar(text,uuid,jsonb,text,text)') IS NULL
+ THEN RAISE EXCEPTION 'PDT_GROUPED_VALIDATOR_NOT_INSTALLED'; END IF;
  IF EXISTS(SELECT 1 FROM sgp_pdt_manual.detalles md JOIN public.sgp_aluminio_pendientes p USING(id_pendiente)
   WHERE p.validacion_estado='VALIDADO' OR EXISTS(SELECT 1 FROM public.sgp_aluminio_pendiente_detalles d WHERE d.id_pendiente=md.id_pendiente))
  THEN RAISE EXCEPTION 'PDT_MANUAL_ALREADY_VALIDATED_OR_UNEXPECTED_DETAILS'; END IF;

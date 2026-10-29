@@ -1,0 +1,19 @@
+# Integración de PDT manual y fuentes múltiples — REVIEW
+
+Estado: **implementado en rama, verificado solo con fixtures PostgreSQL 17; no aplicado ni publicado**. Bases: PR #139 `f1cc941db123e4085709c0ca06b39fc329f23fea` y PR #141 `f346e3174a655e4a539246b65958053b314ce58d`. Ninguna rama original se modifica.
+
+## Despacho y controles
+
+El orden de instalación es **#139 `01_grouped_sources_REVIEW.sql` → manual `01` → manual `02` → manual `03` → manual `04` → manual `05`**. El SQL manual 02 exige `md5(prosrc)=e63bd39e5c7cb891a7834e8c30eef428` del despachador de validación de #139 y sus helpers. El SQL manual 03 exige `md5(prosrc)=e9c137c5c1cb35fc6eda521543de9655` del acreditador de cierre de #139. Ambas huellas se calcularon desde los cuerpos del SQL versionado y se contrastaron en PostgreSQL 17 aislado. **No son huellas de instalación productiva.** Si difieren, abortar y comparar cuerpos; nunca sustituir una constante a ciegas.
+
+Al instalar 02, `sgp_pdt_manual.original_validar` captura el despachador ya instalado de #139. El nuevo despacho público dirige solo los `id_pendiente` presentes en `sgp_pdt_manual.detalles` a la validación manual; el resto delega a #139, que conserva su selección de V4, agrupado y LEGACY. Al instalar 03, `sgp_pdt_manual.original_cierre_acreditado` captura el acreditador de #139; solo los manuales usan la acreditación de entregas manuales. El resto mantiene la acreditación de #139, incluidos controles de avance, Picking y cierre. No se modifica la equivalencia legacy de roles ni los escritores de avances/entregas de #139. La UI fusionada conserva el formulario manual y agrupa las fuentes no manuales mediante `groupPdtSources`.
+
+El SQL 04 audita el período final por PDT y transacción; el reporte original permanece inmutable. El SQL 05 solo admite año y semana explícitos del Export. ChatGPT informó `md5(prosrc)=efc52bdbd29ed89efa87a71fa74a2852` del escritor productivo y que cambia semana sin año. **El cuerpo completo del escritor no está disponible aquí.** Por ello 05 conserva el guard `REPLACE_WITH_VERIFIED_EXPORT_PROSRC_MD5` y no es instalable hasta contrastar el cuerpo real, sus rutas de error y autorización. La huella comunicada se registra como evidencia parcial, sin sustituir el guard. No inferir el año desde la semana.
+
+## Instalación y reversión propuestas
+
+Antes de cualquier operación productiva: respaldo restaurado actual, cotejo de las trece huellas y cuerpos de #139, del escritor Export y de las funciones que manual 03 captura; inspección de permisos y dependencias; pruebas con datos anonimizados. Aplicar cada REVIEW en ese orden, transaccionalmente, con parada ante cualquier preflight fallido. `05_ROLLBACK_REVIEW.sql` restaura el escritor previo sin borrar importaciones; 04, 03 y 02 tienen rollback propio en orden inverso; la reversión de 01 aborta si existen reportes. La reversión de #139 requiere **cero detalles agrupados nuevos** antes de restaurar PK/índice originales. Si ya hay datos creados, conservar contrato y reparar hacia delante; restaurar un backup completo perdería escrituras posteriores.
+
+## Evidencia y bloqueo
+
+En una base PostgreSQL 17 **sintética** con #139 instalado, fases manuales 01–04 instalaron; pasaron siete scripts SQL con ROLLBACK (manual, validación, operaciones, fuente única, dos detalles, V4, programación), además del test de Export con escritor sintético. Rollback 04→03→02→01 pasó en una copia aislada; instalación y rollback 05 restauraron la huella original del escritor sintético en otra copia. Node focalizado: 33/33; `verify:release` pasó tras generar vendor con el procedimiento existente. Esto no demuestra compatibilidad con una restauración productiva. Bloqueo restante: cuerpo íntegro del escritor Export y restauración compatible para comprobar la secuencia completa antes de proponer instalación productiva.

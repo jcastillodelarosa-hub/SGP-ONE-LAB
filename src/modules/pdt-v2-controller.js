@@ -1,6 +1,6 @@
 import {capturePdtView,restorePdtView} from './pdt-v2-view-state.js';
 import {advancesForm,renderPdtWorkspace,bindPdtNavigation} from './pdt-v2-presentation.js';
-import {distributionState,renderSourceDistribution,manualDistributionState,renderManualDistribution} from './pdt-source-distribution.js';
+import {distributionState,renderSourceDistribution,groupPdtSources,manualDistributionState,renderManualDistribution} from './pdt-source-distribution.js';
 import {groupPanelSources} from '../domain/pdt-manual.js';
 import {executePendingV2,executeManualPdt,refreshPendingV2,refreshManualHeader} from '../services/aluminum-pending-v2.js';
 import {normalizeNcNumbers} from '../domain/aluminum-pending-balances.js';
@@ -30,7 +30,7 @@ export async function openPdtV2({row,client,token,role,capabilities,show,escape:
       const result=await client.rpc(manual?'sgp_pdt_manual_fuentes_validacion_v1':'sgp_pdt_fuentes_v2',{p_token:token,p_id:row.id_pendiente});
       if(result.error)throw result.error;
       if(manual){if(result.data?.ok!==true||!Array.isArray(result.data.fuentes)||!result.data.original)throw new Error('Fuentes manuales inválidas');manualOriginal=result.data.original;sources=result.data.fuentes;manualGroups=groupPanelSources(sources);}
-      else{if(!Array.isArray(result.data))throw new Error('Respuesta de fuentes V2 inválida');sources=result.data;}
+      else{if(!Array.isArray(result.data))throw new Error('Respuesta de fuentes V2 inválida');sources=groupPdtSources(result.data);}
     }catch(error){sourceError=error.message||'Consulta de fuentes no disponible';}
   }
   let picking={entregas:[],lineas:[]};

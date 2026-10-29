@@ -1,5 +1,6 @@
 -- REVIEW ONLY. Phase 3; install only after 01 and 02 on a restored compatible PG17 database.
 -- Manual grouped details have no physical id_pieza. Existing V2/LEGACY RPCs remain unchanged.
+-- Integration order requires #139 grouped dispatcher before manual phases.
 BEGIN;
 SET LOCAL lock_timeout='5s';
 SET LOCAL statement_timeout='30s';
@@ -14,6 +15,10 @@ DO $preflight$ BEGIN
  OR to_regprocedure('public.sgp_pdt_cerrar_v2(text,uuid,uuid)') IS NULL
  OR to_regprocedure('public.sgp_aluminio_pendiente_registrar_avance_v1(text,uuid,uuid,integer,text,date,uuid,text)') IS NULL
  THEN RAISE EXCEPTION 'PDT_MANUAL_PHASE3_DEPENDENCY_MISSING'; END IF;
+ IF (SELECT md5(prosrc) FROM pg_proc WHERE oid='public.sgp_pdt_cierre_acreditado(uuid)'::regprocedure)
+ IS DISTINCT FROM 'e9c137c5c1cb35fc6eda521543de9655'
+ OR to_regprocedure('sgp_pdt_multiorigen.grouped_original_cierre_acreditado(uuid)') IS NULL
+ THEN RAISE EXCEPTION 'PDT_GROUPED_CLOSURE_BODY_CHANGED'; END IF;
  IF EXISTS(SELECT 1 FROM pg_proc p WHERE p.oid IN
   ('public.sgp_pdt_cierre_acreditado(uuid)'::regprocedure,'public.sgp_pdt_comprometido(uuid)'::regprocedure,
    'public.sgp_aluminio_pendiente_registrar_avance_v1(text,uuid,uuid,integer,text,date,uuid,text)'::regprocedure)
