@@ -67,7 +67,7 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.SGP_PDT_DATABASE_URL }}
         run: |
-          docker run --rm -e DATABASE_URL postgres:17 bash -c 'psql "$DATABASE_URL" -X -v ON_ERROR_STOP=1 -Atc "select to_regclass(\x27sgp_pdt_manual.corte_operativo\x27)"'
+          docker run --rm -e DATABASE_URL postgres:17 bash -c 'psql "$DATABASE_URL" -X -v ON_ERROR_STOP=1 -Atc "select now()"'
       - name: Stop after preflight
         if: inputs.operation == 'preflight'
         run: echo 'Read-only preflight complete. No deployment performed.'
@@ -84,6 +84,7 @@ jobs:
           req=urllib.request.Request(url,headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json'})
           data=json.load(urllib.request.urlopen(req))
           assert data['conclusion']=='success', 'Backup/recovery run not successful'
+          assert data['event']=='workflow_dispatch', 'Evidence must be a manual run'
           assert data['head_branch'] in ('feat/issue-144-pdt-isolated-validation','feat/pdt-unified-release-workflow'), 'Unexpected backup source'
           print('Successful run exists; operator must additionally verify backup freshness and recovery in environment approval.')
           PY
