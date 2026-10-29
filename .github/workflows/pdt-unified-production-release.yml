@@ -116,7 +116,9 @@ jobs:
           assert data['event']=='workflow_dispatch', 'Evidence must be a manual run'
           assert data['created_at'] >= '2026-10-29T00:00:00Z', 'Evidence predates release window'
           assert data['head_branch'] in ('feat/issue-144-pdt-isolated-validation','feat/pdt-unified-release-workflow'), 'Unexpected backup source'
-          assert data['name'] and 'backup' in data['name'].lower(), 'Evidence must be a backup workflow'
+          jobs_req=urllib.request.Request(data['jobs_url']+'?per_page=100',headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json'})
+          jobs=json.load(urllib.request.urlopen(jobs_req))['jobs']
+          assert any(j['name']=='PDT unified - verified private recovery only' and j['conclusion']=='success' for j in jobs), 'Verified isolated recovery job missing or failed'
           from datetime import datetime,timezone,timedelta
           created=datetime.fromisoformat(data['created_at'].replace('Z','+00:00'))
           assert timedelta(0)<=datetime.now(timezone.utc)-created<=timedelta(hours=6), 'Recovery workflow run is stale'
