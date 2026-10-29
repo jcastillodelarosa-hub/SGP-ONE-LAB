@@ -7,6 +7,7 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'pdt-backup'))
 from gcs_storage import PrivateStorage
+from verify_recovery import pinned_record
 
 ROOT = Path(__file__).resolve().parents[2]
 SECTIONS = ('funciones', 'relaciones', 'triggers', 'politicas', 'roles',
@@ -29,10 +30,7 @@ def compare(source, live):
 def main():
     storage = PrivateStorage(read_only=True)
     storage.verify_boundary()
-    # verify_recovery.py already checked the archive and immutable recovery
-    # record in the preceding step. Reuse its snapshot without redownloading.
-    record = storage.latest_backup_manifest()
-    snapshot = json.loads(storage.get(record['objects']['catalog_and_counts']))['catalog']
+    snapshot = catalog_snapshot(storage, os.environ)
     sql = (ROOT / 'PDT_PREFLIGHT_SUPABASE.sql').read_text()
     command = ['docker', 'run', '--rm', '-i', '-e', 'DATABASE_URL',
                '-e', 'PGOPTIONS=-c default_transaction_read_only=on -c statement_timeout=30000 -c lock_timeout=3000',
@@ -48,6 +46,13 @@ def main():
     if changed:
         raise RuntimeError('LIVE_CATALOG_DRIFT_' + ','.join(changed))
     print('LIVE_FUNCTION_RLS_PERMISSION_DEPENDENCY_CATALOG_VERIFIED')
+
+
+def catalog_snapshot(storage, environment, now=None):
+    # The same immutable recovery generation supplies the catalog identity.
+    # A newly created backup-record cannot redirect this comparison.
+    record = pinned_record(storage, environment, now)
+    return json.loads(storage.get(record['objects']['catalog_and_counts']))['catalog']
 
 
 if __name__ == '__main__':

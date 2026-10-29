@@ -7,7 +7,7 @@ import tempfile
 import unittest
 
 from verify_recovery import BUCKET, PREFIX, checked_record
-from compare_live_catalog import compare, SECTIONS
+from compare_live_catalog import catalog_snapshot, compare, SECTIONS
 from prepare_cutover import render
 from artifact_digest import digest
 from validate_connection import valid
@@ -39,7 +39,15 @@ class Storage:
 
     def get(self, item):
         if item['name'].endswith('/recovery-verified.json'):
+            if (item['name'] != self.base + 'recovery-verified.json'
+                    or item['generation'] != '8' or item['sha256'] != 'a' * 64
+                    or item['bytes'] != 100):
+                raise SafeFailure('PIN_MISMATCH')
             return json.dumps(self.verified).encode()
+        if item['name'].endswith('/catalog-and-counts.json'):
+            if item != self.verified['objects']['catalog_and_counts']:
+                raise SafeFailure('CATALOG_REDIRECTED')
+            return json.dumps({'catalog': {'funciones': [{'firma': 'from-verified-backup'}]}}).encode()
         return self.archive
 
     def environment(self):
@@ -52,6 +60,25 @@ class Storage:
 
 
 class ReleaseControls(unittest.TestCase):
+    def test_newer_backup_between_steps_cannot_redirect_catalog(self):
+        storage = Storage()
+        env = storage.environment()
+        now = datetime.datetime(2026, 10, 29, 12, 30, tzinfo=datetime.timezone.utc)
+        checked_record(storage, env, now)
+        original = storage.verified['objects']['catalog_and_counts'].copy()
+        storage.manifest = {'prefix': PREFIX + '20261029T121000Z-newer/',
+                            'objects': {'catalog_and_counts': {'name': 'newer-secret-catalog'}}}
+        self.assertEqual(catalog_snapshot(storage, env, now),
+                         {'funciones': [{'firma': 'from-verified-backup'}]})
+        self.assertEqual(storage.verified['objects']['catalog_and_counts'], original)
+        env['BACKUP_SHA256'] = 'b' * 64
+        with self.assertRaises(SafeFailure):
+            catalog_snapshot(storage, env, now)
+        env = storage.environment()
+        env['RECOVERY_GENERATION'] = '9'
+        with self.assertRaises(SafeFailure):
+            catalog_snapshot(storage, env, now)
+
     def test_release_storage_downscope_is_read_only(self):
         permissions = boundary(True)['accessBoundary']['accessBoundaryRules'][0]['availablePermissions']
         self.assertEqual(permissions, ['inRole:roles/storage.objectViewer'])

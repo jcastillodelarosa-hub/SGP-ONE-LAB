@@ -17,15 +17,27 @@ PROJECT = 'ocvxbwzqxbrfndkvjmfx'
 MAX_AGE = datetime.timedelta(hours=6)
 
 
-def checked_record(storage, environment, now=None):
-    """Return only the verified manifest; fail closed on any identity mismatch."""
+def pinned_record(storage, environment, now=None):
+    """Read the exact recovery generation and archive identity from dispatch inputs."""
     now = now or datetime.datetime.now(datetime.timezone.utc)
-    manifest = storage.latest_backup_manifest()
-    base = manifest.get('prefix', '')
-    if (manifest.get('project_ref') != PROJECT or manifest.get('bucket') != BUCKET
-            or not base.startswith(PREFIX) or not base.endswith('/')):
+    requested = environment.get('BACKUP_OBJECT', '')
+    bucket_url = 'gs://' + BUCKET + '/'
+    if not requested.startswith(bucket_url) or not requested.endswith('/database.dump'):
+        raise SafeFailure('BACKUP_OBJECT_IDENTITY_MISMATCH')
+    base = requested.removeprefix(bucket_url).removesuffix('database.dump')
+    if not base.startswith(PREFIX) or not base.endswith('/'):
         raise SafeFailure('BACKUP_SOURCE_MISMATCH')
-    objects = manifest.get('objects', {})
+    generation = environment.get('RECOVERY_GENERATION', '')
+    size = environment.get('RECOVERY_BYTES', '')
+    digest = environment.get('RECOVERY_SHA256', '').lower()
+    if (not re.fullmatch(r'[1-9][0-9]*', generation)
+            or not re.fullmatch(r'[1-9][0-9]*', size)
+            or not re.fullmatch(r'[0-9a-f]{64}', digest)):
+        raise SafeFailure('RECOVERY_OBJECT_IDENTITY_INVALID')
+    recovery = storage.get({'name': base + 'recovery-verified.json',
+                            'generation': generation, 'bytes': int(size), 'sha256': digest})
+    verified = json.loads(recovery)
+    objects = verified.get('objects', {})
     required = {'database': 'database.dump', 'globals': 'globals.sql',
                 'catalog_and_counts': 'catalog-and-counts.json'}
     for key, filename in required.items():
@@ -33,21 +45,15 @@ def checked_record(storage, environment, now=None):
         if item.get('name') != base + filename or not re.fullmatch(r'[1-9][0-9]*', str(item.get('generation', ''))):
             raise SafeFailure('BACKUP_OBJECT_IDENTITY_MISMATCH')
     archive = objects['database']
-    if environment.get('BACKUP_OBJECT') != 'gs://' + BUCKET + '/' + archive['name']:
+    if requested != 'gs://' + BUCKET + '/' + archive['name']:
         raise SafeFailure('BACKUP_OBJECT_IDENTITY_MISMATCH')
     expected = environment.get('BACKUP_SHA256', '').lower()
     if not re.fullmatch('[0-9a-f]{64}', expected) or archive.get('sha256') != expected:
         raise SafeFailure('BACKUP_HASH_MISMATCH')
-    recovery = storage.get({'name': base + 'recovery-verified.json',
-                            'generation': environment.get('RECOVERY_GENERATION', ''),
-                            'bytes': int(environment.get('RECOVERY_BYTES', '0')),
-                            'sha256': environment.get('RECOVERY_SHA256', '')})
-    verified = json.loads(recovery)
     checks = verified.get('verification', {})
     if (verified.get('status') != 'POSTGRES_BACKUP_RESTORED_VERIFIED'
             or verified.get('project_ref') != PROJECT or verified.get('bucket') != BUCKET
-            or verified.get('prefix') != base or verified.get('objects') != objects
-            or verified.get('created_utc') != manifest.get('created_utc')
+            or verified.get('prefix') != base
             or verified.get('production_writes') is not False
             or verified.get('source_consistent_snapshot') is not True
             or any(checks.get(k) is not True for k in
@@ -67,6 +73,20 @@ def checked_record(storage, environment, now=None):
     if not (datetime.datetime.fromisoformat(started.replace('Z', '+00:00')) <= created <=
             datetime.datetime.fromisoformat(finished.replace('Z', '+00:00'))):
         raise SafeFailure('BACKUP_RUN_NOT_LINKED')
+    return verified
+
+
+def checked_record(storage, environment, now=None):
+    """Verify pinned proof against its backup record and archive bytes."""
+    verified = pinned_record(storage, environment, now)
+    manifest = storage.latest_backup_manifest()
+    if (manifest.get('project_ref') != PROJECT or manifest.get('bucket') != BUCKET
+            or manifest.get('prefix') != verified['prefix']
+            or manifest.get('objects') != verified['objects']
+            or manifest.get('created_utc') != verified['created_utc']):
+        raise SafeFailure('BACKUP_RECORD_RECOVERY_MISMATCH')
+    archive = verified['objects']['database']
+    expected = environment['BACKUP_SHA256'].lower()
     # The archive was hashed in the isolated restore and is read again from
     # the pinned immutable generation. Do not print its bytes or catalog.
     if hashlib.sha256(storage.get(archive)).hexdigest() != expected:
