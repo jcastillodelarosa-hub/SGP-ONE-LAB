@@ -1,5 +1,5 @@
 import {mountPdtRegistration,openPdtRegistration} from './src/modules/pdt-registration-form.js';
-import {openManualPdt} from './src/modules/pdt-manual-form.js?v=367-pdt-catalog';
+import {openManualPdt} from './src/modules/pdt-manual-form.js?v=368-multi-nc';
 import {saveRegistration,registrationMetadata} from './src/services/pdt-registration.js';
 import {filterPdtRegistrations,ncAssignment,pdtReportCsv} from './src/domain/pdt-registration.js';
 import {basePhysicalProgress} from './src/domain/mecanizado-base-progress.js';
