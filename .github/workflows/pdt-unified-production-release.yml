@@ -149,6 +149,7 @@ jobs:
       - name: Verify isolated restoration evidence and freshness
         if: inputs.operation == 'publish'
         env:
+          BACKUP_OBJECT: ${{ inputs.backup_object }}
           BACKUP_SHA256: ${{ inputs.backup_sha256 }}
           RECOVERY_GENERATION: ${{ inputs.recovery_generation }}
           RECOVERY_BYTES: ${{ inputs.recovery_bytes }}
