@@ -5,7 +5,7 @@ pinned SGP project. Never accept an arbitrary host or disabled TLS.
 """
 import os
 import sys
-from urllib.parse import parse_qs, unquote, urlsplit
+from urllib.parse import parse_qs, unquote, urlsplit, urlunsplit, urlencode
 
 PROJECT = "ocvxbwzqxbrfndkvjmfx"
 POOLER_SUFFIX = ".pooler.supabase.com"
@@ -51,13 +51,36 @@ def diagnose(url):
         return "INVALID_FORMAT"
 
 
+def secure_url(url):
+    """Add explicit TLS only after project host/user/port validation succeeds."""
+    reason = diagnose(url)
+    if reason is None:
+        return url
+    if reason != "TLS_REQUIRED":
+        raise ValueError(reason)
+    parsed = urlsplit(url)
+    query = parse_qs(parsed.query, keep_blank_values=True, strict_parsing=True)
+    if "sslmode" in query:
+        raise ValueError("TLS_REQUIRED")
+    query["sslmode"] = ["require"]
+    secured = urlunsplit(parsed._replace(query=urlencode(query, doseq=True)))
+    reason = diagnose(secured)
+    if reason:
+        raise ValueError(reason)
+    return secured
+
+
 def valid(url):
     return diagnose(url) is None
 
 
 if __name__ == "__main__":
-    reason = diagnose(os.environ.get("PDT_DATABASE_URL", ""))
-    if reason:
-        print(f"::error::SGP_PDT_DATABASE_URL_{reason}")
+    try:
+        url = secure_url(os.environ.get("PDT_DATABASE_URL", ""))
+        print("::add-mask::" + url)
+        with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as out:
+            out.write("DATABASE_URL=" + url + "\\n")
+        print("PRODUCTION_DATABASE_TARGET_AND_TLS_VERIFIED")
+    except ValueError as exc:
+        print(f"::error::SGP_PDT_DATABASE_URL_{exc}")
         sys.exit(1)
-    print("PRODUCTION_DATABASE_TARGET_AND_TLS_VERIFIED")
