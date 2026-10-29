@@ -77,6 +77,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+          fetch-depth: 0
       - name: Validate candidate, authorization inputs and evidence
         env:
           OPERATION: ${{ inputs.operation }}
