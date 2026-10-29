@@ -99,7 +99,7 @@ jobs:
             assert subprocess.check_output(['git','show',f'{base}:{p}'])==open(p,'rb').read(),f'SQL changed: {p}'
           if op=='publish':
             assert re.fullmatch(r'https://github\.com/[^/]+/[^/]+/actions/runs/[0-9]+',os.environ['BACKUP_EVIDENCE']), 'Backup/recovery evidence URL required'
-            assert os.environ['BACKUP_OBJECT'].startswith('gs://'), 'Private GCS backup object required'
+            assert re.fullmatch(r'gs://[A-Za-z0-9._-]+/[A-Za-z0-9._/-]+',os.environ['BACKUP_OBJECT']), 'Private GCS backup object required (provide exact gs://bucket/object from verified recovery evidence)'
             assert re.fullmatch(r'[0-9a-fA-F]{64}',os.environ['BACKUP_SHA256']), 'Verified backup SHA-256 required'
           print('Candidate SQL pinned; inputs structurally valid')
           PY
