@@ -8,7 +8,6 @@ DECLARE s text;
 BEGIN
  IF to_regclass('public.sgp_aluminio_pendientes') IS NULL
  OR to_regclass('public.sgp_usuarios') IS NULL
- OR to_regprocedure('public.sgp_pdt_validar_rol_real(text,text[])') IS NULL
  OR to_regprocedure('public.sgp_login(text,text)') IS NULL
  THEN RAISE EXCEPTION 'PDT_PREFLIGHT_REQUIRED_BASELINE_MISSING'; END IF;
  IF to_regclass('sgp_pdt_manual.corte_operativo') IS NOT NULL
@@ -16,7 +15,8 @@ BEGIN
  THEN RAISE EXCEPTION 'PDT_PREFLIGHT_CUTOVER_ALREADY_INSTALLED'; END IF;
  IF NOT has_function_privilege('anon','public.sgp_login(text,text)','EXECUTE')
  THEN RAISE EXCEPTION 'PDT_PREFLIGHT_LOGIN_PERMISSION_CHANGED'; END IF;
- IF has_function_privilege('anon','public.sgp_pdt_validar_rol_real(text,text[])','EXECUTE')
+ IF to_regprocedure('public.sgp_pdt_validar_rol_real(text,text[])') IS NOT NULL
+ AND has_function_privilege('anon','public.sgp_pdt_validar_rol_real(text,text[])','EXECUTE')
  THEN RAISE EXCEPTION 'PDT_PREFLIGHT_INTERNAL_AUTH_EXPOSED'; END IF;
 END $guard$;
 SELECT 'PDT_BASELINE_READ_ONLY_PASS';
