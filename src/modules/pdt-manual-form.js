@@ -1,5 +1,5 @@
 import {groupPanelSources,manualReportPayload,MANUAL_ORIGINS} from '../domain/pdt-manual.js';
-import {manualCatalog,manualSources,manualNc,saveManualReport} from '../services/pdt-manual.js?v=20261029-pdt-contract';
+import {manualCatalog,manualSources,manualNc,saveManualReport} from '../services/pdt-manual.js?v=366-pdt-rpc';
 const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 export async function openManualPdt({client,token,onSaved=()=>{}}){
  const previous=document.activeElement,modal=document.createElement('div');modal.className='piece-modal pdt-manual-modal';

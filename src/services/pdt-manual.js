@@ -6,7 +6,10 @@ export async function manualCatalog(client,token){
 }
 export async function manualSources(client,token,context){
  const {data,error}=await client.rpc('sgp_pdt_manual_fuentes_v1',{p_token:token,p_key_produccion:context.key_produccion,p_reserva:context.reserva});
- if(error)throw error;
+ if(error){
+  if(error.code==='PGRST202' && /p_reserva, p_token/.test(error.message||'')) throw new Error('La aplicación está consultando una firma antigua del PDT (2 parámetros). Actualiza a LAB v366 y vuelve a abrir Nuevo PDT.');
+  throw error;
+ }
  if(data?.ok!==true||!Array.isArray(data.fuentes))throw new Error('Fuentes PDT inválidas');
  return data.fuentes;
 }
