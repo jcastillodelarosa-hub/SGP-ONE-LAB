@@ -1,5 +1,6 @@
 """Fail-closed PDT unified live preflight. Read-only catalog checks only."""
 import os,subprocess,sys
+from pathlib import Path
 SQL = """
 BEGIN READ ONLY;
 SET LOCAL statement_timeout='15s';
@@ -23,6 +24,7 @@ SELECT 'PDT_BASELINE_READ_ONLY_PASS';
 ROLLBACK;
 """
 def main():
+ if not Path('PDT_PREFLIGHT_SUPABASE.sql').is_file():raise RuntimeError('CATALOG_PREFLIGHT_SQL_MISSING')
  url=os.environ.get('DATABASE_URL')
  if not url: raise RuntimeError('DATABASE_URL_MISSING')
  r=subprocess.run(['docker','run','--rm','-i','-e','DATABASE_URL','postgres:17',
