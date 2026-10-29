@@ -15,7 +15,7 @@ DIRECT_HOST = f"db.{PROJECT}.supabase.co"
 def diagnose(url):
     if not isinstance(url, str) or not url.strip():
         return "MISSING_SECRET"
-    if url != url.strip() or any(c in url for c in "\\r\\n\\x00"):
+    if url != url.strip() or any(ord(c) < 32 or ord(c) == 127 for c in url):
         return "INVALID_FORMAT"
     try:
         parsed = urlsplit(url)
