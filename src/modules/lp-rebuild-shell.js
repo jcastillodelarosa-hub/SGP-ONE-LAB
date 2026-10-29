@@ -29,7 +29,7 @@ btn.addEventListener('click',()=>activate(id));
 shell.append(nav,content);legacyTabs.before(shell);
 legacyTabs.hidden=true;legacyAssembly.hidden=true;legacyPacking.hidden=true;
 function syncLocationAccess(){const allowed=!reportTrigger.hidden;const denied=document.getElementById('lp-location-access');if(denied)denied.hidden=allowed;if(!allowed)report.hidden=true;return allowed;}
-const accessObserver=new MutationObserver(()=>{if(panels.get('LP-04').panel.hidden)return;syncLocationAccess();});accessObserver.observe(reportTrigger,{attributes:true,attributeFilter:['hidden']});
+const accessObserver=new MutationObserver(()=>{if(panels.get('LP-04').panel.hidden)return;if(syncLocationAccess()&&report.hidden)reportTrigger.click();});accessObserver.observe(reportTrigger,{attributes:true,attributeFilter:['hidden']});
 function activate(id){for(const [key,{panel,btn}] of panels){const active=key===id;panel.hidden=!active;btn.classList.toggle('active',active);btn.setAttribute('aria-current',active?'page':'false');}if(id==='LP-04'&&syncLocationAccess())reportTrigger.click();}
 activate('LP-01');
 })();
