@@ -133,6 +133,7 @@ jobs:
           set -euo pipefail
           docker run --rm -e DATABASE_URL postgres:17 sh -c 'psql "$DATABASE_URL" -X -v ON_ERROR_STOP=1 -Atc "select current_database(),current_user,now()"' > /tmp/pdt-release/preflight.txt
           test -s /tmp/pdt-release/preflight.txt
+          python3 tests/pdt-release/live_preflight.py
       - name: Production release interlock — independent approval required
         if: inputs.operation == 'publish'
         run: |
