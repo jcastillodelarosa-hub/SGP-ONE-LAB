@@ -1,0 +1,39 @@
+name: PDT diagnostic - read-only database preflight
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sgp-pdt-readonly-preflight
+  cancel-in-progress: false
+
+jobs:
+  database-preflight:
+    name: Verify Supabase PDT baseline (read only)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment: pdt-unified-production
+    steps:
+      - name: Verify database connection and baseline (read only)
+        env:
+          DATABASE_URL: ${{ secrets.SGP_PDT_DATABASE_URL }}
+        run: |
+          set -euo pipefail
+          test -n "$DATABASE_URL" || { echo "::error::SGP_PDT_DATABASE_URL is missing"; exit 1; }
+          cat > /tmp/pdt-preflight.sql <<'SQL'
+          BEGIN READ ONLY;
+          SELECT CASE WHEN current_setting('transaction_read_only')='on' THEN 'READ_ONLY_CONNECTION_OK' ELSE 'READ_ONLY_CONNECTION_FAILED' END;
+          SELECT CASE WHEN to_regclass('public.sgp_aluminio_pendientes') IS NOT NULL AND to_regclass('public.sgp_usuarios') IS NOT NULL AND to_regprocedure('public.sgp_login(text,text)') IS NOT NULL THEN 'PDT_BASELINE_PRESENT' ELSE 'PDT_BASELINE_MISSING' END;
+          SELECT CASE WHEN to_regclass('sgp_pdt_manual.corte_operativo') IS NULL AND to_regprocedure('public.sgp_pdt_corte_operativo_v1(text)') IS NULL THEN 'PDT_CUTOVER_NOT_INSTALLED' ELSE 'PDT_CUTOVER_ALREADY_PRESENT' END;
+          SELECT CASE WHEN has_function_privilege('anon','public.sgp_login(text,text)','EXECUTE') THEN 'PDT_LOGIN_GRANT_OK' ELSE 'PDT_LOGIN_GRANT_MISSING' END;
+          ROLLBACK;
+          SQL
+          docker run --rm -i -e DATABASE_URL -e PGOPTIONS="-c default_transaction_read_only=on -c statement_timeout=15000 -c lock_timeout=3000" postgres:17 sh -c 'psql "$DATABASE_URL" -X -qAt -v ON_ERROR_STOP=1' < /tmp/pdt-preflight.sql | tee /tmp/pdt-preflight.out
+          grep -qx READ_ONLY_CONNECTION_OK /tmp/pdt-preflight.out
+          grep -qx PDT_BASELINE_PRESENT /tmp/pdt-preflight.out
+          grep -qx PDT_CUTOVER_NOT_INSTALLED /tmp/pdt-preflight.out
+          grep -qx PDT_LOGIN_GRANT_OK /tmp/pdt-preflight.out
+          echo "PDT_READ_ONLY_PREFLIGHT_PASS"
