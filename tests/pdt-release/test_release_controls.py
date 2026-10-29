@@ -185,5 +185,25 @@ class ReleaseControls(unittest.TestCase):
         self.assertNotIn('06_ROLLBACK_REVIEW.sql\n          docker', workflow)
 
 
+    def test_publish_keeps_pinned_evidence_and_validated_connection(self):
+        workflow = (Path(__file__).resolve().parents[2] /
+                    '.github/workflows/pdt-unified-production-release.yml').read_text()
+        verify = workflow.split('- name: Verify isolated restoration evidence and freshness', 1)[1].split('- name: Compare live RPC', 1)[0]
+        compare = workflow.split('- name: Compare live RPC', 1)[1].split('- name: Production release interlock', 1)[0]
+        for key in ('BACKUP_OBJECT', 'BACKUP_SHA256', 'RECOVERY_GENERATION',
+                    'RECOVERY_BYTES', 'RECOVERY_SHA256'):
+            line = key + ': ' + '
+    unittest.main()
+ + '{{ inputs.' + key.lower() + ' }}'
+            self.assertIn(line, verify)
+            self.assertIn(line, compare)
+        self.assertIn('run: python3 tests/pdt-release/verify_recovery.py', verify)
+        self.assertIn('run: python3 tests/pdt-release/compare_live_catalog.py', compare)
+        self.assertIn('out.write("DATABASE_URL=" + url +', (Path(__file__).resolve().parent /
+                      'validate_connection.py').read_text())
+        self.assertIn('docker run --rm -e DATABASE_URL', workflow)
+        self.assertIn('run: python3 tests/pdt-release/post_release.py', workflow)
+
+
 if __name__ == '__main__':
     unittest.main()

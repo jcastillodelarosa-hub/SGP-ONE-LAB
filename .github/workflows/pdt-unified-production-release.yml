@@ -12,6 +12,30 @@ on:
         type: choice
         required: true
         options: [preflight, publish]
+      backup_evidence:
+        description: 'Verified private backup/recovery run URL (mandatory for publish)'
+        required: false
+        type: string
+      backup_object:
+        description: 'Private backup object identity, independently verified by release approver'
+        required: false
+        type: string
+      backup_sha256:
+        description: 'Verified SHA-256 of restored backup'
+        required: false
+        type: string
+      recovery_generation:
+        description: 'GCS immutable generation of recovery-verified.json'
+        required: false
+        type: string
+      recovery_bytes:
+        description: 'Size of recovery-verified.json'
+        required: false
+        type: string
+      recovery_sha256:
+        description: 'SHA-256 of recovery-verified.json'
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -40,7 +64,7 @@ jobs:
           from pathlib import Path
           workflow=Path('.github/workflows/pdt-unified-production-release.yml').read_text()
           assert ("environment: " + "$" + "{{ inputs.operation == 'preflight' && 'supabase-backup' || 'pdt-unified-production' }}") in workflow
-          assert 'Confirm protected production approval' in workflow
+          assert 'Production release interlock — protected approval required' in workflow
           print('PDT_RELEASE_STATIC_GUARDS_PASS')
           PY
   release:
@@ -57,6 +81,12 @@ jobs:
       - name: Validate candidate, authorization inputs and evidence
         env:
           OPERATION: ${{ inputs.operation }}
+          BACKUP_EVIDENCE: ${{ inputs.backup_evidence }}
+          BACKUP_OBJECT: ${{ inputs.backup_object }}
+          BACKUP_SHA256: ${{ inputs.backup_sha256 }}
+          RECOVERY_GENERATION: ${{ inputs.recovery_generation }}
+          RECOVERY_BYTES: ${{ inputs.recovery_bytes }}
+          RECOVERY_SHA256: ${{ inputs.recovery_sha256 }}
         run: |
           python3 - <<'PY'
           import os,re,subprocess,sys
@@ -69,6 +99,13 @@ jobs:
             'docs/sql-proposals/pdt/integration/06_operational_cutover_REVIEW.sql']
           for p in paths:
             assert subprocess.check_output(['git','show',f'{base}:{p}'])==open(p,'rb').read(),f'SQL changed: {p}'
+          if op=='publish':
+            assert re.fullmatch(r'https://github\.com/[^/]+/[^/]+/actions/runs/[0-9]+',os.environ['BACKUP_EVIDENCE']), 'Backup/recovery evidence URL required'
+            assert re.fullmatch(r'gs://[A-Za-z0-9._-]+/[A-Za-z0-9._/-]+',os.environ['BACKUP_OBJECT']), 'Private GCS backup object required (provide exact gs://bucket/object from verified recovery evidence)'
+            assert re.fullmatch(r'[0-9a-fA-F]{64}',os.environ['BACKUP_SHA256']), 'Verified backup SHA-256 required'
+            for field in ('RECOVERY_GENERATION','RECOVERY_BYTES'):
+              assert re.fullmatch(r'[1-9][0-9]*',os.environ[field]), f'{field} required: positive integer from immutable recovery record'
+            assert re.fullmatch(r'[0-9a-fA-F]{64}',os.environ['RECOVERY_SHA256']), 'RECOVERY_SHA256 required: immutable recovery record digest'
           print('Candidate SQL pinned; inputs structurally valid')
           PY
       - name: Build and test before any production writes
@@ -106,12 +143,72 @@ jobs:
       - name: Stop after preflight
         if: inputs.operation == 'preflight'
         run: echo 'Read-only preflight complete. No deployment performed.'
+      - name: Verify backup run conclusion with GitHub API
+        if: inputs.operation == 'publish'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BACKUP_EVIDENCE: ${{ inputs.backup_evidence }}
+        run: |
+          python3 - <<'PY'
+          import json,os,urllib.request
+          run_id=os.environ['BACKUP_EVIDENCE'].rsplit('/',1)[-1]
+          url=f'https://api.github.com/repos/{os.environ["GITHUB_REPOSITORY"]}/actions/runs/{run_id}'
+          req=urllib.request.Request(url,headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json'})
+          data=json.load(urllib.request.urlopen(req))
+          assert data['conclusion']=='success', 'Backup/recovery run not successful'
+          assert data['event']=='workflow_dispatch', 'Evidence must be a manual run'
+          assert data['repository']['full_name'].lower()==os.environ['GITHUB_REPOSITORY'].lower(), 'Backup evidence belongs to another repository'
+          assert data['head_branch'] in ('feat/issue-144-pdt-isolated-validation','feat/pdt-unified-release-workflow','feat/pdt-multifabricacion-avances-nc'), 'Unexpected backup source'
+          jobs_req=urllib.request.Request(data['jobs_url']+'?per_page=100',headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json'})
+          jobs=json.load(urllib.request.urlopen(jobs_req))['jobs']
+          allowed_proof_jobs = {
+            'feat/issue-144-pdt-isolated-validation': ('PDT unified - verified private recovery only',),
+            'feat/pdt-unified-release-workflow': ('PDT unified - verified private recovery only',),
+            'feat/pdt-multifabricacion-avances-nc': ('Supabase - private PostgreSQL backup and isolated recovery',),
+          }
+          proof=next((j for j in jobs if j['name'] in allowed_proof_jobs[data['head_branch']] and j['conclusion']=='success'),None)
+          assert proof and proof['started_at'] and proof['completed_at'], 'Verified isolated recovery job missing or failed'
+          with open(os.environ['GITHUB_ENV'],'a') as out:
+            out.write('BACKUP_RUN_START='+proof['started_at']+'\n')
+            out.write('BACKUP_RUN_END='+proof['completed_at']+'\n')
+          from datetime import datetime,timezone,timedelta
+          created=datetime.fromisoformat(data['created_at'].replace('Z','+00:00'))
+          assert timedelta(0)<=datetime.now(timezone.utc)-created<=timedelta(hours=6), 'Recovery workflow run is stale'
+          print('Successful run exists; operator must additionally verify backup freshness and recovery in environment approval.')
+          PY
+      - name: Authenticate to private GCS backup storage
+        if: inputs.operation == 'publish'
+        uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SGP_ONE_LAB }}
+      - name: Install Google Cloud SDK
+        if: inputs.operation == 'publish'
+        uses: google-github-actions/setup-gcloud@v3
+      - name: Verify isolated restoration evidence and freshness
+        if: inputs.operation == 'publish'
+        env:
+          BACKUP_OBJECT: ${{ inputs.backup_object }}
+          BACKUP_SHA256: ${{ inputs.backup_sha256 }}
+          RECOVERY_GENERATION: ${{ inputs.recovery_generation }}
+          RECOVERY_BYTES: ${{ inputs.recovery_bytes }}
+          RECOVERY_SHA256: ${{ inputs.recovery_sha256 }}
+        run: python3 tests/pdt-release/verify_recovery.py
       - name: Compare live RPC, RLS, grants and dependencies with verified snapshot
         if: inputs.operation == 'publish'
+        env:
+          BACKUP_OBJECT: ${{ inputs.backup_object }}
+          BACKUP_SHA256: ${{ inputs.backup_sha256 }}
+          RECOVERY_GENERATION: ${{ inputs.recovery_generation }}
+          RECOVERY_BYTES: ${{ inputs.recovery_bytes }}
+          RECOVERY_SHA256: ${{ inputs.recovery_sha256 }}
         run: python3 tests/pdt-release/compare_live_catalog.py
-      - name: Confirm protected production approval
+      - name: Production release interlock — protected approval required
         if: inputs.operation == 'publish'
-        run: echo 'Production release authorized through protected environment approval.'
+        env:
+          PUBLISH_ENABLED: ${{ vars.PDT_PUBLISH_ENABLED }}
+        run: |
+          test "$PUBLISH_ENABLED" = 'true' || { echo '::error::PDT_PUBLISH_ENABLED must be set in the protected production environment after review'; exit 1; }
+          echo 'Protected publication gate satisfied; proceeding with pinned SQL only.'
       - name: Install pinned SQL phases
         if: inputs.operation == 'publish'
         run: |
