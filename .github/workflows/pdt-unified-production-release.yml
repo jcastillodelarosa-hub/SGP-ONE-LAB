@@ -39,7 +39,7 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           workflow=Path('.github/workflows/pdt-unified-production-release.yml').read_text()
-          assert 'environment: ${{ inputs.operation == \'preflight\' && \'supabase-backup\' || \'pdt-unified-production\' }}' in workflow
+          assert ("environment: " + "$" + "{{ inputs.operation == 'preflight' && 'supabase-backup' || 'pdt-unified-production' }}") in workflow
           assert 'Confirm protected production approval' in workflow
           print('PDT_RELEASE_STATIC_GUARDS_PASS')
           PY
