@@ -1,35 +1,89 @@
-"""Verify isolated recovery evidence from private GCS, not a green Actions badge."""
-import datetime,json,os,sys
+"""Verify the exact private backup and restored record before a release.
+
+Only fixed error codes leave this process. Backup bytes and catalog stay in memory.
+"""
+import datetime
+import hashlib
+import json
+import os
 from pathlib import Path
-sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'pdt-backup'))
-from gcs_storage import PrivateStorage,SafeFailure,PREFIX,BUCKET
-def verify():
- s=PrivateStorage();s.verify_boundary()
- record=s.latest_backup_manifest()
- base=record['prefix']
- requested_object=os.environ.get('BACKUP_OBJECT','')
- actual_object=record['objects']['database']['name']
- if not requested_object.startswith('gs://') or requested_object!='gs://'+BUCKET+'/'+actual_object:
-  raise SafeFailure('BACKUP_OBJECT_IDENTITY_MISMATCH')
- if not base.startswith(PREFIX):raise SafeFailure('WRONG_BACKUP_PREFIX')
- raw=s.get(record['objects']['database'])
- import hashlib
- digest=hashlib.sha256(raw).hexdigest()
- expected=os.environ.get('BACKUP_SHA256','').lower()
- if expected!=digest:raise SafeFailure('BACKUP_HASH_MISMATCH')
- verified=json.loads(s.get({'name':base+'recovery-verified.json',
-  'generation':os.environ['RECOVERY_GENERATION'],
-  'bytes':int(os.environ['RECOVERY_BYTES']),
-  'sha256':os.environ['RECOVERY_SHA256']}))
- if verified.get('status')!='POSTGRES_BACKUP_RESTORED_VERIFIED':raise SafeFailure('RESTORE_NOT_VERIFIED')
- v=verified.get('verification',{})
- if not all(v.get(k) is True for k in ('table_counts_equal','catalog_sections_equal','archive_sha256_checked_on_download','postgres_scope_only')):raise SafeFailure('RESTORE_PROOF_INCOMPLETE')
- if verified.get('prefix')!=base or verified.get('project_ref')!='ocvxbwzqxbrfndkvjmfx':raise SafeFailure('RESTORE_SOURCE_MISMATCH')
- when=datetime.datetime.fromisoformat(verified['created_utc'].replace('Z','+00:00'))
- age=datetime.datetime.now(datetime.timezone.utc)-when
- if not datetime.timedelta(0)<=age<=datetime.timedelta(hours=6):raise SafeFailure('BACKUP_NOT_FRESH')
- print('PRIVATE_RESTORE_HASH_COUNTS_CATALOG_VERIFIED')
-if __name__=='__main__':
- try:verify()
- except Exception as e:
-  print('::error::RESTORE_EVIDENCE_NOT_VERIFIED: '+str(e));sys.exit(1)
+import re
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'pdt-backup'))
+from gcs_storage import BUCKET, PREFIX, PrivateStorage, SafeFailure
+
+PROJECT = 'ocvxbwzqxbrfndkvjmfx'
+MAX_AGE = datetime.timedelta(hours=6)
+
+
+def checked_record(storage, environment, now=None):
+    """Return only the verified manifest; fail closed on any identity mismatch."""
+    now = now or datetime.datetime.now(datetime.timezone.utc)
+    manifest = storage.latest_backup_manifest()
+    base = manifest.get('prefix', '')
+    if (manifest.get('project_ref') != PROJECT or manifest.get('bucket') != BUCKET
+            or not base.startswith(PREFIX) or not base.endswith('/')):
+        raise SafeFailure('BACKUP_SOURCE_MISMATCH')
+    objects = manifest.get('objects', {})
+    required = {'database': 'database.dump', 'globals': 'globals.sql',
+                'catalog_and_counts': 'catalog-and-counts.json'}
+    for key, filename in required.items():
+        item = objects.get(key, {})
+        if item.get('name') != base + filename or not re.fullmatch(r'[1-9][0-9]*', str(item.get('generation', ''))):
+            raise SafeFailure('BACKUP_OBJECT_IDENTITY_MISMATCH')
+    archive = objects['database']
+    if environment.get('BACKUP_OBJECT') != 'gs://' + BUCKET + '/' + archive['name']:
+        raise SafeFailure('BACKUP_OBJECT_IDENTITY_MISMATCH')
+    expected = environment.get('BACKUP_SHA256', '').lower()
+    if not re.fullmatch('[0-9a-f]{64}', expected) or archive.get('sha256') != expected:
+        raise SafeFailure('BACKUP_HASH_MISMATCH')
+    recovery = storage.get({'name': base + 'recovery-verified.json',
+                            'generation': environment.get('RECOVERY_GENERATION', ''),
+                            'bytes': int(environment.get('RECOVERY_BYTES', '0')),
+                            'sha256': environment.get('RECOVERY_SHA256', '')})
+    verified = json.loads(recovery)
+    checks = verified.get('verification', {})
+    if (verified.get('status') != 'POSTGRES_BACKUP_RESTORED_VERIFIED'
+            or verified.get('project_ref') != PROJECT or verified.get('bucket') != BUCKET
+            or verified.get('prefix') != base or verified.get('objects') != objects
+            or verified.get('created_utc') != manifest.get('created_utc')
+            or verified.get('production_writes') is not False
+            or verified.get('source_consistent_snapshot') is not True
+            or any(checks.get(k) is not True for k in
+                   ('table_counts_equal', 'catalog_sections_equal',
+                    'archive_sha256_checked_on_download', 'postgres_scope_only'))
+            or checks.get('restore_network') != 'none'
+            or checks.get('source_writes') is not False):
+        raise SafeFailure('RESTORE_PROOF_INCOMPLETE')
+    age = now - datetime.datetime.fromisoformat(verified['created_utc'].replace('Z', '+00:00'))
+    if not datetime.timedelta(0) <= age <= MAX_AGE:
+        raise SafeFailure('BACKUP_NOT_FRESH')
+    started = environment.get('BACKUP_RUN_START')
+    finished = environment.get('BACKUP_RUN_END')
+    if not started or not finished:
+        raise SafeFailure('BACKUP_RUN_NOT_LINKED')
+    created = datetime.datetime.fromisoformat(verified['created_utc'].replace('Z', '+00:00'))
+    if not (datetime.datetime.fromisoformat(started.replace('Z', '+00:00')) <= created <=
+            datetime.datetime.fromisoformat(finished.replace('Z', '+00:00'))):
+        raise SafeFailure('BACKUP_RUN_NOT_LINKED')
+    # The archive was hashed in the isolated restore and is read again from
+    # the pinned immutable generation. Do not print its bytes or catalog.
+    if hashlib.sha256(storage.get(archive)).hexdigest() != expected:
+        raise SafeFailure('BACKUP_HASH_MISMATCH')
+    return verified
+
+
+def main():
+    storage = PrivateStorage(read_only=True)
+    storage.verify_boundary()
+    checked_record(storage, os.environ)
+    print('PRIVATE_RESTORE_HASH_COUNTS_CATALOG_VERIFIED')
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except Exception:
+        print('::error::RESTORE_EVIDENCE_NOT_VERIFIED')
+        sys.exit(1)

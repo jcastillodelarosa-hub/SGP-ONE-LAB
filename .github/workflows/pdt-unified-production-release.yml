@@ -58,13 +58,14 @@ jobs:
           persist-credentials: false
       - name: Compile release validation scripts without database access
         run: |
-          python3 -m py_compile tests/pdt-release/live_preflight.py tests/pdt-release/verify_recovery.py
+          python3 -m py_compile tests/pdt-backup/gcs_storage.py tests/pdt-release/live_preflight.py tests/pdt-release/verify_recovery.py tests/pdt-release/compare_live_catalog.py tests/pdt-release/prepare_cutover.py tests/pdt-release/post_release.py tests/pdt-release/artifact_digest.py tests/pdt-release/validate_connection.py
+          python3 -m unittest discover -s tests/pdt-release -p 'test_*.py'
           python3 - <<'PY'
           from pathlib import Path
           workflow=Path('.github/workflows/pdt-unified-production-release.yml').read_text()
           assert 'BACKUP_OBJECT: ${{ inputs.backup_object }}' in workflow
-          assert 'Production release interlock — independent approval required' in workflow
-          assert 'Publish disabled.' in workflow
+          assert 'Production release interlock — protected approval required' in workflow
+          assert 'PDT_PUBLISH_ENABLED' in workflow
           print('PDT_RELEASE_STATIC_GUARDS_PASS')
           PY
   release:
@@ -109,6 +110,7 @@ jobs:
           npm run build:vendor
           npm run verify:release
           npm test
+          echo "SITE_SHA256=$(python3 tests/pdt-release/artifact_digest.py)" >> "$GITHUB_ENV"
       - name: Prepare read-only connection using validated backup credential
         if: inputs.operation == 'preflight'
         env:
@@ -130,16 +132,9 @@ jobs:
         env:
           PDT_DATABASE_URL: ${{ secrets.SGP_PDT_DATABASE_URL }}
         run: |
-          test -n "$PDT_DATABASE_URL" || { echo "::error::SGP_PDT_DATABASE_URL missing"; exit 1; }
+          python3 tests/pdt-release/validate_connection.py
           echo "::add-mask::$PDT_DATABASE_URL"
           echo "DATABASE_URL=$PDT_DATABASE_URL" >> "$GITHUB_ENV"
-      - name: Verify required database connection
-        run: |
-          test -n "$DATABASE_URL" || { echo "::error::DATABASE_URL missing"; exit 1; }
-          docker run --rm -e DATABASE_URL -e PGOPTIONS="-c default_transaction_read_only=on -c statement_timeout=15000 -c lock_timeout=3000" postgres:17 bash -c 'psql "$DATABASE_URL" -X -v ON_ERROR_STOP=1 -Atc "select 1"'
-      - name: Verify release baseline (read only)
-        run: |
-          docker run --rm -e DATABASE_URL -e PGOPTIONS="-c default_transaction_read_only=on -c statement_timeout=15000 -c lock_timeout=3000" postgres:17 bash -c 'psql "$DATABASE_URL" -X -v ON_ERROR_STOP=1 -Atc "select 1"'
       - name: Validate live baseline without writes
         run: python3 tests/pdt-release/live_preflight.py
       - name: Stop after preflight
@@ -163,7 +158,11 @@ jobs:
           assert data['head_branch'] in ('feat/issue-144-pdt-isolated-validation','feat/pdt-unified-release-workflow'), 'Unexpected backup source'
           jobs_req=urllib.request.Request(data['jobs_url']+'?per_page=100',headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json'})
           jobs=json.load(urllib.request.urlopen(jobs_req))['jobs']
-          assert any(j['name']=='PDT unified - verified private recovery only' and j['conclusion']=='success' for j in jobs), 'Verified isolated recovery job missing or failed'
+          proof=next((j for j in jobs if j['name']=='PDT unified - verified private recovery only' and j['conclusion']=='success'),None)
+          assert proof and proof['started_at'] and proof['completed_at'], 'Verified isolated recovery job missing or failed'
+          with open(os.environ['GITHUB_ENV'],'a') as out:
+            out.write('BACKUP_RUN_START='+proof['started_at']+'\n')
+            out.write('BACKUP_RUN_END='+proof['completed_at']+'\n')
           from datetime import datetime,timezone,timedelta
           created=datetime.fromisoformat(data['created_at'].replace('Z','+00:00'))
           assert timedelta(0)<=datetime.now(timezone.utc)-created<=timedelta(hours=6), 'Recovery workflow run is stale'
@@ -177,20 +176,6 @@ jobs:
       - name: Install Google Cloud SDK
         if: inputs.operation == 'publish'
         uses: google-github-actions/setup-gcloud@v3
-      - name: Verify actual private backup bytes and catalog
-        if: inputs.operation == 'publish'
-        env:
-          BACKUP_OBJECT: ${{ inputs.backup_object }}
-          BACKUP_SHA256: ${{ inputs.backup_sha256 }}
-        run: |
-          set -euo pipefail
-          umask 077
-          mkdir -p /tmp/pdt-release
-          gcloud storage cp "$BACKUP_OBJECT" /tmp/pdt-release/backup.dump
-          printf '%s  %s\n' "$BACKUP_SHA256" /tmp/pdt-release/backup.dump | sha256sum -c -
-          docker run --rm -v /tmp/pdt-release:/backup:ro postgres:17 pg_restore --list /backup/backup.dump > /tmp/pdt-release/catalog.txt
-          test -s /tmp/pdt-release/catalog.txt
-          echo 'Backup bytes, SHA-256 and pg_restore catalog verified; restore proof still requires separate approval.'
       - name: Verify isolated restoration evidence and freshness
         if: inputs.operation == 'publish'
         env:
@@ -200,20 +185,16 @@ jobs:
           RECOVERY_BYTES: ${{ inputs.recovery_bytes }}
           RECOVERY_SHA256: ${{ inputs.recovery_sha256 }}
         run: python3 tests/pdt-release/verify_recovery.py
-      - name: Live database preflight — fail closed
+      - name: Compare live RPC, RLS, grants and dependencies with verified snapshot
+        if: inputs.operation == 'publish'
+        run: python3 tests/pdt-release/compare_live_catalog.py
+      - name: Production release interlock — protected approval required
         if: inputs.operation == 'publish'
         env:
-          DATABASE_URL: ${{ secrets.SGP_PDT_DATABASE_URL }}
+          PUBLISH_ENABLED: ${{ vars.PDT_PUBLISH_ENABLED }}
         run: |
-          set -euo pipefail
-          docker run --rm -e DATABASE_URL postgres:17 sh -c 'psql "$DATABASE_URL" -X -v ON_ERROR_STOP=1 -Atc "select current_database(),current_user,now()"' > /tmp/pdt-release/preflight.txt
-          test -s /tmp/pdt-release/preflight.txt
-          python3 tests/pdt-release/live_preflight.py
-      - name: Production release interlock — independent approval required
-        if: inputs.operation == 'publish'
-        run: |
-          echo '::error::STOP: catalog verification is not a restored backup proof; production RPC fingerprints/RLS checks and post-cutover coordinated recovery still require independent validation. Publish disabled.'
-          exit 1
+          test "$PUBLISH_ENABLED" = 'true' || { echo '::error::PDT_PUBLISH_ENABLED must be set in the protected production environment after review'; exit 1; }
+          echo 'Protected publication gate satisfied; proceeding with pinned SQL only.'
       - name: Install pinned SQL phases
         if: inputs.operation == 'publish'
         env:
@@ -232,26 +213,48 @@ jobs:
           for f in "${files[@]}"; do
             echo "Installing $f"
             docker run --rm -e DATABASE_URL -v "$PWD:/work:ro" -w /work postgres:17 sh -c 'psql "$DATABASE_URL" -X -v ON_ERROR_STOP=1 -f "$1"' sh "$f"
+            echo "PDT_PHASE_PASS: $f" >> "$GITHUB_STEP_SUMMARY"
           done
       - name: Activate cutover at actual execution instant
         if: inputs.operation == 'publish'
         env:
           DATABASE_URL: ${{ secrets.SGP_PDT_DATABASE_URL }}
         run: |
-          python3 - <<'PY'
-          from datetime import datetime,timezone
-          sql=open('docs/sql-proposals/pdt/integration/06_ACTIVAR_REVIEW.sql').read()
-          instant=datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
-          sql=sql.replace('REPLACE_WITH_PUBLICATION_UTC',instant).replace('REPLACE_WITH_ADMIN_USER','Jcastillo')
-          open('/tmp/pdt-activate.sql','w').write(sql)
-          print('Recorded cutover UTC:',instant)
-          PY
-          docker run --rm -e DATABASE_URL -v /tmp/pdt-activate.sql:/activate.sql:ro postgres:17 sh -c 'psql "$DATABASE_URL" -X -v ON_ERROR_STOP=1 -f /activate.sql'
+          python3 tests/pdt-release/prepare_cutover.py
+          docker run --rm -e DATABASE_URL -v /tmp/pdt-release/activate.sql:/activate.sql:ro postgres:17 sh -c 'psql "$DATABASE_URL" -X -v ON_ERROR_STOP=1 -f /activate.sql'
+          echo 'Cutover uses the PostgreSQL clock at the INSERT; review the returned UTC value.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Verify frontend artifact still matches tested bytes
+        if: inputs.operation == 'publish'
+        run: python3 tests/pdt-release/artifact_digest.py "$SITE_SHA256"
       - name: Deploy Firebase Hosting
         if: inputs.operation == 'publish'
+        id: firebase
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SGP_ONE_LAB }}
           projectId: sgp-one-lab
           channelId: live
+      - name: Verify deployed workspace was not changed after tests
+        if: inputs.operation == 'publish'
+        run: python3 tests/pdt-release/artifact_digest.py "$SITE_SHA256"
+      - name: Record exact commit and Firebase deployment
+        if: inputs.operation == 'publish'
+        env:
+          DEPLOY_URL: ${{ steps.firebase.outputs.details_url }}
+        run: |
+          test -n "$DEPLOY_URL" || { echo '::error::Firebase deployment URL missing'; exit 1; }
+          echo "PDT_RELEASE_COMMIT: $GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo "FRONTEND_SHA256: $SITE_SHA256" >> "$GITHUB_STEP_SUMMARY"
+          echo "FIREBASE_DEPLOYMENT: $DEPLOY_URL" >> "$GITHUB_STEP_SUMMARY"
+          echo 'Functional PC/mobile and real-role acceptance remain pending until separately evidenced.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Verify backend after deployment without writes
+        if: inputs.operation == 'publish'
+        env:
+          DATABASE_URL: ${{ secrets.SGP_PDT_DATABASE_URL }}
+        run: python3 tests/pdt-release/post_release.py
+      - name: Coordinated recovery notice on release failure
+        if: failure() && inputs.operation == 'publish'
+        run: |
+          echo 'PDT_RELEASE_FAILED: halt operations and inspect whether corte_operativo is active.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Before activation, review guarded reverse SQL in reverse phase order. After activation, preserve all later writes and perform a coordinated forward repair of Supabase/frontend; never restore the whole database automatically.' >> "$GITHUB_STEP_SUMMARY"
