@@ -36,3 +36,11 @@ La ejecución directa requiere `main`, aprobación del entorno protegido `pdt-un
 **Riesgo aceptado expresamente:** sin respaldo ni recuperación verificada, una interrupción entre fases SQL puede dejar cambios parcialmente aplicados; la activación y el despliegue pueden requerir reparación coordinada. No ejecutar automáticamente un rollback sobre datos nuevos. El responsable pidió priorizar implementación sin respaldo adicional. El merge del workflow no ejecuta SQL ni despliega por sí solo.
 
 **Estados a registrar por separado:** workflow implementado en rama, fusionado en `main`, publicación ejecutada, verificación real de Supabase y Firebase. No declarar `PUBLICADO` por CI estática o por merge.
+
+## Registro de ejecución directa — 2026-10-29
+
+Con autorización expresa del propietario se aplicaron mediante la conexión Supabase existente, sin usar el secreto de PostgreSQL de GitHub Actions, las siete fases SQL versionadas en main: agrupados 01, manuales 01–05 e integración 06. Cada llamada de migración devolvió `success: true`. Proyecto `ocvxbwzqxbrfndkvjmfx`.
+
+La activación se ejecutó posteriormente con reloj de la propia base de datos: `desde=2026-10-29 19:42:11.72216+00`, `activado_por=Jcastillo`. Se verificó previamente que el contrato de corte estaba instalado y aún sin activar. No se generó nuevo respaldo. Esta es una ejecución autorizada excepcional, no un permiso permanente para omitir controles.
+
+**Estado al registrar:** SQL APLICADO, corte APLICADO. El frontend requiere despliegue Firebase y verificación independiente; no declarar PUBLICADO/VERIFICADO hasta comprobar el resultado del workflow de Hosting y la experiencia funcional.
