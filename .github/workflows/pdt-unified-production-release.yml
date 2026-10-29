@@ -101,8 +101,6 @@ jobs:
           PDT_DATABASE_URL: ${{ secrets.SGP_PDT_DATABASE_URL }}
         run: |
           python3 tests/pdt-release/validate_connection.py
-          echo "::add-mask::$PDT_DATABASE_URL"
-          echo "DATABASE_URL=$PDT_DATABASE_URL" >> "$GITHUB_ENV"
       - name: Validate live baseline without writes
         run: python3 tests/pdt-release/live_preflight.py
       - name: Stop after preflight
@@ -116,8 +114,6 @@ jobs:
         run: echo 'Production release authorized through protected environment approval.'
       - name: Install pinned SQL phases
         if: inputs.operation == 'publish'
-        env:
-          DATABASE_URL: ${{ secrets.SGP_PDT_DATABASE_URL }}
         run: |
           set -euo pipefail
           files=(
@@ -136,8 +132,6 @@ jobs:
           done
       - name: Activate cutover at actual execution instant
         if: inputs.operation == 'publish'
-        env:
-          DATABASE_URL: ${{ secrets.SGP_PDT_DATABASE_URL }}
         run: |
           python3 tests/pdt-release/prepare_cutover.py
           docker run --rm -e DATABASE_URL -v /tmp/pdt-release/activate.sql:/activate.sql:ro postgres:17 sh -c 'psql "$DATABASE_URL" -X -v ON_ERROR_STOP=1 -f /activate.sql'
@@ -169,8 +163,6 @@ jobs:
           echo 'Functional PC/mobile and real-role acceptance remain pending until separately evidenced.' >> "$GITHUB_STEP_SUMMARY"
       - name: Verify backend after deployment without writes
         if: inputs.operation == 'publish'
-        env:
-          DATABASE_URL: ${{ secrets.SGP_PDT_DATABASE_URL }}
         run: python3 tests/pdt-release/post_release.py
       - name: Coordinated recovery notice on release failure
         if: failure() && inputs.operation == 'publish'
