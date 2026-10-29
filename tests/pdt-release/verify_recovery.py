@@ -2,14 +2,14 @@
 import datetime,json,os,sys
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'pdt-backup'))
-from gcs_storage import PrivateStorage,SafeFailure,PREFIX
+from gcs_storage import PrivateStorage,SafeFailure,PREFIX,BUCKET
 def verify():
  s=PrivateStorage();s.verify_boundary()
  record=s.latest_backup_manifest()
  base=record['prefix']
  requested_object=os.environ.get('BACKUP_OBJECT','')
  actual_object=record['objects']['database']['name']
- if not requested_object.startswith('gs://') or not requested_object.endswith('/'+actual_object):
+ if not requested_object.startswith('gs://') or requested_object!='gs://'+BUCKET+'/'+actual_object:
   raise SafeFailure('BACKUP_OBJECT_IDENTITY_MISMATCH')
  if not base.startswith(PREFIX):raise SafeFailure('WRONG_BACKUP_PREFIX')
  raw=s.get(record['objects']['database'])
