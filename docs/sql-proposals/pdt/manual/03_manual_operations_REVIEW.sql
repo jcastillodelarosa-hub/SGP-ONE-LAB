@@ -129,19 +129,19 @@ BEGIN
  THEN RAISE EXCEPTION 'PDT_MANUAL_ENTREGA_SUPERA_PROCESADO'; END IF;
  INSERT INTO sgp_pdt_manual.entregas(id_detalle,id_entrega,cantidad,clave,registrado_por)
  VALUES(p_detalle,p_entrega,p_cantidad,p_clave,actor) RETURNING id_linea INTO nuevo;
- INSERT INTO public.sgp_aluminio_pendientes_historial(id_pendiente,usuario,tipo_evento,datos_nuevos)
- VALUES(p.id_pendiente,actor,'ENTREGA_MANUAL_PDT',jsonb_build_object('linea',nuevo,'detalle',p_detalle,'entrega',p_entrega,'cantidad',p_cantidad));
+ INSERT INTO public.sgp_aluminio_pendientes_historial(id_pendiente,usuario,estado_anterior,estado_nuevo,tipo_evento,datos_nuevos)
+ VALUES(p.id_pendiente,actor,p.estado,p.estado,'ENTREGA_MANUAL_PDT',jsonb_build_object('linea',nuevo,'detalle',p_detalle,'entrega',p_entrega,'cantidad',p_cantidad));
  RETURN jsonb_build_object('ok',true,'id_linea',nuevo);
 END $fn$;
 
 CREATE FUNCTION public.sgp_pdt_manual_entrega_validar_v1(p_token text,p_linea uuid) RETURNS jsonb
 LANGUAGE plpgsql SECURITY DEFINER SET search_path TO '' AS $fn$
-DECLARE line sgp_pdt_manual.entregas%rowtype; parent uuid; actor text;
+DECLARE line sgp_pdt_manual.entregas%rowtype; parent uuid; actor text; parent_state text;
 BEGIN
  actor:=public.sgp_pdt_validar_rol_real(p_token,ARRAY['ADMINISTRADOR','COORDINADOR','RECEPCION','SUPERVISOR DE PICKING']);
  SELECT d.id_pendiente INTO STRICT parent FROM sgp_pdt_manual.entregas l
  JOIN public.sgp_aluminio_pendiente_detalles d USING(id_detalle) WHERE l.id_linea=p_linea;
- PERFORM 1 FROM public.sgp_aluminio_pendientes WHERE id_pendiente=parent AND estado='PENDIENTE' FOR UPDATE;
+ SELECT estado INTO parent_state FROM public.sgp_aluminio_pendientes WHERE id_pendiente=parent AND estado='PENDIENTE' FOR UPDATE;
  IF NOT FOUND THEN RAISE EXCEPTION 'PDT_MANUAL_CERRADO'; END IF;
  SELECT * INTO STRICT line FROM sgp_pdt_manual.entregas WHERE id_linea=p_linea FOR UPDATE;
  IF line.estado='VALIDADA' THEN RETURN jsonb_build_object('ok',true,'duplicado',true); END IF;
@@ -149,20 +149,20 @@ BEGIN
  PERFORM 1 FROM public.sgp_picking_entregas WHERE id_entrega=line.id_entrega AND estado='VALIDADA' FOR UPDATE;
  IF NOT FOUND THEN RAISE EXCEPTION 'PDT_MANUAL_PICKING_SIN_VALIDACION'; END IF;
  UPDATE sgp_pdt_manual.entregas SET estado='VALIDADA',validado_por=actor,validado_en=now() WHERE id_linea=p_linea;
- INSERT INTO public.sgp_aluminio_pendientes_historial(id_pendiente,usuario,tipo_evento,datos_nuevos)
- VALUES(parent,actor,'VALIDACION_ENTREGA_MANUAL_PDT',jsonb_build_object('linea',p_linea));
+ INSERT INTO public.sgp_aluminio_pendientes_historial(id_pendiente,usuario,estado_anterior,estado_nuevo,tipo_evento,datos_nuevos)
+ VALUES(parent,actor,parent_state,parent_state,'VALIDACION_ENTREGA_MANUAL_PDT',jsonb_build_object('linea',p_linea));
  RETURN jsonb_build_object('ok',true);
 END $fn$;
 
 CREATE FUNCTION public.sgp_pdt_manual_asignar_v1(p_token text,p_linea uuid,p_clave uuid) RETURNS jsonb
 LANGUAGE plpgsql SECURITY DEFINER SET search_path TO '' AS $fn$
-DECLARE line sgp_pdt_manual.entregas%rowtype; parent uuid; actor text;
+DECLARE line sgp_pdt_manual.entregas%rowtype; parent uuid; actor text; parent_state text;
 BEGIN
  actor:=public.sgp_pdt_validar_rol_real(p_token,ARRAY['ADMINISTRADOR','COORDINADOR','RECEPCION','SUPERVISOR DE PICKING']);
  IF p_clave IS NULL THEN RAISE EXCEPTION 'PDT_MANUAL_CLAVE_REQUERIDA'; END IF;
  SELECT d.id_pendiente INTO STRICT parent FROM sgp_pdt_manual.entregas l
  JOIN public.sgp_aluminio_pendiente_detalles d USING(id_detalle) WHERE l.id_linea=p_linea;
- PERFORM 1 FROM public.sgp_aluminio_pendientes WHERE id_pendiente=parent AND estado='PENDIENTE' FOR UPDATE;
+ SELECT estado INTO parent_state FROM public.sgp_aluminio_pendientes WHERE id_pendiente=parent AND estado='PENDIENTE' FOR UPDATE;
  IF NOT FOUND THEN RAISE EXCEPTION 'PDT_MANUAL_CERRADO'; END IF;
  SELECT * INTO STRICT line FROM sgp_pdt_manual.entregas WHERE id_linea=p_linea FOR UPDATE;
  IF line.asignado_en IS NOT NULL THEN
@@ -176,27 +176,27 @@ BEGIN
   >(SELECT cantidad_validada FROM public.sgp_aluminio_pendiente_detalles WHERE id_detalle=line.id_detalle)
  THEN RAISE EXCEPTION 'PDT_MANUAL_SOBREASIGNACION'; END IF;
  UPDATE sgp_pdt_manual.entregas SET asignado_por=actor,asignado_en=now(),clave_asignacion=p_clave WHERE id_linea=p_linea;
- INSERT INTO public.sgp_aluminio_pendientes_historial(id_pendiente,usuario,tipo_evento,datos_nuevos)
- VALUES(parent,actor,'ASIGNACION_ENTREGA_MANUAL_PDT',jsonb_build_object('linea',p_linea,'cantidad',line.cantidad));
+ INSERT INTO public.sgp_aluminio_pendientes_historial(id_pendiente,usuario,estado_anterior,estado_nuevo,tipo_evento,datos_nuevos)
+ VALUES(parent,actor,parent_state,parent_state,'ASIGNACION_ENTREGA_MANUAL_PDT',jsonb_build_object('linea',p_linea,'cantidad',line.cantidad));
  RETURN jsonb_build_object('ok',true);
 END $fn$;
 
 CREATE FUNCTION public.sgp_pdt_manual_entrega_anular_v1(p_token text,p_linea uuid,p_motivo text) RETURNS jsonb
 LANGUAGE plpgsql SECURITY DEFINER SET search_path TO '' AS $fn$
-DECLARE line sgp_pdt_manual.entregas%rowtype; parent uuid; actor text;
+DECLARE line sgp_pdt_manual.entregas%rowtype; parent uuid; actor text; parent_state text;
 BEGIN
  actor:=public.sgp_pdt_validar_rol_real(p_token,ARRAY['ADMINISTRADOR','COORDINADOR']);
  IF nullif(btrim(p_motivo),'') IS NULL THEN RAISE EXCEPTION 'PDT_MANUAL_MOTIVO_REQUERIDO'; END IF;
  SELECT d.id_pendiente INTO STRICT parent FROM sgp_pdt_manual.entregas l
  JOIN public.sgp_aluminio_pendiente_detalles d USING(id_detalle) WHERE l.id_linea=p_linea;
- PERFORM 1 FROM public.sgp_aluminio_pendientes WHERE id_pendiente=parent AND estado='PENDIENTE' FOR UPDATE;
+ SELECT estado INTO parent_state FROM public.sgp_aluminio_pendientes WHERE id_pendiente=parent AND estado='PENDIENTE' FOR UPDATE;
  IF NOT FOUND THEN RAISE EXCEPTION 'PDT_MANUAL_CERRADO'; END IF;
  SELECT * INTO STRICT line FROM sgp_pdt_manual.entregas WHERE id_linea=p_linea FOR UPDATE;
  IF line.estado='ANULADA' THEN RETURN jsonb_build_object('ok',true,'duplicado',true); END IF;
  UPDATE sgp_pdt_manual.entregas SET estado='ANULADA',anulado_por=actor,anulado_en=now(),motivo_anulacion=p_motivo
  WHERE id_linea=p_linea;
- INSERT INTO public.sgp_aluminio_pendientes_historial(id_pendiente,usuario,observacion,tipo_evento,datos_nuevos)
- VALUES(parent,actor,p_motivo,'ANULACION_ENTREGA_MANUAL_PDT',jsonb_build_object('linea',p_linea,'cantidad',line.cantidad));
+ INSERT INTO public.sgp_aluminio_pendientes_historial(id_pendiente,usuario,observacion,estado_anterior,estado_nuevo,tipo_evento,datos_nuevos)
+ VALUES(parent,actor,p_motivo,parent_state,parent_state,'ANULACION_ENTREGA_MANUAL_PDT',jsonb_build_object('linea',p_linea,'cantidad',line.cantidad));
  RETURN jsonb_build_object('ok',true);
 END $fn$;
 
@@ -270,7 +270,7 @@ END $fn$;
 
 CREATE FUNCTION public.sgp_pdt_manual_cerrar_v1(p_token text,p_id uuid,p_clave uuid) RETURNS jsonb
 LANGUAGE plpgsql SECURITY DEFINER SET search_path TO '' AS $fn$
-DECLARE p public.sgp_aluminio_pendientes%rowtype; actor text; prior public.sgp_pdt_cierres%rowtype;
+DECLARE p public.sgp_aluminio_pendientes%rowtype; actor text; prior public.sgp_pdt_cierres%rowtype; final_state text;
 BEGIN
  actor:=public.sgp_pdt_validar_rol_real(p_token,ARRAY['ADMINISTRADOR','COORDINADOR','PICKING','SUPERVISOR DE PICKING']);
  IF p_clave IS NULL THEN RAISE EXCEPTION 'PDT_MANUAL_CLAVE_REQUERIDA'; END IF;
@@ -294,9 +294,9 @@ BEGIN
   WHERE d.id_pendiente=p_id AND l.estado='VALIDADA' AND l.asignado_en IS NOT NULL));
  IF NOT sgp_pdt_manual.cierre_acreditado(p_id) THEN RAISE EXCEPTION 'PDT_MANUAL_COBERTURA_PICKING_INCOMPLETA'; END IF;
  UPDATE public.sgp_aluminio_pendientes SET estado='RESUELTO',estado_repo='PICKING',usuario_cierre=actor,fecha_cierre=now()
- WHERE id_pendiente=p_id;
- INSERT INTO public.sgp_aluminio_pendientes_historial(id_pendiente,usuario,tipo_evento,datos_nuevos)
- VALUES(p_id,actor,'CIERRE_MANUAL_PDT',jsonb_build_object('clave',p_clave));
+ WHERE id_pendiente=p_id RETURNING estado INTO STRICT final_state;
+ INSERT INTO public.sgp_aluminio_pendientes_historial(id_pendiente,usuario,estado_anterior,estado_nuevo,tipo_evento,datos_nuevos)
+ VALUES(p_id,actor,p.estado,final_state,'CIERRE_MANUAL_PDT',jsonb_build_object('clave',p_clave));
  RETURN jsonb_build_object('ok',true);
 END $fn$;
 
