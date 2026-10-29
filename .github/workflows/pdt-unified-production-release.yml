@@ -35,6 +35,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 concurrency:
   group: sgp-pdt-unified-production-release
@@ -43,7 +44,7 @@ concurrency:
 jobs:
   release:
     name: PDT unified / ${{ inputs.operation }}
-    if: github.ref == 'refs/heads/feat/pdt-unified-release-workflow'
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     environment: pdt-unified-production
