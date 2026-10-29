@@ -179,6 +179,8 @@ class ReleaseControls(unittest.TestCase):
         self.assertIn("if: github.ref == 'refs/heads/main'", workflow)
         self.assertIn('cancel-in-progress: false', workflow)
         self.assertIn("PUBLISH_ENABLED: ${{ vars.PDT_PUBLISH_ENABLED }}", workflow)
+        self.assertIn("'feat/pdt-multifabricacion-avances-nc': ('Supabase - private PostgreSQL backup and isolated recovery',)", workflow)
+        self.assertIn("j['name'] in allowed_proof_jobs[data['head_branch']]", workflow)
         self.assertNotIn('pg_restore --clean', workflow)
         self.assertNotIn('06_ROLLBACK_REVIEW.sql\n          docker', workflow)
 

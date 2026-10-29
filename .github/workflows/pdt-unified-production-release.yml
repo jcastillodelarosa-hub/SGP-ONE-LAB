@@ -155,10 +155,15 @@ jobs:
           assert data['conclusion']=='success', 'Backup/recovery run not successful'
           assert data['event']=='workflow_dispatch', 'Evidence must be a manual run'
           assert data['repository']['full_name'].lower()==os.environ['GITHUB_REPOSITORY'].lower(), 'Backup evidence belongs to another repository'
-          assert data['head_branch'] in ('feat/issue-144-pdt-isolated-validation','feat/pdt-unified-release-workflow'), 'Unexpected backup source'
+          assert data['head_branch'] in ('feat/issue-144-pdt-isolated-validation','feat/pdt-unified-release-workflow','feat/pdt-multifabricacion-avances-nc'), 'Unexpected backup source'
           jobs_req=urllib.request.Request(data['jobs_url']+'?per_page=100',headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json'})
           jobs=json.load(urllib.request.urlopen(jobs_req))['jobs']
-          proof=next((j for j in jobs if j['name']=='PDT unified - verified private recovery only' and j['conclusion']=='success'),None)
+          allowed_proof_jobs = {
+            'feat/issue-144-pdt-isolated-validation': ('PDT unified - verified private recovery only',),
+            'feat/pdt-unified-release-workflow': ('PDT unified - verified private recovery only',),
+            'feat/pdt-multifabricacion-avances-nc': ('Supabase - private PostgreSQL backup and isolated recovery',),
+          }
+          proof=next((j for j in jobs if j['name'] in allowed_proof_jobs[data['head_branch']] and j['conclusion']=='success'),None)
           assert proof and proof['started_at'] and proof['completed_at'], 'Verified isolated recovery job missing or failed'
           with open(os.environ['GITHUB_ENV'],'a') as out:
             out.write('BACKUP_RUN_START='+proof['started_at']+'\n')
