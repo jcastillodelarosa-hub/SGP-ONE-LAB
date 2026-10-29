@@ -80,6 +80,10 @@ jobs:
           DATABASE_URL: ${{ secrets.SGP_PDT_DATABASE_URL }}
         run: |
           docker run --rm -e DATABASE_URL postgres:17 bash -c 'psql "$DATABASE_URL" -X -v ON_ERROR_STOP=1 -Atc "select now()"'
+      - name: Validate live baseline without writes
+        env:
+          DATABASE_URL: ${{ secrets.SGP_PDT_DATABASE_URL }}
+        run: python3 tests/pdt-release/live_preflight.py
       - name: Stop after preflight
         if: inputs.operation == 'preflight'
         run: echo 'Read-only preflight complete. No deployment performed.'
