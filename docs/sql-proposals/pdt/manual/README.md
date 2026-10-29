@@ -26,19 +26,16 @@ El guard de Fase 2 exige `md5(prosrc)=51bed910a19ee368c2584e2b7ececc17` para `sg
 
 **Fase 4 — programación vigente.** ChatGPT confirmó en Supabase que `sgp_producciones` contiene `anio`, `semana_base` y `semana_actual`; la vista de reservas expone `semana_produccion=COALESCE(semana_actual,semana_base)`, sin año. Por ello se corrigió `01_manual_phase1_REVIEW.sql` para leer año y semana desde la misma producción, y `03_manual_operations_REVIEW.sql` para devolver el período original y el vigente sin alterar cantidades ni historial. `04_programacion_vigente_REVIEW.sql` observa únicamente cambios de período en producciones con PDT manual, registra antes/después en una tabla privada y en el historial PDT, sin actualizar el reporte. Actualizaciones repetidas del mismo período no crean eventos. La reversión 04 retira el observador y **conserva** el historial; no vuelve a la fuente de año equivocada.
 
-**Bloqueo exacto para reprogramaciones entre años:** no está versionado ni disponible en esta sesión el cuerpo productivo del escritor que actualiza `sgp_producciones.anio` junto a `semana_actual`. La prueba aislada 2026→2027 demuestra el contrato solo cuando ambos campos se actualizan correctamente; no certifica que el escritor productivo lo haga. Antes de instalar 01/03/04 o declarar Fase 4 lista para producción, verificar mediante lectura ese escritor y sus triggers. Consulta de metadatos/definiciones, sin datos operativos:
+**Export entre años.** El libro diario contiene `Año prog.` y `Sem prog.`; `production-importer.js` los valida y transmite como `anio` y `semana_actual` a previsualización y aplicación. ChatGPT verificó que `sgp_aplicar_export_diario(text,text,text,jsonb)` cambia `semana_actual` pero no `anio`; tampoco hay un trigger de usuario que lo complete. El año inicial de `sgp_cargar_paquete_semanal` no resuelve una reprogramación posterior. `05_export_year_REVIEW.sql` propone delegar al escritor instalado y, en la misma transacción, sincronizar el año **explícito** de cada fila solo si la producción y semana resultantes coinciden. Rechaza año ausente, período inválido, claves duplicadas y línea incompatible; no calcula año desde el número de semana. `04` difiere la auditoría hasta el estado final de la transacción y conserva año/semana originales del reporte.
+
+**Bloqueo de instalación:** la definición íntegra y huella `md5(prosrc)` del escritor productivo no están en esta rama. `05` contiene deliberadamente `REPLACE_WITH_VERIFIED_EXPORT_PROSRC_MD5` y se detendrá hasta comparar el cuerpo real, incluidos sus retornos de error, autorización y permisos, en un respaldo restaurado. Si el origen Export deja de aportar un año explícito, corregir el origen y bloquear ese lote; jamás inferir 2026/2027 a partir de semana 1/52. Consulta de lectura mínima pendiente (sin filas operativas):
 
 ```sql
 SELECT p.oid::regprocedure AS firma, md5(p.prosrc) AS huella,
        pg_get_functiondef(p.oid) AS definicion
 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
-WHERE n.nspname='public' AND p.prosrc ILIKE '%sgp_producciones%'
-  AND (p.prosrc ILIKE '%semana_actual%' OR p.prosrc ILIKE '%anio%')
+WHERE n.nspname='public' AND p.oid='public.sgp_aplicar_export_diario(text,text,text,jsonb)'::regprocedure
 ORDER BY firma::text;
-SELECT t.tgname, t.tgenabled, pg_get_triggerdef(t.oid) AS definicion
-FROM pg_trigger t
-WHERE t.tgrelid='public.sgp_producciones'::regclass AND NOT t.tgisinternal
-ORDER BY t.tgname;
 ```
 
 El `md5(prosrc)` del validador instalado `sgp_aluminio_pendiente_validar_detalles_v1` fue confirmado como `51bed910a19ee368c2584e2b7ececc17`, igual al guard de Fase 2. **PR #139 sigue Draft** y propone sustituir ese despachador y el acreditador de cierre; si se instala antes, el guard 02 debe detener la instalación. Conciliar los cuerpos y la secuencia en un esquema restaurado; no aceptar una huella nueva sin comparar la función.
@@ -57,4 +54,4 @@ Para revertir solo la Fase 2, `02_ROLLBACK_REVIEW.sql` restaura la función púb
 
 Fase 3: `tests/pdt-manual/operations-isolated.sql` ejecuta alta, validación, etapas, avances parciales, saldos, permisos, entrega, diferencia auditada, validación, asignación, idempotencia, bloqueo de cambios en fuentes y cierre en PostgreSQL 17.11 aislado, con `ROLLBACK`. La instalación y reversión de 03 se probaron en esa base. `tests/pdt-manual/browser-phase3.py` recorre la ventana real con RPC sintéticas en 1366×900 y 390×844; capturas `phase3-1366.png` y `phase3-390.png`. Ninguna prueba registra datos productivos ni demuestra que Supabase ya tenga estas RPC.
 
-Fase 4: `tests/pdt-manual/programming-isolated.sql` prueba 2026 semana 41→42→43 y 2026→2027 semana 1 con actualización explícita de `anio`, dos reservas compartidas, original inmutable, una auditoría por transición, NC/cantidad intactas y ausencia de eventos sobre LEGACY/V2. La instalación, reversión y reinstalación del observador 04 pasaron en la base PostgreSQL 17.11 aislada. No se ha demostrado todavía la semántica del escritor productivo entre años.
+Fase 4/5: `tests/pdt-manual/programming-isolated.sql` prueba 2026 semana 41→42→43 y 2026→2027 semana 1, dos reservas compartidas, original inmutable, una auditoría neta por PDT y transacción, NC/cantidad intactas y ausencia de eventos sobre LEGACY/V2. `export-year-isolated.sql` instala temporalmente 05 contra un escritor sintético que reproduce el cambio de semana sin año; prueba cambio de año, repetición, semana ordinaria y rechazo de año ausente, siempre con rollback. Son pruebas aisladas, no certifican el cuerpo productivo. `05_ROLLBACK_REVIEW.sql` restaura el cuerpo anterior sin revertir importaciones ni borrar historial. Instalar 05 solo después de 04 y de certificar el escritor real.

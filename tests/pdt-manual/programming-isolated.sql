@@ -4,6 +4,8 @@ DO $qa$ DECLARE response jsonb; pending_one uuid; pending_shared uuid; initial_q
 BEGIN
  UPDATE public.sgp_producciones SET anio=2026,semana_base=41,semana_actual=42
  WHERE key_produccion='QA|PANELES_2';
+ EXECUTE 'SET CONSTRAINTS trg_pdt_manual_auditar_programacion IMMEDIATE';
+ EXECUTE 'SET CONSTRAINTS trg_pdt_manual_auditar_programacion DEFERRED';
  IF (SELECT anio::text||'-'||semana::text FROM sgp_pdt_manual.programacion('QA|PANELES_2','R'))<>'2026-42'
  THEN RAISE EXCEPTION 'CURRENT_2026_PERIOD_WRONG'; END IF;
  response:=public.sgp_pdt_manual_registrar_v1('COORDINADOR','PICKING',
@@ -22,14 +24,11 @@ BEGIN
  SELECT nc INTO initial_nc FROM public.sgp_aluminio_pendientes WHERE id_pendiente=pending_one;
  UPDATE public.sgp_producciones SET semana_actual=43 WHERE key_produccion='QA|PANELES_2';
  UPDATE public.sgp_producciones SET semana_actual=43 WHERE key_produccion='QA|PANELES_2';
+ UPDATE public.sgp_producciones SET anio=2027,semana_actual=1 WHERE key_produccion='QA|PANELES_2';
+ UPDATE public.sgp_producciones SET anio=2027,semana_actual=1 WHERE key_produccion='QA|PANELES_2';
+ EXECUTE 'SET CONSTRAINTS trg_pdt_manual_auditar_programacion IMMEDIATE';
  IF (SELECT count(*) FROM sgp_pdt_manual.programacion_cambios
   WHERE id_pendiente IN (pending_one,pending_shared) AND anio_anterior=2026 AND semana_anterior=42
-   AND anio_nuevo=2026 AND semana_nueva=43)<>2
- THEN RAISE EXCEPTION 'SAME_YEAR_CHANGE_NOT_AUDITED_ONCE_PER_RESERVE'; END IF;
- UPDATE public.sgp_producciones SET anio=2027,semana_actual=1 WHERE key_produccion='QA|PANELES_2';
- UPDATE public.sgp_producciones SET anio=2027,semana_actual=1 WHERE key_produccion='QA|PANELES_2';
- IF (SELECT count(*) FROM sgp_pdt_manual.programacion_cambios
-  WHERE id_pendiente IN (pending_one,pending_shared) AND anio_anterior=2026 AND semana_anterior=43
    AND anio_nuevo=2027 AND semana_nueva=1)<>2
  THEN RAISE EXCEPTION 'CROSS_YEAR_CHANGE_NOT_AUDITED_ONCE_PER_RESERVE'; END IF;
  IF NOT EXISTS(SELECT 1 FROM jsonb_array_elements(public.sgp_pdt_manual_listar_v1('COORDINADOR')->'pendientes') x
@@ -43,11 +42,11 @@ BEGIN
  OR (SELECT count(*) FROM sgp_pdt_manual.reportes WHERE anio=2026 AND semana=42
   AND reserva IN ('R','SHARED'))<>2
  OR (SELECT count(*) FROM public.sgp_aluminio_pendientes_historial WHERE id_pendiente IN (pending_one,pending_shared)
-  AND tipo_evento='REPROGRAMACION_PDT_MANUAL')<>4
+  AND tipo_evento='REPROGRAMACION_PDT_MANUAL')<>2
  OR EXISTS(SELECT 1 FROM public.sgp_aluminio_pendientes_historial h
   LEFT JOIN sgp_pdt_manual.detalles md USING(id_pendiente)
   WHERE h.tipo_evento='REPROGRAMACION_PDT_MANUAL' AND md.id_pendiente IS NULL)
  THEN RAISE EXCEPTION 'ORIGINAL_QUANTITY_OR_AUDIT_CHANGED'; END IF;
- RAISE NOTICE 'QA PHASE4 PASS: current period, 2026-2027, shared reserve, immutable original, no duplicate events';
+ RAISE NOTICE 'QA PHASE4 PASS: final current period, 2026-2027, shared reserve, immutable original, no duplicate events';
 END $qa$;
 ROLLBACK;
