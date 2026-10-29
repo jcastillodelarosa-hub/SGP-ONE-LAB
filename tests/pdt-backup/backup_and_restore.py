@@ -57,15 +57,19 @@ def canonical_default_acl_query(entries):
  rows=','.join('('+','.join('NULL' if e.get(k) is None else literal(e[k]) for k in ('owner','schema','tipo','acl'))+')' for e in entries)
  return "WITH defaults(owner,schema,tipo,acl) AS (VALUES "+rows+") SELECT jsonb_agg(jsonb_build_object('owner',owner,'schema',schema,'tipo',tipo,'acl_efectiva',(SELECT coalesce(jsonb_agg(jsonb_build_object('grantor',pg_get_userbyid(a.grantor),'grantee',CASE WHEN a.grantee=0 THEN 'PUBLIC' ELSE pg_get_userbyid(a.grantee) END,'privilegio',a.privilege_type,'grantable',a.is_grantable) ORDER BY a.grantor,a.grantee,a.privilege_type,a.is_grantable),'[]'::jsonb) FROM aclexplode(acl::aclitem[]) a))) FROM defaults;"
 
-def main():
+def main(validation=None):
  if os.environ.get('GITHUB_ACTIONS')!='true':raise SafeFailure('PROTECTED_RUNNER_REQUIRED')
  resume=os.environ.get('SGP_RESTORE_EXISTING')=='true'
  install=os.environ.get('SGP_INSTALL_PRODUCTION')=='PDT91_AUTHORIZED_NOW'
+ if validation is not None:
+  if not resume or os.environ.get('SGP_INSTALL_PRODUCTION') or os.environ.get('SUPABASE_DB_PASSWORD'):
+   raise SafeFailure('ISOLATED_VALIDATION_ENVIRONMENT_REJECTED')
+  install=False
  if install and resume:raise SafeFailure('FRESH_RECOVERY_REQUIRED_BEFORE_INSTALL')
  if install:
   from production_install import FREEZE_SQL,batch_body,acceptance_sql,safe_ddl_error,manifest as sql_manifest
  if not resume and not os.environ.get('SUPABASE_DB_PASSWORD'):raise SafeFailure('DATABASE_SECRET_UNAVAILABLE')
- storage=PrivateStorage();storage.verify_boundary()
+ storage=validation.storage if validation is not None else PrivateStorage();storage.verify_boundary()
  created=datetime.datetime.now(datetime.timezone.utc)
  base=PREFIX+created.strftime('%Y%m%dT%H%M%SZ')+'-'+uuid.uuid4().hex+'/'
  manifest={'created_utc':created.isoformat(),'project_ref':'ocvxbwzqxbrfndkvjmfx',
@@ -109,7 +113,7 @@ def main():
   try:
    if resume:
     phase='LOAD_EXISTING_PRIVATE_BACKUP'
-    manifest=storage.latest_backup_manifest();base=manifest['prefix']
+    manifest=validation.manifest if validation is not None else storage.latest_backup_manifest();base=manifest['prefix']
     data=json.loads(storage.get(manifest['objects']['catalog_and_counts']))
     source_catalog=data['catalog'];source_counts=data['counts']
     tables=data.get('tables') or [{'schema':n.split('.',1)[0],'name':n.split('.',1)[1]} for n in source_counts]
@@ -156,7 +160,7 @@ def main():
    phase='ISOLATED_ENGINE'
    sandbox='sgp-production-restore-'+uuid.uuid4().hex[:14]
    start="initdb -D /tmp/sgp-restore/db -U "+admin+" --auth=trust >/tmp/sgp-restore/init.log 2>&1 && exec postgres -D /tmp/sgp-restore/db -k /tmp/sgp-restore -c listen_addresses=''"
-   r=subprocess.run(['docker','run','-d','--name',sandbox,'--network','none','--cpus','2','--memory','3g','--cap-drop','ALL','--security-opt','no-new-privileges',
+   r=subprocess.run(['docker','run','-d','--name',sandbox,'--log-driver=none','--network','none','--cpus','2','--memory','3g','--cap-drop','ALL','--security-opt','no-new-privileges',
     '--tmpfs','/tmp/sgp-restore:rw,size=2147483648,mode=1777','--user','postgres','--entrypoint','bash',IMAGE,'-c',start],capture_output=True,timeout=90)
    if r.returncode:raise SafeFailure('ISOLATED_ENGINE_START_FAILED')
    for _ in range(80):
@@ -195,6 +199,10 @@ def main():
     catalog['grants_por_defecto']=isolated('postgres',canonical_default_acl_query(catalog['grants_por_defecto']))
    differences=compare_catalogs(source_catalog,restored_catalog)
    if differences:raise SafeFailure('RESTORED_CATALOG_DIFFER_'+','.join(differences))
+   if validation is not None:
+    # The sole validation hook runs only after verified recovery, before all GCS
+    # writes and the legacy installation route. pg addresses the networkless clone.
+    return validation.run(pg,manifest)
    manifest['status']='POSTGRES_BACKUP_RESTORED_VERIFIED'
    manifest['verification']={'tables_compared':len(tables),'table_counts_equal':True,'catalog_sections_equal':True,
     'archive_sha256_checked_on_download':True,'restore_network':'none','source_writes':False,
@@ -230,9 +238,10 @@ def main():
    return 0
   except SafeFailure as e:
    manifest['status']='NOT_RECOVERY_VERIFIED';manifest['failed_phase']=phase;manifest['safe_error']=str(e)
-   try:storage.put(base+'failure-record-'+uuid.uuid4().hex+'.json',json.dumps(manifest,ensure_ascii=False).encode())
-   except Exception:pass
-   print('::error title=Supabase recovery::'+phase+': '+str(e)+'; recovery not verified; no production writes')
+   if validation is None:
+    try:storage.put(base+'failure-record-'+uuid.uuid4().hex+'.json',json.dumps(manifest,ensure_ascii=False).encode())
+    except Exception:pass
+   print('::error title=Supabase recovery::'+phase+': '+('ISOLATED_VALIDATION_FAILED' if validation is not None else str(e))+'; recovery not verified; no production writes')
    return 1
   except Exception:
    print('::error title=Supabase recovery::'+phase+': BACKUP_OR_RECOVERY_NOT_VERIFIED; no production writes')

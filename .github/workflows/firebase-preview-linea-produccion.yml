@@ -8,6 +8,7 @@ on:
         type: choice
         default: connection
         options:
+          - validate-pdt-unified
           - connection
           - pdt-identity-cohort
           - pdt-identity-permissions
@@ -231,3 +232,53 @@ jobs:
         env:
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
         run: python3 tests/pdt-backup/read_pdt_sources.py --identity-permissions
+
+  validate-pdt-unified:
+    name: PDT unified - verified private recovery only
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/feat/issue-144-pdt-isolated-validation' && inputs.operation == 'validate-pdt-unified'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    environment: supabase-backup
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout validation infrastructure
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Checkout approved candidate at immutable SHA
+        uses: actions/checkout@v4
+        with:
+          ref: b7e7908f822789e3315b2f222f7eda680a13590c
+          path: candidate
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check isolation and report security
+        run: python3 -m unittest discover -s tests/pdt-unified -p 'test_*.py'
+      - name: Verify candidate and release without cloud credentials
+        working-directory: candidate
+        run: |
+          test "$(git rev-parse HEAD)" = b7e7908f822789e3315b2f222f7eda680a13590c
+          npm install --no-audit --no-fund
+          npm run build:vendor
+          npm run verify:release
+          node --test tests/pdt-manual.test.mjs tests/pdt-manual-validation.test.mjs tests/aluminum-pending-v2.test.mjs tests/pdt-grouped/grouped-sources.test.mjs
+      - name: Pull isolated PostgreSQL 17.11 engine
+        run: docker pull supabase/postgres:17.11.0.006
+      - name: Authenticate existing GCS identity
+        uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SGP_ONE_LAB }}
+          create_credentials_file: true
+          cleanup_credentials: true
+      - uses: google-github-actions/setup-gcloud@v3
+      - name: Restore verified backup and validate inside networkless clone
+        env:
+          SGP_RESTORE_EXISTING: 'true'
+          SGP_CANDIDATE_PATH: candidate
+        run: python3 tests/pdt-backup/validate_pdt_unified.py
+      - name: Publish sanitized validation summary only
+        if: always()
+        run: python3 tests/pdt-backup/validate_pdt_unified.py --summary
