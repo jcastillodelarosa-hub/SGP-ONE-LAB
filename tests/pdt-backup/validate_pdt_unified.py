@@ -32,6 +32,61 @@ TESTS = ('real-role-authentication', 'manual-three-origins-nc-idempotency',
  'export-week-year-guard-audit', 'utc-cutover-historical-preservation',
  'legacy-v2-dispatch', 'rollback-before-activation')
 
+CONTRACT_IDS = frozenset((
+ 'setup.session-authorization',
+ 'setup.transaction',
+ 'setup.rpc-helper',
+ 'setup.denied-helper',
+ 'setup.temp-tables',
+ 'real-role-authentication',
+ 'manual-three-origins-nc-idempotency',
+ 'validation-partial-advance-picking-close',
+ 'reception-mecanizado-unified-list',
+ 'export-week-year-guard-audit',
+ 'utc-cutover-historical-preservation',
+ 'setup.outcome-helper',
+ 'legacy-v2-dispatch',
+ 'setup.transaction-rollback',
+))
+CONTRACT_STEPS = {'cycle.assign': 'validation-partial-advance-picking-close',
+ 'cycle.close': 'validation-partial-advance-picking-close',
+ 'auth.hash-contract': 'real-role-authentication',
+ 'auth.hash-column': 'real-role-authentication',
+ 'auth.account-create': 'real-role-authentication',
+ 'auth.login': 'real-role-authentication',
+ 'auth.session': 'real-role-authentication',
+ 'auth.catalog-allow': 'real-role-authentication',
+ 'auth.catalog-deny': 'real-role-authentication',
+ 'auth.invalid-session': 'real-role-authentication',
+ 'manual.catalog': 'manual-three-origins-nc-idempotency',
+ 'manual.sources': 'manual-three-origins-nc-idempotency',
+ 'manual.match-picking-source': 'manual-three-origins-nc-idempotency',
+ 'manual.nc-source': 'manual-three-origins-nc-idempotency',
+ 'manual.register': 'manual-three-origins-nc-idempotency',
+ 'manual.retry': 'manual-three-origins-nc-idempotency',
+ 'manual.denied': 'manual-three-origins-nc-idempotency',
+ 'cycle.validation-denied': 'validation-partial-advance-picking-close',
+ 'cycle.validate': 'validation-partial-advance-picking-close',
+ 'cycle.detail': 'validation-partial-advance-picking-close',
+ 'cycle.stage': 'validation-partial-advance-picking-close',
+ 'cycle.advance': 'validation-partial-advance-picking-close',
+ 'cycle.advance-denied': 'validation-partial-advance-picking-close',
+ 'cycle.advance-final': 'validation-partial-advance-picking-close',
+ 'cycle.delivery': 'validation-partial-advance-picking-close',
+ 'cycle.source-state': 'validation-partial-advance-picking-close',
+ 'cycle.delivery-validate': 'validation-partial-advance-picking-close',
+ 'lists.manual': 'reception-mecanizado-unified-list',
+ 'lists.modern': 'reception-mecanizado-unified-list',
+ 'period.export': 'export-week-year-guard-audit',
+ 'period.audit': 'export-week-year-guard-audit',
+ 'period.export-repeat': 'export-week-year-guard-audit',
+ 'period.export-year-reject': 'export-week-year-guard-audit',
+ 'cut.config': 'utc-cutover-historical-preservation',
+ 'cut.read': 'utc-cutover-historical-preservation',
+ 'dispatch.cohort': 'legacy-v2-dispatch',
+ 'dispatch.validator': 'legacy-v2-dispatch',
+ 'dispatch.stage': 'legacy-v2-dispatch'}
+
 # Only fixed local codes may cross the private recovery boundary. Exception text
 # can contain restored role names, identifiers or data, even in SafeFailure.
 RECOVERY_CODES = frozenset((
@@ -74,6 +129,22 @@ def failure_details(phase, error):
   details['category'] = 'VALIDATOR'
  else:
   details['category'] = 'RECOVERY_UNCLASSIFIED'
+ return details
+
+
+def contract_diagnostics(stdout, stderr):
+ # Identifiers must be constants owned by this validator, never server text.
+ started = [line.removeprefix('CONTRACT:') for line in stdout.decode(errors='replace').splitlines()
+            if line.startswith('CONTRACT:') and line.removeprefix('CONTRACT:') in CONTRACT_IDS]
+ details = {}
+ if started:
+  details['contract'] = started[-1]
+ checkpoints = re.findall(rb'NOTICE:\s+(?:00000:\s+)?PDT_QA_STEP:([a-z0-9.-]+)\s*$', stderr, re.M)
+ if checkpoints and details.get('contract') is not None and CONTRACT_STEPS.get(checkpoints[-1].decode()) == details['contract']:
+  details['check'] = checkpoints[-1].decode()
+ state = re.search(rb'(?:^|\n)(?:psql:[^\r\n]+:\s*)?ERROR:\s+([A-Z0-9]{5}):', stderr)
+ if state:
+  details['sqlstate'] = state.group(1).decode()
  return details
 
 
@@ -144,7 +215,8 @@ class Validation:
   # Never inherit PGHOST or invoke a network client; pg is recovery's docker exec.
   if pg[:3] != ['docker', 'exec', '-i'] or '-h' not in pg or pg[pg.index('-h')+1] != '/tmp/sgp-restore':
    raise SafeFailure('NON_ISOLATED_SQL_COMMAND_REJECTED')
-  result = subprocess.run(pg, input=text.encode(), capture_output=True, timeout=300)
+  command = pg + ['-v', 'VERBOSITY=verbose'] if name == 'contracts' else pg
+  result = subprocess.run(command, input=text.encode(), capture_output=True, timeout=300)
   if name == 'contracts':
    passed = set(result.stdout.decode(errors='replace').splitlines())
    for test in self.report['tests']:
@@ -152,8 +224,14 @@ class Validation:
      test['status'] = 'PASS'
   if result.returncode:
    # Whitelist a code, never a detail, identifier, SQL context or row.
-   match = re.search(rb'\b(?:PDT|QA)_[A-Z][A-Z0-9_]*\b', result.stderr)
-   self.report['failure'] = {'phase': name, 'code': match.group().decode() if match else 'ISOLATED_SQL_REJECTED'}
+   match = re.search(rb'(?:^|\n)(?:psql:[^\r\n]+:\s*)?ERROR:[ \t]+(?:[A-Z0-9]{5}:[ \t]+)?((?:PDT|QA)_[A-Z][A-Z0-9_]*)(?=[: \r\n]|$)', result.stderr)
+   self.report['failure'] = {'phase': name, 'code': match.group(1).decode() if match else 'ISOLATED_SQL_REJECTED'}
+   if name == 'contracts':
+    details = contract_diagnostics(result.stdout, result.stderr)
+    self.report['failure'].update(details)
+    for test in self.report['tests']:
+     if test['name'] == details.get('contract'):
+      test['status'] = 'FAIL'
    raise SafeFailure('ISOLATED_SQL_REJECTED')
   return result.stdout
 
@@ -174,8 +252,8 @@ class Validation:
   if self.sql(pg, history_query, 'post-install-history').strip() != baseline:
    raise SafeFailure('HISTORICAL_ROWS_CHANGED_BY_INSTALL')
   tests = (ROOT / 'tests/pdt-unified/contracts.sql').read_text()
-  output = self.sql(pg, 'SET SESSION AUTHORIZATION postgres;\n' + tests, 'contracts')
-  passed = output.decode().strip().splitlines()
+  output = self.sql(pg, '\\echo CONTRACT:setup.session-authorization\nSET SESSION AUTHORIZATION postgres;\n' + tests, 'contracts')
+  passed = [line for line in output.decode().splitlines() if line.startswith('PASS:')]
   if passed != ['PASS:' + name for name in TESTS[:-1]]:
    raise SafeFailure('INCOMPLETE_CONTRACT_EVIDENCE')
   if self.sql(pg, history_query, 'post-test-history').strip() != baseline:

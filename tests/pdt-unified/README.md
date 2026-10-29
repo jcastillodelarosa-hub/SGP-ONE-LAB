@@ -111,3 +111,55 @@ Tras aprobar `supabase-backup` si se solicita, revisar el informe y los campos
 `restore`, `failure.phase`, `failure.code`, `failure.category` y `phases` en el log.
 Hasta completar esa nueva ejecución, la validación restaurada y publicación
 continúan NO-GO. No se fusiona, instala en producción ni publica Firebase.
+
+## Run42 — localizar el contrato rechazado sin cambiar su lógica
+
+Evidencia: [40864879141](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/actions/runs/40864879141),
+job123417003041, infraestructura `7fdd6ec`, candidato `b7e7908`.
+El log confirma `HASH_COUNTS_CATALOG_VERIFIED`, siete fases SQL PASS y
+`failure.phase=contracts`, `failure.code=ISOLATED_SQL_REJECTED`. No hay ningún
+marcador PASS funcional. Esto acota el fallo a preparación/autenticación inicial
+del archivo de contratos; no demuestra cuál de esas comprobaciones falló.
+No se atribuye el error a una RPC específica, permisos ni datos del respaldo.
+
+Correspondencia revisada de contratos, sin cambiar sus llamadas ni argumentos:
+
+| Contrato | Funciones/ruta | Fase |
+| --- | --- | --- |
+| Autenticación | sgp_login, sgp_sesion_actual; catálogo autorizado | Existentes + manual01 |
+| Alta, NC e idempotencia | sgp_pdt_manual_registrar_v1, fuentes/catalogo | manual01 |
+| Validación | sgp_aluminio_pendiente_validar_detalles_v1 | manual02 |
+| Avance, entrega y cierre | registrar_avance_v1, estado_v2, entrega_registrar/validar, asignar, cerrar | manual03 |
+| Recepción/Mecanizado/Picking | manual_listar_v1, pendientes_listar_v2 | manual03 + ruta V2 existente |
+| Semana y año | auditar_programacion, aplicar_export_diario | manual04/05 |
+| Corte UTC | sgp_pdt_corte_operativo_v1 | integration06 |
+| Regresión no manual | despachos y originales capturados | grouped-source01 + manual02/03 |
+
+Corrección delimitada al diagnóstico: `CONTRACT:` identifica cada bloque y la
+preparación de sesión, helpers, tablas temporales y rollback. Notices con etiquetas
+fijas identifican la última comprobación iniciada (`PDT_QA_STEP`). El cliente usa
+salida verbose capturada en memoria para extraer solamente SQLSTATE, sin publicar
+el mensaje nativo, contexto SQL, filas, usuarios, contraseñas o argumentos RPC.
+Los identificadores de contrato/comprobación están en listas cerradas; un marcador
+desconocido o de otro contrato no se publica como comprobación fallida.
+El código de error se obtiene de la línea ERROR, nunca de los nuevos notices.
+
+El informe conserva `failure.phase=contracts` y añade `contract`, `check` y
+`sqlstate` cuando existen. `check` indica el último checkpoint alcanzado dentro
+del bloque, no una atribución automática de defecto a la RPC. El contrato activo
+queda FAIL; los siguientes permanecen NOT_EXECUTED. Los marcadores de diagnóstico
+no cuentan como PASS ni sustituyen la comprobación de evidencia completa.
+
+Verificación local: 15/15 pruebas del validador, 24/24 de respaldo, verify:release365,
+compilación Python y diff correctos. Cuatro regresiones nuevas comprueban errores
+SQL nativos, errores nombrados precedidos de notices, preparación/etiquetas
+incorrectas y cobertura de las listas cerradas. Comparación local del archivo SQL
+confirma que al retirar únicamente marcadores/notices y el ajuste de visibilidad
+de notices se recupera exactamente el contenido previo: mismas comprobaciones,
+RPC, permisos, transacciones y ROLLBACK. No se modifica SQL01–06 del candidato.
+
+Repetir mediante **Run workflow**, misma rama, operación `validate-pdt-unified`,
+creando un run nuevo en el nuevo HEAD. No usar Re-run del run42 porque ejecutaría
+`7fdd6ec`. Revisar los nuevos campos del informe sanitizado antes de corregir
+cualquier contrato funcional. La causa subyacente sigue pendiente de esa evidencia;
+publicación NO-GO. Sin cambios productivos, merge ni despliegue.

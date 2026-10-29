@@ -154,6 +154,56 @@ class ValidationSecurity(unittest.TestCase):
    self.assertEqual(output.getvalue().rstrip(),summary.read_text().rstrip())
    self.assertIn('RESTORED_TABLE_COUNTS_DIFFER',output.getvalue())
 
+ def test_native_sql_error_identifies_contract_checkpoint_and_sqlstate_only(self):
+  val=object.__new__(v.Validation)
+  val.report={'tests':[{'name':name,'status':'NOT_EXECUTED'} for name in v.TESTS]}
+  pg=['docker','exec','-i','clone','psql','-h','/tmp/sgp-restore']
+  stdout=b'CONTRACT:setup.temp-tables\nCONTRACT:real-role-authentication\n'
+  stderr=(b'NOTICE:  00000: PDT_QA_STEP:auth.account-create\n'
+          b'psql:<stdin>:55: ERROR:  42703: column "private_data" does not exist\n'
+          b'CONTEXT: private token QA_DO_NOT_PUBLISH\n')
+  with patch.object(subprocess,'run',return_value=subprocess.CompletedProcess(pg,1,stdout,stderr)) as run:
+   with self.assertRaises(gcs.SafeFailure):val.sql(pg,'private SQL','contracts')
+  self.assertIn('VERBOSITY=verbose',run.call_args.args[0])
+  self.assertEqual(val.report['failure'],{'phase':'contracts','code':'ISOLATED_SQL_REJECTED',
+   'contract':'real-role-authentication','check':'auth.account-create','sqlstate':'42703'})
+  self.assertEqual(val.report['tests'][0]['status'],'FAIL')
+  self.assertTrue(all(t['status']=='NOT_EXECUTED' for t in val.report['tests'][1:]))
+  self.assertNotIn('private',json.dumps(val.report))
+  self.assertNotIn('QA_DO_NOT_PUBLISH',json.dumps(val.report))
+
+ def test_checkpoint_notices_do_not_replace_actual_named_error_code(self):
+  val=object.__new__(v.Validation);val.report={'tests':[]}
+  pg=['docker','exec','-i','clone','psql','-h','/tmp/sgp-restore']
+  stderr=(b'NOTICE:  00000: PDT_QA_STEP:auth.login\n'
+          b'ERROR:  P0001: QA_REAL_LOGIN_FAILED\nCONTEXT: private values')
+  with patch.object(subprocess,'run',return_value=subprocess.CompletedProcess(pg,1,
+   b'CONTRACT:real-role-authentication\n',stderr)):
+   with self.assertRaises(gcs.SafeFailure):val.sql(pg,'private SQL','contracts')
+  self.assertEqual(val.report['failure']['code'],'QA_REAL_LOGIN_FAILED')
+  self.assertEqual(val.report['failure']['check'],'auth.login')
+
+ def test_setup_and_unknown_diagnostic_labels_are_not_misreported_as_auth(self):
+  detail=v.contract_diagnostics(b'CONTRACT:setup.rpc-helper\n',
+   b'ERROR:  42501: private database privilege message')
+  self.assertEqual(detail,{'contract':'setup.rpc-helper','sqlstate':'42501'})
+  self.assertEqual(v.contract_diagnostics(b'CONTRACT:private-label\n',
+   b'NOTICE: PDT_QA_STEP:private-value\n'),{})
+  # A checkpoint from a completed contract cannot be blamed for a later setup failure.
+  detail=v.contract_diagnostics(b'CONTRACT:real-role-authentication\nCONTRACT:setup.outcome-helper\n',
+   b'NOTICE: PDT_QA_STEP:auth.login\nERROR:  42601: private SQL')
+  self.assertEqual(detail,{'contract':'setup.outcome-helper','sqlstate':'42601'})
+
+ def test_all_contract_markers_and_checkpoints_are_allowlisted(self):
+  import re
+  sql=(ROOT/'tests/pdt-unified/contracts.sql').read_text();active=None
+  for line in sql.splitlines():
+   if line.startswith('\\echo CONTRACT:'):
+    active=line.split(':',1)[1];self.assertIn(active,v.CONTRACT_IDS)
+   match=re.search("RAISE NOTICE 'PDT_QA_STEP:([^']+)';",line)
+   if match:self.assertEqual(v.CONTRACT_STEPS.get(match[1]),active)
+  for name in v.TESTS[:-1]:self.assertIn('\\echo CONTRACT:'+name,sql)
+
  def test_restore_integrity_vs_validator_failure_retains_code_and_cleans_clone(self):
   # Exercise the real orchestration through restore verification into the hook.
   # Do not use cloud data: inject only subprocess outputs and archived metadata.

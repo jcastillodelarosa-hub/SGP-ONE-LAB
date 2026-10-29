@@ -1,9 +1,12 @@
 -- Runs only in the verified, networkless restored database. No helper is replaced.
 -- Login/session checks and RPC authorization are real; all QA writes roll back.
+\echo CONTRACT:setup.transaction
 BEGIN;
 SET LOCAL timezone='UTC';
+SET LOCAL client_min_messages='notice';
 SET LOCAL statement_timeout='120s';
 SET LOCAL lock_timeout='5s';
+\echo CONTRACT:setup.rpc-helper
 CREATE FUNCTION pg_temp.rpc(q text) RETURNS jsonb LANGUAGE plpgsql AS $$
 DECLARE result jsonb;
 BEGIN
@@ -13,6 +16,7 @@ BEGIN
  EXECUTE 'RESET ROLE';
  RETURN result;
 END $$;
+\echo CONTRACT:setup.denied-helper
 CREATE FUNCTION pg_temp.denied(q text) RETURNS void LANGUAGE plpgsql AS $$
 BEGIN
  BEGIN
@@ -23,47 +27,61 @@ BEGIN
  END;
  RAISE EXCEPTION 'QA_ROLE_DENIAL_MISSING';
 END $$;
+\echo CONTRACT:setup.temp-tables
 CREATE TEMP TABLE qa_tokens(role text PRIMARY KEY, token text NOT NULL);
 CREATE TEMP TABLE qa_context(context jsonb, piece jsonb, event uuid, pending uuid);
+\echo CONTRACT:real-role-authentication
 DO $auth$ DECLARE col text; r text; username text; password text; response jsonb; session jsonb;
 BEGIN
+ RAISE NOTICE 'PDT_QA_STEP:auth.hash-contract';
  IF position('crypt' IN lower(pg_get_functiondef('public.sgp_login(text,text)'::regprocedure)))=0
  THEN RAISE EXCEPTION 'QA_LOGIN_CONTRACT_UNKNOWN'; END IF;
+ RAISE NOTICE 'PDT_QA_STEP:auth.hash-column';
  SELECT attname INTO STRICT col FROM pg_attribute WHERE attrelid='public.sgp_usuarios'::regclass
  AND attname IN ('password_hash','clave_hash','contrasena_hash','hash_password') AND NOT attisdropped;
  FOREACH r IN ARRAY ARRAY['ADMINISTRADOR','COORDINADOR','LIDER LINEA','RECEPCION','PICKING',
   'SUPERVISOR DE PICKING','CONSULTA','LIDER MECANIZADO','LIDER','PATINADOR'] LOOP
   username:='991'||floor(random()*100000000000000)::bigint::text;
   password:=gen_random_uuid()::text||gen_random_uuid()::text;
+  RAISE NOTICE 'PDT_QA_STEP:auth.account-create';
   EXECUTE format('INSERT INTO public.sgp_usuarios(usuario,nombre,rol,activo,%I) VALUES($1,$2,$3,true,extensions.crypt($4,extensions.gen_salt(''bf'')))',col)
    USING username,'QA aislada reversible',r,password;
+  RAISE NOTICE 'PDT_QA_STEP:auth.login';
   response:=pg_temp.rpc(format('SELECT public.sgp_login(%L,%L)',username,password));
   IF nullif(response->>'token','') IS NULL THEN RAISE EXCEPTION 'QA_REAL_LOGIN_FAILED'; END IF;
+  RAISE NOTICE 'PDT_QA_STEP:auth.session';
   session:=pg_temp.rpc(format('SELECT public.sgp_sesion_actual(%L)',response->>'token'));
   IF session->>'valida' IS DISTINCT FROM 'true' OR session->>'rol' IS DISTINCT FROM r
   THEN RAISE EXCEPTION 'QA_REAL_SESSION_FAILED'; END IF;
   INSERT INTO qa_tokens VALUES(r,response->>'token');
   IF r IN ('ADMINISTRADOR','COORDINADOR','LIDER LINEA') THEN
+   RAISE NOTICE 'PDT_QA_STEP:auth.catalog-allow';
    PERFORM pg_temp.rpc(format('SELECT public.sgp_pdt_manual_catalogo_v1(%L)',response->>'token'));
   ELSE
+   RAISE NOTICE 'PDT_QA_STEP:auth.catalog-deny';
    PERFORM pg_temp.denied(format('SELECT public.sgp_pdt_manual_catalogo_v1(%L)',response->>'token'));
   END IF;
  END LOOP;
+ RAISE NOTICE 'PDT_QA_STEP:auth.invalid-session';
  PERFORM pg_temp.denied('SELECT public.sgp_pdt_manual_catalogo_v1(''invalid-isolated-token'')');
 END $auth$;
 SELECT 'PASS:real-role-authentication';
 
+\echo CONTRACT:manual-three-origins-nc-idempotency
 DO $manual$ DECLARE token text; p jsonb; source jsonb; details jsonb; response jsonb;
  ctx jsonb; candidate record; event uuid; nc text; origin text; key uuid; id uuid;
 BEGIN
  SELECT t.token INTO STRICT token FROM qa_tokens t WHERE role='COORDINADOR';
  -- Pick an actual restored source with a matching Picking event; never fabricate
  -- relationships or replace origin/context helpers to make a case succeed.
+ RAISE NOTICE 'PDT_QA_STEP:manual.catalog';
  FOR p IN SELECT value FROM jsonb_array_elements(pg_temp.rpc(format(
   'SELECT public.sgp_pdt_manual_catalogo_v1(%L)',token))->'producciones') LOOP
+  RAISE NOTICE 'PDT_QA_STEP:manual.sources';
   FOR source IN SELECT value FROM jsonb_array_elements(pg_temp.rpc(format(
    'SELECT public.sgp_pdt_manual_fuentes_v1(%L,%L,%L)',token,p->>'key_produccion',p->>'reserva'))->'fuentes') LOOP
    IF (source->>'cantidad_referencia')::numeric < 2 OR coalesce(source->>'fabricacion','')='' THEN CONTINUE; END IF;
+   RAISE NOTICE 'PDT_QA_STEP:manual.match-picking-source';
    SELECT e.id_entrega INTO event FROM public.sgp_picking_entregas e
     JOIN public.sgp_mecanizado_programacion m USING(id_programacion)
     WHERE e.produccion=p->>'produccion' AND m.reserva=p->>'reserva'
@@ -75,6 +93,7 @@ BEGIN
   IF event IS NOT NULL THEN EXIT; END IF;
  END LOOP;
  IF event IS NULL THEN RAISE EXCEPTION 'QA_MATCHING_PANEL_PICKING_SOURCE_REQUIRED'; END IF;
+ RAISE NOTICE 'PDT_QA_STEP:manual.nc-source';
  SELECT consecutivo INTO nc FROM public.sgp_nc_aluminio WHERE consecutivo IS NOT NULL
   AND length(consecutivo) BETWEEN 1 AND 120 LIMIT 1;
  IF nc IS NULL THEN RAISE EXCEPTION 'QA_NC_SOURCE_REQUIRED'; END IF;
@@ -83,10 +102,12 @@ BEGIN
   'marca',coalesce(source->>'marca',''),'longitud',source->'longitud','acabado',source->>'acabado','cantidad',2,'nc',nc));
  FOREACH origin IN ARRAY ARRAY['PICKING','ENSAMBLE','EMPAQUE'] LOOP
   key:=gen_random_uuid();
+  RAISE NOTICE 'PDT_QA_STEP:manual.register';
   response:=pg_temp.rpc(format('SELECT public.sgp_pdt_manual_registrar_v1(%L,%L,%L::jsonb,%L::jsonb,%L,%L::uuid)',
    token,origin,ctx,details,'QA aislada',key));
   id:=(response->'ids_pendientes'->>0)::uuid;
   IF response->>'ok' IS DISTINCT FROM 'true' OR id IS NULL THEN RAISE EXCEPTION 'QA_MANUAL_CREATION_FAILED'; END IF;
+  RAISE NOTICE 'PDT_QA_STEP:manual.retry';
   IF (pg_temp.rpc(format('SELECT public.sgp_pdt_manual_registrar_v1(%L,%L,%L::jsonb,%L::jsonb,%L,%L::uuid)',
    token,origin,ctx,details,'QA aislada',key))->>'duplicado') IS DISTINCT FROM 'true'
   THEN RAISE EXCEPTION 'QA_CREATION_NOT_IDEMPOTENT'; END IF;
@@ -94,11 +115,13 @@ BEGIN
   THEN RAISE EXCEPTION 'QA_NC_LINK_MISSING'; END IF;
   IF origin='PICKING' THEN INSERT INTO qa_context VALUES(ctx,details,event,id); END IF;
  END LOOP;
+ RAISE NOTICE 'PDT_QA_STEP:manual.denied';
  PERFORM pg_temp.denied(format('SELECT public.sgp_pdt_manual_registrar_v1(%L,%L,%L::jsonb,%L::jsonb,NULL,%L::uuid)',
   (SELECT t.token FROM qa_tokens t WHERE role='CONSULTA'),'PICKING',ctx,details,gen_random_uuid()));
 END $manual$;
 SELECT 'PASS:manual-three-origins-nc-idempotency';
 
+\echo CONTRACT:validation-partial-advance-picking-close
 DO $cycle$ DECLARE token text; picking text; reception text; c qa_context%rowtype;
  d uuid; result jsonb; key uuid; line uuid; q text;
 BEGIN
@@ -106,33 +129,47 @@ BEGIN
  SELECT t.token INTO picking FROM qa_tokens t WHERE role='PICKING';
  SELECT t.token INTO reception FROM qa_tokens t WHERE role='RECEPCION';
  SELECT * INTO STRICT c FROM qa_context;
+ RAISE NOTICE 'PDT_QA_STEP:cycle.validation-denied';
  PERFORM pg_temp.denied(format('SELECT public.sgp_aluminio_pendiente_validar_detalles_v1(%L,%L::uuid,%L::jsonb,%L,NULL)',
   (SELECT t.token FROM qa_tokens t WHERE role='LIDER MECANIZADO'),c.pending,c.piece,c.context->>'reserva'));
+ RAISE NOTICE 'PDT_QA_STEP:cycle.validate';
  PERFORM pg_temp.rpc(format('SELECT public.sgp_aluminio_pendiente_validar_detalles_v1(%L,%L::uuid,%L::jsonb,%L,NULL)',
   token,c.pending,c.piece,c.context->>'reserva'));
+ RAISE NOTICE 'PDT_QA_STEP:cycle.detail';
  SELECT id_detalle INTO STRICT d FROM public.sgp_aluminio_pendiente_detalles WHERE id_pendiente=c.pending;
+ RAISE NOTICE 'PDT_QA_STEP:cycle.stage';
  PERFORM pg_temp.rpc(format('SELECT public.sgp_pdt_estado_v2(%L,%L::uuid,''CORTE'')',token,c.pending));
+ RAISE NOTICE 'PDT_QA_STEP:cycle.stage';
  PERFORM pg_temp.rpc(format('SELECT public.sgp_pdt_estado_v2(%L,%L::uuid,''MECANIZADO'')',token,c.pending));
  key:=gen_random_uuid();
  q:=format('SELECT public.sgp_aluminio_pendiente_registrar_avance_v1(%L,%L::uuid,%L::uuid,1,''T1'',current_date,%L::uuid,NULL)',token,c.pending,d,key);
+ RAISE NOTICE 'PDT_QA_STEP:cycle.advance';
  result:=pg_temp.rpc(q);
  IF result->>'saldo_detalle' IS DISTINCT FROM '1' THEN RAISE EXCEPTION 'QA_PARTIAL_BALANCE'; END IF;
  IF (pg_temp.rpc(q)->>'duplicado') IS DISTINCT FROM 'true' THEN RAISE EXCEPTION 'QA_ADVANCE_RETRY'; END IF;
+ RAISE NOTICE 'PDT_QA_STEP:cycle.advance-denied';
  PERFORM pg_temp.denied(format('SELECT public.sgp_aluminio_pendiente_registrar_avance_v1(%L,%L::uuid,%L::uuid,1,''T1'',current_date,%L::uuid,NULL)',
   reception,c.pending,d,gen_random_uuid()));
+ RAISE NOTICE 'PDT_QA_STEP:cycle.advance-final';
  result:=pg_temp.rpc(format('SELECT public.sgp_aluminio_pendiente_registrar_avance_v1(%L,%L::uuid,%L::uuid,1,''T1'',current_date,%L::uuid,NULL)',token,c.pending,d,gen_random_uuid()));
  IF result->>'saldo_detalle' IS DISTINCT FROM '0' THEN RAISE EXCEPTION 'QA_FINAL_BALANCE'; END IF;
+ RAISE NOTICE 'PDT_QA_STEP:cycle.stage';
  PERFORM pg_temp.rpc(format('SELECT public.sgp_pdt_estado_v2(%L,%L::uuid,''PROCESADO'')',token,c.pending));
  key:=gen_random_uuid();q:=format('SELECT public.sgp_pdt_manual_entrega_registrar_v1(%L,%L::uuid,%L::uuid,2,%L::uuid)',picking,d,c.event,key);
+ RAISE NOTICE 'PDT_QA_STEP:cycle.delivery';
  result:=pg_temp.rpc(q);line:=(result->>'id_linea')::uuid;
  IF line IS NULL OR (pg_temp.rpc(q)->>'duplicado') IS DISTINCT FROM 'true' THEN RAISE EXCEPTION 'QA_PICKING_RETRY'; END IF;
  -- Source state is altered only inside this rollback transaction in the clone.
+ RAISE NOTICE 'PDT_QA_STEP:cycle.source-state';
  UPDATE public.sgp_picking_entregas SET estado='VALIDADA' WHERE id_entrega=c.event;
+ RAISE NOTICE 'PDT_QA_STEP:cycle.delivery-validate';
  PERFORM pg_temp.rpc(format('SELECT public.sgp_pdt_manual_entrega_validar_v1(%L,%L::uuid)',reception,line));
  key:=gen_random_uuid();q:=format('SELECT public.sgp_pdt_manual_asignar_v1(%L,%L::uuid,%L::uuid)',reception,line,key);
+ RAISE NOTICE 'PDT_QA_STEP:cycle.assign';
  PERFORM pg_temp.rpc(q);
  IF (pg_temp.rpc(q)->>'duplicado') IS DISTINCT FROM 'true' THEN RAISE EXCEPTION 'QA_ASSIGNMENT_RETRY'; END IF;
  key:=gen_random_uuid();q:=format('SELECT public.sgp_pdt_manual_cerrar_v1(%L,%L::uuid,%L::uuid)',token,c.pending,key);
+ RAISE NOTICE 'PDT_QA_STEP:cycle.close';
  PERFORM pg_temp.rpc(q);
  IF (pg_temp.rpc(q)->>'duplicado') IS DISTINCT FROM 'true'
  OR NOT EXISTS(SELECT 1 FROM public.sgp_aluminio_pendientes WHERE id_pendiente=c.pending AND estado='RESUELTO' AND estado_repo='PICKING')
@@ -140,10 +177,12 @@ BEGIN
 END $cycle$;
 SELECT 'PASS:validation-partial-advance-picking-close';
 
+\echo CONTRACT:reception-mecanizado-unified-list
 DO $lists$ DECLARE r text; t text; rows jsonb; n integer;
 BEGIN
  FOREACH r IN ARRAY ARRAY['RECEPCION','LIDER MECANIZADO','PICKING'] LOOP
   SELECT token INTO t FROM qa_tokens WHERE role=r;
+  RAISE NOTICE 'PDT_QA_STEP:lists.manual';
   rows:=pg_temp.rpc(format('SELECT public.sgp_pdt_manual_listar_v1(%L)',t))->'pendientes';
   SELECT count(*) INTO n FROM jsonb_array_elements(rows) x JOIN sgp_pdt_manual.detalles d
    ON d.id_pendiente::text=x->>'id_pendiente';
@@ -152,11 +191,13 @@ BEGIN
   IF EXISTS(SELECT 1 FROM jsonb_array_elements(rows) x JOIN qa_context c ON x->>'id_pendiente'=c.pending::text)
   THEN RAISE EXCEPTION 'QA_CLOSED_PDT_STILL_OPEN'; END IF;
   -- Modern report path must remain callable with the actual role and schema.
+  RAISE NOTICE 'PDT_QA_STEP:lists.modern';
   PERFORM pg_temp.rpc(format('SELECT public.sgp_aluminio_pendientes_listar_v2(%L,false)',t));
  END LOOP;
 END $lists$;
 SELECT 'PASS:reception-mecanizado-unified-list';
 
+\echo CONTRACT:export-week-year-guard-audit
 DO $period$ DECLARE c qa_context%rowtype; y integer; w integer; t text; changed integer; rows jsonb; payload jsonb; response jsonb;
 BEGIN
  SELECT * INTO STRICT c FROM qa_context;
@@ -167,11 +208,14 @@ BEGIN
  changed:=CASE WHEN w=52 THEN 51 ELSE w+1 END;
  SELECT jsonb_build_array(to_jsonb(p)||jsonb_build_object('semana_actual',changed)) INTO STRICT payload
  FROM public.sgp_producciones p WHERE key_produccion=c.context->>'key_produccion';
+ RAISE NOTICE 'PDT_QA_STEP:period.export';
  response:=pg_temp.rpc(format('SELECT public.sgp_aplicar_export_diario(%L,''PANELES_2'',''qa-isolated.xlsx'',%L::jsonb)',t,payload));
  IF response->>'ok' IS DISTINCT FROM 'true' THEN RAISE EXCEPTION 'QA_SAME_YEAR_EXPORT_FAILED'; END IF;
+ RAISE NOTICE 'PDT_QA_STEP:period.audit';
  SET CONSTRAINTS trg_pdt_manual_auditar_programacion IMMEDIATE;
  IF (SELECT count(*) FROM sgp_pdt_manual.programacion_cambios WHERE id_pendiente=c.pending AND anio_nuevo=y AND semana_nueva=changed)<>1
  THEN RAISE EXCEPTION 'QA_WEEK_AUDIT_MISSING'; END IF;
+ RAISE NOTICE 'PDT_QA_STEP:period.export-repeat';
  PERFORM pg_temp.rpc(format('SELECT public.sgp_aplicar_export_diario(%L,''PANELES_2'',''qa-isolated.xlsx'',%L::jsonb)',t,payload));
  IF (SELECT count(*) FROM sgp_pdt_manual.programacion_cambios WHERE id_pendiente=c.pending)<>1
  THEN RAISE EXCEPTION 'QA_WEEK_AUDIT_DUPLICATED'; END IF;
@@ -180,6 +224,7 @@ BEGIN
   RAISE EXCEPTION 'QA_YEAR_CHANGE_ALLOWED';
  EXCEPTION WHEN OTHERS THEN IF SQLERRM NOT LIKE 'PDT_PRODUCTION_YEAR_IMMUTABLE:%' THEN RAISE; END IF; END;
  BEGIN
+  RAISE NOTICE 'PDT_QA_STEP:period.export-year-reject';
   PERFORM pg_temp.rpc(format('SELECT public.sgp_aplicar_export_diario(%L,''PANELES_2'',''qa-isolated.xlsx'',%L::jsonb)',t,
    jsonb_build_array(jsonb_build_object('key_produccion',c.context->>'key_produccion','id_linea','PANELES_2','anio',y+1,'semana_actual',changed))));
   RAISE EXCEPTION 'QA_EXPORT_YEAR_CHANGE_ALLOWED';
@@ -193,11 +238,14 @@ BEGIN
 END $period$;
 SELECT 'PASS:export-week-year-guard-audit';
 
+\echo CONTRACT:utc-cutover-historical-preservation
 DO $cut$ DECLARE t text; stamp timestamptz:='2026-10-29T23:59:59Z'; response jsonb;
 BEGIN
  SELECT token INTO t FROM qa_tokens WHERE role='COORDINADOR';
+ RAISE NOTICE 'PDT_QA_STEP:cut.config';
  INSERT INTO sgp_pdt_manual.corte_operativo(id,desde,activado_por) VALUES(1,stamp,'QA aislada reversible');
  SET LOCAL timezone='America/Bogota';
+ RAISE NOTICE 'PDT_QA_STEP:cut.read';
  response:=pg_temp.rpc(format('SELECT public.sgp_pdt_corte_operativo_v1(%L)',t));
  IF (response->>'desde')::timestamptz IS DISTINCT FROM stamp
  OR NOT ('2026-10-30T00:00:00Z'::timestamptz>=stamp)
@@ -211,6 +259,7 @@ SELECT 'PASS:utc-cutover-historical-preservation';
 
 -- Compare public dispatch with its captured original on nonmanual restored rows.
 -- Each probe is separately rolled back, including successful original calls.
+\echo CONTRACT:setup.outcome-helper
 CREATE FUNCTION pg_temp.outcome(q text, technical_anon boolean) RETURNS jsonb LANGUAGE plpgsql AS $$
 DECLARE result jsonb;
 BEGIN
@@ -222,22 +271,27 @@ BEGIN
  END;
  RETURN result;
 END $$;
+\echo CONTRACT:legacy-v2-dispatch
 DO $dispatch$ DECLARE contract text; id uuid; t text; a jsonb; b jsonb; q text;
 BEGIN
  SELECT token INTO t FROM qa_tokens WHERE role='COORDINADOR';
  FOREACH contract IN ARRAY ARRAY['LEGACY','V2'] LOOP
+  RAISE NOTICE 'PDT_QA_STEP:dispatch.cohort';
   SELECT p.id_pendiente INTO id FROM public.sgp_aluminio_pendientes p
   WHERE p.contrato_pdt=contract AND NOT EXISTS(SELECT 1 FROM sgp_pdt_manual.detalles d WHERE d.id_pendiente=p.id_pendiente) LIMIT 1;
   IF id IS NULL THEN RAISE EXCEPTION 'QA_LEGACY_V2_COHORT_REQUIRED'; END IF;
   q:=format('(%L,%L::uuid,''[]''::jsonb,NULL,NULL)',t,id);
+  RAISE NOTICE 'PDT_QA_STEP:dispatch.validator';
   a:=pg_temp.outcome('SELECT public.sgp_aluminio_pendiente_validar_detalles_v1'||q,true);
   b:=pg_temp.outcome('SELECT sgp_pdt_manual.original_validar'||q,false);
   IF a IS DISTINCT FROM b THEN RAISE EXCEPTION 'QA_VALIDATOR_DISPATCH_REGRESSION'; END IF;
   q:=format('(%L,%L::uuid,''INVALID_QA_STAGE'')',t,id);
+  RAISE NOTICE 'PDT_QA_STEP:dispatch.stage';
   a:=pg_temp.outcome('SELECT public.sgp_pdt_estado_v2'||q,true);
   b:=pg_temp.outcome('SELECT sgp_pdt_manual.original_estado_v2'||q,false);
   IF a IS DISTINCT FROM b THEN RAISE EXCEPTION 'QA_STAGE_DISPATCH_REGRESSION'; END IF;
  END LOOP;
 END $dispatch$;
 SELECT 'PASS:legacy-v2-dispatch';
+\echo CONTRACT:setup.transaction-rollback
 ROLLBACK;
