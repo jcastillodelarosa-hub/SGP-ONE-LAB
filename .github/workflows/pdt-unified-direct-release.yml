@@ -1,0 +1,99 @@
+name: PDT unified - direct controlled release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sgp-pdt-unified-production-release
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: PDT unified / direct publish
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    environment: pdt-unified-production
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Verify pinned SQL candidate
+        run: |
+          python3 - <<'PY'
+          import subprocess
+          base='f830dd48459146d6d2dfeb9173ecd9824c1c93c4'
+          assert subprocess.check_output(['git','merge-base',base,'HEAD'],text=True).strip()==base
+          paths=['docs/sql-proposals/pdt/grouped-source/01_grouped_sources_REVIEW.sql',
+            *[f'docs/sql-proposals/pdt/manual/{x}' for x in
+              ['01_manual_phase1_REVIEW.sql','02_manual_validation_REVIEW.sql','03_manual_operations_REVIEW.sql','04_programacion_vigente_REVIEW.sql','05_export_year_REVIEW.sql']],
+            'docs/sql-proposals/pdt/integration/06_operational_cutover_REVIEW.sql']
+          for p in paths:
+            assert subprocess.check_output(['git','show',f'{base}:{p}'])==open(p,'rb').read(),f'Unexpected SQL change: {p}'
+          print('Pinned SQL verified')
+          PY
+      - name: Build and test
+        run: |
+          npm install --no-package-lock --no-audit --no-fund
+          npm run build:vendor
+          npm run verify:release
+          npm test
+          echo "SITE_SHA256=$(python3 tests/pdt-release/artifact_digest.py)" >> "$GITHUB_ENV"
+      - name: Prepare protected Supabase connection
+        env:
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: python3 tests/pdt-release/validate_connection.py
+      - name: Validate live baseline without writes
+        run: python3 tests/pdt-release/live_preflight.py
+      - name: Production release interlock
+        env:
+          PUBLISH_ENABLED: ${{ vars.PDT_PUBLISH_ENABLED }}
+        run: |
+          test "$PUBLISH_ENABLED" = 'true' || { echo '::error::PDT_PUBLISH_ENABLED must be true in the protected environment'; exit 1; }
+      - name: Install pinned SQL phases
+        run: |
+          set -euo pipefail
+          files=(
+            docs/sql-proposals/pdt/grouped-source/01_grouped_sources_REVIEW.sql
+            docs/sql-proposals/pdt/manual/01_manual_phase1_REVIEW.sql
+            docs/sql-proposals/pdt/manual/02_manual_validation_REVIEW.sql
+            docs/sql-proposals/pdt/manual/03_manual_operations_REVIEW.sql
+            docs/sql-proposals/pdt/manual/04_programacion_vigente_REVIEW.sql
+            docs/sql-proposals/pdt/manual/05_export_year_REVIEW.sql
+            docs/sql-proposals/pdt/integration/06_operational_cutover_REVIEW.sql
+          )
+          for f in "${files[@]}"; do
+            docker run --rm -e DATABASE_URL -v "$PWD:/work:ro" -w /work postgres:17 sh -c 'psql "$DATABASE_URL" -X -v ON_ERROR_STOP=1 -f "$1"' sh "$f"
+            echo "PDT_PHASE_PASS: $f" >> "$GITHUB_STEP_SUMMARY"
+          done
+      - name: Activate cutover
+        run: |
+          python3 tests/pdt-release/prepare_cutover.py
+          docker run --rm -e DATABASE_URL -v /tmp/pdt-release/activate.sql:/activate.sql:ro postgres:17 sh -c 'psql "$DATABASE_URL" -X -v ON_ERROR_STOP=1 -f /activate.sql'
+      - name: Verify tested frontend artifact
+        run: python3 tests/pdt-release/artifact_digest.py "$SITE_SHA256"
+      - name: Deploy Firebase Hosting
+        id: firebase
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SGP_ONE_LAB }}
+          projectId: sgp-one-lab
+          channelId: live
+      - name: Record deployment and verify backend
+        env:
+          DEPLOY_URL: ${{ steps.firebase.outputs.details_url }}
+        run: |
+          python3 tests/pdt-release/artifact_digest.py "$SITE_SHA256"
+          test -n "$DEPLOY_URL"
+          echo "PDT_RELEASE_COMMIT: $GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo "FIREBASE_DEPLOYMENT: $DEPLOY_URL" >> "$GITHUB_STEP_SUMMARY"
+          python3 tests/pdt-release/post_release.py
+      - name: Failure notice
+        if: failure()
+        run: |
+          echo 'PDT_RELEASE_FAILED: inspect current production state before any retry; SQL phases may have been partially applied.' >> "$GITHUB_STEP_SUMMARY"
