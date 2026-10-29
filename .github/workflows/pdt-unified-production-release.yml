@@ -122,9 +122,17 @@ jobs:
           user='postgres.ocvxbwzqxbrfndkvjmfx'
           url='postgresql://'+user+':'+urllib.parse.quote(password,safe='')+'@aws-0-us-east-2.pooler.supabase.com:5432/postgres?sslmode=require'
           with open(os.environ['GITHUB_ENV'],'a') as out:
-              out.write('DATABASE_URL='+url+'\\n')
+              out.write('DATABASE_URL='+url+chr(10))
           print('Read-only preflight connection configured from existing protected backup credential')
           PY
+      - name: Prepare production connection for separately authorized publish
+        if: inputs.operation == 'publish'
+        env:
+          PDT_DATABASE_URL: ${{ secrets.SGP_PDT_DATABASE_URL }}
+        run: |
+          test -n "$PDT_DATABASE_URL" || { echo "::error::SGP_PDT_DATABASE_URL missing"; exit 1; }
+          echo "::add-mask::$PDT_DATABASE_URL"
+          echo "DATABASE_URL=$PDT_DATABASE_URL" >> "$GITHUB_ENV"
       - name: Verify required database connection
         run: |
           test -n "$DATABASE_URL" || { echo "::error::DATABASE_URL missing"; exit 1; }
