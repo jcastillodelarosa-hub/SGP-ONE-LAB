@@ -103,10 +103,40 @@ jobs:
           assert data['head_branch'] in ('feat/issue-144-pdt-isolated-validation','feat/pdt-unified-release-workflow'), 'Unexpected backup source'
           print('Successful run exists; operator must additionally verify backup freshness and recovery in environment approval.')
           PY
-      - name: Production release interlock — manual review required
+      - name: Authenticate to private GCS backup storage
+        if: inputs.operation == 'publish'
+        uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SGP_ONE_LAB }}
+      - name: Install Google Cloud SDK
+        if: inputs.operation == 'publish'
+        uses: google-github-actions/setup-gcloud@v3
+      - name: Verify actual private backup bytes and catalog
+        if: inputs.operation == 'publish'
+        env:
+          BACKUP_OBJECT: ${{ inputs.backup_object }}
+          BACKUP_SHA256: ${{ inputs.backup_sha256 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          mkdir -p /tmp/pdt-release
+          gcloud storage cp "$BACKUP_OBJECT" /tmp/pdt-release/backup.dump
+          printf '%s  %s\n' "$BACKUP_SHA256" /tmp/pdt-release/backup.dump | sha256sum -c -
+          docker run --rm -v /tmp/pdt-release:/backup:ro postgres:17 pg_restore --list /backup/backup.dump > /tmp/pdt-release/catalog.txt
+          test -s /tmp/pdt-release/catalog.txt
+          echo 'Backup bytes, SHA-256 and pg_restore catalog verified; restore proof still requires separate approval.'
+      - name: Live database preflight — fail closed
+        if: inputs.operation == 'publish'
+        env:
+          DATABASE_URL: ${{ secrets.SGP_PDT_DATABASE_URL }}
+        run: |
+          set -euo pipefail
+          docker run --rm -e DATABASE_URL postgres:17 sh -c 'psql "$DATABASE_URL" -X -v ON_ERROR_STOP=1 -Atc "SELECT CASE WHEN to_regclass(\x27sgp_pdt_manual.corte_operativo\x27) IS NULL THEN \x27READY\x27 ELSE \x27STOP_ALREADY_INSTALLED\x27 END"' > /tmp/pdt-release/preflight.txt
+          grep -qx READY /tmp/pdt-release/preflight.txt
+      - name: Production release interlock — independent approval required
         if: inputs.operation == 'publish'
         run: |
-          echo '::error::STOP: backup object/hash are not independently verified; SQL live preflight and coordinated post-cutover repair are not implemented. Publish is disabled until reviewed.'
+          echo '::error::STOP: catalog verification is not a restored backup proof; production RPC fingerprints/RLS checks and post-cutover coordinated recovery still require independent validation. Publish disabled.'
           exit 1
       - name: Install pinned SQL phases
         if: inputs.operation == 'publish'
