@@ -20,6 +20,18 @@ on:
         description: 'Verified SHA-256 of restored backup'
         required: false
         type: string
+      recovery_generation:
+        description: 'GCS immutable generation of recovery-verified.json'
+        required: false
+        type: string
+      recovery_bytes:
+        description: 'Size of recovery-verified.json'
+        required: false
+        type: string
+      recovery_sha256:
+        description: 'SHA-256 of recovery-verified.json'
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -129,6 +141,14 @@ jobs:
           docker run --rm -v /tmp/pdt-release:/backup:ro postgres:17 pg_restore --list /backup/backup.dump > /tmp/pdt-release/catalog.txt
           test -s /tmp/pdt-release/catalog.txt
           echo 'Backup bytes, SHA-256 and pg_restore catalog verified; restore proof still requires separate approval.'
+      - name: Verify isolated restoration evidence and freshness
+        if: inputs.operation == 'publish'
+        env:
+          BACKUP_SHA256: ${{ inputs.backup_sha256 }}
+          RECOVERY_GENERATION: ${{ inputs.recovery_generation }}
+          RECOVERY_BYTES: ${{ inputs.recovery_bytes }}
+          RECOVERY_SHA256: ${{ inputs.recovery_sha256 }}
+        run: python3 tests/pdt-release/verify_recovery.py
       - name: Live database preflight — fail closed
         if: inputs.operation == 'publish'
         env:
