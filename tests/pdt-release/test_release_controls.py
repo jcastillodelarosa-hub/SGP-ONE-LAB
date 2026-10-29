@@ -101,9 +101,22 @@ class ReleaseControls(unittest.TestCase):
                 if change == 'catalog': storage.verified['verification']['catalog_sections_equal'] = False
                 if change == 'network': storage.verified['verification']['restore_network'] = 'bridge'
                 if change == 'age': clock += datetime.timedelta(hours=7)
-                if change == 'run': env['BACKUP_RUN_START'] = '2026-10-29T12:01:00Z'
+                if change == 'run': env['BACKUP_RUN_END'] = '2026-10-29T11:59:00Z'
                 with self.assertRaises(Exception):
                     checked_record(storage, env, clock)
+
+    def test_recovery_job_may_verify_earlier_backup_but_not_future_backup(self):
+        storage = Storage()
+        env = storage.environment()
+        env['BACKUP_RUN_START'] = '2026-10-29T12:10:00Z'
+        now = datetime.datetime(2026, 10, 29, 12, 30, tzinfo=datetime.timezone.utc)
+        self.assertEqual(checked_record(storage, env, now), storage.verified)
+        env['BACKUP_RUN_END'] = '2026-10-29T11:59:00Z'
+        with self.assertRaises(SafeFailure):
+            checked_record(storage, env, now)
+        env['BACKUP_RUN_END'] = '2026-10-29T12:31:00Z'
+        with self.assertRaises(SafeFailure):
+            checked_record(storage, env, now)
 
     def test_catalog_diff_includes_permissions_and_rls(self):
         baseline = {section: [] for section in SECTIONS}
