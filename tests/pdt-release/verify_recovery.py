@@ -70,8 +70,11 @@ def pinned_record(storage, environment, now=None):
     if not started or not finished:
         raise SafeFailure('BACKUP_RUN_NOT_LINKED')
     created = datetime.datetime.fromisoformat(verified['created_utc'].replace('Z', '+00:00'))
-    if not (datetime.datetime.fromisoformat(started.replace('Z', '+00:00')) <= created <=
-            datetime.datetime.fromisoformat(finished.replace('Z', '+00:00'))):
+    run_started = datetime.datetime.fromisoformat(started.replace('Z', '+00:00'))
+    run_finished = datetime.datetime.fromisoformat(finished.replace('Z', '+00:00'))
+    # A recovery job may verify a backup created before that job started.
+    # The pinned proof and archive identities are checked independently.
+    if not (run_started <= run_finished and created <= run_finished <= now):
         raise SafeFailure('BACKUP_RUN_NOT_LINKED')
     return verified
 
