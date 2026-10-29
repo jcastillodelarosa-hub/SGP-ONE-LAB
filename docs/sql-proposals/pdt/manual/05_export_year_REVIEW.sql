@@ -1,5 +1,6 @@
--- REVIEW ONLY. Productive bodies contrasted with the supplied pg_get_functiondef
--- export. Install only after backup restoration, preflight and separate approval.
+-- REVIEW ONLY. The production year is immutable. Reject an Export row whose
+-- explicit year differs from an existing production; only week may change.
+-- Install only after backup restoration, preflight and separate approval.
 -- The XLSX contains explicit "Año prog." -> p_datos[*].anio and "Sem prog." -> semana_actual.
 BEGIN;
 SET LOCAL lock_timeout='5s';
@@ -22,7 +23,20 @@ DO $preflight$ DECLARE fn oid; preview_fn oid; BEGIN
  IF EXISTS(SELECT 1 FROM sgp_pdt_manual.funcion_previa
   WHERE firma='public.sgp_aplicar_export_diario(text,text,text,jsonb)')
  THEN RAISE EXCEPTION 'PDT_EXPORT_YEAR_ALREADY_INSTALLED'; END IF;
+ IF EXISTS(SELECT 1 FROM pg_trigger WHERE tgrelid='public.sgp_producciones'::regclass
+  AND tgname='trg_pdt_anio_inmutable')
+ THEN RAISE EXCEPTION 'PDT_IMMUTABLE_YEAR_TRIGGER_ALREADY_INSTALLED'; END IF;
 END $preflight$;
+CREATE FUNCTION sgp_pdt_manual.proteger_anio_programacion() RETURNS trigger
+LANGUAGE plpgsql SET search_path TO '' AS $fn$
+BEGIN
+ IF OLD.anio IS DISTINCT FROM NEW.anio THEN
+  RAISE EXCEPTION 'PDT_PRODUCTION_YEAR_IMMUTABLE: %',OLD.key_produccion;
+ END IF;
+ RETURN NEW;
+END $fn$;
+CREATE TRIGGER trg_pdt_anio_inmutable BEFORE UPDATE OF anio ON public.sgp_producciones
+FOR EACH ROW EXECUTE FUNCTION sgp_pdt_manual.proteger_anio_programacion();
 INSERT INTO sgp_pdt_manual.funcion_previa(firma,definicion)
 VALUES('public.sgp_aplicar_export_diario(text,text,text,jsonb)',
  pg_get_functiondef('public.sgp_aplicar_export_diario(text,text,text,jsonb)'::regprocedure));
@@ -53,6 +67,13 @@ BEGIN
   IF expected_year NOT BETWEEN 2020 AND 2100 OR expected_week NOT BETWEEN 1 AND 53
    OR key=ANY(seen) THEN RAISE EXCEPTION 'PDT_EXPORT_YEAR_PERIOD_AMBIGUOUS'; END IF;
   seen:=array_append(seen,key);
+  -- Lock the existing production before delegating. This prevents a concurrent
+  -- reprogramming from changing the year between validation and Export writes.
+  SELECT * INTO existing FROM public.sgp_producciones WHERE key_produccion=key FOR UPDATE;
+  IF FOUND AND (existing.id_linea IS DISTINCT FROM p_linea
+    OR existing.anio IS DISTINCT FROM expected_year) THEN
+   RAISE EXCEPTION 'PDT_EXPORT_YEAR_IMMUTABLE: %',key;
+  END IF;
  END LOOP;
  -- Preserve installed Export authorization, reconciliation, history and response.
  response:=sgp_pdt_manual.original_aplicar_export_diario(p_token,p_linea,p_nombre_archivo,p_datos);
@@ -61,19 +82,16 @@ BEGIN
  IF response->>'ok' IS DISTINCT FROM 'true' THEN
   RAISE EXCEPTION 'PDT_EXPORT_YEAR_DELEGATED_NOT_OK';
  END IF;
- -- Update only an existing matching production whose week the original writer set.
+ -- Verify the original writer applied the week without changing the year.
  -- Missing rows remain the original writer's responsibility (e.g. FUERA_BASE).
  FOR item IN SELECT value FROM jsonb_array_elements(p_datos) LOOP
   key:=btrim(item->>'key_produccion');expected_year:=(item->>'anio')::integer;
   expected_week:=(item->>'semana_actual')::integer;
   SELECT * INTO existing FROM public.sgp_producciones WHERE key_produccion=key FOR UPDATE;
   IF FOUND THEN
-   IF existing.id_linea IS DISTINCT FROM p_linea
+   IF existing.id_linea IS DISTINCT FROM p_linea OR existing.anio IS DISTINCT FROM expected_year
     OR coalesce(existing.semana_actual,existing.semana_base) IS DISTINCT FROM expected_week
    THEN RAISE EXCEPTION 'PDT_EXPORT_YEAR_RESULT_MISMATCH: %',key; END IF;
-   IF existing.anio IS DISTINCT FROM expected_year THEN
-    UPDATE public.sgp_producciones SET anio=expected_year WHERE key_produccion=key;
-   END IF;
   END IF;
  END LOOP;
  RETURN response;

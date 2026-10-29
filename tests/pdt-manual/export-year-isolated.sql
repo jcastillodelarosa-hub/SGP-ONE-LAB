@@ -40,51 +40,68 @@ BEGIN
  FROM sgp_pdt_manual.reportes r JOIN sgp_pdt_manual.detalles d ON d.id_reporte=r.id_reporte
  WHERE d.id_pendiente=pending;
  result:=public.sgp_aplicar_export_diario('QA','PANELES_2','qa.xlsx',
-  '[{"key_produccion":"QA|PANELES_2","id_linea":"PANELES_2","anio":2027,"semana_actual":1}]'::jsonb);
+  '[{"key_produccion":"QA|PANELES_2","id_linea":"PANELES_2","anio":2026,"semana_actual":42}]'::jsonb);
  EXECUTE 'SET CONSTRAINTS trg_pdt_manual_auditar_programacion IMMEDIATE';
  IF result IS DISTINCT FROM '{"ok":true}'::jsonb
  OR (SELECT anio::text||'/'||semana_actual::text FROM public.sgp_producciones
-  WHERE key_produccion='QA|PANELES_2')<>'2027/1'
+  WHERE key_produccion='QA|PANELES_2')<>'2026/42'
  OR (SELECT count(*) FROM sgp_pdt_manual.programacion_cambios
   WHERE id_pendiente=pending AND anio_anterior=2026 AND semana_anterior=41
-   AND anio_nuevo=2027 AND semana_nueva=1)<>1
+   AND anio_nuevo=2026 AND semana_nueva=42)<>1
  OR original_year<>2026 OR original_week<>41
- THEN RAISE EXCEPTION 'CROSS_YEAR_IMPORT_FAILED'; END IF;
+ THEN RAISE EXCEPTION 'SAME_YEAR_IMPORT_FAILED'; END IF;
  EXECUTE 'SET CONSTRAINTS trg_pdt_manual_auditar_programacion DEFERRED';
  PERFORM public.sgp_aplicar_export_diario('QA','PANELES_2','qa.xlsx',
-  '[{"key_produccion":"QA|PANELES_2","id_linea":"PANELES_2","anio":2027,"semana_actual":1}]'::jsonb);
+  '[{"key_produccion":"QA|PANELES_2","id_linea":"PANELES_2","anio":2026,"semana_actual":42}]'::jsonb);
  EXECUTE 'SET CONSTRAINTS trg_pdt_manual_auditar_programacion IMMEDIATE';
  IF (SELECT count(*) FROM sgp_pdt_manual.programacion_cambios WHERE id_pendiente=pending)<>1
  THEN RAISE EXCEPTION 'REPEATED_IMPORT_DUPLICATED_AUDIT'; END IF;
  EXECUTE 'SET CONSTRAINTS trg_pdt_manual_auditar_programacion DEFERRED';
  PERFORM public.sgp_aplicar_export_diario('QA','PANELES_2','qa.xlsx',
-  '[{"key_produccion":"QA|PANELES_2","id_linea":"PANELES_2","anio":2027,"semana_actual":2}]'::jsonb);
+  '[{"key_produccion":"QA|PANELES_2","id_linea":"PANELES_2","anio":2026,"semana_actual":43}]'::jsonb);
  EXECUTE 'SET CONSTRAINTS trg_pdt_manual_auditar_programacion IMMEDIATE';
  IF (SELECT anio::text||'/'||semana_actual::text FROM public.sgp_producciones
-  WHERE key_produccion='QA|PANELES_2')<>'2027/2'
+  WHERE key_produccion='QA|PANELES_2')<>'2026/43'
  THEN RAISE EXCEPTION 'SAME_YEAR_IMPORT_FAILED'; END IF;
- RAISE NOTICE 'QA EXPORT YEAR PASS: cross-year, original immutable, repeated load, same-year value';
+ RAISE NOTICE 'QA EXPORT YEAR PASS: immutable original, repeated load, same-year rescheduling';
 END $qa$;
 DO $errors$ DECLARE rejected boolean; BEGIN
  rejected:=false;
  BEGIN
+  PERFORM public.sgp_aplicar_export_diario('QA','PANELES_2','qa.xlsx',
+   '[{"key_produccion":"QA|PANELES_2","id_linea":"PANELES_2","anio":2027,"semana_actual":1}]'::jsonb);
+ EXCEPTION WHEN OTHERS THEN
+  IF SQLERRM='PDT_EXPORT_YEAR_IMMUTABLE: QA|PANELES_2' THEN rejected:=true; ELSE RAISE; END IF;
+ END;
+ IF NOT rejected OR (SELECT anio::text||'/'||semana_actual::text FROM public.sgp_producciones
+  WHERE key_produccion='QA|PANELES_2')<>'2026/43'
+ THEN RAISE EXCEPTION 'CROSS_YEAR_REPROGRAMMING_ACCEPTED'; END IF;
+ rejected:=false;
+ BEGIN
+  UPDATE public.sgp_producciones SET anio=2027 WHERE key_produccion='QA|PANELES_2';
+ EXCEPTION WHEN OTHERS THEN
+  IF SQLERRM='PDT_PRODUCTION_YEAR_IMMUTABLE: QA|PANELES_2' THEN rejected:=true; ELSE RAISE; END IF;
+ END;
+ IF NOT rejected THEN RAISE EXCEPTION 'DIRECT_YEAR_CHANGE_ACCEPTED'; END IF;
+ rejected:=false;
+ BEGIN
   PERFORM public.sgp_aplicar_export_diario('QA','PANELES_2','reject.xlsx',
-   '[{"key_produccion":"QA|PANELES_2","id_linea":"PANELES_2","anio":2028,"semana_actual":2}]'::jsonb);
+   '[{"key_produccion":"QA|PANELES_2","id_linea":"PANELES_2","anio":2026,"semana_actual":43}]'::jsonb);
  EXCEPTION WHEN OTHERS THEN
   IF SQLERRM='PDT_EXPORT_YEAR_DELEGATED_NOT_OK' THEN rejected:=true; ELSE RAISE; END IF;
  END;
- IF NOT rejected OR (SELECT anio FROM public.sgp_producciones WHERE key_produccion='QA|PANELES_2')<>2027
+ IF NOT rejected OR (SELECT anio FROM public.sgp_producciones WHERE key_produccion='QA|PANELES_2')<>2026
  THEN RAISE EXCEPTION 'JSON_REJECTION_CHANGED_YEAR'; END IF;
  rejected:=false;
  BEGIN
   PERFORM public.sgp_aplicar_export_diario('QA','PANELES_2','raise.xlsx',
-   '[{"key_produccion":"QA|PANELES_2","id_linea":"PANELES_2","anio":2028,"semana_actual":2}]'::jsonb);
+   '[{"key_produccion":"QA|PANELES_2","id_linea":"PANELES_2","anio":2026,"semana_actual":43}]'::jsonb);
  EXCEPTION WHEN OTHERS THEN
   IF SQLERRM='QA_EXPORT_ERROR' THEN rejected:=true; ELSE RAISE; END IF;
  END;
- IF NOT rejected OR (SELECT anio FROM public.sgp_producciones WHERE key_produccion='QA|PANELES_2')<>2027
+ IF NOT rejected OR (SELECT anio FROM public.sgp_producciones WHERE key_produccion='QA|PANELES_2')<>2026
  THEN RAISE EXCEPTION 'SQL_EXCEPTION_CHANGED_YEAR'; END IF;
- RAISE NOTICE 'QA EXPORT YEAR PASS: JSON rejection and SQL exception leave year unchanged';
+ RAISE NOTICE 'QA EXPORT YEAR PASS: 2026->2027 rejected; JSON rejection and SQL exception leave period unchanged';
 END $errors$;
 SAVEPOINT missing_year;
 DO $reject$ BEGIN
@@ -97,7 +114,7 @@ EXCEPTION WHEN OTHERS THEN
 END $reject$;
 ROLLBACK TO SAVEPOINT missing_year;
 DO $verify$ BEGIN
- IF (SELECT semana_actual FROM public.sgp_producciones WHERE key_produccion='QA|PANELES_2')<>2
+ IF (SELECT semana_actual FROM public.sgp_producciones WHERE key_produccion='QA|PANELES_2')<>43
  THEN RAISE EXCEPTION 'REJECTED_IMPORT_WROTE_DATA'; END IF;
  RAISE NOTICE 'QA EXPORT YEAR PASS: missing year rejected without writes';
 END $verify$;

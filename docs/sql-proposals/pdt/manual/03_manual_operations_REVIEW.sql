@@ -54,7 +54,7 @@ BEGIN
  RETURN jsonb_build_object('ok',true,'contract_version','pdt-manual-3','pendientes',coalesce((SELECT jsonb_agg(to_jsonb(x)) FROM (
   SELECT md.id_pendiente,r.anio AS anio_original,r.semana AS semana_original,
    prod.anio AS anio,coalesce(prod.semana_actual,prod.semana_base) AS semana,
-   r.linea,r.key_produccion,r.produccion,r.reserva,
+   r.linea,r.key_produccion,r.produccion,r.reserva,r.fecha AS fecha_reporte,
    r.sistema,r.acabado,r.origen,r.observacion AS observacion_general,md.perfil,
    md.fabricacion AS fabricacion_original,md.marca AS marca_original,
    md.longitud AS longitud_original,md.cantidad AS cantidad_original,md.nc,

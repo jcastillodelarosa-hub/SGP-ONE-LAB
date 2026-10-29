@@ -47,11 +47,12 @@ export async function executeManualPdt(client, operation, args) {
 }
 
 export async function refreshManualHeader(client,token,id){
- const result=await client.rpc('sgp_pdt_manual_listar_v1',{p_token:token});
+ const [result,cutoff]=await Promise.all([
+  client.rpc('sgp_pdt_manual_listar_v1',{p_token:token}),operationalPdtCutoff(client,token)]);
  if(result.error)throw result.error;
  if(result.data?.ok!==true||result.data.contract_version!=='pdt-manual-3'||!Array.isArray(result.data.pendientes))
   throw new Error('Cabecera PDT manual no disponible');
- const matches=result.data.pendientes.filter(row=>String(row.id_pendiente)===String(id));
+ const matches=operationalPdtRows(result.data.pendientes,cutoff).filter(row=>String(row.id_pendiente)===String(id));
  if(matches.length!==1)throw new Error('Programación manual no disponible o ambigua');
  return matches[0];
 }
@@ -79,13 +80,30 @@ export async function discoverPendingV2(client, token) {
   return data;
 }
 
+export async function operationalPdtCutoff(client,token){
+ const {data,error}=await client.rpc('sgp_pdt_corte_operativo_v1',{p_token:token});
+ if(error)throw error;
+ if(data?.ok!==true||data.contract_version!==1||
+   (data.desde!==null&&(!Number.isFinite(Date.parse(data.desde))||!/[zZ]|[+-]\d\d:\d\d$/.test(data.desde))))
+  throw new Error('Corte operativo PDT no disponible');
+ return data.desde===null?null:Date.parse(data.desde);
+}
+
+export function operationalPdtRows(rows,cutoff){
+ if(cutoff===null)return rows;
+ return rows.filter(row=>{
+  const instant=Date.parse(row.fecha_reporte);
+  return Number.isFinite(instant)&&instant>=cutoff;
+ });
+}
+
 export async function loadPendingRows(client,token,role) {
-  const capabilities=await discoverPendingV2(client,token);
+  const [capabilities,cutoff]=await Promise.all([discoverPendingV2(client,token),operationalPdtCutoff(client,token)]);
   const [legacy,modern]=await Promise.all([capabilities && ['RECEPCION','PICKING'].includes(role)?Promise.resolve({data:[],error:null}):client.rpc('sgp_aluminio_pendientes_listar',{p_token:token,p_solo_abiertos:false}),capabilities?client.rpc('sgp_aluminio_pendientes_listar_v2',{p_token:token,p_solo_abiertos:false}):Promise.resolve(null)]);
   const {data,error}=legacy;
   if(error)throw error;
   if(!Array.isArray(data))throw new Error('Lista legacy inválida');
-  if(!capabilities)return {rows:data,capabilities:null};
+  if(!capabilities)return {rows:operationalPdtRows(data,cutoff),capabilities:null};
   if(modern.error)throw modern.error;
   const adapted=adaptPendingListV2(modern.data);
   let manualResponse=await client.rpc('sgp_pdt_manual_listar_v1',{p_token:token});
@@ -101,16 +119,18 @@ export async function loadPendingRows(client,token,role) {
     manual_pdt:manualIds.has(String(r.id_pendiente))}));
   const present=new Set(rows.map(r=>r.id_pendiente));
   for(const r of data)if(!present.has(r.id_pendiente))rows.push(r);
-  return {rows,capabilities};
+  return {rows:operationalPdtRows(rows,cutoff),capabilities};
 }
 
 /** Fresh authoritative read after a mutation; no legacy fallback or optimistic balance. */
 export async function refreshPendingV2(client,token,id){
- const result=await client.rpc('sgp_aluminio_pendientes_listar_v2',{p_token:token,p_solo_abiertos:false});
+ const [result,cutoff]=await Promise.all([
+  client.rpc('sgp_aluminio_pendientes_listar_v2',{p_token:token,p_solo_abiertos:false}),
+  operationalPdtCutoff(client,token)]);
  if(result.error)throw result.error;
  const data=result.data;
  if(data?.ok!==true||data.contract_version!==2||!Array.isArray(data.pendientes))throw new Error('No se pudo comprobar el estado actualizado del PDT');
- const matches=data.pendientes.filter(row=>String(row.id_pendiente)===String(id));
+ const matches=operationalPdtRows(data.pendientes,cutoff).filter(row=>String(row.id_pendiente)===String(id));
  if(matches.length!==1)throw new Error('PDT no disponible o ambiguo en la consulta actualizada');
  return adaptPendingListV2({...data,pendientes:matches})[0];
 }
