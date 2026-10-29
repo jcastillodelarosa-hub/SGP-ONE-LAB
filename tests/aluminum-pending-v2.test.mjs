@@ -54,7 +54,7 @@ test('inactive or unresolved historical NC never certifies a potential solution'
   assert.equal(ncAvailability([{estado:'FINALIZADA',activo:false}]).finalizadas,0);
 });
 
-import {discoverPendingV2,loadPendingRows,executeManualPdt} from '../src/services/aluminum-pending-v2.js';
+import {discoverPendingV2,loadPendingRows,executeManualPdt,refreshManualHeader} from '../src/services/aluminum-pending-v2.js';
 import {validateFabricationDistribution} from '../src/domain/aluminum-pending-balances.js';
 test('missing capabilities RPC preserves legacy read without a new write',async()=>{
   const calls=[];const row={id_pendiente:'legacy',cantidad:9};
@@ -93,6 +93,13 @@ test('manual operations never fall back to a legacy write',async()=>{
  assert.deepEqual(calls,['sgp_pdt_manual_cerrar_v1']);
  await assert.rejects(executeManualPdt(client,'sgp_pdt_cerrar_v2',{}),/no permitida/);
  assert.equal(calls.length,1);
+});
+test('manual refresh reads the current programmed period and preserves the original',async()=>{
+ const client={rpc:async name=>name==='sgp_pdt_manual_listar_v1'?{data:{ok:true,contract_version:'pdt-manual-3',pendientes:[
+  {id_pendiente:'p',anio_original:2026,semana_original:42,anio:2027,semana:1,reserva:'R'}]}}:{error:{message:'unexpected'}}};
+ const row=await refreshManualHeader(client,'synthetic','p');
+ assert.deepEqual([row.anio_original,row.semana_original,row.anio,row.semana],[2026,42,2027,1]);
+ await assert.rejects(refreshManualHeader(client,'synthetic','other'),/no disponible o ambigua/);
 });
 test('source reference distinguishes source rows; duplicate same source rejected',()=>{
   const row={fabricacion:'E17',longitud:'109.9375',acabado:'DS',cantidad:4};

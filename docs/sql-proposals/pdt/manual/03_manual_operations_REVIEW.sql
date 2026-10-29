@@ -47,14 +47,17 @@ LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path TO '' AS $fn$
 BEGIN
  PERFORM public.sgp_pdt_validar_rol_real(p_token,ARRAY['ADMINISTRADOR','COORDINADOR','RECEPCION','LIDER LINEA','LIDER MECANIZADO','LIDER','PICKING','SUPERVISOR DE PICKING','PATINADOR','CONSULTA']);
  RETURN jsonb_build_object('ok',true,'contract_version','pdt-manual-3','pendientes',coalesce((SELECT jsonb_agg(to_jsonb(x)) FROM (
-  SELECT md.id_pendiente,r.anio,r.semana,r.linea,r.key_produccion,r.produccion,r.reserva,
+  SELECT md.id_pendiente,r.anio AS anio_original,r.semana AS semana_original,
+   prod.anio AS anio,coalesce(prod.semana_actual,prod.semana_base) AS semana,
+   r.linea,r.key_produccion,r.produccion,r.reserva,
    r.sistema,r.acabado,r.origen,r.observacion AS observacion_general,md.perfil,
    md.fabricacion AS fabricacion_original,md.marca AS marca_original,
    md.longitud AS longitud_original,md.cantidad AS cantidad_original,md.nc,
    p.estado,p.estado_repo,p.validacion_estado
   FROM sgp_pdt_manual.reportes r JOIN sgp_pdt_manual.detalles md USING(id_reporte)
+  JOIN public.sgp_producciones prod ON prod.key_produccion=r.key_produccion
   JOIN public.sgp_aluminio_pendientes p USING(id_pendiente)
-  WHERE p.estado='PENDIENTE' ORDER BY r.anio DESC,r.semana DESC,r.fecha DESC
+  WHERE p.estado='PENDIENTE' ORDER BY prod.anio DESC,coalesce(prod.semana_actual,prod.semana_base) DESC,r.fecha DESC
  ) x),'[]'::jsonb));
 END $fn$;
 

@@ -24,7 +24,7 @@ try:
    page.set_content(f'<link rel="stylesheet" href="{base}/styles.css"><div id="fixture"></div>')
    page.evaluate('''async base=>{
     const {openPdtV2}=await import(base+'/src/modules/pdt-v2-controller.js');
-    window.row={id_pendiente:'qa-manual',manual_pdt:true,contrato_pdt:'V2',estado:'PENDIENTE',estado_repo:'MECANIZADO',validacion_estado:'VALIDADO',produccion:'QA ORDER',reserva:'R',semana:44,perfil:'PANEL-REF',fabricacion_original:'E17',marca_original:'A',longitud_original:100,cantidad_original:2,observacion_general:'QA sintética',cantidad:2,cantidad_validada:2,avance_neto:1,saldo_mecanizado:1,nc:'NC-QA',detalles:[{id_detalle:'qa-detail',fabricacion:'E17',longitud:100,acabado:'DS',cantidad_validada:2,avance_neto:1,saldo:1}],ncs:[],movimientos:[]};
+    window.row={id_pendiente:'qa-manual',manual_pdt:true,contrato_pdt:'V2',estado:'PENDIENTE',estado_repo:'MECANIZADO',validacion_estado:'VALIDADO',produccion:'QA ORDER',reserva:'R',anio:2027,semana:1,anio_original:2026,semana_original:42,perfil:'PANEL-REF',fabricacion_original:'E17',marca_original:'A',longitud_original:100,cantidad_original:2,observacion_general:'QA sintética',cantidad:2,cantidad_validada:2,avance_neto:1,saldo_mecanizado:1,nc:'NC-QA',detalles:[{id_detalle:'qa-detail',fabricacion:'E17',longitud:100,acabado:'DS',cantidad_validada:2,avance_neto:1,saldo:1}],ncs:[],movimientos:[]};
     window.calls=[];window.caps={contract_version:2,picking_cuantitativo:true,cierre_v2:true,operations:['sgp_aluminio_pendiente_registrar_avance_v1','sgp_aluminio_pendiente_revertir_avance_v1','sgp_pdt_estado_v2','sgp_aluminio_pendiente_nc_vincular_v1']};
     window.esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     window.show=(title,meta,body,footer)=>{document.querySelector('#fixture').innerHTML='<div id="repoWorkModal" class="piece-modal"><div class="piece-modal-card repo-work-card" role="dialog"><div class="piece-modal-head"><h2>'+window.esc(title)+'</h2></div><div class="piece-modal-meta">'+meta+'</div><div class="repo-work-body">'+body+'</div><div class="repo-work-footer">'+footer+'</div></div></div>';return document.querySelector('#repoWorkModal')};
@@ -33,6 +33,8 @@ try:
     await window.open();
    }''',base)
    assert 'QA sintética' in page.locator('#repoWorkModal').text_content()
+   assert '2027 · semana 1' in page.locator('#repoWorkModal').text_content()
+   assert '2026 · semana 42' in page.locator('#repoWorkModal').text_content()
    assert 'PANEL-REF' in page.locator('#repoWorkModal').text_content()
    assert page.locator('[data-operation=advance]').count()==1
    assert page.locator('[data-operation=delivery]').count()==1

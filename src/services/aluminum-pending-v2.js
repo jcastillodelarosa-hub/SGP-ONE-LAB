@@ -46,6 +46,16 @@ export async function executeManualPdt(client, operation, args) {
   return result.data;
 }
 
+export async function refreshManualHeader(client,token,id){
+ const result=await client.rpc('sgp_pdt_manual_listar_v1',{p_token:token});
+ if(result.error)throw result.error;
+ if(result.data?.ok!==true||result.data.contract_version!=='pdt-manual-3'||!Array.isArray(result.data.pendientes))
+  throw new Error('Cabecera PDT manual no disponible');
+ const matches=result.data.pendientes.filter(row=>String(row.id_pendiente)===String(id));
+ if(matches.length!==1)throw new Error('Programación manual no disponible o ambigua');
+ return matches[0];
+}
+
 export async function executePendingV2(client, capabilities, operation, args) {
   if (!NEW_WRITES.has(operation) || capabilities?.contract_version !== 2 ||
       !Array.isArray(capabilities.operations) || !capabilities.operations.includes(operation)) {

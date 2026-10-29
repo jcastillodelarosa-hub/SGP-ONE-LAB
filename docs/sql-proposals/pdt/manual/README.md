@@ -1,10 +1,10 @@
-# PDT manual unificado — Issue #140, Fases 1–3
+# PDT manual unificado — Issue #140, Fases 1–4
 
 Estado: **implementado en rama; SQL REVIEW no aplicado ni publicado**. Base `main` `55a309729bb3166cce98e24eb7e840169f4b7890`. No se archivan los 101 PDT históricos. PR #139 se mantiene independiente; ninguna de sus migraciones se incluye aquí.
 
 ## Contratos y relaciones
 
-`sgp_pdt_manual.reportes` es una cabecera transaccional por operación, con clave de idempotencia y campos indexados `anio`, `semana`, `linea`, `key_produccion`, `produccion`, `reserva`, `sistema`, `acabado`, `origen`, `usuario`, `fecha`. El año y la semana provienen de la vista de programación de reservas; no se aceptan como autoridad desde el navegador. Si la vista real no ofrece año explícito ni fecha programada, el catálogo omite esas filas y el alta falla cerrada. Confirmar el campo exacto en el preflight de instalación.
+`sgp_pdt_manual.reportes` es una cabecera transaccional por operación, con clave de idempotencia y campos indexados `anio`, `semana`, `linea`, `key_produccion`, `produccion`, `reserva`, `sistema`, `acabado`, `origen`, `usuario`, `fecha`. Año y semana del reporte son **originales e inmutables**. La relación de reserva procede de `sgp_produccion_reservas_v`; el período vigente procede de la misma fila `sgp_producciones` (`anio`, `COALESCE(semana_actual,semana_base)`). La vista no expone año. El navegador no es autoridad para el período.
 
 `sgp_pdt_manual.detalles` contiene una fila por combinación de referencia PANEL, fabricación, marca, longitud y acabado. Cada fila tiene FK a `sgp_aluminio_pendientes`, creado como V2 `POR_VALIDAR` con cantidad original, NC opcional y observación. `sgp_pdt_manual.fuentes` registra todas las identidades `id_pieza` elegibles y su snapshot; no asigna cantidad a una fuente individual. La cantidad consolidada está solo en el detalle y el PDT. Las funciones públicas usan sesión y rol real, contexto de producción/reserva resuelto en servidor, el maestro PANEL y la relación de reserva compartida existente. El alta manual se limita a ADMINISTRADOR/COORDINADOR y, para ENSAMBLE/EMPAQUE, LIDER LINEA; el diálogo Picking existente conserva PATINADOR y su contrato V4. No se alteran RPC V4, Picking, NC ni RLS. Una NC escrita debe existir y enlazarse sin cambiar su estado; la RPC de consulta exacta muestra número, estado y reserva de solución si existe.
 
@@ -24,24 +24,30 @@ La entrega manual se registra contra una entrega real `sgp_picking_entregas` y u
 
 El guard de Fase 2 exige `md5(prosrc)=51bed910a19ee368c2584e2b7ececc17` para `sgp_aluminio_pendiente_validar_detalles_v1(text,uuid,jsonb,text,text)`, basado en la definición exportada del contrato instalado. Si PR #139 u otra migración cambia ese cuerpo, detener la instalación y reconciliar el despacho con la definición vigente; no modificar solo la huella. La prueba aislada usa un pin temporal del cuerpo sintético, nunca altera el SQL REVIEW.
 
-**Año programado pendiente de certificar con fuente real.** La Fase 1 busca `anio_programacion`, `anio_reserva` o `fecha_programacion` en `sgp_produccion_reservas_v` y falla cerrada si faltan; esta sesión no dispone de consulta autenticada a Supabase para confirmar cuál es oficial. Consulta mínima de catálogo antes de instalar:
+**Fase 4 — programación vigente.** ChatGPT confirmó en Supabase que `sgp_producciones` contiene `anio`, `semana_base` y `semana_actual`; la vista de reservas expone `semana_produccion=COALESCE(semana_actual,semana_base)`, sin año. Por ello se corrigió `01_manual_phase1_REVIEW.sql` para leer año y semana desde la misma producción, y `03_manual_operations_REVIEW.sql` para devolver el período original y el vigente sin alterar cantidades ni historial. `04_programacion_vigente_REVIEW.sql` observa únicamente cambios de período en producciones con PDT manual, registra antes/después en una tabla privada y en el historial PDT, sin actualizar el reporte. Actualizaciones repetidas del mismo período no crean eventos. La reversión 04 retira el observador y **conserva** el historial; no vuelve a la fuente de año equivocada.
+
+**Bloqueo exacto para reprogramaciones entre años:** no está versionado ni disponible en esta sesión el cuerpo productivo del escritor que actualiza `sgp_producciones.anio` junto a `semana_actual`. La prueba aislada 2026→2027 demuestra el contrato solo cuando ambos campos se actualizan correctamente; no certifica que el escritor productivo lo haga. Antes de instalar 01/03/04 o declarar Fase 4 lista para producción, verificar mediante lectura ese escritor y sus triggers. Consulta de metadatos/definiciones, sin datos operativos:
 
 ```sql
-SELECT attname, format_type(atttypid,atttypmod) AS tipo
-FROM pg_attribute
-WHERE attrelid='public.sgp_produccion_reservas_v'::regclass
-  AND attnum>0 AND NOT attisdropped
-  AND attname IN ('anio_programacion','anio_reserva','fecha_programacion','semana_reserva','semana_produccion')
-ORDER BY attname;
+SELECT p.oid::regprocedure AS firma, md5(p.prosrc) AS huella,
+       pg_get_functiondef(p.oid) AS definicion
+FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
+WHERE n.nspname='public' AND p.prosrc ILIKE '%sgp_producciones%'
+  AND (p.prosrc ILIKE '%semana_actual%' OR p.prosrc ILIKE '%anio%')
+ORDER BY firma::text;
+SELECT t.tgname, t.tgenabled, pg_get_triggerdef(t.oid) AS definicion
+FROM pg_trigger t
+WHERE t.tgrelid='public.sgp_producciones'::regclass AND NOT t.tgisinternal
+ORDER BY t.tgname;
 ```
 
-El catálogo no prueba semántica de negocio: confirmar con el propietario qué campo gobierna el año oficial si hay más de uno.
+El `md5(prosrc)` del validador instalado `sgp_aluminio_pendiente_validar_detalles_v1` fue confirmado como `51bed910a19ee368c2584e2b7ececc17`, igual al guard de Fase 2. **PR #139 sigue Draft** y propone sustituir ese despachador y el acreditador de cierre; si se instala antes, el guard 02 debe detener la instalación. Conciliar los cuerpos y la secuencia en un esquema restaurado; no aceptar una huella nueva sin comparar la función.
 
 ## Evidencia y preflight
 
 Node: pruebas de agrupación, reservas, referencias, cantidades, NC y no-fallback. PostgreSQL 17.11 aislado, fixture sintética y transacción revertida: instalación de 01, cabecera, dos detalles, dos fuentes de una combinación, 7 unidades sin multiplicación, reintento, rol denegado, FRAME rechazado, enlace y lectura NC. Visual local PC 1440×900 y móvil 390×844 con RPC sintéticas; capturas en `tests/pdt-manual/`. Esto no prueba Supabase productivo.
 
-Antes de aplicar: backup restaurado, confirmar columnas de año/semana en `sgp_produccion_reservas_v`, firmas de `sgp_pdt_contexto_internal_v3` y `sgp_pdt_origenes_internal_v3`, triggers de identidad y contrato, grants de sesión real, FKs/columnas de historial y NC, pruebas de instalación y rollback en restauración compatible. Si algo difiere, detener la instalación. La migración está fuera de `supabase/migrations` y no se ejecuta automáticamente.
+Antes de aplicar: backup restaurado, confirmar el escritor del año al reprogramar, firmas de `sgp_pdt_contexto_internal_v3` y `sgp_pdt_origenes_internal_v3`, triggers de identidad y contrato, grants de sesión real, FKs/columnas de historial y NC, pruebas de instalación y rollback en restauración compatible. Si algo difiere, detener la instalación. Los SQL REVIEW están fuera de `supabase/migrations` y no se ejecutan automáticamente.
 
 ## Reversión
 
@@ -50,3 +56,5 @@ Si no se registraron reportes, ejecutar `ROLLBACK_REVIEW.sql` en una transacció
 Para revertir solo la Fase 2, `02_ROLLBACK_REVIEW.sql` restaura la función pública original desde `funcion_previa` y elimina los objetos de Fase 2; aborta si ya existe una validación manual. Con validaciones existentes se requiere reparación hacia delante y conciliación, no eliminar su historial o sus detalles.
 
 Fase 3: `tests/pdt-manual/operations-isolated.sql` ejecuta alta, validación, etapas, avances parciales, saldos, permisos, entrega, diferencia auditada, validación, asignación, idempotencia, bloqueo de cambios en fuentes y cierre en PostgreSQL 17.11 aislado, con `ROLLBACK`. La instalación y reversión de 03 se probaron en esa base. `tests/pdt-manual/browser-phase3.py` recorre la ventana real con RPC sintéticas en 1366×900 y 390×844; capturas `phase3-1366.png` y `phase3-390.png`. Ninguna prueba registra datos productivos ni demuestra que Supabase ya tenga estas RPC.
+
+Fase 4: `tests/pdt-manual/programming-isolated.sql` prueba 2026 semana 41→42→43 y 2026→2027 semana 1 con actualización explícita de `anio`, dos reservas compartidas, original inmutable, una auditoría por transición, NC/cantidad intactas y ausencia de eventos sobre LEGACY/V2. La instalación, reversión y reinstalación del observador 04 pasaron en la base PostgreSQL 17.11 aislada. No se ha demostrado todavía la semántica del escritor productivo entre años.

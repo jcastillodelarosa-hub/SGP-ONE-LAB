@@ -2,7 +2,7 @@ import {capturePdtView,restorePdtView} from './pdt-v2-view-state.js';
 import {advancesForm,renderPdtWorkspace,bindPdtNavigation} from './pdt-v2-presentation.js';
 import {distributionState,renderSourceDistribution,manualDistributionState,renderManualDistribution} from './pdt-source-distribution.js';
 import {groupPanelSources} from '../domain/pdt-manual.js';
-import {executePendingV2,executeManualPdt,refreshPendingV2} from '../services/aluminum-pending-v2.js';
+import {executePendingV2,executeManualPdt,refreshPendingV2,refreshManualHeader} from '../services/aluminum-pending-v2.js';
 import {normalizeNcNumbers} from '../domain/aluminum-pending-balances.js';
 
 /** Uses SGP's existing scrollable work modal. Backend is always final authority. */
@@ -49,7 +49,7 @@ export async function openPdtV2({row,client,token,role,capabilities,show,escape:
   let form='';
   if(needsValidation && editable && validator)form+=manual?renderManualDistribution(manualGroups,manualOriginal,sourceError,esc):renderSourceDistribution(sources,row.cantidad,sourceError,esc,row.perfil);
   if(validated && editable && machinist)form+=advancesForm(details,moves,row,esc);
-  if(manual)form+='<section class="repo-modal-section" data-pdt-section="distribution"><h3>Reporte manual</h3><p>Semana '+esc(row.semana||'—')+' · Reserva '+esc(row.reserva||'—')+' · PANEL '+esc(row.perfil||'—')+'</p><p>Original: '+esc(row.fabricacion_original||'—')+' · '+esc(row.marca_original||'—')+' · '+esc(row.longitud_original||'—')+' · '+esc(row.cantidad_original??row.cantidad??'—')+'. Validado: '+esc(row.cantidad_validada??'Pendiente')+'. Procesado: '+esc(row.avance_neto??'—')+'. Saldo: '+esc(row.saldo_mecanizado??'—')+'.</p><p>NC: '+esc(row.nc||'Sin NC')+' · Observación: '+esc(row.observacion_general||'Sin observación')+'</p></section>';
+  if(manual)form+='<section class="repo-modal-section" data-pdt-section="distribution"><h3>Reporte manual</h3><p>Programación vigente: '+esc(row.anio||'—')+' · semana '+esc(row.semana||'—')+' · Reserva '+esc(row.reserva||'—')+' · PANEL '+esc(row.perfil||'—')+'</p><p>Período original del reporte: '+esc(row.anio_original??row.anio??'—')+' · semana '+esc(row.semana_original??row.semana??'—')+'</p><p>Original: '+esc(row.fabricacion_original||'—')+' · '+esc(row.marca_original||'—')+' · '+esc(row.longitud_original||'—')+' · '+esc(row.cantidad_original??row.cantidad??'—')+'. Validado: '+esc(row.cantidad_validada??'Pendiente')+'. Procesado: '+esc(row.avance_neto??'—')+'. Saldo: '+esc(row.saldo_mecanizado??'—')+'.</p><p>NC: '+esc(row.nc||'Sin NC')+' · Observación: '+esc(row.observacion_general||'Sin observación')+'</p></section>';
   if(editable && ncEditor)form+='<section class="repo-modal-section"><h3>NC vinculadas</h3><p>'+esc((row.ncs||[]).map(n=>(n.referencia||n.consecutivo)+' · '+(n.estado||n.resolucion)).join(' / ')||row.nc||'Sin NC')+'</p><label>Añadir NC (sin reemplazar)<input data-ncs type="text" autocomplete="off"></label><button type="button" data-operation="nc">Añadir NC</button></section>';
   if(validated && editable && capabilities.picking_cuantitativo && (pickRegister||pickValidate) && !picking.error){
     form+='<section class="repo-modal-section"><h3>Entrega Picking por detalle</h3><p>Registrar cantidades efectivamente entregadas. Los faltantes de la orden no calculan estas cantidades.</p>';
@@ -125,10 +125,10 @@ export async function openPdtV2({row,client,token,role,capabilities,show,escape:
     if(session.closed||modal.hidden)return;
     if(session.clearAfterWrite?.detail)delete view.quantities[session.clearAfterWrite.detail];if(session.clearAfterWrite?.delivery)view.values['data-pick-qty']='';
     session.busy=true;session.modal?.setAttribute('aria-busy','true');setFeedback(session.dirty?'Operación confirmada. Actualizando PDT…':'Actualizando PDT…');freeze();modal.querySelector('[data-refresh-pdt]').disabled=true;
-    try{const fresh=await refreshPendingV2(client,token,row.id_pendiente);if(session.closed||modal.hidden)return;
+    try{const fresh=await refreshPendingV2(client,token,row.id_pendiente);const header=manual&&fresh.estado==='PENDIENTE'?await refreshManualHeader(client,token,row.id_pendiente):null;if(session.closed||modal.hidden)return;
       const pending=session.pending;if(pending&&!pending.args.p_idempotency_key&&!pending.args.p_clave){session.pending=null;session.feedback='Datos actualizados. Revisa el historial: la operación anterior no tuvo confirmación.';}
       session.needsRefresh=Boolean(session.pending);
-      await openPdtV2({row:{...row,...fresh},client,token,role,capabilities,show,escape:esc,reload,close:session.close,initialSection:view.section,_session:session,_restore:view});session.clearAfterWrite=null;
+      await openPdtV2({row:{...row,...fresh,...header},client,token,role,capabilities,show,escape:esc,reload,close:session.close,initialSection:view.section,_session:session,_restore:view});session.clearAfterWrite=null;
     }catch(error){session.needsRefresh=true;freeze();setFeedback((session.dirty?'Operación guardada. No la repitas. ':'')+'No se pudo actualizar: '+error.message+'. Usa Actualizar PDT.',true);modal.querySelector('[data-refresh-pdt]').disabled=false;}
     finally{session.busy=false;session.modal?.setAttribute('aria-busy','false');if(session.closed&&session.reloadOnFinish)notifyParent();}
   };

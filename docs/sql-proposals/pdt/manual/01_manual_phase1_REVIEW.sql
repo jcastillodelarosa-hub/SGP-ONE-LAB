@@ -10,9 +10,9 @@ DO $preflight$ BEGIN
  OR to_regclass('public.sgp_produccion_reservas_v') IS NULL
  OR to_regclass('public.sgp_aluminio_pendientes') IS NULL
  THEN RAISE EXCEPTION 'PDT_MANUAL_DEPENDENCY_MISSING'; END IF;
- IF NOT EXISTS(SELECT 1 FROM pg_attribute a WHERE a.attrelid='public.sgp_produccion_reservas_v'::regclass
-  AND a.attname IN ('anio_programacion','anio_reserva','fecha_programacion') AND a.attnum>0 AND NOT a.attisdropped)
- THEN RAISE EXCEPTION 'PDT_MANUAL_PROGRAMMED_YEAR_SOURCE_MISSING'; END IF;
+ IF (SELECT count(*) FROM pg_attribute a WHERE a.attrelid='public.sgp_producciones'::regclass
+  AND a.attname IN ('anio','semana_base','semana_actual') AND a.attnum>0 AND NOT a.attisdropped)<>3
+ THEN RAISE EXCEPTION 'PDT_MANUAL_PRODUCTION_PERIOD_COLUMNS_MISSING'; END IF;
  IF to_regnamespace('sgp_pdt_manual') IS NOT NULL THEN RAISE EXCEPTION 'PDT_MANUAL_ALREADY_INSTALLED'; END IF;
 END $preflight$;
 CREATE SCHEMA sgp_pdt_manual;
@@ -43,17 +43,13 @@ CREATE TABLE sgp_pdt_manual.fuentes(
 );
 REVOKE ALL ON ALL TABLES IN SCHEMA sgp_pdt_manual FROM PUBLIC,anon,authenticated;
 
--- Resolve year from an explicit programmed-year column or an ISO date in the
--- reserve view. Never infer it from today's date or from the week number alone.
+-- Current production year/week come from the same production row. The reserve
+-- view establishes membership; it does not supply an authoritative year.
 CREATE FUNCTION sgp_pdt_manual.programacion(p_key text,p_reserva text)
 RETURNS TABLE(anio integer,semana integer,linea text,produccion text,reserva text,sistema text,acabado text)
 LANGUAGE sql STABLE SECURITY DEFINER SET search_path TO '' AS $fn$
  SELECT DISTINCT
-  coalesce(nullif(to_jsonb(r)->>'anio_programacion','')::integer,
-           nullif(to_jsonb(r)->>'anio_reserva','')::integer,
-           extract(isoyear FROM nullif(to_jsonb(r)->>'fecha_programacion','')::date)::integer),
-  coalesce(nullif(to_jsonb(r)->>'semana_reserva','')::integer,
-           nullif(to_jsonb(r)->>'semana_produccion','')::integer),
+  p.anio::integer,coalesce(p.semana_actual,p.semana_base)::integer,
   p.id_linea,p.produccion,r.reserva,p.sistema,coalesce(r.acabado_reserva,'')
  FROM public.sgp_produccion_reservas_v r JOIN public.sgp_producciones p USING(key_produccion)
  WHERE p.id_linea='PANELES_2' AND (p_key IS NULL OR r.key_produccion=p_key)
