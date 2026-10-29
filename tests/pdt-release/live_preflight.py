@@ -7,6 +7,11 @@ SELECT CASE WHEN current_setting('transaction_read_only')='on' THEN 'PDT_TRANSAC
 DO $guard$
 DECLARE s text;
 BEGIN
+ IF current_user <> 'postgres' OR current_database() <> 'postgres'
+ THEN RAISE EXCEPTION 'PDT_PREFLIGHT_DATABASE_IDENTITY_MISMATCH'; END IF;
+ IF NOT has_database_privilege(current_user,current_database(),'CREATE')
+ OR NOT has_schema_privilege(current_user,'public','CREATE,USAGE')
+ THEN RAISE EXCEPTION 'PDT_PREFLIGHT_INSTALL_PERMISSION_MISSING'; END IF;
  IF to_regclass('public.sgp_aluminio_pendientes') IS NULL
  OR to_regclass('public.sgp_usuarios') IS NULL
  OR to_regprocedure('public.sgp_login(text,text)') IS NULL
@@ -27,6 +32,8 @@ def classify_failure(stderr, returncode):
  # Only fixed codes leave this process; never print libpq output or a connection URL.
  message = stderr.lower()
  guards = {
+  'pdt_preflight_database_identity_mismatch': 'PDT_PREFLIGHT_DATABASE_IDENTITY_MISMATCH',
+  'pdt_preflight_install_permission_missing': 'PDT_PREFLIGHT_INSTALL_PERMISSION_MISSING',
   'pdt_preflight_required_baseline_missing': 'PDT_PREFLIGHT_REQUIRED_BASELINE_MISSING',
   'pdt_preflight_cutover_already_installed': 'PDT_PREFLIGHT_CUTOVER_ALREADY_INSTALLED',
   'pdt_preflight_login_permission_changed': 'PDT_PREFLIGHT_LOGIN_PERMISSION_CHANGED',

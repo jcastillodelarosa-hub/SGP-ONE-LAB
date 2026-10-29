@@ -10,7 +10,7 @@ from verify_recovery import BUCKET, PREFIX, checked_record
 from compare_live_catalog import catalog_snapshot, compare, SECTIONS
 from prepare_cutover import render
 from artifact_digest import digest
-from validate_connection import valid
+from validate_connection import valid, from_backup_password
 from gcs_storage import PrivateStorage, SafeFailure, boundary
 
 
@@ -163,6 +163,17 @@ class ReleaseControls(unittest.TestCase):
                     url + '\nDATABASE_URL=other', ''):
             self.assertFalse(valid(bad))
 
+    def test_protected_backup_password_builds_scoped_tls_connection(self):
+        url = from_backup_password('synthetic@value')
+        self.assertTrue(valid(url))
+        self.assertIn('postgres.ocvxbwzqxbrfndkvjmfx:', url)
+        self.assertIn('synthetic%40value', url)
+        self.assertIn('sslmode=require', url)
+        for bad in ('', 'bad\nDATABASE_URL=other', 'bad\rvalue'):
+            with self.subTest(bad=repr(bad)):
+                with self.assertRaises(ValueError):
+                    from_backup_password(bad)
+
     def test_workflow_orders_guards_before_first_write_and_never_restores_automatically(self):
         workflow = (Path(__file__).resolve().parents[2] /
                     '.github/workflows/pdt-unified-production-release.yml').read_text()
@@ -200,6 +211,9 @@ class ReleaseControls(unittest.TestCase):
         self.assertIn('out.write("DATABASE_URL=" + url +', (Path(__file__).resolve().parent /
                       'validate_connection.py').read_text())
         self.assertIn('docker run --rm -e DATABASE_URL', workflow)
+        self.assertIn('SUPABASE_DB_PASSWORD: ' + '$' + '{{ secrets.SUPABASE_DB_PASSWORD }}', workflow)
+        self.assertNotIn('SGP_PDT_DATABASE_URL', workflow)
+        self.assertIn('pdt-unified-production', workflow)
         self.assertIn('run: python3 tests/pdt-release/post_release.py', workflow)
 
 

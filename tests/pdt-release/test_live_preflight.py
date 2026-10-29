@@ -10,6 +10,9 @@ import live_preflight
 class PreflightDiagnostics(unittest.TestCase):
     def test_sql_remains_read_only_and_rolls_back(self):
         self.assertIn('BEGIN READ ONLY;', live_preflight.SQL)
+        self.assertIn("current_user <> 'postgres'", live_preflight.SQL)
+        self.assertIn('has_database_privilege', live_preflight.SQL)
+        self.assertIn('has_schema_privilege', live_preflight.SQL)
         self.assertIn("current_setting('transaction_read_only')", live_preflight.SQL)
         self.assertTrue(live_preflight.SQL.rstrip().endswith('ROLLBACK;'))
 
@@ -21,6 +24,8 @@ class PreflightDiagnostics(unittest.TestCase):
             'relation "private.fixture" does not exist': 'PDT_PREFLIGHT_OBJECT_MISSING',
             'syntax error at or near "secret"': 'PDT_PREFLIGHT_SQL_REJECTED',
             'PDT_PREFLIGHT_CUTOVER_ALREADY_INSTALLED': 'PDT_PREFLIGHT_CUTOVER_ALREADY_INSTALLED',
+            'PDT_PREFLIGHT_DATABASE_IDENTITY_MISMATCH': 'PDT_PREFLIGHT_DATABASE_IDENTITY_MISMATCH',
+            'PDT_PREFLIGHT_INSTALL_PERMISSION_MISSING': 'PDT_PREFLIGHT_INSTALL_PERMISSION_MISSING',
         }
         for stderr, expected in examples.items():
             with self.subTest(expected=expected):

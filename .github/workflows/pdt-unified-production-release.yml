@@ -116,28 +116,10 @@ jobs:
           npm run verify:release
           npm test
           echo "SITE_SHA256=$(python3 tests/pdt-release/artifact_digest.py)" >> "$GITHUB_ENV"
-      - name: Prepare read-only connection using validated backup credential
-        if: inputs.operation == 'preflight'
+      - name: Prepare scoped PostgreSQL connection from protected backup credential
         env:
-          BACKUP_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-        run: |
-          python3 - <<'PY'
-          import os, urllib.parse
-          password=os.environ.get('BACKUP_DB_PASSWORD','')
-          if not password:
-              raise SystemExit('::error::SUPABASE_DB_PASSWORD missing in supabase-backup environment')
-          user='postgres.ocvxbwzqxbrfndkvjmfx'
-          url='postgresql://'+user+':'+urllib.parse.quote(password,safe='')+'@aws-0-us-east-2.pooler.supabase.com:5432/postgres?sslmode=require'
-          with open(os.environ['GITHUB_ENV'],'a') as out:
-              out.write('DATABASE_URL='+url+chr(10))
-          print('Read-only preflight connection configured from existing protected backup credential')
-          PY
-      - name: Prepare production connection for separately authorized publish
-        if: inputs.operation == 'publish'
-        env:
-          PDT_DATABASE_URL: ${{ secrets.SGP_PDT_DATABASE_URL }}
-        run: |
-          python3 tests/pdt-release/validate_connection.py
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: python3 tests/pdt-release/validate_connection.py
       - name: Validate live baseline without writes
         run: python3 tests/pdt-release/live_preflight.py
       - name: Stop after preflight
