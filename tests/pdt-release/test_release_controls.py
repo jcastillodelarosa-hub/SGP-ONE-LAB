@@ -10,7 +10,7 @@ from verify_recovery import BUCKET, PREFIX, checked_record
 from compare_live_catalog import catalog_snapshot, compare, SECTIONS
 from prepare_cutover import render
 from artifact_digest import digest
-from validate_connection import valid
+from validate_connection import valid, from_backup_password
 from gcs_storage import PrivateStorage, SafeFailure, boundary
 
 
@@ -163,6 +163,17 @@ class ReleaseControls(unittest.TestCase):
                     url + '\nDATABASE_URL=other', ''):
             self.assertFalse(valid(bad))
 
+    def test_protected_backup_password_builds_scoped_tls_connection(self):
+        url = from_backup_password('synthetic@value')
+        self.assertTrue(valid(url))
+        self.assertIn('postgres.ocvxbwzqxbrfndkvjmfx:', url)
+        self.assertIn('synthetic%40value', url)
+        self.assertIn('sslmode=require', url)
+        for bad in ('', 'bad\nDATABASE_URL=other', 'bad\rvalue'):
+            with self.subTest(bad=repr(bad)):
+                with self.assertRaises(ValueError):
+                    from_backup_password(bad)
+
     def test_workflow_orders_guards_before_first_write_and_never_restores_automatically(self):
         workflow = (Path(__file__).resolve().parents[2] /
                     '.github/workflows/pdt-unified-production-release.yml').read_text()
@@ -183,6 +194,27 @@ class ReleaseControls(unittest.TestCase):
         self.assertIn("j['name'] in allowed_proof_jobs[data['head_branch']]", workflow)
         self.assertNotIn('pg_restore --clean', workflow)
         self.assertNotIn('06_ROLLBACK_REVIEW.sql\n          docker', workflow)
+
+
+    def test_publish_keeps_pinned_evidence_and_validated_connection(self):
+        workflow = (Path(__file__).resolve().parents[2] /
+                    '.github/workflows/pdt-unified-production-release.yml').read_text()
+        verify = workflow.split('- name: Verify isolated restoration evidence and freshness', 1)[1].split('- name: Compare live RPC', 1)[0]
+        compare = workflow.split('- name: Compare live RPC', 1)[1].split('- name: Production release interlock', 1)[0]
+        for key in ('BACKUP_OBJECT', 'BACKUP_SHA256', 'RECOVERY_GENERATION',
+                    'RECOVERY_BYTES', 'RECOVERY_SHA256'):
+            line = key + ': ' + '$' + '{{ inputs.' + key.lower() + ' }}'
+            self.assertIn(line, verify)
+            self.assertIn(line, compare)
+        self.assertIn('run: python3 tests/pdt-release/verify_recovery.py', verify)
+        self.assertIn('run: python3 tests/pdt-release/compare_live_catalog.py', compare)
+        self.assertIn('out.write("DATABASE_URL=" + url +', (Path(__file__).resolve().parent /
+                      'validate_connection.py').read_text())
+        self.assertIn('docker run --rm -e DATABASE_URL', workflow)
+        self.assertIn('SUPABASE_DB_PASSWORD: ' + '$' + '{{ secrets.SUPABASE_DB_PASSWORD }}', workflow)
+        self.assertNotIn('SGP_PDT_DATABASE_URL', workflow)
+        self.assertIn('pdt-unified-production', workflow)
+        self.assertIn('run: python3 tests/pdt-release/post_release.py', workflow)
 
 
 if __name__ == '__main__':

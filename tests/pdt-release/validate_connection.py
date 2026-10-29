@@ -74,13 +74,31 @@ def valid(url):
     return diagnose(url) is None
 
 
+def from_backup_password(password):
+    """Build the one approved project connection from the protected password."""
+    if not password or any(ord(char) < 32 or ord(char) == 127 for char in password):
+        raise ValueError("MISSING_OR_INVALID_BACKUP_PASSWORD")
+    from urllib.parse import quote
+    url = ("postgresql://postgres." + PROJECT + ":" + quote(password, safe="") +
+           "@aws-0-us-east-2.pooler.supabase.com:5432/postgres?sslmode=require")
+    reason = diagnose(url)
+    if reason:
+        raise ValueError(reason)
+    return url
+
+
 if __name__ == "__main__":
     try:
-        url = secure_url(os.environ.get("PDT_DATABASE_URL", ""))
+        password = os.environ.get("SUPABASE_DB_PASSWORD", "")
+        url = from_backup_password(password)
+        print("::add-mask::" + password)
         print("::add-mask::" + url)
         with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as out:
             out.write("DATABASE_URL=" + url + "\n")
         print("PRODUCTION_DATABASE_TARGET_AND_TLS_VERIFIED")
     except ValueError as exc:
-        print(f"::error::SGP_PDT_DATABASE_URL_{exc}")
+        print(f"::error::SUPABASE_DB_PASSWORD_{exc}")
+        sys.exit(1)
+    except Exception:
+        print("::error::PRODUCTION_DATABASE_CONNECTION_NOT_CONFIGURED")
         sys.exit(1)
