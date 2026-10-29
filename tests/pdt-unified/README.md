@@ -163,3 +163,47 @@ creando un run nuevo en el nuevo HEAD. No usar Re-run del run42 porque ejecutar�
 `7fdd6ec`. Revisar los nuevos campos del informe sanitizado antes de corregir
 cualquier contrato funcional. La causa subyacente sigue pendiente de esa evidencia;
 publicación NO-GO. Sin cambios productivos, merge ni despliegue.
+
+## Run43 — CHECK real de roles de autenticación
+
+Evidencia: [40865974450](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/actions/runs/40865974450),
+job123420730691, infraestructura `b7fe74e`: restauración verificada, siete fases
+PASS, contrato `real-role-authentication`, checkpoint `auth.account-create`,
+SQLSTATE23514. La consulta de catálogo `pg_constraint` se ejecutó después en una
+transacción **READ ONLY** sobre el proyecto autorizado, sin leer usuarios ni datos
+operativos y sin escrituras. Identificó un único CHECK de `sgp_usuarios`:
+`sgp_usuarios_rol_check`, exclusivamente sobre la columna `rol`.
+
+Su definición y procedencia quedan versionadas en `auth-role-contract.json`.
+Admite COORDINADOR, LIDER MECANIZADO, LIDER LINEA, RECEPCION, PATINADOR, PICKING,
+SUPERVISOR DE PICKING, CONSULTA y ADMINISTRADOR. **LIDER no está permitido**.
+El procedimiento anterior intentaba insertar también ese décimo rol.
+Esta evidencia procede del catálogo vivo de solo lectura; no se afirma haber
+consultado directamente el contenedor ya destruido del run43. El preflight nuevo
+verifica en la restauración nombre, tabla, columna, validación y huella MD5 de la
+misma definición (`622dc5a90326fe330e7dee48c5617032`). Si no coincide, aborta;
+no adapta ni debilita restricciones para hacer pasar las pruebas.
+
+Se conservan diez casos: nueve con creación temporal, login, sesión y permisos
+reales; LIDER es una regresión negativa del CHECK. Su INSERT debe producir
+check_violation, con CONSTRAINT_NAME/SCHEMA_NAME/TABLE_NAME exactamente iguales al
+CHECK esperado. Otro rol, restricción, tabla, esquema o SQLSTATE no se ignora.
+La subtransacción revierte el INSERT rechazado; se comprueba que no dejó usuario.
+LIDER no recibe token ni sesión sintética. Los nueve roles permitidos recorren el
+login y la autorización originales como anon. El contador exige9logins,1rechazo,
+9tokens y ningún token LIDER; toda la matriz y las operaciones siguen bajo ROLLBACK.
+El informe distingue `real_login_roles:9`, `schema_denied_roles:[LIDER]` y
+`total_role_cases:10`. No significa diez roles autenticables en el esquema real.
+
+Validación local:17/17pruebas del validador,24/24respaldo, verify:release365 y diff
+correctos. Las dos regresiones nuevas verifican la matriz frente a la evidencia
+versionada, los guards estrictos del rechazo y la presentación honesta del informe.
+La prueba SQL del CHECK/login se ejecutará en el clon de la siguiente ejecución;
+no se certifica aún su éxito con el respaldo. Sin cambios en restricciones,
+funciones productivas, RLS, permisos, fases REVIEW, producción, main o Firebase.
+
+Repetir con **Run workflow**, rama `feat/issue-144-pdt-isolated-validation`, operación
+`validate-pdt-unified`, nueva ejecución sobre el nuevo HEAD. Revisar el preflight
+`auth.role-check`, la matriz `authentication` y los contratos siguientes.
+No usar Re-run del run43 porque reutilizaría el código anterior. NO-GO productivo
+hasta completar la validación aislada.

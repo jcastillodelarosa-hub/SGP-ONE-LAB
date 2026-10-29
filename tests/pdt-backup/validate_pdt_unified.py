@@ -51,6 +51,8 @@ CONTRACT_IDS = frozenset((
 CONTRACT_STEPS = {'cycle.assign': 'validation-partial-advance-picking-close',
  'cycle.close': 'validation-partial-advance-picking-close',
  'auth.hash-contract': 'real-role-authentication',
+ 'auth.role-check': 'real-role-authentication',
+ 'auth.role-matrix': 'real-role-authentication',
  'auth.hash-column': 'real-role-authentication',
  'auth.account-create': 'real-role-authentication',
  'auth.login': 'real-role-authentication',
@@ -222,6 +224,9 @@ class Validation:
    for test in self.report['tests']:
     if 'PASS:' + test['name'] in passed:
      test['status'] = 'PASS'
+   if 'PASS:real-role-authentication' in passed:
+    self.report['authentication'] = {'real_login_roles': 9, 'schema_denied_roles': ['LIDER'],
+     'role_check': 'sgp_usuarios_rol_check', 'total_role_cases': 10}
   if result.returncode:
    # Whitelist a code, never a detail, identifier, SQL context or row.
    match = re.search(rb'(?:^|\n)(?:psql:[^\r\n]+:\s*)?ERROR:[ \t]+(?:[A-Z0-9]{5}:[ \t]+)?((?:PDT|QA)_[A-Z][A-Z0-9_]*)(?=[: \r\n]|$)', result.stderr)

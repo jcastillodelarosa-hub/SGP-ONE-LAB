@@ -204,6 +204,41 @@ class ValidationSecurity(unittest.TestCase):
    if match:self.assertEqual(v.CONTRACT_STEPS.get(match[1]),active)
   for name in v.TESTS[:-1]:self.assertIn('\\echo CONTRACT:'+name,sql)
 
+ def test_auth_regression_keeps_ten_cases_and_rejects_only_the_real_role_check(self):
+  import hashlib,re
+  evidence=json.loads((ROOT/'tests/pdt-unified/auth-role-contract.json').read_text())
+  sql=(ROOT/'tests/pdt-unified/contracts.sql').read_text()
+  auth=sql.split('DO $auth$',1)[1].split('END $auth$;',1)[0]
+  attempted=re.findall("'([^']+)'",re.search(r'FOREACH r IN ARRAY ARRAY\[(.*?)\] LOOP',auth,re.S)[1])
+  self.assertEqual(set(attempted),set(evidence['accepted_roles'])|{'LIDER'})
+  self.assertEqual(len(attempted),10)
+  self.assertNotIn('LIDER',evidence['accepted_roles'])
+  self.assertIn('LIDER LINEA',evidence['accepted_roles'])
+  self.assertIn('LIDER MECANIZADO',evidence['accepted_roles'])
+  self.assertEqual(hashlib.md5(evidence['definition'].encode()).hexdigest(),evidence['definition_md5'])
+  self.assertIn(evidence['definition_md5'],auth)
+  catch=auth.split('EXCEPTION WHEN check_violation THEN',1)[1].split('rejected:=true;',1)[0]
+  # Other roles, constraints, tables and schemas must propagate the error.
+  for guard in ("r IS DISTINCT FROM 'LIDER'", "rejected_constraint IS DISTINCT FROM 'sgp_usuarios_rol_check'",
+                "rejected_table IS DISTINCT FROM 'sgp_usuarios'", "rejected_schema IS DISTINCT FROM 'public'",
+                'THEN RAISE; END IF;'):
+   self.assertIn(guard,catch)
+  negative=auth.split("IF r='LIDER' THEN",1)[1].split("RAISE NOTICE 'PDT_QA_STEP:auth.login'",1)[0]
+  self.assertIn('IF NOT rejected OR EXISTS',negative)
+  self.assertIn('CONTINUE;',negative)
+  self.assertIn('authenticated_count<>9 OR schema_denied_count<>1',auth)
+  self.assertIn("public.sgp_login",auth)
+  self.assertIn("session->>'rol' IS DISTINCT FROM r",auth)
+
+ def test_auth_report_does_not_claim_ten_successful_logins(self):
+  val=object.__new__(v.Validation);val.report={'tests':[{'name':name,'status':'NOT_EXECUTED'} for name in v.TESTS]}
+  pg=['docker','exec','-i','clone','psql','-h','/tmp/sgp-restore']
+  with patch.object(subprocess,'run',return_value=subprocess.CompletedProcess(pg,0,
+   b'CONTRACT:real-role-authentication\nPASS:real-role-authentication\n',b'')):
+   val.sql(pg,'SQL hidden','contracts')
+  self.assertEqual(val.report['authentication'],{'real_login_roles':9,
+   'schema_denied_roles':['LIDER'],'role_check':'sgp_usuarios_rol_check','total_role_cases':10})
+
  def test_restore_integrity_vs_validator_failure_retains_code_and_cleans_clone(self):
   # Exercise the real orchestration through restore verification into the hook.
   # Do not use cloud data: inject only subprocess outputs and archived metadata.

@@ -32,10 +32,20 @@ CREATE TEMP TABLE qa_tokens(role text PRIMARY KEY, token text NOT NULL);
 CREATE TEMP TABLE qa_context(context jsonb, piece jsonb, event uuid, pending uuid);
 \echo CONTRACT:real-role-authentication
 DO $auth$ DECLARE col text; r text; username text; password text; response jsonb; session jsonb;
+ rejected boolean; rejected_constraint text; rejected_table text; rejected_schema text;
+ authenticated_count integer:=0; schema_denied_count integer:=0;
 BEGIN
  RAISE NOTICE 'PDT_QA_STEP:auth.hash-contract';
  IF position('crypt' IN lower(pg_get_functiondef('public.sgp_login(text,text)'::regprocedure)))=0
  THEN RAISE EXCEPTION 'QA_LOGIN_CONTRACT_UNKNOWN'; END IF;
+ RAISE NOTICE 'PDT_QA_STEP:auth.role-check';
+ -- Metadata read in a read-only catalog query; verify the same contract in this clone.
+ IF NOT EXISTS(SELECT 1 FROM pg_constraint c WHERE c.conrelid='public.sgp_usuarios'::regclass
+  AND c.conname='sgp_usuarios_rol_check' AND c.contype='c' AND c.convalidated
+  AND c.conkey=ARRAY[(SELECT a.attnum FROM pg_attribute a
+   WHERE a.attrelid=c.conrelid AND a.attname='rol' AND NOT a.attisdropped)]
+  AND md5(pg_get_constraintdef(c.oid))='622dc5a90326fe330e7dee48c5617032')
+ THEN RAISE EXCEPTION 'QA_AUTH_ROLE_CHECK_CONTRACT_CHANGED'; END IF;
  RAISE NOTICE 'PDT_QA_STEP:auth.hash-column';
  SELECT attname INTO STRICT col FROM pg_attribute WHERE attrelid='public.sgp_usuarios'::regclass
  AND attname IN ('password_hash','clave_hash','contrasena_hash','hash_password') AND NOT attisdropped;
@@ -44,8 +54,24 @@ BEGIN
   username:='991'||floor(random()*100000000000000)::bigint::text;
   password:=gen_random_uuid()::text||gen_random_uuid()::text;
   RAISE NOTICE 'PDT_QA_STEP:auth.account-create';
-  EXECUTE format('INSERT INTO public.sgp_usuarios(usuario,nombre,rol,activo,%I) VALUES($1,$2,$3,true,extensions.crypt($4,extensions.gen_salt(''bf'')))',col)
-   USING username,'QA aislada reversible',r,password;
+  rejected:=false;
+  BEGIN
+   EXECUTE format('INSERT INTO public.sgp_usuarios(usuario,nombre,rol,activo,%I) VALUES($1,$2,$3,true,extensions.crypt($4,extensions.gen_salt(''bf'')))',col)
+    USING username,'QA aislada reversible',r,password;
+  EXCEPTION WHEN check_violation THEN
+   GET STACKED DIAGNOSTICS rejected_constraint=CONSTRAINT_NAME,
+    rejected_table=TABLE_NAME,rejected_schema=SCHEMA_NAME;
+   IF r IS DISTINCT FROM 'LIDER' OR rejected_constraint IS DISTINCT FROM 'sgp_usuarios_rol_check'
+    OR rejected_table IS DISTINCT FROM 'sgp_usuarios' OR rejected_schema IS DISTINCT FROM 'public'
+   THEN RAISE; END IF;
+   rejected:=true;
+  END;
+  IF r='LIDER' THEN
+   IF NOT rejected OR EXISTS(SELECT 1 FROM public.sgp_usuarios WHERE usuario=username)
+   THEN RAISE EXCEPTION 'QA_AUTH_LEGACY_ROLE_CHECK_NOT_ENFORCED'; END IF;
+   schema_denied_count:=schema_denied_count+1;
+   CONTINUE;
+  END IF;
   RAISE NOTICE 'PDT_QA_STEP:auth.login';
   response:=pg_temp.rpc(format('SELECT public.sgp_login(%L,%L)',username,password));
   IF nullif(response->>'token','') IS NULL THEN RAISE EXCEPTION 'QA_REAL_LOGIN_FAILED'; END IF;
@@ -54,6 +80,7 @@ BEGIN
   IF session->>'valida' IS DISTINCT FROM 'true' OR session->>'rol' IS DISTINCT FROM r
   THEN RAISE EXCEPTION 'QA_REAL_SESSION_FAILED'; END IF;
   INSERT INTO qa_tokens VALUES(r,response->>'token');
+  authenticated_count:=authenticated_count+1;
   IF r IN ('ADMINISTRADOR','COORDINADOR','LIDER LINEA') THEN
    RAISE NOTICE 'PDT_QA_STEP:auth.catalog-allow';
    PERFORM pg_temp.rpc(format('SELECT public.sgp_pdt_manual_catalogo_v1(%L)',response->>'token'));
@@ -62,6 +89,10 @@ BEGIN
    PERFORM pg_temp.denied(format('SELECT public.sgp_pdt_manual_catalogo_v1(%L)',response->>'token'));
   END IF;
  END LOOP;
+ RAISE NOTICE 'PDT_QA_STEP:auth.role-matrix';
+ IF authenticated_count<>9 OR schema_denied_count<>1 OR (SELECT count(*) FROM qa_tokens)<>9
+ OR EXISTS(SELECT 1 FROM qa_tokens WHERE role='LIDER')
+ THEN RAISE EXCEPTION 'QA_AUTH_TEN_ROLE_MATRIX_INCOMPLETE'; END IF;
  RAISE NOTICE 'PDT_QA_STEP:auth.invalid-session';
  PERFORM pg_temp.denied('SELECT public.sgp_pdt_manual_catalogo_v1(''invalid-isolated-token'')');
 END $auth$;

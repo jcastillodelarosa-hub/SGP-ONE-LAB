@@ -1,0 +1,24 @@
+{
+  "constraint": "sgp_usuarios_rol_check",
+  "table": "public.sgp_usuarios",
+  "columns": [
+    "rol"
+  ],
+  "definition": "CHECK ((rol = ANY (ARRAY['COORDINADOR'::text, 'LIDER MECANIZADO'::text, 'LIDER LINEA'::text, 'RECEPCION'::text, 'PATINADOR'::text, 'PICKING'::text, 'SUPERVISOR DE PICKING'::text, 'CONSULTA'::text, 'ADMINISTRADOR'::text])))",
+  "definition_md5": "622dc5a90326fe330e7dee48c5617032",
+  "accepted_roles": [
+    "COORDINADOR",
+    "LIDER MECANIZADO",
+    "LIDER LINEA",
+    "RECEPCION",
+    "PATINADOR",
+    "PICKING",
+    "SUPERVISOR DE PICKING",
+    "CONSULTA",
+    "ADMINISTRADOR"
+  ],
+  "schema_denied_roles": [
+    "LIDER"
+  ],
+  "evidence_source": "Read-only live pg_constraint metadata on 2026-10-29; equality must be confirmed in the restored clone by the SQL preflight. No operational rows read."
+}
