@@ -147,8 +147,10 @@ BEGIN
   rows:=pg_temp.rpc(format('SELECT public.sgp_pdt_manual_listar_v1(%L)',t))->'pendientes';
   SELECT count(*) INTO n FROM jsonb_array_elements(rows) x JOIN sgp_pdt_manual.detalles d
    ON d.id_pendiente::text=x->>'id_pendiente';
-  IF n<>3 OR (SELECT count(DISTINCT x->>'id_pendiente') FROM jsonb_array_elements(rows) x)<>jsonb_array_length(rows)
+  IF n<>2 OR (SELECT count(DISTINCT x->>'id_pendiente') FROM jsonb_array_elements(rows) x)<>jsonb_array_length(rows)
   THEN RAISE EXCEPTION 'QA_UNIFIED_LIST_DUPLICATED_OR_MISSING'; END IF;
+  IF EXISTS(SELECT 1 FROM jsonb_array_elements(rows) x JOIN qa_context c ON x->>'id_pendiente'=c.pending::text)
+  THEN RAISE EXCEPTION 'QA_CLOSED_PDT_STILL_OPEN'; END IF;
   -- Modern report path must remain callable with the actual role and schema.
   PERFORM pg_temp.rpc(format('SELECT public.sgp_aluminio_pendientes_listar_v2(%L,false)',t));
  END LOOP;
@@ -158,6 +160,8 @@ SELECT 'PASS:reception-mecanizado-unified-list';
 DO $period$ DECLARE c qa_context%rowtype; y integer; w integer; t text; changed integer; rows jsonb; payload jsonb; response jsonb;
 BEGIN
  SELECT * INTO STRICT c FROM qa_context;
+ SELECT md.id_pendiente INTO STRICT c.pending FROM sgp_pdt_manual.detalles md
+ JOIN public.sgp_aluminio_pendientes p USING(id_pendiente) WHERE p.estado='PENDIENTE' ORDER BY md.id_pendiente LIMIT 1;
  SELECT anio,coalesce(semana_actual,semana_base) INTO STRICT y,w FROM public.sgp_producciones WHERE key_produccion=c.context->>'key_produccion';
  SELECT token INTO t FROM qa_tokens WHERE role='COORDINADOR';
  changed:=CASE WHEN w=52 THEN 51 ELSE w+1 END;
