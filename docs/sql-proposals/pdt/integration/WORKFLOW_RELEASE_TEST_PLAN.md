@@ -1,42 +1,70 @@
-# PDT unificado — plan de pruebas del workflow #146
+# PDT unificado — controles de publicación y aceptación
 
-Estado: pruebas de revisión estática; **NO** autorización para ejecutar `publish`.
+Estado: implementación propuesta en PR de controles; **sin autorización de
+publish**. PR #146 está fusionado. El workflow solo permite `preflight` y
+`publish` desde `main`; este PR ejecuta pruebas estáticas. La variable de entorno
+`PDT_PUBLISH_ENABLED` debe permanecer ausente o distinta de `true` hasta la
+aprobación separada de la ventana y de la evidencia reciente.
 
-## Matriz de aceptación
-
-| ID | Prueba | Criterio |
+| ID | Control implementado | Evidencia necesaria en la ventana |
 | --- | --- | --- |
-| W01 | Workflow manual desde rama autorizada | `preflight` no escribe en Supabase ni Firebase; rama distinta rechazada |
-| W02 | SHA y SQL | Se rechaza un candidato que no desciende de `f830dd4` o modifica cualquiera de los siete SQL fijados |
-| W03 | Secret de conexión | Sin conexión configurada, falla sin escribir |
-| W04 | Respaldo | Se exige respaldo privado **reciente**, identificador de objeto, hash, restauración comprobada y correspondencia con producción; un workflow genérico exitoso no basta |
-| W05 | Pruebas previas | `npm ci`, `build:vendor`, `verify:release` y `npm test` deben finalizar **antes** de la primera escritura |
-| W06 | Preflight SQL productivo | Huellas de funciones, RLS, permisos, columnas y dependencias coinciden; discrepancia detiene todo |
-| W07 | Instalación | Las siete fases SQL se aplican en orden, con `ON_ERROR_STOP`; no activar si falla una |
-| W08 | Corte | Registrar UTC del instante efectivo de activación y `Jcastillo`; no aceptar hora anterior arbitraria |
-| W09 | Firebase | Publicar artefacto exacto validado y registrar revisión/version; no confundir merge con despliegue |
-| W10 | Postpublicación | Login por roles, creación, validación, avance, Picking y cierre; históricos solo en auditoría |
-| W11 | Fallos y reversión | Antes del corte, reversión segura; después del corte, bloquear rollback automático y activar reparación controlada |
-| W12 | Concurrencia | Dos ejecuciones productivas no deben solaparse; permisos mínimos y aprobación de entorno |
-| W13 | PC y móvil | Verificar visualización y flujo en ambas superficies; no marcar VERIFICADO antes |
+| W01–W03 | Rama main, ancestro y siete SQL fijados a f830dd4; inputs y secreto obligatorios | Run preflight en main vigente |
+| W04 | Token GCS reducido a lectura; identidad de archivo/generación/hash, manifiesto y recuperación privados enlazados; snapshot, hash, cantidades, catálogo, sin red; antigüedad ≤6 h | Nuevo respaldo/restore verificado y sus campos exactos; run exitoso correspondiente |
+| W05 | build:vendor, verify:release, npm test y huella de frontend antes de SQL | Resultado verde del run de publicación |
+| W06 | Captura de catálogo productivo en transacción READ ONLY comparada con la captura verificada: RPC, definiciones, RLS, permisos, columnas, índices, políticas, roles y dependencias | Ninguna diferencia; si hay drift, generar otra recuperación compatible y revisar |
+| W07 | Siete fases secuenciales con ON_ERROR_STOP; resumen por fase; siguiente fase/corte no corre si falla una | Siete PASS del mismo run |
+| W08 | `clock_timestamp()` evaluado por PostgreSQL en el INSERT de activación; retorno UTC efectivo | Registrar el valor devuelto y coordinar operaciones |
+| W09 | Commit main, huella del frontend probado y URL del deploy Firebase live | URL/revisión reales y huella sin cambios tras deploy |
+| W10 | Smoke de backend READ ONLY tras deploy | Login de roles reales y ciclo PDT supervisado; no usar datos QA falsos en producción |
+| W11 | Aviso de contención ante fallo, sin rollback automático después de corte | Decidir recuperación según si corte está activo y si hubo nuevas escrituras |
+| W12 | Concurrencia global sin cancelación, entorno productivo y variable bloqueante | Confirmar reviewers y restricciones de rama del entorno antes de poner la variable en true |
+| W13 | No se promueve a VERIFICADO por un run verde | Recorrido PC y móvil, Recepción/Picking/Mecanizado/Producción, históricos/NC/Export con acta |
 
-## Resultado de revisión del workflow en 2026-10-29
+El repositorio no versiona `package-lock.json`; el workflow mantiene
+`npm install --no-package-lock` y prueba el artefacto emitido antes de escribir.
+Crear y verificar un lockfile sería una mejora separada, no un motivo para omitir
+las pruebas previas ni para publicar con un artefacto distinto del probado.
 
-- **W01:** estructura manual y condición de rama presentes; ejecución real NO PROBADA.
-- **W02:** verificación de ancestro y archivos SQL presente; ejecución real NO PROBADA.
-- **W03:** rechazo de secret ausente presente; ejecución real NO PROBADA.
-- **W04:** **FALLA DE DISEÑO**: solo se consulta conclusión del workflow; no se cotejan objeto, hash, restauración ni vigencia.
-- **W05:** **FALLA DE DISEÑO**: pruebas Node se ejecutan después de instalar SQL y activar corte.
-- **W06:** **INCOMPLETA**: solo consulta `now()`; no comprueba huellas ni contratos productivos.
-- **W07:** secuencia y `ON_ERROR_STOP` presentes; ejecución real NO PROBADA.
-- **W08:** **FALLA DE DISEÑO**: UTC proporcionado antes de publicar puede ser anterior al corte real.
-- **W09:** acción Firebase live presente; ejecución real NO PROBADA.
-- **W10/W13:** **PENDIENTES**: no hay prueba real de login, roles, PC/móvil ni flujo operativo.
-- **W11:** rollback poscorte está bloqueado por el SQL; falta procedimiento coordinado de reparación frontend/backend.
-- **W12:** exclusión mutua presente; protección del entorno NO COMPROBADA.
+## Secuencia de autorización y ejecución
 
-## Bloqueos de liberación
+1. Fusionar este PR solo tras revisión. Mantener
+   `PDT_PUBLISH_ENABLED` desactivada. Ejecutar `preflight` en main, entorno
+   `supabase-backup`, con el `SUPABASE_DB_PASSWORD` ya validado. No escribe.
+2. Obtener un **nuevo** respaldo privado y restauración aislada PostgreSQL17.11.
+   Confirmar que su recovery-verified.json corresponde al mismo objeto,
+   generación, SHA256, snapshot, cantidades y catálogo. El run anterior
+   40872064831 sirve como antecedente, no como respaldo vigente.
+3. Configurar en el entorno protegido `pdt-unified-production` el secreto
+   `SGP_PDT_DATABASE_URL` para el pooler productivo PostgreSQL con TLS y permisos
+   de instalación; configurar también
+   `FIREBASE_SERVICE_ACCOUNT_SGP_ONE_LAB`. No reutilizar el URL en logs.
+   Confirmar required reviewers y acceso exclusivo desde main.
+4. Aprobar una ventana coordinada con operaciones. Proporcionar al workflow el
+   run URL, objeto `gs://`, SHA256 y generación/tamaño/SHA256 del
+   recovery-verified.json **del mismo respaldo**. Habilitar
+   `PDT_PUBLISH_ENABLED=true` en ese entorno solo durante la ventana; aprobar
+   explícitamente su job. El guard de catálogo debe pasar antes de la primera
+   escritura. Si el respaldo tiene más de seis horas, detenerse.
+5. Revisar los siete `PDT_PHASE_PASS`, el UTC efectivo del INSERT de corte,
+   commit, huella del frontend y URL/revisión Firebase. Ejecutar aceptación de
+   login/roles y alta→validación→avance→Picking→cierre con operadores autorizados,
+   más PC/móvil, históricos y NC. Registrar evidencia; hasta entonces el estado
+   es PUBLICADO/PENDIENTE DE VERIFICAR, nunca VERIFICADO automáticamente.
+6. Volver a desactivar `PDT_PUBLISH_ENABLED` al cerrar la ventana.
 
-No ejecutar `publish` hasta corregir W04, W05, W06, W08, W11 y verificar la configuración del entorno. La prueba aislada GO del PR #145 **no sustituye** estos controles de publicación.
+## Fallos y recuperación coordinada
 
-No se modificaron datos ni se ejecutaron workflows productivos al preparar este plan.
+- Antes del corte: detener nuevas operaciones, leer fases que pasaron y el
+  estado de `sgp_pdt_manual.corte_operativo`. Si está vacío y no hubo escrituras
+  con los nuevos contratos, revisar y aplicar los SQL REVIEW de rollback en orden
+  06→05→04→03→02→01 y luego la reversión #139 solo si sus guards lo permiten.
+  Una fase fallida no autoriza a saltarse los guards.
+- Después del corte: conservar backend y todas las escrituras posteriores.
+  **No** restaurar la base completa ni ejecutar rollback automático que revele
+  históricos. Si Firebase falló, contener operaciones y publicar el frontend
+  compatible desde el mismo commit/artefacto tras revisión. Si el backend falló,
+  reparar hacia delante con SQL revisado sobre el estado actual; conciliar primero
+  PDT/entregas nuevos. Documentar cada decisión y volver a probar el recorrido.
+- Ante un fallo del smoke o de PC/móvil, mantener el estado BLOQUEADO PARA
+  ACEPTACIÓN, abrir incidente controlado y preservar el registro de corte y la
+  evidencia del run. No confundir ese estado con una restauración aprobada.
