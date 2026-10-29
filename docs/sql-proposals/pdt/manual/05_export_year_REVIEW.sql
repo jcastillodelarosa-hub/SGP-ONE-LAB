@@ -1,5 +1,8 @@
 -- REVIEW ONLY. Do not apply until the installed Export writer body/hash is captured
 -- and compared in a restored production backup. Replace the guard only after review.
+-- BLOCKED: a JSON error response from the delegated writer can still reach the
+-- year UPDATE when the prior week matches. Resolve the real response contract
+-- before replacing the deliberately unset guard; see integration/EXPORT_BODY_CONTRAST.md.
 -- The XLSX contains explicit "Año prog." -> p_datos[*].anio and "Sem prog." -> semana_actual.
 BEGIN;
 SET LOCAL lock_timeout='5s';

@@ -1,5 +1,7 @@
 # Integración PDT manual + fuentes múltiples (rama independiente)
 
+**Preflight Export bloqueado (2026-10-29):** la definición productiva completa de `sgp_aplicar_export_diario` sigue sin estar disponible en esta sesión; solo se recibió su huella `efc52bdbd29ed89efa87a71fa74a2852` y un resumen. En PostgreSQL 17 aislado se demostró que, si el escritor delegando retorna un JSON de rechazo sin excepción y la semana previa coincide, el wrapper REVIEW 05 puede actualizar `anio` igualmente. La prueba hizo ROLLBACK. El guard deliberadamente sin huella no se completó; no instalar 05. Evidencia y paso exacto: `docs/sql-proposals/pdt/integration/EXPORT_BODY_CONTRAST.md`.
+
 Se combinaron las bases de PR #139 y #141 sin cambiar sus ramas. Orden REVIEW: #139 → manual 01 → manual 02 → manual 03 → manual 04 → manual 05. Los preflights 02/03 fijan los cuerpos resultantes de #139 y delegan al contrato agrupado/V4/LEGACY para todo PDT que no sea manual. PostgreSQL 17 aislado: siete regresiones SQL transaccionales, prueba de año Export sintético y rollback 04→01 aprobados; Node focalizado 33/33. El cuerpo íntegro de `sgp_aplicar_export_diario` no está disponible: la huella productiva reportada `efc52bdbd29ed89efa87a71fa74a2852` no basta para certificar su semántica; el guard 05 permanece incompleto a propósito. No hay instalación productiva, fusión ni despliegue. Continuación exacta y riesgos: `docs/sql-proposals/pdt/integration/README.md`.
 
 # Issue #140 — PDT manual unificado, Fases 1–4 (rama de revisión)
