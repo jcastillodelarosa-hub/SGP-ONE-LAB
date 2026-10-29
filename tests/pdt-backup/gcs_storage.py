@@ -8,10 +8,10 @@ PREFIX='supabase/ocvxbwzqxbrfndkvjmfx/'
 
 class SafeFailure(Exception):pass
 
-def boundary():
+def boundary(read_only=False):
  return {'accessBoundary':{'accessBoundaryRules':[{
   'availableResource':'//storage.googleapis.com/projects/_/buckets/'+BUCKET,
-  'availablePermissions':['inRole:roles/storage.objectCreator','inRole:roles/storage.objectViewer'],
+  'availablePermissions':(['inRole:roles/storage.objectViewer'] if read_only else ['inRole:roles/storage.objectCreator','inRole:roles/storage.objectViewer']),
   'availabilityCondition':{'expression':"resource.name.startsWith('projects/_/buckets/"+BUCKET+"/objects/"+PREFIX+"')"}
  }]}}
 
@@ -38,7 +38,8 @@ def request(url,token,method='GET',data=None,headers=None):
  except Exception:raise SafeFailure('GCS_TRANSPORT_FAILED') from None
 
 class PrivateStorage:
- def __init__(self):
+ def __init__(self,read_only=False):
+  self.read_only=read_only
   r=subprocess.run(['gcloud','auth','print-access-token'],capture_output=True,text=True,timeout=60)
   if r.returncode or not r.stdout.strip():raise SafeFailure('GCS_AUTH_UNAVAILABLE')
   source=r.stdout.strip()
@@ -47,7 +48,7 @@ class PrivateStorage:
   data=urllib.parse.urlencode({'grant_type':'urn:ietf:params:oauth:grant-type:token-exchange',
    'requested_token_type':'urn:ietf:params:oauth:token-type:access_token',
    'subject_token_type':'urn:ietf:params:oauth:token-type:access_token',
-   'subject_token':source,'options':json.dumps(boundary())}).encode()
+   'subject_token':source,'options':json.dumps(boundary(read_only))}).encode()
   req=urllib.request.Request('https://sts.googleapis.com/v1/token',data=data,headers={'Content-Type':'application/x-www-form-urlencoded'})
   try:
    with urllib.request.urlopen(req,timeout=60) as response:result=json.load(response)
@@ -57,6 +58,7 @@ class PrivateStorage:
   self.token=result['access_token']
   # Do not retain the broad source token or credentials in this channel object.
  def put(self,name,data):
+  if self.read_only:raise SafeFailure('READ_ONLY_STORAGE_WRITE_REJECTED')
   validate_name(name)
   url='https://storage.googleapis.com/upload/storage/v1/b/'+BUCKET+'/o?'+urllib.parse.urlencode({'uploadType':'media','name':name,'ifGenerationMatch':'0'})
   result=json.loads(request(url,self.token,'POST',data,{'Content-Type':'application/octet-stream'}))
