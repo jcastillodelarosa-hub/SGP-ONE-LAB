@@ -81,6 +81,6 @@ BEGIN
  result:=jsonb_build_object('ok',true,'id_reporte',report,'ids_pendientes',ids);
  UPDATE sgp_pdt_manual.reportes SET respuesta=result WHERE id_reporte=report;
  RETURN result;
-END $function$
+END $function$;
 
 NOTIFY pgrst, 'reload schema';
