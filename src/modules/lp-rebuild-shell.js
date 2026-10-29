@@ -1,0 +1,33 @@
+/* LP-01..06 shell: isolates the existing location report without cloning its DOM or data. */
+(()=>{'use strict';
+const root=document.querySelector('[data-view-panel="ensamble"]');
+const legacyTabs=root?.querySelector('.production-line-tabs');
+const legacyAssembly=document.getElementById('productionAssemblyPanel');
+const legacyPacking=document.getElementById('productionPackingPanel');
+const report=document.getElementById('assemblyLocationReportPanel');
+const reportTrigger=document.getElementById('assemblyLocationReportTab');
+if(!root||!legacyTabs||!legacyAssembly||!legacyPacking||!report||!reportTrigger)return;
+const sections=[
+['LP-01','Programación','Programación de órdenes y prioridades'],
+['LP-02','Seguimiento','Seguimiento del coordinador · Ensamble y Empaque'],
+['LP-03','Operación','Registro de avances y novedades · Ensamble y Empaque'],
+['LP-04','Vidrio','Disponibilidad y mapa de relaciones'],
+['LP-05','Dashboard','Indicadores de Línea de Producción'],
+['LP-06','Reportes','Reportes de Línea de Producción']];
+const shell=document.createElement('div');shell.className='lp-rebuild-shell';
+const nav=document.createElement('nav');nav.className='lp-rebuild-nav';nav.setAttribute('aria-label','Secciones de Línea de Producción');
+const content=document.createElement('div');content.className='lp-rebuild-content';
+const panels=new Map();
+sections.forEach(([id,name,description])=>{
+const btn=document.createElement('button');btn.type='button';btn.className='lp-rebuild-tab';btn.textContent=name;btn.dataset.lpSection=id;btn.setAttribute('aria-controls','lp-section-'+id);nav.append(btn);
+const panel=document.createElement('section');panel.id='lp-section-'+id;panel.className='lp-rebuild-panel';panel.hidden=true;
+const heading=document.createElement('header');heading.className='lp-rebuild-heading';const eyebrow=document.createElement('span');eyebrow.textContent=id;const title=document.createElement('h3');title.textContent=name;const subtitle=document.createElement('p');subtitle.textContent=description;heading.append(eyebrow,title,subtitle);panel.append(heading);
+if(id==='LP-04'){const sub=document.createElement('h4');sub.textContent='Reporte de ubicaciones';panel.append(sub);panel.append(report);}else{const empty=document.createElement('p');empty.className='lp-rebuild-empty';empty.textContent='Sección preparada para la siguiente etapa funcional. No hay operaciones nuevas habilitadas.';panel.append(empty);}
+content.append(panel);panels.set(id,{panel,btn});
+btn.addEventListener('click',()=>activate(id));
+});
+shell.append(nav,content);legacyTabs.before(shell);
+legacyTabs.hidden=true;legacyAssembly.hidden=true;legacyPacking.hidden=true;
+function activate(id){for(const [key,{panel,btn}] of panels){const active=key===id;panel.hidden=!active;btn.classList.toggle('active',active);btn.setAttribute('aria-current',active?'page':'false');}if(id==='LP-04')reportTrigger.click();}
+activate('LP-01');
+})();
