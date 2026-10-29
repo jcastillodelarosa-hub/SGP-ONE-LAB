@@ -85,6 +85,9 @@ jobs:
           BACKUP_EVIDENCE: ${{ inputs.backup_evidence }}
           BACKUP_OBJECT: ${{ inputs.backup_object }}
           BACKUP_SHA256: ${{ inputs.backup_sha256 }}
+          RECOVERY_GENERATION: ${{ inputs.recovery_generation }}
+          RECOVERY_BYTES: ${{ inputs.recovery_bytes }}
+          RECOVERY_SHA256: ${{ inputs.recovery_sha256 }}
         run: |
           python3 - <<'PY'
           import os,re,subprocess,sys
@@ -101,6 +104,9 @@ jobs:
             assert re.fullmatch(r'https://github\.com/[^/]+/[^/]+/actions/runs/[0-9]+',os.environ['BACKUP_EVIDENCE']), 'Backup/recovery evidence URL required'
             assert re.fullmatch(r'gs://[A-Za-z0-9._-]+/[A-Za-z0-9._/-]+',os.environ['BACKUP_OBJECT']), 'Private GCS backup object required (provide exact gs://bucket/object from verified recovery evidence)'
             assert re.fullmatch(r'[0-9a-fA-F]{64}',os.environ['BACKUP_SHA256']), 'Verified backup SHA-256 required'
+            for field in ('RECOVERY_GENERATION','RECOVERY_BYTES'):
+              assert re.fullmatch(r'[1-9][0-9]*',os.environ[field]), f'{field} required: positive integer from immutable recovery record'
+            assert re.fullmatch(r'[0-9a-fA-F]{64}',os.environ['RECOVERY_SHA256']), 'RECOVERY_SHA256 required: immutable recovery record digest'
           print('Candidate SQL pinned; inputs structurally valid')
           PY
       - name: Build and test before any production writes
