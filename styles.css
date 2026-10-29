@@ -2585,3 +2585,5 @@ button.active,[aria-pressed="true"]{border-color:#0865ed}
 .pdt-dashboard .repo-table{min-width:1450px;table-layout:auto}
 .pdt-dashboard .repo-table th:nth-child(2),.pdt-dashboard .repo-table td:nth-child(2){min-width:240px;max-width:380px;white-space:normal;overflow-wrap:anywhere;line-height:1.35}
 .pdt-dashboard #repoContract[hidden]{display:none!important}
+
+.pdt-manual-ncs{display:grid;gap:9px;margin:12px 0}.pdt-manual-nc-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:end}.pdt-manual-nc-row small{grid-column:1/-1}.pdt-manual-ncs [data-add-nc]{justify-self:start}.pdt-manual-nc-row [data-remove-nc]{min-height:40px}
