@@ -1,6 +1,10 @@
 name: PDT unified - controlled production release
 
 on:
+  pull_request:
+    paths:
+      - '.github/workflows/pdt-unified-production-release.yml'
+      - 'tests/pdt-release/**'
   workflow_dispatch:
     inputs:
       operation:
@@ -42,6 +46,27 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  candidate-check:
+    name: PDT release / isolated static checks
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Compile release validation scripts without database access
+        run: |
+          python3 -m py_compile tests/pdt-release/live_preflight.py tests/pdt-release/verify_recovery.py
+          python3 - <<'PY'
+          from pathlib import Path
+          workflow=Path('.github/workflows/pdt-unified-production-release.yml').read_text()
+          assert 'BACKUP_OBJECT: ${{ inputs.backup_object }}' in workflow
+          assert 'Production release interlock — independent approval required' in workflow
+          assert 'Publish disabled.' in workflow
+          print('PDT_RELEASE_STATIC_GUARDS_PASS')
+          PY
   release:
     name: PDT unified / ${{ inputs.operation }}
     if: github.ref == 'refs/heads/main'
