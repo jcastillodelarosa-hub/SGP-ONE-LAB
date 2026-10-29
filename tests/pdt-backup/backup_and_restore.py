@@ -202,6 +202,7 @@ def main(validation=None):
    if validation is not None:
     # The sole validation hook runs only after verified recovery, before all GCS
     # writes and the legacy installation route. pg addresses the networkless clone.
+    phase='PDT_UNIFIED_VALIDATION'
     return validation.run(pg,manifest)
    manifest['status']='POSTGRES_BACKUP_RESTORED_VERIFIED'
    manifest['verification']={'tables_compared':len(tables),'table_counts_equal':True,'catalog_sections_equal':True,
@@ -241,9 +242,11 @@ def main(validation=None):
    if validation is None:
     try:storage.put(base+'failure-record-'+uuid.uuid4().hex+'.json',json.dumps(manifest,ensure_ascii=False).encode())
     except Exception:pass
-   print('::error title=Supabase recovery::'+phase+': '+('ISOLATED_VALIDATION_FAILED' if validation is not None else str(e))+'; recovery not verified; no production writes')
+   code=validation.record_failure(phase,e) if validation is not None else str(e)
+   print('::error title=Supabase recovery::'+phase+': '+code+'; no production writes')
    return 1
-  except Exception:
+  except Exception as e:
+   if validation is not None:validation.record_failure(phase,e)
    print('::error title=Supabase recovery::'+phase+': BACKUP_OR_RECOVERY_NOT_VERIFIED; no production writes')
    return 1
   finally:

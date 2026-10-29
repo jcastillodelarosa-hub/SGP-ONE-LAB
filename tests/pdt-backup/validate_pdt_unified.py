@@ -32,6 +32,50 @@ TESTS = ('real-role-authentication', 'manual-three-origins-nc-idempotency',
  'export-week-year-guard-audit', 'utc-cutover-historical-preservation',
  'legacy-v2-dispatch', 'rollback-before-activation')
 
+# Only fixed local codes may cross the private recovery boundary. Exception text
+# can contain restored role names, identifiers or data, even in SafeFailure.
+RECOVERY_CODES = frozenset((
+ 'ISOLATED_ENGINE_START_FAILED', 'ISOLATED_ENGINE_NOT_READY',
+ 'ISOLATED_DATABASE_CREATE_FAILED', 'DATABASE_RESTORE_FAILED',
+ 'ISOLATED_METADATA_READ_FAILED', 'RESTORED_TABLE_COUNTS_DIFFER',
+ 'GCS_DOWNLOAD_INTEGRITY_FAILED', 'GCS_TRANSPORT_FAILED',
+ 'GLOBAL_ROLES_RESTORE_FAILED', 'ROLE_ALREADY_EXISTS',
+ 'ROLE_CONFIGURATION_NOT_AVAILABLE', 'ROLE_PRIVILEGE_ERROR',
+ 'GLOBAL_SQL_SYNTAX_ERROR', 'TABLESPACE_CONFIGURATION_REQUIRED',
+))
+VALIDATION_CODES = frozenset((
+ 'POSTGRES_17_11_REQUIRED', 'NON_ISOLATED_SQL_COMMAND_REJECTED',
+ 'ISOLATED_SQL_REJECTED', 'HISTORICAL_ROWS_CHANGED_BY_INSTALL',
+ 'INCOMPLETE_CONTRACT_EVIDENCE', 'QA_ROLLBACK_DID_NOT_PRESERVE_HISTORY',
+ 'VALIDATION_INTERRUPTED',
+))
+
+
+def failure_details(phase, error):
+ raw = str(error)
+ code = raw.split(':', 1)[0]
+ details = {'phase': phase, 'code': 'ISOLATED_FAILURE_UNCLASSIFIED'}
+ if isinstance(error, SafeFailure):
+  if code in RECOVERY_CODES | VALIDATION_CODES:
+   details['code'] = code
+  elif raw.startswith('RESTORED_CATALOG_DIFFER_'):
+   sections = raw.removeprefix('RESTORED_CATALOG_DIFFER_').split(',')
+   allowed = {'postgres_major', 'funciones', 'relaciones', 'triggers',
+              'politicas', 'roles', 'membresias', 'secuencias',
+              'grants_por_defecto', 'extensiones'}
+   if sections and all(section in allowed for section in sections):
+    details.update(code='RESTORED_CATALOG_DIFFER', sections=sections)
+ if details['code'] in ('RESTORED_TABLE_COUNTS_DIFFER', 'RESTORED_CATALOG_DIFFER',
+                         'GCS_DOWNLOAD_INTEGRITY_FAILED'):
+  details['category'] = 'INTEGRITY'
+ elif details['code'] == 'ROLE_PRIVILEGE_ERROR':
+  details['category'] = 'PERMISSIONS'
+ elif phase == 'PDT_UNIFIED_VALIDATION':
+  details['category'] = 'VALIDATOR'
+ else:
+  details['category'] = 'RECOVERY_UNCLASSIFIED'
+ return details
+
 
 def check_environment():
  if os.environ.get('GITHUB_ACTIONS') != 'true':
@@ -68,6 +112,14 @@ def validate_manifest(manifest):
 
 
 class Validation:
+ def record_failure(self, phase, error):
+  failure = failure_details(phase, error)
+  self.report['decision'] = 'NO-GO'
+  self.report.setdefault('failure', failure)
+  if phase != 'PDT_UNIFIED_VALIDATION':
+   self.report['restore'] = 'FAILED'
+  return failure['code']
+
  def __init__(self, candidate):
   self.candidate = candidate
   self.storage = PrivateStorage(read_only=True)
@@ -155,8 +207,9 @@ def summary():
  if os.environ.get('GITHUB_STEP_SUMMARY'):
   with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as out:
    out.write(text)
- else:
-  print(text)
+ # The API exposes job logs, but not step-summary contents. Publish this same
+ # already-sanitized report there so a subsequent failure remains diagnosable.
+ print(text)
 
 
 def main():

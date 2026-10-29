@@ -1,5 +1,7 @@
 """Security boundaries and failure behavior; never needs cloud access or data."""
 import importlib.util
+import contextlib
+import io
 import json
 import os
 from pathlib import Path
@@ -106,6 +108,8 @@ class ValidationSecurity(unittest.TestCase):
    def get(self,item):
     return json.dumps({'catalog':{'grants_por_defecto':[]},'counts':{},'tables':[]}).encode() if item=='catalog' else b'roles'
   class Validation:
+   report={}
+   record_failure=v.Validation.record_failure
    storage=Storage()
    manifest={'prefix':'private/','objects':{'catalog_and_counts':'catalog','database':'archive','globals':'globals'}}
   calls=[]
@@ -116,12 +120,85 @@ class ValidationSecurity(unittest.TestCase):
     return subprocess.CompletedProcess(args,1,b'',b'ERROR: private row')
    return subprocess.CompletedProcess(args,0,b'',b'')
   with patch.dict(os.environ,{'GITHUB_ACTIONS':'true','SGP_RESTORE_EXISTING':'true'},clear=True):
-   with patch.object(subprocess,'run',side_effect=run):
+   with patch.object(subprocess,'run',side_effect=run),contextlib.redirect_stdout(io.StringIO()):
     self.assertEqual(recovery.main(validation=Validation()),1)
   start=next(c for c in calls if c[:3]==['docker','run','-d'])
   name=start[start.index('--name')+1]
   self.assertEqual(start[start.index('--network')+1],'none')
   self.assertIn(['docker','rm','-f',name],calls)
   self.assertFalse(any('aws-0-us-east-2.pooler.supabase.com' in str(c) for c in calls))
+
+ def test_safe_failure_code_and_catalog_sections_survive_without_private_detail(self):
+  detail=v.failure_details('RESTORE_INTEGRITY',gcs.SafeFailure('RESTORED_CATALOG_DIFFER_funciones,roles'))
+  self.assertEqual(detail,{'phase':'RESTORE_INTEGRITY','code':'RESTORED_CATALOG_DIFFER',
+   'sections':['funciones','roles'],'category':'INTEGRITY'})
+  detail=v.failure_details('RESTORE_GLOBALS',gcs.SafeFailure('ROLE_PRIVILEGE_ERROR: private user secret'))
+  self.assertEqual(detail['category'],'PERMISSIONS')
+  self.assertNotIn('private',json.dumps(detail))
+  for error in (gcs.SafeFailure('RESTORED_CATALOG_DIFFER_personal_data'),
+                RuntimeError('private token'),gcs.SafeFailure('PRIVATE_TOKEN_VALUE')):
+   detail=v.failure_details('RESTORE_INTEGRITY',error)
+   self.assertEqual(detail['code'],'ISOLATED_FAILURE_UNCLASSIFIED')
+   self.assertNotIn('private',json.dumps(detail).lower())
+
+ def test_summary_is_available_in_logs_as_well_as_step_summary(self):
+  import tempfile
+  with tempfile.TemporaryDirectory() as folder:
+   report=Path(folder)/'report.json';summary=Path(folder)/'summary.md'
+   data={'decision':'NO-GO','restore':'FAILED','failure':v.failure_details(
+    'RESTORE_INTEGRITY',gcs.SafeFailure('RESTORED_TABLE_COUNTS_DIFFER'))}
+   report.write_text(json.dumps(data))
+   output=io.StringIO()
+   with patch.object(v,'REPORT',report),patch.dict(os.environ,{'GITHUB_STEP_SUMMARY':str(summary)}):
+    with contextlib.redirect_stdout(output):v.summary()
+   self.assertEqual(output.getvalue().rstrip(),summary.read_text().rstrip())
+   self.assertIn('RESTORED_TABLE_COUNTS_DIFFER',output.getvalue())
+
+ def test_restore_integrity_vs_validator_failure_retains_code_and_cleans_clone(self):
+  # Exercise the real orchestration through restore verification into the hook.
+  # Do not use cloud data: inject only subprocess outputs and archived metadata.
+  catalog={'grants_por_defecto':[]}
+  class Storage:
+   def verify_boundary(self):pass
+   def get(self,item):
+    if item=='catalog':return json.dumps({'catalog':catalog,'counts':{'public.test':1},
+      'tables':[{'schema':'public','name':'test'}]}).encode()
+    return b'private archive bytes'
+  for failure in ('counts','catalog','validator'):
+   with self.subTest(failure=failure):
+    val=object.__new__(v.Validation);val.storage=Storage()
+    val.manifest={'prefix':'private/','objects':{'catalog_and_counts':'catalog',
+     'database':'archive','globals':'globals'}}
+    val.report={'decision':'NO-GO','restore':'NOT_EXECUTED'}
+    calls=[]
+    def run(args,**kwargs):
+     calls.append(args)
+     query=kwargs.get('input',b'')
+     if args[:3]==['docker','exec','-i'] and query.startswith(b'BEGIN READ ONLY'):
+      if b'jsonb_object_agg(name,count)' in query:
+       value={'public.test':2 if failure=='counts' else 1}
+      elif b"SELECT '[]'::jsonb" in query:value=[]
+      else:value=catalog
+      return subprocess.CompletedProcess(args,0,json.dumps(value).encode(),b'')
+     return subprocess.CompletedProcess(args,0,b'',b'')
+    def reject_validator(*args):
+     val.report['restore']='HASH_COUNTS_CATALOG_VERIFIED'
+     raise gcs.SafeFailure('POSTGRES_17_11_REQUIRED')
+    with patch.dict(os.environ,{'GITHUB_ACTIONS':'true','SGP_RESTORE_EXISTING':'true'},clear=True):
+     with patch.object(subprocess,'run',side_effect=run),patch.object(recovery,'catalog_body',return_value='SELECT catalog;'):
+      with patch.object(recovery,'compare_catalogs',return_value=['funciones'] if failure=='catalog' else []):
+       with patch.object(val,'run',side_effect=reject_validator) as callback,contextlib.redirect_stdout(io.StringIO()) as output:
+        self.assertEqual(recovery.main(validation=val),1)
+        self.assertEqual(callback.call_count,1 if failure=='validator' else 0)
+    expected={'counts':'RESTORED_TABLE_COUNTS_DIFFER','catalog':'RESTORED_CATALOG_DIFFER',
+     'validator':'POSTGRES_17_11_REQUIRED'}[failure]
+    self.assertEqual(val.report['failure']['code'],expected)
+    self.assertEqual(val.report['decision'],'NO-GO')
+    self.assertEqual(val.report['failure']['phase'],'PDT_UNIFIED_VALIDATION' if failure=='validator' else 'RESTORE_INTEGRITY')
+    self.assertEqual(val.report['restore'],'HASH_COUNTS_CATALOG_VERIFIED' if failure=='validator' else 'FAILED')
+    self.assertNotIn('private',output.getvalue())
+    self.assertIn(expected,output.getvalue())
+    start=next(c for c in calls if c[:3]==['docker','run','-d'])
+    self.assertIn(['docker','rm','-f',start[start.index('--name')+1]],calls)
 
 if __name__=='__main__':unittest.main()

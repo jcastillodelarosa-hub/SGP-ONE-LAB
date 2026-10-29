@@ -74,3 +74,40 @@ esta nueva rama, su administrador debe autorizarla en `supabase-backup`.
 El workflow publica NO-GO si falla un paso anterior a la restauración.
 
 Instante UTC y administrador de publicación productiva: **pendientes**.
+
+## Continuación del run41 — diagnóstico conservado
+
+Ejecución examinada: [40863621247](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/actions/runs/40863621247),
+job123412751610, infraestructura `9dfbcbf`, candidato `b7e7908`.
+El login GCS, la descarga de imagen, el release y las32pruebas Node terminaron
+correctamente. El paso real falló a las11:13:31UTC con
+`RESTORE_INTEGRITY: ISOLATED_VALIDATION_FAILED`.
+
+**Causa subyacente no determinada con los registros disponibles.** El recuperador
+sustituía cualquier `SafeFailure` por el mismo texto y no cambiaba la fase al
+entrar en el hook PDT. El informe se escribía únicamente en Step Summary, sin
+copiarse al log accesible por API. Sin el JSON de ese resumen no se puede distinguir
+retrospectivamente entre discrepancia de recuperación/integridad y fallo del
+validador. No se afirma corrupción del respaldo, problema de permisos ni defecto
+funcional PDT. La anotación RESTORE_GLOBALS de11:12:57UTC correspondía a una prueba
+unitaria de fallo controlado que terminó OK; no era el fallo de la restauración.
+
+La corrección conserva códigos locales de una lista cerrada, categorías y nombres
+de secciones de catálogo permitidos, sin incluir excepciones crudas, SQL, filas,
+usuarios ni tokens. Separa `PDT_UNIFIED_VALIDATION` después de superar integridad,
+conserva el detalle seguro ya capturado por fase SQL y copia el informe sanitizado
+al log además del resumen. La salida de fallo de la prueba unitaria se captura
+para evitar una anotación engañosa. No cambia ninguna comparación, guard ni SQL PDT.
+
+Regresión:11/11pruebas del validador +24/24respaldo; verify:release365 y diff correctos.
+Los casos nuevos inyectan discrepancias de conteos/catálogo y un fallo del hook:
+verifican NO-GO, ausencia de invocación del hook si falla integridad, fase/código
+correctos, redacción y eliminación del contenedor en todos los casos.
+
+Para repetir: abrir el workflow Preview, **Run workflow**, seleccionar
+`feat/issue-144-pdt-isolated-validation` y `validate-pdt-unified` sobre el nuevo HEAD.
+**Crear una ejecución nueva**: Re-run jobs del run41 reutiliza el commit anterior.
+Tras aprobar `supabase-backup` si se solicita, revisar el informe y los campos
+`restore`, `failure.phase`, `failure.code`, `failure.category` y `phases` en el log.
+Hasta completar esa nueva ejecución, la validación restaurada y publicación
+continúan NO-GO. No se fusiona, instala en producción ni publica Firebase.
