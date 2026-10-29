@@ -115,9 +115,11 @@ jobs:
           assert data['conclusion']=='success', 'Backup/recovery run not successful'
           assert data['event']=='workflow_dispatch', 'Evidence must be a manual run'
           assert data['created_at'] >= '2026-10-29T00:00:00Z', 'Evidence predates release window'
-          assert data['head_sha'] in ('90b88198c995c98549113d12d374b2ad2eb69ec2',), 'Unapproved recovery evidence SHA'
-          assert data['id']==40872064831, 'Evidence must match verified isolated recovery run'
           assert data['head_branch'] in ('feat/issue-144-pdt-isolated-validation','feat/pdt-unified-release-workflow'), 'Unexpected backup source'
+          assert data['name'] and 'backup' in data['name'].lower(), 'Evidence must be a backup workflow'
+          from datetime import datetime,timezone,timedelta
+          created=datetime.fromisoformat(data['created_at'].replace('Z','+00:00'))
+          assert timedelta(0)<=datetime.now(timezone.utc)-created<=timedelta(hours=6), 'Recovery workflow run is stale'
           print('Successful run exists; operator must additionally verify backup freshness and recovery in environment approval.')
           PY
       - name: Authenticate to private GCS backup storage
