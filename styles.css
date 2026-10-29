@@ -2580,3 +2580,8 @@ button.active,[aria-pressed="true"]{border-color:#0865ed}
  .pdt-dashboard .pdt-dashboard-summary b{font-size:22px}
  .pdt-dashboard .pdt-dashboard-table{margin:0 -8px}
 }
+
+/* PDT v367: production identifiers stay readable in both active and resolved tables. */
+.pdt-dashboard .repo-table{min-width:1450px;table-layout:auto}
+.pdt-dashboard .repo-table th:nth-child(2),.pdt-dashboard .repo-table td:nth-child(2){min-width:240px;max-width:380px;white-space:normal;overflow-wrap:anywhere;line-height:1.35}
+.pdt-dashboard #repoContract[hidden]{display:none!important}
