@@ -79,7 +79,7 @@ if __name__ == "__main__":
         url = secure_url(os.environ.get("PDT_DATABASE_URL", ""))
         print("::add-mask::" + url)
         with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as out:
-            out.write("DATABASE_URL=" + url + "\\n")
+            out.write("DATABASE_URL=" + url + "\n")
         print("PRODUCTION_DATABASE_TARGET_AND_TLS_VERIFIED")
     except ValueError as exc:
         print(f"::error::SGP_PDT_DATABASE_URL_{exc}")
