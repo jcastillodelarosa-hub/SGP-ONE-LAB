@@ -54,7 +54,7 @@ test('inactive or unresolved historical NC never certifies a potential solution'
   assert.equal(ncAvailability([{estado:'FINALIZADA',activo:false}]).finalizadas,0);
 });
 
-import {discoverPendingV2,loadPendingRows} from '../src/services/aluminum-pending-v2.js';
+import {discoverPendingV2,loadPendingRows,executeManualPdt} from '../src/services/aluminum-pending-v2.js';
 import {validateFabricationDistribution} from '../src/domain/aluminum-pending-balances.js';
 test('missing capabilities RPC preserves legacy read without a new write',async()=>{
   const calls=[];const row={id_pendiente:'legacy',cantidad:9};
@@ -68,16 +68,31 @@ test('capabilities transport/auth error never silently degrades',async()=>{
   assert.equal(calls,1);
 });
 test('Reception reads dedicated v2 without requesting forbidden legacy list',async()=>{
-  const calls=[];const client={rpc:async(name)=>{calls.push(name);return name==='sgp_pdt_manual_ids_v1'?{error:{code:'PGRST202'}}:{data:name==='sgp_pdt_capacidades_v2'?{ok:true,contract_version:2,operations:[]}:payload()};}};
+  const calls=[];const client={rpc:async(name)=>{calls.push(name);return name.startsWith('sgp_pdt_manual_')?{error:{code:'PGRST202'}}:{data:name==='sgp_pdt_capacidades_v2'?{ok:true,contract_version:2,operations:[]}:payload()};}};
   const loaded=await loadPendingRows(client,'synthetic','RECEPCION');
   assert.equal(loaded.rows[0].cantidad,9);
-  assert.deepEqual(calls,['sgp_pdt_capacidades_v2','sgp_aluminio_pendientes_listar_v2','sgp_pdt_manual_ids_v1']);
+  assert.deepEqual(calls,['sgp_pdt_capacidades_v2','sgp_aluminio_pendientes_listar_v2','sgp_pdt_manual_listar_v1','sgp_pdt_manual_ids_v1']);
 });
 test('v2 enriches metadata without reinterpreting original quantities',async()=>{
-  const client={rpc:async(name)=>name==='sgp_pdt_manual_ids_v1'?{error:{code:'PGRST202'}}:({data:name==='sgp_pdt_capacidades_v2'?{ok:true,contract_version:2,operations:[]}:
+  const client={rpc:async(name)=>name.startsWith('sgp_pdt_manual_')?{error:{code:'PGRST202'}}:({data:name==='sgp_pdt_capacidades_v2'?{ok:true,contract_version:2,operations:[]}:
     name==='sgp_aluminio_pendientes_listar'?[{id_pendiente:'p',semana:44,acabado:'DS',cantidad:9}]:payload()})};
   const {rows}=await loadPendingRows(client,'synthetic','COORDINADOR');
   assert.equal(rows[0].semana,44);assert.equal(rows[0].cantidad,9);assert.equal(rows[0].cantidad_validada,8);
+});
+test('manual header enriches existing PDT row without consulting piece sources',async()=>{
+ const calls=[];const client={rpc:async(name)=>{calls.push(name);return {data:name==='sgp_pdt_capacidades_v2'?{ok:true,contract_version:2,operations:[]}:
+  name==='sgp_pdt_manual_listar_v1'?{ok:true,contract_version:'pdt-manual-3',pendientes:[{id_pendiente:'p',semana:44,anio:2026,marca_original:'A',observacion_general:'QA'}]}:
+  name==='sgp_aluminio_pendientes_listar'?[]:payload()};}};
+ const {rows}=await loadPendingRows(client,'synthetic','COORDINADOR');
+ assert.equal(rows[0].manual_pdt,true);assert.equal(rows[0].semana,44);assert.equal(rows[0].marca_original,'A');
+ assert.equal(calls.includes('sgp_aluminio_pendiente_piezas'),false);
+});
+test('manual operations never fall back to a legacy write',async()=>{
+ const calls=[];const client={rpc:async name=>{calls.push(name);return {error:{code:'PGRST202',message:'RPC unavailable'}};}};
+ await assert.rejects(executeManualPdt(client,'sgp_pdt_manual_cerrar_v1',{}),error=>error.code==='PGRST202'&&error.message==='RPC unavailable');
+ assert.deepEqual(calls,['sgp_pdt_manual_cerrar_v1']);
+ await assert.rejects(executeManualPdt(client,'sgp_pdt_cerrar_v2',{}),/no permitida/);
+ assert.equal(calls.length,1);
 });
 test('source reference distinguishes source rows; duplicate same source rejected',()=>{
   const row={fabricacion:'E17',longitud:'109.9375',acabado:'DS',cantidad:4};

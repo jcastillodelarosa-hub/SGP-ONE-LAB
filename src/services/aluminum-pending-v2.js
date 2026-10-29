@@ -35,6 +35,16 @@ const NEW_WRITES = new Set(['sgp_aluminio_pendiente_validar_detalles_v1',
   'sgp_aluminio_pendiente_registrar_avance_v1', 'sgp_aluminio_pendiente_revertir_avance_v1',
   'sgp_aluminio_pendiente_nc_vincular_v1','sgp_pdt_estado_v2','sgp_pdt_entrega_registrar_v2','sgp_pdt_entrega_validar_v2',
   'sgp_pdt_asignar_v2','sgp_pdt_entrega_anular_v2','sgp_pdt_cerrar_v2']);
+const MANUAL_WRITES = new Set(['sgp_pdt_manual_entrega_registrar_v1','sgp_pdt_manual_entrega_validar_v1',
+  'sgp_pdt_manual_asignar_v1','sgp_pdt_manual_entrega_anular_v1','sgp_pdt_manual_cerrar_v1']);
+
+export async function executeManualPdt(client, operation, args) {
+  if (!MANUAL_WRITES.has(operation)) throw new Error('Operación PDT manual no permitida');
+  const result=await client.rpc(operation,args);
+  if(result.error)throw result.error;
+  if(result.data?.ok!==true)throw new Error('Respuesta PDT manual inválida');
+  return result.data;
+}
 
 export async function executePendingV2(client, capabilities, operation, args) {
   if (!NEW_WRITES.has(operation) || capabilities?.contract_version !== 2 ||
@@ -68,13 +78,17 @@ export async function loadPendingRows(client,token,role) {
   if(!capabilities)return {rows:data,capabilities:null};
   if(modern.error)throw modern.error;
   const adapted=adaptPendingListV2(modern.data);
-  const manualResponse=await client.rpc('sgp_pdt_manual_ids_v1',{p_token:token});
+  let manualResponse=await client.rpc('sgp_pdt_manual_listar_v1',{p_token:token});
+  if(manualResponse.error&&['PGRST202','42883'].includes(manualResponse.error.code))manualResponse=await client.rpc('sgp_pdt_manual_ids_v1',{p_token:token});
   if(manualResponse.error&&!['PGRST202','42883'].includes(manualResponse.error.code))throw manualResponse.error;
-  if(!manualResponse.error&&(manualResponse.data?.ok!==true||!Array.isArray(manualResponse.data.ids)))throw new Error('Identidades PDT manual inválidas');
-  const manualIds=new Set(manualResponse.error?[]:manualResponse.data.ids.map(String));
+  if(!manualResponse.error&&(manualResponse.data?.ok!==true||!Array.isArray(manualResponse.data.ids??manualResponse.data.pendientes)
+    ||(manualResponse.data.pendientes&&manualResponse.data.contract_version!=='pdt-manual-3')))throw new Error('Identidades PDT manual inválidas');
+  const manualMeta=new Map((manualResponse.data?.pendientes||[]).map(r=>[String(r.id_pendiente),r]));
+  const manualIds=new Set(manualResponse.error?[]:(manualResponse.data.ids||manualResponse.data.pendientes.map(r=>r.id_pendiente)).map(String));
   const original=new Map(data.map(r=>[r.id_pendiente,r]));
-  const rows=adapted.map(r=>({...original.get(r.id_pendiente),...r,
-    semana:r.semana??original.get(r.id_pendiente)?.semana,manual_pdt:manualIds.has(String(r.id_pendiente))}));
+  const rows=adapted.map(r=>({...original.get(r.id_pendiente),...r,...manualMeta.get(String(r.id_pendiente)),
+    semana:manualMeta.get(String(r.id_pendiente))?.semana??r.semana??original.get(r.id_pendiente)?.semana,
+    manual_pdt:manualIds.has(String(r.id_pendiente))}));
   const present=new Set(rows.map(r=>r.id_pendiente));
   for(const r of data)if(!present.has(r.id_pendiente))rows.push(r);
   return {rows,capabilities};

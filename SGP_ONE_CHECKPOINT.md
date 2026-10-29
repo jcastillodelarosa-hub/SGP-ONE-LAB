@@ -1,10 +1,12 @@
-# Issue #140 — PDT manual unificado, Fases 1 y 2 (rama de revisión)
+# Issue #140 — PDT manual unificado, Fases 1–3 (rama de revisión)
 
 Fecha Colombia: 2026-10-28. Base `main` `55a309729bb3166cce98e24eb7e840169f4b7890`; rama `feature/pdt-manual-unificado`. Alcance: botón `+ Nuevo PDT`, filtros de programación, selector PANEL con combinaciones y múltiples piezas, NC opcional, observaciones, tabla visual de fuentes en Picking, SQL REVIEW aditivo de cabeceras/detalles/fuentes y RPC con sesión/roles. Sin archivado histórico ni cambios a V4/PR #139.
 
 Estado: IMPLEMENTADO EN RAMA / VERIFICADO EN AISLAMIENTO. No aplicado en Supabase, no fusionado ni publicado. Fase 2: `POR_VALIDAR` manual se valida con fuentes PANEL verificadas, reporte original inmutable, observación obligatoria para corregir y auditoría original/validado. LEGACY/V2 ajenos se despachan a la función original capturada. Avances, Picking y cierre de registros manuales siguen pendientes de Fase 3 y se ocultan en la UI. SQL REVIEW y reversión separados; ningún SQL aplicado a producción. Pruebas focalizadas Node y PostgreSQL 17.11 sintético con transacción revertida; PC 1440 y móvil 390 de Fase 1 sin nueva captura de Fase 2. Evidencias en `tests/pdt-manual/` y contrato/reversión en `docs/sql-proposals/pdt/manual/README.md`.
 
-Bloqueos para instalación/publicación: confirmar fuente oficial del año programado en `sgp_produccion_reservas_v`; respaldar y probar en restauración compatible; reconciliar el guard del validador si PR #139 cambia su cuerpo; completar protección RPC y contratos de avances/Picking/cierre de Fase 3 antes de exponer PDT manual validado al flujo operativo. Siguiente paso: revisión de Fase 2 en el mismo PR Draft #141; no iniciar Fase 3 ni aplicar SQL sin autorización.
+Fase 3 IMPLEMENTADA EN RAMA y VERIFICADA EN AISLAMIENTO: SQL REVIEW 03 con líneas cuantitativas consolidadas por detalle/evento de Picking, asignación y cierre acreditado; funciones originales delegadas para LEGACY/V2 ajenos. El controlador existente habilita avances y Picking manuales y lee la cabecera indexada. Sin tablero nuevo ni cambio a los 101 históricos. QA: PostgreSQL 17.11 aislado, instalación/reversión y escenario transaccional de alta→validación→2 avances→entrega→validación→asignación→cierre; rechazos de sobreavance, diferencia auditada, permisos, duplicados y cambio de fuente. Navegador PC 1366 y móvil 390 con datos sintéticos; capturas en `tests/pdt-manual/`. No se ejecutó SQL productivo, no hay fusión ni publicación.
+
+Bloqueos para instalación/publicación: confirmar fuente oficial del año programado en `sgp_produccion_reservas_v`; respaldar/restaurar esquema real; comparar funciones productivas actuales capturadas en 03 con PR #139 y otros cambios antes de aprobar aplicación. La prueba sintética no certifica firmas ni cuerpos productivos. Siguiente paso: revisión de Fases 1–3 en el mismo PR Draft #141; no aplicar SQL ni desplegar sin autorización.
 
 ---
 

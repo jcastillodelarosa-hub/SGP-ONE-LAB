@@ -28,7 +28,7 @@ export function renderPdtWorkspace({form,row,picking,validated,esc}){
   if(key){sections[key]+=node.outerHTML;node.remove();}
  }
  if(!validated)sections.distribution=root.innerHTML;
- else sections.distribution=distributionReadOnly(row.detalles||[],esc);
+ else sections.distribution=sections.distribution+distributionReadOnly(row.detalles||[],esc);
  if(!sections.advances)sections.advances='<p>Modo consulta · sin permiso para registrar avances.</p>'+detailTable(row.detalles||[],esc);
  const ncRows=(row.ncs||[]).map(n=>'<tr><td>'+esc(n.referencia||n.consecutivo||n.cod_nc||'—')+'</td><td>'+esc(n.estado||n.resolucion||'—')+'</td><td>'+esc(n.detalle||n.descripcion||n.observacion||'—')+'</td></tr>').join('');
  sections.nc='<div class="pdt-table-wrap"><table><thead><tr><th>Número NC</th><th>Estado</th><th>Detalle</th></tr></thead><tbody>'+ncRows+'</tbody></table></div>'+(!ncRows?'<p>Sin NC vinculadas.</p>':'')+sections.nc;
