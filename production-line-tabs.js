@@ -7,13 +7,14 @@
  const locations=byId('assemblyLocationReportPanel'),sheet=byId('assemblySheetPanel');
  if(!tabs||!assembly||!packing||!assemblyPanel||!packingPanel||!locations||!sheet)return;
  const planner=document.createElement('button');
- planner.type='button';planner.id='productionPlannerTab';planner.textContent='Planificador';
+ planner.type='button';planner.id='productionPlannerTab';planner.textContent='LP-01 · Programación';
+ assembly.textContent='LP-02 · Ensamble';packing.textContent='LP-02 · Empaque';
  const report=document.createElement('button');
  report.type='button';report.id='productionLocationsTab';report.textContent='Reporte de ubicaciones';
  tabs.insertBefore(planner,assembly);tabs.append(report);
  const plannerPanel=document.createElement('div');
  plannerPanel.id='productionPlannerPanel';plannerPanel.className='production-packing-empty';
- plannerPanel.innerHTML='<h3>Planificador de Línea de Producción</h3><p>En preparación: prioridades operativas por línea y turno. No se modifican datos ni reglas de programación.</p>';
+ plannerPanel.innerHTML='<h3>Línea de Producción · Programación</h3><p>Calendario, tabla y Kanban comparten las asignaciones consultadas. La carga programada y los saldos oficiales del Export se muestran por separado.</p>';
  tabs.after(plannerPanel);
  const oldSubtabs=byId('assemblySheetTab')?.parentElement;
  if(oldSubtabs)oldSubtabs.hidden=true;
