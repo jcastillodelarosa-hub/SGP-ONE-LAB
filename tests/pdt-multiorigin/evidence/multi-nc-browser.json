@@ -1,0 +1,28 @@
+[
+  {
+    "viewport": [
+      1366,
+      900
+    ],
+    "two_nc_one_piece": true,
+    "duplicate_blocked": true,
+    "optional_nc": true,
+    "no_horizontal_overflow": true,
+    "external_network": "blocked",
+    "data": "synthetic",
+    "js_errors": []
+  },
+  {
+    "viewport": [
+      390,
+      844
+    ],
+    "two_nc_one_piece": true,
+    "duplicate_blocked": true,
+    "optional_nc": true,
+    "no_horizontal_overflow": true,
+    "external_network": "blocked",
+    "data": "synthetic",
+    "js_errors": []
+  }
+]

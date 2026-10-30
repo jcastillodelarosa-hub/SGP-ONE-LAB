@@ -1,0 +1,30 @@
+{
+  "status": "PASS",
+  "postgres": "17.11 (Debian 17.11-1.pgdg13+2)",
+  "network": "none; no exposed ports",
+  "isolated_checks_total": 46,
+  "multi_nc_checks": [
+    "Multi-NC addon rejects failed installation, installs with pinned hash, rolls back before use, and reinstalls",
+    "Picking 0 NC: one PDT, one missing line, exact links, idempotent retry",
+    "Picking 1 NC: one PDT, one missing line, exact links, idempotent retry",
+    "Picking 2 NC: one PDT, one missing line, exact links, idempotent retry",
+    "Picking 20 NC: one PDT, one missing line, exact links, idempotent retry",
+    "Picking two pieces and shared reserve preserve separate quantities and links",
+    "Picking rejects duplicate raw without delivery/PDT remnants",
+    "Picking rejects duplicate alias without delivery/PDT remnants",
+    "Picking rejects unknown extra without delivery/PDT remnants",
+    "Picking rejects principal mismatch without delivery/PDT remnants",
+    "Picking rejects invalid control without delivery/PDT remnants",
+    "Picking rejects invalid non-string without delivery/PDT remnants",
+    "Picking rejects invalid non-array without delivery/PDT remnants",
+    "Picking rejects over 20 without delivery/PDT remnants",
+    "Picking rejects ambiguous NC lookup",
+    "Ensamble cannot silently discard additional NC"
+  ],
+  "legacy_lifecycle_unchanged": true,
+  "production_access": false,
+  "fixture_limits": [
+    "PANEL listing is synthetic",
+    "No production write or role acceptance"
+  ]
+}

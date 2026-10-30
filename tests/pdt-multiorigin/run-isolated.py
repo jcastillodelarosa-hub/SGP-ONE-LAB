@@ -63,13 +63,21 @@ r=psql(db,changed);assert r.returncode and 'PDT_HISTORIAL_CONTRATO_INCOMPATIBLE'
 r=psql(db,cycle.replace('COMMIT;','SELECT 1/0;COMMIT;'));assert r.returncode
 assert sql('SELECT count(*) FROM sgp_pdt_multiorigen.funciones_previas')=='0'
 sql(cycle)
+multi_nc=(D/'03_multi_nc_REVIEW.sql').read_text()
+r=psql(db,multi_nc.replace('COMMIT;','SELECT 1/0;COMMIT;'))
+assert r.returncode and sql("SELECT md5(prosrc) FROM pg_proc WHERE oid='sgp_pdt_multiorigen.registrar(text,text,jsonb,jsonb,uuid,uuid)'::regprocedure")=='ec01e6f39c131b55c4b0c021d48124f3'
+sql(multi_nc)
+assert sql("SELECT md5(prosrc) FROM pg_proc WHERE oid='sgp_pdt_multiorigen.registrar(text,text,jsonb,jsonb,uuid,uuid)'::regprocedure")=='c0af642cc10c1d391cc30d6f28b611c8'
+sql((D/'03_multi_nc_ROLLBACK_REVIEW.sql').read_text())
+assert sql("SELECT md5(prosrc) FROM pg_proc WHERE oid='sgp_pdt_multiorigen.registrar(text,text,jsonb,jsonb,uuid,uuid)'::regprocedure")=='ec01e6f39c131b55c4b0c021d48124f3'
+sql(multi_nc)
 after_legacy=legacy.results(sql,legacy_ids)
 assert before_legacy==after_legacy,'LEGACY lifecycle changed'
 legacy.unchanged(sql)
 (ROOT/'tests/pdt-multiorigin/evidence/legacy.json').write_text(json.dumps({'status':'PASS','states':list(after_legacy),'operations_per_state':8,'before_equals_after':True,'rows_and_history_unchanged':True,'actual_production_validator_available':False,'matrix':after_legacy},indent=2)+'\n')
 rollback=(D/'ROLLBACK_REVIEW.sql').read_text()
 sql(rollback.replace('COMMIT;','ROLLBACK;'))
-report=['Old name/week-only delivery reproduces PDT_CLAVE_NO_CORRESPONDE_A_MAESTRO and rolls back','Installation failure rolls back all new objects','LEGACY open/validated/with movements/closed: 32 operations identical before/after; rows and history unchanged','Different validator body or SECURITY INVOKER rejected before any lifecycle replacement','Missing estado_nuevo or unknown mandatory audit column aborts installation atomically']
+report=['Old name/week-only delivery reproduces PDT_CLAVE_NO_CORRESPONDE_A_MAESTRO and rolls back','Installation failure rolls back all new objects','LEGACY open/validated/with movements/closed: 32 operations identical before/after; rows and history unchanged','Different validator body or SECURITY INVOKER rejected before any lifecycle replacement','Missing estado_nuevo or unknown mandatory audit column aborts installation atomically','Multi-NC addon rejects failed installation, installs with pinned hash, rolls back before use, and reinstalls']
 ctx={'id_programacion':'00000000-0000-0000-0000-000000000001','produccion':'QA ORDER','completa':False,'fecha_entrega':'2026-10-26','turno':'TURNO 1','key_produccion':'QA|PANELES_2','reserva':'SHARED'}
 source={'id_pieza':'P1','key_produccion':'QA|PANELES_2','reserva':'SHARED','reserva_principal':'R','perfil':'PANEL-REF','fabricacion':'E17','longitud':100,'acabado':'DS','cantidad':1,'nc':''}
 def lit(x):return "'"+json.dumps(x).replace("'","''")+"'::jsonb"
@@ -79,6 +87,37 @@ def check(name,body):
  sql('BEGIN;DO $case$ DECLARE r jsonb; id uuid; n int; BEGIN '+body+' END $case$;ROLLBACK;');report.append(name)
 sql("CREATE FUNCTION qa_reject(q text,expected text) RETURNS void LANGUAGE plpgsql AS $$ BEGIN BEGIN EXECUTE q;RAISE EXCEPTION 'EXPECTED_REJECTION_MISSING';EXCEPTION WHEN OTHERS THEN IF position(expected IN SQLERRM)=0 THEN RAISE EXCEPTION 'Unexpected: %',SQLERRM;END IF;END;END $$;")
 def reject(q,error):return 'PERFORM qa_reject($q$SELECT '+q+'$q$,\''+error+"');"
+sql("INSERT INTO sgp_nc_aluminio(consecutivo,cod_nc,activo) SELECT 'QA-MULTI-'||i,'QA-ALIAS-'||i,true FROM generate_series(1,20) i;")
+for nc_count in (0,1,2,20):
+ ncs=['QA-MULTI-'+str(i) for i in range(1,nc_count+1)]
+ piece={**source,'nc':ncs[0] if ncs else ''}
+ if nc_count>1:piece['ncs']=ncs
+ invocation=call(pieces=[piece])
+ check('Picking '+str(nc_count)+' NC: one PDT, one missing line, exact links, idempotent retry',
+  "r:="+invocation+";id:=(r->'ids_pendientes'->>0)::uuid;"
+  +"IF jsonb_array_length(r->'ids_pendientes')<>1 OR (SELECT count(*) FROM sgp_aluminio_pendientes WHERE id_pendiente=id AND cantidad=1)<>1"
+  +" OR (SELECT count(*) FROM sgp_picking_faltantes WHERE id_entrega=(r->>'id_entrega')::uuid)<>1"
+  +" OR (SELECT count(*) FROM sgp_aluminio_pendiente_ncs WHERE id_pendiente=id)<>"+str(nc_count)
+  +" THEN RAISE EXCEPTION 'MULTI_NC_COUNT_WRONG';END IF;"
+  +"IF ("+invocation+"->>'duplicado') IS DISTINCT FROM 'true' THEN RAISE EXCEPTION 'RETRY_DUPLICATED';END IF;")
+check('Picking two pieces and shared reserve preserve separate quantities and links',
+ "r:="+call(pieces=[{**source,'nc':'QA-MULTI-1','ncs':['QA-MULTI-1','QA-MULTI-2']},{**source,'id_pieza':'P2','fabricacion':'E17-1','nc':'QA-MULTI-3','ncs':['QA-MULTI-3','QA-MULTI-4']}])+";"
+ +"IF jsonb_array_length(r->'ids_pendientes')<>2 OR (SELECT count(*) FROM sgp_picking_faltantes WHERE id_entrega=(r->>'id_entrega')::uuid)<>2"
+ +" OR (SELECT count(*) FROM sgp_aluminio_pendiente_ncs WHERE id_pendiente IN (SELECT jsonb_array_elements_text(r->'ids_pendientes')::uuid))<>4"
+ +" THEN RAISE EXCEPTION 'MULTI_PIECES_WRONG';END IF;")
+for label,piece,error in [
+ ('duplicate raw',{**source,'nc':'QA-MULTI-1','ncs':['QA-MULTI-1','QA-MULTI-1']},'PDT_NC_DUPLICADA'),
+ ('duplicate alias',{**source,'nc':'QA-MULTI-1','ncs':['QA-MULTI-1','QA-ALIAS-1']},'PDT_NC_DUPLICADA'),
+ ('unknown extra',{**source,'nc':'QA-MULTI-1','ncs':['QA-MULTI-1','NO-CATALOG']},'PDT_NC_NO_ENCONTRADA'),
+ ('principal mismatch',{**source,'nc':'QA-MULTI-1','ncs':['QA-MULTI-2','QA-MULTI-3']},'PDT_NC_PRINCIPAL_NO_COINCIDE'),
+ ('invalid control',{**source,'nc':'QA-MULTI-1','ncs':['QA-MULTI-1','BAD\nNC']},'PDT_NC_INVALIDA'),
+ ('invalid non-string',{**source,'nc':'QA-MULTI-1','ncs':['QA-MULTI-1',17]},'PDT_NC_INVALIDA'),
+ ('invalid non-array',{**source,'nc':'QA-MULTI-1','ncs':'QA-MULTI-1'},'PDT_NCS_INVALIDAS'),
+ ('over 20',{**source,'nc':'QA-MULTI-1','ncs':['QA-MULTI-'+str(i) for i in range(1,22)]},'PDT_NCS_INVALIDAS')]:
+ check('Picking rejects '+label+' without delivery/PDT remnants',reject(call(pieces=[piece]),error)+"IF (SELECT count(*) FROM sgp_picking_entregas)<>0 THEN RAISE EXCEPTION 'PARTIAL_DELIVERY';END IF;")
+check('Picking rejects ambiguous NC lookup',"INSERT INTO sgp_nc_aluminio(consecutivo,cod_nc,activo) VALUES('QA-AMB-1','AMBIGUA',true),('QA-AMB-2','AMBIGUA',true);"+reject(call(pieces=[{**source,'nc':'QA-MULTI-1','ncs':['QA-MULTI-1','AMBIGUA']}]),'PDT_NC_AMBIGUA'))
+check('Ensamble cannot silently discard additional NC',reject(call('ENSAMBLE','LIDER LINEA',pieces=[{**source,'nc':'QA-MULTI-1','ncs':['QA-MULTI-1','QA-MULTI-2']}]),'PDT_NCS_INVALIDAS'))
+check('Picking retains one unmatched historical NC reference',"r:="+call(pieces=[{**source,'nc':'OLD-REFERENCE'}])+";id:=(r->'ids_pendientes'->>0)::uuid;IF (SELECT nc FROM sgp_aluminio_pendientes WHERE id_pendiente=id)<>'OLD-REFERENCE' OR EXISTS(SELECT 1 FROM sgp_aluminio_pendiente_ncs WHERE id_pendiente=id) THEN RAISE EXCEPTION 'LEGACY_NC_REFERENCE_CHANGED';END IF;")
 check('PATINADOR: valid shared PANEL -> V2, no NC, real source/key/principal preserved',"r:="+call()+";id:=(r->'ids_pendientes'->>0)::uuid;IF NOT EXISTS(SELECT 1 FROM sgp_aluminio_pendientes WHERE id_pendiente=id AND contrato_pdt='V2' AND validacion_estado='POR_VALIDAR' AND origen='PICKING' AND nc IS NULL AND key_produccion='QA|PANELES_2' AND reserva='SHARED' AND reserva_principal='R') THEN RAISE EXCEPTION 'BAD_RECORD';END IF;")
 for origin in ['ENSAMBLE','EMPAQUE']:
  for nc in ['', '   ']:check(origin+' rejects blank NC',reject(call(origin,'LIDER LINEA',pieces=[{**source,'nc':nc}]),'PDT_NC_OBLIGATORIA'))
@@ -136,3 +175,9 @@ assert sql("SELECT has_function_privilege('anon','sgp_pdt_registrar_v4(text,text
 report.append('Code rollback proven before events; later rollback rejects downgrade, containment blocks new registration preserving events/PDTs/deliveries')
 output={'status':'PASS','postgres':sql('SHOW server_version'),'database':db,'network':'none; no exposed ports','checks':report,'limitations':['PANEL underlying listing is a fixture, not a live Supabase call','Captured source/auth definitions reused in fresh synthetic schema; current productive fingerprints pending review','Official installer rejects synthetic fingerprint; only in-memory fixture pin used for positive isolated tests','Production fingerprint and functional differences supplied by owner/ChatGPT; full productive validator body not attached','No production data or migration executed']}
 (ROOT/'tests/pdt-multiorigin/evidence/sql.json').write_text(json.dumps(output,indent=2)+'\n');print(json.dumps(output,indent=2))
+focused={'status':output['status'],'postgres':output['postgres'],'network':output['network'],
+ 'isolated_checks_total':len(report),
+ 'multi_nc_checks':[x for x in report if x.startswith(('Multi-NC','Picking 0 NC','Picking 1 NC','Picking 2 NC','Picking 20 NC','Picking two pieces','Picking rejects','Ensamble cannot'))],
+ 'legacy_lifecycle_unchanged':any('32 operations identical' in x for x in report),
+ 'production_access':False,'fixture_limits':['PANEL listing is synthetic','No production write or role acceptance']}
+(ROOT/'tests/pdt-multiorigin/evidence/multi-nc-sql.json').write_text(json.dumps(focused,indent=2,ensure_ascii=False)+'\n')
