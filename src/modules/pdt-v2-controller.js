@@ -136,7 +136,7 @@ export async function openPdtV2({row,client,token,role,capabilities,show,escape:
   const keys={advance:crypto.randomUUID(),reverse:crypto.randomUUID(),delivery:crypto.randomUUID(),assign:crypto.randomUUID(),close:crypto.randomUUID()};
   modal.querySelectorAll('[data-operation]').forEach(button=>button.onclick=async()=>{
     if(operationPending||session.busy||session.needsRefresh||button.disabled)return;
-    if(['reverse','stage','annul','close'].includes(button.dataset.operation)&&!window.confirm({reverse:'¿Confirmas revertir este avance? Se conservará la trazabilidad.',stage:'¿Confirmas el cambio de etapa? El servidor validará sus condiciones.',annul:'¿Confirmas anular esta línea de entrega?',close:'¿Solicitar cierre del PDT con evidencia Picking?'}[button.dataset.operation]))return;
+    if(['reverse','annul','close'].includes(button.dataset.operation)&&!window.confirm({reverse:'¿Confirmas revertir este avance? Se conservará la trazabilidad.',stage:'¿Confirmas el cambio de etapa? El servidor validará sus condiciones.',annul:'¿Confirmas anular esta línea de entrega?',close:'¿Solicitar cierre del PDT con evidencia Picking?'}[button.dataset.operation]))return;
     const buttons=[...modal.querySelectorAll('[data-operation]')];const previous=buttons.map(b=>b.disabled);operationPending=true;session.busy=true;session.modal?.setAttribute('aria-busy','true');modal.querySelector('[data-refresh-pdt]').disabled=true;buttons.forEach(b=>b.disabled=true);if(retry)retry.disabled=true;
     const val=s=>modal.querySelector(s)?.value||'';
     let writeStarted=false,operation,args={p_token:token,p_id:row.id_pendiente};
@@ -155,7 +155,7 @@ export async function openPdtV2({row,client,token,role,capabilities,show,escape:
         case 'annul':operation=rpcByAction.annul;args={p_token:token,p_linea:val('[data-pick-line]'),p_motivo:val('[data-annul-note]')};break;
         case 'close':operation=rpcByAction.close;args={...args,p_clave:keys.close};break;
         case 'nc':operation='sgp_aluminio_pendiente_nc_vincular_v1';args={...args,p_ncs:normalizeNcNumbers(val('[data-ncs]'))};break;
-        case 'stage':operation='sgp_pdt_estado_v2';args={...args,p_estado:val('[data-stage]')};break;
+        case 'stage':{const selected=val('[data-stage]');if(!['CORTE','MECANIZADO','PROCESADO'].includes(selected))throw new Error('Selecciona un estado válido');if(selected===row.estado_repo){setFeedback('El PDT ya está en ese estado.');return;}operation='sgp_pdt_estado_v2';args={...args,p_estado:selected};break;}
       }
       if(button.dataset.operation==='advance'){const detail=details[Number(button.dataset.detailIndex)];if(!detail||!Number.isSafeInteger(args.p_cantidad)||args.p_cantidad<=0||args.p_cantidad>Number(detail.saldo))throw new Error('Cantidad de avance inválida o superior al saldo');if(!args.p_fecha_operativa)throw new Error('Selecciona la fecha operativa');}
       if(button.dataset.operation==='reverse'&&!args.p_motivo.trim())throw new Error('Indica el motivo del reverso');
