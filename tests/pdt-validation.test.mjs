@@ -11,8 +11,10 @@ test("regresión v281 conserva columnas históricas y menú Acciones en versione
   assert.match(html, /LAB v\d+/);
   assert.match(html, /app\.js\?v=\d+/);
   assert.match(html, /styles\.css\?v=\d+/);
-  assert.equal((html.match(/<th>Acciones<\/th>/g) || []).length, 3);
-  assert.equal((html.match(/data-repo-week-sort/g) || []).length, 3);
+  assert.equal((html.match(/<th>Acciones<\/th>/g) || []).length, 2);
+  assert.equal((html.match(/data-repo-week-sort/g) || []).length, 2);
+  assert.doesNotMatch(html, /id="repoResolvedBody"/);
+  assert.match(html, /id="repoDeliveredBody"/);
   assert.match(html, /data-repo-week-sort>Sem\. ↑<\/button><\/th><th>OP<\/th><th>Reserva<\/th><th>Referencia<\/th><th>Acabado<\/th><th>Marca<\/th><th>Fabricación<\/th><th>Longitud<\/th><th>Cant\.<\/th><th>NC<\/th><th>Enlace NC<\/th><th>Estado NC<\/th><th>Validación<\/th><th>Observación<\/th><th>Estado PDT<\/th><th>Acciones<\/th>/);
   assert.match(app, /repoWeekSort='asc'/);
   assert.match(app, /repoOpenActionPortal/);
