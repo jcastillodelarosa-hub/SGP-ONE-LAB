@@ -4,3 +4,5 @@
 [data-view-panel="ensamble"] .production-line-tabs[hidden],
 [data-view-panel="ensamble"] #productionAssemblyPanel[hidden],
 [data-view-panel="ensamble"] #productionPackingPanel[hidden]{display:none!important}
+
+.lp-process-switch{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 18px}.lp-process-switch button{min-height:44px;padding:10px 20px;border:1px solid #c9d9f2;border-radius:10px;background:#fff;color:#103b73;font:inherit;font-weight:700;cursor:pointer}.lp-process-switch button.active{background:#103b73;color:#fff;border-color:#103b73}
