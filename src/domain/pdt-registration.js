@@ -10,7 +10,9 @@ export function registrationPieces(origin,sources,entries){
  return entries.map(entry=>{
   const matches=sources.filter(s=>sourceKey(s)===entry.source);
   if(matches.length!==1)throw new Error('La pieza no tiene una identidad verificable. Actualiza las fuentes.');
-  const p=matches[0],quantity=Number(entry.cantidad),nc=text(entry.nc);
+  const p=matches[0],quantity=Number(entry.cantidad),ncs=(entry.ncs??[entry.nc??'']).map(text).filter(Boolean),nc=ncs[0]||'';
+  if(ncs.length>20||new Set(ncs).size!==ncs.length||ncs.some(v=>v.length>120||/[\x00-\x1f\x7f]/.test(v)))throw new Error('NC inválida, repetida o excede 20 NC por pieza');
+  if(ncs.length>1)throw new Error('El contrato de registro V4 todavía no admite varias NC por pieza; no se guardará una entrega incompleta.');
   if(!p.id_pieza||!p.key_produccion||!p.reserva||!p.reserva_principal||!text(p.acabado)||p.tipo_pieza!=='PANEL'||p.id_linea!=='PANELES_2')throw new Error('Identidad PANEL incompleta');
   if(!Number.isSafeInteger(quantity)||quantity<=0||p.cantidad_referencia==null||quantity>Number(p.cantidad_referencia))throw new Error('Cantidad fuera de la referencia de la pieza');
   if(origin!=='PICKING'&&!nc)throw new Error('La NC es obligatoria en '+origin);
