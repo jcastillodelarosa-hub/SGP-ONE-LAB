@@ -92,15 +92,81 @@
   capacity.addEventListener('input', markCapacity);
   markCapacity();
 
-  // The drop only prepares the existing single-production form. A separate click saves it.
-  explorer.addEventListener('dragstart', event => {
-    const button = event.target.closest('[data-plan-key]');
-    if (!button?.dataset.planKey) return;
-    event.dataTransfer.setData('text/plain', button.dataset.planKey);
-    event.dataTransfer.effectAllowed = 'copy';
+  // Every interaction prepares the existing single-production form; none writes data.
+  const results = explorer.querySelector('#sgpExplorerResults');
+  const viewContent = operations.querySelector('.sgp-line-view-content');
+  const selectedStatus = document.createElement('p');
+  selectedStatus.className = 'lp01-selection-status';
+  selectedStatus.setAttribute('role', 'status');
+  selectedStatus.textContent = 'Selecciona una producción y toca una celda, o arrástrala desde su tarjeta.';
+  operations.querySelector('.sgp-line-views')?.insertBefore(selectedStatus, viewContent);
+  let selectedKey = null;
+  let dragKey = null;
+  let activeCell = null;
+  const cards = () => [...results.querySelectorAll('.sgp-explorer-order[data-lp-key]')];
+  const cells = () => [...operations.querySelectorAll('.lp-week-cell[data-lp-date][data-lp-shift]')];
+  const rowFor = key => (window.SGPPlannerBridge?.getRows?.() || []).find(item => String(item.key_produccion) === String(key));
+  function markReady(ready) { cells().forEach(cell => cell.classList.toggle('lp01-drop-ready', ready)); }
+  function highlight(cell) {
+    if (activeCell === cell) return;
+    activeCell?.classList.remove('lp01-drop-active');
+    activeCell = cell;
+    activeCell?.classList.add('lp01-drop-active');
+  }
+  function selectCard(key) {
+    const row = rowFor(key);
+    if (!row) return false;
+    selectedKey = key;
+    cards().forEach(card => { const selected = card.dataset.lpKey === key; card.classList.toggle('lp01-card-selected', selected); card.setAttribute('aria-selected', String(selected)); });
+    selectedStatus.textContent = `${row.produccion || key} seleccionada. Toca una celda de día y turno, o arrastra la tarjeta.`;
+    markReady(true);
+    return true;
+  }
+  function clearDragVisual() { dragKey = null; cards().forEach(card => card.classList.remove('lp01-drag-source')); highlight(null); markReady(Boolean(selectedKey)); }
+  const confirmation = document.createElement('dialog');
+  confirmation.className = 'lp01-drop-dialog';
+  confirmation.innerHTML = '<form method="dialog"><h3>Preparar programación</h3><p id="lp01DropContext"></p><label>Cantidad <input id="lp01DropQuantity" type="number" min="1" step="1" required></label><label>Prioridad <input id="lp01DropPriority" type="number" min="1" step="1" required></label><p>La asignación se guardará únicamente después de pulsar Programar en el formulario existente.</p><div class="lp01-drop-actions"><button type="button" id="lp01DropCancel">Cancelar</button><button type="submit">Preparar formulario</button></div></form>';
+  document.body.append(confirmation);
+  let dropSelection = null;
+  function openDrop(key, target) {
+    if (confirmation.open || !target?.dataset.lpDate || !['1', '2'].includes(target.dataset.lpShift)) return;
+    const row = rowFor(key);
+    if (!row) { document.getElementById('sgpPlanMessage').textContent = 'Producción no disponible en la hoja cargada.'; return; }
+    dropSelection = { key, date: target.dataset.lpDate, shift: target.dataset.lpShift };
+    confirmation.querySelector('#lp01DropContext').textContent = `${row.produccion || key} · ${dropSelection.date} · Turno ${dropSelection.shift}`;
+    confirmation.querySelector('#lp01DropQuantity').value = Number(row.saldo_ensamble) > 0 ? String(Number(row.saldo_ensamble)) : '';
+    confirmation.querySelector('#lp01DropPriority').value = document.getElementById('sgpPlanPriority').value || '1';
+    confirmation.showModal();
+  }
+  confirmation.querySelector('#lp01DropCancel').onclick = () => confirmation.close();
+  confirmation.addEventListener('close', () => { dropSelection = null; });
+  confirmation.querySelector('form').addEventListener('submit', event => {
+    event.preventDefault();
+    if (!dropSelection) return;
+    const quantity = Number(confirmation.querySelector('#lp01DropQuantity').value);
+    const priority = Number(confirmation.querySelector('#lp01DropPriority').value);
+    if (!Number.isInteger(quantity) || quantity < 1 || !Number.isInteger(priority) || priority < 1) return;
+    const result = window.SGPLinePlanner?.selectProduction?.(dropSelection.key);
+    if (!result?.ok) { document.getElementById('sgpPlanMessage').textContent = result?.message || 'No se pudo seleccionar la producción.'; confirmation.close(); return; }
+    document.getElementById('sgpPlanDate').value = dropSelection.date;
+    document.getElementById('sgpPlanShift').value = dropSelection.shift;
+    document.getElementById('sgpPlanQuantity').value = String(quantity);
+    document.getElementById('sgpPlanPriority').value = String(priority);
+    confirmation.close();
+    document.getElementById('sgpPlanMessage').textContent = 'Formulario preparado. Revisa las asignaciones existentes y pulsa Programar para solicitar el guardado.';
+    document.getElementById('sgpPlanProduction')?.scrollIntoView({ block: 'center', behavior: 'smooth' });
   });
   const makeDraggable = () => {
-    explorer.querySelectorAll('[data-plan-key]').forEach(button => { button.draggable = Boolean(button.dataset.planKey); });
+    results.querySelectorAll('.sgp-explorer-order').forEach(card => {
+      const key = card.querySelector('[data-plan-key]')?.dataset.planKey;
+      if (!key) return;
+      card.dataset.lpKey = key;
+      card.draggable = true;
+      card.tabIndex = 0;
+      card.setAttribute('role', 'option');
+      card.setAttribute('aria-selected', String(key === selectedKey));
+      card.classList.toggle('lp01-card-selected', key === selectedKey);
+    });
     explorer.querySelectorAll('.sgp-explorer-reservation').forEach(reservation => {
       if (reservation.querySelector('[data-plan-reserve]')) return;
       const button = document.createElement('button');
@@ -119,48 +185,104 @@
       reservation.querySelector('summary')?.append(button);
     });
   };
-  new MutationObserver(makeDraggable).observe(explorer.querySelector('#sgpExplorerResults'), { childList: true, subtree: true });
+  new MutationObserver(makeDraggable).observe(results, { childList: true, subtree: true });
   makeDraggable();
-  const confirmation = document.createElement('dialog');
-  confirmation.className = 'lp01-drop-dialog';
-  confirmation.innerHTML = '<form method="dialog"><h3>Preparar programación</h3><p id="lp01DropContext"></p><label>Cantidad <input id="lp01DropQuantity" type="number" min="1" step="1" required></label><label>Prioridad <input id="lp01DropPriority" type="number" min="1" step="1" required></label><p>La asignación se guardará únicamente después de pulsar Programar en el formulario existente.</p><div class="lp01-drop-actions"><button type="button" id="lp01DropCancel">Cancelar</button><button type="submit">Preparar formulario</button></div></form>';
-  document.body.append(confirmation);
-  let dropSelection = null;
-  confirmation.querySelector('#lp01DropCancel').onclick = () => confirmation.close();
-  confirmation.querySelector('form').addEventListener('submit', event => {
-    event.preventDefault();
-    if (!dropSelection) return;
-    const quantity = Number(confirmation.querySelector('#lp01DropQuantity').value);
-    const priority = Number(confirmation.querySelector('#lp01DropPriority').value);
-    if (!Number.isInteger(quantity) || quantity < 1 || !Number.isInteger(priority) || priority < 1) return;
-    const result = window.SGPLinePlanner?.selectProduction?.(dropSelection.key);
-    if (!result?.ok) { document.getElementById('sgpPlanMessage').textContent = result?.message || 'No se pudo seleccionar la producción.'; confirmation.close(); return; }
-    document.getElementById('sgpPlanDate').value = dropSelection.date;
-    document.getElementById('sgpPlanShift').value = dropSelection.shift;
-    document.getElementById('sgpPlanQuantity').value = String(quantity);
-    document.getElementById('sgpPlanPriority').value = String(priority);
-    confirmation.close();
-    document.getElementById('sgpPlanMessage').textContent = 'Formulario preparado. Revisa las asignaciones existentes y pulsa Programar para solicitar el guardado.';
-    document.getElementById('sgpPlanProduction')?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  explorer.addEventListener('click', event => {
+    const card = event.target.closest('.sgp-explorer-order[data-lp-key]');
+    if (!card || event.target.closest('button')) return;
+    selectCard(card.dataset.lpKey);
   });
-  operations.addEventListener('dragover', event => { if (event.target.closest('[data-lp-shift]')) event.preventDefault(); });
+  explorer.addEventListener('keydown', event => {
+    const card = event.target.closest('.sgp-explorer-order[data-lp-key]');
+    if (card && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); selectCard(card.dataset.lpKey); }
+  });
+  operations.addEventListener('click', event => { const cell = event.target.closest('.lp-week-cell'); if (cell && selectedKey) openDrop(selectedKey, cell); });
+  explorer.addEventListener('dragstart', event => {
+    const card = event.target.closest('.sgp-explorer-order[data-lp-key]');
+    if (!card) return;
+    dragKey = card.dataset.lpKey;
+    selectCard(dragKey);
+    card.classList.add('lp01-drag-source');
+    event.dataTransfer.setData('text/plain', dragKey);
+    event.dataTransfer.effectAllowed = 'copy';
+    markReady(true);
+  });
+  explorer.addEventListener('dragend', clearDragVisual);
+  operations.addEventListener('dragover', event => {
+    const cell = event.target.closest('.lp-week-cell');
+    if (!cell || !dragKey) return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'copy';
+    highlight(cell);
+  });
+  operations.addEventListener('dragleave', event => { if (!operations.contains(event.relatedTarget)) highlight(null); });
   operations.addEventListener('drop', event => {
-    const target = event.target.closest('[data-lp-shift]');
-    if (!target) return;
+    const cell = event.target.closest('.lp-week-cell');
+    if (!cell || !dragKey) return;
     event.preventDefault();
-    const key = event.dataTransfer.getData('text/plain');
-    if (!key) return;
-    const row = window.SGPPlannerBridge?.getRows?.().find(item => String(item.key_produccion) === key);
-    if (!row) { document.getElementById('sgpPlanMessage').textContent = 'Producción no disponible en la hoja cargada.'; return; }
-    dropSelection = { key, date: target.dataset.lpDate, shift: target.dataset.lpShift };
-    confirmation.querySelector('#lp01DropContext').textContent = `${row.produccion || key} · ${dropSelection.date} · Turno ${dropSelection.shift}`;
-    confirmation.querySelector('#lp01DropQuantity').value = Number(row.saldo_ensamble) > 0 ? String(Number(row.saldo_ensamble)) : '';
-    confirmation.querySelector('#lp01DropPriority').value = document.getElementById('sgpPlanPriority').value || '1';
-    confirmation.showModal();
+    const key = dragKey;
+    clearDragVisual();
+    openDrop(key, cell);
   });
+  // Touch events remain passive until the long press starts. Normal scrolling is untouched.
+  let touch = null;
+  const ghost = document.createElement('div');
+  ghost.className = 'lp01-touch-ghost';
+  ghost.hidden = true;
+  document.body.append(ghost);
+  function endTouch() {
+    if (touch?.timer) clearTimeout(touch.timer);
+    if (touch?.scrollTimer) clearInterval(touch.scrollTimer);
+    touch = null;
+    ghost.hidden = true;
+    clearDragVisual();
+  }
+  function touchCell(point) { return document.elementFromPoint(point.clientX ?? point.x, point.clientY ?? point.y)?.closest('.lp-week-cell') || null; }
+  explorer.addEventListener('touchstart', event => {
+    const card = event.target.closest('.sgp-explorer-order[data-lp-key]');
+    if (!card || event.touches.length !== 1) return;
+    const point = event.touches[0];
+    touch = { key: card.dataset.lpKey, x: point.clientX, y: point.clientY, active: false, timer: setTimeout(() => {
+      if (!touch) return;
+      touch.active = true;
+      selectCard(touch.key);
+      card.classList.add('lp01-drag-source');
+      ghost.textContent = rowFor(touch.key)?.produccion || 'Producción';
+      ghost.hidden = false;
+      ghost.style.transform = `translate(${touch.x + 12}px,${touch.y + 12}px)`;
+      touch.scrollTimer = setInterval(() => {
+        if (!touch?.active) return;
+        if (touch.y > window.innerHeight - 70) window.scrollBy(0, 16);
+        else if (touch.y < 70) window.scrollBy(0, -16);
+        const scroll = operations.querySelector('.lp-week-scroll');
+        if (scroll) { const box = scroll.getBoundingClientRect(); if (touch.y >= box.top && touch.y <= box.bottom) { if (touch.x > box.right - 45) scroll.scrollLeft += 18; else if (touch.x < box.left + 45) scroll.scrollLeft -= 18; } }
+        highlight(touchCell(touch));
+      }, 24);
+    }, 380) };
+  }, { passive: true });
+  document.addEventListener('touchmove', event => {
+    if (!touch || event.touches.length !== 1) return;
+    const point = event.touches[0];
+    if (!touch.active) { if (Math.hypot(point.clientX - touch.x, point.clientY - touch.y) > 12) endTouch(); return; }
+    event.preventDefault();
+    touch.x = point.clientX; touch.y = point.clientY;
+    ghost.style.transform = `translate(${touch.x + 12}px,${touch.y + 12}px)`;
+    if (point.clientY > window.innerHeight - 70) window.scrollBy(0, 26);
+    else if (point.clientY < 70) window.scrollBy(0, -26);
+    const scroll = operations.querySelector('.lp-week-scroll');
+    if (scroll) { const box = scroll.getBoundingClientRect(); if (point.clientY >= box.top && point.clientY <= box.bottom) { if (point.clientX > box.right - 45) scroll.scrollLeft += 25; else if (point.clientX < box.left + 45) scroll.scrollLeft -= 25; } }
+    highlight(touchCell(point));
+  }, { passive: false });
+  document.addEventListener('touchend', event => {
+    if (!touch) return;
+    if (touch.active) { event.preventDefault(); const point = event.changedTouches[0]; const cell = point && touchCell(point); const key = touch.key; endTouch(); if (cell) openDrop(key, cell); else selectedStatus.textContent = 'Producción seleccionada. Desplázate al calendario y toca una celda.'; }
+    else endTouch();
+  }, { passive: false });
+  document.addEventListener('touchcancel', endTouch, { passive: true });
 
   const style = document.createElement('style');
   style.textContent = `.lp01-workspace{display:grid;grid-template-columns:minmax(280px,var(--lp01-left)) 9px minmax(0,1fr);align-items:start;gap:0;min-width:0}.lp01-workspace #sgpPlannerExplorer{min-width:0;margin:0;max-height:82vh;overflow:auto}.lp01-workspace .sgp-planner-operations{min-width:0;margin:0}.lp01-workspace #sgpExplorerResults{display:grid;grid-template-columns:minmax(0,1fr)}.lp01-workspace .sgp-explorer-filters{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px}.lp01-workspace .sgp-explorer-filters>*{min-width:0!important;width:100%;box-sizing:border-box}.lp01-workspace .sgp-explorer-filters select,.lp01-workspace .sgp-explorer-filters input{min-width:0!important;width:100%;box-sizing:border-box}.lp01-workspace .sgp-explorer-view-actions>*{min-width:0;max-width:100%}.lp01-workspace .sgp-line-days{grid-template-columns:repeat(7,minmax(0,1fr))}.lp01-workspace .sgp-line-day{min-width:0;padding:7px;font-size:11px}.lp01-splitter{height:100%;min-height:500px;cursor:col-resize;background:#dbe8f8;border-left:2px solid #9fc0eb;border-right:2px solid #9fc0eb}.lp01-splitter:focus-visible{outline:3px solid #1264c8;outline-offset:2px}.lp01-line-filter{display:grid;gap:4px}.lp01-capacity{display:flex;gap:8px;align-items:center;justify-content:flex-end;color:#36567e;font-size:12px}.lp01-capacity input{width:72px!important}.lp01-capacity-warning{color:#385b83;font-weight:700}.lp01-assignment-disclosure{margin-top:10px;border:1px solid #d5e1ef;border-radius:9px;padding:10px}.lp01-assignment-disclosure summary{cursor:pointer;font-weight:700;color:#103b73}.lp01-workspace [data-plan-key]{cursor:grab}.lp01-workspace [data-plan-reserve]{display:block;margin-top:8px;border:1px solid #1264c8;border-radius:8px;background:#fff;color:#103b73;min-height:36px}.lp01-workspace [data-lp-shift]{min-height:84px;border:1px dashed #a5c5eb}@media(max-width:900px){.lp01-workspace{display:block}.lp01-splitter{display:none}.lp01-workspace #sgpPlannerExplorer{max-height:none}.lp01-workspace .sgp-planner-operations{margin-top:12px}.lp01-workspace .sgp-line-days{grid-template-columns:repeat(2,minmax(0,1fr))}.lp01-workspace .sgp-explorer-filters{grid-template-columns:1fr!important}}`;
   style.textContent += '.lp01-workspace #sgpPendingAssemblyQueue[hidden]{display:none!important}.lp-week-toolbar{display:flex;align-items:end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:8px 0 12px}.lp-week-toolbar h4{margin:0;color:#103b73}.lp-week-toolbar small{color:#526781}.lp-week-controls{display:flex;align-items:end;gap:6px;flex-wrap:wrap}.lp-week-controls label{font-size:12px}.lp-week-controls button,.lp-week-controls input{min-height:38px;padding:6px;border:1px solid #b9cfe9;border-radius:8px;background:#fff;color:#103b73;font-weight:650}.lp-week-scroll{overflow-x:auto;max-width:100%}.lp-week-grid{display:grid;grid-template-columns:64px repeat(7,minmax(0,1fr));gap:5px;min-width:0}.lp-week-corner,.lp-week-day,.lp-week-shift{padding:8px;background:#dceafa;color:#103b73;font-size:12px;font-weight:750;border-radius:7px}.lp-week-day{text-align:center;text-transform:capitalize}.lp-week-shift{display:flex;align-items:center}.lp-week-cell{min-width:0;min-height:132px;padding:7px;border:1px dashed #9fc0eb;border-radius:9px;background:#fff;box-sizing:border-box;overflow-wrap:anywhere}.lp-week-cell-head{display:grid;gap:3px;color:#103b73;font-size:11px}.lp-week-cell-head small,.lp-week-systems{display:block;color:#526781;font-size:11px}.lp-week-empty{display:block;margin-top:16px;color:#68809c}.lp-week-assignment{padding:6px;margin:6px 0;border-left:3px solid #1264c8;border-radius:5px;background:#eef5ff;font-size:11px}.lp-week-assignment strong,.lp-week-assignment small{display:block}.lp-week-legend{font-size:12px;color:#526781}.lp-week-cell:focus-within,.lp-week-cell:hover{border-color:#1264c8;background:#f7fbff}.lp01-drop-dialog{max-width:min(420px,calc(100vw - 24px));border:1px solid #9fc0eb;border-radius:14px;padding:22px;box-shadow:0 20px 55px #102e5366;color:#103b73}.lp01-drop-dialog::backdrop{background:#102e5380}.lp01-drop-dialog form{display:grid;gap:12px}.lp01-drop-dialog h3,.lp01-drop-dialog p{margin:0}.lp01-drop-dialog label{display:grid;gap:4px}.lp01-drop-dialog input{width:100%;box-sizing:border-box;min-height:42px}.lp01-drop-actions{display:flex;justify-content:flex-end;gap:8px}.lp01-drop-actions button{min-height:42px;padding:8px 12px;border-radius:8px;border:1px solid #1264c8;background:#fff;color:#103b73}.lp01-drop-actions button[type=submit]{background:#1264c8;color:white}@media(max-width:900px){.lp-week-grid{grid-template-columns:55px repeat(7,minmax(120px,1fr));min-width:950px}.lp-week-controls{width:100%}.lp-week-controls button{flex:1}}';
+  style.textContent += '.lp01-workspace .sgp-explorer-order[data-lp-key]{cursor:grab;touch-action:auto}.lp01-workspace .sgp-explorer-order[data-lp-key]:focus-visible{outline:3px solid #1264c8}.lp01-workspace .sgp-explorer-order.lp01-card-selected{border:2px solid #1264c8;background:#e9f3ff}.lp01-workspace .sgp-explorer-order.lp01-drag-source{opacity:.58}.lp01-workspace .lp-week-cell.lp01-drop-ready{border:2px dashed #1264c8;background:#eef6ff}.lp01-workspace .lp-week-cell.lp01-drop-active{border:3px solid #0a8d69;background:#dff9ee;box-shadow:inset 0 0 0 2px #fff}.lp01-selection-status{margin:4px 0 10px;padding:8px 10px;border-radius:8px;background:#e9f3ff;color:#103b73;font-size:12px}.lp01-touch-ghost{position:fixed;top:0;left:0;z-index:9999;max-width:180px;padding:8px 12px;border-radius:9px;background:#103b73;color:#fff;box-shadow:0 6px 20px #102e5366;pointer-events:none;font-weight:700;font-size:12px}.lp01-touch-ghost[hidden]{display:none}';
   document.head.append(style);
 })();
