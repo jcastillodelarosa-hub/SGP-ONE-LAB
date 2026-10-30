@@ -128,7 +128,7 @@ export async function openPdtV2({row,client,token,role,capabilities,show,escape:
     try{const fresh=await refreshPendingV2(client,token,row.id_pendiente);const header=manual&&fresh.estado==='PENDIENTE'?await refreshManualHeader(client,token,row.id_pendiente):null;if(session.closed||modal.hidden)return;
       const pending=session.pending;if(pending&&!pending.args.p_idempotency_key&&!pending.args.p_clave){session.pending=null;session.feedback='Datos actualizados. Revisa el historial: la operación anterior no tuvo confirmación.';}
       session.needsRefresh=Boolean(session.pending);
-      await openPdtV2({row:{...row,...fresh,...header},client,token,role,capabilities,show,escape:esc,reload,close:session.close,initialSection:view.section,_session:session,_restore:view});session.clearAfterWrite=null;if(session.dirty){Promise.resolve(reload()).catch(error=>console.warn('Sincronización del listado PDT:',error));session.dirty=false;}
+      await openPdtV2({row:{...row,...fresh,...header},client,token,role,capabilities,show,escape:esc,reload,close:session.close,initialSection:view.section,_session:session,_restore:view});session.clearAfterWrite=null;if(session.dirty){try{await reload({...row,...fresh,...header});session.dirty=false;}catch(error){console.warn('Sincronización del listado PDT:',error);}}
     }catch(error){session.needsRefresh=true;freeze();setFeedback((session.dirty?'Operación guardada. No la repitas. ':'')+'No se pudo actualizar: '+error.message+'. Usa Actualizar PDT.',true);modal.querySelector('[data-refresh-pdt]').disabled=false;}
     finally{session.busy=false;session.modal?.setAttribute('aria-busy','false');if(session.closed&&session.reloadOnFinish)notifyParent();}
   };
