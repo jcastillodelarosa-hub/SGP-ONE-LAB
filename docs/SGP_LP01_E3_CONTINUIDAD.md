@@ -1,5 +1,15 @@
 # LP-01 Programación E3 · checkpoint
 
+## Corrección de cuadrícula y arrastre · LAB v370
+
+Estado: **IMPLEMENTADO EN RAMA Y VERIFICADO LOCALMENTE CON DATOS SINTÉTICOS**; no fusionado ni publicado. Rama `fix/lp01-week-grid-drag-e3`, base `main` `44d7e44412438829b92cfbb0594496373c819997`.
+
+- `planner-operations-v326.js` consulta siempre el intervalo lunes–domingo seleccionado. Flechas, Hoy y selector ISO de semana generan una nueva llamada a `sgp_linea_plan_consultar`; las respuestas anteriores no reemplazan una navegación más reciente. La vista Calendario presenta siete columnas y dos filas de turnos, con asignaciones, prioridad, desglose por sistema y capacidad en cada celda. Tabla y Kanban conservan la misma fuente.
+- `src/modules/lp01-workspace-e3.js` oculta el bloque vertical redundante de pendientes dentro de LP-01. El explorador permanece disponible para seleccionar y programar. Soltar una producción en cualquier celda abre un diálogo con fecha y turno precargados, cantidad y prioridad editables. Cancelar no cambia nada; «Preparar formulario» solo llena el formulario individual existente. La escritura requiere pulsar Programar y confirmar nuevamente. La escritura agrupada continúa bloqueada.
+- Prueba dirigida `python tests/lp01-e3-browser.py`: 14 celdas, consultas al navegar entre semanas, capacidad/sobrecupo, arrastre a lunes/T1 y jueves/T2, cancelar/preparar sin RPC de escritura, Tabla/Kanban; PC 1440×900 y móvil 390×844. Capturas rotuladas **DATOS SINTÉTICOS** en `docs/evidence/lp01-week-grid/`. En móvil se conserva selección por toque y desplazamiento horizontal del calendario.
+- Regresión dirigida: 32/32; sintaxis JS y `git diff --check` correctos. `npm run build:vendor` y `npm run verify:release` correctos para LAB v370.
+- Pendiente para aceptación productiva: lectura con sesión autorizada y revisión visual de B04 cuando el PDF maestro sea accesible. Las capturas no prueban permisos ni datos productivos. No se modificaron Supabase, LP-02, Picking ni Reporte de ubicaciones.
+
 Estado: **IMPLEMENTADO EN RAMA**, **VERIFICADO LOCALMENTE CON DATOS SINTÉTICOS**, no fusionado, no publicado, sin cambios en Supabase.
 
 Base: `main` LAB v369, `e64fa4f48726010662b93b5c4b525c653407fa9b`. Rama: `feat/lp01-programacion-e3`.

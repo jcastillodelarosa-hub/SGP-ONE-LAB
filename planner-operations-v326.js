@@ -7,6 +7,13 @@ root.append(panel);
 const styles=document.createElement('style');styles.textContent='.sgp-planner-operations{margin:18px 0;padding:14px;border:1px solid #c9d9eb;border-radius:12px;background:#f8fbff}.sgp-planner-operations h3{color:#174f89}.sgp-planner-operations label{display:grid;gap:4px}.sgp-planner-operations select,.sgp-planner-operations input{padding:8px;border:1px solid #b7cee9;border-radius:7px;max-width:240px}.sgp-plan-row{padding:10px;border:1px solid #d5e1ef;border-radius:9px;margin:8px 0;background:white}.sgp-plan-row button{margin:4px;padding:8px;border-radius:7px;border:1px solid #bfd2e8;background:#eaf3ff;color:#124b8b}';document.head.append(styles);
 const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const date=$('sgpPlanDate');date.value=new Date().toLocaleDateString('en-CA');let items=[];let pendingPart=null;
+const toISO=value=>new Date(value).toISOString().slice(0,10);
+const addDays=(iso,count)=>toISO(new Date(iso+'T12:00:00Z').getTime()+count*86400000);
+const weekStart=iso=>{const day=new Date(iso+'T12:00:00Z').getUTCDay();return addDays(iso,-((day+6)%7))};
+const todayISO=()=>new Date().toLocaleDateString('en-CA');
+function isoWeekValue(monday){const thursday=addDays(monday,3);const year=Number(thursday.slice(0,4));const jan4=weekStart(year+'-01-04');const number=1+Math.round((new Date(monday+'T12:00:00Z')-new Date(jan4+'T12:00:00Z'))/604800000);return year+'-W'+String(number).padStart(2,'0')}
+function mondayFromIsoWeek(value){const match=/^(\d{4})-W(\d{2})$/.exec(value||'');if(!match)return null;const number=Number(match[2]);if(number<1||number>53)return null;const monday=addDays(weekStart(match[1]+'-01-04'),(number-1)*7);return isoWeekValue(monday)===value?monday:null}
+let weekAnchor=weekStart(date.value),loadSequence=0;
 function rows(){return Array.isArray(window.SGPPlannerBridge?.getRows?.())?window.SGPPlannerBridge.getRows():[]}
 function refreshProductions(){const old=$('sgpPlanProduction').value;const sel=$('sgpPlanProduction');sel.replaceChildren(...rows().map(r=>new Option([r.produccion,r.sistema,'Saldo '+r.saldo_ensamble].join(' · '),r.key_produccion)));if([...sel.options].some(o=>o.value===old))sel.value=old}
 function notify(s){$('sgpPlanMessage').textContent=s}
@@ -15,7 +22,7 @@ function selectPart(keys,meta={}){refreshProductions();const distinct=[...new Se
 window.SGPLinePlanner=Object.freeze({selectProduction,selectPart,getAssignments:()=>items.slice(),reloadAssignments:()=>load()});
 
 async function rpc(name,params){const token=window.SGPPlannerBridge?.getToken?.();if(!token)throw Error('No hay sesión accesible para el Planificador');const client=await window.SGPPlannerBridge.getClient();const {data,error}=await client.rpc(name,{p_token:token,...params});if(error)throw error;return data}
-async function load(){try{const d=date.value;if(!d)throw Error('Selecciona una fecha');const next=new Date(d+'T12:00:00');next.setDate(next.getDate()+6);const end=next.toLocaleDateString('en-CA');items=await rpc('sgp_linea_plan_consultar',{p_desde:d,p_hasta:end,p_linea:$('assemblyLine')?.value||null});if(selectedDay<d||selectedDay>end)selectedDay=d;render();renderViews();document.dispatchEvent(new CustomEvent('sgp:line-plan-updated'));notify(items.length+' asignaciones consultadas')}catch(e){notify('No fue posible consultar: '+e.message)}}
+async function load(){const sequence=++loadSequence;const start=weekAnchor,end=addDays(start,6);notify('Consultando '+start+' a '+end+'…');try{const result=await rpc('sgp_linea_plan_consultar',{p_desde:start,p_hasta:end,p_linea:$('assemblyLine')?.value||null});if(sequence!==loadSequence)return;if(!Array.isArray(result))throw Error('La consulta no devolvió asignaciones válidas');items=result;if(selectedDay<start||selectedDay>end)selectedDay=start;render();renderViews();document.dispatchEvent(new CustomEvent('sgp:line-plan-updated'));notify(items.length+' asignaciones consultadas · '+start+' a '+end)}catch(e){if(sequence!==loadSequence)return;items=[];render();renderViews();notify('No fue posible consultar '+start+' a '+end+': '+e.message)}}
 function reviewAssignment(key,day,shift,quantity,priority,moving){
  const row=rows().find(r=>String(r.key_produccion||'')===String(key));
  const context=window.SGPLP01ReadContext?.forKey?.(key);
@@ -63,16 +70,24 @@ function renderViews(){
   };viewContent.querySelector('#sgpLinePendingSearch').addEventListener('input',draw);draw();return;
  }
  if(activeView==='calendar'){
-  const start=new Date(date.value+'T12:00:00');const days=Number.isNaN(start.getTime())?[]:Array.from({length:7},(_,index)=>{const d=new Date(start);d.setDate(d.getDate()+index);return d.toLocaleDateString('en-CA')});
-  viewContent.innerHTML='<div class="sgp-line-view-head"><h4>Calendario por día y turno</h4><small>Asignaciones consultadas · Selecciona un día</small></div><div class="sgp-line-days"></div><div id="sgpLineDayDetail"></div>';
-  const grid=viewContent.querySelector('.sgp-line-days');
-  if(!days.length){grid.textContent='Sin asignaciones para el rango consultado. Pulsa Consultar turnos.';return}
-  if(!days.includes(selectedDay))selectedDay=days[0];
-  days.forEach(d=>{const entries=data.filter(a=>dayKey(a)===d),button=document.createElement('button');button.type='button';button.className='sgp-line-day';
-   button.setAttribute('aria-pressed',String(d===selectedDay));button.innerHTML='<strong>'+escape(d)+'</strong><span>T1: '+sum(entries.filter(a=>Number(a.turno)===1),'cantidad')+'</span><span>T2: '+sum(entries.filter(a=>Number(a.turno)===2),'cantidad')+'</span>';
-   button.onclick=()=>{selectedDay=d;renderViews()};grid.append(button)});
-  const day=data.filter(a=>dayKey(a)===selectedDay),detail=viewContent.querySelector('#sgpLineDayDetail');
-  detail.innerHTML='<h5>'+escape(selectedDay)+' · '+day.length+' asignaciones</h5>'+[1,2].map(t=>{const shift=day.filter(a=>Number(a.turno)===t);return '<details open data-lp-date="'+escape(selectedDay)+'" data-lp-shift="'+t+'"><summary>Turno '+t+' · '+sum(shift,'cantidad')+' programadas · '+sum(shift,'ejecutado')+' ensambladas</summary>'+ (shift.length?shift.map(a=>'<div class="sgp-line-detail"><strong>'+escape(a.produccion)+'</strong><small>Prioridad '+escape(a.prioridad)+' · '+escape(a.cantidad)+' programadas · '+escape(a.ejecutado)+' ensambladas</small></div>').join(''):'<p>Sin asignaciones</p>')+'</details>'}).join('')+'<h5>Carga programada por sistema</h5><div class="sgp-line-table-wrap"><table><thead><tr><th>Sistema</th><th>Turno 1</th><th>Turno 2</th><th>Total</th></tr></thead><tbody>'+[...new Set(day.map(a=>String(a.sistema||'Sin sistema')))].sort().map(system=>{const matches=day.filter(a=>String(a.sistema||'Sin sistema')===system);return '<tr><td>'+escape(system)+'</td><td>'+sum(matches.filter(a=>Number(a.turno)===1),'cantidad')+'</td><td>'+sum(matches.filter(a=>Number(a.turno)===2),'cantidad')+'</td><td>'+sum(matches,'cantidad')+'</td></tr>'}).join('')+'</tbody></table></div>';return;
+  const days=Array.from({length:7},(_,index)=>addDays(weekAnchor,index));
+  viewContent.innerHTML='<div class="lp-week-toolbar"><div><h4>Programación semanal</h4><small>Asignaciones consultadas · lunes a domingo · dos turnos</small></div><div class="lp-week-controls"><button type="button" data-week-action="prev">← Semana anterior</button><label>Semana <input id="sgpPlanWeek" type="week" aria-label="Seleccionar semana"></label><button type="button" data-week-action="today">Hoy</button><button type="button" data-week-action="next">Semana siguiente →</button></div></div><div class="lp-week-scroll"><div class="lp-week-grid" role="grid" aria-label="Calendario de programación semanal"></div></div><p class="lp-week-legend">Arrastra una producción del explorador a cualquier celda. Soltar abre un formulario; no guarda una asignación.</p>';
+  const grid=viewContent.querySelector('.lp-week-grid');
+  const corner=document.createElement('div');corner.className='lp-week-corner';corner.textContent='Turno / día';grid.append(corner);
+  days.forEach(d=>{const h=document.createElement('div');h.className='lp-week-day';h.textContent=new Intl.DateTimeFormat('es-CO',{weekday:'short',day:'numeric',month:'short',timeZone:'UTC'}).format(new Date(d+'T12:00:00Z'));h.title=d;grid.append(h)});
+  for(const shift of [1,2]){
+   const label=document.createElement('div');label.className='lp-week-shift';label.textContent='Turno '+shift;grid.append(label);
+   days.forEach(d=>{const subset=data.filter(a=>dayKey(a)===d&&Number(a.turno)===shift),load=sum(subset,'cantidad');const cell=document.createElement('section');cell.className='lp-week-cell';cell.dataset.lpDate=d;cell.dataset.lpShift=String(shift);cell.setAttribute('role','gridcell');cell.setAttribute('aria-label',d+' turno '+shift+'; '+load+' unidades programadas');
+    const head=document.createElement('div');head.className='lp-week-cell-head';head.innerHTML='<strong>'+load+' programadas</strong><small>'+subset.length+' asignaciones</small>';cell.append(head);
+    const systems=new Map();subset.forEach(a=>systems.set(String(a.sistema||'Sin sistema'),(systems.get(String(a.sistema||'Sin sistema'))||0)+(Number(a.cantidad)||0)));
+    if(systems.size){const breakdown=document.createElement('small');breakdown.className='lp-week-systems';breakdown.textContent=[...systems].map(([name,qty])=>name+': '+qty).join(' · ');cell.append(breakdown)}
+    if(!subset.length){const empty=document.createElement('small');empty.className='lp-week-empty';empty.textContent='Suelta aquí una producción';cell.append(empty)}
+    subset.sort((a,b)=>Number(a.prioridad)-Number(b.prioridad)).forEach(a=>{const card=document.createElement('article');card.className='lp-week-assignment';card.innerHTML='<strong>'+escape(a.produccion||'Producción')+'</strong><small>'+escape(a.sistema||'—')+' · '+escape(a.cantidad)+' und. · Prioridad '+escape(a.prioridad)+'</small>';cell.append(card)});
+    grid.append(cell)})
+  }
+  const weekInput=viewContent.querySelector('#sgpPlanWeek');weekInput.value=isoWeekValue(weekAnchor);
+  weekInput.onchange=()=>{const chosen=mondayFromIsoWeek(weekInput.value);if(!chosen){notify('Semana inválida');return}weekAnchor=chosen;selectedDay=chosen;load()};
+  viewContent.querySelectorAll('[data-week-action]').forEach(button=>button.onclick=()=>{const action=button.dataset.weekAction;weekAnchor=action==='today'?weekStart(todayISO()):addDays(weekAnchor,action==='prev'?-7:7);selectedDay=weekAnchor;load()});return;
  }
  if(activeView==='table'){
   viewContent.innerHTML='<div class="sgp-line-view-head"><h4>Programación · tabla</h4><small>Orden visual por fecha, turno y prioridad; no modifica prioridades guardadas.</small></div><div class="sgp-line-table-wrap"><table><thead><tr><th>Fecha</th><th>Turno</th><th>Prioridad</th><th>Producción</th><th>Sistema</th><th>Programadas</th><th>Ejecutadas</th><th>Estado</th><th>Acción</th></tr></thead><tbody></tbody></table></div>';
