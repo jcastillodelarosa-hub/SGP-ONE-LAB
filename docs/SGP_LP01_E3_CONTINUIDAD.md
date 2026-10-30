@@ -1,5 +1,15 @@
 # LP-01 Programación E3 · checkpoint
 
+## Corrección de arrastre por tarjeta y táctil · LAB v371
+
+Estado: **IMPLEMENTADO EN RAMA, VERIFICADO LOCALMENTE CON DATOS SINTÉTICOS**. Rama `fix/lp01-production-card-drag-v371`, base `main` `3389d98db9eec003b6bbf662bb81bc8eb3f964a5`. No fusionado, no publicado y sin cambios en Supabase.
+
+- `src/modules/lp01-workspace-e3.js`: la tarjeta completa de producción inicia HTML Drag and Drop en PC; sus celdas muestran destino disponible y resaltan el destino bajo el ratón. En móvil, una pulsación prolongada inicia un movimiento táctil real, muestra la producción seleccionada y permite desplazar página y calendario horizontalmente antes de soltar. Tocar una tarjeta y después cualquier celda ofrece una alternativa sin arrastre. Teclado: la tarjeta acepta Enter/Espacio y después puede seleccionarse la celda.
+- Los tres caminos comparten **un solo diálogo**. Cantidad y prioridad son editables; cancelar no altera el formulario; «Preparar formulario» precarga los campos existentes y **no escribe**. Solo el botón Programar, seguido de su confirmación, puede invocar `sgp_linea_plan_programar`. El guardado agrupado continúa deshabilitado.
+- `python tests/lp01-e3-browser.py`: ratón PC 1440×900 desde la tarjeta completa; flujo táctil Chromium por `Input.dispatchTouchEvent` en 390×844, con pulsación prolongada, autodesplazamiento y soltado en jueves/T2; alternativa toque/tarjeta; cancelación sin cambios de prioridad ni RPC de escritura; regresión de 14 celdas, semanas, Tabla y Kanban. Capturas sintéticas rotuladas en `docs/evidence/lp01-week-grid/`.
+- Regresión dirigida: 32/32. `npm run build:vendor`, `npm run verify:release` (LAB v371), sintaxis JS y `git diff --check`: correctos.
+- Límite: la prueba usa datos y respuestas RPC sintéticos. Falta verificación con sesión autorizada y dispositivos físicos de la planta; no implica despliegue ni validación productiva.
+
 ## Corrección de cuadrícula y arrastre · LAB v370
 
 Estado: **IMPLEMENTADO EN RAMA Y VERIFICADO LOCALMENTE CON DATOS SINTÉTICOS**; no fusionado ni publicado. Rama `fix/lp01-week-grid-drag-e3`, base `main` `44d7e44412438829b92cfbb0594496373c819997`.
