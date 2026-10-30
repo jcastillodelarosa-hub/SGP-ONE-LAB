@@ -12,12 +12,12 @@ export function registrationPieces(origin,sources,entries){
   if(matches.length!==1)throw new Error('La pieza no tiene una identidad verificable. Actualiza las fuentes.');
   const p=matches[0],quantity=Number(entry.cantidad),ncs=(entry.ncs??[entry.nc??'']).map(text).filter(Boolean),nc=ncs[0]||'';
   if(ncs.length>20||new Set(ncs).size!==ncs.length||ncs.some(v=>v.length>120||/[\x00-\x1f\x7f]/.test(v)))throw new Error('NC inválida, repetida o excede 20 NC por pieza');
-  if(ncs.length>1)throw new Error('El contrato de registro V4 todavía no admite varias NC por pieza; no se guardará una entrega incompleta.');
+
   if(!p.id_pieza||!p.key_produccion||!p.reserva||!p.reserva_principal||!text(p.acabado)||p.tipo_pieza!=='PANEL'||p.id_linea!=='PANELES_2')throw new Error('Identidad PANEL incompleta');
   if(!Number.isSafeInteger(quantity)||quantity<=0||p.cantidad_referencia==null||quantity>Number(p.cantidad_referencia))throw new Error('Cantidad fuera de la referencia de la pieza');
   if(origin!=='PICKING'&&!nc)throw new Error('La NC es obligatoria en '+origin);
   if(nc.length>120||/[\x00-\x1f\x7f]/.test(nc))throw new Error('NC inválida');
-  return {id_pieza:p.id_pieza,key_produccion:p.key_produccion,produccion:p.produccion,reserva:p.reserva,reserva_principal:p.reserva_principal,perfil:p.codigo_sap,fabricacion:p.fabricacion,longitud:p.longitud,acabado:p.acabado,cantidad:quantity,nc,observacion:text(entry.observacion)};
+  return {id_pieza:p.id_pieza,key_produccion:p.key_produccion,produccion:p.produccion,reserva:p.reserva,reserva_principal:p.reserva_principal,perfil:p.codigo_sap,fabricacion:p.fabricacion,longitud:p.longitud,acabado:p.acabado,cantidad:quantity,nc,ncs,observacion:text(entry.observacion)};
  });
 }
 export function ncAssignment(row){
