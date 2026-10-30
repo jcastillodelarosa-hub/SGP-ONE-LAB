@@ -1,3 +1,24 @@
+# Mecanizado — programación parcial por cantidades agregadas (2026-10-30)
+
+Base main observada `3389d98db9eec003b6bbf662bb81bc8eb3f964a5`; rama independiente
+`feat/mecanizado-programacion-parcial`. Alternativa A aprobada expresamente.
+Catálogo Supabase SGP-ONE-LAB contrastado mediante lecturas READ ONLY; no datos
+operativos modificados. Implementación, SQL REVIEW versionado, reversión con guards,
+contratos consumidores y formulario PC/móvil preparados. Evidencias y límites:
+`docs/sql-proposals/mecanizado/parcial/README.md` y `tests/mecanizado-parcial/`.
+42 escenarios PostgreSQL aislados aprobados; 288=90+90+90+18, concurrencia de
+programación y entregas, identidad estable, estados por parte, históricos y reversión.
+Chromium 1366/390 con módulo y opener reales hacia SQL sintético aprobado. No se
+certifica el ciclo completo de piezas PDT ni reservas compartidas: tienen stubs
+acotados en la fixture y requieren restauración/aceptación antes de producción.
+Pruebas JS y release aprobadas. Sin cambios en main, Supabase, Firebase, GOOGLE o LAC.
+Estado: IMPLEMENTADO Y PROBADO EN AISLAMIENTO; NO APLICADO, NO FUSIONADO, NO PUBLICADO.
+Siguiente paso único: revisar PR independiente y evidencias; cualquier instalación,
+fusión o publicación requiere autorización posterior. El cierre del chat enlaza el PR
+real, sin inferir su creación ni estado desde este checkpoint.
+
+---
+
 # Integración PDT manual + fuentes múltiples (rama independiente)
 
 **Cierre PDT unificado — corte operativo (2026-10-29):** decisión funcional nueva: año de producción inmutable; SQL REVIEW 05 rechaza Export con año distinto y protege `UPDATE anio`, sin alterar eventos/historial. 06 configura un instante UTC de publicación; el listado único filtra por `fecha_reporte` para ocultar históricos operativos sin borrarlos. Manuales nuevos aportan `reportes.fecha`; fallos de RPC/fecha bloquean la visualización. QA PostgreSQL 17 aislado: semana ordinaria, rechazo 2026→2027, rollback 05, instalación/corte/rollback 06. Node dirigido: listado único, filtro y fallo cerrado. Pendiente antes de autorización productiva: restauración compatible, ciclo completo con roles reales y fecha efectiva coordinada. Plan: `docs/sql-proposals/pdt/integration/README.md`.

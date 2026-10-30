@@ -2,7 +2,7 @@
 export const normalizeShift=value=>{const text=String(value??'').trim().toUpperCase();return ['1','T1','TURNO 1'].includes(text)?'TURNO 1':['2','T2','TURNO 2'].includes(text)?'TURNO 2':null;};
 export const displayMachiningState=value=>!value||value==='PROGRAMADA'?'SIN INICIAR':value;
 const amount=value=>{const n=Number(value);if(!Number.isSafeInteger(n)||n<0)throw new Error('Cantidad operativa inválida');return n;};
-const identity=row=>JSON.stringify([row.reserva,row.key_produccion||row.produccion,row.sistema,row.acabado]);
+const identity=row=>JSON.stringify([row.reserva,row.key_produccion||row.produccion,row.sistema,row.acabado,row.parte_id||null]);
 export function normalizeCarry(rows,date,shift){
  const target=normalizeShift(shift);if(!target||!Array.isArray(rows))throw new Error('Respuesta de arrastres inválida');
  const seen=new Map();

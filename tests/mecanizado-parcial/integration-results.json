@@ -1,0 +1,178 @@
+{
+  "environment": "PostgreSQL 17.11 Docker network none; synthetic data; actual captured session validator",
+  "limitations": [
+    "PDT piece validation and shared-reserve metadata are bounded fixture stubs, not production verification"
+  ],
+  "passed": 42,
+  "failed": 0,
+  "tests": [
+    {
+      "name": "programar 90: saldo 198",
+      "ok": true
+    },
+    {
+      "name": "programar 90: saldo 108",
+      "ok": true
+    },
+    {
+      "name": "programar 90: saldo 18",
+      "ok": true
+    },
+    {
+      "name": "programar 18: saldo 0",
+      "ok": true
+    },
+    {
+      "name": "288 conservadas; cuatro identificadores estables",
+      "ok": true
+    },
+    {
+      "name": "rechaza programaci\u00f3n sin saldo",
+      "ok": true
+    },
+    {
+      "name": "rechaza cantidad 0",
+      "ok": true
+    },
+    {
+      "name": "rechaza cantidad -1",
+      "ok": true
+    },
+    {
+      "name": "rechaza cantidad 289",
+      "ok": true
+    },
+    {
+      "name": "rechaza cantidad 1.5",
+      "ok": true
+    },
+    {
+      "name": "rechaza cantidad None",
+      "ok": true
+    },
+    {
+      "name": "rechaza fecha/turno/priority ausentes",
+      "ok": true
+    },
+    {
+      "name": "consulta no programa y sesi\u00f3n inv\u00e1lida rechazada",
+      "ok": true
+    },
+    {
+      "name": "idempotencia devuelve misma parte",
+      "ok": true
+    },
+    {
+      "name": "misma clave con otro payload rechazada",
+      "ok": true
+    },
+    {
+      "name": "procesar P1 no procesa P2/P3/P4",
+      "ok": true
+    },
+    {
+      "name": "producci\u00f3n ajena no cambia estado",
+      "ok": true
+    },
+    {
+      "name": "escritura directa de estado de parte denegada",
+      "ok": true
+    },
+    {
+      "name": "cancelar procesada no libera saldo",
+      "ok": true
+    },
+    {
+      "name": "reprogramar mantiene ID, n\u00famero y cantidad",
+      "ok": true
+    },
+    {
+      "name": "cancelar libera solo su cantidad",
+      "ok": true
+    },
+    {
+      "name": "n\u00famero hist\u00f3rico no se reutiliza",
+      "ok": true
+    },
+    {
+      "name": "detalle devuelve cantidad de parte",
+      "ok": true
+    },
+    {
+      "name": "cobertura consolidada no duplica producci\u00f3n",
+      "ok": true
+    },
+    {
+      "name": "Picking muestra cuatro partes activas por cantidades reales",
+      "ok": true
+    },
+    {
+      "name": "Picking 40+50=P1; P2/P4 no cerradas; idempotencia y exceso",
+      "ok": true
+    },
+    {
+      "name": "Recepci\u00f3n usa cantidad de cada entrega",
+      "ok": true
+    },
+    {
+      "name": "Informe cuenta una producci\u00f3n para dos entregas de P1",
+      "ok": true
+    },
+    {
+      "name": "arrastre mantiene todas las partes sin procesar",
+      "ok": true
+    },
+    {
+      "name": "cantidad original no puede bajar de asignada",
+      "ok": true
+    },
+    {
+      "name": "dos coordinadores concurrentes: solo uno programa 90/100",
+      "ok": true
+    },
+    {
+      "name": "programaci\u00f3n hist\u00f3rica completa conserva contrato",
+      "ok": true
+    },
+    {
+      "name": "historial contiene estados y movimientos",
+      "ok": true
+    },
+    {
+      "name": "Ensamble conserva estado parcial despu\u00e9s de P1",
+      "ok": true
+    },
+    {
+      "name": "resumen de turnos reconcilia 288+10+90; procesadas solo P1=90",
+      "ok": true
+    },
+    {
+      "name": "escritura directa del agregado denegada",
+      "ok": true
+    },
+    {
+      "name": "reversi\u00f3n no puede borrar partes utilizadas",
+      "ok": true
+    },
+    {
+      "name": "propuesta excesiva revierte todas las partes",
+      "ok": true
+    },
+    {
+      "name": "saldo global entre dos reservas de la misma producci\u00f3n",
+      "ok": true
+    },
+    {
+      "name": "carrera programaci\u00f3n hist\u00f3rica contra nueva: sin exceso",
+      "ok": true
+    },
+    {
+      "name": "instalaci\u00f3n y reversi\u00f3n sin datos restauran todos los cuerpos originales",
+      "ok": true
+    },
+    {
+      "name": "dos entregas concurrentes de 60/100: solo una acreditada",
+      "ok": true
+    }
+  ]
+}
