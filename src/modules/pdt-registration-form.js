@@ -5,10 +5,16 @@ const esc=v=>String(v??'').replace(/[&<>"']/g,x=>({'&':'&amp;','<':'&lt;','>':'&
  * onChange is called after every selection, not only after mounting. */
 export async function mountPdtRegistration(host,{client,token,origin,context,onChange=()=>{}}){
  let sources=[],entries=[],loaded=false,busy=false;
- host.innerHTML='<div class="pdt-registration"><div role="status" data-status></div><button type="button" data-retry>Actualizar piezas</button><div data-entries></div><button type="button" data-add>+ Agregar otra pieza</button></div>';
+ host.innerHTML='<div class="pdt-registration"><div role="status" data-status></div><p role="status" data-validation hidden></p><button type="button" data-retry>Actualizar piezas</button><div data-entries></div><button type="button" data-add>+ Agregar otra pieza</button></div>';
  const root=host.firstElementChild,status=root.querySelector('[data-status]'),list=root.querySelector('[data-entries]');
  function value(){return registrationPieces(origin,sources,entries);}
- function notify(){let valid=false;try{value();valid=loaded&&!busy;}catch{}onChange(valid);}
+ function notify(){
+  let valid=false,reason='';
+  if(loaded&&!busy){try{value();valid=true;}catch(error){reason=error.message||'Completa los datos de la pieza.';}}
+  const hint=root.querySelector('[data-validation]');
+  if(hint){hint.textContent=reason&&!valid?'Para guardar: '+reason:'';hint.hidden=!reason||valid;}
+  onChange(valid);
+ }
  function draw(){
   list.innerHTML=entries.map((e,i)=>{
    const refs=[...new Set(sources.map(p=>p.codigo_sap))].sort();
