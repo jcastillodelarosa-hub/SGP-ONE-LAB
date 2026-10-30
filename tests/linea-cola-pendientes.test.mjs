@@ -33,10 +33,11 @@ test('explorador permite filtrar y ordenar por estado de mecanizado',()=>{
  assert.match(source,/explorerSort\.addEventListener/);
 });
 
-test('tarjeta de reserva cerrada muestra Estado con distintivo coloreado',()=>{
+test('tarjeta de reserva cerrada consolida Estados con distintivo coloreado',()=>{
  assert.match(source,/sgp-explorer-status-summary/);
- assert.match(source,/Estado: '\+\(\[/);
- assert.match(source,/\.map\(explorerState\)/);
+ assert.match(source,/Estado: '\+explorerConsolidated\(rs\)/);
+ assert.match(source,/states\.length===1/);
+ assert.match(source,/explorerState\('MIXTO'\)/);
  assert.match(source,/sgp-explorer-status-summary \.sgp-explorer-state/);
  assert.doesNotMatch(source,/<span>Mecanizado: '\+explorerEsc/);
 });
