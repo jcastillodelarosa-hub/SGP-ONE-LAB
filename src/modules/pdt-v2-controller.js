@@ -8,7 +8,7 @@ import {normalizeNcNumbers} from '../domain/aluminum-pending-balances.js';
 /** Uses SGP's existing scrollable work modal. Backend is always final authority. */
 export async function openPdtV2({row,client,token,role,capabilities,show,escape:esc,reload,close,initialSection='distribution',_session=null,_restore=null}) {
   const session=_session||{opener:document.activeElement,close,show,closed:false,busy:false,needsRefresh:false,dirty:false,feedback:'',pending:null};
-  const notifyParent=()=>{if(session.parentNotified)return;session.parentNotified=true;Promise.resolve(reload()).catch(()=>{});};
+  const notifyParent=()=>{if(session.parentNotified)return;session.parentNotified=true;if(session.lastSyncedRow)Promise.resolve(reload(session.lastSyncedRow)).catch(()=>{});};
   close=()=>{if(session.closed)return;session.closed=true;session.close();if(session.opener?.isConnected)session.opener.focus();if(session.busy)session.reloadOnFinish=true;else if(session.dirty)notifyParent();};
   const render=(title,meta,body,footer)=>{
     if(!session.modal)return session.show(title,meta,body,footer);
@@ -128,7 +128,7 @@ export async function openPdtV2({row,client,token,role,capabilities,show,escape:
     try{const fresh=await refreshPendingV2(client,token,row.id_pendiente);const header=manual&&fresh.estado==='PENDIENTE'?await refreshManualHeader(client,token,row.id_pendiente):null;if(session.closed||modal.hidden)return;
       const pending=session.pending;if(pending&&!pending.args.p_idempotency_key&&!pending.args.p_clave){session.pending=null;session.feedback='Datos actualizados. Revisa el historial: la operación anterior no tuvo confirmación.';}
       session.needsRefresh=Boolean(session.pending);
-      await openPdtV2({row:{...row,...fresh,...header},client,token,role,capabilities,show,escape:esc,reload,close:session.close,initialSection:view.section,_session:session,_restore:view});session.clearAfterWrite=null;if(session.dirty){try{await reload({...row,...fresh,...header});session.dirty=false;}catch(error){console.warn('Sincronización del listado PDT:',error);}}
+      await openPdtV2({row:{...row,...fresh,...header},client,token,role,capabilities,show,escape:esc,reload,close:session.close,initialSection:view.section,_session:session,_restore:view});session.clearAfterWrite=null;if(session.dirty){try{session.lastSyncedRow={...row,...fresh,...header};session.dirty=false;Promise.resolve().then(()=>reload(session.lastSyncedRow)).catch(error=>console.warn('Sincronización del listado PDT:',error));}catch(error){console.warn('Sincronización del listado PDT:',error);}}
     }catch(error){session.needsRefresh=true;freeze();setFeedback((session.dirty?'Operación guardada. No la repitas. ':'')+'No se pudo actualizar: '+error.message+'. Usa Actualizar PDT.',true);modal.querySelector('[data-refresh-pdt]').disabled=false;}
     finally{session.busy=false;session.modal?.setAttribute('aria-busy','false');if(session.closed&&session.reloadOnFinish)notifyParent();}
   };
