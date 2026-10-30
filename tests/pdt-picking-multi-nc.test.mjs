@@ -4,7 +4,7 @@ import {registrationPieces} from '../src/domain/pdt-registration.js';
 const source={id_pieza:'p1',key_produccion:'k1',reserva:'r1',reserva_principal:'r1',tipo_pieza:'PANEL',id_linea:'PANELES_2',acabado:'AZUL',cantidad_referencia:4,produccion:'o1',codigo_sap:'ref',fabricacion:'f',longitud:10};
 const entry={source:JSON.stringify(['k1','r1','p1']),cantidad:1,nc:'NC-1'};
 test('Picking conserva NC única opcional',()=>{assert.equal(registrationPieces('PICKING',[source],[{...entry,nc:'',ncs:['']}])[0].nc,'');});
-test('Picking rechaza varias NC mientras V4 solo persista una',()=>{assert.throws(()=>registrationPieces('PICKING',[source],[{...entry,ncs:['NC-1','NC-2']}]),/todavía no admite varias NC/);});
+test('Picking prepara varias NC en un único pendiente',()=>{const rows=registrationPieces('PICKING',[source],[{...entry,ncs:['NC-1','NC-2']}]);assert.equal(rows.length,1);assert.deepEqual(rows[0].ncs,['NC-1','NC-2']);assert.equal(rows[0].cantidad,1);});
 test('Picking rechaza NC repetidas',()=>{assert.throws(()=>registrationPieces('PICKING',[source],[{...entry,ncs:['NC-1','NC-1']}]),/repetida/);});
 test('Picking rechaza más de 20 NC',()=>{assert.throws(()=>registrationPieces('PICKING',[source],[{...entry,ncs:Array.from({length:21},(_,i)=>'NC-'+i)}]),/20 NC/);});
 test('Picking conserva identidad y cantidad',()=>{const p=registrationPieces('PICKING',[source],[entry])[0];assert.equal(p.cantidad,1);assert.equal(p.id_pieza,'p1');assert.equal(p.reserva,'r1');});
