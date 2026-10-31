@@ -31,3 +31,42 @@ ROLLBACK;
 DO $$ BEGIN IF (SELECT count(*) FROM public.sgp_linea_plan_asignaciones)<>0 THEN RAISE EXCEPTION 'Rollback did not restore assignments'; END IF; END $$;
 -- Privilege boundary: no new anonymous/authenticated EXECUTE grant.
 DO $$ BEGIN IF has_function_privilege('anon','public.sgp_linea_plan_programar_grupo_v1(text,uuid,date,integer,jsonb)','EXECUTE') OR has_function_privilege('authenticated','public.sgp_linea_plan_programar_grupo_v1(text,uuid,date,integer,jsonb)','EXECUTE') THEN RAISE EXCEPTION 'Unexpected EXECUTE grant'; END IF; END $$;
+
+-- Conditional access rehearsal, strictly inside a rolled-back transaction.
+-- The production REVIEW migration keeps anon EXECUTE revoked.
+BEGIN;
+GRANT EXECUTE ON FUNCTION public.sgp_linea_plan_programar_grupo_v1(text,uuid,date,integer,jsonb) TO anon;
+GRANT EXECUTE ON FUNCTION public.sgp_linea_plan_saldos_grupo_v1(text,jsonb) TO anon;
+SET LOCAL ROLE anon;
+DO $$ DECLARE r jsonb; BEGIN
+  r := public.sgp_linea_plan_saldos_grupo_v1('coord','["A|L"]'::jsonb);
+  IF (r->0->>'pendiente')::numeric <> 5 THEN
+    RAISE EXCEPTION 'Authorized anon preview failed';
+  END IF;
+  BEGIN
+    PERFORM public.sgp_linea_plan_saldos_grupo_v1('bad','["A|L"]'::jsonb);
+    RAISE EXCEPTION 'Invalid session was accepted';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM = 'Invalid session was accepted' THEN RAISE; END IF;
+  END;
+  r := public.sgp_linea_plan_programar_grupo_v1('coord',gen_random_uuid(),
+    '2026-11-02',1,'[{"key_produccion":"A|L","cantidad":1,"prioridad":1}]'::jsonb);
+  IF jsonb_array_length(r->'aceptadas') <> 1 THEN
+    RAISE EXCEPTION 'Authorized anon programming failed: %',r;
+  END IF;
+  BEGIN
+    PERFORM public.sgp_linea_plan_programar_grupo_v1('bad',gen_random_uuid(),
+      '2026-11-02',1,'[{"key_produccion":"A|L","cantidad":1,"prioridad":1}]'::jsonb);
+    RAISE EXCEPTION 'Invalid session wrote group';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM = 'Invalid session wrote group' THEN RAISE; END IF;
+  END;
+END $$;
+ROLLBACK;
+DO $$ BEGIN
+ IF has_function_privilege('anon','public.sgp_linea_plan_programar_grupo_v1(text,uuid,date,integer,jsonb)','EXECUTE')
+    OR has_function_privilege('anon','public.sgp_linea_plan_saldos_grupo_v1(text,jsonb)','EXECUTE')
+ THEN RAISE EXCEPTION 'Conditional anon grant escaped rollback'; END IF;
+ IF (SELECT count(*) FROM public.sgp_linea_plan_asignaciones)<>0
+ THEN RAISE EXCEPTION 'Conditional access rehearsal wrote permanent assignments'; END IF;
+END $$;
