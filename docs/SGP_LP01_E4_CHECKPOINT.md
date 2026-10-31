@@ -26,6 +26,8 @@ El cliente de `src/services/supabase-client.js` usa la clave publicable y `auth.
 
 La función de saldo ahora replica la elegibilidad descrita de `sgp_linea_plan_programar`: `activa='SI'`, saldo inicializado y suma global de asignaciones no CANCELADA. No descarta `CERRADA` ni `FINALIZADA` por una regla adicional. Para la cantidad entera programable, toma el piso del saldo numérico positivo. El servidor individual sigue siendo la autoridad en la escritura; la vista previa puede quedar obsoleta entre consulta y confirmación.
 
+Revisión de puente servidor: `docs/SGP_LP01_E4_PUENTE_SERVIDOR_REVIEW.md`. `functions/sgpGateway` es un proxy con clave publicable que reenvía las peticiones; no autentica el token SGP ni aporta otro rol SQL. El workflow de Hosting no despliega Functions. No existe un puente autenticado reutilizable en la arquitectura actual. Un endpoint específico con rol SQL técnico restringido y secreto administrado sería viable como propuesta, pero requiere recursos, configuración y aprobación de seguridad nuevos. No se ha implementado ni probado un cliente real con esos permisos. La bandera grupal continúa apagada.
+
 ## Instalación y reversión propuestos
 
 1. Revisar con seguridad el rol SQL efectivo del navegador y elegir explícitamente entre un puente servidor autenticado con permisos limitados o una autorización excepcional y justificada de EXECUTE a `anon` para estas RPC, conservando la validación del token SGP. El SQL REVIEW actual no concede ese permiso; sin decisión, no activar la bandera.
