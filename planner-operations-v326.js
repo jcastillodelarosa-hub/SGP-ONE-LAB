@@ -24,16 +24,25 @@ window.SGPLinePlanner=Object.freeze({selectProduction,selectPart,getAssignments:
 async function rpc(name,params){const token=window.SGPPlannerBridge?.getToken?.();if(!token)throw Error('No hay sesión accesible para el Planificador');const client=await window.SGPPlannerBridge.getClient();const {data,error}=await client.rpc(name,{p_token:token,...params});if(error)throw error;return data}
 const inFlight=new Set();
 async function groupBalances(keys){
- if(!window.SGPLP01_GROUP_RPC_ENABLED)throw Error('Consulta grupal pendiente de instalación y autorización');
- const result=await rpc('sgp_linea_plan_saldos_grupo_v1',{p_keys:keys});
- if(!Array.isArray(result)||result.length!==keys.length)throw Error('Respuesta de saldos incompleta');
- return result;
+ // The visible week is not the global balance. Do not infer a safe amount here.
+ return keys.map(key=>({key_produccion:key,pendiente:null,asignado_global:null,inconsistente:false}));
 }
 async function programGroup({requestId,day,shift,items:productions}){
- if(!window.SGPLP01_GROUP_RPC_ENABLED)throw Error('Programación grupal pendiente de instalación y autorización');
- if(!requestId||!/^\d{4}-\d{2}-\d{2}$/.test(day)||![1,2].includes(Number(shift))||!Array.isArray(productions)||!productions.length)throw Error('Solicitud grupal inválida');
- const key='group|'+requestId;if(inFlight.has(key))throw Error('La solicitud grupal ya está en curso');inFlight.add(key);
- try{const result=await rpc('sgp_linea_plan_programar_grupo_v1',{p_solicitud:requestId,p_fecha:day,p_turno:Number(shift),p_items:productions});if(!result||!Array.isArray(result.aceptadas)||!Array.isArray(result.rechazadas))throw Error('Respuesta grupal inválida');await load();return result}finally{inFlight.delete(key)}
+ if(!requestId||!/^\\d{4}-\\d{2}-\\d{2}$/.test(day)||![1,2].includes(Number(shift))||!Array.isArray(productions)||!productions.length)throw Error('Solicitud grupal inválida');
+ if(productions.length>100||new Set(productions.map(p=>p.key_produccion)).size!==productions.length||productions.some(p=>!rows().some(r=>String(r.key_produccion)===String(p.key_produccion))||!validTarget(day,shift,p.cantidad,p.prioridad)))throw Error('Cantidades, prioridades o producciones inválidas');
+ const key='group|'+requestId;if(inFlight.has(key))throw Error('La programación ya está en curso');inFlight.add(key);
+ const accepted=[],rejected=[];
+ try{
+  for(const item of productions){
+   try{
+    const result=await rpc('sgp_linea_plan_programar',{p_key_produccion:item.key_produccion,p_fecha:day,p_turno:Number(shift),p_cantidad:Number(item.cantidad),p_prioridad:Number(item.prioridad)});
+    if(result?.ok===false)throw Error(result.mensaje||result.error||'Rechazada');
+    accepted.push({key_produccion:item.key_produccion,cantidad:Number(item.cantidad),id_asignacion:result});
+   }catch(error){rejected.push({key_produccion:item.key_produccion,cantidad:Number(item.cantidad),motivo:'No programada; revisar saldo, sesión o datos'});}
+  }
+  await load();
+  return {ok:rejected.length===0,parcial:accepted.length>0&&rejected.length>0,aceptadas:accepted,rechazadas:rejected,ventanas_programadas:accepted.reduce((n,p)=>n+p.cantidad,0),ventanas_pendientes:rejected.reduce((n,p)=>n+p.cantidad,0)};
+ }finally{inFlight.delete(key)}
 }
 function validTarget(day,shift,quantity,priority){return /^\d{4}-\d{2}-\d{2}$/.test(day)&&[1,2].includes(Number(shift))&&Number.isInteger(Number(quantity))&&Number(quantity)>0&&Number.isInteger(Number(priority))&&Number(priority)>0}
 async function programDirect({key,day,shift,quantity,priority}){
