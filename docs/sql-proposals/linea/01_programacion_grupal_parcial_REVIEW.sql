@@ -102,8 +102,19 @@ BEGIN
         'key_produccion',v_key,'cantidad',v_cantidad,'prioridad',v_prioridad,
         'id_asignacion',v_asignacion));
     EXCEPTION WHEN OTHERS THEN
+      -- Only expose known business error codes. Unexpected SQL errors may
+      -- contain relation names, constraints or other internal details.
+      -- Never echo SQLERRM, SQLSTATE or the SGP token to the browser.
       v_rechazadas := v_rechazadas || jsonb_build_array(jsonb_build_object(
-        'key_produccion',v_key,'cantidad',v_cantidad,'motivo',SQLERRM));
+        'key_produccion',v_key,'cantidad',v_cantidad,'motivo',
+        CASE SQLERRM
+          WHEN 'PARAMETROS_INVALIDOS' THEN 'PARAMETROS_INVALIDOS'
+          WHEN 'PRODUCCION_NO_ENCONTRADA' THEN 'PRODUCCION_NO_ENCONTRADA'
+          WHEN 'SALDO_EXPORT_NO_VALIDADO' THEN 'SALDO_EXPORT_NO_VALIDADO'
+          WHEN 'CANTIDAD_SUPERA_SALDO_EXPORT' THEN 'CANTIDAD_SUPERA_SALDO_EXPORT'
+          WHEN 'PERMISO_DENEGADO' THEN 'PERMISO_DENEGADO'
+          ELSE 'ERROR_PROGRAMACION'
+        END));
     END;
   END LOOP;
 
