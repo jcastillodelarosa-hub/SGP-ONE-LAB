@@ -1,3 +1,11 @@
+# LP-01 E4 — preparación LAB v374 sobre main vigente
+
+PR #170, rama `feat/lp01-e4-programacion-grupos`. Se incorporó `main` `ce559cb7b92b289b6ab81597f6609939184bf6ba`, que ya contiene el PR #168 de Mecanizado parcial. Se preservaron sus módulos, pruebas, SQL y estilos; el único conflicto fue `index.html` y se resolvió manteniendo LAB v374, `styles.css?v=374` y `app.js?v=374-multi-nc`. `scripts/build-release-info.mjs` también declara LAB v374.
+
+Una regresión de la rama E4 rechazaba fechas válidas en la programación de grupo por una expresión regular con barras duplicadas. Corregida y comprobada en Chromium PC/móvil. `npm test`: 363/363; `npm run verify:release`: aprobado; sintaxis JavaScript y `git diff --check`: aprobados. El grupo usa llamadas individuales secuenciales a la RPC instalada: se muestran aceptadas/rechazadas y no se afirma atomicidad grupal ni idempotencia transaccional. No se creó nueva RPC ni migración. No se fusionó PR #170 ni se desplegó. Continuidad específica: `docs/SGP_LP01_E4_CHECKPOINT.md`.
+
+---
+
 # PR168 — PDT y reservas compartidas sin stubs (2026-10-30 Colombia)
 
 Continuación de `a46d58e` en `feat/mecanizado-programacion-parcial`, mismo PR #168.
