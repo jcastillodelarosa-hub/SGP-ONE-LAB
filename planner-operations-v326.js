@@ -19,10 +19,22 @@ function refreshProductions(){const old=$('sgpPlanProduction').value;const sel=$
 function notify(s){$('sgpPlanMessage').textContent=s}
 function selectProduction(key){pendingPart=null;$('sgpPlanPartBatch').hidden=true;refreshProductions();const sel=$('sgpPlanProduction');const option=Array.from(sel.options).find(o=>o.value===String(key||''));if(!option)return {ok:false,message:'Producción no disponible en la hoja de Ensamble cargada. Actualiza la semana y la línea.'};sel.value=option.value;const row=rows().find(r=>String(r.key_produccion||'')===option.value);const qty=Number(row?.saldo_ensamble);$('sgpPlanQuantity').value=Number.isInteger(qty)&&qty>0?String(qty):'';notify('Producción seleccionada. Verifica las asignaciones existentes, fecha, turno y cantidad antes de guardar.');return {ok:true,message:'Producción cargada en el formulario de Línea. Verifica los datos antes de pulsar Programar.'}}
 function selectPart(keys,meta={}){refreshProductions();const distinct=[...new Set(keys.map(String))];const selected=distinct.map(key=>rows().find(r=>String(r.key_produccion)===key));if(!distinct.length||selected.some(r=>!r))return {ok:false,message:'No se pudo preparar la parte: faltan producciones en la hoja cargada.'};if(selected.some(r=>!Number.isInteger(Number(r.saldo_ensamble))||Number(r.saldo_ensamble)<1))return {ok:false,message:'La parte contiene producciones sin saldo positivo; revisa los pendientes antes de programar.'};pendingPart=selected.map(r=>({key:r.key_produccion,name:r.produccion,quantity:Number(r.saldo_ensamble)}));$('sgpPlanPartBatch').hidden=false;$('sgpPlanPartTitle').textContent='Parte '+(meta.parte||'')+' · '+pendingPart.length+' producciones';$('sgpPlanPartPreview').textContent='Cantidades propuestas según saldo de ensamble: '+pendingPart.map(r=>r.name+' ('+r.quantity+')').join(' · ')+'. Verifica asignaciones previas; no equivale al saldo sin programar.';notify('Parte preparada. Revisa fecha, turno, prioridad y cantidades. El guardado masivo está bloqueado hasta contar con una operación transaccional.');return {ok:true,message:'Parte '+(meta.parte||'')+' preparada con '+pendingPart.length+' producciones. Revisa el resumen y confirma la programación.'};}
-window.SGPLinePlanner=Object.freeze({selectProduction,selectPart,getAssignments:()=>items.slice(),reloadAssignments:()=>load(),programDirect,moveDirect});
+window.SGPLinePlanner=Object.freeze({selectProduction,selectPart,getAssignments:()=>items.slice(),reloadAssignments:()=>load(),programDirect,moveDirect,programGroup,groupBalances});
 
 async function rpc(name,params){const token=window.SGPPlannerBridge?.getToken?.();if(!token)throw Error('No hay sesión accesible para el Planificador');const client=await window.SGPPlannerBridge.getClient();const {data,error}=await client.rpc(name,{p_token:token,...params});if(error)throw error;return data}
 const inFlight=new Set();
+async function groupBalances(keys){
+ if(!window.SGPLP01_GROUP_RPC_ENABLED)throw Error('Consulta grupal pendiente de instalación y autorización');
+ const result=await rpc('sgp_linea_plan_saldos_grupo_v1',{p_keys:keys});
+ if(!Array.isArray(result)||result.length!==keys.length)throw Error('Respuesta de saldos incompleta');
+ return result;
+}
+async function programGroup({requestId,day,shift,items:productions}){
+ if(!window.SGPLP01_GROUP_RPC_ENABLED)throw Error('Programación grupal pendiente de instalación y autorización');
+ if(!requestId||!/^\d{4}-\d{2}-\d{2}$/.test(day)||![1,2].includes(Number(shift))||!Array.isArray(productions)||!productions.length)throw Error('Solicitud grupal inválida');
+ const key='group|'+requestId;if(inFlight.has(key))throw Error('La solicitud grupal ya está en curso');inFlight.add(key);
+ try{const result=await rpc('sgp_linea_plan_programar_grupo_v1',{p_solicitud:requestId,p_fecha:day,p_turno:Number(shift),p_items:productions});if(!result||!Array.isArray(result.aceptadas)||!Array.isArray(result.rechazadas))throw Error('Respuesta grupal inválida');await load();return result}finally{inFlight.delete(key)}
+}
 function validTarget(day,shift,quantity,priority){return /^\d{4}-\d{2}-\d{2}$/.test(day)&&[1,2].includes(Number(shift))&&Number.isInteger(Number(quantity))&&Number(quantity)>0&&Number.isInteger(Number(priority))&&Number(priority)>0}
 async function programDirect({key,day,shift,quantity,priority}){
  if(!rows().some(r=>String(r.key_produccion)===String(key))||!validTarget(day,shift,quantity,priority))throw Error('Producción o datos de programación inválidos');
@@ -31,7 +43,7 @@ async function programDirect({key,day,shift,quantity,priority}){
  try{const result=await rpc('sgp_linea_plan_programar',{p_key_produccion:key,p_fecha:day,p_turno:Number(shift),p_cantidad:Number(quantity),p_prioridad:Number(priority)});if(result?.ok===false)throw Error(result.mensaje||result.error||'El servidor rechazó la programación');await load();notify('Programación confirmada por el servidor y calendario actualizado.');return result}finally{inFlight.delete(request)}
 }
 async function moveDirect({assignment,day,shift,quantity,priority}){
- const original=items.find(item=>String(item.id)===String(assignment));if(!original||!validTarget(day,shift,quantity,priority)||Number(quantity)!==Number(original.cantidad))throw Error('Solo se permite mover la asignación completa hasta verificar el contrato de división');
+ const original=items.find(item=>String(item.id)===String(assignment));if(!original||!validTarget(day,shift,quantity,priority)||Number(quantity)>Number(original.cantidad))throw Error('Asignación o movimiento inválido');
  const request='move|'+assignment;if(inFlight.has(request))throw Error('Este movimiento ya está en curso');inFlight.add(request);
  try{const result=await rpc('sgp_linea_plan_mover',{p_asignacion:assignment,p_fecha:day,p_turno:Number(shift),p_cantidad:Number(quantity),p_prioridad:Number(priority)});if(result?.ok===false)throw Error(result.mensaje||result.error||'El servidor rechazó el movimiento');await load();notify('Movimiento confirmado por el servidor y calendario actualizado.');return result}finally{inFlight.delete(request)}
 }

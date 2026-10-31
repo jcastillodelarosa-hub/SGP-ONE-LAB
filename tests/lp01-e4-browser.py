@@ -21,7 +21,7 @@ def run(page, label):
         from:()=>builder,
         rpc:async(name,args)=>{window.__lpCalls.push({name,args});return {error:null,data:name==='sgp_linea_plan_consultar' ? [
           {id:'A1',key_produccion:'KEY1',fecha:args.p_desde,turno:1,prioridad:1,produccion:'TORRE NORTE',sistema:'ES7100',cantidad:12,ejecutado:0,estado:'ABIERTA'}
-        ] : name==='sgp_linea_plan_explorador_v327' ? [
+        ] : name==='sgp_linea_plan_saldos_grupo_v1' ? [{key_produccion:'KEY1',pendiente:8,asignado_global:4,inconsistente:false}] : name==='sgp_linea_plan_programar_grupo_v1' ? {aceptadas:[{key_produccion:'KEY1',cantidad:2}],rechazadas:[],ventanas_programadas:2,ventanas_pendientes:0} : name==='sgp_linea_plan_explorador_v327' ? [
           {key_produccion:'KEY1',parte:'1.1',vidrio_preparado:14,vidrio_novedad:2,vidrio_traslado:1}
         ] : []}}}
       )};
@@ -78,12 +78,24 @@ def run(page, label):
         assert page.locator('#lp01DropGroup').is_visible()
         assert page.locator('#lp01DropSubmit').is_hidden()
         page.locator('#lp01DropCancel').click()
+        page.evaluate('window.SGPLP01_GROUP_RPC_ENABLED=true')
+        reserve.drag_to(target)
+        assert page.locator('#lp01DropSubmit').is_visible()
+        page.wait_for_function("window.__lpCalls.some(x=>x.name==='sgp_linea_plan_saldos_grupo_v1')")
+        page.locator('[data-lp-group-quantity="KEY1"]').fill('2')
+        page.locator('#lp01DropSubmit').click()
+        page.wait_for_function("window.__lpCalls.some(x=>x.name==='sgp_linea_plan_programar_grupo_v1')")
+        assert '1 aceptadas' in page.locator('#lp01DropMessage').inner_text()
+        page.locator('#lp01DropCancel').click()
+        page.evaluate('window.SGPLP01_GROUP_RPC_ENABLED=false')
         card=page.locator('.lp-week-assignment')
         card.drag_to(target)
         assert page.locator('#lp01DropTitle').inner_text()=='Confirmar movimiento'
         assert '2026-10-29 · Turno 2' in page.locator('#lp01DropContext').inner_text()
+        page.locator('#lp01DropQuantity').fill('3')
         page.locator('#lp01DropSubmit').click()
         page.wait_for_function("window.__lpCalls.some(x=>x.name==='sgp_linea_plan_mover')")
+        assert page.evaluate("window.__lpCalls.find(x=>x.name==='sgp_linea_plan_mover').args.p_cantidad") == 3
         assert not page.evaluate("window.__lpCalls.some(x=>x.name==='sgp_linea_plan_programar' && x.args.p_cantidad===12)")
     else:
         # Real Chromium touch stream: hold, move while the page/calendar scrolls, release.
