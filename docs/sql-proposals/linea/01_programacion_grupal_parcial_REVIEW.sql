@@ -156,6 +156,22 @@ END;
 $function$;
 REVOKE ALL ON FUNCTION public.sgp_linea_plan_saldos_grupo_v1(text,jsonb)
   FROM PUBLIC, anon, authenticated;
--- No EXECUTE grant is included. Grant only after the application's effective
--- database role and the installed individual RPC privileges are confirmed.
+-- SECURITY REVIEW: browser calls use Supabase publishable key (effective SQL
+-- role anon) plus an independent SGP session token. The installed individual
+-- RPC sgp_linea_plan_programar permits anon EXECUTE and validates that token.
+-- Direct read-only inspection confirmed sgp_validar_sesion_rol hashes the token,
+-- requires non-revoked and unexpired session, active user, and role validation.
+-- It is NOT directly executable by anon; only the guarded SECURITY DEFINER RPC
+-- invokes it. Session tables also deny anon direct SELECT.
+--
+-- CONDITIONAL ACCESS PROPOSAL (NOT APPLIED): if security review approves
+-- the same SGP-session pattern for E4, grant EXECUTE only to anon on the two
+-- exact signatures, with PUBLIC and authenticated still revoked. This makes
+-- the endpoints callable by anyone possessing a publishable key, so token
+-- validation, abuse controls, negative-role tests and operational monitoring
+-- MUST be approved and verified before enabling the UI. No service_role key
+-- may be placed in the browser. Do not uncomment these grants by default.
+-- GRANT EXECUTE ON FUNCTION public.sgp_linea_plan_programar_grupo_v1(text,uuid,date,integer,jsonb) TO anon;
+-- GRANT EXECUTE ON FUNCTION public.sgp_linea_plan_saldos_grupo_v1(text,jsonb) TO anon;
+-- No EXECUTE grant is active in this REVIEW file.
 COMMIT;
