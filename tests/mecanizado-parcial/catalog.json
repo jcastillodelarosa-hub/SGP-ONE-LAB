@@ -1,0 +1,1972 @@
+{
+  "captured_at": "2026-10-30",
+  "project": "ocvxbwzqxbrfndkvjmfx",
+  "postgres": "17.11",
+  "columns": [
+    {
+      "table_name": "sgp_mecanizado_ejecucion",
+      "column_name": "id_ejecucion",
+      "udt_name": "uuid",
+      "column_default": "gen_random_uuid()",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_mecanizado_ejecucion",
+      "column_name": "id_programacion",
+      "udt_name": "uuid",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_mecanizado_ejecucion",
+      "column_name": "estado",
+      "udt_name": "text",
+      "column_default": "'SIN INICIAR'::text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_mecanizado_ejecucion",
+      "column_name": "cantidad_procesada",
+      "udt_name": "int4",
+      "column_default": "0",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_mecanizado_ejecucion",
+      "column_name": "observacion",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_mecanizado_ejecucion",
+      "column_name": "usuario",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_mecanizado_ejecucion",
+      "column_name": "actualizado_en",
+      "udt_name": "timestamptz",
+      "column_default": "now()",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_mecanizado_ejecucion_orden",
+      "column_name": "id_programacion",
+      "udt_name": "uuid",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_mecanizado_ejecucion_orden",
+      "column_name": "produccion",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_mecanizado_ejecucion_orden",
+      "column_name": "estado",
+      "udt_name": "text",
+      "column_default": "'SIN INICIAR'::text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_mecanizado_ejecucion_orden",
+      "column_name": "observacion",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_mecanizado_ejecucion_orden",
+      "column_name": "usuario",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_mecanizado_ejecucion_orden",
+      "column_name": "actualizado_en",
+      "udt_name": "timestamptz",
+      "column_default": "now()",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_mecanizado_programacion",
+      "column_name": "id_programacion",
+      "udt_name": "uuid",
+      "column_default": "gen_random_uuid()",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_mecanizado_programacion",
+      "column_name": "reserva",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_mecanizado_programacion",
+      "column_name": "produccion",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_mecanizado_programacion",
+      "column_name": "cantidad_programada",
+      "udt_name": "int4",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_mecanizado_programacion",
+      "column_name": "fecha_programacion",
+      "udt_name": "date",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_mecanizado_programacion",
+      "column_name": "turno",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_mecanizado_programacion",
+      "column_name": "prioridad",
+      "udt_name": "numeric",
+      "column_default": "1",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_mecanizado_programacion",
+      "column_name": "observacion",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_mecanizado_programacion",
+      "column_name": "observacion_orden",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_mecanizado_programacion",
+      "column_name": "sistema",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_mecanizado_programacion",
+      "column_name": "acabado",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_mecanizado_programacion",
+      "column_name": "porc_vidrio_snapshot",
+      "udt_name": "numeric",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_mecanizado_programacion",
+      "column_name": "cant_vidrio_snapshot",
+      "udt_name": "numeric",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_mecanizado_programacion",
+      "column_name": "estado",
+      "udt_name": "text",
+      "column_default": "'SIN INICIAR'::text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_mecanizado_programacion",
+      "column_name": "usuario_programa",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_mecanizado_programacion",
+      "column_name": "fecha_creacion",
+      "udt_name": "timestamptz",
+      "column_default": "now()",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_mecanizado_programacion",
+      "column_name": "fecha_actualizacion",
+      "udt_name": "timestamptz",
+      "column_default": "now()",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_mecanizado_programacion",
+      "column_name": "prioridad_semanal",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_mecanizado_programacion",
+      "column_name": "programada",
+      "udt_name": "bool",
+      "column_default": "false",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_mecanizado_programacion_detalle",
+      "column_name": "id_programacion",
+      "udt_name": "uuid",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_mecanizado_programacion_detalle",
+      "column_name": "key_produccion",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_mecanizado_programacion_detalle",
+      "column_name": "cantidad_snapshot",
+      "udt_name": "numeric",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_mecanizado_programacion_detalle",
+      "column_name": "reserva_snapshot",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_mecanizado_programacion_detalle",
+      "column_name": "prioridad_semanal_snapshot",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_mecanizado_programacion_detalle",
+      "column_name": "produccion_snapshot",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_mecanizado_programacion_detalle",
+      "column_name": "creado_en",
+      "udt_name": "timestamptz",
+      "column_default": "now()",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_mecanizado_programacion_detalle",
+      "column_name": "origen",
+      "udt_name": "text",
+      "column_default": "'CANONICA'::text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_mecanizado_reprogramaciones",
+      "column_name": "id",
+      "udt_name": "uuid",
+      "column_default": "gen_random_uuid()",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_mecanizado_reprogramaciones",
+      "column_name": "id_origen",
+      "udt_name": "uuid",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_mecanizado_reprogramaciones",
+      "column_name": "id_destino",
+      "udt_name": "uuid",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_mecanizado_reprogramaciones",
+      "column_name": "produccion",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_mecanizado_reprogramaciones",
+      "column_name": "cantidad",
+      "udt_name": "int4",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_mecanizado_reprogramaciones",
+      "column_name": "motivo",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_mecanizado_reprogramaciones",
+      "column_name": "usuario",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_mecanizado_reprogramaciones",
+      "column_name": "creado_en",
+      "udt_name": "timestamptz",
+      "column_default": "now()",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_picking_entregas",
+      "column_name": "id_entrega",
+      "udt_name": "uuid",
+      "column_default": "gen_random_uuid()",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_picking_entregas",
+      "column_name": "id_programacion",
+      "udt_name": "uuid",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_picking_entregas",
+      "column_name": "produccion",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_picking_entregas",
+      "column_name": "completa",
+      "udt_name": "bool",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_picking_entregas",
+      "column_name": "estado",
+      "udt_name": "text",
+      "column_default": "'PENDIENTE_VALIDACION'::text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_picking_entregas",
+      "column_name": "observacion",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_picking_entregas",
+      "column_name": "usuario_entrega",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_picking_entregas",
+      "column_name": "fecha_entrega",
+      "udt_name": "timestamptz",
+      "column_default": "now()",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_picking_entregas",
+      "column_name": "usuario_validacion",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_picking_entregas",
+      "column_name": "fecha_validacion",
+      "udt_name": "timestamptz",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_picking_entregas",
+      "column_name": "observacion_validacion",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_picking_entregas",
+      "column_name": "creado_en",
+      "udt_name": "timestamptz",
+      "column_default": "now()",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_picking_entregas",
+      "column_name": "actualizado_en",
+      "udt_name": "timestamptz",
+      "column_default": "now()",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_picking_entregas",
+      "column_name": "fecha_operativa",
+      "udt_name": "date",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_picking_entregas",
+      "column_name": "turno_entrega",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_prioridades",
+      "column_name": "id_prioridad",
+      "udt_name": "uuid",
+      "column_default": "gen_random_uuid()",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_prioridades",
+      "column_name": "anio",
+      "udt_name": "int4",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_prioridades",
+      "column_name": "semana",
+      "udt_name": "int4",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_prioridades",
+      "column_name": "id_linea",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_prioridades",
+      "column_name": "reserva",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_prioridades",
+      "column_name": "key_produccion",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_prioridades",
+      "column_name": "prioridad",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_prioridades",
+      "column_name": "usuario",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_prioridades",
+      "column_name": "fecha_actualizacion",
+      "udt_name": "timestamptz",
+      "column_default": "now()",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "key_produccion",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "id",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "id_linea",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "prioridad_programacion",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "anio",
+      "udt_name": "int4",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "semana_base",
+      "udt_name": "int4",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "semana_actual",
+      "udt_name": "int4",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "tipo",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "mercado",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "proyecto",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "produccion",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "sistema",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "cantidad",
+      "udt_name": "numeric",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "cliente",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "mercado_detalle",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "ensamblado",
+      "udt_name": "numeric",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "empacado",
+      "udt_name": "numeric",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "cantidad_pt",
+      "udt_name": "numeric",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "cargue",
+      "udt_name": "numeric",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "despacho",
+      "udt_name": "numeric",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "saldo_ensamble",
+      "udt_name": "numeric",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "saldo_empaque",
+      "udt_name": "numeric",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "saldo_cargue",
+      "udt_name": "numeric",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "saldo_despacho",
+      "udt_name": "numeric",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "estado_produccion",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "codigo_programacion_abierto",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "estado_destino_fussion",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "acabado",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "reserva_al",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "porc_aluminio",
+      "udt_name": "numeric",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "estado_reserva_al",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "orden_oves",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "porc_vidrio",
+      "udt_name": "numeric",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "grupo_vidrio",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "reservas_accesorios",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "obs_accesorios",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "muntin",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "cantidad_muntin",
+      "udt_name": "numeric",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "flush_frame",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "cantidad_flush_frame",
+      "udt_name": "numeric",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "sistema_curvo",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "screen_requiere_frame",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "es_smi",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "es_lmi",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "es_two_tone",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "id_op_fussion",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "id_sistema_fk",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "fecha_recibido",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "pedido_sap",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "orden_co",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "es_service",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "solo_panel_lleva_cover",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "sistema_pvc",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "tipo_sellado",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "mecanizado",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "es_sistema_modificado",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "lotes",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "activa",
+      "udt_name": "text",
+      "column_default": "'SI'::text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "fecha_actualizacion",
+      "udt_name": "timestamptz",
+      "column_default": "now()",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "fuente",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "id_carga",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "presente_ultimo_export",
+      "udt_name": "bool",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "ultima_vez_export",
+      "udt_name": "timestamptz",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "ultima_carga_diaria",
+      "udt_name": "uuid",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "saldos_inicializados",
+      "udt_name": "bool",
+      "column_default": "false",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_producciones",
+      "column_name": "fecha_inicializacion_saldos",
+      "udt_name": "timestamptz",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_mecanizado_arrastre_activacion",
+      "column_name": "id",
+      "udt_name": "bool",
+      "column_default": "true",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_mecanizado_arrastre_activacion",
+      "column_name": "activado_en",
+      "udt_name": "timestamptz",
+      "column_default": "now()",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_mecanizado_historial_orden",
+      "column_name": "id_historial",
+      "udt_name": "uuid",
+      "column_default": "gen_random_uuid()",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_mecanizado_historial_orden",
+      "column_name": "id_programacion",
+      "udt_name": "uuid",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_mecanizado_historial_orden",
+      "column_name": "produccion",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_mecanizado_historial_orden",
+      "column_name": "estado_anterior",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_mecanizado_historial_orden",
+      "column_name": "estado_nuevo",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_mecanizado_historial_orden",
+      "column_name": "observacion",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_mecanizado_historial_orden",
+      "column_name": "usuario",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_mecanizado_historial_orden",
+      "column_name": "fecha_evento",
+      "udt_name": "timestamptz",
+      "column_default": "now()",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_mecanizado_novedades",
+      "column_name": "id_novedad",
+      "udt_name": "uuid",
+      "column_default": "gen_random_uuid()",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_mecanizado_novedades",
+      "column_name": "id_programacion",
+      "udt_name": "uuid",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_mecanizado_novedades",
+      "column_name": "produccion",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_mecanizado_novedades",
+      "column_name": "origen",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_mecanizado_novedades",
+      "column_name": "tipo",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_mecanizado_novedades",
+      "column_name": "perfil",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_mecanizado_novedades",
+      "column_name": "cantidad",
+      "udt_name": "int4",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_mecanizado_novedades",
+      "column_name": "cortes_afectados",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_mecanizado_novedades",
+      "column_name": "numero_nc",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_mecanizado_novedades",
+      "column_name": "numero_novedad",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_mecanizado_novedades",
+      "column_name": "ticket_mtto",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_mecanizado_novedades",
+      "column_name": "acabado_esperado",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_mecanizado_novedades",
+      "column_name": "acabado_recibido",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_mecanizado_novedades",
+      "column_name": "medida_esperada",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_mecanizado_novedades",
+      "column_name": "medida_recibida",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_mecanizado_novedades",
+      "column_name": "observacion",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_mecanizado_novedades",
+      "column_name": "estado",
+      "udt_name": "text",
+      "column_default": "'ABIERTA'::text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_mecanizado_novedades",
+      "column_name": "usuario",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_mecanizado_novedades",
+      "column_name": "creado_en",
+      "udt_name": "timestamptz",
+      "column_default": "now()",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_mecanizado_novedades",
+      "column_name": "actualizado_en",
+      "udt_name": "timestamptz",
+      "column_default": "now()",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_mecanizado_novedades",
+      "column_name": "longitud",
+      "udt_name": "numeric",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_mecanizado_novedades",
+      "column_name": "reserva_solucion",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_picking_faltantes",
+      "column_name": "id_faltante",
+      "udt_name": "uuid",
+      "column_default": "gen_random_uuid()",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_picking_faltantes",
+      "column_name": "id_entrega",
+      "udt_name": "uuid",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_picking_faltantes",
+      "column_name": "id_pieza",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_picking_faltantes",
+      "column_name": "produccion",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_picking_faltantes",
+      "column_name": "perfil",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_picking_faltantes",
+      "column_name": "marca",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_picking_faltantes",
+      "column_name": "fabricacion",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_picking_faltantes",
+      "column_name": "longitud",
+      "udt_name": "numeric",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_picking_faltantes",
+      "column_name": "cantidad",
+      "udt_name": "numeric",
+      "column_default": "1",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_picking_faltantes",
+      "column_name": "observacion",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_picking_faltantes",
+      "column_name": "nc",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_picking_faltantes",
+      "column_name": "ventanas_afectadas",
+      "udt_name": "int4",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_picking_faltantes",
+      "column_name": "auditado",
+      "udt_name": "bool",
+      "column_default": "false",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_picking_faltantes",
+      "column_name": "usuario_auditoria",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_picking_faltantes",
+      "column_name": "fecha_auditoria",
+      "udt_name": "timestamptz",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_picking_faltantes",
+      "column_name": "reserva_pendiente",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_picking_faltantes",
+      "column_name": "acabado_pendiente",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_capacidad_linea",
+      "column_name": "id",
+      "udt_name": "int8",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_capacidad_linea",
+      "column_name": "linea",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_capacidad_linea",
+      "column_name": "proceso",
+      "udt_name": "text",
+      "column_default": "'MECANIZADO'::text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_capacidad_linea",
+      "column_name": "capacidad_dia",
+      "udt_name": "numeric",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_capacidad_linea",
+      "column_name": "capacidad_turno",
+      "udt_name": "numeric",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_capacidad_linea",
+      "column_name": "activo",
+      "udt_name": "bool",
+      "column_default": "true",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_capacidad_linea",
+      "column_name": "actualizado_en",
+      "udt_name": "timestamptz",
+      "column_default": "now()",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_capacidad_sistema",
+      "column_name": "id",
+      "udt_name": "int8",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_capacidad_sistema",
+      "column_name": "linea",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_capacidad_sistema",
+      "column_name": "proceso",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_capacidad_sistema",
+      "column_name": "sistema",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_capacidad_sistema",
+      "column_name": "capacidad_dia",
+      "udt_name": "numeric",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_capacidad_sistema",
+      "column_name": "capacidad_turno",
+      "udt_name": "numeric",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_capacidad_sistema",
+      "column_name": "factor_dificultad",
+      "udt_name": "numeric",
+      "column_default": "1",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_capacidad_sistema",
+      "column_name": "activo",
+      "udt_name": "bool",
+      "column_default": "true",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_capacidad_sistema",
+      "column_name": "actualizado_en",
+      "udt_name": "timestamptz",
+      "column_default": "now()",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_lineas_config",
+      "column_name": "id_linea",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_lineas_config",
+      "column_name": "usar_sgp",
+      "udt_name": "bool",
+      "column_default": "false",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_lineas_config",
+      "column_name": "requiere_export",
+      "udt_name": "bool",
+      "column_default": "false",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_lineas_config",
+      "column_name": "requiere_ubicacion_vidrio",
+      "udt_name": "bool",
+      "column_default": "false",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_lineas_config",
+      "column_name": "requiere_nc_aluminio",
+      "udt_name": "bool",
+      "column_default": "false",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_lineas_config",
+      "column_name": "requiere_nc_vidrio",
+      "udt_name": "bool",
+      "column_default": "false",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_lineas_config",
+      "column_name": "requiere_seguimiento_aluminio",
+      "udt_name": "bool",
+      "column_default": "false",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_lineas_config",
+      "column_name": "fecha_actualizacion",
+      "udt_name": "timestamptz",
+      "column_default": "now()",
+      "is_nullable": "NO"
+    }
+  ],
+  "constraints": [
+    {
+      "name": "sgp_mecanizado_programacion_turno_check",
+      "table": "sgp_mecanizado_programacion",
+      "definition": "CHECK ((turno = ANY (ARRAY['TURNO 1'::text, 'TURNO 2'::text])))"
+    },
+    {
+      "name": "sgp_mecanizado_programacion_pkey",
+      "table": "sgp_mecanizado_programacion",
+      "definition": "PRIMARY KEY (id_programacion)"
+    },
+    {
+      "name": "sgp_mecanizado_ejecucion_pkey",
+      "table": "sgp_mecanizado_ejecucion",
+      "definition": "PRIMARY KEY (id_ejecucion)"
+    },
+    {
+      "name": "sgp_mecanizado_ejecucion_id_programacion_key",
+      "table": "sgp_mecanizado_ejecucion",
+      "definition": "UNIQUE (id_programacion)"
+    },
+    {
+      "name": "sgp_mecanizado_ejecucion_id_programacion_fkey",
+      "table": "sgp_mecanizado_ejecucion",
+      "definition": "FOREIGN KEY (id_programacion) REFERENCES sgp_mecanizado_programacion(id_programacion) ON DELETE CASCADE"
+    },
+    {
+      "name": "sgp_mecanizado_novedades_origen_check",
+      "table": "sgp_mecanizado_novedades",
+      "definition": "CHECK ((origen = ANY (ARRAY['PROVEEDOR'::text, 'BODEGA'::text, 'MECANIZADO_PERSONAL'::text, 'MECANIZADO_MAQUINA'::text, 'INGENIERIA'::text, 'CALIDAD'::text])))"
+    },
+    {
+      "name": "sgp_mecanizado_novedades_pkey",
+      "table": "sgp_mecanizado_novedades",
+      "definition": "PRIMARY KEY (id_novedad)"
+    },
+    {
+      "name": "sgp_mecanizado_novedades_id_programacion_fkey",
+      "table": "sgp_mecanizado_novedades",
+      "definition": "FOREIGN KEY (id_programacion) REFERENCES sgp_mecanizado_programacion(id_programacion) ON DELETE CASCADE"
+    },
+    {
+      "name": "sgp_mecanizado_ejecucion_orden_pkey",
+      "table": "sgp_mecanizado_ejecucion_orden",
+      "definition": "PRIMARY KEY (id_programacion, produccion)"
+    },
+    {
+      "name": "sgp_mecanizado_ejecucion_orden_id_programacion_fkey",
+      "table": "sgp_mecanizado_ejecucion_orden",
+      "definition": "FOREIGN KEY (id_programacion) REFERENCES sgp_mecanizado_programacion(id_programacion) ON DELETE CASCADE"
+    },
+    {
+      "name": "sgp_mecanizado_historial_orden_pkey",
+      "table": "sgp_mecanizado_historial_orden",
+      "definition": "PRIMARY KEY (id_historial)"
+    },
+    {
+      "name": "sgp_picking_entregas_pkey",
+      "table": "sgp_picking_entregas",
+      "definition": "PRIMARY KEY (id_entrega)"
+    },
+    {
+      "name": "sgp_picking_entregas_id_programacion_fkey",
+      "table": "sgp_picking_entregas",
+      "definition": "FOREIGN KEY (id_programacion) REFERENCES sgp_mecanizado_programacion(id_programacion)"
+    },
+    {
+      "name": "sgp_mecanizado_reprogramaciones_cantidad_check",
+      "table": "sgp_mecanizado_reprogramaciones",
+      "definition": "CHECK ((cantidad > 0))"
+    },
+    {
+      "name": "sgp_mecanizado_reprogramaciones_pkey",
+      "table": "sgp_mecanizado_reprogramaciones",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "sgp_mecanizado_reprogramaciones_id_origen_produccion_key",
+      "table": "sgp_mecanizado_reprogramaciones",
+      "definition": "UNIQUE (id_origen, produccion)"
+    },
+    {
+      "name": "sgp_mecanizado_reprogramaciones_id_origen_fkey",
+      "table": "sgp_mecanizado_reprogramaciones",
+      "definition": "FOREIGN KEY (id_origen) REFERENCES sgp_mecanizado_programacion(id_programacion)"
+    },
+    {
+      "name": "sgp_mecanizado_reprogramaciones_id_destino_fkey",
+      "table": "sgp_mecanizado_reprogramaciones",
+      "definition": "FOREIGN KEY (id_destino) REFERENCES sgp_mecanizado_programacion(id_programacion)"
+    },
+    {
+      "name": "sgp_mecanizado_programacion_cantidad_programada_check",
+      "table": "sgp_mecanizado_programacion",
+      "definition": "CHECK ((cantidad_programada >= 0))"
+    },
+    {
+      "name": "sgp_mecanizado_reportes_turno_pkey",
+      "table": "sgp_mecanizado_reportes_turno",
+      "definition": "PRIMARY KEY (id_reporte)"
+    },
+    {
+      "name": "sgp_mecanizado_reportes_turno_fecha_turno_key",
+      "table": "sgp_mecanizado_reportes_turno",
+      "definition": "UNIQUE (fecha, turno)"
+    },
+    {
+      "name": "sgp_mecanizado_programacion_detalle_cantidad_snapshot_check",
+      "table": "sgp_mecanizado_programacion_detalle",
+      "definition": "CHECK ((cantidad_snapshot >= (0)::numeric))"
+    },
+    {
+      "name": "sgp_mecanizado_programacion_detalle_pkey",
+      "table": "sgp_mecanizado_programacion_detalle",
+      "definition": "PRIMARY KEY (id_programacion, key_produccion)"
+    },
+    {
+      "name": "sgp_mecanizado_programacion_detalle_id_programacion_fkey",
+      "table": "sgp_mecanizado_programacion_detalle",
+      "definition": "FOREIGN KEY (id_programacion) REFERENCES sgp_mecanizado_programacion(id_programacion) ON DELETE CASCADE"
+    },
+    {
+      "name": "sgp_mecanizado_conciliaciones_operativa_cantidad_canonica_check",
+      "table": "sgp_mecanizado_conciliaciones_operativas",
+      "definition": "CHECK ((cantidad_canonica > 0))"
+    },
+    {
+      "name": "sgp_mecanizado_conciliaciones_operativas_check",
+      "table": "sgp_mecanizado_conciliaciones_operativas",
+      "definition": "CHECK (((cantidad_confirmada > 0) AND (cantidad_confirmada <= cantidad_canonica)))"
+    },
+    {
+      "name": "sgp_mecanizado_conciliaciones_operativas_estado_check",
+      "table": "sgp_mecanizado_conciliaciones_operativas",
+      "definition": "CHECK ((estado = ANY (ARRAY['CONFIRMADA_OPERACION'::text, 'REVOCADA'::text])))"
+    },
+    {
+      "name": "sgp_mecanizado_conciliaciones_operativas_motivo_check",
+      "table": "sgp_mecanizado_conciliaciones_operativas",
+      "definition": "CHECK ((length(TRIM(BOTH FROM motivo)) > 5))"
+    },
+    {
+      "name": "sgp_mecanizado_conciliaciones_operativas_pkey",
+      "table": "sgp_mecanizado_conciliaciones_operativas",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "sgp_mecanizado_conciliaciones_operativas_reserva_estado_key",
+      "table": "sgp_mecanizado_conciliaciones_operativas",
+      "definition": "UNIQUE (reserva, estado)"
+    },
+    {
+      "name": "sgp_mecanizado_arrastre_activacion_id_check",
+      "table": "sgp_mecanizado_arrastre_activacion",
+      "definition": "CHECK (id)"
+    },
+    {
+      "name": "sgp_mecanizado_arrastre_activacion_pkey",
+      "table": "sgp_mecanizado_arrastre_activacion",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "sgp_mecanizado_ejecucion_estado_check",
+      "table": "sgp_mecanizado_ejecucion",
+      "definition": "CHECK ((estado = ANY (ARRAY['SIN INICIAR'::text, 'PICKING'::text, 'CORTE'::text, 'MECANIZADO'::text, 'PROCESADO'::text, 'REPROGRAMADO'::text])))"
+    },
+    {
+      "name": "sgp_mecanizado_ejecucion_orden_estado_check",
+      "table": "sgp_mecanizado_ejecucion_orden",
+      "definition": "CHECK ((estado = ANY (ARRAY['SIN INICIAR'::text, 'PROGRAMADA'::text, 'PICKING'::text, 'CORTE'::text, 'MECANIZADO'::text, 'PROCESADO'::text, 'REPROGRAMADO'::text])))"
+    }
+  ],
+  "triggers": [
+    {
+      "name": "sgp_mecanizado_validar_prioridad_nueva",
+      "table": "sgp_mecanizado_programacion",
+      "definition": "CREATE TRIGGER sgp_mecanizado_validar_prioridad_nueva BEFORE INSERT ON public.sgp_mecanizado_programacion FOR EACH ROW EXECUTE FUNCTION sgp_mecanizado_validar_prioridad_nueva()"
+    },
+    {
+      "name": "sgp_mecanizado_prevenir_detalle_duplicado",
+      "table": "sgp_mecanizado_programacion_detalle",
+      "definition": "CREATE TRIGGER sgp_mecanizado_prevenir_detalle_duplicado BEFORE INSERT ON public.sgp_mecanizado_programacion_detalle FOR EACH ROW EXECUTE FUNCTION sgp_mecanizado_prevenir_detalle_duplicado()"
+    },
+    {
+      "name": "trg_sgp_picking_no_duplicar_completa",
+      "table": "sgp_picking_entregas",
+      "definition": "CREATE TRIGGER trg_sgp_picking_no_duplicar_completa BEFORE INSERT ON public.sgp_picking_entregas FOR EACH ROW EXECUTE FUNCTION sgp_picking_rechazar_entrega_completa_duplicada()"
+    },
+    {
+      "name": "trg_sgp_mecanizado_programada_insert",
+      "table": "sgp_mecanizado_programacion",
+      "definition": "CREATE TRIGGER trg_sgp_mecanizado_programada_insert BEFORE INSERT ON public.sgp_mecanizado_programacion FOR EACH ROW EXECUTE FUNCTION sgp_mecanizado_programada_al_insertar()"
+    },
+    {
+      "name": "trg_sgp_mecanizado_programada_update",
+      "table": "sgp_mecanizado_programacion",
+      "definition": "CREATE TRIGGER trg_sgp_mecanizado_programada_update BEFORE UPDATE OF estado ON public.sgp_mecanizado_programacion FOR EACH ROW EXECUTE FUNCTION sgp_mecanizado_programada_al_actualizar()"
+    },
+    {
+      "name": "trg_sgp_pdt_entrega_origen",
+      "table": "sgp_picking_entregas",
+      "definition": "CREATE TRIGGER trg_sgp_pdt_entrega_origen BEFORE DELETE OR UPDATE ON public.sgp_picking_entregas FOR EACH ROW EXECUTE FUNCTION sgp_pdt_proteger_entrega_origen()"
+    },
+    {
+      "name": "trg_sgp_pdt_programacion_origen",
+      "table": "sgp_mecanizado_programacion",
+      "definition": "CREATE TRIGGER trg_sgp_pdt_programacion_origen BEFORE DELETE OR UPDATE ON public.sgp_mecanizado_programacion FOR EACH ROW EXECUTE FUNCTION sgp_pdt_proteger_programacion_origen()"
+    },
+    {
+      "name": "trg_sgp_picking_validar_jornada_insert",
+      "table": "sgp_picking_entregas",
+      "definition": "CREATE TRIGGER trg_sgp_picking_validar_jornada_insert BEFORE INSERT ON public.sgp_picking_entregas FOR EACH ROW EXECUTE FUNCTION sgp_picking_validar_jornada_insert()"
+    },
+    {
+      "name": "trg_pdt_manual_entrega_origen",
+      "table": "sgp_picking_entregas",
+      "definition": "CREATE TRIGGER trg_pdt_manual_entrega_origen BEFORE DELETE OR UPDATE ON public.sgp_picking_entregas FOR EACH ROW EXECUTE FUNCTION sgp_pdt_manual.proteger_entrega_origen()"
+    },
+    {
+      "name": "trg_pdt_manual_programacion_origen",
+      "table": "sgp_mecanizado_programacion",
+      "definition": "CREATE TRIGGER trg_pdt_manual_programacion_origen BEFORE DELETE OR UPDATE ON public.sgp_mecanizado_programacion FOR EACH ROW EXECUTE FUNCTION sgp_pdt_manual.proteger_programacion_origen()"
+    },
+    {
+      "name": "trg_pdt_manual_auditar_programacion",
+      "table": "sgp_producciones",
+      "definition": "CREATE CONSTRAINT TRIGGER trg_pdt_manual_auditar_programacion AFTER UPDATE ON public.sgp_producciones DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION sgp_pdt_manual.auditar_programacion()"
+    },
+    {
+      "name": "trg_pdt_anio_inmutable",
+      "table": "sgp_producciones",
+      "definition": "CREATE TRIGGER trg_pdt_anio_inmutable BEFORE UPDATE OF anio ON public.sgp_producciones FOR EACH ROW EXECUTE FUNCTION sgp_pdt_manual.proteger_anio_programacion()"
+    }
+  ],
+  "functions": [
+    {
+      "acl": "{postgres=X/postgres,service_role=X/postgres,anon=X/postgres,authenticated=X/postgres}",
+      "signature": "sgp_picking_reporte_entregas_v1(text,date,date,text,text,integer,integer)",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_picking_reporte_entregas_v1(p_token text, p_fecha_inicio date, p_fecha_fin date, p_turno text DEFAULT NULL::text, p_sistema text DEFAULT NULL::text, p_limit integer DEFAULT 100, p_offset integer DEFAULT 0)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nDECLARE v_user text; v_total bigint; v_summary jsonb; v_systems jsonb; v_rows jsonb;\nBEGIN\n v_user := public.sgp_validar_sesion_rol(p_token,ARRAY['ADMINISTRADOR','COORDINADOR','PICKING','SUPERVISOR DE PICKING']);\n IF p_fecha_inicio IS NULL OR p_fecha_fin IS NULL OR p_fecha_fin<p_fecha_inicio OR p_fecha_fin-p_fecha_inicio>30 THEN\n  RAISE EXCEPTION 'RANGO_FECHAS_INVALIDO';\n END IF;\n IF p_limit IS NULL OR p_limit<1 OR p_limit>500 OR p_offset IS NULL OR p_offset<0 THEN\n  RAISE EXCEPTION 'PAGINACION_INVALIDA';\n END IF;\n IF p_turno IS NOT NULL AND p_turno NOT IN ('TURNO 1','TURNO 2') THEN\n  RAISE EXCEPTION 'TURNO_INVALIDO';\n END IF;\n SELECT count(*) INTO v_total\n FROM public.sgp_picking_entregas e\n JOIN public.sgp_mecanizado_programacion p ON p.id_programacion=e.id_programacion\n WHERE e.fecha_operativa BETWEEN p_fecha_inicio AND p_fecha_fin\n   AND (p_turno IS NULL OR e.turno_entrega=p_turno)\n   AND (p_sistema IS NULL OR p.sistema=p_sistema);\n -- Repeating CTEs is deliberate: aggregate across ALL matching events, never just the page.\n SELECT jsonb_build_object(\n  'movimientos',count(*),\n  'producciones_unicas',count(DISTINCT (e.id_programacion,e.produccion,p.sistema)),\n  'completas',count(*) FILTER (WHERE e.completa IS TRUE),\n  'parciales',count(*) FILTER (WHERE e.completa IS FALSE),\n  'filas_faltantes',coalesce(sum((SELECT count(*) FROM public.sgp_picking_faltantes f WHERE f.id_entrega=e.id_entrega)),0),\n  'cantidad_piezas_faltantes',coalesce(sum((SELECT sum(f.cantidad) FROM public.sgp_picking_faltantes f WHERE f.id_entrega=e.id_entrega)),0)\n ) INTO v_summary\n FROM public.sgp_picking_entregas e JOIN public.sgp_mecanizado_programacion p ON p.id_programacion=e.id_programacion\n WHERE e.fecha_operativa BETWEEN p_fecha_inicio AND p_fecha_fin\n   AND (p_turno IS NULL OR e.turno_entrega=p_turno)\n   AND (p_sistema IS NULL OR p.sistema=p_sistema);\n SELECT coalesce(jsonb_agg(to_jsonb(s) ORDER BY s.sistema),'[]'::jsonb) INTO v_systems FROM (\n  SELECT p.sistema,count(*) movimientos,\n   count(DISTINCT (e.id_programacion,e.produccion,p.sistema)) producciones_unicas,\n   count(*) FILTER (WHERE e.completa IS TRUE) completas,\n   count(*) FILTER (WHERE e.completa IS FALSE) parciales,\n   coalesce(sum((SELECT count(*) FROM public.sgp_picking_faltantes f WHERE f.id_entrega=e.id_entrega)),0) filas_faltantes\n  FROM public.sgp_picking_entregas e JOIN public.sgp_mecanizado_programacion p ON p.id_programacion=e.id_programacion\n  WHERE e.fecha_operativa BETWEEN p_fecha_inicio AND p_fecha_fin\n    AND (p_turno IS NULL OR e.turno_entrega=p_turno)\n    AND (p_sistema IS NULL OR p.sistema=p_sistema)\n  GROUP BY p.sistema\n ) s;\n SELECT coalesce(jsonb_agg(to_jsonb(z) ORDER BY z.fecha_entrega,z.id_entrega),'[]'::jsonb) INTO v_rows FROM (\n  SELECT e.id_entrega,e.id_programacion,e.produccion,e.completa,e.estado,e.observacion,\n   e.usuario_entrega,(SELECT u.nombre FROM public.sgp_usuarios u WHERE u.usuario=e.usuario_entrega LIMIT 1) AS nombre_responsable,e.fecha_entrega,e.fecha_operativa,e.turno_entrega,\n   e.usuario_validacion,e.fecha_validacion,p.reserva,p.prioridad_semanal AS parte,p.sistema,p.acabado,p.cantidad_programada,\n   coalesce((SELECT jsonb_agg(jsonb_build_object('id_faltante',f.id_faltante,'perfil',f.perfil,'marca',f.marca,'fabricacion',f.fabricacion,'longitud',f.longitud,'cantidad',f.cantidad,'observacion',f.observacion,'nc',f.nc,'reserva_pendiente',f.reserva_pendiente,'acabado_pendiente',f.acabado_pendiente,'ventanas_afectadas',f.ventanas_afectadas) ORDER BY f.id_faltante) FROM public.sgp_picking_faltantes f WHERE f.id_entrega=e.id_entrega),'[]'::jsonb) faltantes\n  FROM public.sgp_picking_entregas e JOIN public.sgp_mecanizado_programacion p ON p.id_programacion=e.id_programacion\n  WHERE e.fecha_operativa BETWEEN p_fecha_inicio AND p_fecha_fin\n   AND (p_turno IS NULL OR e.turno_entrega=p_turno)\n   AND (p_sistema IS NULL OR p.sistema=p_sistema)\n  ORDER BY e.fecha_entrega,e.id_entrega LIMIT p_limit OFFSET p_offset\n ) z;\n RETURN jsonb_build_object('ok',true,'filters',jsonb_build_object('fecha_inicio',p_fecha_inicio,'fecha_fin',p_fecha_fin,'turno',p_turno,'sistema',p_sistema),'summary',v_summary,'por_sistema',v_systems,'total_rows',v_total,'limit',p_limit,'offset',p_offset,'rows',v_rows);\nEND $function$\n"
+    },
+    {
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "signature": "sgp_validar_sesion_rol(text,text[])",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_validar_sesion_rol(p_token text, p_roles text[])\n RETURNS text\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public', 'extensions'\nAS $function$ declare v_usuario text; v_rol text; begin select u.usuario,u.rol into v_usuario,v_rol from public.sgp_sesiones_app s join public.sgp_usuarios u on u.id_usuario=s.id_usuario where s.token_hash=encode(extensions.digest(coalesce(p_token,''),'sha256'),'hex') and s.revocado_en is null and s.expira_en>now() and u.activo=true; if v_usuario is null then raise exception 'PERMISO_DENEGADO'; end if; if v_rol=any(p_roles) then return v_usuario; end if; if v_rol='RECEPCION' and 'LIDER'=any(p_roles) then return v_usuario; end if; raise exception 'PERMISO_DENEGADO'; end $function$\n"
+    },
+    {
+      "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "signature": "sgp_picking_rechazar_entrega_completa_duplicada()",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_picking_rechazar_entrega_completa_duplicada()\n RETURNS trigger\n LANGUAGE plpgsql\n SET search_path TO 'public'\nAS $function$\nbegin\n  if new.completa is distinct from true then\n    return new;\n  end if;\n  perform pg_advisory_xact_lock(hashtextextended(new.id_programacion::text || '|' || new.produccion, 0));\n  if exists (\n    select 1 from public.sgp_picking_entregas e\n    where e.id_programacion = new.id_programacion\n      and e.produccion = new.produccion\n      and e.completa is true\n      and e.estado in ('PENDIENTE_VALIDACION','VALIDADA','AUDITADA_DIFERENCIA')\n  ) then\n    raise exception 'ENTREGA_COMPLETA_YA_REGISTRADA: la producci\u00f3n ya tiene una entrega completa activa'\n      using errcode = '23505';\n  end if;\n  return new;\nend;\n$function$\n"
+    },
+    {
+      "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "signature": "sgp_mecanizado_programacion_listar(text)",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_mecanizado_programacion_listar(p_token text)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nDECLARE u text;\nBEGIN\n  u := sgp_validar_sesion_rol(p_token, ARRAY['ADMINISTRADOR','COORDINADOR','LIDER','LIDER MECANIZADO','CONSULTA']);\n  RETURN COALESCE(\n    (SELECT jsonb_agg(to_jsonb(p) ORDER BY fecha_programacion,turno,prioridad)\n     FROM sgp_mecanizado_programacion p),\n    '[]'::jsonb\n  );\nEND\n$function$\n"
+    },
+    {
+      "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "signature": "sgp_mecanizado_programar(text,text,text,integer,date,text,integer,text,text)",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_mecanizado_programar(p_token text, p_reserva text, p_produccion text, p_cantidad integer, p_fecha date, p_turno text, p_prioridad integer, p_observacion text, p_observacion_orden text)\n RETURNS uuid\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\ndeclare v_parte text;\nbegin\n v_parte:=nullif(current_setting('request.headers',true)::jsonb->>'x-sgp-prioridad-semanal','');\n return public.sgp_mecanizado_programar(p_token,p_reserva,p_produccion,p_cantidad,p_fecha,p_turno,p_prioridad,p_observacion,p_observacion_orden,v_parte);\nend $function$\n"
+    },
+    {
+      "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "signature": "sgp_mecanizado_guardar_estado_orden(text,uuid,text,text,text)",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_mecanizado_guardar_estado_orden(p_token text, p_id_programacion uuid, p_produccion text, p_estado text, p_observacion text DEFAULT NULL::text)\n RETURNS boolean\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nDECLARE u text; old_state text; new_state text;\nBEGIN\n u:=sgp_validar_sesion_rol(p_token,array['ADMINISTRADOR','COORDINADOR','LIDER MECANIZADO','LIDER','LIDER LINEA']);\n new_state:=upper(trim(coalesce(p_estado,'')));\n IF new_state NOT IN ('SIN INICIAR','CORTE','MECANIZADO','PROCESADO','REPROGRAMADO') THEN\n  RAISE EXCEPTION 'Estado de mecanizado no permitido: %',p_estado;\n END IF;\n IF new_state='REPROGRAMADO' AND NOT EXISTS (\n  SELECT 1 FROM sgp_mecanizado_reprogramaciones\n  WHERE id_origen=p_id_programacion AND produccion=p_produccion\n ) THEN\n  RAISE EXCEPTION 'REPROGRAMADO requiere v\u00ednculo de reprogramaci\u00f3n';\n END IF;\n IF NOT EXISTS (SELECT 1 FROM sgp_mecanizado_programacion\n                WHERE id_programacion=p_id_programacion AND estado<>'CANCELADA') THEN\n  IF new_state <> 'REPROGRAMADO' OR NOT EXISTS (SELECT 1 FROM sgp_mecanizado_reprogramaciones WHERE id_origen=p_id_programacion AND produccion=p_produccion) THEN\n   RAISE EXCEPTION 'Programaci\u00f3n inexistente o cancelada';\n  END IF;\n END IF;\n SELECT estado INTO old_state FROM sgp_mecanizado_ejecucion_orden\n WHERE id_programacion=p_id_programacion AND produccion=p_produccion;\n INSERT INTO sgp_mecanizado_ejecucion_orden(id_programacion,produccion,estado,observacion,usuario,actualizado_en)\n VALUES(p_id_programacion,p_produccion,new_state,p_observacion,u,now())\n ON CONFLICT(id_programacion,produccion) DO UPDATE SET\n estado=excluded.estado,\n observacion=coalesce(excluded.observacion,sgp_mecanizado_ejecucion_orden.observacion),\n usuario=excluded.usuario,actualizado_en=now();\n IF old_state IS DISTINCT FROM new_state OR p_observacion IS NOT NULL THEN\n  INSERT INTO sgp_mecanizado_historial_orden(id_programacion,produccion,estado_anterior,estado_nuevo,observacion,usuario)\n  VALUES(p_id_programacion,p_produccion,old_state,new_state,p_observacion,u);\n END IF;\n RETURN true;\nEND $function$\n"
+    },
+    {
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres,anon=X/postgres}",
+      "signature": "sgp_mecanizado_pendientes_turno(text,date,text)",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_mecanizado_pendientes_turno(p_token text, p_fecha date, p_turno text)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\ndeclare v_usuario text; v_inicio timestamptz; v_habilitado timestamptz; v_fin timestamptz; v_activado timestamptz; v_ahora timestamptz:=now();\nbegin\n v_usuario:=public.sgp_validar_sesion_rol(p_token,array['ADMINISTRADOR','COORDINADOR','LIDER MECANIZADO','LIDER','LIDER LINEA','CONSULTA']);\n if upper(trim(p_turno)) not in ('TURNO 1','TURNO 2') then raise exception 'Turno no v\u00e1lido'; end if;\n v_inicio:=(p_fecha::text||case when upper(trim(p_turno))='TURNO 1' then ' 07:00 America/Bogota' when extract(isodow from p_fecha)=7 then ' 18:00 America/Bogota' else ' 19:00 America/Bogota' end)::timestamptz;\n v_habilitado:=v_inicio+interval '5 minutes';\n -- End of the requested shift, including the different Sunday schedule.\n v_fin := case\n   when upper(trim(p_turno))='TURNO 1' and extract(isodow from p_fecha)=7\n     then (p_fecha::text||' 18:00 America/Bogota')::timestamptz\n   when upper(trim(p_turno))='TURNO 1'\n     then (p_fecha::text||' 19:00 America/Bogota')::timestamptz\n   when extract(isodow from p_fecha)=7\n     then ((p_fecha+1)::text||' 05:00 America/Bogota')::timestamptz\n   else ((p_fecha+1)::text||' 07:00 America/Bogota')::timestamptz\n end;\n select activado_en into strict v_activado from public.sgp_mecanizado_arrastre_activacion where id=true;\n if v_ahora<v_habilitado then return '[]'::jsonb; end if;\n return coalesce((\n with legacy_scope as (\n   select mp.id_programacion,sp.key_produccion\n   from public.sgp_mecanizado_programacion mp\n   join public.sgp_prioridades pr on pr.reserva=mp.reserva and pr.id_linea='PANELES_2'\n     and (mp.prioridad_semanal is null or pr.prioridad=mp.prioridad_semanal)\n   join public.sgp_producciones sp on sp.key_produccion=pr.key_produccion and sp.id_linea='PANELES_2'\n     and (mp.produccion is null or mp.produccion=sp.produccion)\n   where not exists(select 1 from public.sgp_mecanizado_programacion_detalle d where d.id_programacion=mp.id_programacion)\n ), scope as (\n   select d.id_programacion,d.key_produccion from public.sgp_mecanizado_programacion_detalle d\n   union all\n   select l.id_programacion,l.key_produccion from legacy_scope l\n ), base as (\n  select mp.id_programacion,mp.reserva,coalesce(mp.prioridad_semanal,pr.prioridad) prioridad_semanal,mp.sistema,mp.acabado,mp.fecha_programacion,mp.turno,\n   sp.key_produccion,sp.produccion,sp.proyecto,sp.cliente,sp.tipo,round(coalesce(sp.cantidad,0))::int cantidad,\n   coalesce(sp.semana_actual,sp.semana_base)::int semana,\n   public.sgp_es_reserva_compartida(sp.key_produccion) reserva_compartida,\n   public.sgp_reservas_por_produccion_json(sp.key_produccion) reservas_compartidas,\n   coalesce(eo.estado,me.estado,'SIN INICIAR') estado_actual,eo.observacion,\n   (select max(h.fecha_evento) from public.sgp_mecanizado_historial_orden h where h.id_programacion=mp.id_programacion and h.produccion=sp.produccion and h.estado_nuevo='PROCESADO') procesado_en,\n   (select max(h.fecha_evento) from public.sgp_mecanizado_historial_orden h where h.id_programacion=mp.id_programacion and h.produccion=sp.produccion and h.estado_nuevo='REPROGRAMADO') reprogramado_en,\n   (select min(r.creado_en) from public.sgp_mecanizado_reprogramaciones r where r.id_origen=mp.id_programacion and r.produccion=sp.produccion) movido_en\n  from public.sgp_mecanizado_programacion mp\n  join scope sc on sc.id_programacion=mp.id_programacion\n  join public.sgp_producciones sp on sp.key_produccion=sc.key_produccion\n  left join public.sgp_prioridades pr on pr.key_produccion=sp.key_produccion and pr.reserva=mp.reserva and pr.id_linea='PANELES_2'\n  left join public.sgp_mecanizado_ejecucion me on me.id_programacion=mp.id_programacion\n  left join public.sgp_mecanizado_ejecucion_orden eo on eo.id_programacion=mp.id_programacion and eo.produccion=sp.produccion\n  where (mp.fecha_programacion::text||case when upper(trim(mp.turno))='TURNO 1' then ' 07:00 America/Bogota' else ' 19:00 America/Bogota' end)::timestamptz < v_inicio\n    and mp.estado<>'CANCELADA'\n ), eligible as (\n  select *,row_number() over(partition by reserva,key_produccion order by fecha_programacion desc,case when upper(trim(turno))='TURNO 2' then 2 else 1 end desc,id_programacion desc) rn\n  from base where (\n      ((procesado_en is null and estado_actual<>'PROCESADO')\n       and (movido_en is null or movido_en>=v_inicio)\n       and (reprogramado_en is null or reprogramado_en>=v_inicio))\n      or (procesado_en>=greatest(v_inicio,v_activado) and procesado_en<v_fin)\n    )\n )\n select jsonb_agg(jsonb_build_object(\n   'id_programacion_origen',id_programacion,'reserva',reserva,'key_produccion',key_produccion,'produccion',produccion,\n   'proyecto',coalesce(proyecto,cliente),'tipo',coalesce(tipo,''),'cantidad',cantidad,'semana',semana,\n   'prioridad_semanal',prioridad_semanal,'sistema',sistema,'acabado',acabado,'estado',case when procesado_en>=greatest(v_inicio,v_activado) and procesado_en<v_fin then 'PROCESADO' else estado_actual end,'observacion',observacion,\n   'reserva_compartida',reserva_compartida,'reservas_compartidas',reservas_compartidas,\n   'turno_origen',turno,'fecha_origen',fecha_programacion,'arrastre',true,'culminado_en_turno',(procesado_en>=greatest(v_inicio,v_activado) and procesado_en<v_fin),'fecha_culminacion',case when procesado_en>=greatest(v_inicio,v_activado) and procesado_en<v_fin then procesado_en else null end\n ) order by fecha_programacion,turno,reserva,produccion)\n from eligible where rn=1\n ),'[]'::jsonb);\nend $function$\n"
+    },
+    {
+      "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "signature": "sgp_mecanizado_programada_al_insertar()",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_mecanizado_programada_al_insertar()\n RETURNS trigger\n LANGUAGE plpgsql\n SET search_path TO 'public'\nAS $function$\nBEGIN\n NEW.programada := (NEW.estado IS DISTINCT FROM 'CANCELADA');\n RETURN NEW;\nEND $function$\n"
+    },
+    {
+      "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "signature": "sgp_mecanizado_programada_al_actualizar()",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_mecanizado_programada_al_actualizar()\n RETURNS trigger\n LANGUAGE plpgsql\n SET search_path TO 'public'\nAS $function$\nBEGIN\n NEW.programada := (NEW.estado IS DISTINCT FROM 'CANCELADA');\n RETURN NEW;\nEND $function$\n"
+    },
+    {
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres,anon=X/postgres}",
+      "signature": "sgp_mecanizado_reprogramar_orden(text,uuid,text,date,text,integer,text)",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_mecanizado_reprogramar_orden(p_token text, p_id_programacion uuid, p_produccion text, p_fecha date, p_turno text, p_prioridad integer, p_motivo text)\n RETURNS uuid\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\ndeclare v_usuario text; v_origen public.sgp_mecanizado_programacion%rowtype; v_destino uuid; v_cantidad integer; v_parte text; v_estado text; v_detalle_count integer; v_detalle_cantidad numeric; v_inserted integer;\nbegin\n v_usuario:=public.sgp_validar_sesion_rol(p_token,array['ADMINISTRADOR','COORDINADOR']);\n if p_fecha is null or p_turno not in ('TURNO 1','TURNO 2') or p_prioridad<1 or p_prioridad is null or length(trim(coalesce(p_motivo,'')))<5 then\n   raise exception 'Indica fecha, turno, prioridad y motivo (m\u00ednimo 5 caracteres)';\n end if;\n select * into v_origen from public.sgp_mecanizado_programacion where id_programacion=p_id_programacion for update;\n if not found or v_origen.estado='CANCELADA' then raise exception 'Programaci\u00f3n de origen no disponible'; end if;\n if (v_origen.fecha_programacion,v_origen.turno)=(p_fecha,p_turno) then raise exception 'Selecciona una fecha o turno diferente'; end if;\n if exists(select 1 from public.sgp_mecanizado_reprogramaciones where id_origen=p_id_programacion and produccion=p_produccion) then raise exception 'La orden ya fue reprogramada'; end if;\n if v_origen.produccion is not null and v_origen.produccion<>p_produccion then raise exception 'Orden no pertenece a esta programaci\u00f3n'; end if;\n -- La composici\u00f3n can\u00f3nica determina la producci\u00f3n, no un nombre potencialmente repetido.\n -- El join por key_produccion impide tomar cantidad/prioridad de otra reserva o sistema.\n select min(d.prioridad_semanal_snapshot),round(sum(d.cantidad_snapshot))::int into v_parte,v_cantidad\n from public.sgp_mecanizado_programacion_detalle d\n join public.sgp_producciones sp on sp.key_produccion=d.key_produccion\n where d.id_programacion=p_id_programacion\n   and d.reserva_snapshot=v_origen.reserva\n   and d.produccion_snapshot=p_produccion\n   and sp.reserva_al=v_origen.reserva and sp.id_linea='PANELES_2'\n   and sp.produccion=p_produccion\n   and (v_origen.prioridad_semanal is null or d.prioridad_semanal_snapshot=v_origen.prioridad_semanal);\n if v_cantidad is null then raise exception 'Orden no pertenece a la reserva / parte'; end if;\n if v_cantidad>v_origen.cantidad_programada then raise exception 'La orden tiene % ventanas pero solo % programadas en el origen; no se permite mover parcialmente',v_cantidad,v_origen.cantidad_programada; end if;\n select eo.estado into v_estado from public.sgp_mecanizado_ejecucion_orden eo where eo.id_programacion=p_id_programacion and eo.produccion=p_produccion;\n if v_estado in ('PROCESADO','REPROGRAMADO') then raise exception 'No se puede reprogramar una orden procesada o ya reprogramada'; end if;\n\n -- Preflight can\u00f3nico: no crear destinos sin key_produccion exacta.\n select count(*),coalesce(sum(d.cantidad_snapshot),0) into v_detalle_count,v_detalle_cantidad\n from public.sgp_mecanizado_programacion_detalle d\n where d.id_programacion=p_id_programacion\n   and d.produccion_snapshot=p_produccion\n   and d.reserva_snapshot=v_origen.reserva;\n if v_detalle_count=0 or v_detalle_cantidad<>v_cantidad then\n   raise exception 'Composici\u00f3n de programaci\u00f3n ausente o inconsistente para producci\u00f3n % (detalle %, cantidad %, esperada %)',\n    p_produccion,v_detalle_count,v_detalle_cantidad,v_cantidad;\n end if;\n insert into public.sgp_mecanizado_programacion(reserva,produccion,cantidad_programada,fecha_programacion,turno,prioridad,prioridad_semanal,observacion,observacion_orden,sistema,acabado,porc_vidrio_snapshot,cant_vidrio_snapshot,usuario_programa)\n values(v_origen.reserva,p_produccion,v_cantidad,p_fecha,p_turno,p_prioridad,coalesce(v_origen.prioridad_semanal,v_parte),'Reprogramada desde '||v_origen.fecha_programacion||' '||v_origen.turno||'. Motivo: '||trim(p_motivo),v_origen.observacion_orden,v_origen.sistema,v_origen.acabado,v_origen.porc_vidrio_snapshot,v_origen.cant_vidrio_snapshot,v_usuario) returning id_programacion into v_destino;\n -- Transferencia at\u00f3mica de identidad de producci\u00f3n, semana y vidrio.\n update public.sgp_mecanizado_programacion_detalle d\n set id_programacion=v_destino, origen='REPROGRAMACION'\n where d.id_programacion=p_id_programacion and d.produccion_snapshot=p_produccion\n   and d.reserva_snapshot=v_origen.reserva;\n get diagnostics v_inserted=row_count;\n if v_inserted<>v_detalle_count then raise exception 'La composici\u00f3n de la reprogramaci\u00f3n no coincide con el origen'; end if;\n insert into public.sgp_mecanizado_reprogramaciones(id_origen,id_destino,produccion,cantidad,motivo,usuario)\n values(p_id_programacion,v_destino,p_produccion,v_cantidad,trim(p_motivo),v_usuario);\n update public.sgp_mecanizado_programacion set cantidad_programada=cantidad_programada-v_cantidad,\n estado=case when cantidad_programada=v_cantidad then 'CANCELADA' else estado end,\n fecha_actualizacion=now() where id_programacion=p_id_programacion;\n perform public.sgp_mecanizado_guardar_estado_orden(p_token,p_id_programacion,p_produccion,'REPROGRAMADO','Reprogramada a '||p_fecha||' '||p_turno||'. '||trim(p_motivo));\n return v_destino;\nend $function$\n"
+    },
+    {
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres,anon=X/postgres}",
+      "signature": "sgp_mecanizado_reprogramar_reserva(text,uuid,date,text,integer,text)",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_mecanizado_reprogramar_reserva(p_token text, p_id_programacion uuid, p_fecha date, p_turno text, p_prioridad integer, p_motivo text)\n RETURNS integer\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\ndeclare v_usuario text; v_orden jsonb; v_lista jsonb; v_contador int:=0;\nbegin\n v_usuario:=public.sgp_validar_sesion_rol(p_token,array['ADMINISTRADOR','COORDINADOR']);\n select public.sgp_mecanizado_ordenes_programacion(p_token,p_id_programacion) into v_lista;\n for v_orden in select value from jsonb_array_elements(coalesce(v_lista,'[]'::jsonb)) loop\n   perform public.sgp_mecanizado_reprogramar_orden(p_token,p_id_programacion,v_orden->>'produccion',p_fecha,p_turno,p_prioridad+v_contador,p_motivo);\n   v_contador:=v_contador+1;\n end loop;\n if v_contador=0 then raise exception 'No hay \u00f3rdenes disponibles para reprogramar'; end if;\n return v_contador;\nend $function$\n"
+    },
+    {
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres,anon=X/postgres}",
+      "signature": "sgp_mecanizado_guardar_estado_arrastre(text,uuid,text,text)",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_mecanizado_guardar_estado_arrastre(p_token text, p_id_programacion uuid, p_estado text, p_observacion text DEFAULT NULL::text)\n RETURNS integer\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\ndeclare v_usuario text; v_orden jsonb; v_lista jsonb; v_total integer:=0;\nbegin\n v_usuario:=public.sgp_validar_sesion_rol(p_token,array['ADMINISTRADOR','COORDINADOR','LIDER MECANIZADO','LIDER','LIDER LINEA']);\n select public.sgp_mecanizado_ordenes_programacion(p_token,p_id_programacion) into v_lista;\n for v_orden in select value from jsonb_array_elements(coalesce(v_lista,'[]'::jsonb)) loop\n  perform public.sgp_mecanizado_guardar_estado_orden(p_token,p_id_programacion,v_orden->>'produccion',p_estado,p_observacion);\n  v_total:=v_total+1;\n end loop;\n return v_total;\nend $function$\n"
+    },
+    {
+      "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "signature": "sgp_picking_recepcion_cola(text)",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_picking_recepcion_cola(p_token text)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\ndeclare u text;\nbegin\n u:=public.sgp_validar_sesion_rol(p_token,array['ADMINISTRADOR','COORDINADOR','PICKING','SUPERVISOR DE PICKING','LIDER LINEA','LIDER']);\n return coalesce((select jsonb_agg(jsonb_build_object(\n  'id_entrega',pe.id_entrega,'id_programacion',pe.id_programacion,'produccion',pe.produccion,'completa',pe.completa,'estado',pe.estado,\n  'observacion',pe.observacion,'usuario_entrega',pe.usuario_entrega,'fecha_entrega',pe.fecha_operativa,'turno_entrega',pe.turno_entrega,\n  'reserva',mp.reserva,'parte',mp.prioridad_semanal,'sistema',mp.sistema,'acabado',mp.acabado,\n  'cantidad_ventanas',coalesce(sp.cantidad,0),'proyecto',sp.proyecto,'key_produccion',sp.key_produccion,\n  'reserva_compartida',public.sgp_es_reserva_compartida(sp.key_produccion),\n  'reservas_compartidas',public.sgp_reservas_por_produccion_json(sp.key_produccion),\n  'faltantes',coalesce((select jsonb_agg(jsonb_build_object(\n    'id_faltante',pf.id_faltante,'id_pieza',pf.id_pieza,'perfil',pf.perfil,'marca',pf.marca,'fabricacion',pf.fabricacion,\n    'longitud',pf.longitud,'cantidad',pf.cantidad,'observacion',pf.observacion,'nc',pf.nc,'ventanas_afectadas',pf.ventanas_afectadas,\n    'reserva',pf.reserva_pendiente,'acabado',pf.acabado_pendiente\n  ) order by pf.perfil,pf.fabricacion,pf.longitud) from public.sgp_picking_faltantes pf where pf.id_entrega=pe.id_entrega),'[]'::jsonb)\n ) order by pe.fecha_entrega)\n from public.sgp_picking_entregas pe\n join public.sgp_mecanizado_programacion mp on mp.id_programacion=pe.id_programacion\n left join lateral (\n   select s.key_produccion,s.proyecto,s.cantidad\n   from public.sgp_producciones s\n   join public.sgp_prioridades pr on pr.key_produccion=s.key_produccion and pr.reserva=mp.reserva and pr.id_linea='PANELES_2'\n   where s.produccion=pe.produccion and s.id_linea='PANELES_2'\n   order by coalesce(s.semana_actual,s.semana_base) desc limit 1\n ) sp on true\n where pe.estado='PENDIENTE_VALIDACION'),'[]'::jsonb);\nend $function$\n"
+    },
+    {
+      "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "signature": "sgp_consultar_ensamble(text,integer,text)",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_consultar_ensamble(p_token text, p_semana integer DEFAULT NULL::integer, p_linea text DEFAULT 'PANELES_2'::text)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\ndeclare v_user text;\nbegin\n v_user:=public.sgp_validar_sesion_rol(p_token,array['ADMINISTRADOR','COORDINADOR','LIDER','LIDER MECANIZADO','CONSULTA']);\n return jsonb_build_object('usuario',v_user,'filas',coalesce((\n   select jsonb_agg(to_jsonb(q) order by q.semana_actual,q.prioridad nulls last,q.id) from(\n    select p.*,pr.prioridad,coalesce(g.tipo_vidrio,'\u2014') tipo_vidrio,coalesce(g.medidas,'\u2014') medidas,coalesce(u.ubicacion,'\u2014') ubicacion_vidrio,\n      coalesce(mo.estado,'\u2014') estado_mecanizado,coalesce(mo.observacion,'') observacion_mecanizado,\n      coalesce(pd.pendientes_mecanizado,'') pendientes_mecanizado,coalesce(pd.pdt_repo_ok,false) pdt_repo_ok,\n      coalesce(pd.pdt_por_validar,false) pdt_por_validar,\n      public.sgp_es_reserva_compartida(p.key_produccion) reserva_compartida,\n      public.sgp_reservas_por_produccion_json(p.key_produccion) reservas_compartidas\n    from public.sgp_producciones p\n    left join public.sgp_prioridades pr on pr.anio=p.anio and pr.semana=coalesce(p.semana_actual,p.semana_base) and pr.id_linea=p.id_linea and pr.key_produccion=p.key_produccion\n    left join lateral(select string_agg(distinct nullif(v.datos_origen->>'Tipo V',''),' \u00b7 ') tipo_vidrio,string_agg(distinct nullif(v.datos_origen->>'Cant y Tama\u00f1o',''),' \u00b7 ') medidas from public.sgp_vidrio v where v.key_produccion=p.key_produccion and v.activo='SI')g on true\n    left join lateral(select string_agg(format('(%s) %s \u00b7 %s',trim(to_char(sumx,'FM999999990.##')),posicion,estado_orden),' | ' order by ord,posicion) ubicacion from(select uv.posicion,min(uv.estado_orden) estado_orden,sum(coalesce(uv.disponible,0)) sumx,case when lower(min(coalesce(uv.estado_orden,''))) like 'preparado%' then 1 when lower(min(coalesce(uv.estado_orden,''))) like 'novedad%' then 2 else 3 end ord from public.sgp_ubicacion_vidrio_actual uv where uv.key_produccion=p.key_produccion and uv.activo=true group by uv.posicion)z)u on true\n    left join lateral(select eo.estado,eo.observacion from public.sgp_mecanizado_ejecucion_orden eo where eo.produccion=p.produccion order by eo.actualizado_en desc nulls last limit 1)mo on true\n    left join lateral(\n      select\n        string_agg('PDT '||trim(to_char(ap.cantidad,'FM999999990.##'))||' '||coalesce(regexp_replace(ap.perfil,'^.*-',''),'\u2014')||case when ap.nc is not null then ' NC '||ap.nc else '' end,' \u00b7 ' order by ap.fecha_reporte) pendientes_mecanizado,\n        bool_or(ap.estado_repo='REPO_OK' and coalesce(ap.validacion_estado,'POR_VALIDAR')='VALIDADO') pdt_repo_ok,\n        bool_or(coalesce(ap.validacion_estado,'POR_VALIDAR')='POR_VALIDAR') pdt_por_validar\n      from public.sgp_aluminio_pendientes ap\n      where ap.produccion=p.produccion and ap.estado='PENDIENTE' and coalesce(ap.estado_repo,'PENDIENTE')<>'PICKING'\n    )pd on true\n    where p.id_linea=p_linea and p.activa='SI' and(p_semana is null or coalesce(p.semana_actual,p.semana_base)=p_semana)\n   )q\n ),'[]'::jsonb));\nend $function$\n"
+    },
+    {
+      "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "signature": "sgp_mecanizado_detalle_reserva(text,text,text)",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_mecanizado_detalle_reserva(p_token text, p_reserva text, p_parte text DEFAULT NULL::text)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\ndeclare u text;\nbegin\n u:=public.sgp_validar_sesion_rol(p_token,array['ADMINISTRADOR','COORDINADOR','LIDER MECANIZADO','LIDER LINEA','RECEPCION','CONSULTA']);\n return coalesce((select jsonb_agg(to_jsonb(x) order by x.produccion) from(\n   select sp.produccion,sp.key_produccion,sp.proyecto,sp.cliente,sp.sistema,sp.acabado,\n          round(coalesce(sp.cantidad,0))::integer cantidad,coalesce(s.porcentaje_vidrio,0) porc_vidrio,\n          coalesce(g.preparadas,0)::integer vidrio_preparado,coalesce(g.novedad,0)::integer vidrio_novedad,\n          coalesce(g.traslado,0)::integer vidrio_traslado,\n          public.sgp_es_reserva_compartida(sp.key_produccion) reserva_compartida,\n          public.sgp_reservas_por_produccion_json(sp.key_produccion) reservas_compartidas\n   from public.sgp_producciones sp\n   join public.sgp_prioridades pr on pr.key_produccion=sp.key_produccion and pr.id_linea='PANELES_2'\n   left join public.sgp_seguimiento_aluminio s on s.id=sp.id and s.reserva=pr.reserva\n        and coalesce(s.activo,'SI')='SI' and s.linea_prog='PANELES 2'\n   left join lateral(\n     select coalesce(sum(uv.disponible) filter(where lower(coalesce(uv.estado_orden,'')) like 'preparado%' and upper(coalesce(uv.posicion,'')) not like 'T%' and upper(coalesce(uv.posicion,'')) not like 'L%'),0) preparadas,\n            coalesce(sum(uv.disponible) filter(where lower(coalesce(uv.estado_orden,'')) like 'novedad%' and upper(coalesce(uv.posicion,'')) not like 'T%' and upper(coalesce(uv.posicion,'')) not like 'L%'),0) novedad,\n            coalesce(sum(uv.disponible) filter(where upper(coalesce(uv.posicion,'')) like 'T%' or upper(coalesce(uv.posicion,'')) like 'L%'),0) traslado\n     from public.sgp_ubicacion_vidrio_actual uv where uv.key_produccion=sp.key_produccion and uv.activo=true\n   )g on true\n   where pr.reserva=p_reserva and sp.id_linea='PANELES_2'\n     and (p_parte is null or p_parte='' or pr.prioridad=p_parte)\n )x),'[]'::jsonb);\nend $function$\n"
+    },
+    {
+      "acl": "{postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "signature": "sgp_mecanizado_cobertura_programacion(text,integer)",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_mecanizado_cobertura_programacion(p_token text, p_semana integer DEFAULT NULL::integer)\n RETURNS TABLE(reserva text, prioridad_semanal text, cantidad_canonica integer, cantidad_cubierta integer, cantidad_pendiente integer, estado_cobertura text, programaciones integer, detalle_persistido boolean)\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\nbegin\n perform public.sgp_validar_sesion_rol(p_token,array['ADMINISTRADOR','COORDINADOR','LIDER MECANIZADO','LIDER','LIDER LINEA','CONSULTA']);\n return query\n with actual as (\n   select pr.reserva,pr.prioridad,\n          sum(sp.cantidad)::int cantidad_canonica\n   from public.sgp_prioridades pr\n   join public.sgp_producciones sp on sp.key_produccion=pr.key_produccion\n   where pr.id_linea='PANELES_2' and sp.id_linea='PANELES_2'\n     and (p_semana is null or coalesce(sp.semana_actual,sp.semana_base)=p_semana)\n   group by pr.reserva,pr.prioridad\n ), sched as (\n   select mp.reserva,mp.prioridad_semanal,\n          count(*)::int programaciones,\n          coalesce(sum(mp.cantidad_programada),0)::int snapshot_programado,\n          bool_or(exists(select 1 from public.sgp_mecanizado_programacion_detalle d where d.id_programacion=mp.id_programacion)) tiene_detalle\n   from public.sgp_mecanizado_programacion mp\n   where mp.estado<>'CANCELADA'\n   group by mp.reserva,mp.prioridad_semanal\n ), covered as (\n   select mp.reserva,mp.prioridad_semanal,\n          coalesce(sum(sp.cantidad),0)::int cantidad_cubierta\n   from public.sgp_mecanizado_programacion mp\n   join public.sgp_mecanizado_programacion_detalle d on d.id_programacion=mp.id_programacion\n   join public.sgp_producciones sp on sp.key_produccion=d.key_produccion\n   where mp.estado<>'CANCELADA'\n   group by mp.reserva,mp.prioridad_semanal\n )\n select a.reserva,a.prioridad,a.cantidad_canonica,\n        case\n          when coalesce(s.tiene_detalle,false) then least(a.cantidad_canonica,coalesce(c.cantidad_cubierta,0))\n          when coalesce(s.snapshot_programado,0)=a.cantidad_canonica then a.cantidad_canonica\n          else least(a.cantidad_canonica,coalesce(s.snapshot_programado,0))\n        end::int cantidad_cubierta,\n        case\n          when coalesce(s.tiene_detalle,false) then greatest(a.cantidad_canonica-coalesce(c.cantidad_cubierta,0),0)\n          when coalesce(s.snapshot_programado,0)=a.cantidad_canonica then 0\n          else greatest(a.cantidad_canonica-coalesce(s.snapshot_programado,0),0)\n        end::int cantidad_pendiente,\n        case\n          when coalesce(s.programaciones,0)=0 then 'SIN_PROGRAMAR'\n          when coalesce(s.tiene_detalle,false) and coalesce(c.cantidad_cubierta,0)>=a.cantidad_canonica then 'PROGRAMADA'\n          when coalesce(s.tiene_detalle,false) then 'PARCIAL'\n          when s.snapshot_programado=a.cantidad_canonica then 'PROGRAMADA_LEGACY'\n          else 'LEGACY_REVISAR'\n        end estado_cobertura,\n        coalesce(s.programaciones,0)::int,\n        coalesce(s.tiene_detalle,false)\n from actual a\n left join sched s on s.reserva=a.reserva and s.prioridad_semanal is not distinct from a.prioridad\n left join covered c on c.reserva=a.reserva and c.prioridad_semanal is not distinct from a.prioridad;\nend $function$\n"
+    },
+    {
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres,anon=X/postgres}",
+      "signature": "sgp_mecanizado_ordenes_programacion(text,uuid)",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_mecanizado_ordenes_programacion(p_token text, p_id_programacion uuid)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\ndeclare v_usuario text; v_mp public.sgp_mecanizado_programacion%rowtype; v_json jsonb; v_has_detail boolean;\nbegin\n v_usuario:=public.sgp_validar_sesion_rol(p_token,array['ADMINISTRADOR','COORDINADOR','LIDER MECANIZADO','LIDER','LIDER LINEA','CONSULTA']);\n select * into v_mp from public.sgp_mecanizado_programacion where id_programacion=p_id_programacion;\n if not found then return '[]'::jsonb; end if;\n select exists(select 1 from public.sgp_mecanizado_programacion_detalle d where d.id_programacion=p_id_programacion) into v_has_detail;\n if v_has_detail then\n   return coalesce((\n     select jsonb_agg(jsonb_build_object(\n       'key_produccion',sp.key_produccion,'produccion',sp.produccion,'cantidad',sp.cantidad,\n       'proyecto',sp.proyecto,'cliente',sp.cliente,'tipo',sp.tipo,'sistema',sp.sistema,'acabado',sp.acabado,\n       'semana',coalesce(sp.semana_actual,sp.semana_base),\n       'vidrio_preparado',coalesce(g.vidrio_preparado,0)::integer,\n       'vidrio_novedad',coalesce(g.vidrio_novedad,0)::integer,\n       'vidrio_traslado',coalesce(g.vidrio_traslado,0)::integer,\n       'reserva_compartida',public.sgp_es_reserva_compartida(sp.key_produccion),\n       'reservas_compartidas',public.sgp_reservas_por_produccion_json(sp.key_produccion)\n     ) order by sp.produccion)\n     from public.sgp_mecanizado_programacion_detalle d\n     join public.sgp_producciones sp on sp.key_produccion=d.key_produccion\n     left join public.sgp_vidrio_resumen_produccion g on g.key_produccion=sp.key_produccion\n     where d.id_programacion=p_id_programacion\n       and not exists(select 1 from public.sgp_mecanizado_reprogramaciones r where r.id_origen=p_id_programacion and r.produccion=sp.produccion)\n   ),'[]'::jsonb);\n end if;\n select public.sgp_mecanizado_detalle_reserva(p_token,v_mp.reserva,v_mp.prioridad_semanal) into v_json;\n return coalesce((\n   select jsonb_agg(o.value order by o.value->>'produccion')\n   from jsonb_array_elements(coalesce(v_json,'[]'::jsonb)) o\n   where (v_mp.produccion is null or o.value->>'produccion'=v_mp.produccion)\n     and not exists(select 1 from public.sgp_mecanizado_reprogramaciones r where r.id_origen=p_id_programacion and r.produccion=o.value->>'produccion')\n ),'[]'::jsonb);\nend $function$\n"
+    },
+    {
+      "acl": "{postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "signature": "sgp_mecanizado_cobertura_ordenes(text,integer)",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_mecanizado_cobertura_ordenes(p_token text, p_semana integer DEFAULT NULL::integer)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\nbegin\n perform public.sgp_validar_sesion_rol(p_token,array['ADMINISTRADOR','COORDINADOR','LIDER MECANIZADO','LIDER','LIDER LINEA','CONSULTA']);\n return coalesce((with a as (\n  select pr.reserva,pr.prioridad,sp.key_produccion,sp.produccion,round(coalesce(sp.cantidad,0))::int cantidad\n  from public.sgp_prioridades pr join public.sgp_producciones sp on sp.key_produccion=pr.key_produccion\n  where pr.id_linea='PANELES_2' and sp.id_linea='PANELES_2' and (p_semana is null or coalesce(sp.semana_actual,sp.semana_base)=p_semana)\n ), p as (\n  select mp.reserva,mp.prioridad_semanal,count(*)::int n,\n   count(*) filter(where exists(select 1 from public.sgp_mecanizado_programacion_detalle d where d.id_programacion=mp.id_programacion))::int nd,\n   min(mp.id_programacion::text)::uuid legacy_id\n  from public.sgp_mecanizado_programacion mp where mp.estado<>'CANCELADA' group by mp.reserva,mp.prioridad_semanal\n ), c as (\n  select distinct mp.reserva,mp.prioridad_semanal,d.key_produccion,d.id_programacion,d.origen\n  from public.sgp_mecanizado_programacion mp join public.sgp_mecanizado_programacion_detalle d on d.id_programacion=mp.id_programacion where mp.estado<>'CANCELADA'\n )\n select jsonb_agg(jsonb_build_object('reserva',a.reserva,'prioridad_semanal',a.prioridad,'key_produccion',a.key_produccion,'produccion',a.produccion,'cantidad',a.cantidad,\n 'estado_orden',case when c.key_produccion is not null then 'PROGRAMADA' when coalesce(p.n,0)=0 or coalesce(p.nd,0)>0 then 'PENDIENTE' else 'REVISAR' end,\n 'id_programacion',c.id_programacion,'origen_cobertura',c.origen,'id_programacion_legacy',case when coalesce(p.n,0)=1 and coalesce(p.nd,0)=0 then p.legacy_id else null end,\n 'reconciliable',coalesce(p.n,0)=1 and coalesce(p.nd,0)=0) order by a.reserva,a.prioridad,a.produccion)\n from a left join p on p.reserva=a.reserva and p.prioridad_semanal is not distinct from a.prioridad\n left join c on c.reserva=a.reserva and c.prioridad_semanal is not distinct from a.prioridad and c.key_produccion=a.key_produccion),'[]'::jsonb);\nend $function$\n"
+    },
+    {
+      "acl": "{postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "signature": "sgp_mecanizado_programar(text,text,text,integer,date,text,integer,text,text,text)",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_mecanizado_programar(p_token text, p_reserva text, p_produccion text, p_cantidad integer, p_fecha date, p_turno text, p_prioridad integer, p_observacion text, p_observacion_orden text, p_prioridad_semanal text)\n RETURNS uuid\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\ndeclare\n u text; rid uuid; v_sistema text; v_acabado text; v_pct numeric; v_vidrio numeric;\n total_disponible integer; total_cubierto integer; v_scope_qty integer;\nbegin\n u:=public.sgp_validar_sesion_rol(p_token,array['ADMINISTRADOR','COORDINADOR']);\n\n with scope as (\n   select sp.*\n   from public.sgp_prioridades pr\n   join public.sgp_producciones sp on sp.key_produccion=pr.key_produccion\n   where pr.reserva=p_reserva and pr.id_linea='PANELES_2' and sp.id_linea='PANELES_2'\n     and (p_prioridad_semanal is null or pr.prioridad=p_prioridad_semanal)\n     and (p_produccion is null or sp.produccion=p_produccion)\n ), covered_keys as (\n   select distinct d.key_produccion\n   from public.sgp_mecanizado_programacion mp\n   join public.sgp_mecanizado_programacion_detalle d on d.id_programacion=mp.id_programacion\n   where mp.reserva=p_reserva and mp.estado<>'CANCELADA'\n     \n )\n select coalesce(sum(s.cantidad),0)::int,\n        coalesce(sum(s.cantidad) filter(where ck.key_produccion is not null),0)::int\n into total_disponible,total_cubierto\n from scope s left join covered_keys ck on ck.key_produccion=s.key_produccion;\n\n if total_cubierto=0 then\n   select coalesce(sum(mp.cantidad_programada),0)::int into total_cubierto\n   from public.sgp_mecanizado_programacion mp\n   where mp.reserva=p_reserva and mp.estado<>'CANCELADA'\n     and mp.prioridad_semanal is not distinct from p_prioridad_semanal\n     and (p_produccion is null or mp.produccion=p_produccion);\n end if;\n\n if p_cantidad<1 or p_cantidad>greatest(total_disponible-total_cubierto,0) then\n   raise exception 'Cantidad supera el saldo pendiente por programar (% ventanas)',greatest(total_disponible-total_cubierto,0);\n end if;\n\n select sp.sistema,sp.acabado,\n   case when sum(sp.cantidad)>0 then round(100*sum(least(coalesce(sa.vent_cant_vidrio,0),sp.cantidad))/sum(sp.cantidad),1) else 0 end,\n   sum(least(coalesce(sa.vent_cant_vidrio,0),sp.cantidad))\n into v_sistema,v_acabado,v_pct,v_vidrio\n from public.sgp_prioridades pr\n join public.sgp_producciones sp on sp.key_produccion=pr.key_produccion\n left join public.sgp_seguimiento_aluminio sa on sa.id=sp.id and sa.reserva=p_reserva and coalesce(sa.activo,'SI')='SI' and sa.linea_prog='PANELES 2'\n where pr.reserva=p_reserva and pr.id_linea='PANELES_2' and sp.id_linea='PANELES_2'\n   and (p_prioridad_semanal is null or pr.prioridad=p_prioridad_semanal)\n   and (p_produccion is null or sp.produccion=p_produccion)\n group by sp.sistema,sp.acabado order by count(*) desc limit 1;\n\n insert into public.sgp_mecanizado_programacion(\n   reserva,produccion,cantidad_programada,fecha_programacion,turno,prioridad,prioridad_semanal,\n   observacion,observacion_orden,sistema,acabado,porc_vidrio_snapshot,cant_vidrio_snapshot,usuario_programa\n ) values(\n   p_reserva,p_produccion,p_cantidad,p_fecha,p_turno,p_prioridad,p_prioridad_semanal,\n   p_observacion,p_observacion_orden,v_sistema,v_acabado,v_pct,v_vidrio,u\n ) returning id_programacion into rid;\n\n with already as (\n   select distinct d.key_produccion\n   from public.sgp_mecanizado_programacion mp\n   join public.sgp_mecanizado_programacion_detalle d on d.id_programacion=mp.id_programacion\n   where mp.reserva=p_reserva and mp.id_programacion<>rid and mp.estado<>'CANCELADA'\n     \n ), scope as (\n   select sp.key_produccion,sp.cantidad,sp.produccion\n   from public.sgp_prioridades pr\n   join public.sgp_producciones sp on sp.key_produccion=pr.key_produccion\n   left join already a on a.key_produccion=sp.key_produccion\n   where pr.reserva=p_reserva and pr.id_linea='PANELES_2' and sp.id_linea='PANELES_2'\n     and (p_prioridad_semanal is null or pr.prioridad=p_prioridad_semanal)\n     and (p_produccion is null or sp.produccion=p_produccion)\n     and a.key_produccion is null\n )\n select coalesce(sum(cantidad),0)::int into v_scope_qty from scope;\n\n if v_scope_qty=p_cantidad then\n   insert into public.sgp_mecanizado_programacion_detalle(\n     id_programacion,key_produccion,cantidad_snapshot,reserva_snapshot,prioridad_semanal_snapshot,produccion_snapshot\n   )\n   with already as (\n   select distinct d.key_produccion\n   from public.sgp_mecanizado_programacion mp\n   join public.sgp_mecanizado_programacion_detalle d on d.id_programacion=mp.id_programacion\n   where mp.reserva=p_reserva and mp.id_programacion<>rid and mp.estado<>'CANCELADA'\n     \n ), scope as (\n   select sp.key_produccion,sp.cantidad,sp.produccion\n   from public.sgp_prioridades pr\n   join public.sgp_producciones sp on sp.key_produccion=pr.key_produccion\n   left join already a on a.key_produccion=sp.key_produccion\n   where pr.reserva=p_reserva and pr.id_linea='PANELES_2' and sp.id_linea='PANELES_2'\n     and (p_prioridad_semanal is null or pr.prioridad=p_prioridad_semanal)\n     and (p_produccion is null or sp.produccion=p_produccion)\n     and a.key_produccion is null\n )\n\n   select rid,key_produccion,cantidad,p_reserva,p_prioridad_semanal,produccion from scope;\n else\n   delete from public.sgp_mecanizado_programacion where id_programacion=rid;\n   raise exception 'La composici\u00f3n can\u00f3nica pendiente suma % ventanas y no coincide con la cantidad solicitada %. Recargue Programaci\u00f3n antes de guardar.',v_scope_qty,p_cantidad;\n end if;\n\n return rid;\nend $function$\n"
+    },
+    {
+      "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "signature": "sgp_mecanizado_validar_prioridad_nueva()",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_mecanizado_validar_prioridad_nueva()\n RETURNS trigger\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$ begin if new.prioridad_semanal is null then raise exception 'Prioridad semanal requerida'; end if; if not exists(select 1 from public.sgp_prioridades pr where pr.reserva=new.reserva and pr.prioridad=new.prioridad_semanal and pr.id_linea='PANELES_2') then raise exception 'Prioridad no corresponde a la reserva'; end if; return new; end $function$\n"
+    },
+    {
+      "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "signature": "sgp_mecanizado_prevenir_detalle_duplicado()",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_mecanizado_prevenir_detalle_duplicado()\n RETURNS trigger\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\ndeclare v_reserva text;\nbegin\n select p.reserva into v_reserva from public.sgp_mecanizado_programacion p where p.id_programacion=new.id_programacion;\n if v_reserva is null then raise exception 'Programaci\u00f3n inexistente'; end if;\n if new.reserva_snapshot is distinct from v_reserva then raise exception 'Reserva de detalle no coincide con programaci\u00f3n'; end if;\n perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended(v_reserva||'|'||new.key_produccion,0));\n if exists (\n  select 1 from public.sgp_mecanizado_programacion_detalle d\n  join public.sgp_mecanizado_programacion p on p.id_programacion=d.id_programacion\n  where p.reserva=v_reserva and d.key_produccion=new.key_produccion\n    and p.estado<>'CANCELADA'\n ) then\n  raise exception 'La orden % ya est\u00e1 vinculada a una programaci\u00f3n activa de la reserva %',new.key_produccion,v_reserva;\n end if;\n return new;\nend $function$\n"
+    },
+    {
+      "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "signature": "sgp_picking_cola(text)",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_picking_cola(p_token text)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\ndeclare u text;\nbegin\n u:=public.sgp_validar_sesion_rol(p_token,array['ADMINISTRADOR','COORDINADOR','LIDER MECANIZADO','LIDER','PATINADOR','PICKING','SUPERVISOR DE PICKING','LIDER LINEA']);\n return coalesce((with base as (\n   select p.*,e.estado estado_ejecucion\n   from public.sgp_mecanizado_programacion p\n   left join public.sgp_mecanizado_ejecucion e on e.id_programacion=p.id_programacion\n   where p.estado<>'CANCELADA'\n ), partes as (\n   select b.id_programacion,b.reserva,b.produccion,b.fecha_programacion,b.turno,b.prioridad,\n          b.sistema,b.acabado,b.observacion,b.observacion_orden,b.estado_ejecucion,\n          pr.prioridad parte,min(coalesce(sp.semana_actual,sp.semana_base))::int semana,sum(sp.cantidad)::int cantidad_ventanas\n   from base b\n   join public.sgp_prioridades pr on pr.reserva=b.reserva and pr.id_linea='PANELES_2'\n      and (b.prioridad_semanal is null or pr.prioridad=b.prioridad_semanal)\n   join public.sgp_producciones sp on sp.key_produccion=pr.key_produccion and sp.id_linea='PANELES_2' and sp.activa='SI'\n   group by b.id_programacion,b.reserva,b.produccion,b.fecha_programacion,b.turno,b.prioridad,b.sistema,b.acabado,b.observacion,b.observacion_orden,b.estado_ejecucion,pr.prioridad\n ), filas as (\n   select p.id_programacion,p.reserva,p.parte,p.produccion,p.fecha_programacion,p.turno,p.prioridad,\n          p.cantidad_ventanas,p.sistema,p.acabado,p.observacion,p.observacion_orden,\n          coalesce(p.estado_ejecucion,'SIN INICIAR') estado,\n          (select count(*) from public.sgp_mecanizado_novedades n where n.id_programacion=p.id_programacion and n.estado<>'RESUELTA') novedades,\n          (select pe.estado from public.sgp_picking_entregas pe where pe.id_programacion=p.id_programacion order by pe.fecha_entrega desc limit 1) estado_entrega,\n          case coalesce(p.estado_ejecucion,'SIN INICIAR') when 'PROCESADO' then 0 when 'MECANIZADO' then 1 when 'CORTE' then 2 when 'PROGRAMADA' then 3 when 'SIN INICIAR' then 3 else 4 end orden_estado,\n          p.semana,case when p.parte ~ '^[0-9]+([.][0-9]+)?$' then p.parte::numeric when p.parte ~ '^[0-9]+([.][0-9]+){2}$' then (split_part(p.parte,'.',1)||'.'||split_part(p.parte,'.',2))::numeric else 999999::numeric end parte_num,\n          coalesce((select jsonb_agg(jsonb_build_object(\n             'key_produccion',z.key_produccion,'produccion',z.produccion,'proyecto',z.proyecto,'cantidad',z.cantidad,\n             'observacion_mecanizado',z.observacion_mecanizado,'novedades',z.novedades,'entrega_estado',z.entrega_estado,\n             'entrega_completa',z.entrega_completa,'fecha_entrega',z.fecha_entrega,'turno_entrega',z.turno_entrega,\n             'estado_mecanizado',z.estado_mecanizado,'reserva_compartida',z.reserva_compartida,'reservas_compartidas',z.reservas_compartidas\n           ) order by z.produccion)\n           from (\n             select distinct pr.key_produccion,sp.produccion,sp.proyecto,sp.cantidad,coalesce(eo.observacion,'') observacion_mecanizado,\n               (select count(*) from public.sgp_mecanizado_novedades n where n.id_programacion=p.id_programacion and n.produccion=sp.produccion and n.estado<>'RESUELTA') novedades,\n               le.estado entrega_estado,le.completa entrega_completa,le.fecha_operativa fecha_entrega,le.turno_entrega,\n               coalesce(eo.estado,coalesce(p.estado_ejecucion,'SIN INICIAR')) estado_mecanizado,\n               public.sgp_es_reserva_compartida(pr.key_produccion) reserva_compartida,\n               public.sgp_reservas_por_produccion_json(pr.key_produccion) reservas_compartidas\n             from public.sgp_prioridades pr join public.sgp_producciones sp on sp.key_produccion=pr.key_produccion\n             left join public.sgp_mecanizado_ejecucion_orden eo on eo.id_programacion=p.id_programacion and eo.produccion=sp.produccion\n             left join lateral (select pe.estado,pe.completa,pe.fecha_operativa,pe.turno_entrega from public.sgp_picking_entregas pe where pe.id_programacion=p.id_programacion and pe.produccion=sp.produccion order by pe.fecha_entrega desc limit 1) le on true\n             where pr.reserva=p.reserva and pr.id_linea='PANELES_2' and pr.prioridad=p.parte\n           ) z),'[]'::jsonb) ordenes\n   from partes p\n )\n select jsonb_agg(f order by f.orden_estado,f.reserva,lpad(coalesce(nullif(split_part(f.parte,'.',1),''),'999999'),12,'0'),lpad(coalesce(nullif(split_part(f.parte,'.',2),''),'0'),12,'0'),lpad(coalesce(nullif(split_part(f.parte,'.',3),''),'0'),12,'0'),f.fecha_programacion,f.prioridad) from filas f),'[]'::jsonb);\nend $function$\n"
+    },
+    {
+      "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "signature": "sgp_picking_validar_jornada_insert()",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_picking_validar_jornada_insert()\n RETURNS trigger\n LANGUAGE plpgsql\n SET search_path TO ''\nAS $function$\nDECLARE\n  v_now timestamptz := statement_timestamp();\n  v_local timestamp := v_now AT TIME ZONE 'America/Bogota';\n  v_date date := v_local::date;\n  v_hour time := v_local::time;\n  v_prev date := v_date - 1;\n  v_prev_sunday boolean := extract(isodow from v_prev) = 7;\n  v_expected_date date;\n  v_expected_turn text;\n  v_start timestamptz;\n  v_start_hour integer;\nBEGIN\n  IF v_hour >= time '07:00' THEN\n    v_expected_date := v_date;\n    IF extract(isodow from v_date) = 7 THEN\n      v_expected_turn := CASE WHEN v_hour < time '18:00' THEN 'TURNO 1' ELSE 'TURNO 2' END;\n    ELSE\n      v_expected_turn := CASE WHEN v_hour < time '19:00' THEN 'TURNO 1' ELSE 'TURNO 2' END;\n    END IF;\n  ELSIF v_prev_sunday AND v_hour >= time '05:00' THEN\n    v_expected_date := NULL; -- No active shift Monday 05:00-07:00.\n  ELSE\n    v_expected_date := v_prev;\n    v_expected_turn := 'TURNO 2';\n  END IF;\n\n  -- Legacy 6-argument RPC omits both fields. Fill both from the actual active shift.\n  IF NEW.fecha_operativa IS NULL AND NEW.turno_entrega IS NULL THEN\n    IF v_expected_date IS NULL THEN\n      RAISE EXCEPTION 'PICKING_SIN_TURNO_ACTIVO';\n    END IF;\n    NEW.fecha_operativa := v_expected_date;\n    NEW.turno_entrega := v_expected_turn;\n  ELSIF NEW.fecha_operativa IS NULL OR NEW.turno_entrega IS NULL THEN\n    RAISE EXCEPTION 'PICKING_FECHA_TURNO_REQUERIDOS';\n  END IF;\n\n  NEW.turno_entrega := upper(btrim(NEW.turno_entrega));\n  IF NEW.turno_entrega NOT IN ('TURNO 1','TURNO 2') THEN\n    RAISE EXCEPTION 'PICKING_TURNO_INVALIDO';\n  END IF;\n  v_start_hour := CASE\n    WHEN NEW.turno_entrega = 'TURNO 1' THEN 7\n    WHEN extract(isodow from NEW.fecha_operativa) = 7 THEN 18\n    ELSE 19\n  END;\n  v_start := (NEW.fecha_operativa::timestamp + make_interval(hours => v_start_hour))\n    AT TIME ZONE 'America/Bogota';\n  IF v_start > v_now THEN\n    RAISE EXCEPTION 'PICKING_TURNO_FUTURO';\n  END IF;\n  RETURN NEW;\nEND;\n$function$\n"
+    },
+    {
+      "acl": "{postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "signature": "sgp_pdt_registrar_v4(text,text,jsonb,jsonb,uuid)",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_pdt_registrar_v4(p_token text, p_origen text, p_contexto jsonb, p_piezas jsonb, p_idempotency_key uuid)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\nDECLARE actor text; request jsonb; prior sgp_pdt_multiorigen.eventos%rowtype; result jsonb; delivery uuid; program public.sgp_mecanizado_programacion%rowtype; row jsonb; complete boolean;\nBEGIN\n actor:=sgp_pdt_multiorigen.actor(p_token,p_origen);\n IF p_idempotency_key IS NULL THEN RAISE EXCEPTION 'PDT_EVENTO_REQUERIDO'; END IF;\n request:=jsonb_build_object('origen',p_origen,'contexto',p_contexto,'piezas',p_piezas);\n PERFORM pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended(p_idempotency_key::text,0));\n SELECT * INTO prior FROM sgp_pdt_multiorigen.eventos WHERE id_evento=p_idempotency_key;\n IF FOUND THEN\n IF prior.usuario IS DISTINCT FROM actor OR prior.solicitud IS DISTINCT FROM request THEN RAISE EXCEPTION 'PDT_IDEMPOTENCIA_REUTILIZADA'; END IF;\n RETURN prior.respuesta||jsonb_build_object('duplicado',true);\n END IF;\n IF p_origen='PICKING' THEN\n SELECT * INTO STRICT program FROM public.sgp_mecanizado_programacion WHERE id_programacion=(p_contexto->>'id_programacion')::uuid AND estado<>'CANCELADA' FOR UPDATE;\n IF nullif(p_contexto->>'produccion','') IS NULL OR p_contexto->>'completa' NOT IN ('true','false') OR p_contexto->>'completa' IS NULL THEN RAISE EXCEPTION 'PDT_ENTREGA_INVALIDA'; END IF;\n IF p_contexto->>'turno' NOT IN ('TURNO 1','TURNO 2') OR p_contexto->>'turno' IS NULL OR nullif(p_contexto->>'fecha_entrega','') IS NULL THEN RAISE EXCEPTION 'PDT_FECHA_TURNO_REQUERIDOS'; END IF;\n complete:=(p_contexto->>'completa')::boolean;\n IF complete THEN\n IF p_piezas IS DISTINCT FROM '[]'::jsonb THEN RAISE EXCEPTION 'PDT_ENTREGA_COMPLETA_CON_FALTANTES'; END IF;\n -- Preserve installed complete-delivery behavior and its duplicate trigger.\n result:=sgp_pdt_compat_91.sgp_picking_entrega_orden(p_token,program.id_programacion,p_contexto->>'produccion',true,p_contexto->>'observacion','[]'::jsonb,(p_contexto->>'fecha_entrega')::date,p_contexto->>'turno');\n ELSE\n delivery:=gen_random_uuid();\n INSERT INTO public.sgp_picking_entregas(id_entrega,id_programacion,produccion,completa,estado,observacion,usuario_entrega,fecha_entrega,fecha_operativa,turno_entrega)\n VALUES(delivery,program.id_programacion,p_contexto->>'produccion',false,'PENDIENTE_VALIDACION',nullif(btrim(p_contexto->>'observacion'),''),actor,now(),(p_contexto->>'fecha_entrega')::date,p_contexto->>'turno');\n result:=sgp_pdt_multiorigen.registrar(p_token,p_origen,p_contexto,p_piezas,p_idempotency_key,delivery);\n FOR row IN SELECT value FROM jsonb_array_elements(p_piezas) LOOP\n INSERT INTO public.sgp_picking_faltantes(id_entrega,id_pieza,produccion,perfil,marca,fabricacion,longitud,cantidad,observacion,nc,reserva_pendiente,acabado_pendiente)\n VALUES(delivery,row->>'id_pieza',p_contexto->>'produccion',row->>'perfil',row->>'marca',row->>'fabricacion',(row->>'longitud')::numeric,(row->>'cantidad')::numeric,nullif(btrim(row->>'observacion'),''),nullif(btrim(row->>'nc'),''),row->>'reserva',row->>'acabado');\n END LOOP;\n result:=result||jsonb_build_object('id_entrega',delivery,'estado','PENDIENTE_VALIDACION');\n END IF;\n ELSE\n result:=sgp_pdt_multiorigen.registrar(p_token,p_origen,p_contexto,p_piezas,p_idempotency_key);\n END IF;\n INSERT INTO sgp_pdt_multiorigen.eventos VALUES(p_idempotency_key,actor,request,result,now());\n RETURN result;\nEND $function$\n"
+    }
+  ],
+  "dependency_signatures": [
+    {
+      "signature": "sgp_mecanizado_semanas_programacion(text,uuid[])",
+      "md5_definition": "194189d52129d79795ffa917ab9983bf",
+      "acl": "{postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}"
+    },
+    {
+      "signature": "sgp_mecanizado_programacion_reordenar(text,uuid[])",
+      "md5_definition": "c076b1930462727a31e5e9682094d25f",
+      "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}"
+    },
+    {
+      "signature": "sgp_mecanizado_disponibles(text)",
+      "md5_definition": "a2596a225d328d3b860642f5042da25d",
+      "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}"
+    },
+    {
+      "signature": "sgp_mecanizado_disponibles(text,integer)",
+      "md5_definition": "1f2ffd91589d99a08834e772a938788d",
+      "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}"
+    },
+    {
+      "signature": "sgp_mecanizado_estado_grupo(text,text)",
+      "md5_definition": "5ea1e6e183240029877afcaaa960816e",
+      "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}"
+    },
+    {
+      "signature": "sgp_mecanizado_detalle_produccion(text,text[])",
+      "md5_definition": "0d32bb2549ec124fc1f94216d0add140",
+      "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}"
+    },
+    {
+      "signature": "sgp_mecanizado_perfiles_reserva(text,text)",
+      "md5_definition": "726f65168d8d3a8000721375b04a9fc5",
+      "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}"
+    },
+    {
+      "signature": "sgp_mecanizado_perfiles_reserva(text,text,text)",
+      "md5_definition": "1593f8b75af879ed8ad80486f8420114",
+      "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}"
+    },
+    {
+      "signature": "sgp_mecanizado_novedades_listar(text,date,date)",
+      "md5_definition": "db4e0b29653d54c3213b33363bdd833c",
+      "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}"
+    },
+    {
+      "signature": "sgp_mecanizado_novedad_actualizar(text,uuid,text,text,text,text)",
+      "md5_definition": "33b408591d262b685905fd0577b52e70",
+      "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}"
+    },
+    {
+      "signature": "sgp_picking_entrega_orden(text,uuid,text,boolean,text,jsonb)",
+      "md5_definition": "0a5e2afcca140be9c621d6968525f229",
+      "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}"
+    },
+    {
+      "signature": "sgp_picking_semanas(text)",
+      "md5_definition": "35ab7f74a82d26c3cb78780aebf3c300",
+      "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}"
+    },
+    {
+      "signature": "sgp_picking_entrega_orden(text,uuid,text,boolean,text,jsonb,date,text)",
+      "md5_definition": "cff28e68922cbea1b349ac48481ff52c",
+      "acl": "{anon=X/postgres,=X/postgres,postgres=X/postgres,service_role=X/postgres,authenticated=X/postgres}"
+    },
+    {
+      "signature": "sgp_picking_validar_recepcion(text,uuid,jsonb,jsonb,text)",
+      "md5_definition": "ff5790e874d81b713d82f4b91cb3be08",
+      "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}"
+    },
+    {
+      "signature": "sgp_picking_piezas(text,uuid,text)",
+      "md5_definition": "9c171e7187e30916189d48fa5bb8f99b",
+      "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}"
+    },
+    {
+      "signature": "sgp_picking_piezas_panel(text,uuid,text)",
+      "md5_definition": "354d8705f6eddfb7902544b30e6a12dd",
+      "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}"
+    },
+    {
+      "signature": "sgp_mecanizado_reconciliar_programacion_legacy(text,uuid,text[])",
+      "md5_definition": "df5ac5bad26f41b74bf9b4408a8bdacc",
+      "acl": "{postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}"
+    },
+    {
+      "signature": "sgp_mecanizado_conciliaciones_listar(text)",
+      "md5_definition": "9f779ee177692f4a31bd7aab998853f4",
+      "acl": "{postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}"
+    },
+    {
+      "signature": "sgp_mecanizado_recepcion_resumen_listar(text,integer)",
+      "md5_definition": "04c20c2fe424cf2dd076058e40b4b549",
+      "acl": "{postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}"
+    },
+    {
+      "signature": "sgp_mecanizado_reprogramaciones_listar(text)",
+      "md5_definition": "76f104be2bd202dbb2fcbee3052bf439",
+      "acl": "{postgres=X/postgres,anon=X/postgres,authenticated=X/postgres}"
+    },
+    {
+      "signature": "sgp_guardar_prioridad(text,integer,integer,text,text,jsonb)",
+      "md5_definition": "d5f44c16aecf4ffdfabda321cbe76364",
+      "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}"
+    },
+    {
+      "signature": "sgp_consultar_seguimiento_aluminio(text,integer)",
+      "md5_definition": "b52c7cc7cb3be28d66ce47c87909a2f5",
+      "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}"
+    },
+    {
+      "signature": "sgp_linea_plan_explorador_v327(text,integer,text)",
+      "md5_definition": "c932ee9f72323077038fd41aabb059a8",
+      "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}"
+    },
+    {
+      "signature": "sgp_produccion_novedad_pdt_crear_v3(text,jsonb,text,text,text,text,text)",
+      "md5_definition": "5b6324f40f4ede8fd9019cac0953375c",
+      "acl": "{postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}"
+    },
+    {
+      "signature": "sgp_pdt_manual_picking_v1(text,uuid)",
+      "md5_definition": "53f50347f5814c2d8d229b90c4e2ff50",
+      "acl": "{postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}"
+    },
+    {
+      "signature": "sgp_pdt_manual_entrega_registrar_v1(text,uuid,uuid,integer,uuid)",
+      "md5_definition": "b3345388b80c0dea374dc380e00a5283",
+      "acl": "{postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}"
+    }
+  ]
+}

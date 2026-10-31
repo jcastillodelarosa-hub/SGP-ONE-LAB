@@ -1,0 +1,41 @@
+{
+  "transport": "local RPC facade to PostgreSQL synthetic fixture, real module",
+  "results": [
+    {
+      "viewport": [
+        1366,
+        1000
+      ],
+      "ok": true,
+      "checks": [
+        "real SQL saldo",
+        "manual validation",
+        "explicit dates/shifts",
+        "P1-P4",
+        "save disabled at zero",
+        "history",
+        "Escape",
+        "no horizontal overflow",
+        "no browser errors"
+      ]
+    },
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "ok": true,
+      "checks": [
+        "real SQL saldo",
+        "four editable capacity rows",
+        "explicit dates/shifts",
+        "P1-P4",
+        "save disabled at zero",
+        "history",
+        "Escape",
+        "no horizontal overflow",
+        "no browser errors"
+      ]
+    }
+  ]
+}

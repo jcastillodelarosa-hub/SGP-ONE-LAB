@@ -45,7 +45,11 @@ export function filterReceptionRows(rows=[],{week='',search=''}={}){
   const current=normalizeReceptionWeek(row?.semana);
   if(selected==='sin-semana'?current!==null:(selected&&current!==selected))return false;
   if(!q)return true;
-  return [row?.produccion,row?.proyecto,row?.reserva,row?.parte,row?.sistema,row?.acabado,JSON.stringify(row?.reservas_compartidas||[])]
+  return [row?.identificador_parte,row?.produccion,row?.proyecto,row?.reserva,row?.parte,row?.sistema,row?.acabado,JSON.stringify(row?.reservas_compartidas||[])]
    .some(value=>String(value??'').toLocaleLowerCase('es').includes(q));
  });
+}
+
+export function receptionGroupKey(row){
+ return JSON.stringify([row.reserva??'—',row.parte_id||row.parte||'—',normalizeReceptionWeek(row.semana)]);
 }
