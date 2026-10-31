@@ -2219,7 +2219,7 @@ function renderProgramming(options={}){
  document.querySelectorAll('.prog-res-complete').forEach((node,index)=>{const r=complete[index];if(!r)return;node.dataset.reserva=r.reserva;const list=document.createElement('div');list.className='prog-orders';for(const o of r.ordenes||[]){const button=document.createElement('button');button.type='button';button.textContent='Ver partes · '+o.produccion;button.onclick=()=>openProgModal(r.reserva,o.produccion,0);list.append(button);}node.append(list);});
  if(!options?.skipCalendar)renderProgCalendar();
  // Ordenamiento local por sección: no altera las identidades ni los manejadores de programación.
- const sortColumns=[['reserva','Reserva'],['tipo','Tipo'],['sistema','Sistema'],['acabado','Acabado'],['cantidad','Ventanas'],['programadas','Programadas'],['pendientes','Pendientes'],['vidrio','Vidrio']];
+ const sortColumns=[['reserva','Reserva'],['tipo','Tipo'],['sistema','Sistema'],['acabado','Acabado'],['cantidad','Ventanas'],['programadas','Programadas'],['pendientes','Pendientes'],['vidrio','Vidrio'],['accion','Acción']];
  const sortValues=r=>({reserva:String(r.reserva||''),tipo:String(r.tipo||r.tipo_produccion||r.clase||''),sistema:String(r.sistema||''),acabado:String(r.acabado||''),cantidad:Number(r.cantidad||0),programadas:Number(r._done||0),pendientes:Number(r._left||0),vidrio:Number(r.vidrio_pct||0)});
  const grouped=[...document.querySelectorAll('#progPool .prog-group')];
  grouped.forEach((group,index)=>{
@@ -2242,6 +2242,14 @@ function renderProgramming(options={}){
        const quantity=document.createElement('strong');quantity.className='prog-table-quantity';quantity.textContent=data.cantidad+' ventanas';
        badges.append(type,quantity);
        summary.querySelector(':scope > b')?.after(badges);
+       const summaryRow=node.querySelector('summary');
+       const cells=document.createElement('div');cells.className='prog-table-cells';
+       for(const [field,value] of [['tipo',data.tipo||'—'],['sistema',data.sistema||'—'],['acabado',data.acabado||'—'],['cantidad',data.cantidad],['programadas',data.programadas],['pendientes',data.pendientes],['vidrio',data.vidrio+'%']]){
+         const cell=document.createElement('span');cell.className='prog-table-cell prog-table-'+field;
+         cell.textContent=String(value);cell.title=field+': '+value;cells.append(cell);
+       }
+       summaryRow.insertBefore(cells,summaryRow.querySelector('button, .prog-done-badge'));
+
      }
    });
    const header=document.createElement('div');
@@ -2266,6 +2274,7 @@ function renderProgramming(options={}){
      const button=document.createElement('button');
      button.type='button';button.dataset.sort=key;button.textContent=label;
      const indicator=document.createElement('span');indicator.setAttribute('aria-hidden','true');button.append(indicator);
+     button.disabled=key==='accion';
      button.addEventListener('click',()=>{if(field===key)ascending=!ascending;else{field=key;ascending=true;}sort()});
      header.append(button);
    });
