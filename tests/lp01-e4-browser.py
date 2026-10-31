@@ -80,7 +80,7 @@ def run(page, label):
         page.locator('[data-lp-group-quantity="KEY1"]').fill('2')
         before=page.evaluate("window.__lpCalls.filter(x=>x.name==='sgp_linea_plan_programar').length")
         page.locator('#lp01DropSubmit').click()
-        page.wait_for_function("(before) => window.__lpCalls.filter(x=>x.name==='sgp_linea_plan_programar').length > before", before)
+        page.wait_for_function("(before) => window.__lpCalls.filter(x=>x.name==='sgp_linea_plan_programar').length > before", arg=before)
         assert '1 aceptadas' in page.locator('#lp01DropMessage').inner_text()
         assert page.locator('#lp01DropSubmit').is_hidden()
         assert not page.evaluate("window.__lpCalls.some(x=>x.name==='sgp_linea_plan_programar_grupo_v1' || x.name==='sgp_linea_plan_saldos_grupo_v1')")
