@@ -2235,6 +2235,14 @@ function renderProgramming(options={}){
      node.dataset.progSistema=data.sistema;
      node.dataset.progAcabado=data.acabado;
      node.dataset.progVidrio=String(data.vidrio);
+     const summary=node.querySelector('summary > div:first-child');
+     if(summary){
+       const badges=document.createElement('span');badges.className='prog-table-badges';
+       const type=document.createElement('strong');type.className='prog-table-type';type.textContent=data.tipo||'Tipo no informado';
+       const quantity=document.createElement('strong');quantity.className='prog-table-quantity';quantity.textContent=data.cantidad+' ventanas';
+       badges.append(type,quantity);
+       summary.querySelector(':scope > b')?.after(badges);
+     }
    });
    const header=document.createElement('div');
    header.className='prog-table-head';
