@@ -2636,3 +2636,26 @@ button.active,[aria-pressed="true"]{border-color:#0865ed}
  #progPool .prog-table-row summary>button{grid-column:auto;justify-self:center}
  #progPool .prog-table-row summary>.glass-mini{display:none}
 }
+
+/* Programación v375: vista móvil sin columnas ni acciones recortadas. */
+@media(max-width:760px){
+ #progPool .prog-group{overflow:visible;min-width:0}
+ #progPool .prog-table-head{display:flex;min-width:0;max-width:100%;overflow-x:auto;gap:6px;position:relative}
+ #progPool .prog-table-head button{flex:0 0 auto;min-height:36px;white-space:nowrap;background:#e2ebfa;padding:7px 10px;border-radius:7px}
+ #progPool .prog-table-row{min-width:0;width:100%}
+ #progPool .prog-table-row summary{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;min-width:0;width:100%;padding:12px;box-sizing:border-box;align-items:center}
+ #progPool .prog-table-row summary>div:first-child{display:flex;align-items:flex-start;flex-direction:column;gap:3px;padding:0;grid-column:1;grid-row:1}
+ #progPool .prog-table-row summary>div:first-child>b{font-size:17px}
+ #progPool .prog-table-row summary>.prog-table-cells{display:grid;grid-column:1/-1;grid-row:2;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;min-width:0}
+ #progPool .prog-table-row .prog-table-cell{display:flex;flex-direction:column;min-width:0;white-space:normal;overflow-wrap:anywhere;font-size:12px;padding:6px;background:#f1f5fb;border-radius:6px}
+ #progPool .prog-table-row .prog-table-cell::before{font-size:10px;font-weight:700;color:#607693;margin-bottom:3px}
+ #progPool .prog-table-row .prog-table-tipo::before{content:'Tipo'}
+ #progPool .prog-table-row .prog-table-sistema::before{content:'Sistema'}
+ #progPool .prog-table-row .prog-table-acabado::before{content:'Acabado'}
+ #progPool .prog-table-row .prog-table-cantidad::before{content:'Ventanas'}
+ #progPool .prog-table-row .prog-table-programadas::before{content:'Programadas'}
+ #progPool .prog-table-row .prog-table-pendientes::before{content:'Pendientes'}
+ #progPool .prog-table-row .prog-table-vidrio::before{content:'Vidrio'}
+ #progPool .prog-table-row summary>button,#progPool .prog-table-row summary>.prog-done-badge{grid-column:2;grid-row:1;justify-self:end;max-width:100%;white-space:normal}
+ #progPool .prog-table-row[open] .prog-orders{min-width:0;max-width:100%;overflow-x:auto}
+}
