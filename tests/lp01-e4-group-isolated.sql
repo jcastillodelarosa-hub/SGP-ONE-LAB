@@ -18,6 +18,14 @@ DO $$ DECLARE r jsonb; id uuid := '00000000-0000-0000-0000-000000000001'; BEGIN
  BEGIN PERFORM public.sgp_linea_plan_programar_grupo_v1('coord',gen_random_uuid(),'2026-10-31',1,'[{"key_produccion":"C|L","cantidad":1,"prioridad":1},{"key_produccion":"C|L","cantidad":1,"prioridad":1}]'); RAISE EXCEPTION 'Duplicate accepted'; EXCEPTION WHEN raise_exception THEN IF SQLERRM='Duplicate accepted' THEN RAISE; END IF; END;
  r:=public.sgp_linea_plan_programar_grupo_v1('coord',gen_random_uuid(),'2026-10-31',1,'[{"key_produccion":"INACTIVA|L","cantidad":1,"prioridad":1}]');
  IF (r->>'procesadas')::integer<>1 OR jsonb_array_length(r->'rechazadas')<>1 THEN RAISE EXCEPTION 'Total rejection failed'; END IF;
+ -- Regression: the synthetic individual RPC emits an internal, non-allowlisted
+ -- exception for inactive production. It must not escape in the JSON response.
+ IF (r->'rechazadas'->0->>'motivo') IS DISTINCT FROM 'ERROR_PROGRAMACION' THEN
+   RAISE EXCEPTION 'Unexpected SQL error detail leaked to client: %',r;
+ END IF;
+ IF r::text LIKE '%Producción inactiva o desconocida%' THEN
+   RAISE EXCEPTION 'Raw PostgreSQL error leaked to client';
+ END IF;
 END $$;
 ROLLBACK;
 DO $$ BEGIN IF (SELECT count(*) FROM public.sgp_linea_plan_asignaciones)<>0 THEN RAISE EXCEPTION 'Rollback did not restore assignments'; END IF; END $$;
