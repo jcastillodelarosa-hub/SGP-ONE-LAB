@@ -37,3 +37,9 @@ test('per-order execution in a multi-production part credits only completed orde
 test('past-year executions are not reused for a new annual base sharing a production key',()=>{const r=run(snapshot({base:[production('K',10,{anio:2027})],receipts:[receipt()],schedule:[assignment()],executions:[{id_programacion:'A',estado:'PROCESADO',cantidad_procesada:0}]}),{year:2027});assert.equal(r.total.processed,null);assert.match(r.warnings.join(' '),/otro año/);});
 
 test('partial reception exposes affected base separately without claiming received windows',()=>{const r=run(snapshot({base:[production('A',4),production('B',6,{reserva_al:'OTHER'})],receipts:[receipt('R',{completa:false}),receipt('OTHER')]}));assert.equal(r.total.programmed,10);assert.equal(r.total.received,10);assert.equal(r.total.receivedKnown,10);assert.equal(r.total.partialReceiptBase,4);});
+
+test('aggregate parts use the canonical key even with a homonymous order in the same system/reserve',()=>{
+ const s=snapshot({base:[production('K',288,{produccion:'SAME'}),production('L',7,{produccion:'SAME'})],receipts:[receipt()],schedule:[assignment('A',{produccion:'SAME',key_produccion:'K',parte_id:'A',cantidad_programada:90})],executions:[{id_programacion:'A',estado:'PROCESADO',cantidad_procesada:90}]});
+ assert.equal(run(s).total.programmed,295);assert.equal(run(s).total.processed,90);assert.equal(run(s).total.pending,205);
+ assert.throws(()=>run({...s,schedule:[{...s.schedule[0],key_produccion:null}]}),/identidad canónica/);
+});

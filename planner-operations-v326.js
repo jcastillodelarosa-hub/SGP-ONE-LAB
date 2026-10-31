@@ -28,7 +28,7 @@ async function groupBalances(keys){
  return keys.map(key=>({key_produccion:key,pendiente:null,asignado_global:null,inconsistente:false}));
 }
 async function programGroup({requestId,day,shift,items:productions}){
- if(!requestId||!/^\\d{4}-\\d{2}-\\d{2}$/.test(day)||![1,2].includes(Number(shift))||!Array.isArray(productions)||!productions.length)throw Error('Solicitud grupal inválida');
+ if(!requestId||!/^\d{4}-\d{2}-\d{2}$/.test(day)||![1,2].includes(Number(shift))||!Array.isArray(productions)||!productions.length)throw Error('Solicitud grupal inválida');
  if(productions.length>100||new Set(productions.map(p=>p.key_produccion)).size!==productions.length||productions.some(p=>!rows().some(r=>String(r.key_produccion)===String(p.key_produccion))||!validTarget(day,shift,p.cantidad,p.prioridad)))throw Error('Cantidades, prioridades o producciones inválidas');
  const key='group|'+requestId;if(inFlight.has(key))throw Error('La programación ya está en curso');inFlight.add(key);
  const accepted=[],rejected=[];

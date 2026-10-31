@@ -1,3 +1,35 @@
+# LP-01 E4 — preparación LAB v374 sobre main vigente
+
+PR #170, rama `feat/lp01-e4-programacion-grupos`. Se incorporó `main` `ce559cb7b92b289b6ab81597f6609939184bf6ba`, que ya contiene el PR #168 de Mecanizado parcial. Se preservaron sus módulos, pruebas, SQL y estilos; el único conflicto fue `index.html` y se resolvió manteniendo LAB v374, `styles.css?v=374` y `app.js?v=374-multi-nc`. `scripts/build-release-info.mjs` también declara LAB v374.
+
+Una regresión de la rama E4 rechazaba fechas válidas en la programación de grupo por una expresión regular con barras duplicadas. Corregida y comprobada en Chromium PC/móvil. `npm test`: 363/363; `npm run verify:release`: aprobado; sintaxis JavaScript y `git diff --check`: aprobados. El grupo usa llamadas individuales secuenciales a la RPC instalada: se muestran aceptadas/rechazadas y no se afirma atomicidad grupal ni idempotencia transaccional. No se creó nueva RPC ni migración. No se fusionó PR #170 ni se desplegó. Continuidad específica: `docs/SGP_LP01_E4_CHECKPOINT.md`.
+
+---
+
+# PR168 — PDT y reservas compartidas sin stubs (2026-10-30 Colombia)
+
+Continuación de `a46d58e` en `feat/mecanizado-programacion-parcial`, mismo PR #168.
+Supabase utilizado solo en READ ONLY para definiciones del catálogo implicado.
+No copias, respaldos, restauraciones, datos productivos, aplicación de migraciones,
+fusión ni despliegue. Bases QA creadas vacías con datos sintéticos y contratos reales.
+
+Corregidos: fuente PANEL por clave exacta y acabado asociado; auditoría acotada al
+PDT/evento; reposición de material con 0 ventanas; evidencia de la misma parte y
+posterior al faltante; Recepción, Ensamble e informe de avance ante homónimas.
+63 escenarios SQL aprobados, incluidos ciclos reales V4/simple/agrupado/auditoría,
+NC, validación, avances, entrega, asignación, cierre, histórico y concurrencia.
+Huellas de 19 funciones núcleo y vista real verificadas; payload JS real sobre
+fuentes SQL. Regresión JS y Chromium 1366/390 aprobados. Evidencias en
+`tests/mecanizado-parcial/` y contrato en `docs/sql-proposals/mecanizado/parcial/README.md`.
+
+Estado: IMPLEMENTADO Y VERIFICADO EN AISLAMIENTO; SQL REVIEW, NO APLICADO,
+NO FUSIONADO, NO DESPLEGADO. No se certifica PostgREST/Auth gestionado, red,
+cuentas operativas, recepción física de material ni teléfono físico. Los DTO QA
+no prueban planta. La tarea no pide ni habilita esas operaciones.
+Siguiente paso único: revisión del PR #168 actualizado, sin crear otro PR.
+
+---
+
 # Integración PDT manual + fuentes múltiples (rama independiente)
 
 **Cierre PDT unificado — corte operativo (2026-10-29):** decisión funcional nueva: año de producción inmutable; SQL REVIEW 05 rechaza Export con año distinto y protege `UPDATE anio`, sin alterar eventos/historial. 06 configura un instante UTC de publicación; el listado único filtra por `fecha_reporte` para ocultar históricos operativos sin borrarlos. Manuales nuevos aportan `reportes.fecha`; fallos de RPC/fecha bloquean la visualización. QA PostgreSQL 17 aislado: semana ordinaria, rechazo 2026→2027, rollback 05, instalación/corte/rollback 06. Node dirigido: listado único, filtro y fallo cerrado. Pendiente antes de autorización productiva: restauración compatible, ciclo completo con roles reales y fecha efectiva coordinada. Plan: `docs/sql-proposals/pdt/integration/README.md`.

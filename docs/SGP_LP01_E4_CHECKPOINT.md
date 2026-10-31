@@ -1,6 +1,6 @@
 # LP-01 E4 — Arrastrar y programar (implementación simplificada)
 
-PR #170, rama `feat/lp01-e4-programacion-grupos`. No fusionado ni publicado.
+PR #170, rama `feat/lp01-e4-programacion-grupos`. Base integrada: `main` `ce559cb7b92b289b6ab81597f6609939184bf6ba` con PR #168 Mecanizado parcial. LAB v374 preparada; PR abierto, no fusionado ni publicado.
 
 ## Alcance
 - Calendario semanal de dos turnos; arrastre individual, por parte y por reserva, con selección táctil y confirmación.
@@ -16,4 +16,4 @@ Se descartaron las nuevas RPC grupales, el ledger de idempotencia, el puente ser
 - Checks GitHub `SGP ONE Tests` y `JavaScript syntax check` aprobados en commit `98adc75d` (antes de la limpieza documental).
 - Capturas PC/móvil y prueba de arrastre sintética disponibles en `docs/evidence/lp01-e4/` y `tests/lp01-e4-browser.py`; no constituyen validación productiva.
 - Pendiente comprobar los checks del HEAD final y probar desde PC y móvil con datos de prueba: arrastre individual, varias órdenes, saldo insuficiente, movimiento parcial, guardado parcial y refresco de calendario.
-- PR permanece Draft; fusión y despliegue requieren autorización expresa.
+- PR abierto; fusión y despliegue requieren autorización expresa. Tras integrar main: 363 pruebas Node, recorrido Chromium PC/móvil, `verify:release`, sintaxis JavaScript y checks CI. Se corrigió la validación de fecha de grupos que impedía llamar la RPC individual.

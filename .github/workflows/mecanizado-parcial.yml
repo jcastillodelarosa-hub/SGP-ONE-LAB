@@ -1,0 +1,59 @@
+name: Mecanizado parcial - isolated integration
+on:
+  pull_request:
+    paths:
+      - 'docs/sql-proposals/mecanizado/parcial/**'
+      - 'supabase/migrations/*_mecanizado_programacion_parcial.sql'
+      - 'scripts/build-mecanizado-parcial.py'
+      - 'tests/mecanizado-parcial/**'
+      - 'tests/mecanizado-partes.test.mjs'
+      - 'src/modules/mecanizado-partes.*'
+      - 'src/domain/mecanizado-partes.js'
+      - '.github/workflows/mecanizado-parcial.yml'
+permissions:
+  contents: read
+jobs:
+  isolated:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install isolated browser tooling
+        run: |
+          pip install playwright==1.62.0
+          python -m playwright install --with-deps chromium
+      - name: Build and verify reviewed SQL
+        run: |
+          python scripts/build-mecanizado-parcial.py
+          git diff --exit-code -- supabase/migrations
+          node tests/mecanizado-partes.test.mjs
+      - name: Start synthetic PostgreSQL without networking
+        run: |
+          docker run -d --name sgp-parcial-test --network none -e POSTGRES_HOST_AUTH_METHOD=trust postgres:17.11
+          for i in $(seq 1 30); do
+            if docker exec sgp-parcial-test pg_isready -U postgres; then exit 0; fi
+            sleep 1
+          done
+          exit 1
+      - name: Integration, concurrency and guarded rollback
+        run: python tests/mecanizado-parcial/integration.py
+      - name: Browser to SQL on desktop and mobile
+        run: python tests/mecanizado-parcial/browser.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mecanizado-parcial-synthetic-evidence
+          path: |
+            tests/mecanizado-parcial/integration-results.json
+            tests/mecanizado-parcial/real-function-evidence.json
+            tests/mecanizado-parcial/physical-report-evidence.json
+            tests/mecanizado-parcial/evidence/
+      - name: Destroy isolated database
+        if: always()
+        run: docker rm -f sgp-parcial-test || true

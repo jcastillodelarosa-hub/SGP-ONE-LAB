@@ -1,0 +1,494 @@
+{
+  "columns": [
+    {
+      "table_name": "sgp_aluminio_pendientes",
+      "column_name": "id_pendiente",
+      "udt_name": "uuid",
+      "column_default": "gen_random_uuid()",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_aluminio_pendientes",
+      "column_name": "reserva",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_aluminio_pendientes",
+      "column_name": "produccion",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_aluminio_pendientes",
+      "column_name": "perfil",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_aluminio_pendientes",
+      "column_name": "cantidad",
+      "udt_name": "numeric",
+      "column_default": "1",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_aluminio_pendientes",
+      "column_name": "longitud",
+      "udt_name": "numeric",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_aluminio_pendientes",
+      "column_name": "origen",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_aluminio_pendientes",
+      "column_name": "causa",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_aluminio_pendientes",
+      "column_name": "observacion",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_aluminio_pendientes",
+      "column_name": "estado",
+      "udt_name": "text",
+      "column_default": "'PENDIENTE'::text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_aluminio_pendientes",
+      "column_name": "usuario_reporte",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_aluminio_pendientes",
+      "column_name": "fecha_reporte",
+      "udt_name": "timestamptz",
+      "column_default": "now()",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_aluminio_pendientes",
+      "column_name": "usuario_cierre",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_aluminio_pendientes",
+      "column_name": "fecha_cierre",
+      "udt_name": "timestamptz",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_aluminio_pendientes",
+      "column_name": "id_pieza",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_aluminio_pendientes",
+      "column_name": "marca",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_aluminio_pendientes",
+      "column_name": "fabricacion",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_aluminio_pendientes",
+      "column_name": "nc",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_aluminio_pendientes",
+      "column_name": "estado_repo",
+      "udt_name": "text",
+      "column_default": "'PENDIENTE'::text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_aluminio_pendientes",
+      "column_name": "fecha_repo_ok",
+      "udt_name": "timestamptz",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_aluminio_pendientes",
+      "column_name": "usuario_estado",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_aluminio_pendientes",
+      "column_name": "fecha_estado",
+      "udt_name": "timestamptz",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_aluminio_pendientes",
+      "column_name": "ventanas_afectadas",
+      "udt_name": "int4",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_aluminio_pendientes",
+      "column_name": "auditado",
+      "udt_name": "bool",
+      "column_default": "false",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_aluminio_pendientes",
+      "column_name": "key_produccion",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_aluminio_pendientes",
+      "column_name": "reserva_principal",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_aluminio_pendientes",
+      "column_name": "acabado_pendiente",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_aluminio_pendientes",
+      "column_name": "es_reserva_compartida",
+      "udt_name": "bool",
+      "column_default": "false",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_aluminio_pendientes",
+      "column_name": "validacion_estado",
+      "udt_name": "text",
+      "column_default": "'POR_VALIDAR'::text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_aluminio_pendientes",
+      "column_name": "validado_por",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_aluminio_pendientes",
+      "column_name": "fecha_validacion",
+      "udt_name": "timestamptz",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_aluminio_pendientes",
+      "column_name": "observacion_validacion",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_aluminio_pendientes",
+      "column_name": "reserva_solucion_manual",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_aluminio_pendientes",
+      "column_name": "contrato_pdt",
+      "udt_name": "text",
+      "column_default": "'LEGACY'::text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_ubicacion_vidrio_actual",
+      "column_name": "id_ubicacion",
+      "udt_name": "uuid",
+      "column_default": "gen_random_uuid()",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_ubicacion_vidrio_actual",
+      "column_name": "key_produccion",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_ubicacion_vidrio_actual",
+      "column_name": "id",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_ubicacion_vidrio_actual",
+      "column_name": "id_linea",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_ubicacion_vidrio_actual",
+      "column_name": "orden_oves",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_ubicacion_vidrio_actual",
+      "column_name": "orden_sap",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_ubicacion_vidrio_actual",
+      "column_name": "item",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_ubicacion_vidrio_actual",
+      "column_name": "posicion",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_ubicacion_vidrio_actual",
+      "column_name": "posicion_anterior",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_ubicacion_vidrio_actual",
+      "column_name": "estado_orden",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_ubicacion_vidrio_actual",
+      "column_name": "disponible",
+      "udt_name": "numeric",
+      "column_default": "0",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_ubicacion_vidrio_actual",
+      "column_name": "proyecto_reporte",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_ubicacion_vidrio_actual",
+      "column_name": "po",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_ubicacion_vidrio_actual",
+      "column_name": "fecha_reporte",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_ubicacion_vidrio_actual",
+      "column_name": "dias_bodega",
+      "udt_name": "numeric",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_ubicacion_vidrio_actual",
+      "column_name": "dimensiones",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_ubicacion_vidrio_actual",
+      "column_name": "composicion",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_ubicacion_vidrio_actual",
+      "column_name": "mt2",
+      "udt_name": "numeric",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_ubicacion_vidrio_actual",
+      "column_name": "linea_reporte",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_ubicacion_vidrio_actual",
+      "column_name": "clave_origen",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_ubicacion_vidrio_actual",
+      "column_name": "activo",
+      "udt_name": "bool",
+      "column_default": "true",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_ubicacion_vidrio_actual",
+      "column_name": "id_lote",
+      "udt_name": "uuid",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_ubicacion_vidrio_actual",
+      "column_name": "fecha_actualizacion",
+      "udt_name": "timestamptz",
+      "column_default": "now()",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_vidrio",
+      "column_name": "id_vidrio",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_vidrio",
+      "column_name": "id_carga",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_vidrio",
+      "column_name": "fila_origen",
+      "udt_name": "int4",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_vidrio",
+      "column_name": "id_export",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_vidrio",
+      "column_name": "id",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_vidrio",
+      "column_name": "key_produccion",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_vidrio",
+      "column_name": "estado_relacion_produccion",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_vidrio",
+      "column_name": "produccion",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_vidrio",
+      "column_name": "sistema",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_vidrio",
+      "column_name": "fuente",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_vidrio",
+      "column_name": "datos_origen",
+      "udt_name": "jsonb",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_vidrio",
+      "column_name": "fecha_carga",
+      "udt_name": "timestamptz",
+      "column_default": "now()",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_vidrio",
+      "column_name": "activo",
+      "udt_name": "text",
+      "column_default": "'SI'::text",
+      "is_nullable": "NO"
+    }
+  ]
+}

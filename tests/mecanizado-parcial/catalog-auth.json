@@ -1,0 +1,154 @@
+{
+  "columns": [
+    {
+      "table_name": "sgp_sesiones_app",
+      "column_name": "token_hash",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_sesiones_app",
+      "column_name": "id_usuario",
+      "udt_name": "uuid",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_sesiones_app",
+      "column_name": "creado_en",
+      "udt_name": "timestamptz",
+      "column_default": "now()",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_sesiones_app",
+      "column_name": "expira_en",
+      "udt_name": "timestamptz",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_sesiones_app",
+      "column_name": "revocado_en",
+      "udt_name": "timestamptz",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_usuarios",
+      "column_name": "id_usuario",
+      "udt_name": "uuid",
+      "column_default": "gen_random_uuid()",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_usuarios",
+      "column_name": "usuario",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_usuarios",
+      "column_name": "nombre",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_usuarios",
+      "column_name": "rol",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_usuarios",
+      "column_name": "password_hash",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_usuarios",
+      "column_name": "activo",
+      "udt_name": "bool",
+      "column_default": "true",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_usuarios",
+      "column_name": "creado_en",
+      "udt_name": "timestamptz",
+      "column_default": "now()",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_usuarios",
+      "column_name": "actualizado_en",
+      "udt_name": "timestamptz",
+      "column_default": "now()",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_usuarios",
+      "column_name": "ultimo_acceso",
+      "udt_name": "timestamptz",
+      "column_default": null,
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_vidrio_resumen_produccion",
+      "column_name": "key_produccion",
+      "udt_name": "text",
+      "column_default": null,
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_vidrio_resumen_produccion",
+      "column_name": "vidrio_preparado",
+      "udt_name": "numeric",
+      "column_default": "0",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_vidrio_resumen_produccion",
+      "column_name": "vidrio_novedad",
+      "udt_name": "numeric",
+      "column_default": "0",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_vidrio_resumen_produccion",
+      "column_name": "vidrio_traslado",
+      "udt_name": "numeric",
+      "column_default": "0",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_vidrio_resumen_produccion",
+      "column_name": "actualizado_en",
+      "udt_name": "timestamptz",
+      "column_default": "now()",
+      "is_nullable": "NO"
+    }
+  ],
+  "functions": [
+    {
+      "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "signature": "sgp_pdt_compat_91.sgp_picking_entrega_orden(text,uuid,text,boolean,text,jsonb,date,text)",
+      "definition": "CREATE OR REPLACE FUNCTION sgp_pdt_compat_91.sgp_picking_entrega_orden(p_token text, p_id_programacion uuid, p_produccion text, p_completa boolean, p_observacion text DEFAULT NULL::text, p_faltantes jsonb DEFAULT '[]'::jsonb, p_fecha_entrega date DEFAULT NULL::date, p_turno text DEFAULT NULL::text)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\ndeclare u text; eid uuid; f jsonb; v_reserva text; v_fecha date; v_turno text; v_key text; v_shared boolean:=false;\n        v_pending_res text; v_finish text; v_principal text;\nbegin\n u:=public.sgp_validar_sesion_rol(p_token,array['ADMINISTRADOR','COORDINADOR','LIDER MECANIZADO','LIDER','PATINADOR','PICKING','SUPERVISOR DE PICKING','LIDER LINEA']);\n select reserva into v_reserva from public.sgp_mecanizado_programacion where id_programacion=p_id_programacion and estado<>'CANCELADA';\n if v_reserva is null then raise exception 'Programaci\u00f3n no encontrada'; end if;\n select v.key_produccion,v.reserva_principal,bool_or(v.es_reserva_compartida)\n into v_key,v_principal,v_shared\n from public.sgp_produccion_reservas_v v\n where v.produccion=p_produccion and v.reserva_principal=v_reserva\n group by v.key_produccion,v.reserva_principal\n order by max(v.semana_produccion) desc\n limit 1;\n v_principal:=coalesce(v_principal,v_reserva); v_shared:=coalesce(v_shared,false);\n v_fecha:=coalesce(p_fecha_entrega,(now() at time zone 'America/Bogota')::date);\n v_turno:=upper(trim(coalesce(p_turno,'')));\n if v_turno not in ('TURNO 1','TURNO 2') then raise exception 'Debe seleccionar el turno de entrega'; end if;\n if not p_completa and jsonb_array_length(coalesce(p_faltantes,'[]'))=0 then raise exception 'Debe registrar al menos un faltante'; end if;\n insert into public.sgp_picking_entregas(id_programacion,produccion,completa,estado,observacion,usuario_entrega,fecha_entrega,fecha_operativa,turno_entrega)\n values(p_id_programacion,p_produccion,p_completa,'PENDIENTE_VALIDACION',nullif(trim(coalesce(p_observacion,'')),''),u,now(),v_fecha,v_turno)\n returning id_entrega into eid;\n if not p_completa then\n  for f in select value from jsonb_array_elements(p_faltantes) loop\n   v_pending_res:=coalesce(nullif(trim(f->>'reserva'),''),v_reserva);\n   if v_key is not null and not exists(select 1 from public.sgp_produccion_reservas_v v where v.key_produccion=v_key and v.reserva=v_pending_res) then\n     raise exception 'Seleccione una reserva v\u00e1lida para el faltante de la orden con reserva compartida';\n   end if;\n   select v.acabado_reserva into v_finish from public.sgp_produccion_reservas_v v where v.key_produccion=v_key and v.reserva=v_pending_res limit 1;\n   v_finish:=coalesce(nullif(trim(f->>'acabado'),''),v_finish);\n   insert into public.sgp_picking_faltantes(id_entrega,id_pieza,produccion,perfil,marca,fabricacion,longitud,cantidad,observacion,nc,reserva_pendiente,acabado_pendiente)\n   values(eid,f->>'id_pieza',p_produccion,f->>'perfil',nullif(f->>'marca',''),nullif(f->>'fabricacion',''),nullif(f->>'longitud','')::numeric,\n          greatest(coalesce((f->>'cantidad')::numeric,1),1),nullif(f->>'observacion',''),nullif(f->>'nc',''),v_pending_res,v_finish);\n   insert into public.sgp_aluminio_pendientes(\n     reserva,reserva_principal,key_produccion,es_reserva_compartida,acabado_pendiente,\n     produccion,perfil,cantidad,longitud,origen,causa,observacion,estado,usuario_reporte,id_pieza,marca,fabricacion,nc,estado_repo\n   ) values(\n     v_pending_res,v_principal,v_key,v_shared,v_finish,p_produccion,f->>'perfil',\n     greatest(coalesce((f->>'cantidad')::numeric,1),1),nullif(f->>'longitud','')::numeric,\n     'PICKING','FALTANTE_ENTREGA',nullif(f->>'observacion',''),'PENDIENTE',u,\n     nullif(f->>'id_pieza',''),nullif(f->>'marca',''),nullif(f->>'fabricacion',''),nullif(f->>'nc',''),'PENDIENTE'\n   );\n  end loop;\n end if;\n return jsonb_build_object('ok',true,'id_entrega',eid,'estado','PENDIENTE_VALIDACION','fecha_entrega',v_fecha,'turno',v_turno);\nend $function$\n"
+    },
+    {
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "signature": "sgp_pdt_proteger_entrega_origen()",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_pdt_proteger_entrega_origen()\n RETURNS trigger\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\nBEGIN\n IF EXISTS(SELECT 1 FROM public.sgp_pdt_entrega_lineas WHERE id_entrega=OLD.id_entrega AND estado<>'ANULADA') THEN\n  IF TG_OP='DELETE' THEN RAISE EXCEPTION 'Entrega con evidencia PDT vigente'; END IF;\n  IF ROW(NEW.produccion,NEW.id_programacion) IS DISTINCT FROM ROW(OLD.produccion,OLD.id_programacion) THEN\n   RAISE EXCEPTION 'Conciliar evidencia PDT antes de modificar entrega';\n  END IF;\n  -- Registered quantities do not certify delivery: let the legacy audit produce\n  -- VALIDADA or AUDITADA_DIFERENCIA. Once certified, annul explicitly first.\n  IF NEW.estado IS DISTINCT FROM OLD.estado AND EXISTS(\n   SELECT 1 FROM public.sgp_pdt_entrega_lineas WHERE id_entrega=OLD.id_entrega AND estado='VALIDADA') THEN\n   RAISE EXCEPTION 'Conciliar evidencia PDT antes de modificar entrega';\n  END IF;\n END IF;\n IF TG_OP='DELETE' THEN RETURN OLD; END IF;\n RETURN NEW;\nEND $function$\n"
+    },
+    {
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "signature": "sgp_pdt_proteger_programacion_origen()",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_pdt_proteger_programacion_origen()\n RETURNS trigger\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\nBEGIN\n IF EXISTS(SELECT 1 FROM public.sgp_pdt_entrega_lineas l JOIN public.sgp_picking_entregas e USING(id_entrega)\n WHERE e.id_programacion=OLD.id_programacion AND l.estado<>'ANULADA') THEN\n  IF TG_OP='DELETE' THEN RAISE EXCEPTION 'Programaci\u00f3n con evidencia PDT vigente'; END IF;\n  IF ROW(NEW.sistema,NEW.reserva,NEW.acabado) IS DISTINCT FROM ROW(OLD.sistema,OLD.reserva,OLD.acabado)\n  THEN RAISE EXCEPTION 'Conciliar evidencia PDT antes de modificar identidad de programaci\u00f3n'; END IF;\n END IF;\n IF TG_OP='DELETE' THEN RETURN OLD; END IF;\n RETURN NEW;\nEND $function$\n"
+    }
+  ]
+}

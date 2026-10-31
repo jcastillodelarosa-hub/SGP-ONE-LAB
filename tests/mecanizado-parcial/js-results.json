@@ -1,0 +1,9 @@
+{
+  "files": 65,
+  "failed_files": [],
+  "reported_tests": 363,
+  "method": "Each *.test.mjs executed directly with node; npm test separately",
+  "new_critical_part_tests": 7,
+  "release": "verify:release; baseline LAB v371, no deployment",
+  "real_integration": "PDT and shared-reserve functions have no stubs; see integration-results.json and real-function-evidence.json"
+}
