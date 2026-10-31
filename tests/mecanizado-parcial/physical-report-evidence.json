@@ -1,0 +1,33 @@
+{
+  "sql_inputs": "actual synthetic production/parts/coverage/execution/relations; reception DTOs are explicit synthetic input data",
+  "totals": [
+    {
+      "programmed": 295,
+      "received": 295,
+      "processed": 90,
+      "receivedKnown": 295,
+      "partialReceiptBase": 0,
+      "processedKnown": 90,
+      "unresolved": 0,
+      "warnings": [],
+      "pending": 205,
+      "receivedPercent": 100,
+      "percent": 30.508474576271187,
+      "consistent": true
+    },
+    {
+      "programmed": 288,
+      "received": 288,
+      "processed": 90,
+      "receivedKnown": 288,
+      "partialReceiptBase": 0,
+      "processedKnown": 90,
+      "unresolved": 0,
+      "warnings": [],
+      "pending": 198,
+      "receivedPercent": 100,
+      "percent": 31.25,
+      "consistent": true
+    }
+  ]
+}

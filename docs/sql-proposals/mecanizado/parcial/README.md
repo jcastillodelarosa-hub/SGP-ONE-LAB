@@ -34,7 +34,7 @@ no reutilizan números. El número se asigna bajo bloqueo de producción.
 
 Tablas privadas adicionales: `partes`, `solicitudes` (idempotencia con usuario y
 payload), `movimientos` (antes/después), `entregas` (ventanas explícitas por evento)
-y respaldo de funciones para reversión. Todas tienen RLS; no se concede acceso
+y definiciones de funciones para reversión. La continuación no crea copias ni respaldos de bases. Todas tienen RLS; no se concede acceso
 directo a anon/authenticated. No se altera el RLS ni los grants de tablas existentes.
 
 RPC nuevas:
@@ -73,17 +73,34 @@ división. La programación nueva conserva el alcance actual PANELES_2.
 | Producción | Cantidad de cada parte y distintivo estable; guardado por RPC con sesión; ejecución general sincronizada con la de la parte |
 | Mecanizado | Arrastre independiente por parte en SQL y JS; sin deduplicar P2/P3 por compartir producción; traslado conserva cabecera y número |
 | Picking | Cola restringida a la clave de la parte; campo explícito `cantidad_ventanas` en contexto V4; ledger transaccional evita sobreentregas concurrentes e idempotencia evita duplicados |
-| Recepción | Muestra ventanas del movimiento, no las 288 de la producción; auditoría existente preservada |
+| Recepción | Muestra ventanas del movimiento, clave y P1/P2 estables; separa partes de la misma prioridad. La auditoría queda limitada a sus PDT de origen |
 | Informes | Producciones únicas por clave para partes; cantidades previstas una vez por parte y entregadas por evento, sin restar piezas PANEL como si fueran ventanas |
 | Ensamble/Empaque | `sgp_consultar_ensamble` consolida estados de partes: P1 procesada no produce PROCESADO global; solo se alcanza al cubrir la cantidad original procesada. No se añaden flujos de Ensamble/Empaque |
-| Aluminio/PDT | Conserva reservas, referencias y el escritor V4 instalado; no reparte automáticamente piezas ni material entre partes |
+| Aluminio/PDT | Fuentes PANEL reales por clave y reservas principal/asociadas; ciclos V4 y de auditoría, simples y agrupados, validados y cerrados con evidencia de reposición de la misma parte |
 
 Picking distingue cantidad **registrada** de cantidad **validada**. Una entrega con
 faltantes sigue por el flujo PDT existente. Las fuentes PANEL se consultan como
 referencia de la producción completa, sin atribuirlas automáticamente a P1/P2.
-Las pruebas SQL de esta entrega ejercitan el escritor V4 real para entregas
-completas y cantidades parciales de ventanas; la validación física de piezas PDT
-y las reservas compartidas usan límites de fixture descritos abajo.
+Una reposición puede registrar **0 ventanas nuevas** si existe un PDT procesado de
+la misma parte. Así, 90 ventanas registradas no cierran el material pendiente ni
+bloquean su reposición. El evento incompleto de origen no acredita su propia falta;
+una entrega de P2 tampoco acredita un PDT originado en P1. Las funciones de entrega,
+asignación y cierre mantienen sus locks, idempotencia y condiciones de cobertura.
+
+La continuación del PR #168 sustituye todos los stubs de PDT y reservas compartidas.
+`catalog-pdt-real.json` contiene únicamente definiciones del catálogo implicado,
+consultadas en READ ONLY. La base QA se crea vacía y recibe filas sintéticas: no se
+copian datos operativos ni se usa un respaldo o restauración de Supabase. Se
+reutilizan los cuerpos reales, restricciones, índices, triggers, ACL y la vista real
+de reservas. No se reemplaza el validador, el origen PANEL, el escritor V4, los
+avances ni el cierre por funciones de fixture.
+
+Defectos encontrados y corregidos: fuentes con acabado asociado omitido; entrada
+de una clave homónima por coincidencia de nombre; auditoría que marcaba otros PDT
+con la misma pieza; reposición de material sumando ventanas de nuevo; cierre con
+evidencia de otra parte; Recepción/Ensamble y avance físico ambiguos por nombres
+repetidos. La ruta sin partes conserva su comportamiento histórico y tiene un
+ciclo V4 completo de regresión.
 
 La interfaz reutiliza el sistema azul SGP y el diálogo de programación como
 referencia principal; guía Refero `craft-details` para campos, foco, scroll y
@@ -116,27 +133,28 @@ concurrencia, reversión y navegador sin secretos ni acceso productivo. Para
 Chromium local puede usarse `PLAYWRIGHT_CHROMIUM_EXECUTABLE`; en CI se instala con
 Playwright. El reporte final indica los conteos efectivamente obtenidos.
 
-**Límites:** no se restauró un backup completo productivo en esta tarea. Metadatos
-de reservas compartidas y validación de piezas PDT tienen stubs delimitados en la
-fixture; no certifican esos flujos ni roles de planta en producción. Falta la
-aceptación completa sobre restauración autorizada, con esos componentes reales,
-antes de aplicar o publicar. Las capturas no equivalen a teléfono físico.
+**Resultado de integración: 63/63 escenarios SQL aprobados**, incluidos funciones
+reales con PANEL/NC, fuentes agrupadas, auditoría, validación, avances, entrega,
+asignación y cierre, concurrencia e idempotencia. `real-function-evidence.json`
+comprueba huellas idénticas para 19 funciones núcleo y la vista de reservas.
+`physical-report-evidence.json` verifica el informe JavaScript con contratos SQL:
+90 procesadas / 288 originales y saldo 198, incluso con una clave homónima.
 
-## Despliegue posterior — requiere autorización independiente
+**Límites de certificación:** los registros, sesiones y roles son sintéticos y usan
+el validador y permisos RPC reales. Los DTO de recepción física del informe de
+avance son entradas QA explícitas; no prueban llegada de material a planta.
+El navegador utiliza una fachada RPC local; no certifica PostgREST/Auth gestionado,
+conectividad corporativa, usuarios operativos ni un teléfono físico. Esos escenarios
+no se declaran aprobados en producción. No quedan stubs para el comportamiento de
+PDT/reservas que las pruebas de integración certifican.
 
-1. Fijar SHA aprobado y reconfirmar catálogo vivo. El SQL falla antes del DDL si
-   cambia cualquiera de los cuerpos contrastados; no forzar esos guards.
-2. Obtener respaldo privado consistente de esquema/datos/ACL, con manifiesto y
-   hashes; restaurarlo en entorno aislado y verificar integridad y consumidores.
-   Usar el mecanismo de respaldo aprobado del proyecto; no copiar datos a GitHub.
-3. Ensayar instalación, aceptación y reversión sobre esa restauración, incluidos
-   reservas compartidas, PDT con piezas, auditoría real y roles permitidos/denegados.
-4. Coordinar ventana y control de escrituras con planta. Con autorización expresa,
-   aplicar la migración versionada en una transacción. No usar `db push` indiscriminado
-   sobre el historial heterogéneo del repositorio. Registrar SHA y SQL exactos.
-5. Verificar integridad y cantidades sin modificar producciones reales como pruebas.
-   Publicar la interfaz solo después del backend aprobado y de autorización de
-   merge/despliegue. Confirmar PC/móvil y operación con los responsables de planta.
+## Operaciones fuera de esta continuación
+
+No se autorizan copias o respaldos de bases, aplicación de migraciones en Supabase,
+fusión ni despliegue. La migración sigue siendo un artefacto REVIEW; únicamente se
+ensaya su SQL en bases vacías de datos sintéticos, sin historial de migración de
+Supabase. Un eventual despliegue requiere otra autorización y un plan específico.
+Los guards de catálogo, coherencia de cantidades y reversión no deben forzarse.
 
 ## Reversión
 

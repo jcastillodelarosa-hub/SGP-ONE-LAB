@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {proposeParts,validateParts,coverageAmount} from '../src/domain/mecanizado-partes.js';
+import {proposeParts,validateParts,coverageAmount,partDeliveryStatus} from '../src/domain/mecanizado-partes.js';
 import {normalizeCarry,operationalLoad,workloadTotals} from '../src/domain/mecanizado-operational-load.js';
+import {receptionGroupKey,filterReceptionRows} from '../src/domain/picking-reception-weeks.js';
 import {reportQuantityGroups,summarizeDeliveryEvents} from '../src/domain/picking-delivery-report.js';
 test('288 = 90 + 90 + 90 + 18; configured capacity can differ',()=>{
  assert.deepEqual(proposeParts(288,90),[90,90,90,18]);
@@ -31,4 +32,18 @@ test('reports sum explicit windows; two parts remain one production',()=>{
  const rows=[{...a,id_entrega:'e1',cantidad_ventanas_entregadas:40},{...a,id_entrega:'e2',cantidad_ventanas_entregadas:50},{...a,id_programacion:'p2',parte_id:'p2',id_entrega:'e3',cantidad_ventanas_entregadas:18}];
  assert.deepEqual(reportQuantityGroups(rows).get('S'),{known:180,actual:108,unknown:0});
  assert.equal(summarizeDeliveryEvents(rows).produccionesUnicas,1);
+});
+
+test('90 ventanas registradas no ocultan una reposición de material pendiente',()=>{
+ assert.deepEqual(partDeliveryStatus({cantidad_ventanas:90,cantidad_entregada:90,pdt_abiertos:1}),{remaining:0,materialPending:true,done:false});
+ assert.equal(partDeliveryStatus({cantidad_ventanas:90,cantidad_entregada:90,pdt_abiertos:0}).done,true);
+ assert.equal(partDeliveryStatus({cantidad_ventanas:90,cantidad_entregada:40,pdt_abiertos:0}).remaining,50);
+});
+
+test('Recepción separa P1/P2 aunque compartan prioridad semanal y permite buscar el distintivo',()=>{
+ const p1={reserva:'R',parte:'1.1',parte_id:'P1-uuid',identificador_parte:'8642595-P1',semana:44};
+ const p2={...p1,parte_id:'P2-uuid',identificador_parte:'8642595-P2'};
+ assert.notEqual(receptionGroupKey(p1),receptionGroupKey(p2));
+ assert.equal(receptionGroupKey(p1),receptionGroupKey({...p1,id_entrega:'otra entrega misma parte'}));
+ assert.deepEqual(filterReceptionRows([p1,p2],{search:'8642595-P1'}),[p1]);
 });

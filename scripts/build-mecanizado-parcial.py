@@ -3,6 +3,8 @@ import hashlib,json,pathlib,re
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 CAT=json.loads((ROOT/'tests/mecanizado-parcial/catalog.json').read_text())
 FUN={x['signature']:x['definition'] for x in CAT['functions']}
+PDT=json.loads((ROOT/'tests/mecanizado-parcial/catalog-pdt-real.json').read_text())
+FUN.update({x['signature']:x['definition'] for x in PDT['functions']})
 changed={}
 def edit(signature,fn):
     original=FUN[signature]
@@ -149,11 +151,71 @@ changed[sig]=once(changed[sig], 'SELECT e.id_entrega,e.id_programacion,e.producc
    (select en.cantidad from sgp_mecanizado_parcial.entregas en where en.id_entrega=e.id_entrega) cantidad_ventanas_entregadas,
    e.id_entrega,e.id_programacion,e.produccion,e.completa,e.estado,e.observacion,""")
 
+# Real PDT/shared-reserve integration. Historical non-part branches retain their finish rule.
+edit('sgp_picking_piezas_panel(text,uuid,text)',lambda body:inject(body,(ROOT/'docs/sql-proposals/mecanizado/parcial/picking-panel-branch.sql').read_text()))
+def sources(body):
+    body=once(body,"AND x->>'tipo_pieza'='PANEL'", "AND (p_origen<>'PICKING' OR NOT public.sgp_mecanizado_es_parte(program.id_programacion) OR x->>'key_produccion'=(SELECT key_produccion FROM sgp_mecanizado_parcial.partes WHERE id_programacion=program.id_programacion)) AND x->>'tipo_pieza'='PANEL'")
+    return once(body,"AND upper(btrim(x->>'acabado'))=upper(btrim(program.acabado))", "AND (public.sgp_mecanizado_es_parte(program.id_programacion) OR upper(btrim(x->>'acabado'))=upper(btrim(program.acabado)))")
+edit('sgp_pdt_multiorigen.fuentes(text,text,jsonb)',sources)
+for signature,alias,finish in [
+ ('sgp_pdt_multiorigen.nuevo_sgp_pdt_entrega_registrar_v2(text,uuid,uuid,integer,uuid)','pe','d.acabado'),
+ ('sgp_pdt_multiorigen.grouped_nuevo_entrega(text,uuid,uuid,integer,uuid)','pe','d.acabado'),
+ ('sgp_pdt_multiorigen.nuevo_sgp_pdt_cierre_acreditado(uuid)','e','d.acabado'),
+ ('sgp_pdt_multiorigen.grouped_nuevo_cierre_acreditado(uuid)','e','d.acabado'),
+ ('sgp_pdt_multiorigen.nuevo_sgp_pdt_picking_v2(text,uuid)','pe','p.acabado_pendiente')]:
+    edit(signature,lambda body,alias=alias,finish=finish:once(body,'upper(btrim(mp.acabado))=upper(btrim('+finish+'))', 'sgp_mecanizado_parcial.material_pdt(p.id_pendiente,'+alias+'.id_entrega,'+finish+')'))
+# A homonymous production without parts cannot inherit the state of another key's part.
+sig='sgp_consultar_ensamble(text,integer,text)'
+changed[sig]=once(changed[sig],'eo.produccion=p.produccion order by eo.actualizado_en',"eo.produccion=p.produccion and not exists(select 1 from sgp_mecanizado_parcial.partes pt where pt.id_programacion=eo.id_programacion) order by eo.actualizado_en")
+# Quantity and material recovery are independent dimensions.
+sig='sgp_picking_cola(text)'
+changed[sig]=once(changed[sig],'select coalesce((select sum(en.cantidad)',"select (select count(*) from sgp_mecanizado_parcial.contextos_pdt src join public.sgp_aluminio_pendientes ap using(id_pendiente) join public.sgp_picking_entregas original on original.id_entrega=src.id_entrega where original.id_programacion=p.id_programacion and ap.estado='PENDIENTE') pdt_abiertos,coalesce((select sum(en.cantidad)")
+
+for signature,alias,finish in [
+ ('sgp_pdt_multiorigen.original_sgp_pdt_entrega_registrar_v2(text,uuid,uuid,integer,uuid)','pe','d.acabado'),
+ ('sgp_pdt_multiorigen.grouped_original_entrega(text,uuid,uuid,integer,uuid)','pe','d.acabado'),
+ ('sgp_pdt_multiorigen.original_sgp_pdt_cierre_acreditado(uuid)','e','d.acabado'),
+ ('sgp_pdt_multiorigen.grouped_original_cierre_acreditado(uuid)','e','d.acabado'),
+ ('sgp_pdt_multiorigen.original_sgp_pdt_picking_v2(text,uuid)','pe','p.acabado_pendiente')]:
+    def legacy_material(body,alias=alias,finish=finish):
+        body=once(body,'mp.reserva=p.reserva','(mp.reserva=p.reserva OR public.sgp_mecanizado_es_parte(mp.id_programacion))')
+        return once(body,'upper(btrim(mp.acabado))=upper(btrim('+finish+'))','sgp_mecanizado_parcial.material_pdt(p.id_pendiente,'+alias+'.id_entrega,'+finish+')')
+    edit(signature,legacy_material)
+
+sig='sgp_picking_recepcion_cola(text)'
+changed[sig]=once(changed[sig],"'id_entrega',pe.id_entrega", "'parte_id',(select id_programacion from sgp_mecanizado_parcial.partes where id_programacion=pe.id_programacion),'identificador_parte',(select pe.produccion||'-P'||numero from sgp_mecanizado_parcial.partes where id_programacion=pe.id_programacion),'id_entrega',pe.id_entrega")
+changed[sig]=once(changed[sig],"where s.produccion=pe.produccion and s.id_linea='PANELES_2'", "where s.produccion=pe.produccion and s.id_linea='PANELES_2' and (not public.sgp_mecanizado_es_parte(pe.id_programacion) or s.key_produccion=(select key_produccion from sgp_mecanizado_parcial.partes where id_programacion=pe.id_programacion))")
+
+def audit(body):
+    body=once(body,'v_finish text;', 'v_finish text; v_nuevo uuid;')
+    body=once(body,' for f in select value from jsonb_array_elements',"""
++ if public.sgp_mecanizado_es_parte(e.id_programacion) then
++  select pt.key_produccion,mp.reserva,public.sgp_es_reserva_compartida(pt.key_produccion)
++  into strict v_key,v_principal,v_shared from sgp_mecanizado_parcial.partes pt
++  join public.sgp_mecanizado_programacion mp using(id_programacion) where pt.id_programacion=e.id_programacion;
++ end if;
++ for f in select value from jsonb_array_elements""".replace('\n+','\n'))
+    body=once(body,"  if coalesce((f->>'ventanas_afectadas')::int,0)<1", "  if public.sgp_mecanizado_es_parte(e.id_programacion) and (f->>'ventanas_afectadas')::integer>(select cantidad from sgp_mecanizado_parcial.partes where id_programacion=e.id_programacion) then raise exception 'VENTANAS_AFECTADAS_SUPERAN_PARTE'; end if;\n  if coalesce((f->>'ventanas_afectadas')::int,0)<1")
+    body=once(body,"  v_diff:=true;", "  if public.sgp_mecanizado_es_parte(e.id_programacion) and (nullif(d->>'id_pieza','') is null or (d->>'cantidad') is null or (d->>'cantidad')::numeric<=0 or (d->>'cantidad')::numeric<>trunc((d->>'cantidad')::numeric) or (d->>'cantidad')::numeric>(select cantidad from public.sgp_aluminio where id_pieza=d->>'id_pieza')) then raise exception 'CANTIDAD_MATERIAL_INVALIDA'; end if;\n  v_diff:=true;")
+    body=once(body,"  v_diff:=true;", "  if public.sgp_mecanizado_es_parte(e.id_programacion) and coalesce((d->>'ventanas_afectadas')::integer,1)>(select cantidad from sgp_mecanizado_parcial.partes where id_programacion=e.id_programacion) then raise exception 'VENTANAS_AFECTADAS_SUPERAN_PARTE'; end if;\n  v_diff:=true;")
+    body=once(body,"  if coalesce((f->>'ventanas_afectadas')::int,0)<1", """  if public.sgp_mecanizado_es_parte(e.id_programacion) and not exists(
++   select 1 from public.sgp_picking_faltantes pf where pf.id_faltante=(f->>'id_faltante')::uuid
++   and pf.id_entrega=p_id_entrega and pf.id_pieza is not distinct from nullif(f->>'id_pieza','')
++  ) then raise exception 'FALTANTE_AJENO_A_ENTREGA'; end if;
++  if coalesce((f->>'ventanas_afectadas')::int,0)<1""".replace('\n+','\n'))
+    target="and (reserva=e.reserva or reserva=(select pf.reserva_pendiente from public.sgp_picking_faltantes pf where pf.id_faltante=(f->>'id_faltante')::uuid));"
+    body=once(body,target,target[:-1]+" and (not public.sgp_mecanizado_es_parte(e.id_programacion) or exists(select 1 from sgp_mecanizado_parcial.contextos_pdt src where src.id_pendiente=public.sgp_aluminio_pendientes.id_pendiente and src.id_entrega=p_id_entrega));")
+    target="greatest(coalesce((d->>'ventanas_afectadas')::int,1),1),true\n  );"
+    body=once(body,target,target[:-1]+" returning id_pendiente into v_nuevo;\n  if public.sgp_mecanizado_es_parte(e.id_programacion) then insert into sgp_mecanizado_parcial.origenes_pdt values(v_nuevo,p_id_entrega); end if;")
+    return body
+edit('sgp_picking_validar_recepcion(text,uuid,jsonb,jsonb,text)',audit)
+
 out=['-- REVIEW ONLY: requires separate production authorization.\nbegin;\nset local lock_timeout=\'5s\';\n']
 for sig in changed:
     md5=hashlib.md5(FUN[sig].encode()).hexdigest()
     out.append(f"do $guard$ begin if md5(pg_get_functiondef('{sig}'::regprocedure))<>'{md5}' then raise exception 'CATALOGO_CAMBIO: {sig}'; end if; end $guard$;\n")
 out.append((ROOT/'docs/sql-proposals/mecanizado/parcial/core.sql').read_text())
+out.append((ROOT/'docs/sql-proposals/mecanizado/parcial/pdt-context.sql').read_text())
 out.append("create table sgp_mecanizado_parcial.respaldo_funciones(firma text primary key,definicion text not null,instalada text); alter table sgp_mecanizado_parcial.respaldo_funciones enable row level security; revoke all on sgp_mecanizado_parcial.respaldo_funciones from public,anon,authenticated;\n")
 for sig,definition in changed.items():
     out.append(f"insert into sgp_mecanizado_parcial.respaldo_funciones values('{sig}',pg_get_functiondef('{sig}'::regprocedure),null);\n")

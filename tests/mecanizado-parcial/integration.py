@@ -99,8 +99,9 @@ test('reversión no puede borrar partes utilizadas',lambda:sql((ROOT/'docs/sql-p
 seed('ATOMIC|PANELES_2',288)
 test('propuesta excesiva revierte todas las partes',lambda:(program('ATOMIC|PANELES_2',None,parts=[{'cantidad':90,'fecha':'2026-10-28','turno':'TURNO 1','prioridad':1},{'cantidad':200,'fecha':'2026-10-28','turno':'TURNO 1','prioridad':1}],ok=False),expect(read('ATOMIC|PANELES_2')['partes'],[])))
 seed('MULTI|PANELES_2',100)
-sql("insert into sgp_prioridades(anio,semana,id_linea,reserva,key_produccion,prioridad,usuario) values(2026,44,'PANELES_2','QA-R2','MULTI|PANELES_2','1.1','qa-coordinador');")
-test('saldo global entre dos reservas de la misma producción',lambda:(program('MULTI|PANELES_2',60),program('MULTI|PANELES_2',50,reserve='QA-R2',ok=False),program('MULTI|PANELES_2',40,reserve='QA-R2'),expect(read('MULTI|PANELES_2')['disponible'],0)))
+sql("update sgp_producciones set reserva_al='QA-R,QA-R2' where key_produccion='MULTI|PANELES_2';")
+seed('OWNER|PANELES_2',20,reserve='QA-R2')
+test('reserva asociada no sustituye la principal ni duplica cantidades',lambda:(program('MULTI|PANELES_2',60),program('MULTI|PANELES_2',50,reserve='QA-R2',ok=False),program('MULTI|PANELES_2',40),expect(read('MULTI|PANELES_2')['disponible'],0),expect(sql("select sgp_es_reserva_compartida('MULTI|PANELES_2');"),'t')))
 seed('MIX|PANELES_2',100)
 def race_legacy():
  def new():
@@ -137,7 +138,8 @@ def race_delivery():
  with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:expect(sum(pool.map(worker,range(2))),1)
  expect(read('DELIVERY|PANELES_2')['partes'][0]['entregada'],60)
 test('dos entregas concurrentes de 60/100: solo una acreditada',race_delivery)
-summary={'environment':'PostgreSQL 17.11 Docker network none; synthetic data; actual captured session validator','limitations':['PDT piece validation and shared-reserve metadata are bounded fixture stubs, not production verification'],'passed':sum(x['ok'] for x in results),'failed':sum(not x['ok'] for x in results),'tests':results}
+exec((ROOT/'tests/mecanizado-parcial/pdt-shared-cases.py').read_text())
+summary={'environment':'PostgreSQL 17.11 Docker network none; synthetic data; real captured PDT functions, triggers, constraints and shared-reserve view','limitations':['Synthetic data; no database copy, backup or production writes. No claim of plant, managed PostgREST/Auth transport or physical-device verification.'],'passed':sum(x['ok'] for x in results),'failed':sum(not x['ok'] for x in results),'tests':results}
 path=ROOT/'tests/mecanizado-parcial/integration-results.json';path.write_text(json.dumps(summary,indent=2)+'\n')
 print(json.dumps({'passed':summary['passed'],'failed':summary['failed']}))
 sys.exit(bool(summary['failed']))

@@ -23,3 +23,10 @@ export function coverageAmount(row){
  if(row.cantidad_programada!=null)return Number(row.cantidad_programada);
  return row.estado_orden==='PROGRAMADA'?Number(row.cantidad||0):0;
 }
+
+/** Registered window totals and unresolved material are independent. */
+export function partDeliveryStatus(row){
+ const remaining=Math.max(0,Number(row.cantidad_ventanas)-Number(row.cantidad_entregada||0));
+ const materialPending=Number(row.pdt_abiertos||0)>0;
+ return {remaining,materialPending,done:remaining===0&&!materialPending};
+}

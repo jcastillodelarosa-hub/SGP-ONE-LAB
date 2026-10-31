@@ -1,21 +1,24 @@
-# Mecanizado — programación parcial por cantidades agregadas (2026-10-30)
+# PR168 — PDT y reservas compartidas sin stubs (2026-10-30 Colombia)
 
-Base main observada `3389d98db9eec003b6bbf662bb81bc8eb3f964a5`; rama independiente
-`feat/mecanizado-programacion-parcial`. Alternativa A aprobada expresamente.
-Catálogo Supabase SGP-ONE-LAB contrastado mediante lecturas READ ONLY; no datos
-operativos modificados. Implementación, SQL REVIEW versionado, reversión con guards,
-contratos consumidores y formulario PC/móvil preparados. Evidencias y límites:
-`docs/sql-proposals/mecanizado/parcial/README.md` y `tests/mecanizado-parcial/`.
-42 escenarios PostgreSQL aislados aprobados; 288=90+90+90+18, concurrencia de
-programación y entregas, identidad estable, estados por parte, históricos y reversión.
-Chromium 1366/390 con módulo y opener reales hacia SQL sintético aprobado. No se
-certifica el ciclo completo de piezas PDT ni reservas compartidas: tienen stubs
-acotados en la fixture y requieren restauración/aceptación antes de producción.
-Pruebas JS y release aprobadas. Sin cambios en main, Supabase, Firebase, GOOGLE o LAC.
-Estado: IMPLEMENTADO Y PROBADO EN AISLAMIENTO; NO APLICADO, NO FUSIONADO, NO PUBLICADO.
-Siguiente paso único: revisar PR independiente y evidencias; cualquier instalación,
-fusión o publicación requiere autorización posterior. El cierre del chat enlaza el PR
-real, sin inferir su creación ni estado desde este checkpoint.
+Continuación de `a46d58e` en `feat/mecanizado-programacion-parcial`, mismo PR #168.
+Supabase utilizado solo en READ ONLY para definiciones del catálogo implicado.
+No copias, respaldos, restauraciones, datos productivos, aplicación de migraciones,
+fusión ni despliegue. Bases QA creadas vacías con datos sintéticos y contratos reales.
+
+Corregidos: fuente PANEL por clave exacta y acabado asociado; auditoría acotada al
+PDT/evento; reposición de material con 0 ventanas; evidencia de la misma parte y
+posterior al faltante; Recepción, Ensamble e informe de avance ante homónimas.
+63 escenarios SQL aprobados, incluidos ciclos reales V4/simple/agrupado/auditoría,
+NC, validación, avances, entrega, asignación, cierre, histórico y concurrencia.
+Huellas de 19 funciones núcleo y vista real verificadas; payload JS real sobre
+fuentes SQL. Regresión JS y Chromium 1366/390 aprobados. Evidencias en
+`tests/mecanizado-parcial/` y contrato en `docs/sql-proposals/mecanizado/parcial/README.md`.
+
+Estado: IMPLEMENTADO Y VERIFICADO EN AISLAMIENTO; SQL REVIEW, NO APLICADO,
+NO FUSIONADO, NO DESPLEGADO. No se certifica PostgREST/Auth gestionado, red,
+cuentas operativas, recepción física de material ni teléfono físico. Los DTO QA
+no prueban planta. La tarea no pide ni habilita esas operaciones.
+Siguiente paso único: revisión del PR #168 actualizado, sin crear otro PR.
 
 ---
 

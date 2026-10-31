@@ -75,12 +75,13 @@ export function basePhysicalProgress(input,{year,weeks,line='PANELES_2',system='
    else throw new Error('Material compartido con recepciones distintas: cantidad de ventanas sin conciliar');
   }catch(error){warn(p.key,error.message);}
  }
- const schedules=deduplicate(schedule.filter(r=>r.tipo!=='ARRASTRE'&&!r.arrastre),r=>text(r.id_programacion),r=>JSON.stringify([r.reserva,r.sistema,r.produccion,r.cantidad_programada,r.estado,r.prioridad_semanal]));
+ const schedules=deduplicate(schedule.filter(r=>r.tipo!=='ARRASTRE'&&!r.arrastre),r=>text(r.id_programacion),r=>JSON.stringify([r.reserva,r.sistema,r.produccion,r.cantidad_programada,r.estado,r.prioridad_semanal,r.parte_id,r.key_produccion]));
+ for(const row of schedules)if(row.parte_id&&(!text(row.key_produccion)||text(row.parte_id)!==text(row.id_programacion)))throw new Error('Parte sin identidad canónica de producción/programación');
  const byId=new Map(schedules.map(r=>[text(r.id_programacion),r]));
  const exec=new Map(deduplicate(executions,r=>text(r.id_programacion),r=>JSON.stringify([r.estado,r.cantidad_procesada])).map(r=>[text(r.id_programacion),r]));
  const orders=deduplicate(orderExecutions,r=>JSON.stringify([r.id_programacion,r.produccion]),r=>text(r.estado));
  const events=deduplicate(moves,r=>JSON.stringify([r.id_origen,r.id_destino,r.produccion]),r=>JSON.stringify([r.id_origen,r.id_destino,r.produccion]));
- const affected=row=>[...records.values()].filter(p=>p.system===text(row.sistema)&&(!row.produccion||text(p.produccion)===text(row.produccion))&&(reserveSets.get(p.key)?.has(text(row.reserva))||links.some(l=>text(l.key_produccion)===p.key&&text(l.reserva)===text(row.reserva))));
+ const affected=row=>[...records.values()].filter(p=>(!row.parte_id||p.key===text(row.key_produccion))&&p.system===text(row.sistema)&&(!row.produccion||text(p.produccion)===text(row.produccion))&&(reserveSets.get(p.key)?.has(text(row.reserva))||links.some(l=>text(l.key_produccion)===p.key&&text(l.reserva)===text(row.reserva))));
  const fail=(rows,message)=>{for(const p of rows){p.allocationInvalid=true;warn(p.key,message);}};
  const root=row=>{
   const seen=new Set();while(true){const id=text(row.id_programacion);if(seen.has(id))throw new Error('Ciclo de reprogramaciones');seen.add(id);
@@ -91,7 +92,7 @@ export function basePhysicalProgress(input,{year,weeks,line='PANELES_2',system='
  };
  for(const row of schedules){
   if(['CANCELADA','REPROGRAMADO'].includes(row.estado))continue;
-  const candidates=affected(row);if(!candidates.length)continue;let failureCandidates=candidates;
+  const candidates=affected(row);if(!candidates.length){if(row.parte_id&&records.has(text(row.key_produccion)))fail([records.get(text(row.key_produccion))],'Identidad de parte no concilia con producción/reserva/sistema');continue;}let failureCandidates=candidates;
   try{
    const outgoing=events.filter(e=>text(e.id_origen)===text(row.id_programacion));
    if(outgoing.some(e=>!byId.has(text(e.id_destino))))throw new Error('Destino de traslado no disponible');

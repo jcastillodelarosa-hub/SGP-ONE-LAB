@@ -1,0 +1,101 @@
+{
+  "functions": [
+    {
+      "signature": "sgp_pdt_multiorigen.actor(text,text)",
+      "md5_actual_catalog_and_test": "0135538938cabe8e2466df05e9499e30",
+      "stub": false
+    },
+    {
+      "signature": "sgp_pdt_multiorigen.registrar(text,text,jsonb,jsonb,uuid,uuid)",
+      "md5_actual_catalog_and_test": "c3b6e78ead504f407d89c88f127c2899",
+      "stub": false
+    },
+    {
+      "signature": "sgp_pdt_contexto_internal_v3(text,text,text,text,text,text,text,numeric)",
+      "md5_actual_catalog_and_test": "f681f48417e747552687f45ec1a2bacf",
+      "stub": false
+    },
+    {
+      "signature": "sgp_pdt_origenes_internal_v3(text,text,text,text,text)",
+      "md5_actual_catalog_and_test": "dd86a4e4b41bd60fc2c090bcc2093f05",
+      "stub": false
+    },
+    {
+      "signature": "sgp_aluminio_pendiente_validar_detalles_v1(text,uuid,jsonb,text,text)",
+      "md5_actual_catalog_and_test": "8735ff7cc79f2069e94f4de78caa266d",
+      "stub": false
+    },
+    {
+      "signature": "sgp_pdt_multiorigen.nuevo_sgp_aluminio_pendiente_validar_detalles_v1(text,uuid,jsonb,text,text)",
+      "md5_actual_catalog_and_test": "9c4794e6418d6b13855e4736af32bb46",
+      "stub": false
+    },
+    {
+      "signature": "sgp_pdt_multiorigen.grouped_nuevo_validar(text,uuid,jsonb,text,text)",
+      "md5_actual_catalog_and_test": "f60a4b8c52c42ae9873b326cc5527bc0",
+      "stub": false
+    },
+    {
+      "signature": "sgp_aluminio_pendiente_registrar_avance_v1(text,uuid,uuid,integer,text,date,uuid,text)",
+      "md5_actual_catalog_and_test": "0f2df8a0f1fc5889995fa5e10b1d693b",
+      "stub": false
+    },
+    {
+      "signature": "sgp_pdt_manual.original_avance(text,uuid,uuid,integer,text,date,uuid,text)",
+      "md5_actual_catalog_and_test": "7dff6d5b73720e50be55230ed2734309",
+      "stub": false
+    },
+    {
+      "signature": "sgp_pdt_estado_v2(text,uuid,text)",
+      "md5_actual_catalog_and_test": "6d924d5a51a6f0c602135ca73f0a7d4a",
+      "stub": false
+    },
+    {
+      "signature": "sgp_pdt_guardar_contrato()",
+      "md5_actual_catalog_and_test": "30cf521e6c7451074cdb3fbc23edc2c5",
+      "stub": false
+    },
+    {
+      "signature": "sgp_pdt_entrega_validar_v2(text,uuid)",
+      "md5_actual_catalog_and_test": "d1636ba2f38234b43a69a95ab6b42019",
+      "stub": false
+    },
+    {
+      "signature": "sgp_pdt_asignar_v2(text,uuid,uuid)",
+      "md5_actual_catalog_and_test": "831f98fcc52e25248d8fbc4747c1ebe9",
+      "stub": false
+    },
+    {
+      "signature": "sgp_pdt_cerrar_v2(text,uuid,uuid)",
+      "md5_actual_catalog_and_test": "cad60e24cefcd15a441189b320753808",
+      "stub": false
+    },
+    {
+      "signature": "sgp_pdt_manual.original_cerrar_v2(text,uuid,uuid)",
+      "md5_actual_catalog_and_test": "7cfb562666d1861e2e93ab3dd13e650e",
+      "stub": false
+    },
+    {
+      "signature": "sgp_aluminio_pendiente_nc_vincular_v1(text,uuid,text[])",
+      "md5_actual_catalog_and_test": "9eb04462832dd3ae0a5b539b2bdc10c9",
+      "stub": false
+    },
+    {
+      "signature": "sgp_es_reserva_compartida(text)",
+      "md5_actual_catalog_and_test": "4fc49de68fac68e5d6b93086232404f3",
+      "stub": false
+    },
+    {
+      "signature": "sgp_reserva_es_principal(text,text,text)",
+      "md5_actual_catalog_and_test": "e4db7542d667e4a25ae63b008fd5ce6f",
+      "stub": false
+    },
+    {
+      "signature": "sgp_reservas_por_produccion_json(text)",
+      "md5_actual_catalog_and_test": "844fd0c481a9584e0851f80abab459f2",
+      "stub": false
+    }
+  ],
+  "view_md5": "f0edf5a04ac0d41b841412c0d0c58fbb",
+  "data": "synthetic only; no backup or database copy"
+}

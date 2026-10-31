@@ -1,9 +1,9 @@
 {
   "files": 65,
   "failed_files": [],
-  "reported_tests": 360,
-  "method": "Each existing *.test.mjs executed directly with node, in addition to npm test",
-  "new_critical_unit_tests": 5,
-  "release": "npm run verify:release passed; baseline LAB v371 retained; no publication",
-  "final_targeted_regression": "26 tests: Picking report, report integration/model, part arithmetic/carry, operational load; passed after final changes"
+  "reported_tests": 363,
+  "method": "Each *.test.mjs executed directly with node; npm test separately",
+  "new_critical_part_tests": 7,
+  "release": "verify:release; baseline LAB v371, no deployment",
+  "real_integration": "PDT and shared-reserve functions have no stubs; see integration-results.json and real-function-evidence.json"
 }

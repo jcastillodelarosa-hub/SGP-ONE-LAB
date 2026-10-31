@@ -1,9 +1,9 @@
 {
-  "environment": "PostgreSQL 17.11 Docker network none; synthetic data; actual captured session validator",
+  "environment": "PostgreSQL 17.11 Docker network none; synthetic data; real captured PDT functions, triggers, constraints and shared-reserve view",
   "limitations": [
-    "PDT piece validation and shared-reserve metadata are bounded fixture stubs, not production verification"
+    "Synthetic data; no database copy, backup or production writes. No claim of plant, managed PostgREST/Auth transport or physical-device verification."
   ],
-  "passed": 42,
+  "passed": 63,
   "failed": 0,
   "tests": [
     {
@@ -159,7 +159,7 @@
       "ok": true
     },
     {
-      "name": "saldo global entre dos reservas de la misma producci\u00f3n",
+      "name": "reserva asociada no sustituye la principal ni duplica cantidades",
       "ok": true
     },
     {
@@ -172,6 +172,90 @@
     },
     {
       "name": "dos entregas concurrentes de 60/100: solo una acreditada",
+      "ok": true
+    },
+    {
+      "name": "real: vista y funciones reconocen principal/compartida y sus acabados",
+      "ok": true
+    },
+    {
+      "name": "real: fuentes PANEL incluyen acabado asociado y excluyen FRAME/clave hom\u00f3nima",
+      "ok": true
+    },
+    {
+      "name": "real: payload JS de fuentes SQL crea PDT/faltante/NC; reintento no duplica",
+      "ok": true
+    },
+    {
+      "name": "real: RPC NC resuelve c\u00f3digo/consecutivo sin duplicar y conserva permisos",
+      "ok": true
+    },
+    {
+      "name": "real: Recepci\u00f3n conserva clave/P1/90 y material asociado pese a producci\u00f3n hom\u00f3nima",
+      "ok": true
+    },
+    {
+      "name": "real: clave/reserva/acabado/FRAME y exceso material ajenos rechazados",
+      "ok": true
+    },
+    {
+      "name": "real: validaci\u00f3n de fabricaci\u00f3n/fuente y permisos sin sustituir la funci\u00f3n",
+      "ok": true
+    },
+    {
+      "name": "real: avances parciales/idempotentes; saldo mecanizado cero no cierra PDT",
+      "ok": true
+    },
+    {
+      "name": "real: auditor\u00eda de faltantes; evento con falta no acredita su propia reposici\u00f3n",
+      "ok": true
+    },
+    {
+      "name": "real: reposici\u00f3n de PANEL sin volver a sumar ventanas; validar/asignar/cerrar",
+      "ok": true
+    },
+    {
+      "name": "real: cerrar PDT/P1 no cierra P2-P4 ni otra clave hom\u00f3nima ni original",
+      "ok": true
+    },
+    {
+      "name": "real: NC finalizada no valida ni procesa ni cierra un nuevo PDT",
+      "ok": true
+    },
+    {
+      "name": "real: auditar un evento no marca otro PDT de la misma pieza/producci\u00f3n",
+      "ok": true
+    },
+    {
+      "name": "real: validaci\u00f3n agrupada con dos fuentes; Picking y cierre no duplican cantidades",
+      "ok": true
+    },
+    {
+      "name": "real: informes y Picking separan 90 ventanas de reposiciones de material con 0",
+      "ok": true
+    },
+    {
+      "name": "real: evidencia de P2 no se usa para cerrar un PDT originado en P1",
+      "ok": true
+    },
+    {
+      "name": "real: diferencias de auditor\u00eda siguen validaci\u00f3n/avance/reposici\u00f3n/cierre",
+      "ok": true
+    },
+    {
+      "name": "real: cabecera hist\u00f3rica sin partes mantiene registro/validaci\u00f3n/Picking/cierre V4",
+      "ok": true
+    },
+    {
+      "name": "sin stubs: 19 funciones n\u00facleo tienen huella id\u00e9ntica al cat\u00e1logo vivo le\u00eddo",
+      "ok": true
+    },
+    {
+      "name": "real: avances y entregas PDT concurrentes rechazan exceso y conservan 90 ventanas",
+      "ok": true
+    },
+    {
+      "name": "real: informe JS consume contratos SQL; 90/288 sin atribuir avances a hom\u00f3nimas",
       "ok": true
     }
   ]

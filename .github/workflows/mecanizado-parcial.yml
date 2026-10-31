@@ -51,6 +51,8 @@ jobs:
           name: mecanizado-parcial-synthetic-evidence
           path: |
             tests/mecanizado-parcial/integration-results.json
+            tests/mecanizado-parcial/real-function-evidence.json
+            tests/mecanizado-parcial/physical-report-evidence.json
             tests/mecanizado-parcial/evidence/
       - name: Destroy isolated database
         if: always()

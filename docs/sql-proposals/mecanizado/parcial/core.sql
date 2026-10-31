@@ -25,6 +25,11 @@ create table sgp_mecanizado_parcial.entregas (
  cantidad integer not null check(cantidad>=0)
 );
 create index on sgp_mecanizado_parcial.entregas(id_programacion);
+create table sgp_mecanizado_parcial.origenes_pdt (
+ id_pendiente uuid primary key references public.sgp_aluminio_pendientes,
+ id_entrega uuid not null references public.sgp_picking_entregas
+);
+alter table sgp_mecanizado_parcial.origenes_pdt enable row level security;
 alter table sgp_mecanizado_parcial.partes enable row level security;
 alter table sgp_mecanizado_parcial.solicitudes enable row level security;
 alter table sgp_mecanizado_parcial.movimientos enable row level security;

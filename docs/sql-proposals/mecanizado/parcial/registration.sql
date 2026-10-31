@@ -24,7 +24,14 @@ begin
  qty:=(p_contexto->>'cantidad_ventanas')::integer;
  select coalesce(sum(en.cantidad),0) into used from sgp_mecanizado_parcial.entregas en join public.sgp_picking_entregas pe using(id_entrega)
  where en.id_programacion=pt.id_programacion and pe.estado in ('PENDIENTE_VALIDACION','VALIDADA','AUDITADA_DIFERENCIA');
- if qty<0 or qty>pt.cantidad-used or (qty=0 and coalesce(p_contexto->>'completa','true')<>'false') then raise exception 'CANTIDAD_SUPERA_SALDO_ENTREGA'; end if;
+ if qty<0 or qty>pt.cantidad-used then raise exception 'CANTIDAD_SUPERA_SALDO_ENTREGA'; end if;
+ if qty=0 and coalesce(p_contexto->>'completa','true')<>'false' and not exists(
+  select 1 from sgp_mecanizado_parcial.contextos_pdt src
+  join public.sgp_aluminio_pendientes ap using(id_pendiente)
+  join public.sgp_picking_entregas original on original.id_entrega=src.id_entrega
+  where original.id_programacion=pt.id_programacion and ap.key_produccion=pt.key_produccion
+  and ap.estado='PENDIENTE' and ap.validacion_estado='VALIDADO' and ap.estado_repo='PROCESADO'
+ ) then raise exception 'REPOSICION_SIN_PDT_PROCESADO'; end if;
  gate:=current_setting('sgp.parte_entrega',true);
  perform pg_catalog.set_config('sgp.parte_entrega',pt.id_programacion::text,true);
  result:=sgp_mecanizado_parcial.registro_legacy(p_token,p_origen,p_contexto,p_piezas,p_idempotency_key);

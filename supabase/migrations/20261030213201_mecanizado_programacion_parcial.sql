@@ -30,6 +30,32 @@ do $guard$ begin if md5(pg_get_functiondef('sgp_picking_recepcion_cola(text)'::r
 
 do $guard$ begin if md5(pg_get_functiondef('sgp_consultar_ensamble(text,integer,text)'::regprocedure))<>'5185549ea9c433bfe5f444034afc8e52' then raise exception 'CATALOGO_CAMBIO: sgp_consultar_ensamble(text,integer,text)'; end if; end $guard$;
 
+do $guard$ begin if md5(pg_get_functiondef('sgp_picking_piezas_panel(text,uuid,text)'::regprocedure))<>'354d8705f6eddfb7902544b30e6a12dd' then raise exception 'CATALOGO_CAMBIO: sgp_picking_piezas_panel(text,uuid,text)'; end if; end $guard$;
+
+do $guard$ begin if md5(pg_get_functiondef('sgp_pdt_multiorigen.fuentes(text,text,jsonb)'::regprocedure))<>'1d2661833973f1726a0219a55bdc4853' then raise exception 'CATALOGO_CAMBIO: sgp_pdt_multiorigen.fuentes(text,text,jsonb)'; end if; end $guard$;
+
+do $guard$ begin if md5(pg_get_functiondef('sgp_pdt_multiorigen.nuevo_sgp_pdt_entrega_registrar_v2(text,uuid,uuid,integer,uuid)'::regprocedure))<>'29083f8c5b4db059f985531a20df394b' then raise exception 'CATALOGO_CAMBIO: sgp_pdt_multiorigen.nuevo_sgp_pdt_entrega_registrar_v2(text,uuid,uuid,integer,uuid)'; end if; end $guard$;
+
+do $guard$ begin if md5(pg_get_functiondef('sgp_pdt_multiorigen.grouped_nuevo_entrega(text,uuid,uuid,integer,uuid)'::regprocedure))<>'ddf725ca1b26ff5fead403b87ba41f29' then raise exception 'CATALOGO_CAMBIO: sgp_pdt_multiorigen.grouped_nuevo_entrega(text,uuid,uuid,integer,uuid)'; end if; end $guard$;
+
+do $guard$ begin if md5(pg_get_functiondef('sgp_pdt_multiorigen.nuevo_sgp_pdt_cierre_acreditado(uuid)'::regprocedure))<>'fc13cb02bd2f3d9552eb01c61c6e0735' then raise exception 'CATALOGO_CAMBIO: sgp_pdt_multiorigen.nuevo_sgp_pdt_cierre_acreditado(uuid)'; end if; end $guard$;
+
+do $guard$ begin if md5(pg_get_functiondef('sgp_pdt_multiorigen.grouped_nuevo_cierre_acreditado(uuid)'::regprocedure))<>'7e39661c15b7d2cd783bf2d3fe32e83c' then raise exception 'CATALOGO_CAMBIO: sgp_pdt_multiorigen.grouped_nuevo_cierre_acreditado(uuid)'; end if; end $guard$;
+
+do $guard$ begin if md5(pg_get_functiondef('sgp_pdt_multiorigen.nuevo_sgp_pdt_picking_v2(text,uuid)'::regprocedure))<>'e12fb4920a844ba86edb2bebec4558e7' then raise exception 'CATALOGO_CAMBIO: sgp_pdt_multiorigen.nuevo_sgp_pdt_picking_v2(text,uuid)'; end if; end $guard$;
+
+do $guard$ begin if md5(pg_get_functiondef('sgp_pdt_multiorigen.original_sgp_pdt_entrega_registrar_v2(text,uuid,uuid,integer,uuid)'::regprocedure))<>'bd77ebb40dac7a94091b0b740fc6eb7e' then raise exception 'CATALOGO_CAMBIO: sgp_pdt_multiorigen.original_sgp_pdt_entrega_registrar_v2(text,uuid,uuid,integer,uuid)'; end if; end $guard$;
+
+do $guard$ begin if md5(pg_get_functiondef('sgp_pdt_multiorigen.grouped_original_entrega(text,uuid,uuid,integer,uuid)'::regprocedure))<>'904d9fd8b666cd27f8db7a8b163822e8' then raise exception 'CATALOGO_CAMBIO: sgp_pdt_multiorigen.grouped_original_entrega(text,uuid,uuid,integer,uuid)'; end if; end $guard$;
+
+do $guard$ begin if md5(pg_get_functiondef('sgp_pdt_multiorigen.original_sgp_pdt_cierre_acreditado(uuid)'::regprocedure))<>'92c4a0388a41614cfb53a52d126f6648' then raise exception 'CATALOGO_CAMBIO: sgp_pdt_multiorigen.original_sgp_pdt_cierre_acreditado(uuid)'; end if; end $guard$;
+
+do $guard$ begin if md5(pg_get_functiondef('sgp_pdt_multiorigen.grouped_original_cierre_acreditado(uuid)'::regprocedure))<>'eb9f9b2304a5a76a7b0b0d25e6cfaff7' then raise exception 'CATALOGO_CAMBIO: sgp_pdt_multiorigen.grouped_original_cierre_acreditado(uuid)'; end if; end $guard$;
+
+do $guard$ begin if md5(pg_get_functiondef('sgp_pdt_multiorigen.original_sgp_pdt_picking_v2(text,uuid)'::regprocedure))<>'961e56199d5261710bc1660501f3fdfb' then raise exception 'CATALOGO_CAMBIO: sgp_pdt_multiorigen.original_sgp_pdt_picking_v2(text,uuid)'; end if; end $guard$;
+
+do $guard$ begin if md5(pg_get_functiondef('sgp_picking_validar_recepcion(text,uuid,jsonb,jsonb,text)'::regprocedure))<>'ff5790e874d81b713d82f4b91cb3be08' then raise exception 'CATALOGO_CAMBIO: sgp_picking_validar_recepcion(text,uuid,jsonb,jsonb,text)'; end if; end $guard$;
+
 -- REVIEW ONLY. Aggregate window parts, never aluminium-piece allocation.
 create schema sgp_mecanizado_parcial;
 revoke all on schema sgp_mecanizado_parcial from public,anon,authenticated;
@@ -57,6 +83,11 @@ create table sgp_mecanizado_parcial.entregas (
  cantidad integer not null check(cantidad>=0)
 );
 create index on sgp_mecanizado_parcial.entregas(id_programacion);
+create table sgp_mecanizado_parcial.origenes_pdt (
+ id_pendiente uuid primary key references public.sgp_aluminio_pendientes,
+ id_entrega uuid not null references public.sgp_picking_entregas
+);
+alter table sgp_mecanizado_parcial.origenes_pdt enable row level security;
 alter table sgp_mecanizado_parcial.partes enable row level security;
 alter table sgp_mecanizado_parcial.solicitudes enable row level security;
 alter table sgp_mecanizado_parcial.movimientos enable row level security;
@@ -243,6 +274,32 @@ revoke all on function public.sgp_mecanizado_partes_consultar(text,text),public.
  public.sgp_mecanizado_parte_mover(text,uuid,date,text,integer,text,boolean),public.sgp_mecanizado_parte_historial(text,uuid) from public;
 grant execute on function public.sgp_mecanizado_partes_consultar(text,text),public.sgp_mecanizado_partes_programar(text,text,text,jsonb,uuid),
  public.sgp_mecanizado_parte_mover(text,uuid,date,text,integer,text,boolean),public.sgp_mecanizado_parte_historial(text,uuid) to anon,authenticated;
+
+-- Both actual V4 registration and the legacy audit-difference writer retain their real paths.
+create view sgp_mecanizado_parcial.contextos_pdt with (security_invoker=true) as
+ select id_pendiente,id_entrega from sgp_pdt_multiorigen.detalles
+ union all select id_pendiente,id_entrega from sgp_mecanizado_parcial.origenes_pdt;
+revoke all on sgp_mecanizado_parcial.contextos_pdt from public,anon,authenticated;
+-- Private predicate: preserve the historical finish rule, bind new part evidence to its key and origin.
+create function sgp_mecanizado_parcial.material_pdt(p_pendiente uuid,p_entrega uuid,p_acabado text)
+returns boolean language sql stable set search_path='' as $$
+ select case when pt.id_programacion is null then upper(btrim(mp.acabado))=upper(btrim(p_acabado))
+ else pt.key_produccion=p.key_produccion and mp.estado<>'CANCELADA'
+  and exists(select 1 from public.sgp_produccion_reservas_v r
+   where r.key_produccion=p.key_produccion and r.reserva=p.reserva and r.reserva_principal=mp.reserva
+    and (r.acabado_reserva is null or upper(btrim(r.acabado_reserva))=upper(btrim(p_acabado))))
+  and not exists(select 1 from sgp_mecanizado_parcial.contextos_pdt src
+   join public.sgp_picking_entregas original on original.id_entrega=src.id_entrega
+   join sgp_mecanizado_parcial.partes origen on origen.id_programacion=original.id_programacion
+   where src.id_pendiente=p.id_pendiente
+   and (original.id_entrega=p_entrega or origen.id_programacion<>pt.id_programacion))
+ end
+ from public.sgp_picking_entregas pe
+ join public.sgp_mecanizado_programacion mp using(id_programacion)
+ left join sgp_mecanizado_parcial.partes pt using(id_programacion)
+ join public.sgp_aluminio_pendientes p on p.id_pendiente=p_pendiente
+ where pe.id_entrega=p_entrega
+$$;
 
 create table sgp_mecanizado_parcial.respaldo_funciones(firma text primary key,definicion text not null,instalada text); alter table sgp_mecanizado_parcial.respaldo_funciones enable row level security; revoke all on sgp_mecanizado_parcial.respaldo_funciones from public,anon,authenticated;
 
@@ -666,7 +723,7 @@ begin
    join public.sgp_producciones sp on sp.key_produccion=pr.key_produccion and sp.id_linea='PANELES_2' and sp.activa='SI' and (not exists(select 1 from sgp_mecanizado_parcial.partes pt where pt.id_programacion=b.id_programacion) or sp.key_produccion=(select key_produccion from sgp_mecanizado_parcial.partes where id_programacion=b.id_programacion))
    group by b.id_programacion,b.reserva,b.produccion,b.fecha_programacion,b.turno,b.prioridad,b.sistema,b.acabado,b.observacion,b.observacion_orden,b.estado_ejecucion,pr.prioridad
  ), filas as (
-   select coalesce((select sum(en.cantidad) from sgp_mecanizado_parcial.entregas en join public.sgp_picking_entregas pe using(id_entrega) where en.id_programacion=p.id_programacion and pe.estado in ('PENDIENTE_VALIDACION','VALIDADA','AUDITADA_DIFERENCIA')),0) cantidad_entregada,(select pt.id_programacion from sgp_mecanizado_parcial.partes pt where pt.id_programacion=p.id_programacion) parte_id,(select p.produccion||'-P'||pt.numero from sgp_mecanizado_parcial.partes pt where pt.id_programacion=p.id_programacion) identificador_parte,p.id_programacion,p.reserva,p.parte,p.produccion,p.fecha_programacion,p.turno,p.prioridad,
+   select (select count(*) from sgp_mecanizado_parcial.contextos_pdt src join public.sgp_aluminio_pendientes ap using(id_pendiente) join public.sgp_picking_entregas original on original.id_entrega=src.id_entrega where original.id_programacion=p.id_programacion and ap.estado='PENDIENTE') pdt_abiertos,coalesce((select sum(en.cantidad) from sgp_mecanizado_parcial.entregas en join public.sgp_picking_entregas pe using(id_entrega) where en.id_programacion=p.id_programacion and pe.estado in ('PENDIENTE_VALIDACION','VALIDADA','AUDITADA_DIFERENCIA')),0) cantidad_entregada,(select pt.id_programacion from sgp_mecanizado_parcial.partes pt where pt.id_programacion=p.id_programacion) parte_id,(select p.produccion||'-P'||pt.numero from sgp_mecanizado_parcial.partes pt where pt.id_programacion=p.id_programacion) identificador_parte,p.id_programacion,p.reserva,p.parte,p.produccion,p.fecha_programacion,p.turno,p.prioridad,
           p.cantidad_ventanas,p.sistema,p.acabado,p.observacion,p.observacion_orden,
           coalesce(p.estado_ejecucion,'SIN INICIAR') estado,
           (select count(*) from public.sgp_mecanizado_novedades n where n.id_programacion=p.id_programacion and n.estado<>'RESUELTA') novedades,
@@ -898,7 +955,14 @@ begin
  qty:=(p_contexto->>'cantidad_ventanas')::integer;
  select coalesce(sum(en.cantidad),0) into used from sgp_mecanizado_parcial.entregas en join public.sgp_picking_entregas pe using(id_entrega)
  where en.id_programacion=pt.id_programacion and pe.estado in ('PENDIENTE_VALIDACION','VALIDADA','AUDITADA_DIFERENCIA');
- if qty<0 or qty>pt.cantidad-used or (qty=0 and coalesce(p_contexto->>'completa','true')<>'false') then raise exception 'CANTIDAD_SUPERA_SALDO_ENTREGA'; end if;
+ if qty<0 or qty>pt.cantidad-used then raise exception 'CANTIDAD_SUPERA_SALDO_ENTREGA'; end if;
+ if qty=0 and coalesce(p_contexto->>'completa','true')<>'false' and not exists(
+  select 1 from sgp_mecanizado_parcial.contextos_pdt src
+  join public.sgp_aluminio_pendientes ap using(id_pendiente)
+  join public.sgp_picking_entregas original on original.id_entrega=src.id_entrega
+  where original.id_programacion=pt.id_programacion and ap.key_produccion=pt.key_produccion
+  and ap.estado='PENDIENTE' and ap.validacion_estado='VALIDADO' and ap.estado_repo='PROCESADO'
+ ) then raise exception 'REPOSICION_SIN_PDT_PROCESADO'; end if;
  gate:=current_setting('sgp.parte_entrega',true);
  perform pg_catalog.set_config('sgp.parte_entrega',pt.id_programacion::text,true);
  result:=sgp_mecanizado_parcial.registro_legacy(p_token,p_origen,p_contexto,p_piezas,p_idempotency_key);
@@ -955,7 +1019,7 @@ declare u text;
 begin
  u:=public.sgp_validar_sesion_rol(p_token,array['ADMINISTRADOR','COORDINADOR','PICKING','SUPERVISOR DE PICKING','LIDER LINEA','LIDER']);
  return coalesce((select jsonb_agg(jsonb_build_object(
-  'id_entrega',pe.id_entrega,'id_programacion',pe.id_programacion,'produccion',pe.produccion,'completa',pe.completa,'estado',pe.estado,
+  'parte_id',(select id_programacion from sgp_mecanizado_parcial.partes where id_programacion=pe.id_programacion),'identificador_parte',(select pe.produccion||'-P'||numero from sgp_mecanizado_parcial.partes where id_programacion=pe.id_programacion),'id_entrega',pe.id_entrega,'id_programacion',pe.id_programacion,'produccion',pe.produccion,'completa',pe.completa,'estado',pe.estado,
   'observacion',pe.observacion,'usuario_entrega',pe.usuario_entrega,'fecha_entrega',pe.fecha_operativa,'turno_entrega',pe.turno_entrega,
   'reserva',mp.reserva,'parte',mp.prioridad_semanal,'sistema',mp.sistema,'acabado',mp.acabado,
   'cantidad_ventanas',coalesce((select en.cantidad from sgp_mecanizado_parcial.entregas en where en.id_entrega=pe.id_entrega),sp.cantidad,0),'proyecto',sp.proyecto,'key_produccion',sp.key_produccion,
@@ -973,7 +1037,7 @@ begin
    select s.key_produccion,s.proyecto,s.cantidad
    from public.sgp_producciones s
    join public.sgp_prioridades pr on pr.key_produccion=s.key_produccion and pr.reserva=mp.reserva and pr.id_linea='PANELES_2'
-   where s.produccion=pe.produccion and s.id_linea='PANELES_2'
+   where s.produccion=pe.produccion and s.id_linea='PANELES_2' and (not public.sgp_mecanizado_es_parte(pe.id_programacion) or s.key_produccion=(select key_produccion from sgp_mecanizado_parcial.partes where id_programacion=pe.id_programacion))
    order by coalesce(s.semana_actual,s.semana_base) desc limit 1
  ) sp on true
  where pe.estado='PENDIENTE_VALIDACION'),'[]'::jsonb);
@@ -1006,7 +1070,7 @@ begin
     left join lateral(select string_agg(distinct nullif(v.datos_origen->>'Tipo V',''),' · ') tipo_vidrio,string_agg(distinct nullif(v.datos_origen->>'Cant y Tamaño',''),' · ') medidas from public.sgp_vidrio v where v.key_produccion=p.key_produccion and v.activo='SI')g on true
     left join lateral(select string_agg(format('(%s) %s · %s',trim(to_char(sumx,'FM999999990.##')),posicion,estado_orden),' | ' order by ord,posicion) ubicacion from(select uv.posicion,min(uv.estado_orden) estado_orden,sum(coalesce(uv.disponible,0)) sumx,case when lower(min(coalesce(uv.estado_orden,''))) like 'preparado%' then 1 when lower(min(coalesce(uv.estado_orden,''))) like 'novedad%' then 2 else 3 end ord from public.sgp_ubicacion_vidrio_actual uv where uv.key_produccion=p.key_produccion and uv.activo=true group by uv.posicion)z)u on true
     left join lateral(
-      select eo.estado,eo.observacion from (select eo.* from public.sgp_mecanizado_ejecucion_orden eo where eo.produccion=p.produccion order by eo.actualizado_en desc nulls last limit 1) eo
+      select eo.estado,eo.observacion from (select eo.* from public.sgp_mecanizado_ejecucion_orden eo where eo.produccion=p.produccion and not exists(select 1 from sgp_mecanizado_parcial.partes pt where pt.id_programacion=eo.id_programacion) order by eo.actualizado_en desc nulls last limit 1) eo
       where eo.produccion=p.produccion and not exists(select 1 from sgp_mecanizado_parcial.partes where key_produccion=p.key_produccion)
       union all
       select case when sum(case when eo.estado='PROCESADO' then pt.cantidad else 0 end)>=p.cantidad then 'PROCESADO'
@@ -1033,6 +1097,551 @@ end $function$
 ;
 
 update sgp_mecanizado_parcial.respaldo_funciones set instalada=md5(pg_get_functiondef('sgp_consultar_ensamble(text,integer,text)'::regprocedure)) where firma='sgp_consultar_ensamble(text,integer,text)';
+
+insert into sgp_mecanizado_parcial.respaldo_funciones values('sgp_picking_piezas_panel(text,uuid,text)',pg_get_functiondef('sgp_picking_piezas_panel(text,uuid,text)'::regprocedure),null);
+
+CREATE OR REPLACE FUNCTION public.sgp_picking_piezas_panel(p_token text, p_id_programacion uuid, p_produccion text DEFAULT NULL::text)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+declare
+  v_sistema text;
+  v_acabado text;
+  v_reserva text;
+  v_multi boolean:=false;
+begin
+ if exists(select 1 from sgp_mecanizado_parcial.partes where id_programacion=p_id_programacion) then
+  perform public.sgp_validar_sesion_rol(p_token,array['ADMINISTRADOR','COORDINADOR','LIDER MECANIZADO','LIDER','PATINADOR','PICKING','SUPERVISOR DE PICKING','LIDER LINEA']);
+  if p_produccion is not null and p_produccion is distinct from
+   (select produccion from public.sgp_mecanizado_programacion where id_programacion=p_id_programacion and estado<>'CANCELADA') then
+   raise exception 'PRODUCCION_AJENA_A_PARTE'; end if;
+  return coalesce((select jsonb_agg(q.pieza) from (
+   select distinct to_jsonb(a)||jsonb_build_object('key_produccion',pt.key_produccion,'perfil',a.codigo_sap,'ambito','REFERENCIA_PRODUCCION') pieza
+   from sgp_mecanizado_parcial.partes pt
+   join public.sgp_mecanizado_programacion mp using(id_programacion)
+   join public.sgp_produccion_reservas_v r on r.key_produccion=pt.key_produccion and r.reserva_principal=mp.reserva
+   cross join lateral public.sgp_pdt_origenes_internal_v3(r.reserva,null,mp.produccion,null,null) x
+   join public.sgp_aluminio a on a.id_pieza=x->>'id_pieza'
+   where pt.id_programacion=p_id_programacion and mp.estado<>'CANCELADA'
+    and x->>'key_produccion'=pt.key_produccion and x->>'tipo_pieza'='PANEL' and x->>'id_linea'='PANELES_2'
+    and upper(btrim(x->>'sistema'))=upper(btrim(mp.sistema))
+  ) q),'[]'::jsonb);
+ end if;
+
+  select sistema,acabado,reserva into v_sistema,v_acabado,v_reserva
+  from public.sgp_mecanizado_programacion
+  where id_programacion=p_id_programacion;
+
+  if p_produccion is not null then
+    select coalesce(count(distinct v.reserva)>1,false) into v_multi
+    from public.sgp_produccion_reservas_v v
+    where v.produccion=p_produccion and v.reserva_principal=v_reserva;
+  else
+    select exists(
+      select 1
+      from public.sgp_prioridades pr
+      join public.sgp_produccion_reservas_v v on v.key_produccion=pr.key_produccion
+      join public.sgp_mecanizado_programacion mp on mp.id_programacion=p_id_programacion
+      where pr.reserva=mp.reserva and pr.id_linea='PANELES_2'
+        and (mp.prioridad_semanal is null or pr.prioridad=mp.prioridad_semanal)
+      group by v.key_produccion
+      having count(distinct v.reserva)>1
+    ) into v_multi;
+  end if;
+
+  return coalesce((
+    select jsonb_agg(x)
+    from jsonb_array_elements(
+      public.sgp_picking_piezas(p_token,p_id_programacion,p_produccion)
+    ) x
+    join public.sgp_maestro_piezas m
+      on trim(m.codigo_sap)=trim(coalesce(x->>'codigo_sap',x->>'perfil'))
+     and m.activo='SI'
+     and m.tipo_pieza='PANEL'
+    where (v_sistema is null or trim(v_sistema)='' or upper(trim(coalesce(x->>'sistema','')))=upper(trim(v_sistema)))
+      and (
+        v_multi
+        or v_acabado is null
+        or trim(v_acabado)=''
+        or upper(trim(coalesce(x->>'acabado','')))=upper(trim(v_acabado))
+      )
+  ),'[]'::jsonb);
+end
+$function$
+;
+
+update sgp_mecanizado_parcial.respaldo_funciones set instalada=md5(pg_get_functiondef('sgp_picking_piezas_panel(text,uuid,text)'::regprocedure)) where firma='sgp_picking_piezas_panel(text,uuid,text)';
+
+insert into sgp_mecanizado_parcial.respaldo_funciones values('sgp_pdt_multiorigen.fuentes(text,text,jsonb)',pg_get_functiondef('sgp_pdt_multiorigen.fuentes(text,text,jsonb)'::regprocedure),null);
+
+CREATE OR REPLACE FUNCTION sgp_pdt_multiorigen.fuentes(p_token text, p_origen text, p_contexto jsonb)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+DECLARE program public.sgp_mecanizado_programacion%rowtype; allowed jsonb; result jsonb;
+BEGIN
+ PERFORM sgp_pdt_multiorigen.actor(p_token,p_origen);
+ IF nullif(btrim(p_contexto->>'produccion'),'') IS NULL THEN RAISE EXCEPTION 'PDT_PRODUCCION_REQUERIDA'; END IF;
+ IF p_origen='PICKING' THEN
+ SELECT * INTO STRICT program FROM public.sgp_mecanizado_programacion WHERE id_programacion=(p_contexto->>'id_programacion')::uuid AND estado<>'CANCELADA' FOR SHARE;
+ allowed:=public.sgp_picking_piezas_panel(p_token,program.id_programacion,p_contexto->>'produccion');
+ ELSE
+ IF nullif(p_contexto->>'key_produccion','') IS NULL THEN RAISE EXCEPTION 'PDT_CLAVE_REQUERIDA'; END IF;
+ END IF;
+ SELECT coalesce(jsonb_agg(x ORDER BY x->>'codigo_sap',x->>'fabricacion',x->>'longitud',x->>'id_pieza'),'[]'::jsonb) INTO result
+ FROM (SELECT DISTINCT x||jsonb_build_object('id_carga',a.id_carga,'fila_origen',a.fila_origen) AS x FROM public.sgp_produccion_reservas_v r
+ CROSS JOIN LATERAL public.sgp_pdt_origenes_internal_v3(r.reserva,NULL,p_contexto->>'produccion',NULL,NULL) x
+ JOIN public.sgp_aluminio a ON a.id_pieza=x->>'id_pieza'
+ WHERE r.produccion=p_contexto->>'produccion' AND r.key_produccion=x->>'key_produccion' AND r.reserva=x->>'reserva'
+ AND (p_origen<>'PICKING' OR NOT public.sgp_mecanizado_es_parte(program.id_programacion) OR x->>'key_produccion'=(SELECT key_produccion FROM sgp_mecanizado_parcial.partes WHERE id_programacion=program.id_programacion)) AND x->>'tipo_pieza'='PANEL' AND x->>'id_linea'='PANELES_2'
+ AND (nullif(p_contexto->>'reserva','') IS NULL OR x->>'reserva'=p_contexto->>'reserva')
+ AND (nullif(p_contexto->>'key_produccion','') IS NULL OR x->>'key_produccion'=p_contexto->>'key_produccion')
+ AND (p_origen<>'PICKING' OR (
+ coalesce(x->>'reserva_principal',x->>'reserva')=program.reserva
+ AND upper(btrim(x->>'sistema'))=upper(btrim(program.sistema))
+ AND (public.sgp_mecanizado_es_parte(program.id_programacion) OR upper(btrim(x->>'acabado'))=upper(btrim(program.acabado)))
+ AND EXISTS(SELECT 1 FROM jsonb_array_elements(allowed) a WHERE a->>'id_pieza'=x->>'id_pieza')))) q;
+ IF jsonb_array_length(result)>1000 THEN RAISE EXCEPTION 'PDT_FUENTES_EXCEDEN_LIMITE'; END IF;
+ RETURN result;
+END $function$
+;
+
+update sgp_mecanizado_parcial.respaldo_funciones set instalada=md5(pg_get_functiondef('sgp_pdt_multiorigen.fuentes(text,text,jsonb)'::regprocedure)) where firma='sgp_pdt_multiorigen.fuentes(text,text,jsonb)';
+
+insert into sgp_mecanizado_parcial.respaldo_funciones values('sgp_pdt_multiorigen.nuevo_sgp_pdt_entrega_registrar_v2(text,uuid,uuid,integer,uuid)',pg_get_functiondef('sgp_pdt_multiorigen.nuevo_sgp_pdt_entrega_registrar_v2(text,uuid,uuid,integer,uuid)'::regprocedure),null);
+
+CREATE OR REPLACE FUNCTION sgp_pdt_multiorigen.nuevo_sgp_pdt_entrega_registrar_v2(p_token text, p_detalle uuid, p_entrega uuid, p_cantidad integer, p_clave uuid)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+DECLARE d public.sgp_aluminio_pendiente_detalles%rowtype; p public.sgp_aluminio_pendientes%rowtype;
+ e public.sgp_pdt_entrega_lineas%rowtype; u text; nuevo uuid; neto bigint;
+BEGIN
+ u:=public.sgp_validar_sesion_rol(p_token,ARRAY['ADMINISTRADOR','COORDINADOR','PICKING','SUPERVISOR DE PICKING']);
+ IF p_cantidad IS NULL OR p_cantidad<=0 OR p_clave IS NULL THEN RAISE EXCEPTION 'Cantidad/clave inválida'; END IF;
+ SELECT * INTO STRICT d FROM public.sgp_aluminio_pendiente_detalles WHERE id_detalle=p_detalle;
+ SELECT * INTO STRICT p FROM public.sgp_aluminio_pendientes WHERE id_pendiente=d.id_pendiente FOR UPDATE;
+ PERFORM public.sgp_pdt_exigir_panel_v3(p.id_pendiente);
+ SELECT * INTO e FROM public.sgp_pdt_entrega_lineas WHERE clave=p_clave;
+ IF FOUND THEN
+  IF e.id_detalle<>p_detalle OR e.id_entrega<>p_entrega OR e.cantidad<>p_cantidad THEN RAISE EXCEPTION 'Clave reutilizada'; END IF;
+  RETURN jsonb_build_object('ok',true,'duplicado',true,'id_linea',e.id_linea);
+ END IF;
+ IF p.contrato_pdt<>'V2' OR p.estado<>'PENDIENTE' OR p.validacion_estado<>'VALIDADO' THEN RAISE EXCEPTION 'PDT no apto'; END IF;
+ PERFORM 1 FROM public.sgp_picking_entregas WHERE id_entrega=p_entrega FOR UPDATE;
+ IF NOT FOUND THEN RAISE EXCEPTION 'Entrega inexistente'; END IF;
+ PERFORM 1 FROM public.sgp_mecanizado_programacion mp JOIN public.sgp_picking_entregas pe_lock USING(id_programacion) WHERE pe_lock.id_entrega=p_entrega FOR UPDATE OF mp;
+ -- Explicit event identity, not global order status or missing quantities.
+ PERFORM 1 FROM public.sgp_picking_entregas pe
+ JOIN public.sgp_mecanizado_programacion mp ON mp.id_programacion=pe.id_programacion
+ JOIN public.sgp_producciones prod ON prod.key_produccion=p.key_produccion
+ WHERE pe.id_entrega=p_entrega AND pe.produccion=prod.produccion
+ AND upper(btrim(mp.sistema))=upper(btrim(prod.sistema))
+ AND (mp.reserva=p.reserva OR (mp.reserva=p.reserva_principal AND EXISTS(SELECT 1 FROM public.sgp_produccion_reservas_v rel WHERE rel.key_produccion=p.key_produccion AND rel.reserva=p.reserva AND rel.reserva_principal=mp.reserva))) AND sgp_mecanizado_parcial.material_pdt(p.id_pendiente,pe.id_entrega,d.acabado)
+ AND EXISTS(SELECT 1 FROM public.sgp_pdt_fuentes f WHERE f.id_detalle=d.id_detalle
+ AND upper(btrim(f.snapshot->>'sistema'))=upper(btrim(mp.sistema))
+ AND EXISTS(SELECT 1 FROM public.sgp_pdt_origenes_internal_v3(p.reserva,p.perfil,p.produccion,p.acabado_pendiente,d.id_pieza) x
+ WHERE x->>'key_produccion'=p.key_produccion AND x->>'tipo_pieza'='PANEL' AND x->>'id_linea'='PANELES_2'
+ AND f.snapshot->>'id_pieza'=x->>'id_pieza'
+ AND (SELECT to_jsonb(a)-'cantidad' FROM public.sgp_aluminio a WHERE a.id_pieza=d.id_pieza)=f.snapshot-'cantidad'));
+ IF NOT FOUND THEN RAISE EXCEPTION 'Entrega ajena o identidad incompleta'; END IF;
+ SELECT coalesce(sum(CASE WHEN tipo='AVANCE' THEN cantidad ELSE -cantidad END),0) INTO neto
+ FROM public.sgp_aluminio_pendiente_movimientos WHERE id_detalle=p_detalle;
+ IF p_cantidad+coalesce((SELECT sum(cantidad) FROM public.sgp_pdt_entrega_lineas WHERE id_detalle=p_detalle AND estado<>'ANULADA'),0)>neto
+ THEN RAISE EXCEPTION 'Entrega supera procesado'; END IF;
+ INSERT INTO public.sgp_pdt_entrega_lineas(id_entrega,id_detalle,id_pieza,cantidad,clave,registrado_por)
+ VALUES(p_entrega,p_detalle,d.id_pieza,p_cantidad,p_clave,u) RETURNING id_linea INTO nuevo;
+ RETURN jsonb_build_object('ok',true,'id_linea',nuevo);
+END $function$
+;
+
+update sgp_mecanizado_parcial.respaldo_funciones set instalada=md5(pg_get_functiondef('sgp_pdt_multiorigen.nuevo_sgp_pdt_entrega_registrar_v2(text,uuid,uuid,integer,uuid)'::regprocedure)) where firma='sgp_pdt_multiorigen.nuevo_sgp_pdt_entrega_registrar_v2(text,uuid,uuid,integer,uuid)';
+
+insert into sgp_mecanizado_parcial.respaldo_funciones values('sgp_pdt_multiorigen.grouped_nuevo_entrega(text,uuid,uuid,integer,uuid)',pg_get_functiondef('sgp_pdt_multiorigen.grouped_nuevo_entrega(text,uuid,uuid,integer,uuid)'::regprocedure),null);
+
+CREATE OR REPLACE FUNCTION sgp_pdt_multiorigen.grouped_nuevo_entrega(p_token text, p_detalle uuid, p_entrega uuid, p_cantidad integer, p_clave uuid)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+DECLARE d public.sgp_aluminio_pendiente_detalles%rowtype; p public.sgp_aluminio_pendientes%rowtype;
+ e public.sgp_pdt_entrega_lineas%rowtype; u text; nuevo uuid; neto bigint;
+BEGIN
+ u:=public.sgp_validar_sesion_rol(p_token,ARRAY['ADMINISTRADOR','COORDINADOR','PICKING','SUPERVISOR DE PICKING']);
+ IF p_cantidad IS NULL OR p_cantidad<=0 OR p_clave IS NULL THEN RAISE EXCEPTION 'Cantidad/clave inválida'; END IF;
+ SELECT * INTO STRICT d FROM public.sgp_aluminio_pendiente_detalles WHERE id_detalle=p_detalle;
+ SELECT * INTO STRICT p FROM public.sgp_aluminio_pendientes WHERE id_pendiente=d.id_pendiente FOR UPDATE;
+ PERFORM public.sgp_pdt_exigir_panel_v3(p.id_pendiente);
+ SELECT * INTO e FROM public.sgp_pdt_entrega_lineas WHERE clave=p_clave;
+ IF FOUND THEN
+  IF e.id_detalle<>p_detalle OR e.id_entrega<>p_entrega OR e.cantidad<>p_cantidad THEN RAISE EXCEPTION 'Clave reutilizada'; END IF;
+  RETURN jsonb_build_object('ok',true,'duplicado',true,'id_linea',e.id_linea);
+ END IF;
+ IF p.contrato_pdt<>'V2' OR p.estado<>'PENDIENTE' OR p.validacion_estado<>'VALIDADO' THEN RAISE EXCEPTION 'PDT no apto'; END IF;
+ PERFORM 1 FROM public.sgp_picking_entregas WHERE id_entrega=p_entrega FOR UPDATE;
+ IF NOT FOUND THEN RAISE EXCEPTION 'Entrega inexistente'; END IF;
+ PERFORM 1 FROM public.sgp_mecanizado_programacion mp JOIN public.sgp_picking_entregas pe_lock USING(id_programacion) WHERE pe_lock.id_entrega=p_entrega FOR UPDATE OF mp;
+ -- Explicit event identity, not global order status or missing quantities.
+ PERFORM 1 FROM public.sgp_picking_entregas pe
+ JOIN public.sgp_mecanizado_programacion mp ON mp.id_programacion=pe.id_programacion
+ JOIN public.sgp_producciones prod ON prod.key_produccion=p.key_produccion
+ WHERE pe.id_entrega=p_entrega AND pe.produccion=prod.produccion
+ AND upper(btrim(mp.sistema))=upper(btrim(prod.sistema))
+ AND (mp.reserva=p.reserva OR (mp.reserva=p.reserva_principal AND EXISTS(SELECT 1 FROM public.sgp_produccion_reservas_v rel WHERE rel.key_produccion=p.key_produccion AND rel.reserva=p.reserva AND rel.reserva_principal=mp.reserva))) AND sgp_mecanizado_parcial.material_pdt(p.id_pendiente,pe.id_entrega,d.acabado)
+ AND EXISTS(SELECT 1 FROM public.sgp_pdt_fuentes f WHERE f.id_detalle=d.id_detalle
+ AND upper(btrim(f.snapshot->>'sistema'))=upper(btrim(mp.sistema))
+ AND EXISTS(SELECT 1 FROM public.sgp_pdt_origenes_internal_v3(p.reserva,p.perfil,p.produccion,p.acabado_pendiente,f.id_pieza) x
+ WHERE x->>'key_produccion'=p.key_produccion AND x->>'tipo_pieza'='PANEL' AND x->>'id_linea'='PANELES_2'
+ AND f.snapshot->>'id_pieza'=x->>'id_pieza'
+ AND (SELECT to_jsonb(a)-'cantidad' FROM public.sgp_aluminio a WHERE a.id_pieza=f.id_pieza)=f.snapshot-'cantidad'));
+ IF NOT FOUND THEN RAISE EXCEPTION 'Entrega ajena o identidad incompleta'; END IF;
+ SELECT coalesce(sum(CASE WHEN tipo='AVANCE' THEN cantidad ELSE -cantidad END),0) INTO neto
+ FROM public.sgp_aluminio_pendiente_movimientos WHERE id_detalle=p_detalle;
+ IF p_cantidad+coalesce((SELECT sum(cantidad) FROM public.sgp_pdt_entrega_lineas WHERE id_detalle=p_detalle AND estado<>'ANULADA'),0)>neto
+ THEN RAISE EXCEPTION 'Entrega supera procesado'; END IF;
+ INSERT INTO public.sgp_pdt_entrega_lineas(id_entrega,id_detalle,id_pieza,cantidad,clave,registrado_por)
+ VALUES(p_entrega,p_detalle,'',p_cantidad,p_clave,u) RETURNING id_linea INTO nuevo;
+ RETURN jsonb_build_object('ok',true,'id_linea',nuevo);
+END $function$
+;
+
+update sgp_mecanizado_parcial.respaldo_funciones set instalada=md5(pg_get_functiondef('sgp_pdt_multiorigen.grouped_nuevo_entrega(text,uuid,uuid,integer,uuid)'::regprocedure)) where firma='sgp_pdt_multiorigen.grouped_nuevo_entrega(text,uuid,uuid,integer,uuid)';
+
+insert into sgp_mecanizado_parcial.respaldo_funciones values('sgp_pdt_multiorigen.nuevo_sgp_pdt_cierre_acreditado(uuid)',pg_get_functiondef('sgp_pdt_multiorigen.nuevo_sgp_pdt_cierre_acreditado(uuid)'::regprocedure),null);
+
+CREATE OR REPLACE FUNCTION sgp_pdt_multiorigen.nuevo_sgp_pdt_cierre_acreditado(p_id uuid)
+ RETURNS boolean
+ LANGUAGE sql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+ SELECT EXISTS(SELECT 1 FROM public.sgp_pdt_cierres WHERE id_pendiente=p_id)
+ AND EXISTS(SELECT 1 FROM public.sgp_aluminio_pendiente_detalles WHERE id_pendiente=p_id)
+ AND NOT EXISTS(SELECT 1 FROM public.sgp_aluminio_pendiente_detalles d WHERE d.id_pendiente=p_id AND (
+ d.cantidad_validada<>(SELECT coalesce(sum(CASE WHEN m.tipo='AVANCE' THEN m.cantidad ELSE -m.cantidad END),0) FROM public.sgp_aluminio_pendiente_movimientos m WHERE m.id_detalle=d.id_detalle)
+ OR d.cantidad_validada<>(SELECT coalesce(sum(a.cantidad),0) FROM public.sgp_pdt_asignaciones a
+ JOIN public.sgp_pdt_entrega_lineas l USING(id_linea) JOIN public.sgp_picking_entregas e ON e.id_entrega=l.id_entrega
+ JOIN public.sgp_mecanizado_programacion mp ON mp.id_programacion=e.id_programacion
+ JOIN public.sgp_pdt_fuentes f ON f.id_detalle=a.id_detalle
+ JOIN public.sgp_aluminio_pendientes p ON p.id_pendiente=d.id_pendiente
+ WHERE a.id_detalle=d.id_detalle AND l.estado='VALIDADA' AND e.estado='VALIDADA'
+ AND e.produccion=p.produccion AND (mp.reserva=p.reserva OR (mp.reserva=p.reserva_principal AND EXISTS(SELECT 1 FROM public.sgp_produccion_reservas_v rel WHERE rel.key_produccion=p.key_produccion AND rel.reserva=p.reserva AND rel.reserva_principal=mp.reserva)))
+ AND upper(btrim(mp.sistema))=upper(btrim(f.snapshot->>'sistema'))
+ AND sgp_mecanizado_parcial.material_pdt(p.id_pendiente,e.id_entrega,d.acabado))));
+$function$
+;
+
+update sgp_mecanizado_parcial.respaldo_funciones set instalada=md5(pg_get_functiondef('sgp_pdt_multiorigen.nuevo_sgp_pdt_cierre_acreditado(uuid)'::regprocedure)) where firma='sgp_pdt_multiorigen.nuevo_sgp_pdt_cierre_acreditado(uuid)';
+
+insert into sgp_mecanizado_parcial.respaldo_funciones values('sgp_pdt_multiorigen.grouped_nuevo_cierre_acreditado(uuid)',pg_get_functiondef('sgp_pdt_multiorigen.grouped_nuevo_cierre_acreditado(uuid)'::regprocedure),null);
+
+CREATE OR REPLACE FUNCTION sgp_pdt_multiorigen.grouped_nuevo_cierre_acreditado(p_id uuid)
+ RETURNS boolean
+ LANGUAGE sql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+ SELECT EXISTS(SELECT 1 FROM public.sgp_pdt_cierres WHERE id_pendiente=p_id)
+ AND EXISTS(SELECT 1 FROM public.sgp_aluminio_pendiente_detalles WHERE id_pendiente=p_id)
+ AND NOT EXISTS(SELECT 1 FROM public.sgp_aluminio_pendiente_detalles d WHERE d.id_pendiente=p_id AND (
+ d.cantidad_validada<>(SELECT coalesce(sum(CASE WHEN m.tipo='AVANCE' THEN m.cantidad ELSE -m.cantidad END),0) FROM public.sgp_aluminio_pendiente_movimientos m WHERE m.id_detalle=d.id_detalle)
+ OR d.cantidad_validada<>(SELECT coalesce(sum(a.cantidad),0) FROM public.sgp_pdt_asignaciones a
+ JOIN public.sgp_pdt_entrega_lineas l USING(id_linea) JOIN public.sgp_picking_entregas e ON e.id_entrega=l.id_entrega
+ JOIN public.sgp_mecanizado_programacion mp ON mp.id_programacion=e.id_programacion
+
+ JOIN public.sgp_aluminio_pendientes p ON p.id_pendiente=d.id_pendiente
+ WHERE a.id_detalle=d.id_detalle AND l.estado='VALIDADA' AND e.estado='VALIDADA'
+ AND e.produccion=p.produccion AND (mp.reserva=p.reserva OR (mp.reserva=p.reserva_principal AND EXISTS(SELECT 1 FROM public.sgp_produccion_reservas_v rel WHERE rel.key_produccion=p.key_produccion AND rel.reserva=p.reserva AND rel.reserva_principal=mp.reserva)))
+ AND EXISTS(SELECT 1 FROM public.sgp_pdt_fuentes f WHERE f.id_detalle=a.id_detalle AND upper(btrim(mp.sistema))=upper(btrim(f.snapshot->>'sistema')))
+ AND sgp_mecanizado_parcial.material_pdt(p.id_pendiente,e.id_entrega,d.acabado))));
+$function$
+;
+
+update sgp_mecanizado_parcial.respaldo_funciones set instalada=md5(pg_get_functiondef('sgp_pdt_multiorigen.grouped_nuevo_cierre_acreditado(uuid)'::regprocedure)) where firma='sgp_pdt_multiorigen.grouped_nuevo_cierre_acreditado(uuid)';
+
+insert into sgp_mecanizado_parcial.respaldo_funciones values('sgp_pdt_multiorigen.nuevo_sgp_pdt_picking_v2(text,uuid)',pg_get_functiondef('sgp_pdt_multiorigen.nuevo_sgp_pdt_picking_v2(text,uuid)'::regprocedure),null);
+
+CREATE OR REPLACE FUNCTION sgp_pdt_multiorigen.nuevo_sgp_pdt_picking_v2(p_token text, p_id uuid)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+DECLARE p public.sgp_aluminio_pendientes%rowtype;
+BEGIN
+ PERFORM public.sgp_validar_sesion_rol(p_token,ARRAY['ADMINISTRADOR','COORDINADOR','RECEPCION','PICKING','SUPERVISOR DE PICKING','LIDER MECANIZADO','LIDER']);
+ SELECT * INTO STRICT p FROM public.sgp_aluminio_pendientes WHERE id_pendiente=p_id;
+ IF p.contrato_pdt<>'V2' THEN RAISE EXCEPTION 'PDT no V2'; END IF;
+ RETURN jsonb_build_object('ok',true,'entregas',coalesce((SELECT jsonb_agg(to_jsonb(x)) FROM (
+  SELECT pe.id_entrega,pe.estado,pe.completa,pe.produccion FROM public.sgp_picking_entregas pe
+  JOIN public.sgp_mecanizado_programacion mp USING(id_programacion)
+  JOIN public.sgp_producciones prod ON prod.key_produccion=p.key_produccion
+  WHERE pe.produccion=prod.produccion AND upper(btrim(mp.sistema))=upper(btrim(prod.sistema))
+  AND (mp.reserva=p.reserva OR (mp.reserva=p.reserva_principal AND EXISTS(SELECT 1 FROM public.sgp_produccion_reservas_v rel WHERE rel.key_produccion=p.key_produccion AND rel.reserva=p.reserva AND rel.reserva_principal=mp.reserva))) AND sgp_mecanizado_parcial.material_pdt(p.id_pendiente,pe.id_entrega,p.acabado_pendiente)
+ )x),'[]'::jsonb),'lineas',coalesce((SELECT jsonb_agg(to_jsonb(l)||jsonb_build_object('asignada',EXISTS(
+ SELECT 1 FROM public.sgp_pdt_asignaciones a WHERE a.id_linea=l.id_linea)))
+ FROM public.sgp_pdt_entrega_lineas l JOIN public.sgp_aluminio_pendiente_detalles d USING(id_detalle)
+ WHERE d.id_pendiente=p_id),'[]'::jsonb));
+END $function$
+;
+
+update sgp_mecanizado_parcial.respaldo_funciones set instalada=md5(pg_get_functiondef('sgp_pdt_multiorigen.nuevo_sgp_pdt_picking_v2(text,uuid)'::regprocedure)) where firma='sgp_pdt_multiorigen.nuevo_sgp_pdt_picking_v2(text,uuid)';
+
+insert into sgp_mecanizado_parcial.respaldo_funciones values('sgp_pdt_multiorigen.original_sgp_pdt_entrega_registrar_v2(text,uuid,uuid,integer,uuid)',pg_get_functiondef('sgp_pdt_multiorigen.original_sgp_pdt_entrega_registrar_v2(text,uuid,uuid,integer,uuid)'::regprocedure),null);
+
+CREATE OR REPLACE FUNCTION sgp_pdt_multiorigen.original_sgp_pdt_entrega_registrar_v2(p_token text, p_detalle uuid, p_entrega uuid, p_cantidad integer, p_clave uuid)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+DECLARE d public.sgp_aluminio_pendiente_detalles%rowtype; p public.sgp_aluminio_pendientes%rowtype;
+ e public.sgp_pdt_entrega_lineas%rowtype; u text; nuevo uuid; neto bigint;
+BEGIN
+ u:=public.sgp_validar_sesion_rol(p_token,ARRAY['ADMINISTRADOR','COORDINADOR','PICKING','SUPERVISOR DE PICKING']);
+ IF p_cantidad IS NULL OR p_cantidad<=0 OR p_clave IS NULL THEN RAISE EXCEPTION 'Cantidad/clave inválida'; END IF;
+ SELECT * INTO STRICT d FROM public.sgp_aluminio_pendiente_detalles WHERE id_detalle=p_detalle;
+ SELECT * INTO STRICT p FROM public.sgp_aluminio_pendientes WHERE id_pendiente=d.id_pendiente FOR UPDATE;
+ PERFORM public.sgp_pdt_exigir_panel_v3(p.id_pendiente);
+ SELECT * INTO e FROM public.sgp_pdt_entrega_lineas WHERE clave=p_clave;
+ IF FOUND THEN
+  IF e.id_detalle<>p_detalle OR e.id_entrega<>p_entrega OR e.cantidad<>p_cantidad THEN RAISE EXCEPTION 'Clave reutilizada'; END IF;
+  RETURN jsonb_build_object('ok',true,'duplicado',true,'id_linea',e.id_linea);
+ END IF;
+ IF p.contrato_pdt<>'V2' OR p.estado<>'PENDIENTE' OR p.validacion_estado<>'VALIDADO' THEN RAISE EXCEPTION 'PDT no apto'; END IF;
+ PERFORM 1 FROM public.sgp_picking_entregas WHERE id_entrega=p_entrega FOR UPDATE;
+ IF NOT FOUND THEN RAISE EXCEPTION 'Entrega inexistente'; END IF;
+ PERFORM 1 FROM public.sgp_mecanizado_programacion mp JOIN public.sgp_picking_entregas pe_lock USING(id_programacion) WHERE pe_lock.id_entrega=p_entrega FOR UPDATE OF mp;
+ -- Explicit event identity, not global order status or missing quantities.
+ PERFORM 1 FROM public.sgp_picking_entregas pe
+ JOIN public.sgp_mecanizado_programacion mp ON mp.id_programacion=pe.id_programacion
+ JOIN public.sgp_producciones prod ON prod.key_produccion=p.key_produccion
+ WHERE pe.id_entrega=p_entrega AND pe.produccion=prod.produccion
+ AND upper(btrim(mp.sistema))=upper(btrim(prod.sistema))
+ AND (mp.reserva=p.reserva OR public.sgp_mecanizado_es_parte(mp.id_programacion)) AND sgp_mecanizado_parcial.material_pdt(p.id_pendiente,pe.id_entrega,d.acabado)
+ AND EXISTS(SELECT 1 FROM public.sgp_pdt_fuentes f WHERE f.id_detalle=d.id_detalle
+ AND upper(btrim(f.snapshot->>'sistema'))=upper(btrim(mp.sistema))
+ AND f.snapshot->>'key_produccion'=p.key_produccion);
+ IF NOT FOUND THEN RAISE EXCEPTION 'Entrega ajena o identidad incompleta'; END IF;
+ SELECT coalesce(sum(CASE WHEN tipo='AVANCE' THEN cantidad ELSE -cantidad END),0) INTO neto
+ FROM public.sgp_aluminio_pendiente_movimientos WHERE id_detalle=p_detalle;
+ IF p_cantidad+coalesce((SELECT sum(cantidad) FROM public.sgp_pdt_entrega_lineas WHERE id_detalle=p_detalle AND estado<>'ANULADA'),0)>neto
+ THEN RAISE EXCEPTION 'Entrega supera procesado'; END IF;
+ INSERT INTO public.sgp_pdt_entrega_lineas(id_entrega,id_detalle,id_pieza,cantidad,clave,registrado_por)
+ VALUES(p_entrega,p_detalle,d.id_pieza,p_cantidad,p_clave,u) RETURNING id_linea INTO nuevo;
+ RETURN jsonb_build_object('ok',true,'id_linea',nuevo);
+END $function$
+;
+
+update sgp_mecanizado_parcial.respaldo_funciones set instalada=md5(pg_get_functiondef('sgp_pdt_multiorigen.original_sgp_pdt_entrega_registrar_v2(text,uuid,uuid,integer,uuid)'::regprocedure)) where firma='sgp_pdt_multiorigen.original_sgp_pdt_entrega_registrar_v2(text,uuid,uuid,integer,uuid)';
+
+insert into sgp_mecanizado_parcial.respaldo_funciones values('sgp_pdt_multiorigen.grouped_original_entrega(text,uuid,uuid,integer,uuid)',pg_get_functiondef('sgp_pdt_multiorigen.grouped_original_entrega(text,uuid,uuid,integer,uuid)'::regprocedure),null);
+
+CREATE OR REPLACE FUNCTION sgp_pdt_multiorigen.grouped_original_entrega(p_token text, p_detalle uuid, p_entrega uuid, p_cantidad integer, p_clave uuid)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+DECLARE d public.sgp_aluminio_pendiente_detalles%rowtype; p public.sgp_aluminio_pendientes%rowtype;
+ e public.sgp_pdt_entrega_lineas%rowtype; u text; nuevo uuid; neto bigint;
+BEGIN
+ u:=public.sgp_validar_sesion_rol(p_token,ARRAY['ADMINISTRADOR','COORDINADOR','PICKING','SUPERVISOR DE PICKING']);
+ IF p_cantidad IS NULL OR p_cantidad<=0 OR p_clave IS NULL THEN RAISE EXCEPTION 'Cantidad/clave inválida'; END IF;
+ SELECT * INTO STRICT d FROM public.sgp_aluminio_pendiente_detalles WHERE id_detalle=p_detalle;
+ SELECT * INTO STRICT p FROM public.sgp_aluminio_pendientes WHERE id_pendiente=d.id_pendiente FOR UPDATE;
+ PERFORM public.sgp_pdt_exigir_panel_v3(p.id_pendiente);
+ SELECT * INTO e FROM public.sgp_pdt_entrega_lineas WHERE clave=p_clave;
+ IF FOUND THEN
+  IF e.id_detalle<>p_detalle OR e.id_entrega<>p_entrega OR e.cantidad<>p_cantidad THEN RAISE EXCEPTION 'Clave reutilizada'; END IF;
+  RETURN jsonb_build_object('ok',true,'duplicado',true,'id_linea',e.id_linea);
+ END IF;
+ IF p.contrato_pdt<>'V2' OR p.estado<>'PENDIENTE' OR p.validacion_estado<>'VALIDADO' THEN RAISE EXCEPTION 'PDT no apto'; END IF;
+ PERFORM 1 FROM public.sgp_picking_entregas WHERE id_entrega=p_entrega FOR UPDATE;
+ IF NOT FOUND THEN RAISE EXCEPTION 'Entrega inexistente'; END IF;
+ PERFORM 1 FROM public.sgp_mecanizado_programacion mp JOIN public.sgp_picking_entregas pe_lock USING(id_programacion) WHERE pe_lock.id_entrega=p_entrega FOR UPDATE OF mp;
+ -- Explicit event identity, not global order status or missing quantities.
+ PERFORM 1 FROM public.sgp_picking_entregas pe
+ JOIN public.sgp_mecanizado_programacion mp ON mp.id_programacion=pe.id_programacion
+ JOIN public.sgp_producciones prod ON prod.key_produccion=p.key_produccion
+ WHERE pe.id_entrega=p_entrega AND pe.produccion=prod.produccion
+ AND upper(btrim(mp.sistema))=upper(btrim(prod.sistema))
+ AND (mp.reserva=p.reserva OR public.sgp_mecanizado_es_parte(mp.id_programacion)) AND sgp_mecanizado_parcial.material_pdt(p.id_pendiente,pe.id_entrega,d.acabado)
+ AND EXISTS(SELECT 1 FROM public.sgp_pdt_fuentes f WHERE f.id_detalle=d.id_detalle
+ AND upper(btrim(f.snapshot->>'sistema'))=upper(btrim(mp.sistema))
+ AND f.snapshot->>'key_produccion'=p.key_produccion);
+ IF NOT FOUND THEN RAISE EXCEPTION 'Entrega ajena o identidad incompleta'; END IF;
+ SELECT coalesce(sum(CASE WHEN tipo='AVANCE' THEN cantidad ELSE -cantidad END),0) INTO neto
+ FROM public.sgp_aluminio_pendiente_movimientos WHERE id_detalle=p_detalle;
+ IF p_cantidad+coalesce((SELECT sum(cantidad) FROM public.sgp_pdt_entrega_lineas WHERE id_detalle=p_detalle AND estado<>'ANULADA'),0)>neto
+ THEN RAISE EXCEPTION 'Entrega supera procesado'; END IF;
+ INSERT INTO public.sgp_pdt_entrega_lineas(id_entrega,id_detalle,id_pieza,cantidad,clave,registrado_por)
+ VALUES(p_entrega,p_detalle,'',p_cantidad,p_clave,u) RETURNING id_linea INTO nuevo;
+ RETURN jsonb_build_object('ok',true,'id_linea',nuevo);
+END $function$
+;
+
+update sgp_mecanizado_parcial.respaldo_funciones set instalada=md5(pg_get_functiondef('sgp_pdt_multiorigen.grouped_original_entrega(text,uuid,uuid,integer,uuid)'::regprocedure)) where firma='sgp_pdt_multiorigen.grouped_original_entrega(text,uuid,uuid,integer,uuid)';
+
+insert into sgp_mecanizado_parcial.respaldo_funciones values('sgp_pdt_multiorigen.original_sgp_pdt_cierre_acreditado(uuid)',pg_get_functiondef('sgp_pdt_multiorigen.original_sgp_pdt_cierre_acreditado(uuid)'::regprocedure),null);
+
+CREATE OR REPLACE FUNCTION sgp_pdt_multiorigen.original_sgp_pdt_cierre_acreditado(p_id uuid)
+ RETURNS boolean
+ LANGUAGE sql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+ SELECT EXISTS(SELECT 1 FROM public.sgp_pdt_cierres WHERE id_pendiente=p_id)
+ AND EXISTS(SELECT 1 FROM public.sgp_aluminio_pendiente_detalles WHERE id_pendiente=p_id)
+ AND NOT EXISTS(SELECT 1 FROM public.sgp_aluminio_pendiente_detalles d WHERE d.id_pendiente=p_id AND (
+ d.cantidad_validada<>(SELECT coalesce(sum(CASE WHEN m.tipo='AVANCE' THEN m.cantidad ELSE -m.cantidad END),0) FROM public.sgp_aluminio_pendiente_movimientos m WHERE m.id_detalle=d.id_detalle)
+ OR d.cantidad_validada<>(SELECT coalesce(sum(a.cantidad),0) FROM public.sgp_pdt_asignaciones a
+ JOIN public.sgp_pdt_entrega_lineas l USING(id_linea) JOIN public.sgp_picking_entregas e ON e.id_entrega=l.id_entrega
+ JOIN public.sgp_mecanizado_programacion mp ON mp.id_programacion=e.id_programacion
+ JOIN public.sgp_pdt_fuentes f ON f.id_detalle=a.id_detalle
+ JOIN public.sgp_aluminio_pendientes p ON p.id_pendiente=d.id_pendiente
+ WHERE a.id_detalle=d.id_detalle AND l.estado='VALIDADA' AND e.estado='VALIDADA'
+ AND e.produccion=p.produccion AND (mp.reserva=p.reserva OR public.sgp_mecanizado_es_parte(mp.id_programacion))
+ AND upper(btrim(mp.sistema))=upper(btrim(f.snapshot->>'sistema'))
+ AND sgp_mecanizado_parcial.material_pdt(p.id_pendiente,e.id_entrega,d.acabado))));
+$function$
+;
+
+update sgp_mecanizado_parcial.respaldo_funciones set instalada=md5(pg_get_functiondef('sgp_pdt_multiorigen.original_sgp_pdt_cierre_acreditado(uuid)'::regprocedure)) where firma='sgp_pdt_multiorigen.original_sgp_pdt_cierre_acreditado(uuid)';
+
+insert into sgp_mecanizado_parcial.respaldo_funciones values('sgp_pdt_multiorigen.grouped_original_cierre_acreditado(uuid)',pg_get_functiondef('sgp_pdt_multiorigen.grouped_original_cierre_acreditado(uuid)'::regprocedure),null);
+
+CREATE OR REPLACE FUNCTION sgp_pdt_multiorigen.grouped_original_cierre_acreditado(p_id uuid)
+ RETURNS boolean
+ LANGUAGE sql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+ SELECT EXISTS(SELECT 1 FROM public.sgp_pdt_cierres WHERE id_pendiente=p_id)
+ AND EXISTS(SELECT 1 FROM public.sgp_aluminio_pendiente_detalles WHERE id_pendiente=p_id)
+ AND NOT EXISTS(SELECT 1 FROM public.sgp_aluminio_pendiente_detalles d WHERE d.id_pendiente=p_id AND (
+ d.cantidad_validada<>(SELECT coalesce(sum(CASE WHEN m.tipo='AVANCE' THEN m.cantidad ELSE -m.cantidad END),0) FROM public.sgp_aluminio_pendiente_movimientos m WHERE m.id_detalle=d.id_detalle)
+ OR d.cantidad_validada<>(SELECT coalesce(sum(a.cantidad),0) FROM public.sgp_pdt_asignaciones a
+ JOIN public.sgp_pdt_entrega_lineas l USING(id_linea) JOIN public.sgp_picking_entregas e ON e.id_entrega=l.id_entrega
+ JOIN public.sgp_mecanizado_programacion mp ON mp.id_programacion=e.id_programacion
+
+ JOIN public.sgp_aluminio_pendientes p ON p.id_pendiente=d.id_pendiente
+ WHERE a.id_detalle=d.id_detalle AND l.estado='VALIDADA' AND e.estado='VALIDADA'
+ AND e.produccion=p.produccion AND (mp.reserva=p.reserva OR public.sgp_mecanizado_es_parte(mp.id_programacion))
+ AND EXISTS(SELECT 1 FROM public.sgp_pdt_fuentes f WHERE f.id_detalle=a.id_detalle AND upper(btrim(mp.sistema))=upper(btrim(f.snapshot->>'sistema')))
+ AND sgp_mecanizado_parcial.material_pdt(p.id_pendiente,e.id_entrega,d.acabado))));
+$function$
+;
+
+update sgp_mecanizado_parcial.respaldo_funciones set instalada=md5(pg_get_functiondef('sgp_pdt_multiorigen.grouped_original_cierre_acreditado(uuid)'::regprocedure)) where firma='sgp_pdt_multiorigen.grouped_original_cierre_acreditado(uuid)';
+
+insert into sgp_mecanizado_parcial.respaldo_funciones values('sgp_pdt_multiorigen.original_sgp_pdt_picking_v2(text,uuid)',pg_get_functiondef('sgp_pdt_multiorigen.original_sgp_pdt_picking_v2(text,uuid)'::regprocedure),null);
+
+CREATE OR REPLACE FUNCTION sgp_pdt_multiorigen.original_sgp_pdt_picking_v2(p_token text, p_id uuid)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+DECLARE p public.sgp_aluminio_pendientes%rowtype;
+BEGIN
+ PERFORM public.sgp_validar_sesion_rol(p_token,ARRAY['ADMINISTRADOR','COORDINADOR','RECEPCION','PICKING','SUPERVISOR DE PICKING','LIDER MECANIZADO','LIDER']);
+ SELECT * INTO STRICT p FROM public.sgp_aluminio_pendientes WHERE id_pendiente=p_id;
+ IF p.contrato_pdt<>'V2' THEN RAISE EXCEPTION 'PDT no V2'; END IF;
+ RETURN jsonb_build_object('ok',true,'entregas',coalesce((SELECT jsonb_agg(to_jsonb(x)) FROM (
+  SELECT pe.id_entrega,pe.estado,pe.completa,pe.produccion FROM public.sgp_picking_entregas pe
+  JOIN public.sgp_mecanizado_programacion mp USING(id_programacion)
+  JOIN public.sgp_producciones prod ON prod.key_produccion=p.key_produccion
+  WHERE pe.produccion=prod.produccion AND upper(btrim(mp.sistema))=upper(btrim(prod.sistema))
+  AND (mp.reserva=p.reserva OR public.sgp_mecanizado_es_parte(mp.id_programacion)) AND sgp_mecanizado_parcial.material_pdt(p.id_pendiente,pe.id_entrega,p.acabado_pendiente)
+ )x),'[]'::jsonb),'lineas',coalesce((SELECT jsonb_agg(to_jsonb(l)||jsonb_build_object('asignada',EXISTS(
+ SELECT 1 FROM public.sgp_pdt_asignaciones a WHERE a.id_linea=l.id_linea)))
+ FROM public.sgp_pdt_entrega_lineas l JOIN public.sgp_aluminio_pendiente_detalles d USING(id_detalle)
+ WHERE d.id_pendiente=p_id),'[]'::jsonb));
+END $function$
+;
+
+update sgp_mecanizado_parcial.respaldo_funciones set instalada=md5(pg_get_functiondef('sgp_pdt_multiorigen.original_sgp_pdt_picking_v2(text,uuid)'::regprocedure)) where firma='sgp_pdt_multiorigen.original_sgp_pdt_picking_v2(text,uuid)';
+
+insert into sgp_mecanizado_parcial.respaldo_funciones values('sgp_picking_validar_recepcion(text,uuid,jsonb,jsonb,text)',pg_get_functiondef('sgp_picking_validar_recepcion(text,uuid,jsonb,jsonb,text)'::regprocedure),null);
+
+CREATE OR REPLACE FUNCTION public.sgp_picking_validar_recepcion(p_token text, p_id_entrega uuid, p_faltantes jsonb DEFAULT '[]'::jsonb, p_diferencias jsonb DEFAULT '[]'::jsonb, p_observacion text DEFAULT NULL::text)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare u text; e record; f jsonb; d jsonb; v_diff boolean:=false; v_key text; v_shared boolean:=false; v_principal text; v_pending_res text; v_finish text; v_nuevo uuid;
+begin
+ u:=public.sgp_validar_sesion_rol(p_token,array['ADMINISTRADOR','COORDINADOR','PICKING','SUPERVISOR DE PICKING','LIDER LINEA','LIDER']);
+ select pe.*,mp.reserva into e from public.sgp_picking_entregas pe join public.sgp_mecanizado_programacion mp on mp.id_programacion=pe.id_programacion where pe.id_entrega=p_id_entrega for update;
+ if e.id_entrega is null then raise exception 'Entrega no encontrada'; end if;
+ if e.estado<>'PENDIENTE_VALIDACION' then raise exception 'La entrega ya fue auditada'; end if;
+ select v.key_produccion,v.reserva_principal,bool_or(v.es_reserva_compartida)
+ into v_key,v_principal,v_shared
+ from public.sgp_produccion_reservas_v v
+ where v.produccion=e.produccion and v.reserva_principal=e.reserva
+ group by v.key_produccion,v.reserva_principal
+ order by max(v.semana_produccion) desc limit 1;
+ v_principal:=coalesce(v_principal,e.reserva);v_shared:=coalesce(v_shared,false);
+
+ if public.sgp_mecanizado_es_parte(e.id_programacion) then
+  select pt.key_produccion,mp.reserva,public.sgp_es_reserva_compartida(pt.key_produccion)
+  into strict v_key,v_principal,v_shared from sgp_mecanizado_parcial.partes pt
+  join public.sgp_mecanizado_programacion mp using(id_programacion) where pt.id_programacion=e.id_programacion;
+ end if;
+ for f in select value from jsonb_array_elements(coalesce(p_faltantes,'[]')) loop
+  if public.sgp_mecanizado_es_parte(e.id_programacion) and (f->>'ventanas_afectadas')::integer>(select cantidad from sgp_mecanizado_parcial.partes where id_programacion=e.id_programacion) then raise exception 'VENTANAS_AFECTADAS_SUPERAN_PARTE'; end if;
+  if public.sgp_mecanizado_es_parte(e.id_programacion) and not exists(
+   select 1 from public.sgp_picking_faltantes pf where pf.id_faltante=(f->>'id_faltante')::uuid
+   and pf.id_entrega=p_id_entrega and pf.id_pieza is not distinct from nullif(f->>'id_pieza','')
+  ) then raise exception 'FALTANTE_AJENO_A_ENTREGA'; end if;
+  if coalesce((f->>'ventanas_afectadas')::int,0)<1 then raise exception 'Indique las ventanas afectadas de cada faltante'; end if;
+  update public.sgp_picking_faltantes set ventanas_afectadas=(f->>'ventanas_afectadas')::int,auditado=true,usuario_auditoria=u,fecha_auditoria=now()
+   where id_faltante=(f->>'id_faltante')::uuid and id_entrega=p_id_entrega;
+  update public.sgp_aluminio_pendientes set ventanas_afectadas=(f->>'ventanas_afectadas')::int,auditado=true
+   where produccion=e.produccion and id_pieza is not distinct from nullif(f->>'id_pieza','') and estado='PENDIENTE'
+     and (reserva=e.reserva or reserva=(select pf.reserva_pendiente from public.sgp_picking_faltantes pf where pf.id_faltante=(f->>'id_faltante')::uuid)) and (not public.sgp_mecanizado_es_parte(e.id_programacion) or exists(select 1 from sgp_mecanizado_parcial.contextos_pdt src where src.id_pendiente=public.sgp_aluminio_pendientes.id_pendiente and src.id_entrega=p_id_entrega));
+ end loop;
+ for d in select value from jsonb_array_elements(coalesce(p_diferencias,'[]')) loop
+  if public.sgp_mecanizado_es_parte(e.id_programacion) and (nullif(d->>'id_pieza','') is null or (d->>'cantidad') is null or (d->>'cantidad')::numeric<=0 or (d->>'cantidad')::numeric<>trunc((d->>'cantidad')::numeric) or (d->>'cantidad')::numeric>(select cantidad from public.sgp_aluminio where id_pieza=d->>'id_pieza')) then raise exception 'CANTIDAD_MATERIAL_INVALIDA'; end if;
+  if public.sgp_mecanizado_es_parte(e.id_programacion) and coalesce((d->>'ventanas_afectadas')::integer,1)>(select cantidad from sgp_mecanizado_parcial.partes where id_programacion=e.id_programacion) then raise exception 'VENTANAS_AFECTADAS_SUPERAN_PARTE'; end if;
+  v_diff:=true;
+  v_pending_res:=coalesce(nullif(trim(d->>'reserva'),''),e.reserva);
+  if v_key is not null and not exists(select 1 from public.sgp_produccion_reservas_v v where v.key_produccion=v_key and v.reserva=v_pending_res) then
+    raise exception 'Seleccione una reserva válida para la diferencia de la orden con reserva compartida';
+  end if;
+  select v.acabado_reserva into v_finish from public.sgp_produccion_reservas_v v where v.key_produccion=v_key and v.reserva=v_pending_res limit 1;
+  v_finish:=coalesce(nullif(trim(d->>'acabado'),''),v_finish);
+  insert into public.sgp_picking_auditoria_diferencias(id_entrega,id_pieza,perfil,marca,fabricacion,longitud,cantidad,ventanas_afectadas,observacion,usuario_auditoria,reserva_pendiente,acabado_pendiente)
+  values(p_id_entrega,nullif(d->>'id_pieza',''),d->>'perfil',nullif(d->>'marca',''),nullif(d->>'fabricacion',''),nullif(d->>'longitud','')::numeric,
+         greatest(coalesce((d->>'cantidad')::numeric,1),1),greatest(coalesce((d->>'ventanas_afectadas')::int,1),1),nullif(d->>'observacion',''),u,v_pending_res,v_finish);
+  insert into public.sgp_aluminio_pendientes(
+    reserva,reserva_principal,key_produccion,es_reserva_compartida,acabado_pendiente,
+    produccion,perfil,cantidad,longitud,origen,causa,observacion,estado,usuario_reporte,id_pieza,marca,fabricacion,estado_repo,ventanas_afectadas,auditado
+  ) values(
+    v_pending_res,v_principal,v_key,v_shared,v_finish,e.produccion,d->>'perfil',
+    greatest(coalesce((d->>'cantidad')::numeric,1),1),nullif(d->>'longitud','')::numeric,
+    'PICKING_AUDITORIA','DIFERENCIA_AUDITORIA',nullif(d->>'observacion',''),'PENDIENTE',u,
+    nullif(d->>'id_pieza',''),nullif(d->>'marca',''),nullif(d->>'fabricacion',''),'PENDIENTE',
+    greatest(coalesce((d->>'ventanas_afectadas')::int,1),1),true
+  ) returning id_pendiente into v_nuevo;
+  if public.sgp_mecanizado_es_parte(e.id_programacion) then insert into sgp_mecanizado_parcial.origenes_pdt values(v_nuevo,p_id_entrega); end if;
+ end loop;
+ update public.sgp_picking_entregas set estado=case when v_diff then 'AUDITADA_DIFERENCIA' else 'VALIDADA' end,usuario_validacion=u,fecha_validacion=now(),
+  observacion_validacion=nullif(trim(coalesce(p_observacion,'')),'') where id_entrega=p_id_entrega;
+ return jsonb_build_object('ok',true,'estado',case when v_diff then 'AUDITADA_DIFERENCIA' else 'VALIDADA' end);
+end $function$
+;
+
+update sgp_mecanizado_parcial.respaldo_funciones set instalada=md5(pg_get_functiondef('sgp_picking_validar_recepcion(text,uuid,jsonb,jsonb,text)'::regprocedure)) where firma='sgp_picking_validar_recepcion(text,uuid,jsonb,jsonb,text)';
 
 create function sgp_mecanizado_parcial.auditar_estado() returns trigger language plpgsql security definer set search_path='' as $$
 begin
