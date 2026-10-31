@@ -2218,6 +2218,69 @@ function renderProgramming(options={}){
  document.querySelector('#progPool').innerHTML='<section class="prog-group"><div class="prog-group-title"><b>Reservas no programadas · Programada: NO</b><span>'+unprogrammed.length+'</span></div><div class="empty-state">Las reservas con programación parcial continúan disponibles en la sección de pendientes por completar.</div></section>'+[1,2,3,4].map(g=>{const rr=unprogrammed.filter(x=>Number(x.grupo)===g);return '<section class="prog-group"><div class="prog-group-title"><b>'+progGroupName[g]+'</b><span>'+rr.length+'</span></div>'+(rr.length?rr.map(card).join(''):'<div class="empty-state">Sin reservas en esta condición.</div>')+'</section>'}).join('')+'<section class="prog-group"><div class="prog-group-title"><b>Reservas con programación parcial · Programada: SÍ</b><span>'+partial.length+'</span></div>'+(partial.length?partial.map(card).join(''):'<div class="empty-state">Sin programaciones parciales.</div>')+'</section>'+'<section class="prog-group prog-complete-group"><div class="prog-group-title"><b>✓ Reservas completamente programadas · Programada: SÍ</b><span>'+complete.length+'</span></div>'+(complete.length?complete.map(r=>'<details class="prog-res prog-res-complete"><summary><div><b>'+escapeHtml(r.reserva)+'</b>'+sharedReserveNoticeHtml(r.reserva)+'<span>'+escapeHtml(r.sistema||'')+' · '+escapeHtml(r.acabado||'')+' · '+r.cantidad+' ventanas</span><span class="prog-balance"><b>'+r._done+' programadas</b> · 0 pendientes</span><span class="prog-progress"><i style="width:100%"></i></span></div><span class="prog-done-badge">PROGRAMADA</span><div class="glass-mini '+glassClass(r.vidrio_pct)+'"><b>'+Number(r.vidrio_pct||0).toFixed(0)+'%</b><span>Vidrio '+r.vidrio_cant+'/'+r.cantidad+'</span></div></summary></details>').join(''):'<div class="empty-state">Aún no hay reservas completamente programadas.</div>')+'</section>';
  document.querySelectorAll('.prog-res-complete').forEach((node,index)=>{const r=complete[index];if(!r)return;node.dataset.reserva=r.reserva;const list=document.createElement('div');list.className='prog-orders';for(const o of r.ordenes||[]){const button=document.createElement('button');button.type='button';button.textContent='Ver partes · '+o.produccion;button.onclick=()=>openProgModal(r.reserva,o.produccion,0);list.append(button);}node.append(list);});
  if(!options?.skipCalendar)renderProgCalendar();
+ // Ordenamiento local por sección: no altera las identidades ni los manejadores de programación.
+ const sortColumns=[['reserva','Reserva'],['tipo','Tipo'],['sistema','Sistema'],['acabado','Acabado'],['cantidad','Ventanas'],['programadas','Programadas'],['pendientes','Pendientes'],['vidrio','Vidrio'],['accion','Acción']];
+ const sortValues=r=>({reserva:String(r.reserva||''),tipo:String(r.tipo||r.tipo_produccion||r.clase||''),sistema:String(r.sistema||''),acabado:String(r.acabado||''),cantidad:Number(r.cantidad||0),programadas:Number(r._done||0),pendientes:Number(r._left||0),vidrio:Number(r.vidrio_pct||0)});
+ const grouped=[...document.querySelectorAll('#progPool .prog-group')];
+ grouped.forEach((group,index)=>{
+   const source=index===0?[]:index<=4?unprogrammed.filter(r=>Number(r.grupo)===index):index===5?partial:complete;
+   if(!source.length)return;
+   const nodes=[...group.querySelectorAll(':scope > .prog-res')];
+   if(nodes.length!==source.length)return;
+   const rows=source.map((r,i)=>({data:sortValues(r),node:nodes[i]}));
+   rows.forEach(({data,node})=>{
+     node.classList.add('prog-table-row');
+     node.dataset.progTipo=data.tipo||'—';
+     node.dataset.progCantidad=String(data.cantidad);
+     node.dataset.progSistema=data.sistema;
+     node.dataset.progAcabado=data.acabado;
+     node.dataset.progVidrio=String(data.vidrio);
+     const summary=node.querySelector('summary > div:first-child');
+     if(summary){
+       const badges=document.createElement('span');badges.className='prog-table-badges';
+       const type=document.createElement('strong');type.className='prog-table-type';type.textContent=data.tipo||'Tipo no informado';
+       const quantity=document.createElement('strong');quantity.className='prog-table-quantity';quantity.textContent=data.cantidad+' ventanas';
+       badges.append(type,quantity);
+       summary.querySelector(':scope > b')?.after(badges);
+       const summaryRow=node.querySelector('summary');
+       const cells=document.createElement('div');cells.className='prog-table-cells';
+       for(const [field,value] of [['tipo',data.tipo||'—'],['sistema',data.sistema||'—'],['acabado',data.acabado||'—'],['cantidad',data.cantidad],['programadas',data.programadas],['pendientes',data.pendientes],['vidrio',data.vidrio+'%']]){
+         const cell=document.createElement('span');cell.className='prog-table-cell prog-table-'+field;
+         cell.textContent=String(value);cell.title=field+': '+value;cells.append(cell);
+       }
+       summaryRow.insertBefore(cells,summaryRow.querySelector('button, .prog-done-badge'));
+
+     }
+   });
+   const header=document.createElement('div');
+   header.className='prog-table-head';
+   header.setAttribute('role','group');
+   header.setAttribute('aria-label','Ordenar reservas de '+group.querySelector('.prog-group-title b')?.textContent);
+   let field='reserva',ascending=true;
+   const sort=()=>{
+     rows.sort((a,b)=>{
+       const x=a.data[field],y=b.data[field];
+       const comparison=typeof x==='number'&&typeof y==='number'?x-y:String(x).localeCompare(String(y),'es',{numeric:true,sensitivity:'base'});
+       return ascending?comparison:-comparison;
+     });
+     rows.forEach(({node})=>group.appendChild(node));
+     header.querySelectorAll('button').forEach(btn=>{
+       const active=btn.dataset.sort===field;
+       btn.setAttribute('aria-sort',active?(ascending?'ascending':'descending'):'none');
+       btn.querySelector('span').textContent=active?(ascending?' ↑':' ↓'):' ↕';
+     });
+   };
+   sortColumns.forEach(([key,label])=>{
+     const button=document.createElement('button');
+     button.type='button';button.dataset.sort=key;button.textContent=label;
+     const indicator=document.createElement('span');indicator.setAttribute('aria-hidden','true');button.append(indicator);
+     button.disabled=key==='accion';
+     button.addEventListener('click',()=>{if(field===key)ascending=!ascending;else{field=key;ascending=true;}sort()});
+     header.append(button);
+   });
+   group.querySelector('.prog-group-title').after(header);
+   sort();
+ });
  document.querySelectorAll('[data-prog-res],[data-prog-order]').forEach(b=>b.onclick=e=>{e.preventDefault();if(!b.dataset.prod&&Number(b.dataset.progQty||0)<=0)return;openProgModal(b.dataset.progRes||b.dataset.progOrder,b.dataset.prod||null,Number(b.dataset.progQty||1))})
 }
 function renderProgParts(parts,produccion){
