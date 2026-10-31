@@ -36,3 +36,23 @@ Revisión de puente servidor: `docs/SGP_LP01_E4_PUENTE_SERVIDOR_REVIEW.md`. `fun
 4. Para revertir, deshabilitar la bandera, detener solicitudes nuevas y ejecutar `01_programacion_grupal_parcial_ROLLBACK.sql` tras verificar operaciones en curso. Conservar asignaciones y ledger de idempotencia; no deshacer programaciones aceptadas automáticamente.
 
 Estado: **IMPLEMENTADO EN RAMA; VERIFICADO EN AISLAMIENTO CON CONTRATOS SINTÉTICOS; NO APLICADO; NO PUBLICADO; BLOQUEADO PARA USO DEL CLIENTE ACTUAL HASTA DECISIÓN DE ACCESO Y VALIDACIÓN REAL**.
+
+## Revisión complementaria de preimplementación — 2026-10-31
+
+Inspección de solo lectura contra Supabase real (sin ejecutar RPC de escritura):
+
+- `sgp_linea_plan_consultar`, `sgp_linea_plan_mover` y `sgp_linea_plan_programar`: propietario `postgres`, `SECURITY DEFINER`, EXECUTE efectivo para `anon` y `authenticated`.
+- `sgp_validar_sesion_rol`: propietario `postgres`, `SECURITY DEFINER`, sin EXECUTE directo para `anon` ni `authenticated`.
+- Las RPC E4 `sgp_linea_plan_programar_grupo_v1` y `sgp_linea_plan_saldos_grupo_v1` todavía no están instaladas en la base consultada.
+- La validación instalada usa hash SHA-256 de token, sesión no revocada y no vencida, usuario activo y rol autorizado; no se leyeron tokens ni datos de sesiones.
+- Checks GitHub del commit `d8c3a1af4e7bfb2cb275f3f707550252ffc89b7e`: JavaScript syntax check y SGP ONE Tests, ambos `success`.
+
+**Pendientes de seguridad antes de autorización productiva:**
+
+1. Ejecutar pruebas de invocación efectiva `anon` contra las RPC E4 en una restauración aislada con la concesión condicional, con token ausente/inválido/revocado/vencido, usuario inactivo, roles sin permiso y token válido autorizado; confirmar denegaciones sin cambios.
+2. Ensayar límites de tasa y tamaño de solicitudes frente a abuso, y revisar que `SQLERRM` devuelto en rechazos no filtre detalles internos.
+3. Repetir integración de lote parcial, concurrencia, idempotencia y rollback usando los cuerpos literales de RPC instaladas en una restauración compatible, no únicamente sustitutos sintéticos.
+4. Comprobar permisos efectivos de `PUBLIC`, `anon`, `authenticated` y `service_role` tras instalación aislada, así como propietario, `search_path`, RLS y ausencia de privilegios directos sobre el ledger.
+5. Ensayar desde navegador con sesión SGP autorizada y un dispositivo real antes de declarar verificación productiva.
+
+Esta inspección **no sustituye** las pruebas aisladas de permisos ni autoriza `GRANT EXECUTE` productivo. El guardado agrupado sigue apagado.
