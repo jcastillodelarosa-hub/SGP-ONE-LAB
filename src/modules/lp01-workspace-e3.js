@@ -102,6 +102,7 @@
   operations.querySelector('.sgp-line-views')?.insertBefore(selectedStatus, viewContent);
   let selectedKey = null;
   let dragKey = null;
+  let dragSelection = null;
   let activeCell = null;
   const cards = () => [...results.querySelectorAll('.sgp-explorer-order[data-lp-key]')];
   const cells = () => [...operations.querySelectorAll('.lp-week-cell[data-lp-date][data-lp-shift]')];
@@ -122,39 +123,44 @@
     markReady(true);
     return true;
   }
-  function clearDragVisual() { dragKey = null; cards().forEach(card => card.classList.remove('lp01-drag-source')); highlight(null); markReady(Boolean(selectedKey)); }
+  function clearDragVisual() { dragKey = null; dragSelection = null; cards().forEach(card => card.classList.remove('lp01-drag-source')); highlight(null); markReady(Boolean(selectedKey)); }
   const confirmation = document.createElement('dialog');
   confirmation.className = 'lp01-drop-dialog';
-  confirmation.innerHTML = '<form method="dialog"><h3>Preparar programación</h3><p id="lp01DropContext"></p><label>Cantidad <input id="lp01DropQuantity" type="number" min="1" step="1" required></label><label>Prioridad <input id="lp01DropPriority" type="number" min="1" step="1" required></label><p>La asignación se guardará únicamente después de pulsar Programar en el formulario existente.</p><div class="lp01-drop-actions"><button type="button" id="lp01DropCancel">Cancelar</button><button type="submit">Preparar formulario</button></div></form>';
+  confirmation.innerHTML = '<form><h3 id="lp01DropTitle">Confirmar programación</h3><p id="lp01DropContext"></p><p id="lp01DropWarning"></p><div id="lp01DropGroup" hidden></div><label id="lp01QuantityLabel">Cantidad <input id="lp01DropQuantity" type="number" min="1" step="1" required></label><label>Prioridad <input id="lp01DropPriority" type="number" min="1" step="1" required></label><p id="lp01DropMessage" role="status"></p><div class="lp01-drop-actions"><button type="button" id="lp01DropCancel">Cancelar</button><button type="button" id="lp01DropPrepare">Preparar formulario</button><button type="submit" id="lp01DropSubmit">Confirmar y programar</button></div></form>';
   document.body.append(confirmation);
   let dropSelection = null;
+  const input = id => confirmation.querySelector('#'+id);
+  const keysFor = element => [...new Set([...element.querySelectorAll('[data-plan-key]')].map(item => item.dataset.planKey).filter(Boolean))];
+  function groupPreview(keys) {
+    const assignments=window.SGPLinePlanner?.getAssignments?.()||[];
+    return keys.map(key=>{const row=rowFor(key);const relevant=assignments.filter(a=>String(a.key_produccion||'')===String(key));const programmed=relevant.reduce((total,a)=>total+(Number(a.cantidad)||0),0);const official=Number(row?.saldo_ensamble);return {key,name:row?.produccion||key,programmed,official,known:Boolean(row)&&Number.isFinite(official)&&official>=0&&relevant.every(a=>Number.isFinite(Number(a.cantidad)))};});
+  }
   function openDrop(key, target) {
     if (confirmation.open || !target?.dataset.lpDate || !['1', '2'].includes(target.dataset.lpShift)) return;
-    const row = rowFor(key);
-    if (!row) { document.getElementById('sgpPlanMessage').textContent = 'Producción no disponible en la hoja cargada.'; return; }
-    dropSelection = { key, date: target.dataset.lpDate, shift: target.dataset.lpShift };
-    confirmation.querySelector('#lp01DropContext').textContent = `${row.produccion || key} · ${dropSelection.date} · Turno ${dropSelection.shift}`;
-    confirmation.querySelector('#lp01DropQuantity').value = Number(row.saldo_ensamble) > 0 ? String(Number(row.saldo_ensamble)) : '';
-    confirmation.querySelector('#lp01DropPriority').value = document.getElementById('sgpPlanPriority').value || '1';
+    const selection=typeof key==='string'?{kind:'production',key}:key;
+    if(selection.kind==='production'&&!rowFor(selection.key))return;
+    dropSelection = { ...selection, date: target.dataset.lpDate, shift: target.dataset.lpShift };
+    const group=selection.kind==='group';
+    input('lp01DropTitle').textContent=group?'Vista previa de programación · '+selection.label:selection.kind==='move'?'Confirmar movimiento':'Confirmar programación';
+    input('lp01DropContext').textContent=(group?selection.label:selection.kind==='move'?selection.assignment.produccion||'Asignación':rowFor(selection.key)?.produccion||selection.key)+' · '+dropSelection.date+' · Turno '+dropSelection.shift;
+    input('lp01DropMessage').textContent='';input('lp01DropWarning').textContent=group?'Solo vista previa: la RPC agrupada todavía no está instalada. No se enviará ninguna escritura.':selection.kind==='move'?'Se moverá únicamente esta asignación; no se programará una nueva producción.':'Comprueba la cantidad pendiente y las asignaciones existentes. El servidor validará permisos y saldo.';
+    input('lp01DropGroup').hidden=!group;
+    if(group){const preview=groupPreview(selection.keys);input('lp01DropGroup').replaceChildren();const summary=document.createElement('p');summary.textContent=preview.length+' producciones · saldo Export '+preview.filter(p=>p.known).reduce((n,p)=>n+p.official,0)+' · ya programadas en semana consultada '+preview.reduce((n,p)=>n+p.programmed,0)+'. Las cantidades pendientes requieren conciliación servidor con todas las asignaciones.';input('lp01DropGroup').append(summary);for(const item of preview){const line=document.createElement('p');line.textContent=item.name+' · saldo Export '+(item.known?item.official:'sin dato')+' · programadas visibles '+item.programmed;input('lp01DropGroup').append(line)}}
+    input('lp01QuantityLabel').hidden=group;input('lp01DropPriority').closest('label').hidden=group;input('lp01DropPrepare').hidden=group||selection.kind==='move';input('lp01DropSubmit').hidden=group;
+    input('lp01DropQuantity').required=!group;input('lp01DropQuantity').value=selection.kind==='move'?String(selection.assignment.cantidad):'';
+    input('lp01DropPriority').value=selection.kind==='move'?String(selection.assignment.prioridad||1):document.getElementById('sgpPlanPriority').value||'1';
     confirmation.showModal();
   }
-  confirmation.querySelector('#lp01DropCancel').onclick = () => confirmation.close();
-  confirmation.addEventListener('close', () => { dropSelection = null; });
-  confirmation.querySelector('form').addEventListener('submit', event => {
-    event.preventDefault();
-    if (!dropSelection) return;
-    const quantity = Number(confirmation.querySelector('#lp01DropQuantity').value);
-    const priority = Number(confirmation.querySelector('#lp01DropPriority').value);
-    if (!Number.isInteger(quantity) || quantity < 1 || !Number.isInteger(priority) || priority < 1) return;
-    const result = window.SGPLinePlanner?.selectProduction?.(dropSelection.key);
-    if (!result?.ok) { document.getElementById('sgpPlanMessage').textContent = result?.message || 'No se pudo seleccionar la producción.'; confirmation.close(); return; }
-    document.getElementById('sgpPlanDate').value = dropSelection.date;
-    document.getElementById('sgpPlanShift').value = dropSelection.shift;
-    document.getElementById('sgpPlanQuantity').value = String(quantity);
-    document.getElementById('sgpPlanPriority').value = String(priority);
-    confirmation.close();
-    document.getElementById('sgpPlanMessage').textContent = 'Formulario preparado. Revisa las asignaciones existentes y pulsa Programar para solicitar el guardado.';
-    document.getElementById('sgpPlanProduction')?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  input('lp01DropCancel').onclick=()=>confirmation.close();
+  confirmation.addEventListener('close',()=>{dropSelection=null;input('lp01DropSubmit').disabled=false});
+  input('lp01DropPrepare').onclick=()=>{if(!dropSelection||dropSelection.kind!=='production')return;const result=window.SGPLinePlanner?.selectProduction?.(dropSelection.key);if(!result?.ok){input('lp01DropMessage').textContent=result?.message||'Producción no disponible';return}document.getElementById('sgpPlanDate').value=dropSelection.date;document.getElementById('sgpPlanShift').value=dropSelection.shift;document.getElementById('sgpPlanQuantity').value=input('lp01DropQuantity').value;document.getElementById('sgpPlanPriority').value=input('lp01DropPriority').value;confirmation.close();document.getElementById('sgpPlanMessage').textContent='Formulario preparado. Pulsa Programar para guardar.'};
+  confirmation.querySelector('form').addEventListener('submit',async event=>{
+    event.preventDefault();if(!dropSelection||dropSelection.kind==='group'||input('lp01DropSubmit').disabled)return;
+    const quantity=Number(input('lp01DropQuantity').value),priority=Number(input('lp01DropPriority').value);
+    if(!Number.isInteger(quantity)||quantity<1||!Number.isInteger(priority)||priority<1){input('lp01DropMessage').textContent='Cantidad y prioridad deben ser enteros positivos.';return}
+    input('lp01DropSubmit').disabled=true;input('lp01DropMessage').textContent='Validando con el servidor…';
+    try{if(dropSelection.kind==='move')await window.SGPLinePlanner.moveDirect({assignment:dropSelection.assignment.id,day:dropSelection.date,shift:dropSelection.shift,quantity,priority});else await window.SGPLinePlanner.programDirect({key:dropSelection.key,day:dropSelection.date,shift:dropSelection.shift,quantity,priority});confirmation.close();selectedStatus.textContent='Operación confirmada por el servidor. Calendario actualizado.'}
+    catch(error){input('lp01DropMessage').textContent='Operación rechazada: '+error.message;input('lp01DropSubmit').disabled=false}
   });
   const makeDraggable = () => {
     results.querySelectorAll('.sgp-explorer-order').forEach(card => {
@@ -167,7 +173,8 @@
       card.setAttribute('aria-selected', String(key === selectedKey));
       card.classList.toggle('lp01-card-selected', key === selectedKey);
     });
-    explorer.querySelectorAll('.sgp-explorer-reservation').forEach(reservation => {
+    results.querySelectorAll('.sgp-explorer-part').forEach(part => { const header=part.querySelector('.sgp-part-header'); if(header){header.draggable=true;header.tabIndex=0;header.dataset.lpGroup='part';} });
+    explorer.querySelectorAll('.sgp-explorer-reservation').forEach(reservation => { const summary=reservation.querySelector('summary'); if(summary){summary.draggable=true;summary.tabIndex=0;summary.dataset.lpGroup='reserve';}
       if (reservation.querySelector('[data-plan-reserve]')) return;
       const button = document.createElement('button');
       button.type = 'button';
@@ -187,7 +194,7 @@
   };
   new MutationObserver(makeDraggable).observe(results, { childList: true, subtree: true });
   makeDraggable();
-  explorer.addEventListener('click', event => {
+  explorer.addEventListener('click', event => { const group=event.target.closest('[data-lp-group]');if(group&&!event.target.closest('button')){const container=group.dataset.lpGroup==='part'?group.closest('.sgp-explorer-part'):group.closest('.sgp-explorer-reservation');const keys=keysFor(container);if(keys.length){selectedKey=null;dragSelection={kind:'group',keys,label:group.querySelector('strong')?.textContent||'Grupo'};selectedStatus.textContent=dragSelection.label+' seleccionada. Toca una celda para ver el desglose.';markReady(true);}return;}
     const card = event.target.closest('.sgp-explorer-order[data-lp-key]');
     if (!card || event.target.closest('button')) return;
     selectCard(card.dataset.lpKey);
@@ -196,10 +203,12 @@
     const card = event.target.closest('.sgp-explorer-order[data-lp-key]');
     if (card && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); selectCard(card.dataset.lpKey); }
   });
-  operations.addEventListener('click', event => { const cell = event.target.closest('.lp-week-cell'); if (cell && selectedKey) openDrop(selectedKey, cell); });
+  operations.addEventListener('click', event => { const cell = event.target.closest('.lp-week-cell'); if (cell && (selectedKey||dragSelection?.kind==='group') && !event.target.closest('.lp-week-assignment')) openDrop(dragSelection?.kind==='group'?dragSelection:selectedKey, cell); });
+  operations.addEventListener('dragstart', event => { const card=event.target.closest('.lp-week-assignment[data-lp-assignment]'); if(!card)return; const assignment=window.SGPLinePlanner?.getAssignments?.().find(a=>String(a.id)===card.dataset.lpAssignment);if(!assignment)return;dragSelection={kind:'move',assignment};event.dataTransfer.setData('text/plain','assignment:'+assignment.id);event.dataTransfer.effectAllowed='move';markReady(true); });
+  operations.addEventListener('dragend',clearDragVisual);
   explorer.addEventListener('dragstart', event => {
     const card = event.target.closest('.sgp-explorer-order[data-lp-key]');
-    if (!card) return;
+    if (!card) {const group=event.target.closest('[data-lp-group]');if(!group||event.target.closest('button'))return;const container=group.dataset.lpGroup==='part'?group.closest('.sgp-explorer-part'):group.closest('.sgp-explorer-reservation');const keys=keysFor(container);if(!keys.length)return;dragSelection={kind:'group',keys,label:group.querySelector('strong')?.textContent||'Grupo'};event.dataTransfer.setData('text/plain','group');event.dataTransfer.effectAllowed='copy';markReady(true);return;}
     dragKey = card.dataset.lpKey;
     selectCard(dragKey);
     card.classList.add('lp01-drag-source');
@@ -210,17 +219,17 @@
   explorer.addEventListener('dragend', clearDragVisual);
   operations.addEventListener('dragover', event => {
     const cell = event.target.closest('.lp-week-cell');
-    if (!cell || !dragKey) return;
+    if (!cell || (!dragKey&&!dragSelection)) return;
     event.preventDefault();
-    event.dataTransfer.dropEffect = 'copy';
+    event.dataTransfer.dropEffect = dragSelection?.kind==='move'?'move':'copy';
     highlight(cell);
   });
   operations.addEventListener('dragleave', event => { if (!operations.contains(event.relatedTarget)) highlight(null); });
   operations.addEventListener('drop', event => {
     const cell = event.target.closest('.lp-week-cell');
-    if (!cell || !dragKey) return;
+    if (!cell || (!dragKey&&!dragSelection)) return;
     event.preventDefault();
-    const key = dragKey;
+    const key = dragSelection||dragKey;
     clearDragVisual();
     openDrop(key, cell);
   });
@@ -239,15 +248,16 @@
   }
   function touchCell(point) { return document.elementFromPoint(point.clientX ?? point.x, point.clientY ?? point.y)?.closest('.lp-week-cell') || null; }
   explorer.addEventListener('touchstart', event => {
-    const card = event.target.closest('.sgp-explorer-order[data-lp-key]');
+    const card = event.target.closest('.sgp-explorer-order[data-lp-key], [data-lp-group]');
     if (!card || event.touches.length !== 1) return;
+    const group=card.dataset.lpGroup;const container=group==='part'?card.closest('.sgp-explorer-part'):group==='reserve'?card.closest('.sgp-explorer-reservation'):null;const selection=group?{kind:'group',keys:keysFor(container),label:card.querySelector('strong')?.textContent||'Grupo'}:card.dataset.lpKey;
     const point = event.touches[0];
-    touch = { key: card.dataset.lpKey, x: point.clientX, y: point.clientY, active: false, timer: setTimeout(() => {
+    touch = { key: selection, x: point.clientX, y: point.clientY, active: false, timer: setTimeout(() => {
       if (!touch) return;
       touch.active = true;
-      selectCard(touch.key);
+      if(typeof touch.key==='string')selectCard(touch.key);else markReady(true);
       card.classList.add('lp01-drag-source');
-      ghost.textContent = rowFor(touch.key)?.produccion || 'Producción';
+      ghost.textContent = typeof touch.key==='string'?(rowFor(touch.key)?.produccion||'Producción'):touch.key.label;
       ghost.hidden = false;
       ghost.style.transform = `translate(${touch.x + 12}px,${touch.y + 12}px)`;
       touch.scrollTimer = setInterval(() => {
@@ -282,7 +292,7 @@
 
   const style = document.createElement('style');
   style.textContent = `.lp01-workspace{display:grid;grid-template-columns:minmax(280px,var(--lp01-left)) 9px minmax(0,1fr);align-items:start;gap:0;min-width:0}.lp01-workspace #sgpPlannerExplorer{min-width:0;margin:0;max-height:82vh;overflow:auto}.lp01-workspace .sgp-planner-operations{min-width:0;margin:0}.lp01-workspace #sgpExplorerResults{display:grid;grid-template-columns:minmax(0,1fr)}.lp01-workspace .sgp-explorer-filters{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px}.lp01-workspace .sgp-explorer-filters>*{min-width:0!important;width:100%;box-sizing:border-box}.lp01-workspace .sgp-explorer-filters select,.lp01-workspace .sgp-explorer-filters input{min-width:0!important;width:100%;box-sizing:border-box}.lp01-workspace .sgp-explorer-view-actions>*{min-width:0;max-width:100%}.lp01-workspace .sgp-line-days{grid-template-columns:repeat(7,minmax(0,1fr))}.lp01-workspace .sgp-line-day{min-width:0;padding:7px;font-size:11px}.lp01-splitter{height:100%;min-height:500px;cursor:col-resize;background:#dbe8f8;border-left:2px solid #9fc0eb;border-right:2px solid #9fc0eb}.lp01-splitter:focus-visible{outline:3px solid #1264c8;outline-offset:2px}.lp01-line-filter{display:grid;gap:4px}.lp01-capacity{display:flex;gap:8px;align-items:center;justify-content:flex-end;color:#36567e;font-size:12px}.lp01-capacity input{width:72px!important}.lp01-capacity-warning{color:#385b83;font-weight:700}.lp01-assignment-disclosure{margin-top:10px;border:1px solid #d5e1ef;border-radius:9px;padding:10px}.lp01-assignment-disclosure summary{cursor:pointer;font-weight:700;color:#103b73}.lp01-workspace [data-plan-key]{cursor:grab}.lp01-workspace [data-plan-reserve]{display:block;margin-top:8px;border:1px solid #1264c8;border-radius:8px;background:#fff;color:#103b73;min-height:36px}.lp01-workspace [data-lp-shift]{min-height:84px;border:1px dashed #a5c5eb}@media(max-width:900px){.lp01-workspace{display:block}.lp01-splitter{display:none}.lp01-workspace #sgpPlannerExplorer{max-height:none}.lp01-workspace .sgp-planner-operations{margin-top:12px}.lp01-workspace .sgp-line-days{grid-template-columns:repeat(2,minmax(0,1fr))}.lp01-workspace .sgp-explorer-filters{grid-template-columns:1fr!important}}`;
-  style.textContent += '.lp01-workspace #sgpPendingAssemblyQueue[hidden]{display:none!important}.lp-week-toolbar{display:flex;align-items:end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:8px 0 12px}.lp-week-toolbar h4{margin:0;color:#103b73}.lp-week-toolbar small{color:#526781}.lp-week-controls{display:flex;align-items:end;gap:6px;flex-wrap:wrap}.lp-week-controls label{font-size:12px}.lp-week-controls button,.lp-week-controls input{min-height:38px;padding:6px;border:1px solid #b9cfe9;border-radius:8px;background:#fff;color:#103b73;font-weight:650}.lp-week-scroll{overflow-x:auto;max-width:100%}.lp-week-grid{display:grid;grid-template-columns:64px repeat(7,minmax(0,1fr));gap:5px;min-width:0}.lp-week-corner,.lp-week-day,.lp-week-shift{padding:8px;background:#dceafa;color:#103b73;font-size:12px;font-weight:750;border-radius:7px}.lp-week-day{text-align:center;text-transform:capitalize}.lp-week-shift{display:flex;align-items:center}.lp-week-cell{min-width:0;min-height:132px;padding:7px;border:1px dashed #9fc0eb;border-radius:9px;background:#fff;box-sizing:border-box;overflow-wrap:anywhere}.lp-week-cell-head{display:grid;gap:3px;color:#103b73;font-size:11px}.lp-week-cell-head small,.lp-week-systems{display:block;color:#526781;font-size:11px}.lp-week-empty{display:block;margin-top:16px;color:#68809c}.lp-week-assignment{padding:6px;margin:6px 0;border-left:3px solid #1264c8;border-radius:5px;background:#eef5ff;font-size:11px}.lp-week-assignment strong,.lp-week-assignment small{display:block}.lp-week-legend{font-size:12px;color:#526781}.lp-week-cell:focus-within,.lp-week-cell:hover{border-color:#1264c8;background:#f7fbff}.lp01-drop-dialog{max-width:min(420px,calc(100vw - 24px));border:1px solid #9fc0eb;border-radius:14px;padding:22px;box-shadow:0 20px 55px #102e5366;color:#103b73}.lp01-drop-dialog::backdrop{background:#102e5380}.lp01-drop-dialog form{display:grid;gap:12px}.lp01-drop-dialog h3,.lp01-drop-dialog p{margin:0}.lp01-drop-dialog label{display:grid;gap:4px}.lp01-drop-dialog input{width:100%;box-sizing:border-box;min-height:42px}.lp01-drop-actions{display:flex;justify-content:flex-end;gap:8px}.lp01-drop-actions button{min-height:42px;padding:8px 12px;border-radius:8px;border:1px solid #1264c8;background:#fff;color:#103b73}.lp01-drop-actions button[type=submit]{background:#1264c8;color:white}@media(max-width:900px){.lp-week-grid{grid-template-columns:55px repeat(7,minmax(120px,1fr));min-width:950px}.lp-week-controls{width:100%}.lp-week-controls button{flex:1}}';
+  style.textContent += '.lp01-workspace #sgpPendingAssemblyQueue[hidden]{display:none!important}.lp-week-toolbar{display:flex;align-items:end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:8px 0 12px}.lp-week-toolbar h4{margin:0;color:#103b73}.lp-week-toolbar small{color:#526781}.lp-week-controls{display:flex;align-items:end;gap:6px;flex-wrap:wrap}.lp-week-controls label{font-size:12px}.lp-week-controls button,.lp-week-controls input{min-height:38px;padding:6px;border:1px solid #b9cfe9;border-radius:8px;background:#fff;color:#103b73;font-weight:650}.lp-week-scroll{overflow-x:auto;max-width:100%}.lp-week-grid{display:grid;grid-template-columns:64px repeat(7,minmax(0,1fr));gap:5px;min-width:0}.lp-week-corner,.lp-week-day,.lp-week-shift{padding:8px;background:#dceafa;color:#103b73;font-size:12px;font-weight:750;border-radius:7px}.lp-week-day{text-align:center;text-transform:capitalize}.lp-week-shift{display:flex;align-items:center}.lp-week-cell{min-width:0;min-height:132px;padding:7px;border:1px dashed #9fc0eb;border-radius:9px;background:#fff;box-sizing:border-box;overflow-wrap:anywhere}.lp-week-cell-head{display:grid;gap:3px;color:#103b73;font-size:11px}.lp-week-cell-head small,.lp-week-systems{display:block;color:#526781;font-size:11px}.lp-week-empty{display:block;margin-top:16px;color:#68809c}.lp-week-assignment{padding:6px;margin:6px 0;border-left:3px solid #1264c8;border-radius:5px;background:#eef5ff;font-size:11px}.lp-week-assignment strong,.lp-week-assignment small{display:block}.lp-week-legend{font-size:12px;color:#526781}.lp-week-cell:focus-within,.lp-week-cell:hover{border-color:#1264c8;background:#f7fbff}.lp01-drop-dialog{max-width:min(520px,calc(100vw - 24px));max-height:85vh;overflow:auto;border:1px solid #9fc0eb;border-radius:14px;padding:22px;box-shadow:0 20px 55px #102e5366;color:#103b73}.lp01-drop-dialog::backdrop{background:#102e5380}.lp01-drop-dialog form{display:grid;gap:12px}.lp01-drop-dialog h3,.lp01-drop-dialog p{margin:0}.lp01-drop-dialog label{display:grid;gap:4px}.lp01-drop-dialog input{width:100%;box-sizing:border-box;min-height:42px}.lp01-drop-actions{display:flex;justify-content:flex-end;gap:8px}.lp01-drop-actions button{min-height:42px;padding:8px 12px;border-radius:8px;border:1px solid #1264c8;background:#fff;color:#103b73}.lp01-drop-actions button[type=submit]{background:#1264c8;color:white}@media(max-width:900px){.lp-week-grid{grid-template-columns:55px repeat(7,minmax(120px,1fr));min-width:950px}.lp-week-controls{width:100%}.lp-week-controls button{flex:1}}';
   style.textContent += '.lp01-workspace .sgp-explorer-order[data-lp-key]{cursor:grab;touch-action:auto}.lp01-workspace .sgp-explorer-order[data-lp-key]:focus-visible{outline:3px solid #1264c8}.lp01-workspace .sgp-explorer-order.lp01-card-selected{border:2px solid #1264c8;background:#e9f3ff}.lp01-workspace .sgp-explorer-order.lp01-drag-source{opacity:.58}.lp01-workspace .lp-week-cell.lp01-drop-ready{border:2px dashed #1264c8;background:#eef6ff}.lp01-workspace .lp-week-cell.lp01-drop-active{border:3px solid #0a8d69;background:#dff9ee;box-shadow:inset 0 0 0 2px #fff}.lp01-selection-status{margin:4px 0 10px;padding:8px 10px;border-radius:8px;background:#e9f3ff;color:#103b73;font-size:12px}.lp01-touch-ghost{position:fixed;top:0;left:0;z-index:9999;max-width:180px;padding:8px 12px;border-radius:9px;background:#103b73;color:#fff;box-shadow:0 6px 20px #102e5366;pointer-events:none;font-weight:700;font-size:12px}.lp01-touch-ghost[hidden]{display:none}';
   document.head.append(style);
 })();
