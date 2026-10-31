@@ -2608,3 +2608,7 @@ button.active,[aria-pressed="true"]{border-color:#0865ed}
  #progPool .prog-table-row summary .glass-mini{grid-column:2;grid-row:1}
  #progPool .prog-table-row summary>button{grid-column:1/-1;justify-self:stretch}
 }
+
+#progPool .prog-table-badges{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin:3px 0}
+#progPool .prog-table-type{font-size:11px;font-weight:800;color:#174e83;background:#e4eefc;padding:4px 7px;border-radius:6px}
+#progPool .prog-table-quantity{font-size:15px;font-weight:850;color:#0b376a;background:#f0f5fc;padding:3px 8px;border-radius:6px}
