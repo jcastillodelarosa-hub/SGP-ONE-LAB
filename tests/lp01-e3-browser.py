@@ -10,7 +10,7 @@ OUT.mkdir(parents=True, exist_ok=True)
 def run(page, label):
     errors = []
     page.on('pageerror', lambda error: errors.append(str(error)))
-    page.goto('http://127.0.0.1:8768/', wait_until='domcontentloaded')
+    page.goto('http://127.0.0.1:8769/', wait_until='domcontentloaded')
     page.evaluate("""() => {
       const section=document.querySelector('[data-view-panel="ensamble"]');section.hidden=false;
       const marker=document.createElement('p');marker.textContent='PRUEBA VISUAL LOCAL · DATOS SINTÉTICOS · SIN CONEXIÓN PRODUCTIVA';marker.style='padding:10px;background:#fff1cc;color:#563900;font-weight:700';section.prepend(marker);
@@ -47,7 +47,7 @@ def run(page, label):
     page.locator('[data-week-action="prev"]').click()
     page.wait_for_function("document.querySelector('#sgpPlanWeek')?.value==='2026-W44'")
     page.locator('.sgp-explorer-reservation > summary').click()
-    source = page.locator('[data-plan-key="KEY1"]')
+    source = page.locator('.sgp-explorer-order[data-lp-key="KEY1"]')
     if label == 'pc':
         target = page.locator('[data-lp-date="2026-10-26"][data-lp-shift="1"]')
         source.drag_to(target)
@@ -56,6 +56,7 @@ def run(page, label):
         page.screenshot(path=str(OUT / 'pc-arrastre-confirmacion.png'), full_page=False)
         page.locator('#lp01DropCancel').click()
         assert not page.locator('.lp01-drop-dialog').is_visible()
+        assert page.locator('#sgpPlanPriority').input_value() == '1'
         assert not page.evaluate("window.__lpCalls.some(x=>x.name==='sgp_linea_plan_programar')")
         target = page.locator('[data-lp-date="2026-10-29"][data-lp-shift="2"]')
         source.drag_to(target)
@@ -68,8 +69,39 @@ def run(page, label):
         assert page.locator('#sgpPlanQuantity').input_value() == '3'
         assert page.locator('#sgpPlanPriority').input_value() == '2'
     else:
+        # Real Chromium touch stream: hold, move while the page/calendar scrolls, release.
+        source.scroll_into_view_if_needed()
+        box = source.bounding_box()
+        session = page.context.new_cdp_session(page)
+        session.send('Input.dispatchTouchEvent', {'type': 'touchStart', 'touchPoints': [{'x': box['x'] + 30, 'y': min(box['y'] + 35, 800), 'id': 1}]})
+        page.wait_for_timeout(500)
+        assert page.locator('.lp01-touch-ghost').is_visible()
+        session.send('Input.dispatchTouchEvent', {'type': 'touchMove', 'touchPoints': [{'x': 350, 'y': 800, 'id': 1}]})
+        touch_target = page.locator('[data-lp-date="2026-10-29"][data-lp-shift="2"]')
+        for _ in range(30):
+            page.wait_for_timeout(120)
+            box = touch_target.bounding_box()
+            if box and 0 < box['x'] < 300 and 120 < box['y'] < 620:
+                break
+        assert box and 0 < box['x'] < 300 and 120 < box['y'] < 620, 'La celda no fue alcanzable durante el arrastre táctil'
+        session.send('Input.dispatchTouchEvent', {'type': 'touchMove', 'touchPoints': [{'x': box['x'] + 30, 'y': box['y'] + 40, 'id': 1}]})
+        page.wait_for_timeout(100)
+        page.screenshot(path=str(OUT / 'movil-arrastre-en-curso.png'), full_page=False)
+        session.send('Input.dispatchTouchEvent', {'type': 'touchEnd', 'touchPoints': []})
+        assert page.locator('.lp01-drop-dialog').is_visible()
+        assert '2026-10-29 · Turno 2' in page.locator('#lp01DropContext').inner_text()
+        page.screenshot(path=str(OUT / 'movil-arrastre-tactil.png'), full_page=False)
+        page.locator('#lp01DropCancel').click()
+        assert page.locator('#sgpPlanPriority').input_value() == '1'
+        assert not page.evaluate("window.__lpCalls.some(x=>x.name==='sgp_linea_plan_programar')")
         source.click()
-        assert page.locator('#sgpPlanProduction').input_value() == 'KEY1'
+        assert page.locator('.lp01-card-selected').count() == 1
+        assert page.locator('#sgpPlanProduction').input_value() != 'KEY1'
+        page.locator('[data-lp-date="2026-10-29"][data-lp-shift="2"]').click()
+        assert page.locator('.lp01-drop-dialog').is_visible()
+        page.screenshot(path=str(OUT / 'movil-seleccion-toque.png'), full_page=False)
+        page.locator('#lp01DropCancel').click()
+        assert not page.evaluate("window.__lpCalls.some(x=>x.name==='sgp_linea_plan_programar')")
     assert not page.evaluate("window.__lpCalls.some(x=>x.name==='sgp_linea_plan_programar')")
     page.locator('.sgp-line-view-tabs [data-view="table"]').click()
     assert page.locator('.sgp-line-table-wrap tbody tr').count() >= 1
@@ -81,7 +113,7 @@ def run(page, label):
 with sync_playwright() as playwright:
     browser = playwright.chromium.launch(executable_path='/usr/bin/chromium', args=['--no-sandbox'])
     for name, width, height in [('pc', 1440, 900), ('movil', 390, 844)]:
-        page = browser.new_page(viewport={'width': width, 'height': height})
+        page = browser.new_page(viewport={'width': width, 'height': height}, has_touch=name == 'movil', is_mobile=name == 'movil')
         run(page, name)
         page.close()
     browser.close()
