@@ -2612,3 +2612,27 @@ button.active,[aria-pressed="true"]{border-color:#0865ed}
 #progPool .prog-table-badges{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin:3px 0}
 #progPool .prog-table-type{font-size:11px;font-weight:800;color:#174e83;background:#e4eefc;padding:4px 7px;border-radius:6px}
 #progPool .prog-table-quantity{font-size:15px;font-weight:850;color:#0b376a;background:#f0f5fc;padding:3px 8px;border-radius:6px}
+
+/* Tabla operativa de reservas: una fila por reserva, columnas realmente alineadas. */
+#progPool .prog-group{overflow-x:auto}
+#progPool .prog-table-head{grid-template-columns:115px 85px 115px minmax(120px,1fr) 78px 92px 85px 75px 115px;min-width:920px}
+#progPool .prog-table-row summary{display:grid;grid-template-columns:115px minmax(0,1fr) 115px;gap:0;min-width:920px;padding:0 14px;align-items:stretch}
+#progPool .prog-table-row summary>div:first-child{display:flex;align-items:center;gap:3px;padding:12px 0;min-width:0}
+#progPool .prog-table-row summary>div:first-child>:not(b):not(.prog-table-badges){display:none}
+#progPool .prog-table-row summary .prog-table-badges{display:none}
+#progPool .prog-table-row summary>.prog-table-cells{display:grid;grid-template-columns:85px 115px minmax(120px,1fr) 78px 92px 85px 75px;gap:8px;align-items:center;min-width:0}
+#progPool .prog-table-row .prog-table-cell{font-size:12px;color:#294a70;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#progPool .prog-table-row .prog-table-cantidad{font-size:17px;font-weight:850;color:#103e79}
+#progPool .prog-table-row .prog-table-pendientes{font-weight:700;color:#a65b00}
+#progPool .prog-table-row .prog-table-vidrio{font-weight:800;color:#11733c}
+#progPool .prog-table-row summary>button,#progPool .prog-table-row summary>.prog-done-badge{align-self:center;justify-self:center}
+#progPool .prog-table-row summary>.glass-mini{display:none}
+#progPool .prog-table-row[open] .prog-orders{min-width:920px}
+@media(max-width:760px){
+ #progPool .prog-table-head{display:grid;min-width:920px;overflow:visible;gap:8px}
+ #progPool .prog-table-head button{background:transparent;padding:5px 2px}
+ #progPool .prog-table-row summary{grid-template-columns:115px minmax(0,1fr) 115px;min-width:920px;gap:0;padding:0 14px}
+ #progPool .prog-table-row summary>.prog-table-cells{grid-column:auto;grid-row:auto}
+ #progPool .prog-table-row summary>button{grid-column:auto;justify-self:center}
+ #progPool .prog-table-row summary>.glass-mini{display:none}
+}
