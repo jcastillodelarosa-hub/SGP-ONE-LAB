@@ -12,14 +12,18 @@ DO $preflight$ BEGIN
   END IF;
   IF NOT EXISTS (SELECT 1 FROM pg_catalog.pg_proc
       WHERE oid='public.sgp_linea_plan_programar(text,text,date,integer,integer,integer)'::regprocedure
-        AND prosecdef) THEN
-    RAISE EXCEPTION 'La programación individual no conserva SECURITY DEFINER';
+        AND prosecdef AND proowner = (SELECT oid FROM pg_catalog.pg_roles WHERE rolname=current_user)) THEN
+    RAISE EXCEPTION 'Instalar con el propietario de la programación individual SECURITY DEFINER';
   END IF;
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns
       WHERE table_schema='public' AND table_name='sgp_producciones' AND column_name='saldo_ensamble')
      OR NOT EXISTS (SELECT 1 FROM information_schema.columns
       WHERE table_schema='public' AND table_name='sgp_linea_plan_asignaciones' AND column_name='estado') THEN
     RAISE EXCEPTION 'Columnas de saldo global incompatibles';
+  END IF;
+  IF NOT has_table_privilege(current_user,'public.sgp_producciones','SELECT')
+     OR NOT has_table_privilege(current_user,'public.sgp_linea_plan_asignaciones','SELECT') THEN
+    RAISE EXCEPTION 'El propietario instalador no puede consultar las fuentes';
   END IF;
 END $preflight$;
 
@@ -138,9 +142,11 @@ BEGIN
     IF NOT FOUND THEN RAISE EXCEPTION 'Producción no encontrada'; END IF;
     SELECT coalesce(sum(cantidad),0) INTO v_asignado FROM public.sgp_linea_plan_asignaciones
       WHERE key_produccion=v_key AND estado<>'CANCELADA';
+    -- Match sgp_linea_plan_programar: active production, initialized balance,
+    -- and all non-cancelled assignments, regardless of production state label.
     v_pendiente:=CASE WHEN v_produccion.saldos_inicializados AND v_produccion.saldo_ensamble IS NOT NULL
-      AND v_produccion.activa='SI' AND coalesce(v_produccion.estado_produccion,'') NOT IN ('CERRADA','FINALIZADA')
-      THEN greatest(0,v_produccion.saldo_ensamble-v_asignado) ELSE NULL END;
+      AND v_produccion.activa='SI'
+      THEN greatest(0,floor(v_produccion.saldo_ensamble-v_asignado)) ELSE NULL END;
     v_result:=v_result||jsonb_build_array(jsonb_build_object('key_produccion',v_key,
       'saldo_ensamble',v_produccion.saldo_ensamble,'asignado_global',v_asignado,
       'pendiente',v_pendiente,'inconsistente',v_produccion.saldo_ensamble<v_asignado));

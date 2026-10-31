@@ -3,6 +3,8 @@ DO $$ BEGIN IF NOT EXISTS(SELECT 1 FROM pg_roles WHERE rolname='anon') THEN CREA
 CREATE TABLE public.sgp_producciones(key_produccion text PRIMARY KEY, id text NOT NULL, id_linea text NOT NULL, saldo_ensamble numeric, saldos_inicializados boolean NOT NULL DEFAULT false, activa text NOT NULL DEFAULT 'SI', estado_produccion text, CONSTRAINT produccion_identity CHECK(key_produccion=id||'|'||id_linea));
 CREATE TABLE public.sgp_linea_plan_asignaciones(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),key_produccion text NOT NULL REFERENCES public.sgp_producciones,fecha date NOT NULL,turno integer NOT NULL,cantidad integer NOT NULL,prioridad integer NOT NULL,estado text NOT NULL DEFAULT 'PROGRAMADA');
 INSERT INTO public.sgp_producciones(key_produccion,id,id_linea,saldo_ensamble,saldos_inicializados,activa) VALUES('A|L','A','L',5,true,'SI'),('B|L','B','L',3,true,'SI'),('C|L','C','L',2,true,'SI'),('INACTIVA|L','INACTIVA','L',2,true,'NO');
+INSERT INTO public.sgp_producciones(key_produccion,id,id_linea,saldo_ensamble,saldos_inicializados,activa) VALUES('DECIMAL|L','DECIMAL','L',2.5,true,'SI');
+UPDATE public.sgp_producciones SET estado_produccion='CERRADA' WHERE key_produccion='C|L';
 CREATE FUNCTION public.sgp_validar_sesion_rol(p_token text,p_roles text[]) RETURNS text LANGUAGE plpgsql AS $$ BEGIN IF p_token='coord' AND 'COORDINADOR'=ANY(p_roles) THEN RETURN 'coordinador'; END IF; RAISE EXCEPTION 'Rol denegado'; END $$;
 CREATE FUNCTION public.sgp_linea_plan_programar(p_token text,p_key_produccion text,p_fecha date,p_turno integer,p_cantidad integer,p_prioridad integer) RETURNS uuid LANGUAGE plpgsql SECURITY DEFINER AS $$
 DECLARE v_saldo integer;v_asignado integer;v_id uuid;

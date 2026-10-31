@@ -1,8 +1,9 @@
 -- Run after fixture and REVIEW migration, on disposable PostgreSQL only.
 BEGIN;
 DO $$ DECLARE r jsonb; BEGIN
- r:=public.sgp_linea_plan_saldos_grupo_v1('coord','["A|L","B|L"]'::jsonb);
- IF (r->0->>'pendiente')::numeric<>5 OR (r->1->>'pendiente')::numeric<>3 THEN
+ r:=public.sgp_linea_plan_saldos_grupo_v1('coord','["A|L","B|L","C|L","DECIMAL|L"]'::jsonb);
+ IF (r->0->>'pendiente')::numeric<>5 OR (r->1->>'pendiente')::numeric<>3
+    OR (r->2->>'pendiente')::numeric<>2 OR (r->3->>'pendiente')::numeric<>2 THEN
    RAISE EXCEPTION 'Global preview failed: %',r;
  END IF;
 END $$;
