@@ -2658,3 +2658,79 @@ button.active,[aria-pressed="true"]{border-color:#0865ed}
  #progPool .prog-table-row summary>button{grid-column:auto;justify-self:center}
  #progPool .prog-table-row summary>.glass-mini{display:none}
 }
+
+/* Programación v375: vista móvil sin columnas ni acciones recortadas. */
+@media(max-width:760px){
+ #progPool .prog-group{overflow:visible;min-width:0}
+ #progPool .prog-table-head{display:flex;min-width:0;max-width:100%;overflow-x:auto;gap:6px;position:relative}
+ #progPool .prog-table-head button{flex:0 0 auto;min-height:36px;white-space:nowrap;background:#e2ebfa;padding:7px 10px;border-radius:7px}
+ #progPool .prog-table-row{min-width:0;width:100%}
+ #progPool .prog-table-row summary{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;min-width:0;width:100%;padding:12px;box-sizing:border-box;align-items:center}
+ #progPool .prog-table-row summary>div:first-child{display:flex;align-items:flex-start;flex-direction:column;gap:3px;padding:0;grid-column:1;grid-row:1}
+ #progPool .prog-table-row summary>div:first-child>b{font-size:17px}
+ #progPool .prog-table-row summary>.prog-table-cells{display:grid;grid-column:1/-1;grid-row:2;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;min-width:0}
+ #progPool .prog-table-row .prog-table-cell{display:flex;flex-direction:column;min-width:0;white-space:normal;overflow-wrap:anywhere;font-size:12px;padding:6px;background:#f1f5fb;border-radius:6px}
+ #progPool .prog-table-row .prog-table-cell::before{font-size:10px;font-weight:700;color:#607693;margin-bottom:3px}
+ #progPool .prog-table-row .prog-table-tipo::before{content:'Tipo'}
+ #progPool .prog-table-row .prog-table-sistema::before{content:'Sistema'}
+ #progPool .prog-table-row .prog-table-acabado::before{content:'Acabado'}
+ #progPool .prog-table-row .prog-table-cantidad::before{content:'Ventanas'}
+ #progPool .prog-table-row .prog-table-programadas::before{content:'Programadas'}
+ #progPool .prog-table-row .prog-table-pendientes::before{content:'Pendientes'}
+ #progPool .prog-table-row .prog-table-vidrio::before{content:'Vidrio'}
+ #progPool .prog-table-row summary>button,#progPool .prog-table-row summary>.prog-done-badge{grid-column:2;grid-row:1;justify-self:end;max-width:100%;white-space:normal}
+ #progPool .prog-table-row[open] .prog-orders{min-width:0;max-width:100%;overflow-x:auto}
+}
+
+/* Reservas y agenda a ancho completo en escritorio. */
+@media(min-width:761px){
+ #mecanizado .prog-layout,.prog-layout:has(#progPool){display:grid;grid-template-columns:minmax(0,1fr)!important;gap:22px;width:100%}
+ .prog-layout:has(#progPool)>div{min-width:0;width:100%}
+ #progPool,#progPool .prog-group{width:100%;max-width:none;box-sizing:border-box}
+ #progPool .prog-table-head{grid-template-columns:minmax(110px,1.05fr) minmax(85px,.8fr) minmax(110px,1fr) minmax(140px,1.35fr) minmax(78px,.7fr) minmax(100px,.9fr) minmax(90px,.8fr) minmax(80px,.7fr) minmax(115px,1fr);min-width:0;gap:8px}
+ #progPool .prog-table-row summary{grid-template-columns:minmax(110px,1.05fr) minmax(0,6.25fr) minmax(115px,1fr);min-width:0;gap:8px}
+ #progPool .prog-table-row summary>.prog-table-cells{grid-template-columns:minmax(85px,.8fr) minmax(110px,1fr) minmax(140px,1.35fr) minmax(78px,.7fr) minmax(100px,.9fr) minmax(90px,.8fr) minmax(80px,.7fr);gap:8px}
+ #progPool .prog-table-row summary>button{max-width:100%;min-width:0;white-space:normal}
+}
+@media(min-width:761px) and (max-width:1100px){
+ #progPool .prog-group{overflow-x:auto}
+ #progPool .prog-table-head,#progPool .prog-table-row summary{min-width:1080px}
+}
+
+@media(min-width:1101px){#progPool .prog-table-head{grid-template-columns:minmax(110px,1.05fr) minmax(85px,.8fr) minmax(110px,1fr) minmax(140px,1.35fr) minmax(78px,.7fr) minmax(100px,.9fr) minmax(90px,.8fr) minmax(80px,.7fr) minmax(115px,1fr)}#progPool .prog-table-row summary{grid-template-columns:minmax(110px,1.05fr) minmax(0,6.25fr) minmax(115px,1fr)}}
+
+/* Programación: tipo, prioridades semanales y partes provenientes del contrato existente. */
+@media(min-width:761px){
+ .prog-layout:has(#progPool) #progPool .prog-table-head{
+  grid-template-columns:minmax(100px,1fr) minmax(82px,.8fr) minmax(100px,1fr) minmax(125px,1.2fr) minmax(70px,.65fr) minmax(90px,.8fr) minmax(80px,.7fr) minmax(70px,.65fr) minmax(85px,.8fr) minmax(135px,1.3fr) minmax(110px,1fr);
+  min-width:1160px;
+ }
+ .prog-layout:has(#progPool) #progPool .prog-table-row summary{
+  grid-template-columns:minmax(100px,1fr) minmax(0,8.9fr) minmax(110px,1fr);
+  min-width:1160px;
+ }
+ .prog-layout:has(#progPool) #progPool .prog-table-row summary>.prog-table-cells{
+  grid-template-columns:minmax(82px,.8fr) minmax(100px,1fr) minmax(125px,1.2fr) minmax(70px,.65fr) minmax(90px,.8fr) minmax(80px,.7fr) minmax(70px,.65fr) minmax(85px,.8fr) minmax(135px,1.3fr);
+ }
+ #progPool .prog-table-row .prog-table-partes{white-space:normal;line-height:1.3}
+}
+@media(max-width:760px){
+ #progPool .prog-table-row .prog-table-prioridad::before{content:'Prioridad'}
+ #progPool .prog-table-row .prog-table-partes::before{content:'Partes'}
+ #progPool .prog-table-row .prog-table-partes{grid-column:span 2;line-height:1.4}
+}
+
+/* Prioridad a la izquierda de Reserva; partes legibles sin notación ambigua. */
+@media(min-width:761px){
+ .prog-layout:has(#progPool) #progPool .prog-table-head{grid-template-columns:minmax(78px,.65fr) minmax(110px,1fr) minmax(82px,.8fr) minmax(100px,1fr) minmax(125px,1.2fr) minmax(70px,.65fr) minmax(90px,.8fr) minmax(80px,.7fr) minmax(70px,.65fr) minmax(175px,1.7fr) minmax(110px,1fr);min-width:1240px}
+ .prog-layout:has(#progPool) #progPool .prog-table-row summary{grid-template-columns:minmax(78px,.65fr) minmax(110px,1fr) minmax(0,8.45fr) minmax(110px,1fr);min-width:1240px}
+ .prog-layout:has(#progPool) #progPool .prog-table-row summary>.prog-table-cells{grid-template-columns:minmax(82px,.8fr) minmax(100px,1fr) minmax(125px,1.2fr) minmax(70px,.65fr) minmax(90px,.8fr) minmax(80px,.7fr) minmax(70px,.65fr) minmax(175px,1.7fr)}
+ #progPool .prog-table-priority-leading{display:flex;align-items:center;font-weight:800;color:#123d73;padding:0 8px}
+}
+@media(max-width:760px){
+ #progPool .prog-table-row summary>.prog-table-priority-leading{grid-column:1;grid-row:1;align-self:start;justify-self:start;background:#e2ebfa;border-radius:7px;padding:5px 9px;font-weight:800;color:#123d73}
+ #progPool .prog-table-row summary>div:first-of-type{grid-column:1;grid-row:2}
+ #progPool .prog-table-row summary>.prog-table-cells{grid-row:3}
+ #progPool .prog-table-row summary>button,#progPool .prog-table-row summary>.prog-done-badge{grid-row:1}
+ #progPool .prog-table-row .prog-table-partes{grid-column:span 3}
+}
