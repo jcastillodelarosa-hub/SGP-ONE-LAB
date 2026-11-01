@@ -2220,7 +2220,11 @@ function renderProgramming(options={}){
  if(!options?.skipCalendar)renderProgCalendar();
  // Ordenamiento local por sección: no altera las identidades ni los manejadores de programación.
  const sortColumns=[['reserva','Reserva'],['tipo','Tipo'],['sistema','Sistema'],['acabado','Acabado'],['cantidad','Ventanas'],['programadas','Programadas'],['pendientes','Pendientes'],['vidrio','Vidrio'],['accion','Acción']];
- const sortValues=r=>({reserva:String(r.reserva||''),tipo:String(r.tipo||r.tipo_produccion||r.clase||''),sistema:String(r.sistema||''),acabado:String(r.acabado||''),cantidad:Number(r.cantidad||0),programadas:Number(r._done||0),pendientes:Number(r._left||0),vidrio:Number(r.vidrio_pct||0)});
+ const programmingReservationType=r=>{
+   const types=[...new Set((Array.isArray(r.ordenes)?r.ordenes:[]).map(o=>String(o?.tipo||'').trim()).filter(Boolean).map(t=>{const u=t.toUpperCase();return u==='RETAIL'?'Retail':u==='PROYECTO'?'Proyecto':t;}))];
+   return types.length===1?types[0]:types.length>1?'Mixto':'—';
+ };
+ const sortValues=r=>({reserva:String(r.reserva||''),tipo:programmingReservationType(r),sistema:String(r.sistema||''),acabado:String(r.acabado||''),cantidad:Number(r.cantidad||0),programadas:Number(r._done||0),pendientes:Number(r._left||0),vidrio:Number(r.vidrio_pct||0)});
  const grouped=[...document.querySelectorAll('#progPool .prog-group')];
  grouped.forEach((group,index)=>{
    const source=index===0?[]:index<=4?unprogrammed.filter(r=>Number(r.grupo)===index):index===5?partial:complete;
@@ -2230,7 +2234,7 @@ function renderProgramming(options={}){
    const rows=source.map((r,i)=>({data:sortValues(r),node:nodes[i]}));
    rows.forEach(({data,node})=>{
      node.classList.add('prog-table-row');
-     node.dataset.progTipo=data.tipo||'—';
+     node.dataset.progTipo=data.tipo;
      node.dataset.progCantidad=String(data.cantidad);
      node.dataset.progSistema=data.sistema;
      node.dataset.progAcabado=data.acabado;
