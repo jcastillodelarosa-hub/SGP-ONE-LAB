@@ -2636,3 +2636,25 @@ button.active,[aria-pressed="true"]{border-color:#0865ed}
  #progPool .prog-table-row summary>button{grid-column:auto;justify-self:center}
  #progPool .prog-table-row summary>.glass-mini{display:none}
 }
+/* Picking audit follows the shared SGP modal: fixed header/footer, scroll body. */
+#pickAuditModal .pick-audit-card{display:flex;flex-direction:column;max-height:calc(100dvh - 24px);overflow:hidden}
+#pickAuditModal .modal-header,#pickAuditModal .modal-actions{flex:none}
+#pickAuditModal .pick-audit-body{min-height:0;overflow-y:auto;overscroll-behavior:contain}
+#pickAuditModal .modal-actions{display:flex;flex-wrap:wrap;gap:8px;background:#fff;padding-bottom:max(12px,env(safe-area-inset-bottom))}
+#pickAuditModal button{min-height:44px}
+.pick-audit-decision{border:1px solid #cbd9e8;border-left:4px solid #1264c8;border-radius:10px;padding:12px;margin:12px 0;background:#f8fbff}
+.pick-audit-decision[data-state="ACEPTAR"]{border-left-color:#208250}
+.pick-audit-decision[data-state="ELIMINAR"]{border-left-color:#b42318;background:#fff6f5}
+.pick-audit-decision[data-state="MODIFICAR"]{border-left-color:#ad7100}
+.pick-audit-decision label,#pickAuditModal .pick-audit-body>label{display:grid;gap:5px;margin:10px 0}
+.pick-audit-decision select,.pick-audit-decision input,.pick-audit-decision textarea{min-width:0;max-width:100%;min-height:42px;width:100%;box-sizing:border-box}
+#pickAuditModal [data-error]{color:#b42318}
+#pickAuditModal :focus-visible{outline:2px solid #1264c8;outline-offset:2px}
+@media(max-width:600px){#pickAuditModal .rec-grid{grid-template-columns:1fr}#pickAuditModal .modal-actions button{flex:1 1 130px}}
+#pickAuditModal{overflow:hidden;box-sizing:border-box}
+#pickAuditModal .pick-audit-card{margin:0;box-sizing:border-box;max-height:calc(100dvh - 64px)}
+@media(max-width:720px){#pickAuditModal .pick-audit-card{max-height:calc(100dvh - 16px)}}
+#pickAuditModal{overflow:clip!important}
+#pickAuditModal .modal-header>div{min-width:0;padding:8px 12px}
+#pickAuditModal .modal-header strong,#pickAuditModal .modal-header small{display:block;overflow-wrap:anywhere}
+#pickAuditModal .modal-header small{font-size:12px;margin-top:4px}

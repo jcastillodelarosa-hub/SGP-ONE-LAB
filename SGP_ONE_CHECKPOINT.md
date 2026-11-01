@@ -1,3 +1,34 @@
+# Auditoría individual de Picking — rama de revisión (2026-10-31 Colombia)
+
+Repositorio SGP-ONE-LAB; base main `3e5d438`; rama `feat/picking-auditoria-pendientes`.
+Encargo N3: decisiones individuales, corrección por identidad PANEL, anulación lógica,
+fecha/turno operativos, diferencias nuevas y scroll PC/móvil. No intervenir recepción
+general, GOOGLE ni LAC. Sin operaciones productivas, migraciones aplicadas, fusión,
+Firebase ni publish; sin copias/respaldos de bases.
+
+IMPLEMENTADO EN RAMA / VERIFICADO EN AISLAMIENTO / PENDIENTE DE REVISIÓN.
+SQL REVIEW aditivo de RPC y ledger privado con RLS; roles y cuerpos vigentes
+contrastados READ ONLY. Bloqueo de entrega/PDT, versión, idempotencia y trazabilidad.
+La guarda V2 permite cantidad corregida solo mediante autorización privada por
+transacción; las invariantes siguen activas fuera de ese procedimiento.
+
+QA: 14 escenarios PostgreSQL reales, 63 regresiones previas a la instalación aislada,
+363 casos JS/65 archivos, cinco pruebas de fechas/decisiones; modal real PC/móvil
+contra SQL local, formulario largo, encabezado/pie accesibles y guardado. Transporte
+HTTP y configuración horaria QA declarados; no certifican Auth/PostgREST ni planta.
+
+Bloqueo técnico delimitado: históricos sin vínculo de entrega inequívoco se rechazan
+con AUDITORIA_ORIGEN_NO_UNIVOCO; no deducir relaciones por nombre/pieza. Su edición
+requiere conciliación autorizada y no se declara certificada. El frontend requiere
+el contrato nuevo: no publicarlo solo. Ningún SQL aplicado en Supabase.
+
+Siguiente paso único: revisión del Draft y de la propuesta SQL, incluyendo la
+conciliación histórica que permanece fuera de la aceptación certificada.
+Detalles y reproducción: docs/sql-proposals/picking-audit/README.md;
+tests/picking-audit/README.md y evidencias JSON/PNG.
+
+---
+
 # LP-01 E4 — preparación LAB v374 sobre main vigente
 
 PR #170, rama `feat/lp01-e4-programacion-grupos`. Se incorporó `main` `ce559cb7b92b289b6ab81597f6609939184bf6ba`, que ya contiene el PR #168 de Mecanizado parcial. Se preservaron sus módulos, pruebas, SQL y estilos; el único conflicto fue `index.html` y se resolvió manteniendo LAB v374, `styles.css?v=374` y `app.js?v=374-multi-nc`. `scripts/build-release-info.mjs` también declara LAB v374.

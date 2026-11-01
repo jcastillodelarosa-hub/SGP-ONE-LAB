@@ -1,0 +1,58 @@
+name: Picking audit - isolated acceptance
+on:
+  pull_request:
+    paths:
+      - 'docs/sql-proposals/picking-audit/**'
+      - 'scripts/build-picking-audit.py'
+      - 'tests/picking-audit/**'
+      - 'tests/picking-audit-catalog.json'
+      - 'src/domain/picking-audit.js'
+      - 'src/modules/picking-audit.js'
+      - '.github/workflows/picking-audit.yml'
+permissions:
+  contents: read
+jobs:
+  acceptance:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Tooling
+        run: |
+          pip install playwright==1.62.0
+          python -m playwright install --with-deps chromium
+      - name: Build and domain tests
+        run: |
+          python scripts/build-picking-audit.py
+          git diff --exit-code -- docs/sql-proposals/picking-audit
+          node tests/picking-audit/domain.test.mjs
+      - name: Fresh isolated database and existing regressions
+        run: |
+          docker run -d --name sgp-audit-test --network none -e POSTGRES_HOST_AUTH_METHOD=trust postgres:17.11
+          for i in $(seq 1 30); do
+            if docker exec sgp-audit-test pg_isready -U postgres; then break; fi
+            sleep 1
+          done
+          python tests/mecanizado-parcial/integration.py sgp-audit-test
+      - name: Real audit contracts and browser
+        run: |
+          python tests/picking-audit/install.py
+          python tests/picking-audit/integration.py
+          python tests/picking-audit/browser.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: picking-audit-synthetic-evidence
+          path: |
+            tests/picking-audit/integration-results.json
+            tests/picking-audit/evidence/
+            tests/mecanizado-parcial/integration-results.json
+      - name: Destroy only synthetic container
+        if: always()
+        run: docker rm -f sgp-audit-test || true
