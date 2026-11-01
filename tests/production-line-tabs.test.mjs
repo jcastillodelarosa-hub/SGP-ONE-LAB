@@ -13,7 +13,7 @@ test('navigation renames Ensamble without changing view identity',()=>{
 });
 test('Ensamble and Empaque have independent accessible tabs',()=>{
  for(const id of ['productionAssemblyTab','productionPackingTab','productionAssemblyPanel','productionPackingPanel'])assert.ok(html.includes('id="'+id+'"'));
- assert.match(html,/production-line-tabs\.js\?v=1/);
+ assert.match(html,/production-line-tabs\.js\?v=2/);
  assert.match(tabs,/assemblyPanel.hidden=/);
  assert.match(tabs,/packingPanel.hidden=/);
  assert.match(html,/id="packingPreviewBody"/);

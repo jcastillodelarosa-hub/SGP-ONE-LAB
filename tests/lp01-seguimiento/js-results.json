@@ -1,0 +1,26 @@
+{
+  "tests": [
+    {
+      "file": "tests/lp01-followup.test.mjs",
+      "passed": true,
+      "tests": 7
+    },
+    {
+      "file": "tests/production-line-tabs.test.mjs",
+      "passed": true,
+      "tests": 19
+    },
+    {
+      "file": "tests/planner-integration.test.mjs",
+      "passed": true,
+      "tests": 2
+    },
+    {
+      "file": "tests/linea-produccion-v328.test.mjs",
+      "passed": true,
+      "tests": 3
+    }
+  ],
+  "total": 31,
+  "scope": "Focused local domain/navigation/planner regressions; not production verification"
+}

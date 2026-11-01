@@ -1,3 +1,34 @@
+# Seguimiento y Operación LP-01 — entrega delimitada (2026-10-31 Colombia)
+
+Rama independiente `feat/lp01-seguimiento-operacion`, base main `bb224f0`.
+Seguimiento implementado con las dos RPC de lectura vigentes: asignaciones por
+fecha/turno y hoja Export por clave. Filtros, secuencia, detalles, observaciones
+existentes, identidad/origen, estados legacy descriptivos y saldos por producción
+separados de ejecución. Navegación nueva conserva Programación, hojas y ubicaciones.
+
+Operación permite consultar Ensamble/Empaque y validar borradores sin guardar.
+Inicio/avance/cierre, notas persistidas e historial por etapa bloqueados: no hay
+etapa en las tablas actuales y registrar suma incrementos sin idempotencia/revisión,
+incompatible con el modelo documentado por etapa. No se inventaron transiciones.
+
+Guía de 27 bocetos no localizada tras búsqueda dirigida en repo/ramas/PR/Drive.
+B05–B11 se conocen solo por continuidad E2; no se afirma haber revisado imágenes.
+Mapa de aprobados/referencias/pendientes y dependencias con PR117–157 en
+`docs/SGP_LP01_SEGUIMIENTO_OPERACION.md`. Refero remoto sin suscripción; diseño
+basado en SGP vigente y guía craft. No duplicar motores propuestos de otros PR.
+
+QA: 31 pruebas focalizadas y Chromium PC1440/móvil390 con respuestas RPC sintéticas,
+red externa bloqueada y cero escrituras. Carga descarta sesiones antiguas y errores
+limpian filas. Capturas y resultados en `tests/lp01-seguimiento/`.
+IMPLEMENTADO EN RAMA / VERIFICADO EN AISLAMIENTO / PENDIENTE DE REVISIÓN.
+Sin cambios productivos, SQL aplicado, RPC/migraciones nuevas, fusión o despliegue;
+no GOOGLE/LAC. Programación/Mecanizado/Picking e importadores permanecen intactos.
+
+Siguiente paso único: revisar el Draft y recuperar guía/contrato aprobado por etapa
+antes de habilitar escrituras o certificar fidelidad completa a los bocetos.
+
+---
+
 # LP-01 E4 — preparación LAB v374 sobre main vigente
 
 PR #170, rama `feat/lp01-e4-programacion-grupos`. Se incorporó `main` `ce559cb7b92b289b6ab81597f6609939184bf6ba`, que ya contiene el PR #168 de Mecanizado parcial. Se preservaron sus módulos, pruebas, SQL y estilos; el único conflicto fue `index.html` y se resolvió manteniendo LAB v374, `styles.css?v=374` y `app.js?v=374-multi-nc`. `scripts/build-release-info.mjs` también declara LAB v374.

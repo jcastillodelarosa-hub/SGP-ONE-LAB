@@ -1,0 +1,43 @@
+name: LP01 followup - isolated UI acceptance
+on:
+  pull_request:
+    paths:
+      - 'src/domain/lp01-followup.js'
+      - 'src/modules/lp01-followup.*'
+      - 'production-line-tabs.js'
+      - 'tests/lp01-followup.test.mjs'
+      - 'tests/lp01-seguimiento/**'
+      - '.github/workflows/lp01-followup.yml'
+permissions:
+  contents: read
+jobs:
+  ui:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm ci
+      - run: npm run build:vendor
+      - run: npm run verify:release
+      - name: Focused regressions
+        run: |
+          node tests/lp01-followup.test.mjs
+          node tests/production-line-tabs.test.mjs
+          node tests/planner-integration.test.mjs
+          node tests/linea-produccion-v328.test.mjs
+      - name: Synthetic PC and mobile acceptance
+        run: |
+          pip install playwright==1.62.0
+          python -m playwright install --with-deps chromium
+          python tests/lp01-seguimiento/browser.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lp01-followup-synthetic-evidence
+          path: tests/lp01-seguimiento/evidence/
