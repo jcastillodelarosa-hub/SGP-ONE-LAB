@@ -1,6 +1,8 @@
 # Auditoría individual de Picking — rama de revisión (2026-10-31 Colombia)
 
 Repositorio SGP-ONE-LAB; base main `3e5d438`; rama `feat/picking-auditoria-pendientes`.
+PR Draft #174: https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/pull/174
+Main posterior contrastado: `845d710`; sin conflictos, sin fusionar ramas.
 Encargo N3: decisiones individuales, corrección por identidad PANEL, anulación lógica,
 fecha/turno operativos, diferencias nuevas y scroll PC/móvil. No intervenir recepción
 general, GOOGLE ni LAC. Sin operaciones productivas, migraciones aplicadas, fusión,
