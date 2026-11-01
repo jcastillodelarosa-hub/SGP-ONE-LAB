@@ -1,6 +1,7 @@
 # Seguimiento y Operación LP-01 — entrega delimitada (2026-10-31 Colombia)
 
 Rama independiente `feat/lp01-seguimiento-operacion`, base main `bb224f0`.
+PR Draft #183: https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/pull/183
 Seguimiento implementado con las dos RPC de lectura vigentes: asignaciones por
 fecha/turno y hoja Export por clave. Filtros, secuencia, detalles, observaciones
 existentes, identidad/origen, estados legacy descriptivos y saldos por producción

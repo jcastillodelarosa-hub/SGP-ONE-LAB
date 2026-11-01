@@ -13,7 +13,7 @@
 Reproducir desde raíz con vendor generado y Python Playwright instalado:
 
 ```sh
-npm ci
+npm install --no-package-lock --no-audit --no-fund
 npm run build:vendor
 node tests/lp01-followup.test.mjs
 node tests/production-line-tabs.test.mjs
