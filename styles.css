@@ -2697,3 +2697,18 @@ button.active,[aria-pressed="true"]{border-color:#0865ed}
  #progPool .prog-table-row .prog-table-partes::before{content:'Partes'}
  #progPool .prog-table-row .prog-table-partes{grid-column:span 2;line-height:1.4}
 }
+
+/* Prioridad a la izquierda de Reserva; partes legibles sin notación ambigua. */
+@media(min-width:761px){
+ .prog-layout:has(#progPool) #progPool .prog-table-head{grid-template-columns:minmax(78px,.65fr) minmax(110px,1fr) minmax(82px,.8fr) minmax(100px,1fr) minmax(125px,1.2fr) minmax(70px,.65fr) minmax(90px,.8fr) minmax(80px,.7fr) minmax(70px,.65fr) minmax(175px,1.7fr) minmax(110px,1fr);min-width:1240px}
+ .prog-layout:has(#progPool) #progPool .prog-table-row summary{grid-template-columns:minmax(78px,.65fr) minmax(110px,1fr) minmax(0,8.45fr) minmax(110px,1fr);min-width:1240px}
+ .prog-layout:has(#progPool) #progPool .prog-table-row summary>.prog-table-cells{grid-template-columns:minmax(82px,.8fr) minmax(100px,1fr) minmax(125px,1.2fr) minmax(70px,.65fr) minmax(90px,.8fr) minmax(80px,.7fr) minmax(70px,.65fr) minmax(175px,1.7fr)}
+ #progPool .prog-table-priority-leading{display:flex;align-items:center;font-weight:800;color:#123d73;padding:0 8px}
+}
+@media(max-width:760px){
+ #progPool .prog-table-row summary>.prog-table-priority-leading{grid-column:1;grid-row:1;align-self:start;justify-self:start;background:#e2ebfa;border-radius:7px;padding:5px 9px;font-weight:800;color:#123d73}
+ #progPool .prog-table-row summary>div:first-of-type{grid-column:1;grid-row:2}
+ #progPool .prog-table-row summary>.prog-table-cells{grid-row:3}
+ #progPool .prog-table-row summary>button,#progPool .prog-table-row summary>.prog-done-badge{grid-row:1}
+ #progPool .prog-table-row .prog-table-partes{grid-column:span 3}
+}
