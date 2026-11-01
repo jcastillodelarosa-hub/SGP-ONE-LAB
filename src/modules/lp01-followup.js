@@ -1,4 +1,5 @@
-import {followupRows,filterFollowup,draftAdvance,weekRange} from '../domain/lp01-followup.js';
+import {mountOperation} from './lp01-operation.js';
+import {followupRows,filterFollowup,weekRange} from '../domain/lp01-followup.js';
 const esc=v=>String(v??'—').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const show=v=>v===null||v===undefined?'Sin dato':String(v);
 export function mountFollowup({tracking,operation,bridge}){
@@ -26,17 +27,16 @@ export function mountFollowup({tracking,operation,bridge}){
   get('[data-list]').querySelectorAll('[data-operate]').forEach(b=>b.onclick=()=>{selected=rows.find(r=>r.id===b.dataset.operate);renderOperation();document.getElementById('productionOperationTab')?.click();});
  }
  function renderOperation(){
-  const host=operation.querySelector('[data-operation-detail]');if(!selected){host.textContent='Selecciona una asignación en Seguimiento.';return;}
+  const host=operation.querySelector('[data-operation-detail]');if(!selected){host.textContent='Consulta un turno operativo o una asignación histórica en Seguimiento.';return;}
   const r=selected;
-  host.innerHTML='<h4>'+esc(r.produccion)+' · Prioridad '+esc(r.prioridad)+'</h4><p>'+esc(r.key_produccion)+' · '+esc(r.fecha)+' / T'+esc(r.turno)+' · '+esc(r.id)+'</p><label>Etapa a consultar<select data-stage><option>ENSAMBLE</option><option>EMPAQUE</option></select></label><p data-stage-context></p><div class="lp-followup-blocked" role="note"><b>Registro de operación pendiente de contrato</b><p>Inicio y cierre por etapa no están confirmados en el contrato instalado. El avance disponible suma cantidades sin etapa ni clave idempotente; no se enviará desde esta vista.</p></div><label>Cantidad a revisar (borrador, sin guardar)<input type="number" min="1" step="1" data-quantity></label><label>Observación / novedad (borrador, sin guardar)<textarea rows="3" data-note></textarea></label><button type="button" data-review>Validar borrador</button><p data-draft-status role="status"></p><div class="lp-followup-actions"><button type="button" disabled>Registrar inicio</button><button type="button" disabled>Guardar avance</button><button type="button" disabled>Finalizar actividad</button></div><details><summary>Historial y trazabilidad disponibles</summary><p>Creada por '+esc(r.creado_por)+' · '+esc(r.creado_en)+' · Última actualización '+esc(r.actualizado_en)+'</p><p>Estado registrado: '+esc(r.estado)+' · Asignación '+esc(r.id)+(r.part?' · Origen '+esc(r.part):'')+'</p><p>La RPC devuelve ejecución agregada. El historial de movimientos por etapa aún no está disponible por un contrato de lectura confirmado; no se reconstruye a partir del total.</p></details>';
-  const update=()=>{const stage=host.querySelector('[data-stage]').value;host.querySelector('[data-stage-context]').textContent='Saldo oficial '+stage+': '+show(stage==='ENSAMBLE'?r.assemblyBalance:r.packingBalance)+' · Asignación legacy: '+show(r.executed)+' ejecutadas / '+show(r.remaining)+' pendientes. No hay asignación verificada por etapa.';};update();host.querySelector('[data-stage]').onchange=update;
-  host.querySelector('[data-review]').onclick=()=>{const label=host.querySelector('[data-draft-status]');try{draftAdvance(r,host.querySelector('[data-quantity]').value,host.querySelector('[data-note]').value);label.textContent='Cantidad compatible con el saldo legacy. Borrador sin guardar; pendiente de contrato por etapa.';}catch(e){label.textContent=e.message;}};
+  host.innerHTML='<h4>'+esc(r.produccion)+' · Consulta histórica</h4><p>'+esc(r.key_produccion)+' · '+esc(r.fecha)+' / T'+esc(r.turno)+' · '+esc(r.id)+'</p><p>Saldo oficial Ensamble '+show(r.assemblyBalance)+' · Empaque '+show(r.packingBalance)+'</p><p>Asignación legacy: '+show(r.executed)+' ejecutadas / '+show(r.remaining)+' pendientes. No identifica etapa.</p><p>'+esc(r.observacion)+'</p><p>Las escrituras requieren el contrato operativo por etapa instalado y ámbitos autorizados. No se usa el registro aditivo legacy desde esta ventana.</p><button type="button" data-existing-glass>Ver vidrio / OVES</button>';
+  host.querySelector('[data-existing-glass]').onclick=()=>bridge.openGlass?.(r.key_produccion,r.produccion);
  }
- get('[data-refresh]').onclick=load;for(const selector of ['[data-line]','[data-week]'])get(selector).onchange=load;
+ get('[data-refresh]').onclick=()=>operational.load();get('[data-week]').onchange=()=>operational.load();
  for(const selector of ['[data-search]','[data-day]','[data-shift]','[data-progress]','[data-sort]'])get(selector).addEventListener(selector==='[data-search]'?'input':'change',render);
- document.addEventListener('sgp:production-panel',e=>{if(e.detail==='seguimiento')load();});
- document.addEventListener('sgp:line-plan-updated',()=>{loaded=false;if(!tracking.hidden||!operation.hidden)load();});
- return {load};
+ const operational=mountOperation({tracking,operation,bridge,legacyLoad:()=>{get('[data-list]').hidden=false;get('[data-summary]').hidden=false;return load();}});
+
+ return {load:operational.load};
 }
-function boot(){mountFollowup({tracking:document.getElementById('productionTrackingPanel'),operation:document.getElementById('productionOperationPanel'),bridge:{getToken:()=>window.SGPPlannerBridge?.getToken?.(),getClient:()=>window.SGPPlannerBridge.getClient()}});}
+function boot(){mountFollowup({tracking:document.getElementById('productionTrackingPanel'),operation:document.getElementById('productionOperationPanel'),bridge:{getToken:()=>window.SGPPlannerBridge?.getToken?.(),getClient:()=>window.SGPPlannerBridge.getClient(),openGlass:(...args)=>window.SGPPlannerBridge.openGlass(...args)}});}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();

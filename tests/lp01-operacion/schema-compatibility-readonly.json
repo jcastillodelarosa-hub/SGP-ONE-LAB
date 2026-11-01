@@ -1,0 +1,108 @@
+{
+  "date": "2026-11-01",
+  "read_only": true,
+  "compatibility": {
+    "roles": [
+      {
+        "name": "authenticated",
+        "bypassrls": false,
+        "superuser": false
+      },
+      {
+        "name": "anon",
+        "bypassrls": false,
+        "superuser": false
+      }
+    ],
+    "sources": [
+      {
+        "rls": true,
+        "table": "sgp_linea_plan_asignaciones",
+        "triggers": null,
+        "constraints": [
+          {
+            "name": "sgp_linea_plan_asignaciones_cantidad_check",
+            "type": "c",
+            "definition": "CHECK ((cantidad > 0))"
+          },
+          {
+            "name": "sgp_linea_plan_asignaciones_estado_check",
+            "type": "c",
+            "definition": "CHECK ((estado = ANY (ARRAY['PROGRAMADA'::text, 'ABIERTA'::text, 'FINALIZADA'::text, 'CANCELADA'::text])))"
+          },
+          {
+            "name": "sgp_linea_plan_asignaciones_origen_id_fkey",
+            "type": "f",
+            "definition": "FOREIGN KEY (origen_id) REFERENCES sgp_linea_plan_asignaciones(id)"
+          },
+          {
+            "name": "sgp_linea_plan_asignaciones_pkey",
+            "type": "p",
+            "definition": "PRIMARY KEY (id)"
+          },
+          {
+            "name": "sgp_linea_plan_asignaciones_turno_check",
+            "type": "c",
+            "definition": "CHECK ((turno = ANY (ARRAY[1, 2])))"
+          }
+        ]
+      },
+      {
+        "rls": true,
+        "table": "sgp_producciones",
+        "triggers": [
+          {
+            "name": "parcial_proteger_total",
+            "definition": "CREATE TRIGGER parcial_proteger_total BEFORE UPDATE OF cantidad, produccion, id_linea, key_produccion ON public.sgp_producciones FOR EACH ROW EXECUTE FUNCTION sgp_mecanizado_parcial.proteger_total()"
+          },
+          {
+            "name": "trg_pdt_anio_inmutable",
+            "definition": "CREATE TRIGGER trg_pdt_anio_inmutable BEFORE UPDATE OF anio ON public.sgp_producciones FOR EACH ROW EXECUTE FUNCTION sgp_pdt_manual.proteger_anio_programacion()"
+          },
+          {
+            "name": "trg_pdt_manual_auditar_programacion",
+            "definition": "CREATE CONSTRAINT TRIGGER trg_pdt_manual_auditar_programacion AFTER UPDATE ON public.sgp_producciones DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION sgp_pdt_manual.auditar_programacion()"
+          }
+        ],
+        "constraints": [
+          {
+            "name": "produccion_identity",
+            "type": "c",
+            "definition": "CHECK ((key_produccion = ((id || '|'::text) || id_linea)))"
+          },
+          {
+            "name": "sgp_producciones_activa_check",
+            "type": "c",
+            "definition": "CHECK ((activa = ANY (ARRAY['SI'::text, 'NO'::text])))"
+          },
+          {
+            "name": "sgp_producciones_estado_produccion_check",
+            "type": "c",
+            "definition": "CHECK (((estado_produccion IS NULL) OR (estado_produccion = ANY (ARRAY['CERRADA'::text, 'ABIERTA'::text, 'ENSAMBLADA'::text, 'FINALIZADA'::text]))))"
+          },
+          {
+            "name": "sgp_producciones_id_linea_fkey",
+            "type": "f",
+            "definition": "FOREIGN KEY (id_linea) REFERENCES sgp_lineas(id_linea)"
+          },
+          {
+            "name": "sgp_producciones_pkey",
+            "type": "p",
+            "definition": "PRIMARY KEY (key_produccion)"
+          },
+          {
+            "name": "trg_pdt_manual_auditar_programacion",
+            "type": "t",
+            "definition": "TRIGGER DEFERRABLE INITIALLY DEFERRED"
+          }
+        ]
+      }
+    ],
+    "glass_report": {
+      "md5": "51621668224c838c5c870849b141f40d",
+      "signature": "sgp_reporte_dispersion_vidrio(text)"
+    },
+    "server_version": "17.11",
+    "new_schema_absent": true
+  }
+}

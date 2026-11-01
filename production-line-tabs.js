@@ -1,4 +1,4 @@
-/* Four-tab navigation; presentation-only, no database writes. */
+/* Unified LP navigation. Existing sheets remain available as historical consultations. */
 (()=>{
  const byId=id=>document.getElementById(id);
  const tabs=byId('productionAssemblyTab')?.parentElement;
@@ -7,20 +7,21 @@
  const locations=byId('assemblyLocationReportPanel'),sheet=byId('assemblySheetPanel');
  if(!tabs||!assembly||!packing||!assemblyPanel||!packingPanel||!locations||!sheet)return;
  const planner=document.createElement('button');
- planner.type='button';planner.id='productionPlannerTab';planner.textContent='LP-01 · Programación';
- assembly.textContent='LP-02 · Ensamble';packing.textContent='LP-02 · Empaque';
+ planner.type='button';planner.id='productionPlannerTab';planner.textContent='Programación';
+ assembly.textContent='Consulta Ensamble';packing.textContent='Consulta Empaque';
  const report=document.createElement('button');
- report.type='button';report.id='productionLocationsTab';report.textContent='Reporte de ubicaciones';
+ report.type='button';report.id='productionLocationsTab';report.textContent='Vidrio · ubicaciones';
  tabs.insertBefore(planner,assembly);tabs.append(report);
  const plannerPanel=document.createElement('div');
  plannerPanel.id='productionPlannerPanel';plannerPanel.className='production-packing-empty';
  plannerPanel.innerHTML='<h3>Línea de Producción · Programación</h3><p>Calendario, tabla y Kanban comparten las asignaciones consultadas. La carga programada y los saldos oficiales del Export se muestran por separado.</p>';
  tabs.after(plannerPanel);
  const extraPanels={};
- for(const [key,id,label] of [['seguimiento','Tracking','Seguimiento'],['operacion','Operation','Operación']]){
+ for(const [key,id,label] of [['seguimiento','Tracking','Seguimiento'],['operacion','Operation','Operación'],['dashboard','Dashboard','Dashboard'],['reportes','Reports','Reportes']]){
   const button=document.createElement('button');button.type='button';button.id='production'+id+'Tab';button.textContent=label;
   const panel=document.createElement('section');panel.id='production'+id+'Panel';panel.hidden=true;plannerPanel.after(panel);tabs.insertBefore(button,assembly);extraPanels[key]={button,panel};
  }
+ tabs.insertBefore(report,extraPanels.dashboard.button);
  const oldSubtabs=byId('assemblySheetTab')?.parentElement;
  if(oldSubtabs)oldSubtabs.hidden=true;
  const style=document.createElement('style');

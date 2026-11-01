@@ -1,3 +1,35 @@
+# Línea de Producción integral — PR #183 / Issue #184 (01/11/2026)
+
+Rama `feat/lp01-seguimiento-operacion`, base main `bb224f0`. Guía original de 27
+bocetos y DOCX aprobado recuperados e incorporados con hashes y matriz de estados.
+
+Implementado en rama: contrato real por línea/etapa/orden/parte/fecha/turno,
+último acumulado, SALE, notas y afectaciones agregadas con validación/justificación,
+auditoría, idempotencia, arrastre raíz al abrir turno y notificaciones. Cierre exige
+archivo previo, diferencias justificadas y comentario; reapertura de coordinador
+con versiones inmutables. Dashboard del turno y reportes CSV con fuentes reales.
+Vidrio reutiliza modal/reporte; corrección SQL propuesta para clasificar Traslado
+como el reporte vigente. Calendario y escritores legacy conservados.
+
+Verificado únicamente en PostgreSQL 17.11 aislado y navegador PC1440/móvil390:
+288 = 90 + 90 + 90 + 18, permisos/sesiones/ámbitos, dos líneas, reemplazos de
+acumulado, UUID/reintento tras respuesta perdida, concurrencia, arrastre sin duplicar,
+consolidación de ventanas, cierre/reapertura/versiones, descarga y Vidrio SQL real.
+Supabase solo SELECT de catálogo/contratos y estados agregados de vidrio.
+
+Bloqueos reales: archivo/esquema Power BI no suministrado (CSV-v1 solo QA, apagado
+por defecto), inclusión de avances en cargas Export y liberaciones reales PDT en
+ventanas consolidadas no certificadas; ámbitos reales pendientes. Falta también
+conciliar correcciones de orígenes ya arrastrados, histórico operativo semanal,
+reportes consolidados/PDF/imagen y completar Tabla/Kanban. No declarar módulo
+completo ni disponibilidad de planta. No se aplica SQL, fusiona, publica ni despliega.
+
+Detalle y pruebas: `docs/SGP_LP01_SEGUIMIENTO_OPERACION.md`,
+`docs/linea-produccion/INSTALACION_Y_RECUPERACION.md`, `tests/lp01-operacion/`.
+El hito consultivo anterior se conserva debajo como historia, superado en alcance.
+
+---
+
 # Seguimiento y Operación LP-01 — entrega delimitada (2026-10-31 Colombia)
 
 Rama independiente `feat/lp01-seguimiento-operacion`, base main `bb224f0`.

@@ -6,10 +6,9 @@
       "identity_homonyms": true,
       "filters": true,
       "navigation_legacy": true,
-      "draft_only": true,
+      "missing_contract_read_only_fallback": true,
       "write_calls": 0,
-      "read_error_clears_rows": true,
-      "late_session_discarded": true
+      "read_error_clears_rows": true
     },
     {
       "viewport": 390,
@@ -17,10 +16,9 @@
       "identity_homonyms": true,
       "filters": true,
       "navigation_legacy": true,
-      "draft_only": true,
+      "missing_contract_read_only_fallback": true,
       "write_calls": 0,
-      "read_error_clears_rows": true,
-      "late_session_discarded": true
+      "read_error_clears_rows": true
     }
   ],
   "scope": "Real UI/navigation; synthetic RPC response fixtures. Not backend, plant, authenticated-role or write verification."

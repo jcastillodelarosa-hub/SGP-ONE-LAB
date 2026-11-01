@@ -1,126 +1,148 @@
-# LP-01 — Seguimiento y Operación de Línea
+# Línea de Producción — continuidad del PR #183
 
-Estado: IMPLEMENTADO EN RAMA / VERIFICADO CON DATOS SINTÉTICOS / PENDIENTE DE REVISIÓN.
-Repositorio SGP-ONE-LAB; base main `bb224f0`, rama `feat/lp01-seguimiento-operacion`.
-No se cambian Programación, Mecanizado, Picking, reportes ni sus RPC. No migraciones,
-datos productivos, fusión, Firebase, publish, GOOGLE o LAC.
+01/11/2026. Rama `feat/lp01-seguimiento-operacion`, base `main bb224f0`.
+Especificación: [Issue #184](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/issues/184).
+Estado: **IMPLEMENTADO EN RAMA y VERIFICADO EN AISLAMIENTO**. No aplicado en
+Supabase, fusionado, publicado ni verificado en planta.
 
-## Recuperación dirigida y bocetos
+El encargo pegado es la instrucción de trabajo. El DOCX adjunto aporta la definición
+funcional aprobada; el HTML aporta imágenes originales y estados de aprobación
+individuales. Se incorporaron ambos con hashes y [matriz de 27 bocetos](linea-produccion/REFERENCIAS_27_BOCETOS.md).
+La ausencia de guía documentada en el hito anterior queda resuelta. Ese hito sigue
+consultable en el commit `8a6f36e`; sus evidencias consultivas no prueban escrituras.
 
-Se consultaron AGENTS, MASTER_CONTEXT, ESTADO_ACTUAL, CHECKPOINT, Design System,
-continuidad E2/E3/E4 y los PR relacionados antes de implementar. El checkpoint raíz
-mantiene hitos históricos que no prueban estado actual: main bb224f0 ya integra
-Programación E3/E4 y sus correcciones. El PR157 sigue abierto con shell LP01–LP06;
-se revisó su reconstrucción sin copiar ni fusionar esa rama. PR136 es continuidad
-anterior de consulta E2. Los motores propuestos en PR117–132 no se instalan aquí.
-
-**La guía original de 27 bocetos no pudo localizarse.** Se buscaron nombres/contenido
-en main, ramas relacionadas, issues/PR y Drive conectado (dos conexiones, búsquedas
-SGP/bocetos y carpeta SGP). No se halló PDF/DOCX fuente. No se afirma haber visto
-las 27 imágenes ni se presenta una reconstrucción inventada como aprobación.
-
-| Referencia | Evidencia disponible | Clasificación aplicada |
-|---|---|---|
-| B05–B07 (semana/día, tabla, Kanban) | `SGP_LINEA_PRODUCCION_CONTINUIDAD_E2.md` y E3/E4 | Aprobación referida en continuidad; Programación ya existe y se conserva |
-| B08–B11 | E2 las identifica como referencia aprobada; B11 exige Export válido y saldo cero, sin imagen corregida | Referencia documental; no certificación visual de las imágenes originales |
-| LP02 Seguimiento / LP03 Operación | PR157, `docs/linea-produccion/ETAPA_3_RECONSTRUCCION.md` en esa rama | Alcance de reconstrucción documentado; su PR declara bocetos/funciones pendientes |
-| B01–B04 y B12–B27 | Guía fuente no disponible | No clasificables como aprobados; no se inventan contenido ni aprobación |
-| Motor Ensamble/Empaque por etapa | PR117, `docs/linea-etapa1/CONTRATOS_Y_MODELO.md` en esa rama | Continuidad/modelo de referencia, persistencia propuesta; no contrato instalado aprobado para este frontend |
-
-Por ello la alineación definitiva con los 27 bocetos sigue pendiente de recuperar la
-guía y su mapa de aprobación. Se entrega el alcance acotado expresamente autorizado
-en este encargo, sin nuevas transiciones funcionales.
-
-## Referencia visual y decisiones
-
-Principal: Design System SGP existente, azul #103B73 / acción #1264C8, fondo claro,
-controles de 42px, tarjetas compactas con detalle expandible y etiquetas visibles.
-Secundaria: guía Refero craft-details para foco, formularios y móvil. Las herramientas
-Refero devolvieron NO_SUBSCRIPTION; se usó el sistema existente y las referencias
-locales, no se declara investigación visual remota completada.
-
-Se conserva la navegación y los paneles existentes; se agregan Seguimiento y Operación
-al mismo registro de pestañas, con teclado y paneles independientes. Hojas previas
-de Ensamble/Empaque y Reporte de ubicaciones se mantienen. No se crean LP04–LP06
-vacíos ni se reemplaza Programación. La clasificación visual LP definitiva requiere
-la guía fuente; no se renumeran las hojas heredadas arbitrariamente.
-
-## Etapa 1 — Seguimiento implementado
-
-Consulta autenticada en paralelo:
-- `sgp_linea_plan_consultar(p_token,p_desde,p_hasta,p_linea)`: semana calendario,
-  asignación, fecha/turno, prioridad, cantidad, agregado ejecutado, estado y origen.
-- `sgp_consultar_ensamble(p_token,p_semana=NULL,p_linea)`: contexto completo de la
-  línea para unir por key_produccion sin excluir órdenes de otra semana base.
-
-Las RPC se contrastaron en Supabase **solo con SELECT de catálogo**. Cuerpos,
-firmas y ACL se guardan en `tests/lp01-seguimiento/catalog-readonly.json` (metadatos,
-no filas operativas). La presencia de SECURITY DEFINER no equivale a una nueva
-certificación de permisos de planta; el servidor conserva sus controles existentes.
-
-Filtros: línea, semana calendario, día, turno, búsqueda y progreso de asignación.
-Orden: fecha/turno/prioridad, producción o mayor pendiente. Detalle: clave, UUID de
-asignación, origen de movimiento, reserva, sistema, Mecanizado y observación/PDT,
-saldos Export y cantidades de Ensamble/Empaque, contexto temporal y creador.
-
-Identidad: jamás unir por nombre. Duplicados idénticos se cuentan una vez; claves o
-cantidades contradictorias se rechazan o muestran SIN CONCILIAR. Excesos se muestran
-sin recortar. Export no se vuelve a descontar con la ejecución de asignaciones.
-Los saldos por producción se repiten como contexto en detalles, no se suman como
-cantidades de cada asignación. Datos sin Export validado no se presentan como cero.
-
-PENDIENTE/EN PROCESO/FINALIZADA de la vista son descripciones del saldo de la
-asignación legacy, no estados escritos ni acreditación de cierre físico por etapa.
-La pantalla lo indica. Un UUID origen de movimiento no se convierte en P1/P2 de
-Mecanizado: la correspondencia entre esos contratos no está certificada.
-
-## Etapas 2/3 — Operación preparada, escritura bloqueada
-
-Se abre desde una asignación. Permite consultar Ensamble/Empaque y sus saldos,
-identidad, prioridad, cantidades legacy, observaciones originales y trazabilidad
-básica de creación/actualización. Se puede validar cantidad/observación como
-**borrador sin guardar**; no se persiste ni se presenta un evento de ejecución.
-
-Bloqueos demostrados por catálogo/documentación:
-
-| Operación | Bloqueo |
+| Área | Implementación y límite de esta entrega |
 |---|---|
-| Inicio / cierre por Ensamble o Empaque | Sin contrato confirmado por etapa; asignaciones/ejecuciones actuales no tienen columna etapa |
-| Avance | `sgp_linea_plan_registrar` suma incrementos, no sustituye acumulado; sin clave idempotente/revisión. Contradice la semántica propuesta en continuidad PR117 |
-| Permisos/cierre/reapertura/Sale | Reglas y propiedad por etapa requieren conciliación del modelo aprobado con el contrato servidor; no heredar permisos por conjetura |
-| Historial de movimientos | Consulta actual entrega suma, no movimientos. No se reconstruye historial ficticio desde el agregado ni se usa SELECT directo a tablas |
-| Observación/novedad nueva | No se conecta al escritor legacy incompatible. Borrador rotulado, sin falsa confirmación |
-| Disponibilidad física Empaque/Picking | No convertir piezas PANEL/PDT a ventanas ni asumir que saldo cero acredita recepción. Resolvedor cuantitativo por etapa pendiente en PR previos |
+| Programación | Calendario y contratos existentes conservados. No se reescriben `planner-operations-v326.js` ni `planner-readonly-v326.js`. Tabla y Kanban siguen pendientes de definición/completitud. |
+| Seguimiento | Turno por línea/etapa, consulta por identidad canónica, búsqueda, abiertas con SALE positivo → abiertas con cero → nuevas, prioridad, SALE, observaciones, afectaciones y consolidación. Valida cantidades y conserva auditoría. Consulta contextual de Mecanizado/PDT mediante RPC existente, sin acreditar liberaciones por su resumen. |
+| Operación | Último acumulado del turno reemplaza al anterior; notas, afectaciones y correcciones trazadas. Ensamble y Empaque independientes. Arrastre automático al abrir el turno siguiente; no se copia su ejecución. |
+| Vidrio | Reutiliza el modal y reporte existentes. Contexto de orden y retorno, indicadores navegables y SQL propuesto para el desglose de Traslado. Consulta actual v1 muestra su falta de desglose; no informa un cero ficticio. |
+| Dashboard | Indicadores reales del turno local consultado, sin mezclarlos con avance oficial diario. Indicadores oficiales semanales por sistema siguen pendientes de fuente histórica contrastada. |
+| Reportes | Cierres por línea/etapa/fecha/turno, versiones y diferencias inmutables, descarga CSV compatible con Excel. Consolidado de etapas, PDF e imagen siguen pendientes; no se anuncian como disponibles. Reporte de ubicaciones existente conservado. |
 
-Registrar inicio/Guardar avance/Finalizar están deshabilitados. **No hay llamadas
-RPC de escritura en el nuevo módulo**, fallback legacy, estados optimistas ni
-persistencia simulada. Programar/mover/registrar en componentes previos conservan
-su comportamiento; este PR no los invoca ni cambia.
+## Persistencia y compatibilidad
 
-## Pruebas / límites
+La consulta SELECT del catálogo vigente confirma que no existen las RPC nuevas ni
+el motor B2 propuesto en PR #122. Las tablas legacy de asignaciones/ejecuciones
+carecen de etapa, y su registro suma incrementos sin UUID idempotente. Por eso no
+se reutiliza esa escritura para el acumulado del líder. Se reutilizan la sesión
+real y los patrones de autorización, bloqueo, revisión, UUID y bitácora de B2,
+adaptados a la consolidación agregada aprobada en #184. No se fusionan ni instalan
+las propuestas de PR #117–132 ni se afirma que sus puentes estén certificados.
 
-- Dominio: identidad, homónimas, deduplicación, discrepancias, Export nulo/ausente,
-  orden/filtros, validación de borrador y semana ISO entre años.
-- Regresión focalizada: navegación existente, contratos/operaciones protegidos del
-  planificador y selección de reservas/producciones.
-- Chromium1440 y390: filtros, detalle, Ensamble/Empaque, cantidades inválidas,
-  borrador, botones bloqueados, cero escrituras, vuelta a Programación/ubicaciones,
-  error de lectura que limpia filas y móvil sin overflow horizontal.
-- Respuestas RPC del navegador son fixtures sintéticas. Se ejecuta el módulo y
-  navegación reales; no es prueba de funciones servidor, usuarios/roles, planta,
-  red corporativa ni dispositivo físico. Metadatos READ ONLY no prueban el runtime.
+Propuesta [01_operacion_REVIEW.sql](sql-proposals/lp01-operacion/01_operacion_REVIEW.sql):
 
-Resultados y capturas en `tests/lp01-seguimiento/`. Sintaxis, verify:release y diff
-comprobados. No se aplicó SQL ni se creó una RPC o migración nueva.
+- `sgp_lp_operacion_consultar(text,text,text,date,integer)` devuelve contrato,
+  permisos, turno, órdenes, historial, notificaciones y versiones de cierre.
+- `sgp_lp_operacion_comando(text,jsonb)` admite ABRIR, SALE, EJECUTAR, AFECTAR,
+  VALIDAR, NOTA, IMPORTAR_BI, CERRAR, REABRIR y LIBERAR. El payload identifica
+  `line`, `stage`, `date`, `shift`, `key`, `part`, `revision` e `id` según operación.
+- Esquema privado con RLS; sin acceso directo desde navegador. Únicamente las dos
+  fachadas tienen EXECUTE para anon/authenticated, con sesión SGP y ámbitos reales
+  por usuario/etapa/producción. Recepción no hereda permisos de escritura de líder.
+- Instalación atómica, comprobación del contrato de sesión y columnas, sin
+  sobrescribir un esquema existente. Escrituras y formato BI desactivados por defecto.
+- UUID ligado al usuario y payload; bloqueos reales por solicitud, línea/etapa,
+  turno y producción, revisiones CAS y bitácoras inmutables. Reintento explícito del
+  mismo UUID tras perder una respuesta. Los filtros no cambian prioridades.
 
-## Cómo validar
+Cada parte LP conserva el UUID raíz de su asignación de Programación. Los arrastres
+legacy se resuelven por `origen_id`, verificando identidad y ciclos. No se inventa
+un vínculo entre ese UUID y los P1/P2 de Mecanizado cuando la fuente no lo aporta.
+Se protege la cantidad original por parte y el presupuesto local por producción.
+Procesar una parte no finaliza sus hermanas ni cambia el estado de la producción.
 
-En una instalación local con vendor disponible, abrir Línea de Producción →
-Seguimiento, elegir línea/semana y Actualizar. Buscar una orden, expandir y abrir
-Consultar operación; cambiar etapa, probar un borrador y verificar que no se guarda.
-Para el recorrido sintético reproducible: `python tests/lp01-seguimiento/browser.py`.
-No usar una prueba de aceptación para modificar datos operativos.
+El saldo oficial solo se lee del Export. Un presupuesto local conservador impide
+reutilizar cantidades entre turnos; nunca se presenta como nuevo saldo oficial.
+Si cambia `ultima_carga_diaria`/fecha/saldo, los comandos cuantitativos se bloquean
+hasta disponer de inclusión explícita de eventos. No se infiere esa inclusión a
+partir de la fecha de carga. NOTA y el reporte de afectaciones no reescriben saldos.
+Las correcciones de un origen ya arrastrado quedan bloqueadas para no desajustar
+su sucesor; el flujo de conciliación de esa cadena sigue pendiente.
 
-**Siguiente paso único:** revisar el Draft y recuperar la guía de 27 bocetos y el
-contrato aprobado por etapa antes de habilitar escrituras de Operación. Las decisiones
-funcionales y la instalación SQL quedan fuera de esta entrega y requieren autorización.
+Las afectaciones son ventanas, no registros NC ni piezas PANEL. Un reporte invalida
+su validación anterior. El coordinador declara el total distinto entre el máximo
+de las categorías y su suma, con motivo obligatorio. Las categorías no se suman
+como KPI. No se resta automáticamente el consolidado de SALE: sus solapamientos
+requieren validación del coordinador.
+
+La liberación preparada consume una evidencia privada una sola vez, vinculada a
+producción y etapa, con ventanas consolidadas y límites de parte/Export. No hay
+RPC pública que permita fabricar esa evidencia. El puente productivo desde PDT
+continúa bloqueado: no se convierte cantidad de perfiles en ventanas ni se interpreta
+un cierre de PDT como cantidad automáticamente disponible.
+
+## Power BI, cierre y continuidad
+
+CERRAR exige archivo guardado de la misma línea/etapa/fecha/turno, cobertura exacta
+de órdenes/partes, motivos de diferencias o incumplimiento y comentario general.
+El archivo, SHA256, filas, último valor del líder, diferencias, saldos consultados,
+usuario y versión quedan en un snapshot inmutable. Solo coordinador/administrador
+reabre con motivo; las correcciones en revisión requieren ese rol. El cierre de
+una línea o etapa no cierra la otra. El archivo nunca actualiza Export.
+
+**No se recibió un archivo real Power BI ni su esquema de columnas.** Se preparó
+un adaptador CSV-v1 estricto para QA, con encabezado
+`etapa;fecha;turno;key_produccion;parte;cantidad`. Permanece desactivado en el SQL
+propuesto. Sus pruebas acreditan el contrato aislado; no certifican el formato
+productivo ni autorizan a exigir ese formato al usuario de planta. Falta contrastar
+una muestra real, su granularidad por parte y la correspondencia inequívoca de órdenes.
+
+Al abrir un nuevo turno se incorporan las órdenes anteriores con saldo oficial
+pendiente, conservando observaciones/afectaciones y ejecución nueva cero; SALE
+queda cero/por validar. La ventana no crea registros mediante una lectura ni depende
+de un job instalado. La apertura e incorporación las realiza el coordinador.
+Empaque sugiere saldo Export en el formulario inicial y exige validar su reparto
+entre partes/capacidad; no asigna todo el saldo a cada parte. La inicialización
+masiva y el resumen semanal operativo completo quedan pendientes.
+
+SALE genera notificación persistida. La vista activa consulta cada 20 segundos;
+no se anuncia entrega por correo/push ni acuse de lectura. Conserva formularios
+editados y avisa de cambios remotos, manteniendo la protección CAS.
+
+## Vidrio
+
+La consulta vigente agrupa Traslado dentro de Otros y no clasifica `preparado - sin
+movimiento` igual que el reporte de dispersión. La propuesta [04_vidrio_REVIEW.sql](sql-proposals/lp01-operacion/04_vidrio_REVIEW.sql)
+conserva firma, sesión y ACL de `sgp_detalle_ubicacion_vidrio`, añade
+`categorias_version=2` y reutiliza exactamente las reglas de la RPC de dispersión
+vigente: posiciones T/L son traslado; preparado/novedad por prefijo; resto Otros.
+No se crean ubicaciones ni NC. El modal descarta respuestas tardías, filtra la
+categoría solicitada y conserva el contexto al cerrarlo.
+
+## Evidencias y reproducción
+
+- [Catálogo SELECT](../tests/lp01-operacion/catalog-readonly.json), cuerpos capturados
+  de sesión/roles/Vidrio y estados agregados, sin sesiones ni datos personales reales.
+- [PostgreSQL real](../tests/lp01-operacion/evidence/postgres.json): permisos y ámbitos,
+  dos líneas, 288 = 90 + 90 + 90 + 18, acumulados, consolidación, UUID, carreras de
+  edición y cierre, arrastre raíz, límites por parte, archivo, reapertura/versiones,
+  RLS y conservación de fuentes oficiales. `python tests/lp01-operacion/postgres.py`.
+- [Navegador PC/móvil](../tests/lp01-operacion/evidence/browser.json): interfaz → HTTP
+  local → funciones SQL reales → recarga; cierre y descarga, más modal Vidrio real
+  con fuente sintética. `python tests/lp01-operacion/browser.py`.
+- [Modo sin instalación](../tests/lp01-seguimiento/evidence/browser-results.json):
+  fixtures solo para lectura histórica y ausencia de contrato, cero escrituras.
+  No acredita persistencia. `python tests/lp01-seguimiento/browser.py`.
+- **111 pruebas en 18 archivos** de dominio y regresiones focalizadas: LP, Programación, partes de Mecanizado,
+  cantidades Picking y relaciones Vidrio. `npm run verify:release` comprueba paquete;
+  su mensaje «listo para Firebase» no significa publicación autorizada o realizada.
+
+No se certifica operación productiva, liberación física PDT, formato Power BI real,
+inclusión de avances en Export, dispositivo físico ni rendimiento de planta. La meta
+03/11/2026 depende de estos contratos/fuentes y de autorizaciones, no de CI verde.
+
+## Bloqueos y siguiente paso
+
+1. Muestra/especificación real Power BI y enlace estable orden/parte: indispensable
+   para certificar la conciliación productiva.
+2. Puentes reales de inclusión Export y liberaciones PDT en ventanas consolidadas,
+   con identidad y participación de todos los escritores; no instalados/certificados.
+3. Ámbitos reales de líderes por línea/etapa/producción y autorización de instalación,
+   pruebas productivas controladas y publicación, cada operación por separado.
+4. Flujo de corrección de una cadena ya arrastrada; vistas históricas/semanales y
+   descargas consolidadas pendientes. No resolverlas conciliando datos por inferencia.
+
+Ver [plan de instalación y recuperación](linea-produccion/INSTALACION_Y_RECUPERACION.md).
+Se actualiza el mismo Draft #183; no se solicita aplicar SQL mientras falten las
+fuentes anteriores y la revisión del instalador. No hubo cambios en GOOGLE/LAC.

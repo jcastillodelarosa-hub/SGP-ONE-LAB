@@ -1,0 +1,31 @@
+/** Contracts for the stage-specific engine; never mix local execution with Export. */
+export const BI_HEADER='etapa;fecha;turno;key_produccion;parte;cantidad';
+export const AFFECTATIONS=['NC_AL','NC_V','TECNO','NOVEDAD'];
+export const quantity=value=>{if(!/^(0|[1-9]\d*)$/.test(String(value))||!Number.isSafeInteger(Number(value)))throw Error('Escribe una cantidad entera no negativa');return Number(value);};
+export function operationalRows(data,{line='',search=''}={}){
+ if(data?.contract!=='LP-OPERACION-1'||!Array.isArray(data.orders))throw Error('Contrato de operación incompatible');
+ const seen=new Set(),q=search.trim().toLocaleLowerCase('es');
+ return data.orders.filter(r=>{const id=[r.linea,r.etapa,r.fecha,r.turno,r.key,r.parte].join('/');if(seen.has(id))throw Error('Orden/parte duplicada');seen.add(id);return(!line||r.oficial?.id_linea===line)&&(!q||[r.produccion,r.key,r.parte,r.observacion,r.oficial?.sistema,r.oficial?.reserva_al].some(x=>String(x??'').toLocaleLowerCase('es').includes(q)));})
+ .sort((a,b)=>bucket(a)-bucket(b)||String(a.origen_fecha||a.fecha).localeCompare(String(b.origen_fecha||b.fecha))||Number(a.prioridad)-Number(b.prioridad)||a.key.localeCompare(b.key)||a.parte.localeCompare(b.parte));
+}
+const bucket=r=>r.abierta?(r.sale>0?0:1):2;
+export function officialBalance(row,stage){const p=row.oficial;if(p?.saldos_inicializados!==true||p?.presente_ultimo_export!==true)return null;const n=Number(p[stage==='ENSAMBLE'?'saldo_ensamble':'saldo_empaque']);return Number.isSafeInteger(n)&&n>=0?n:null;}
+export function validateAffectations(affectations,consolidated){
+ const values=AFFECTATIONS.map(k=>quantity(affectations[k]??0));
+ if(consolidated===undefined)return null;
+ const total=quantity(consolidated);if(total<Math.max(...values)||total>values.reduce((a,b)=>a+b,0))throw Error('El consolidado debe cubrir la categoría mayor sin superar la suma. Confirma los solapamientos.');return total;
+}
+export function previewBI(content,{stage,date,shift,orders}){
+ if(typeof content!=='string'||content.length>2000000)throw Error('Archivo demasiado grande o inválido');
+ const lines=content.replace(/\r/g,'').split('\n');if(lines.shift()!==BI_HEADER)throw Error('Formato CSV pendiente de correspondencia con el Power BI aprobado');
+ const found=new Map();for(const line of lines.filter(Boolean)){
+  const c=line.split(';');if(c.length!==6||c[0]!==stage||c[1]!==date||c[2]!==String(shift))throw Error('Archivo de otra etapa, fecha o turno');
+  const id=c[3]+'/'+c[4];if(found.has(id)||!orders.some(r=>r.key===c[3]&&r.parte===c[4]))throw Error('Orden ajena o repetida en Power BI');found.set(id,quantity(c[5]));
+ }
+ if(!orders.length||found.size!==orders.length)throw Error('Faltan órdenes del turno en el archivo');
+ return orders.map(r=>({...r,power_bi:found.get(r.key+'/'+r.parte),difference:found.get(r.key+'/'+r.parte)-r.ejecutado}));
+}
+export function reportCSV(snapshot){
+ const cell=v=>'"'+String(v??'').replace(/"/g,'""').replace(/^[=+@-]/,"'$&")+'"';
+ return '\uFEFF'+[['Etapa','Línea','Fecha','Turno','Producción','Parte','SALE','Líder','Power BI','Diferencia','Saldo Export','Motivo','Observación general','Versión','SHA256'],...snapshot.rows.map(r=>[snapshot.stage,snapshot.line,snapshot.date,snapshot.shift,r.key,r.parte,r.sale,r.ejecutado,r.power_bi,r.diferencia,r.saldo_oficial,snapshot.reasons?.[r.key+'/'+r.parte],snapshot.observation,snapshot.version,snapshot.file.sha256])].map(r=>r.map(cell).join(';')).join('\r\n');
+}

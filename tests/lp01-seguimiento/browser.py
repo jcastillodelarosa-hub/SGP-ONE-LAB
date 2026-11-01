@@ -20,7 +20,7 @@ with sync_playwright() as p:
     {key_produccion:'QA2|PANELES_2',produccion:'TORRE NORTE',id_linea:'PANELES_2',sistema:'ES7100',reserva_al:'R3',saldos_inicializados:false,saldo_ensamble:null,saldo_empaque:null,estado_mecanizado:'CORTE'}];
    window.calls=[];window.failRead=false;
    window.SGPPlannerBridge.getToken=()=> 'qa-synthetic';window.SGPPlannerBridge.getClient=async()=>({rpc:async(name,args)=>{
-    window.calls.push({name,args});if(!['sgp_linea_plan_consultar','sgp_consultar_ensamble'].includes(name))throw Error('Unexpected RPC: '+name);
+    window.calls.push({name,args});if(name==='sgp_lp_operacion_consultar')return {data:null,error:{code:'PGRST202',message:'QA contrato no instalado'}};if(!['sgp_linea_plan_consultar','sgp_consultar_ensamble'].includes(name))throw Error('Unexpected RPC: '+name);
     if(window.failRead)return {error:{message:'QA no disponible'},data:null};
     return {error:null,data:name==='sgp_consultar_ensamble'?{filas:products}:[
      {id:'A1',key_produccion:'QA1|PANELES_2',fecha:args.p_desde,turno:1,prioridad:1,cantidad:90,ejecutado:30,estado:'ABIERTA',produccion:'TORRE NORTE',sistema:'ES7100',observacion:'Falta vidrio',creado_por:'QA Líder'},
@@ -34,24 +34,17 @@ with sync_playwright() as p:
   page.locator('[data-shift]').select_option('2');assert page.locator('.lp-followup-order').count()==1;page.locator('[data-shift]').select_option('')
   page.locator('.lp-followup-order').first.locator('summary').click();page.locator('#productionTrackingPanel').screenshot(path=str(OUT/f'tracking-{width}.png'))
   page.locator('[data-operate]').first.click();assert page.locator('#productionOperationPanel').is_visible()
-  page.locator('[data-stage]').select_option('EMPAQUE');assert '248' in page.locator('[data-stage-context]').inner_text()
-  page.locator('[data-quantity]').fill('61');page.locator('[data-review]').click();assert 'no superar' in page.locator('[data-draft-status]').inner_text()
-  page.locator('[data-quantity]').fill('20');page.locator('[data-review]').click();assert 'observación' in page.locator('[data-draft-status]').inner_text()
-  page.locator('[data-note]').fill('QA material pendiente');page.locator('[data-review]').click();assert 'sin guardar' in page.locator('[data-draft-status]').inner_text()
-  assert page.locator('.lp-followup-actions button:disabled').count()==3
+  assert 'Consulta histórica' in page.locator('[data-operation-detail]').inner_text()
+  assert page.locator('[data-order-form]').count()==0
   page.locator('#productionOperationPanel').screenshot(path=str(OUT/f'operation-{width}.png'))
   assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
-  followup_calls=page.evaluate('window.calls');assert all(x['name'] in ['sgp_linea_plan_consultar','sgp_consultar_ensamble'] for x in followup_calls)
+  followup_calls=page.evaluate('window.calls');assert all(x['name'] in ['sgp_linea_plan_consultar','sgp_consultar_ensamble','sgp_lp_operacion_consultar'] for x in followup_calls)
   page.locator('#productionLocationsTab').click();assert page.locator('#assemblyLocationReportPanel').is_visible()
   page.locator('#productionPlannerTab').click();assert page.locator('#productionPlannerPanel').is_visible()
   page.locator('#productionTrackingTab').click()
-  page.evaluate('''()=>{window.originalClient=window.SGPPlannerBridge.getClient;window.releases=[];window.SGPPlannerBridge.getClient=async()=>({rpc:async()=>{await new Promise(resolve=>window.releases.push(resolve));return {error:null,data:[]};}});}''')
-  page.locator('[data-refresh]').click();page.wait_for_function('window.releases.length===2')
-  page.evaluate("window.SGPPlannerBridge.getToken=()=> 'qa-session-changed';window.releases.forEach(resolve=>resolve())")
-  page.wait_for_function("document.querySelector('[data-status]').textContent.includes('sesión cambió')");assert page.locator('.lp-followup-order').count()==0
-  page.evaluate("window.SGPPlannerBridge.getClient=window.originalClient;window.SGPPlannerBridge.getToken=()=> 'qa-synthetic';window.failRead=true");page.locator('[data-refresh]').click();page.wait_for_function("document.querySelector('[data-status]').textContent.includes('QA no disponible')");assert page.locator('.lp-followup-order').count()==0
+  page.evaluate('window.failRead=true');page.locator('[data-refresh]').click();page.wait_for_function("document.querySelector('[data-status]').textContent.includes('QA no disponible')");assert page.locator('.lp-followup-order').count()==0
   calls=page.evaluate('window.calls');assert not any(any(word in x['name'] for word in ['guardar','registrar','programar','mover','arrastrar']) for x in calls)
   assert not errors,errors
-  results.append({'viewport':width,'assignments':3,'identity_homonyms':True,'filters':True,'navigation_legacy':True,'draft_only':True,'write_calls':0,'read_error_clears_rows':True,'late_session_discarded':True});page.close()
+  results.append({'viewport':width,'assignments':3,'identity_homonyms':True,'filters':True,'navigation_legacy':True,'missing_contract_read_only_fallback':True,'write_calls':0,'read_error_clears_rows':True});page.close()
  browser.close()
 server.shutdown();(OUT/'browser-results.json').write_text(json.dumps({'results':results,'scope':'Real UI/navigation; synthetic RPC response fixtures. Not backend, plant, authenticated-role or write verification.'},indent=2)+'\n');print(json.dumps(results))

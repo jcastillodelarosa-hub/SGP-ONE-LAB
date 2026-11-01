@@ -1,0 +1,119 @@
+{
+  "status": "PASS",
+  "date": "2026-11-01",
+  "files": [
+    {
+      "file": "tests/lp01-operation.test.mjs",
+      "passed": true,
+      "tests": 6
+    },
+    {
+      "file": "tests/lp01-followup.test.mjs",
+      "passed": true,
+      "tests": 7
+    },
+    {
+      "file": "tests/production-line-tabs.test.mjs",
+      "passed": true,
+      "tests": 19
+    },
+    {
+      "file": "tests/linea-produccion-v328.test.mjs",
+      "passed": true,
+      "tests": 3
+    },
+    {
+      "file": "tests/mecanizado-partes.test.mjs",
+      "passed": true,
+      "tests": 7
+    },
+    {
+      "file": "tests/mecanizado-base-progress.test.mjs",
+      "passed": true,
+      "tests": 27
+    },
+    {
+      "file": "tests/picking-delivery-quantities-v335.test.mjs",
+      "passed": true,
+      "tests": 6
+    },
+    {
+      "file": "tests/picking-delivery-report-model.test.mjs",
+      "passed": true,
+      "tests": 1
+    },
+    {
+      "file": "tests/glass-relations-v306.test.mjs",
+      "passed": true,
+      "tests": 6
+    },
+    {
+      "file": "tests/glass-week-filter-v306.test.mjs",
+      "passed": true,
+      "tests": 3
+    },
+    {
+      "file": "tests/glass-explorer-visual-v307.test.mjs",
+      "passed": true,
+      "tests": 5
+    },
+    {
+      "file": "tests/planner-init-controls-v338.test.mjs",
+      "passed": true,
+      "tests": 1
+    },
+    {
+      "file": "tests/planner-integration.test.mjs",
+      "passed": true,
+      "tests": 2
+    },
+    {
+      "file": "tests/planner-operational-statuses-v337.test.mjs",
+      "passed": true,
+      "tests": 4
+    },
+    {
+      "file": "tests/planner-part-bulk-v336.test.mjs",
+      "passed": true,
+      "tests": 2
+    },
+    {
+      "file": "tests/planner-production-loading-v339.test.mjs",
+      "passed": true,
+      "tests": 4
+    },
+    {
+      "file": "tests/planner-reservations-v327.test.mjs",
+      "passed": true,
+      "tests": 5
+    },
+    {
+      "file": "tests/planner-status-reception-v339.test.mjs",
+      "passed": true,
+      "tests": 3
+    }
+  ],
+  "total_named_tests": 111,
+  "protected_sources": [
+    {
+      "file": "planner-operations-v326.js",
+      "unchanged_from_main": true,
+      "sha256": "42dd96c5ff15dc99262de0369784dd0ea569f3d513cf254d022cbdd825d5c1dc"
+    },
+    {
+      "file": "planner-readonly-v326.js",
+      "unchanged_from_main": true,
+      "sha256": "27a2ef1e1a4eea2e37a877793dbf04a2d99e74e489a3d580d1116afce9c3c98e"
+    },
+    {
+      "file": "src/modules/pdt-v2-controller.js",
+      "unchanged_from_main": true,
+      "sha256": "8a3254250401b62178283b431dd6ddf1c64b227bf37e01cd9e3d41f0415776ef"
+    },
+    {
+      "file": "src/domain/mecanizado-partes.js",
+      "unchanged_from_main": true,
+      "sha256": "c7ff60c052f32cb63070c39ec6e54ae1ca9a3539560930158e2f4e492ca3f117"
+    }
+  ]
+}
