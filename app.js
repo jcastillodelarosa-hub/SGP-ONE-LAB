@@ -2219,13 +2219,13 @@ function renderProgramming(options={}){
  document.querySelectorAll('.prog-res-complete').forEach((node,index)=>{const r=complete[index];if(!r)return;node.dataset.reserva=r.reserva;const list=document.createElement('div');list.className='prog-orders';for(const o of r.ordenes||[]){const button=document.createElement('button');button.type='button';button.textContent='Ver partes · '+o.produccion;button.onclick=()=>openProgModal(r.reserva,o.produccion,0);list.append(button);}node.append(list);});
  if(!options?.skipCalendar)renderProgCalendar();
  // Ordenamiento local por sección: no altera las identidades ni los manejadores de programación.
- const sortColumns=[['reserva','Reserva'],['tipo','Tipo'],['sistema','Sistema'],['acabado','Acabado'],['cantidad','Ventanas'],['programadas','Programadas'],['pendientes','Pendientes'],['vidrio','Vidrio'],['prioridad','Prioridad'],['partes','Partes'],['accion','Acción']];
+ const sortColumns=[['prioridad','Prioridad'],['reserva','Reserva'],['tipo','Tipo'],['sistema','Sistema'],['acabado','Acabado'],['cantidad','Ventanas'],['programadas','Programadas'],['pendientes','Pendientes'],['vidrio','Vidrio'],['partes','Partes'],['accion','Acción']];
  const sortValues=r=>{
    const orders=Array.isArray(r.ordenes)?r.ordenes:[];
    const types=[...new Set(orders.map(o=>String(o.tipo||'').trim()).filter(Boolean).map(v=>/retail/i.test(v)?'Retail':/proyecto/i.test(v)?'Proyecto':v))];
    const parts=Array.isArray(r.partes)?r.partes:[];
    const priorities=[...new Set([...parts.map(p=>p.prioridad),...orders.map(o=>o.prioridad_semanal)].map(v=>String(v||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'es',{numeric:true}));
-   return {reserva:String(r.reserva||''),tipo:types.join(' / ')||'—',sistema:String(r.sistema||''),acabado:String(r.acabado||''),cantidad:Number(r.cantidad||0),programadas:Number(r._done||0),pendientes:Number(r._left||0),vidrio:Number(r.vidrio_pct||0),prioridad:priorities.join(', ')||'—',partes:parts.length?parts.length+' ('+parts.map(p=>String(p.prioridad||'?')+': '+Number(p.cantidad||0)).join(', ')+')':'—'};
+   return {reserva:String(r.reserva||''),tipo:types.join(' / ')||'—',sistema:String(r.sistema||''),acabado:String(r.acabado||''),cantidad:Number(r.cantidad||0),programadas:Number(r._done||0),pendientes:Number(r._left||0),vidrio:Number(r.vidrio_pct||0),prioridad:priorities.join(', ')||'—',partes:parts.length?parts.map(p=>'Parte '+String(p.prioridad||'?')+' · '+Number(p.cantidad||0)+' ventanas').join(' / '):'Sin división registrada'};
  };
  const grouped=[...document.querySelectorAll('#progPool .prog-group')];
  grouped.forEach((group,index)=>{
@@ -2237,11 +2237,14 @@ function renderProgramming(options={}){
    rows.forEach(({data,node})=>{
      node.classList.add('prog-table-row');
      node.dataset.progTipo=data.tipo||'—';
+     node.dataset.progPrioridad=data.prioridad;
      node.dataset.progCantidad=String(data.cantidad);
      node.dataset.progSistema=data.sistema;
      node.dataset.progAcabado=data.acabado;
      node.dataset.progVidrio=String(data.vidrio);
      const summary=node.querySelector('summary > div:first-child');
+     const priorityCell=document.createElement('span');priorityCell.className='prog-table-priority-leading';priorityCell.textContent=data.prioridad;priorityCell.title='Prioridad semanal: '+data.prioridad;
+     node.querySelector('summary')?.prepend(priorityCell);
      if(summary){
        const badges=document.createElement('span');badges.className='prog-table-badges';
        const type=document.createElement('strong');type.className='prog-table-type';type.textContent=data.tipo||'Tipo no informado';
@@ -2250,7 +2253,7 @@ function renderProgramming(options={}){
        summary.querySelector(':scope > b')?.after(badges);
        const summaryRow=node.querySelector('summary');
        const cells=document.createElement('div');cells.className='prog-table-cells';
-       for(const [field,value] of [['tipo',data.tipo||'—'],['sistema',data.sistema||'—'],['acabado',data.acabado||'—'],['cantidad',data.cantidad],['programadas',data.programadas],['pendientes',data.pendientes],['vidrio',data.vidrio+'%'],['prioridad',data.prioridad],['partes',data.partes]]){
+       for(const [field,value] of [['tipo',data.tipo||'—'],['sistema',data.sistema||'—'],['acabado',data.acabado||'—'],['cantidad',data.cantidad],['programadas',data.programadas],['pendientes',data.pendientes],['vidrio',data.vidrio+'%'],['partes',data.partes]]){
          const cell=document.createElement('span');cell.className='prog-table-cell prog-table-'+field;
          cell.textContent=String(value);cell.title=field+': '+value;cells.append(cell);
        }
