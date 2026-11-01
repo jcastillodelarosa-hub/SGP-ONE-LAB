@@ -2502,11 +2502,22 @@ function renderPickingReception(){
   '<section class="pick-reception-group"><header><div class="pick-reception-group-head"><span class="pick-week-badge">SEM '+escapeHtml(g.semana||'—')+'</span><div><b>Reserva '+escapeHtml(g.reserva)+'</b><span> · Parte '+escapeHtml(g.parte)+'</span><small>'+escapeHtml(g.sistema)+' · '+escapeHtml(g.acabado)+'</small>'+sharedReserveNoticeHtml(g.reserva)+'</div></div><strong>'+g.rows.length+' orden'+(g.rows.length===1?'':'es')+'</strong></header>'+
   g.rows.map(x=>{
    const meta=sharedMetaFromEmbedded(x,x.reserva),semana=normalizeReceptionWeek(x.semana);
-   return '<div class="pick-reception-card grouped '+(isSharedMeta(meta)?'shared-row':'')+'"><div><strong>'+escapeHtml(x.produccion||'—')+' · '+escapeHtml(x.proyecto||'')+'</strong>'+(meta?sharedBadgeHtml(meta)+sharedDetailsHtml(meta):'')+'<small>Semana '+escapeHtml(semana||'sin identificar')+' · '+escapeHtml(x.cantidad_ventanas||0)+' ventanas</small></div><div><span class="prod-state pick-status-yellow">PICKING</span><span class="pick-delivery-state">'+(x.completa?'COMPLETA · POR VALIDAR':'CON PENDIENTES · POR VALIDAR')+'</span></div><div><small>Entrega '+escapeHtml(x.fecha_entrega||'—')+' · '+escapeHtml(x.turno_entrega||'—')+'</small><small>Por '+escapeHtml(x.usuario_entrega||'—')+'</small></div><div class="pick-reception-actions"><button data-audit-pieces="'+x.id_programacion+'" data-production="'+escapeHtml(x.produccion||'')+'">Ver piezas</button><button class="primary" data-audit="'+x.id_entrega+'">Auditar</button></div></div>';
+   return '<div class="pick-reception-card grouped '+(isSharedMeta(meta)?'shared-row':'')+'"><div><strong>'+escapeHtml(x.produccion||'—')+' · '+escapeHtml(x.proyecto||'')+'</strong>'+(meta?sharedBadgeHtml(meta)+sharedDetailsHtml(meta):'')+'<small>Semana '+escapeHtml(semana||'sin identificar')+' · '+escapeHtml(x.cantidad_ventanas||0)+' ventanas</small></div><div><span class="prod-state pick-status-yellow">PICKING</span><span class="pick-delivery-state">'+(x.completa?'COMPLETA · POR VALIDAR':'CON PENDIENTES · POR VALIDAR')+'</span></div><div><small>Entrega '+escapeHtml(x.fecha_entrega||'—')+' · '+escapeHtml(x.turno_entrega||'—')+'</small><small>Por '+escapeHtml(x.usuario_entrega||'—')+'</small></div><div class="pick-reception-actions"><button data-audit-pieces="'+x.id_entrega+'" data-production="'+escapeHtml(x.produccion||'')+'">Ver piezas</button><button class="primary" data-audit="'+x.id_entrega+'">Auditar</button></div></div>';
   }).join('')+'</section>'
  ).join(''):'<div class="empty-state">'+(pickingReceptionRows.length?'No hay órdenes pendientes de auditoría para los filtros seleccionados.':'No hay órdenes pendientes de auditoría.')+'</div>';
- host.querySelectorAll('[data-audit-pieces]').forEach(b=>b.onclick=()=>openPickingPieces(b.dataset.auditPieces,b.dataset.production));
+ host.querySelectorAll('[data-audit-pieces]').forEach(b=>b.onclick=()=>openPickingAuditPieces(b.dataset.auditPieces));
  host.querySelectorAll('[data-audit]').forEach(b=>b.onclick=()=>openPickingAudit(b.dataset.audit));
+}
+async function openPickingAuditPieces(id){
+ const target=pickingReceptionRows.find(r=>r.id_entrega===id);if(!target)return;
+ try{
+  const db=await getSupabaseClient(),{data,error}=await db.rpc('sgp_picking_auditoria_contexto',{p_token:getAppToken(),p_id_entrega:id});if(error)throw error;
+  if(!Array.isArray(data?.fuentes))throw Error('Contrato de fuentes de auditoría inválido');
+  currentPieceRows=data.fuentes.map(p=>({...p,codigo_sap:p.codigo_sap||p.perfil,perfil:p.perfil||p.codigo_sap}));
+  currentPieceContext='order';currentPieceView='summary';els.pieceModalTitle.textContent='Orden '+target.produccion;
+  els.pieceModalMeta.textContent='Auditoría · Reserva '+target.reserva+' · '+target.sistema+' · '+target.acabado;
+  els.pieceModal.hidden=false;renderPieceModal();
+ }catch(e){alert('No fue posible cargar las piezas de auditoría: '+e.message);}
 }
 async function openPickingAudit(id){
  const target=pickingReceptionRows.find(r=>r.id_entrega===id);if(!target)return;

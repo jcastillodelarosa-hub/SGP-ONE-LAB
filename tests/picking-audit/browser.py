@@ -17,7 +17,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
  def do_POST(self):
   try:
    args=json.loads(self.rfile.read(int(self.headers['Content-Length'])));name=args['name'];kw=args['args'];assert name in ['sgp_picking_auditoria_contexto','sgp_picking_auditoria_guardar','sgp_pdt_registro_fuentes_v4','sgp_configuracion_general_obtener']
-   if name=='sgp_configuracion_general_obtener':result=[{'clave':'HORARIOS_TURNOS','valor':CONFIG}]
+   if name=='sgp_configuracion_general_obtener':result=json.loads(sql("select coalesce(jsonb_agg(to_jsonb(c)),'[]') from sgp_configuracion_general_obtener('qa-recepcion') c;"))
    else:
     assert all(re.fullmatch(r'p_[a-z_]+',k) for k in kw)
     result=json.loads(sql('set role anon;select '+name+"(p_token=>'qa-recepcion',"+','.join(k+'=>'+lit(v) for k,v in kw.items())+');').splitlines()[-1])
@@ -28,7 +28,7 @@ server=http.server.ThreadingHTTPServer(('127.0.0.1',0),Handler);threading.Thread
 context={'__file__':str(ROOT/'tests/picking-audit/integration.py')}
 exec((ROOT/'tests/picking-audit/integration.py').read_text().split("test('aceptar,")[0],context)
 context['counter']=int(os.environ.get('AUDIT_BROWSER_COUNTER','200'))
-fixtures=[context['fixture'](2),context['fixture'](1)]
+fixtures=[context['fixture'](2),context['fixture'](1),context['fixture'](1)]
 results=[]
 with sync_playwright() as p:
  browser=p.chromium.launch(executable_path='/usr/bin/chromium' if pathlib.Path('/usr/bin/chromium').exists() else None,args=['--no-sandbox'])
@@ -54,5 +54,18 @@ with sync_playwright() as p:
   page.locator('[data-save]').click();page.wait_for_function('window.saved===true',timeout=20000)
   audit=json.loads(sql("select to_jsonb(a)-'payload' from sgp_picking_audit.eventos a where id_entrega='"+target['id_entrega']+"';"));assert audit['fecha_recepcion']=='2026-10-30'
   results.append({'width':width,'scroll':metrics,'saved':True,'real_sql':True,'date':audit['fecha_recepcion'],'shift':audit['turno_recepcion']});page.close()
+ # Explicit client fault injection: no claim that a synthetic response certifies SQL behavior.
+ target=json.loads(sql("select public.sgp_picking_recepcion_cola('qa-recepcion');"));target=next(x for x in target if x['produccion']==fixtures[2]['prod'])
+ page=browser.new_page(viewport={'width':390,'height':844});page.goto('http://127.0.0.1:'+str(server.server_port)+'/styles.css');page.set_content('<link rel="stylesheet" href="/styles.css"><div id="pickAuditModal" class="modal-backdrop rec-overlay" hidden><div class="modal-card pick-audit-card"></div></div>')
+ page.evaluate("""async target=>{const {openAudit}=await import('/src/modules/picking-audit.js');window.attempts=0;window.mode='negative';await openAudit({target,rpc:async(name,args)=>{if(name==='sgp_picking_auditoria_guardar'){window.attempts++;if(window.mode==='negative')return {ok:false};}const r=await fetch('/rpc',{method:'POST',body:JSON.stringify({name,args})});if(!r.ok)throw Error(await r.text());return r.json();},onSaved:async()=>{throw Error('QA refresh disconnected');}});}""",target)
+ page.locator('[data-save]').click();assert page.locator('[data-error]').inner_text();assert page.evaluate('window.attempts')==0
+ page.locator('[data-action]').select_option('ACEPTAR');page.locator('[data-date]').fill('');page.locator('[data-save]').click();assert page.evaluate('window.attempts')==0
+ page.locator('[data-date]').fill('2026-10-30');page.locator('[data-shift]').select_option('TURNO 2');page.locator('[data-save]').click();page.wait_for_function("document.querySelector('[data-error]').textContent.includes('no confirmó')")
+ assert page.locator('#pickAuditModal').is_visible();assert sql("select count(*) from sgp_picking_audit.eventos where id_entrega='"+target['id_entrega']+"';")=='0'
+ page.evaluate("window.mode='refresh'");page.locator('[data-save]').click();page.wait_for_function("document.querySelector('[data-error]').textContent.includes('Auditoría guardada')")
+ assert page.locator('[data-save]').is_disabled();assert page.locator('[data-close]').first.is_enabled()
+ assert sql("select count(*) from sgp_picking_audit.eventos where id_entrega='"+target['id_entrega']+"';")=='1'
+ page.screenshot(path=str(OUT/'saved-refresh-error-390.png'))
+ results.append({'case':'form validation, unconfirmed response and refresh failure after real save','client_fault_injection':True,'real_saved_events':1,'duplicate_save_disabled':True});page.close()
  browser.close()
-server.shutdown();(OUT/'browser-results.json').write_text(json.dumps({'tests':results,'limitations':['Synthetic data only; actual modal and SQL functions. Local RPC transport, synthetic QA shift configuration; no managed Auth/PostgREST, plant or physical-device certification.']},indent=2)+'\n');print(json.dumps(results))
+server.shutdown();(OUT/'browser-results.json').write_text(json.dumps({'tests':results,'limitations':['Synthetic data only; actual modal and SQL functions. Local RPC transport; current captured shift configuration read by the real SQL configuration function in a synthetic database; no managed Auth/PostgREST, plant or physical-device certification.']},indent=2)+'\n');print(json.dumps(results))

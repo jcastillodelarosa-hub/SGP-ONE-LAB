@@ -1,0 +1,94 @@
+{
+  "parser": "pglast 7.22 / PostgreSQL grammar",
+  "scope": "All SQL proposals, active top-level statements and SQL/PLpgSQL bodies; string literals containing catalog snapshots are not executed SQL.",
+  "unbounded_updates": 0,
+  "unbounded_deletes": 0,
+  "truncate_statements": 0,
+  "dynamic_execution": [],
+  "instructions": [
+    {
+      "file": "docs/sql-proposals/picking-audit/01-review.sql",
+      "context": "public.sgp_picking_auditoria_contexto",
+      "operation": "DELETE",
+      "without_where": false,
+      "sql": "delete from sgp_picking_audit.contextos where transaccion=pg_current_xact_id()::text"
+    },
+    {
+      "file": "docs/sql-proposals/picking-audit/01-review.sql",
+      "context": "public.sgp_picking_auditoria_guardar",
+      "operation": "DELETE",
+      "without_where": false,
+      "sql": "delete from sgp_picking_audit.correcciones where id_pendiente=pid"
+    },
+    {
+      "file": "docs/sql-proposals/picking-audit/01-review.sql",
+      "context": "public.sgp_picking_auditoria_guardar",
+      "operation": "DELETE",
+      "without_where": false,
+      "sql": "delete from sgp_picking_audit.contextos where transaccion=pg_current_xact_id()::text"
+    },
+    {
+      "file": "docs/sql-proposals/picking-audit/install-review.sql",
+      "context": "public.sgp_picking_auditoria_contexto",
+      "operation": "DELETE",
+      "without_where": false,
+      "sql": "delete from sgp_picking_audit.contextos where transaccion=pg_current_xact_id()::text"
+    },
+    {
+      "file": "docs/sql-proposals/picking-audit/install-review.sql",
+      "context": "public.sgp_picking_auditoria_guardar",
+      "operation": "DELETE",
+      "without_where": false,
+      "sql": "delete from sgp_picking_audit.correcciones where id_pendiente=pid"
+    },
+    {
+      "file": "docs/sql-proposals/picking-audit/install-review.sql",
+      "context": "public.sgp_picking_auditoria_guardar",
+      "operation": "DELETE",
+      "without_where": false,
+      "sql": "delete from sgp_picking_audit.contextos where transaccion=pg_current_xact_id()::text"
+    },
+    {
+      "file": "docs/sql-proposals/picking-audit/rollback-review.sql",
+      "context": "top-level",
+      "operation": "DROP",
+      "without_where": false,
+      "sql": "DROP FUNCTION public.sgp_picking_auditoria_contexto (text, uuid)"
+    },
+    {
+      "file": "docs/sql-proposals/picking-audit/rollback-review.sql",
+      "context": "top-level",
+      "operation": "DROP",
+      "without_where": false,
+      "sql": "DROP FUNCTION public.sgp_picking_auditoria_guardar (text, uuid, text, uuid, date, text, jsonb, jsonb, text)"
+    },
+    {
+      "file": "docs/sql-proposals/picking-audit/rollback-review.sql",
+      "context": "top-level",
+      "operation": "DROP",
+      "without_where": false,
+      "sql": "DROP FUNCTION sgp_picking_audit.snapshot (uuid)"
+    },
+    {
+      "file": "docs/sql-proposals/picking-audit/rollback-review.sql",
+      "context": "top-level",
+      "operation": "DROP",
+      "without_where": false,
+      "sql": "DROP FUNCTION sgp_picking_audit.pendiente (public.sgp_picking_faltantes)"
+    },
+    {
+      "file": "docs/sql-proposals/picking-audit/rollback-review.sql",
+      "context": "top-level",
+      "operation": "DROP",
+      "without_where": false,
+      "sql": "DROP TABLE sgp_picking_audit.decisiones, sgp_picking_audit.eventos, sgp_picking_audit.correcciones, sgp_picking_audit.contextos"
+    },
+    {
+      "file": "docs/sql-proposals/picking-audit/rollback-review.sql",
+      "context": "top-level",
+      "operation": "DROP",
+      "without_where": false,
+      "sql": "DROP SCHEMA sgp_picking_audit"
+    }
+  ]
+}

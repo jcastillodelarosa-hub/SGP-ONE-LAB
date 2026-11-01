@@ -17,6 +17,9 @@ create table sgp_picking_audit.decisiones(
  ejecutado_en timestamptz not null default clock_timestamp());
 alter table sgp_picking_audit.eventos enable row level security;
 alter table sgp_picking_audit.decisiones enable row level security;
+-- Capability exists only inside an authorized audit RPC transaction.
+create table sgp_picking_audit.contextos(transaccion text primary key,usuario text not null);
+alter table sgp_picking_audit.contextos enable row level security;
 create table sgp_picking_audit.correcciones(
  id_pendiente uuid primary key,transaccion text not null,anterior numeric not null,nueva numeric not null);
 alter table sgp_picking_audit.correcciones enable row level security;
@@ -39,12 +42,16 @@ from public.sgp_picking_entregas e where e.id_entrega=id;
 $$;
 create function public.sgp_picking_auditoria_contexto(p_token text,p_id_entrega uuid) returns jsonb
 language plpgsql security definer set search_path='' as $$
-declare s jsonb;
+declare s jsonb;actor text;fuentes jsonb;ent public.sgp_picking_entregas;
 begin
- perform public.sgp_validar_sesion_rol(p_token,array['ADMINISTRADOR','COORDINADOR','PICKING','SUPERVISOR DE PICKING','LIDER LINEA','LIDER','RECEPCION']);
+ actor:=public.sgp_pdt_validar_rol_real(p_token,array['ADMINISTRADOR','COORDINADOR','PICKING','SUPERVISOR DE PICKING','LIDER LINEA','LIDER','RECEPCION']);
  s:=sgp_picking_audit.snapshot(p_id_entrega);
  if s is null then raise exception 'Entrega no encontrada'; end if;
- return s||jsonb_build_object('version',md5(s::text));
+ select * into strict ent from public.sgp_picking_entregas where id_entrega=p_id_entrega;
+ insert into sgp_picking_audit.contextos values(pg_current_xact_id()::text,actor);
+ fuentes:=sgp_pdt_multiorigen.fuentes(p_token,'PICKING',jsonb_build_object('id_programacion',ent.id_programacion,'produccion',ent.produccion));
+ delete from sgp_picking_audit.contextos where transaccion=pg_current_xact_id()::text;
+ return s||jsonb_build_object('version',md5(s::text),'fuentes',fuentes);
 end $$;
 create function public.sgp_picking_auditoria_guardar(p_token text,p_id_entrega uuid,p_version text,p_solicitud uuid,p_fecha date,p_turno text,p_decisiones jsonb,p_diferencias jsonb default '[]',p_observacion text default null)
 returns jsonb language plpgsql security definer set search_path='' as $$
@@ -52,7 +59,7 @@ declare actor text;e public.sgp_picking_entregas;f public.sgp_picking_faltantes;
  d jsonb;src jsonb;sources jsonb;ctx jsonb;old jsonb;req jsonb;action text;reason text;pid uuid;n integer;
  saved sgp_picking_audit.eventos;result jsonb;ev uuid;ids jsonb;
 begin
- actor:=public.sgp_validar_sesion_rol(p_token,array['ADMINISTRADOR','COORDINADOR','PICKING','SUPERVISOR DE PICKING','LIDER LINEA','LIDER','RECEPCION']);
+ actor:=public.sgp_pdt_validar_rol_real(p_token,array['ADMINISTRADOR','COORDINADOR','PICKING','SUPERVISOR DE PICKING','LIDER LINEA','LIDER','RECEPCION']);
  if p_solicitud is null or p_fecha is null or p_turno is null or p_turno not in ('TURNO 1','TURNO 2') then raise exception 'FECHA_TURNO_REQUERIDOS';end if;
  req:=jsonb_build_object('version',p_version,'fecha',p_fecha,'turno',p_turno,'decisiones',p_decisiones,'diferencias',p_diferencias,'observacion',p_observacion);
  select * into strict e from public.sgp_picking_entregas where id_entrega=p_id_entrega for update;
@@ -69,6 +76,7 @@ begin
  if jsonb_typeof(p_decisiones) is distinct from 'array' or jsonb_typeof(p_diferencias) is distinct from 'array' then raise exception 'DECISIONES_INVALIDAS';end if;
  if (select count(*) from public.sgp_picking_faltantes where id_entrega=p_id_entrega)<>jsonb_array_length(p_decisiones)
  or (select count(distinct x->>'id_faltante') from jsonb_array_elements(p_decisiones) x)<>jsonb_array_length(p_decisiones) then raise exception 'DECIDIR_CADA_FALTANTE_UNA_VEZ';end if;
+ insert into sgp_picking_audit.contextos values(pg_current_xact_id()::text,actor);
  ctx:=jsonb_build_object('id_programacion',e.id_programacion,'produccion',e.produccion);
  sources:=sgp_pdt_multiorigen.fuentes(p_token,'PICKING',ctx);
  for d in select value from jsonb_array_elements(p_decisiones) loop
@@ -134,7 +142,8 @@ begin
  end if;
  update public.sgp_picking_entregas set estado=case when jsonb_array_length(p_diferencias)>0 then 'AUDITADA_DIFERENCIA' else 'VALIDADA' end,usuario_validacion=actor,fecha_validacion=clock_timestamp(),observacion_validacion=p_observacion where id_entrega=p_id_entrega;
  result:=jsonb_build_object('ok',true,'id_entrega',p_id_entrega,'ids_nuevos',coalesce(ids,'[]'::jsonb));
- insert into sgp_picking_audit.eventos values(p_id_entrega,p_solicitud,req,result,actor,p_fecha,p_turno,clock_timestamp());return result;
+ insert into sgp_picking_audit.eventos values(p_id_entrega,p_solicitud,req,result,actor,p_fecha,p_turno,clock_timestamp());
+ delete from sgp_picking_audit.contextos where transaccion=pg_current_xact_id()::text;return result;
 end $$;
 revoke all on all functions in schema sgp_picking_audit from public,anon,authenticated;
 revoke all on function public.sgp_picking_auditoria_contexto(text,uuid) from public;

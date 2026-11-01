@@ -1,11 +1,11 @@
 """Real PostgreSQL audit contracts; fresh synthetic rows, no database copies."""
-import pathlib,json,uuid,concurrent.futures
+import pathlib,json,uuid,concurrent.futures,os
 exec((pathlib.Path(__file__).resolve().parents[1]/'mecanizado-parcial/integration.py').read_text().split('# Refuse any attached')[0])
 CONTAINER='sgp-audit-test';DB='sgp_parcial_integration'
 def rpc(name,*args,ok=True):
  q='set role anon;select '+name+'('+','.join(jsonarg(a) if isinstance(a,(dict,list)) else 'null' if a is None else str(a) if isinstance(a,int) else literal(a) for a in args)+');'
  t=sql(q,ok);return json.loads(t.splitlines()[-1]) if ok else t
-counter=100
+counter=int(os.environ.get('AUDIT_CASE_COUNTER','100'))
 def fixture(count=1):
  global counter
  counter+=1;prod=str(920000+counter);key=prod+'|PANELES_2';res='QA-AUD-'+prod
@@ -71,7 +71,7 @@ def permissions():
  f=fixture()
  for role in ['qa-consulta','qa-mecanizado']:
   save(f,token=role,ok=False)
- sql("insert into sgp_usuarios(usuario,nombre,password_hash,rol,activo) values('qa-patinador','QA','fixture','PATINADOR',true);insert into sgp_sesiones_app(id_usuario,token_hash,expira_en) select id_usuario,encode(extensions.digest(usuario,'sha256'),'hex'),now()+interval '1 day' from sgp_usuarios where usuario='qa-patinador';")
+ sql("insert into sgp_usuarios(usuario,nombre,password_hash,rol,activo) values('qa-patinador','QA','fixture','PATINADOR',true) on conflict(usuario) do nothing;insert into sgp_sesiones_app(id_usuario,token_hash,expira_en) select id_usuario,encode(extensions.digest(usuario,'sha256'),'hex'),now()+interval '1 day' from sgp_usuarios where usuario='qa-patinador' on conflict do nothing;")
  save(f,token='qa-patinador',ok=False);save(f)
  sql("set role anon;select * from sgp_picking_audit.eventos;",False)
 test('Recepción autorizada; Consulta, Patinador y otros roles sin auditoría ni escritura directa',permissions)

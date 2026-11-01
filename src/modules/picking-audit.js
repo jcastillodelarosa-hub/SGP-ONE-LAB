@@ -11,11 +11,11 @@ export async function openAudit({target,rpc,config,onSaved}){
  modal.onkeydown=e=>{if(e.key==='Escape')close();if(e.key==='Tab'){const els=[...card.querySelectorAll('button,input,select,textarea')].filter(x=>!x.disabled&&x.getClientRects().length);const first=els[0],last=els.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus();}}};
  try{
   const snapshot=await rpc('sgp_picking_auditoria_contexto',{p_id_entrega:target.id_entrega});
-  const sources=await rpc('sgp_pdt_registro_fuentes_v4',{p_origen:'PICKING',p_contexto:{id_programacion:target.id_programacion,produccion:target.produccion}});
   if(modal.hidden||modal.dataset.auditSession!==session)return;
-  if(sources?.ok!==true||sources.contract_version!==4||!Array.isArray(sources.fuentes))throw Error('Contrato de fuentes PDT inválido');
-  const pieces=sources.fuentes;
+  if(!Array.isArray(snapshot.fuentes))throw Error('Contrato de fuentes de auditoría inválido');
+  const pieces=snapshot.fuentes;
   const configuration=await rpc('sgp_configuracion_general_obtener',{});
+  if(modal.hidden||modal.dataset.auditSession!==session)return;
   config=configuration.find(x=>x.clave==='HORARIOS_TURNOS')?.valor;
   const rows=snapshot.faltantes.map(f=>({...f,reserva:f.reserva_pendiente||f.pendiente.reserva,acabado:f.acabado_pendiente||f.pendiente.acabado_pendiente,accion:'',motivo:''}));
   const differences=[],request=crypto.randomUUID(),time=auditOperationalTime(new Date(),config);
@@ -40,8 +40,13 @@ export async function openAudit({target,rpc,config,onSaved}){
     const decisions=auditDecisions(rows);auditDecisions(differences.map(r=>({...r,accion:'MODIFICAR',motivo:'Diferencia adicional'})));
     if(!body.querySelector('[data-date]').value||!body.querySelector('[data-shift]').value)throw Error('Completa fecha y turno de recepción.');
     busy=true;card.querySelectorAll('button,input,select,textarea').forEach(el=>el.disabled=true);
-    await rpc('sgp_picking_auditoria_guardar',{p_id_entrega:target.id_entrega,p_version:snapshot.version,p_solicitud:request,p_fecha:body.querySelector('[data-date]').value,p_turno:body.querySelector('[data-shift]').value,p_decisiones:decisions,p_diferencias:differences,p_observacion:body.querySelector('[data-observation]').value||null});
-    busy=false;close();await onSaved();
+    const result=await rpc('sgp_picking_auditoria_guardar',{p_id_entrega:target.id_entrega,p_version:snapshot.version,p_solicitud:request,p_fecha:body.querySelector('[data-date]').value,p_turno:body.querySelector('[data-shift]').value,p_decisiones:decisions,p_diferencias:differences,p_observacion:body.querySelector('[data-observation]').value||null});
+    if(result?.ok!==true)throw Error('El servidor no confirmó la auditoría. Recarga antes de continuar.');
+    busy=false;
+    try{await onSaved();close();}catch(refreshError){
+     error.textContent='Auditoría guardada. No fue posible actualizar los listados: '+refreshError.message+'. Cierra y actualiza la vista; no vuelvas a guardar.';
+     card.querySelectorAll('[data-close]').forEach(el=>el.disabled=false);error.focus();
+    }
    }catch(e){busy=false;card.querySelectorAll('button,input,select,textarea').forEach(el=>el.disabled=false);error.textContent=e.message;error.focus();}
   };
   card.querySelector('[data-close]').focus();

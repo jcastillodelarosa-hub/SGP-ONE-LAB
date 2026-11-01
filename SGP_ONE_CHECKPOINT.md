@@ -1,3 +1,37 @@
+# PR #174 — cierre técnico preparado para revisión (2026-10-31 Colombia)
+
+Rama `feat/picking-auditoria-pendientes`; referencia `972c351`; main integrado
+`4f5b8af` mediante merge en la rama de trabajo, sin fusionar el PR ni desplegar.
+Supabase contrastado solo con SELECT: 15 funciones, 11 relaciones, 10 triggers y
+123 columnas coincidentes. Una comprobación remota DO expiró sin ejecutarse y fue
+sustituida por SELECT. No se ejecutó DDL/DML productivo ni se creó respaldo/copia.
+
+Recepción limitada a contexto de auditoría con rol real (evita alias LIDER).
+Capacidad privada por transacción; lectores generales de piezas denegados; botón
+Ver piezas de Recepción usa contexto de auditoría. Sin DML directo de navegador en
+diferencias históricas. SQL propuesto sigue sin aplicar. Instalador atómico único
+con preflight; reversión sin CASCADE protegida por uso y cuerpos divergentes.
+Informe expone fecha/turno y decisiones separadas de la entrega original; errores
+de guardado/refresco ya no se confunden ni permiten volver a guardar tras éxito.
+
+READ ONLY: 36 entregas por auditar bloqueadas, 61 faltantes sin origen; cero ambiguos.
+No conciliados. Ver JSON/consulta y población histórica separada en el plan.
+QA dirigido: 14 funcionales, 3 controles nuevos, 9 instalación/reversión; PC/móvil
+con guardado real local y fallos de cliente inyectados explícitos; fechas/turnos y
+Recepción dirigidos. Evidencia general previa reutilizada sin repetirla manualmente.
+
+Estado: IMPLEMENTADO EN RAMA / VERIFICADO EN AISLAMIENTO / PENDIENTE DE APROBACIÓN.
+Plan completo de respaldo previo, instalación, postchecks y recuperación forward:
+docs/sql-proposals/picking-audit/INSTALLATION_RECOVERY_PLAN.md. Inventario de DROP,
+DELETE, TRUNCATE y UPDATE sin WHERE separado y reproducible. Ninguna operación
+productiva solicitada: respaldo/restauración, instalación, pruebas productivas,
+conciliación, rollback/forward, fusión y publicación requieren autorización expresa.
+
+Siguiente paso único: revisión del PR #174 y aprobación de alcance/plan, incluyendo
+el bloqueo de históricos no conciliados. https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/pull/174
+
+---
+
 # Auditoría individual de Picking — rama de revisión (2026-10-31 Colombia)
 
 Repositorio SGP-ONE-LAB; base main `3e5d438`; rama `feat/picking-auditoria-pendientes`.

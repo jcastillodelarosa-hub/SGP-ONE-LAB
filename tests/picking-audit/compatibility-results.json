@@ -1,0 +1,248 @@
+{
+  "columns": {
+    "checked": 123,
+    "mismatches": 0
+  },
+  "triggers": [
+    {
+      "name": "trg_sgp_picking_no_duplicar_completa",
+      "match": true,
+      "relation": "public.sgp_picking_entregas"
+    },
+    {
+      "name": "trg_sgp_pdt_contrato",
+      "match": true,
+      "relation": "public.sgp_aluminio_pendientes"
+    },
+    {
+      "name": "trg_sgp_pdt_detalle_inmutable",
+      "match": true,
+      "relation": "public.sgp_aluminio_pendiente_detalles"
+    },
+    {
+      "name": "trg_sgp_pdt_movimiento_inmutable",
+      "match": true,
+      "relation": "public.sgp_aluminio_pendiente_movimientos"
+    },
+    {
+      "name": "trg_sgp_pdt_nc_inmutable",
+      "match": true,
+      "relation": "public.sgp_aluminio_pendiente_ncs"
+    },
+    {
+      "name": "trg_sgp_pdt_entrega_origen",
+      "match": true,
+      "relation": "public.sgp_picking_entregas"
+    },
+    {
+      "name": "trg_sgp_pdt_identidad_v3",
+      "match": true,
+      "relation": "public.sgp_aluminio_pendientes"
+    },
+    {
+      "name": "trg_sgp_picking_validar_jornada_insert",
+      "match": true,
+      "relation": "public.sgp_picking_entregas"
+    },
+    {
+      "name": "trg_pdt_manual_entrega_origen",
+      "match": true,
+      "relation": "public.sgp_picking_entregas"
+    },
+    {
+      "name": "parcial_proteger_entrega",
+      "match": true,
+      "relation": "public.sgp_picking_entregas"
+    }
+  ],
+  "functions": [
+    {
+      "acl_match": true,
+      "signature": "public.sgp_picking_piezas(text,uuid,text)",
+      "body_match": true,
+      "owner_match": true,
+      "config_match": true,
+      "definer_match": true
+    },
+    {
+      "acl_match": true,
+      "signature": "public.sgp_picking_reporte_entregas_v1(text,date,date,text,text,integer,integer)",
+      "body_match": true,
+      "owner_match": true,
+      "config_match": true,
+      "definer_match": true
+    },
+    {
+      "acl_match": true,
+      "signature": "public.sgp_validar_sesion_rol(text,text[])",
+      "body_match": true,
+      "owner_match": true,
+      "config_match": true,
+      "definer_match": true
+    },
+    {
+      "acl_match": true,
+      "signature": "public.sgp_configuracion_general_obtener(text)",
+      "body_match": true,
+      "owner_match": true,
+      "config_match": true,
+      "definer_match": true
+    },
+    {
+      "acl_match": true,
+      "signature": "public.sgp_picking_recepcion_cola(text)",
+      "body_match": true,
+      "owner_match": true,
+      "config_match": true,
+      "definer_match": true
+    },
+    {
+      "acl_match": true,
+      "signature": "public.sgp_aluminio_pendientes_listar(text,boolean)",
+      "body_match": true,
+      "owner_match": true,
+      "config_match": true,
+      "definer_match": true
+    },
+    {
+      "acl_match": true,
+      "signature": "public.sgp_picking_piezas_panel(text,uuid,text)",
+      "body_match": true,
+      "owner_match": true,
+      "config_match": true,
+      "definer_match": true
+    },
+    {
+      "acl_match": true,
+      "signature": "public.sgp_pdt_guardar_contrato()",
+      "body_match": true,
+      "owner_match": true,
+      "config_match": true,
+      "definer_match": true
+    },
+    {
+      "acl_match": true,
+      "signature": "public.sgp_pdt_validar_rol_real(text,text[])",
+      "body_match": true,
+      "owner_match": true,
+      "config_match": true,
+      "definer_match": true
+    },
+    {
+      "acl_match": true,
+      "signature": "public.sgp_aluminio_pendientes_listar_v2(text,boolean)",
+      "body_match": true,
+      "owner_match": true,
+      "config_match": true,
+      "definer_match": true
+    },
+    {
+      "acl_match": true,
+      "signature": "sgp_pdt_multiorigen.registrar(text,text,jsonb,jsonb,uuid,uuid)",
+      "body_match": true,
+      "owner_match": true,
+      "config_match": true,
+      "definer_match": true
+    },
+    {
+      "acl_match": true,
+      "signature": "sgp_pdt_multiorigen.actor(text,text)",
+      "body_match": true,
+      "owner_match": true,
+      "config_match": true,
+      "definer_match": true
+    },
+    {
+      "acl_match": true,
+      "signature": "public.sgp_pdt_registrar_v4(text,text,jsonb,jsonb,uuid)",
+      "body_match": true,
+      "owner_match": true,
+      "config_match": true,
+      "definer_match": true
+    },
+    {
+      "acl_match": true,
+      "signature": "public.sgp_pdt_registro_fuentes_v4(text,text,jsonb)",
+      "body_match": true,
+      "owner_match": true,
+      "config_match": true,
+      "definer_match": true
+    },
+    {
+      "acl_match": true,
+      "signature": "sgp_pdt_multiorigen.fuentes(text,text,jsonb)",
+      "body_match": true,
+      "owner_match": true,
+      "config_match": true,
+      "definer_match": true
+    }
+  ],
+  "relations": [
+    {
+      "name": "public.sgp_picking_auditoria_diferencias",
+      "acl_match": true,
+      "rls_match": true,
+      "view_match": true
+    },
+    {
+      "name": "public.sgp_aluminio_pendientes",
+      "acl_match": true,
+      "rls_match": true,
+      "view_match": true
+    },
+    {
+      "name": "public.sgp_picking_faltantes",
+      "acl_match": true,
+      "rls_match": true,
+      "view_match": true
+    },
+    {
+      "name": "public.sgp_picking_entregas",
+      "acl_match": true,
+      "rls_match": true,
+      "view_match": true
+    },
+    {
+      "name": "public.sgp_aluminio_pendiente_detalles",
+      "acl_match": true,
+      "rls_match": true,
+      "view_match": true
+    },
+    {
+      "name": "public.sgp_aluminio_pendiente_movimientos",
+      "acl_match": true,
+      "rls_match": true,
+      "view_match": true
+    },
+    {
+      "name": "public.sgp_aluminio_pendiente_ncs",
+      "acl_match": true,
+      "rls_match": true,
+      "view_match": true
+    },
+    {
+      "name": "sgp_mecanizado_parcial.partes",
+      "acl_match": true,
+      "rls_match": true,
+      "view_match": true
+    },
+    {
+      "name": "sgp_mecanizado_parcial.contextos_pdt",
+      "acl_match": true,
+      "rls_match": true,
+      "view_match": true
+    },
+    {
+      "name": "sgp_pdt_multiorigen.detalles",
+      "acl_match": true,
+      "rls_match": true,
+      "view_match": true
+    },
+    {
+      "name": "sgp_pdt_multiorigen.eventos",
+      "acl_match": true,
+      "rls_match": true,
+      "view_match": true
+    }
+  ]
+}

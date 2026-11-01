@@ -21,9 +21,15 @@
       "real_sql": true,
       "date": "2026-10-30",
       "shift": "TURNO 2"
+    },
+    {
+      "case": "form validation, unconfirmed response and refresh failure after real save",
+      "client_fault_injection": true,
+      "real_saved_events": 1,
+      "duplicate_save_disabled": true
     }
   ],
   "limitations": [
-    "Synthetic data only; actual modal and SQL functions. Local RPC transport, synthetic QA shift configuration; no managed Auth/PostgREST, plant or physical-device certification."
+    "Synthetic data only; actual modal and SQL functions. Local RPC transport; current captured shift configuration read by the real SQL configuration function in a synthetic database; no managed Auth/PostgREST, plant or physical-device certification."
   ]
 }

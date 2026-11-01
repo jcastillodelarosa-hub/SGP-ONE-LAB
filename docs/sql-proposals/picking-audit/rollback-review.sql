@@ -1,5 +1,13 @@
 begin;
-do $$ begin if exists(select 1 from sgp_picking_audit.eventos) then raise exception 'AUDITORIA_EN_USO_REQUIERE_CORRECCION_FORWARD';end if;end $$;
+do $$ begin if exists(select 1 from sgp_picking_audit.eventos) or exists(select 1 from sgp_picking_audit.decisiones) or exists(select 1 from sgp_picking_audit.contextos) or exists(select 1 from sgp_picking_audit.correcciones) then raise exception 'AUDITORIA_EN_USO_REQUIERE_CORRECCION_FORWARD';end if;end $$;
+do $installed$ begin
+if (select md5(prosrc) from pg_proc where oid='public.sgp_picking_reporte_entregas_v1(text,date,date,text,text,integer,integer)'::regprocedure)<>'0c54bda7a380679b1086fabd631e9052' then raise exception 'ROLLBACK_CUERPO_CAMBIO: public.sgp_picking_reporte_entregas_v1(text,date,date,text,text,integer,integer)';end if;
+if (select md5(prosrc) from pg_proc where oid='public.sgp_picking_recepcion_cola(text)'::regprocedure)<>'9dc0efd9a1658c422a4c0351abcfa734' then raise exception 'ROLLBACK_CUERPO_CAMBIO: public.sgp_picking_recepcion_cola(text)';end if;
+if (select md5(prosrc) from pg_proc where oid='public.sgp_picking_piezas(text,uuid,text)'::regprocedure)<>'efc7bfb75e55007c60eb148d0d85cdd7' then raise exception 'ROLLBACK_CUERPO_CAMBIO: public.sgp_picking_piezas(text,uuid,text)';end if;
+if (select md5(prosrc) from pg_proc where oid='public.sgp_picking_piezas_panel(text,uuid,text)'::regprocedure)<>'ec90ba8529f400dd99c3fb9e16faf485' then raise exception 'ROLLBACK_CUERPO_CAMBIO: public.sgp_picking_piezas_panel(text,uuid,text)';end if;
+if (select md5(prosrc) from pg_proc where oid='sgp_pdt_multiorigen.actor(text,text)'::regprocedure)<>'543ae5e05171eaee03e4dda86e9f8bc4' then raise exception 'ROLLBACK_CUERPO_CAMBIO: sgp_pdt_multiorigen.actor(text,text)';end if;
+if (select md5(prosrc) from pg_proc where oid='public.sgp_pdt_guardar_contrato()'::regprocedure)<>'1f6e9fc9401869bc9cdb72a5c6483260' then raise exception 'ROLLBACK_CUERPO_CAMBIO: public.sgp_pdt_guardar_contrato()';end if;
+end $installed$;
 CREATE OR REPLACE FUNCTION public.sgp_picking_reporte_entregas_v1(p_token text, p_fecha_inicio date, p_fecha_fin date, p_turno text DEFAULT NULL::text, p_sistema text DEFAULT NULL::text, p_limit integer DEFAULT 100, p_offset integer DEFAULT 0)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -99,6 +107,33 @@ begin
    order by coalesce(s.semana_actual,s.semana_base) desc limit 1
  ) sp on true
  where pe.estado='PENDIENTE_VALIDACION'),'[]'::jsonb);
+end $function$
+;
+CREATE OR REPLACE FUNCTION public.sgp_picking_piezas(p_token text, p_id_programacion uuid, p_produccion text DEFAULT NULL::text)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare u text; v_reserva text; v_parte text; v_prod_num text;
+begin
+ u:=sgp_validar_sesion_rol(p_token,array['ADMINISTRADOR','COORDINADOR','LIDER MECANIZADO','LIDER','PATINADOR','PICKING','SUPERVISOR DE PICKING','LIDER LINEA']);
+ select reserva,prioridad_semanal into v_reserva,v_parte from sgp_mecanizado_programacion where id_programacion=p_id_programacion;
+ v_prod_num:=nullif(substring(coalesce(p_produccion,'') from '^[[:space:]]*([0-9]+)'),'');
+ return coalesce((select jsonb_agg(jsonb_build_object(
+  'id_pieza',a.id_pieza,'produccion',a.produccion,'codigo_sap',a.codigo_sap,'perfil',a.codigo_sap,'descripcion',a.descripcion,'marca',a.marca,'fabricacion',a.fabricacion,'longitud',a.longitud,'cantidad',a.cantidad,'sistema',a.sistema,'acabado',a.acabado,'tipo_pieza',a.tipo_pieza
+ ) order by a.produccion,a.codigo_sap,a.fabricacion,a.longitud)
+ from sgp_aluminio a
+ where a.activo='SI'
+ and (
+   (v_reserva is not null and a.key_produccion in (select pr.key_produccion from sgp_prioridades pr where pr.reserva=v_reserva and (v_parte is null or v_parte='' or pr.prioridad=v_parte) and pr.id_linea='PANELES_2')
+    and (p_produccion is null or a.produccion=p_produccion or a.id_orden_produccion::text=p_produccion))
+   or
+   (p_produccion is not null and a.produccion=p_produccion)
+   or
+   (v_prod_num is not null and (a.id_orden_produccion::text=v_prod_num or substring(coalesce(a.produccion,'') from '^[[:space:]]*([0-9]+)')=v_prod_num))
+ )
+ ),'[]'::jsonb);
 end $function$
 ;
 CREATE OR REPLACE FUNCTION public.sgp_picking_piezas_panel(p_token text, p_id_programacion uuid, p_produccion text DEFAULT NULL::text)
@@ -248,7 +283,11 @@ BEGIN
  RETURN NEW;
 END $function$
 ;
+grant insert,update,delete,truncate,references,trigger,maintain on public.sgp_picking_auditoria_diferencias to anon,authenticated;
 drop function public.sgp_picking_auditoria_contexto(text,uuid);
 drop function public.sgp_picking_auditoria_guardar(text,uuid,text,uuid,date,text,jsonb,jsonb,text);
-drop schema sgp_picking_audit cascade;
+drop function sgp_picking_audit.snapshot(uuid);
+drop function sgp_picking_audit.pendiente(public.sgp_picking_faltantes);
+drop table sgp_picking_audit.decisiones,sgp_picking_audit.eventos,sgp_picking_audit.correcciones,sgp_picking_audit.contextos;
+drop schema sgp_picking_audit restrict;
 commit;

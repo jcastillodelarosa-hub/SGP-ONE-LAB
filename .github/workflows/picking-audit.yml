@@ -25,25 +25,29 @@ jobs:
           python-version: '3.12'
       - name: Tooling
         run: |
-          pip install playwright==1.62.0
+          pip install playwright==1.62.0 pglast==7.22
           python -m playwright install --with-deps chromium
       - name: Build and domain tests
         run: |
           python scripts/build-picking-audit.py
+          python scripts/picking-audit-compatibility-select.py > /dev/null
+          python scripts/inventory-picking-audit-sql.py
           git diff --exit-code -- docs/sql-proposals/picking-audit
           node tests/picking-audit/domain.test.mjs
-      - name: Fresh isolated database and existing regressions
+      - name: Fresh synthetic schema for affected tests
         run: |
           docker run -d --name sgp-audit-test --network none -e POSTGRES_HOST_AUTH_METHOD=trust postgres:17.11
           for i in $(seq 1 30); do
             if docker exec sgp-audit-test pg_isready -U postgres; then break; fi
             sleep 1
           done
-          python tests/mecanizado-parcial/integration.py sgp-audit-test
+          python tests/picking-audit/setup-close.py
       - name: Real audit contracts and browser
         run: |
           python tests/picking-audit/install.py
+          python tests/picking-audit/lifecycle-close.py
           python tests/picking-audit/integration.py
+          python tests/picking-audit/closure-controls.py
           python tests/picking-audit/browser.py
       - uses: actions/upload-artifact@v4
         if: always()
@@ -52,7 +56,10 @@ jobs:
           path: |
             tests/picking-audit/integration-results.json
             tests/picking-audit/evidence/
-            tests/mecanizado-parcial/integration-results.json
+            tests/picking-audit/lifecycle-results.json
+            tests/picking-audit/closure-controls-results.json
+            tests/picking-audit/compatibility-results.json
+            tests/picking-audit/destructive-inventory.json
       - name: Destroy only synthetic container
         if: always()
         run: docker rm -f sgp-audit-test || true

@@ -1,6 +1,6 @@
 # Auditoría individual de Picking — propuesta REVIEW
 
-Base observada: `main` **3e5d438**, 31/10/2026 (Colombia).
+Base inicial: `main` **3e5d438**; cierre sincronizado con **4f5b8af**, 31/10/2026 (Colombia).
 Rama independiente: `feat/picking-auditoria-pendientes`.
 Estado: IMPLEMENTADO EN RAMA / VERIFICACIÓN AISLADA / PENDIENTE DE REVISIÓN.
 No aplicado a Supabase, no fusionado, no publicado.
@@ -37,9 +37,9 @@ entregas excluye del conteo de faltantes los anulados. Un anulado V2 no se react
 - Esquema privado `sgp_picking_audit`: eventos, decisiones y autorización efímera
   de corrección de cantidad. RLS activada; sin acceso directo de anon/authenticated.
 - Roles de auditoría existentes + Recepción, expresamente requerido en el encargo.
-  Patinador, Consulta y Líder Mecanizado no adquieren auditoría. Se habilita a
-  Recepción la lectura de fuentes PANEL necesaria para su auditoría y el registro
-  de diferencias mediante el registrador real. No se alteran roles del sistema.
+  Patinador, Consulta y Líder Mecanizado no adquieren auditoría. Recepción obtiene fuentes PANEL y registra diferencias solo mediante las RPC de
+  auditoría y una capacidad privada por transacción; las rutas generales quedan
+  denegadas para su rol real. Se evita el alias heredado Recepción→LIDER. No se alteran roles del sistema.
 - Se conservan RPC y firmas históricas; CREATE OR REPLACE mantiene sus ACL.
 - Bloqueos de entrega y pendientes, versión del snapshot, una decisión por faltante,
   solicitud idempotente, rechazo de payload distinto y rollback completo ante error.
@@ -65,13 +65,15 @@ siguen operando; no se altera su contenido masivamente.
 
 ## Archivos y orden de revisión (NO instalación productiva)
 
-1. `01-review.sql`: esquema privado y RPC nuevas; requiere los contratos parciales
-   y PDT V4 ya contrastados en catálogo vivo de solo lectura.
-2. `02-review-contracts.sql`: cambios dirigidos de lectura/roles, informe y guarda;
-   compara íntegramente cada cuerpo vivo con el capturado antes de reemplazarlo.
-3. `rollback-review.sql`: restaura cuerpos originales y elimina contrato nuevo
-   únicamente si no se ha usado. Si hay auditorías persistidas, bloquea el rollback;
-   debe revisarse una corrección forward que preserve la evidencia.
+1. `compatibility-select-readonly.sql`: único contraste remoto utilizado, SELECT de catálogo.
+2. `00-preflight-readonly.sql`: guardas de revisión DO probadas solo en aislamiento.
+3. `01-review.sql` y `02-review-contracts.sql`: piezas de revisión; **no instalarlas por separado**.
+4. `install-review.sql`: instalador único, preflight + 01 + 02 dentro de una transacción.
+5. `rollback-review.sql`: restaura cuerpos/ACL y retira objetos propios solo sin uso y sin divergencias, sin CASCADE.
+
+[Plan de respaldo, instalación, comprobaciones y recuperación](INSTALLATION_RECOVERY_PLAN.md).
+[Compatibilidad](COMPATIBILITY_REVIEW.md).
+[Inventario DROP/DELETE/TRUNCATE/UPDATE sin WHERE](DESTRUCTIVE_INSTRUCTIONS.md).
 
 No se crea una migración autoaplicable. Las funciones capturadas contienen solo
 metadatos de catálogo, sin filas operativas. `scripts/build-picking-audit.py` genera
@@ -80,9 +82,10 @@ metadatos de catálogo, sin filas operativas. `scripts/build-picking-audit.py` g
 ## Validación y reproducción aislada
 
 Ver `tests/picking-audit/README.md`, JSON de resultados y capturas. El workflow
-`picking-audit.yml` crea PostgreSQL 17.11 vacío en `--network none`, ejecuta las 63
-regresiones existentes, instala la propuesta únicamente allí, ejecuta los 14 casos
-dirigidos y el modal real con su adaptador HTTP local.
+`picking-audit.yml` crea PostgreSQL 17.11 vacío en `--network none`, instala la propuesta únicamente allí y ejecuta los casos afectados (14 funcionales,
+3 de controles nuevos, 9 de instalación/reversión) y el modal real con adaptador
+HTTP local. Las 63 regresiones previas se reutilizan, no se ejecutan para preparar
+el esquema.
 
 Los metadatos actuales de Supabase se contrastaron con transacciones READ ONLY.
 No se hicieron copias, respaldos, restauraciones de bases reales ni operaciones
