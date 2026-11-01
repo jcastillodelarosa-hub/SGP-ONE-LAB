@@ -2674,3 +2674,5 @@ button.active,[aria-pressed="true"]{border-color:#0865ed}
  #progPool .prog-group{overflow-x:auto}
  #progPool .prog-table-head,#progPool .prog-table-row summary{min-width:1080px}
 }
+
+@media(min-width:1101px){#progPool .prog-table-head{grid-template-columns:minmax(110px,1.05fr) minmax(85px,.8fr) minmax(110px,1fr) minmax(140px,1.35fr) minmax(78px,.7fr) minmax(100px,.9fr) minmax(90px,.8fr) minmax(80px,.7fr) minmax(115px,1fr)}#progPool .prog-table-row summary{grid-template-columns:minmax(110px,1.05fr) minmax(0,6.25fr) minmax(115px,1fr)}}
