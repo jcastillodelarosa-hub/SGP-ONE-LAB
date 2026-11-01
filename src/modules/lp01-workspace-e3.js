@@ -121,6 +121,50 @@
   let dragKey = null;
   let dragSelection = null;
   let activeCell = null;
+  // Presentation-only compact reservation rows. Keep original summary, metrics and
+  // nested order/part controls in the DOM for existing selection and drag handlers.
+  function compactReservations() {
+    results.querySelectorAll('.sgp-explorer-reservation > summary:not([data-lp-compact])').forEach(summary => {
+      summary.dataset.lpCompact = '1';
+      const metrics = summary.querySelector('.sgp-explorer-metrics');
+      if (!metrics) return;
+      const source = [...summary.childNodes].filter(node => node !== metrics);
+      const title = document.createElement('span');
+      title.className = 'lp01-original-title';
+      source.forEach(node => title.append(node));
+      const read = prefix => [...metrics.children].find(el => el.textContent.trim().startsWith(prefix))?.textContent.trim().slice(prefix.length).trim() || '—';
+      const metric = (label, value, extra='') => {
+        const item = document.createElement('span');
+        item.className = 'lp01-compact-metric ' + extra;
+        const caption = document.createElement('small');
+        caption.textContent = label;
+        const content = document.createElement('strong');
+        content.textContent = value;
+        item.append(caption, content);
+        return item;
+      };
+      const row = document.createElement('span');
+      row.className = 'lp01-compact-row';
+      const identity = document.createElement('span');
+      identity.className = 'lp01-compact-identity';
+      identity.textContent = title.textContent.replace(/^Reserva\\s*/i,'').trim();
+      row.append(identity,
+        metric('Órd.', read('Órdenes/producciones:')),
+        metric('Vent.', read('Ventanas:')),
+        metric('Vidrio', read('Vidrio promedio:')),
+        metric('Recepción', read('Recepción:'), 'lp01-compact-reception'));
+      const arrow = document.createElement('span');
+      arrow.className = 'lp01-compact-arrow';
+      arrow.textContent = '⌄';
+      arrow.setAttribute('aria-hidden', 'true');
+      row.append(arrow);
+      summary.prepend(row, title);
+    });
+  }
+  const compactObserver = new MutationObserver(compactReservations);
+  compactObserver.observe(results, {childList:true, subtree:false});
+  compactReservations();
+
   const cards = () => [...results.querySelectorAll('.sgp-explorer-order[data-lp-key]')];
   const cells = () => [...operations.querySelectorAll('.lp-week-cell[data-lp-date][data-lp-shift]')];
   const rowFor = key => (window.SGPPlannerBridge?.getRows?.() || []).find(item => String(item.key_produccion) === String(key));
@@ -317,5 +361,6 @@
   style.textContent += '.lp01-workspace #sgpPendingAssemblyQueue[hidden]{display:none!important}.lp-week-toolbar{display:flex;align-items:end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:8px 0 12px}.lp-week-toolbar h4{margin:0;color:#103b73}.lp-week-toolbar small{color:#526781}.lp-week-controls{display:flex;align-items:end;gap:6px;flex-wrap:wrap}.lp-week-controls label{font-size:12px}.lp-week-controls button,.lp-week-controls input{min-height:38px;padding:6px;border:1px solid #b9cfe9;border-radius:8px;background:#fff;color:#103b73;font-weight:650}.lp-week-scroll{overflow-x:auto;max-width:100%}.lp-week-grid{display:grid;grid-template-columns:64px repeat(7,minmax(0,1fr));gap:5px;min-width:0}.lp-week-corner,.lp-week-day,.lp-week-shift{padding:8px;background:#dceafa;color:#103b73;font-size:12px;font-weight:750;border-radius:7px}.lp-week-day{text-align:center;text-transform:capitalize}.lp-week-shift{display:flex;align-items:center}.lp-week-cell{min-width:0;min-height:132px;padding:7px;border:1px dashed #9fc0eb;border-radius:9px;background:#fff;box-sizing:border-box;overflow-wrap:anywhere}.lp-week-cell-head{display:grid;gap:3px;color:#103b73;font-size:11px}.lp-week-cell-head small,.lp-week-systems{display:block;color:#526781;font-size:11px}.lp-week-empty{display:block;margin-top:16px;color:#68809c}.lp-week-assignment{padding:6px;margin:6px 0;border-left:3px solid #1264c8;border-radius:5px;background:#eef5ff;font-size:11px}.lp-week-assignment strong,.lp-week-assignment small{display:block}.lp-week-legend{font-size:12px;color:#526781}.lp-week-cell:focus-within,.lp-week-cell:hover{border-color:#1264c8;background:#f7fbff}.lp01-drop-dialog{max-width:min(520px,calc(100vw - 24px));max-height:85vh;overflow:auto;border:1px solid #9fc0eb;border-radius:14px;padding:22px;box-shadow:0 20px 55px #102e5366;color:#103b73}.lp01-drop-dialog::backdrop{background:#102e5380}.lp01-drop-dialog form{display:grid;gap:12px}.lp01-drop-dialog h3,.lp01-drop-dialog p{margin:0}.lp01-drop-dialog label{display:grid;gap:4px}.lp01-drop-dialog input{width:100%;box-sizing:border-box;min-height:42px}.lp01-drop-actions{display:flex;justify-content:flex-end;gap:8px}.lp01-drop-actions button{min-height:42px;padding:8px 12px;border-radius:8px;border:1px solid #1264c8;background:#fff;color:#103b73}.lp01-drop-actions button[type=submit]{background:#1264c8;color:white}@media(max-width:900px){.lp-week-grid{grid-template-columns:55px repeat(7,minmax(120px,1fr));min-width:950px}.lp-week-controls{width:100%}.lp-week-controls button{flex:1}}';
   style.textContent += '.lp01-workspace .sgp-explorer-order[data-lp-key]{cursor:grab;touch-action:auto}.lp01-workspace .sgp-explorer-order[data-lp-key]:focus-visible{outline:3px solid #1264c8}.lp01-workspace .sgp-explorer-order.lp01-card-selected{border:2px solid #1264c8;background:#e9f3ff}.lp01-workspace .sgp-explorer-order.lp01-drag-source{opacity:.58}.lp01-workspace .lp-week-cell.lp01-drop-ready{border:2px dashed #1264c8;background:#eef6ff}.lp01-workspace .lp-week-cell.lp01-drop-active{border:3px solid #0a8d69;background:#dff9ee;box-shadow:inset 0 0 0 2px #fff}.lp01-selection-status{margin:4px 0 10px;padding:8px 10px;border-radius:8px;background:#e9f3ff;color:#103b73;font-size:12px}.lp01-touch-ghost{position:fixed;top:0;left:0;z-index:9999;max-width:180px;padding:8px 12px;border-radius:9px;background:#103b73;color:#fff;box-shadow:0 6px 20px #102e5366;pointer-events:none;font-weight:700;font-size:12px}.lp01-touch-ghost[hidden]{display:none}';
   style.textContent += '.lp01-workspace .lp-week-scroll{overflow-x:auto;overscroll-behavior-inline:contain;scrollbar-gutter:stable}.lp01-workspace .lp-week-grid{grid-template-columns:68px repeat(7,minmax(174px,1fr));min-width:1328px;gap:8px}.lp01-workspace .lp-week-cell{min-height:170px;padding:10px;overflow-wrap:normal;word-break:normal}.lp01-workspace .lp-week-assignment{padding:9px;font-size:12px;overflow-wrap:anywhere}.lp01-workspace .lp-week-day{font-size:12px;padding:11px 6px}.lp01-workspace .lp-week-cell-head{font-size:12px}.lp01-workspace .lp-week-cell-head small{font-size:11px}.lp01-workspace .lp01-manual-disclosure{margin-top:14px;border:1px solid #c9d9eb;border-radius:10px;background:#fff;padding:12px}.lp01-workspace .lp01-manual-disclosure>summary{cursor:pointer;color:#103b73;font-weight:750}.lp01-workspace .lp01-manual-disclosure[open]>summary{margin-bottom:12px}.lp01-workspace .lp01-manual-disclosure>h3{margin-top:8px}@media(max-width:900px){.lp01-workspace .lp-week-grid{grid-template-columns:58px repeat(7,minmax(158px,1fr));min-width:1220px}}';
+  style.textContent += '.lp01-workspace #sgpExplorerResults{gap:4px}.lp01-workspace .sgp-explorer-reservation{margin:0;border-radius:8px;border-left:4px solid #1768c7}.lp01-workspace .sgp-explorer-reservation>summary{padding:7px 9px}.lp01-workspace .sgp-explorer-reservation>summary:after{display:none}.lp01-workspace .lp01-original-title{display:none}.lp01-workspace .sgp-explorer-reservation>summary>.sgp-explorer-metrics{display:none}.lp01-workspace .sgp-explorer-reservation[open]>summary>.sgp-explorer-metrics{display:flex;padding-top:8px;border-top:1px solid #dbe8f6;margin-top:9px}.lp01-workspace .lp01-compact-row{display:grid;grid-template-columns:minmax(105px,2.5fr) minmax(36px,.5fr) minmax(42px,.55fr) minmax(55px,.7fr) minmax(70px,1fr) 18px;gap:5px;align-items:center;color:#103b73}.lp01-workspace .lp01-compact-identity{font-size:12px;font-weight:750;line-height:1.3;overflow-wrap:anywhere}.lp01-workspace .lp01-compact-metric{display:grid;gap:2px;min-width:0;font-size:11px}.lp01-workspace .lp01-compact-metric small{font-size:9px;color:#60748b}.lp01-workspace .lp01-compact-metric strong{font-size:11px;overflow-wrap:anywhere}.lp01-workspace .lp01-compact-arrow{font-size:18px;color:#1264c8}.lp01-workspace .sgp-explorer-reservation[open] .lp01-compact-arrow{transform:rotate(180deg)}.lp01-workspace .sgp-explorer-reservation[open]{box-shadow:0 3px 10px #17477818}.lp01-workspace .sgp-explorer-reservation[open] .sgp-explorer-part{margin:6px;padding:8px}.lp01-workspace .lp-week-cell:has(.lp-week-empty) .lp-week-cell-head,.lp01-workspace .lp-week-cell .lp-week-empty{display:none}.lp01-workspace .lp-week-cell:has(.lp-week-empty){background:#fff}@container (max-width:520px){.lp01-workspace .lp01-compact-row{grid-template-columns:minmax(95px,2fr) 36px 44px 48px 16px}.lp01-workspace .lp01-compact-reception{display:none}}.lp01-workspace #sgpPlannerExplorer{container-type:inline-size}@media(max-width:600px){.lp01-workspace .lp01-compact-row{grid-template-columns:minmax(100px,2fr) 36px 44px 48px 16px}.lp01-workspace .lp01-compact-reception{display:none}}';
   document.head.append(style);
 })();
