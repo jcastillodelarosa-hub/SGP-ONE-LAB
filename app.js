@@ -2246,11 +2246,9 @@ function renderProgramming(options={}){
      const priorityCell=document.createElement('span');priorityCell.className='prog-table-priority-leading';priorityCell.textContent=data.prioridad;priorityCell.title='Prioridad semanal: '+data.prioridad;
      node.querySelector('summary')?.prepend(priorityCell);
      if(summary){
-       const badges=document.createElement('span');badges.className='prog-table-badges';
-       const type=document.createElement('strong');type.className='prog-table-type';type.textContent=data.tipo||'Tipo no informado';
-       const quantity=document.createElement('strong');quantity.className='prog-table-quantity';quantity.textContent=data.cantidad+' ventanas';
-       badges.append(type,quantity);
-       summary.querySelector(':scope > b')?.after(badges);
+       // La columna Reserva muestra únicamente el identificador; los detalles ya están en columnas propias.
+       const reserveNumber=summary.querySelector(':scope > b');
+       if(reserveNumber)summary.replaceChildren(reserveNumber);
        const summaryRow=node.querySelector('summary');
        const cells=document.createElement('div');cells.className='prog-table-cells';
        for(const [field,value] of [['tipo',data.tipo||'—'],['sistema',data.sistema||'—'],['acabado',data.acabado||'—'],['cantidad',data.cantidad],['programadas',data.programadas],['pendientes',data.pendientes],['vidrio',data.vidrio+'%'],['partes',data.partes]]){
