@@ -12,3 +12,7 @@ ROLLBACK;
 SELECT clave,valor FROM public.sgp_configuracion_general WHERE clave='HORARIOS_TURNOS';
 SELECT tgname FROM pg_trigger WHERE tgrelid='sgp_lp_operacion.config'::regclass AND NOT tgisinternal;
 SELECT table_name,column_name,data_type FROM information_schema.columns WHERE table_schema='sgp_lp_operacion' AND column_name IN('capacidad','antiguedad_fecha','antiguedad_turno','contexto_origen','apertura_id','sale_fuente','sale_estado');
+
+-- Typed closure contract: only SIN_ACTIVIDAD may omit the Power BI file.
+SELECT column_name,data_type,is_nullable,column_default FROM information_schema.columns WHERE table_schema='sgp_lp_operacion' AND table_name='cierres' AND column_name IN('tipo','archivo');
+SELECT pg_get_constraintdef(oid) FROM pg_constraint WHERE conrelid='sgp_lp_operacion.cierres'::regclass AND contype='c';

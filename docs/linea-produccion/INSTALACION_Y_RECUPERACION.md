@@ -1,3 +1,9 @@
+> Candidato actualizado desde 21c40f4: [cierre SIN ACTIVIDAD](SIN_ACTIVIDAD.md).
+> 01 añade tipo/constraint de archivo opcional exclusivo para el modo vacío y
+> bloqueo transaccional SHARE NOWAIT de fuentes; 03 verifica ese contrato.
+> Sin nueva RPC pública ni cambios en 06/Power BI, Programación, Export o PDT.
+> Continúa como instalación fresca sin aplicar; las versiones previas se conservan.
+
 # LP — instalación y recuperación propuestas
 
 No ejecutar este plan sin autorización expresa. Ningún SQL de esta carpeta se

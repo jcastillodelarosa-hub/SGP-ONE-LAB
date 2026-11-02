@@ -27,6 +27,7 @@ export function previewBI(content,{stage,date,shift,orders}){
 }
 export function reportCSV(snapshot){
  const cell=v=>'"'+(typeof v==='number'&&Number.isFinite(v)?String(v):String(v??'').replace(/^[=+@-]/,"'$&")).replace(/"/g,'""')+'"';
+ if(snapshot.type==='SIN_ACTIVIDAD')return '\uFEFF'+[['Tipo de cierre','Etapa','Línea','Fecha operativa','Turno','Responsable','Fecha/hora de cierre','Motivo','Versión','Archivo Power BI'],['SIN ACTIVIDAD',snapshot.stage,snapshot.line,snapshot.date,snapshot.shift,snapshot.user,snapshot.closedAt,snapshot.observation,snapshot.version,'No aplica: turno sin órdenes']].map(r=>r.map(cell).join(';')).join('\r\n');
  return '\uFEFF'+[['Etapa','Línea','Fecha','Turno','Producción','Parte','SALE','Líder','Power BI','Diferencia','Saldo Export','Motivo','Observación general','Versión','SHA256'],...snapshot.rows.map(r=>[snapshot.stage,snapshot.line,snapshot.date,snapshot.shift,r.key,r.assignments?r.assignments.map(a=>a.parte).join(', '):r.parte,r.sale,r.ejecutado,r.power_bi,r.diferencia,r.saldo_oficial,snapshot.reasons?.[r.assignments?r.key:r.key+'/'+r.parte],snapshot.observation,snapshot.version,snapshot.file.sha256])].map(r=>r.map(cell).join(';')).join('\r\n');
 }
 

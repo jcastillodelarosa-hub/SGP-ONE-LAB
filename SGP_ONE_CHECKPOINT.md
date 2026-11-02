@@ -1,3 +1,26 @@
+# PR #183 — cierre SIN ACTIVIDAD aprobado (02/11/2026)
+
+Continúa 21c40f4. Regla de Issue #184 implementada en el mismo motor: CERRAR con
+close_type=SIN_ACTIVIDAD, confirmación booleana explícita y motivo. Sin Power BI
+solo ante ausencia real de filas LP, asignaciones activas y abiertas pendientes.
+Chequeo dentro de transacción con bloqueo SHARE NOWAIT de fuentes externas,
+permisos/roles, revisión/UUID, auditoría y cierre tipado/versionado sin archivo.
+
+UI PC/móvil diferencia cierre vacío, motivo y confirmación, reporte CSV y recibo de
+commit perdido; conserva reapertura del coordinador e incorporación en revisión.
+La carrera asignación/cierre se serializa: posteriores al corte no reescriben
+historia, invalidan elegibilidad y requieren reapertura. Siguiente turno configurado
+abre después del cierre vacío; no se crea producción, SALE ni partes artificiales.
+
+Pruebas nuevas y regresiones afectadas en PostgreSQL aislado y navegador. Parser,
+cliente/handler XLSX, 06, LP Programación, Export y PDT intactos. No se reintenta la
+consulta sensible ni se aplica SQL, habilitan escrituras, fusiona o despliega.
+Detalles/evidencias/instalación: docs/linea-produccion/SIN_ACTIVIDAD.md.
+Persisten solo pendientes independientes: apertura desatendida, ámbitos reales,
+puentes PDT/Export y conciliación de cadenas arrastradas.
+
+---
+
 # PR #183 — SALE, siguiente turno y contención (02/11/2026)
 
 Continúa 8defa34 en la misma rama. Implementación en rama y SQL propuesto; no SQL

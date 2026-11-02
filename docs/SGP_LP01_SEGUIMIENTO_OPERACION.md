@@ -1,3 +1,8 @@
+> Desde 21c40f4, la regla [SIN ACTIVIDAD](linea-produccion/SIN_ACTIVIDAD.md), aprobada
+> en #184, permite cerrar un turno realmente vacío sin archivo, con confirmación,
+> motivo, auditoría/versiones y comprobación transaccional de fuentes. Resuelve el
+> bloqueo de turno vacío; mantiene pendientes independientes y restricciones productivas.
+
 > Continuación desde 8defa34: [SALE, continuidad y contención](linea-produccion/SALE_CONTINUIDAD_CONTENCION.md)
 > implementados y delimitados en rama, con pruebas aisladas. Sustituye las brechas
 > de inicialización sugerida, antigüedad y drenaje descritas históricamente abajo.

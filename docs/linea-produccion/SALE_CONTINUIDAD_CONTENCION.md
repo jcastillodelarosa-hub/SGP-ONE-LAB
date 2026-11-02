@@ -1,3 +1,7 @@
+> Continuación desde 21c40f4: [SIN ACTIVIDAD](SIN_ACTIVIDAD.md) resuelve el cierre
+> de turnos realmente vacíos y su continuidad. Las limitaciones de apertura
+> desatendida y corrección de cadenas con órdenes permanecen vigentes.
+
 # SALE, continuidad operativa y contención — PR #183
 
 02/11/2026, America/Bogota. Base **8defa34**, misma rama y Draft. SQL propuesto,
