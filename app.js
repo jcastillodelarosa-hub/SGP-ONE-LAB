@@ -2248,7 +2248,17 @@ function renderProgramming(options={}){
      if(summary){
        // La columna Reserva muestra únicamente el identificador; los detalles ya están en columnas propias.
        const reserveNumber=summary.querySelector(':scope > b');
-       if(reserveNumber)summary.replaceChildren(reserveNumber);
+       if(reserveNumber){
+         const notice=summary.querySelector('.shared-reserve-notice');
+         if(notice){
+           notice.querySelector('b').textContent='⚠ ELEMENTOS COMPARTIDOS';
+           const detail=document.createElement('div');
+           detail.className='prog-shared-info';
+           detail.append(notice);
+           node.append(detail);
+         }
+         summary.replaceChildren(reserveNumber);
+       }
        const summaryRow=node.querySelector('summary');
        const cells=document.createElement('div');cells.className='prog-table-cells';
        for(const [field,value] of [['tipo',data.tipo||'—'],['sistema',data.sistema||'—'],['acabado',data.acabado||'—'],['cantidad',data.cantidad],['programadas',data.programadas],['pendientes',data.pendientes],['vidrio',data.vidrio+'%'],['partes',data.partes]]){
