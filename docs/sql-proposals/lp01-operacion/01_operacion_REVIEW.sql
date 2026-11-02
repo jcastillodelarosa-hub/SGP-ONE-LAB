@@ -143,10 +143,30 @@ CREATE FUNCTION sgp_lp_operacion.turno_vacio(et text,line_id text,d date,t int) 
  AND NOT EXISTS(SELECT 1 FROM public.sgp_linea_plan_asignaciones a JOIN public.sgp_producciones p ON p.key_produccion=a.key_produccion JOIN sgp_lp_operacion.turnos period ON period.etapa=et AND period.linea=line_id AND period.fecha=a.fecha AND period.turno=a.turno LEFT JOIN public.sgp_linea_plan_asignaciones root ON root.id=sgp_lp_operacion.raiz(a.id,a.key_produccion) WHERE p.id_linea=line_id AND(a.fecha,a.turno)<(d,t) AND a.estado IS DISTINCT FROM 'CANCELADA' AND(root.cantidad IS NULL OR (SELECT coalesce(sum(q.ejecutado),0) FROM sgp_lp_operacion.ordenes q WHERE q.etapa=et AND q.key=a.key_produccion AND q.parte=root.id AND(q.fecha,q.turno)<=(d,t))<root.cantidad));
 $$;
 
+-- Preparation/observation only. No job, technical principal, grant or write binding.
+CREATE FUNCTION sgp_lp_operacion.cierre_valido(et text,line_id text,d date,t int) RETURNS jsonb LANGUAGE sql STABLE SET search_path='' AS $$
+ SELECT jsonb_build_object('id',c.id,'version',c.version,'type',c.tipo)
+ FROM sgp_lp_operacion.cierres c JOIN sgp_lp_operacion.auditoria a ON a.id=c.id AND a.operacion='CERRAR' AND a.respuesta=c.snapshot AND a.usuario=c.usuario
+ WHERE c.id=(SELECT latest.id FROM sgp_lp_operacion.cierres latest WHERE latest.etapa=et AND latest.linea=line_id AND latest.fecha=d AND latest.turno=t ORDER BY latest.version DESC LIMIT 1);
+$$;
+CREATE FUNCTION sgp_lp_operacion.apertura_preparada(et text,line_id text,observed_at timestamptz DEFAULT clock_timestamp()) RETURNS jsonb LANGUAGE plpgsql SET search_path='' AS $$
+DECLARE anchor sgp_lp_operacion.turnos%rowtype;target jsonb;closed jsonb;state text;result jsonb;enabled boolean;BEGIN
+ enabled:=coalesce((SELECT escrituras FROM sgp_lp_operacion.config WHERE id),false);
+ result:=jsonb_build_object('writesEnabled',enabled,'contract','LP-AUTO-OPEN-PREP-1','mode','PREPARATION_ONLY','automaticExecutionEnabled',false,'technicalIdentity','PENDING_APPROVAL','durableExecutorLog','PENDING_IDENTITY_AND_SINK','stage',et,'line',line_id,'observedAt',observed_at,'scheduleSource','HORARIOS_TURNOS_GLOBAL_VIGENTE','timezone','America/Bogota');
+ SELECT * INTO anchor FROM sgp_lp_operacion.turnos WHERE etapa=et AND linea=line_id ORDER BY fecha DESC,turno DESC LIMIT 1;
+ IF NOT FOUND THEN RETURN result||jsonb_build_object('state',CASE WHEN enabled THEN 'MANUAL_BOOTSTRAP_REQUIRED' ELSE 'BLOCKED_WRITES_DISABLED' END,'due',false,'manualOpeningRequired',true); END IF;
+ target:=sgp_lp_operacion.siguiente(anchor.fecha,anchor.turno);
+ closed:=sgp_lp_operacion.cierre_valido(et,line_id,anchor.fecha,anchor.turno);
+ state:=CASE WHEN NOT enabled THEN 'BLOCKED_WRITES_DISABLED' WHEN anchor.estado<>'CERRADO' THEN 'BLOCKED_PREVIOUS_OPEN' WHEN closed IS NULL THEN 'BLOCKED_INVALID_CLOSE' WHEN (target->>'start')::timestamptz>observed_at THEN 'WAITING_SCHEDULE' ELSE 'READY_PENDING_TECHNICAL_APPROVAL' END;
+ RETURN result||jsonb_build_object('state',state,'anchor',jsonb_build_object('date',anchor.fecha,'shift',anchor.turno,'state',anchor.estado,'revision',anchor.revision,'close',closed),'target',target,
+  'due',observed_at>=(target->>'start')::timestamptz,'late',observed_at>=(target->>'end')::timestamptz,'delaySeconds',greatest(0,extract(epoch FROM observed_at-(target->>'start')::timestamptz)),'manualOpeningRequired',state IN('READY_PENDING_TECHNICAL_APPROVAL','BLOCKED_INVALID_CLOSE'));
+EXCEPTION WHEN OTHERS THEN RETURN result||jsonb_build_object('state','BLOCKED_SCHEDULE_INVALID','due',false,'reason',SQLERRM);
+END $$;
+
 CREATE FUNCTION public.sgp_lp_operacion_consultar(p_token text,p_etapa text,p_linea text,p_fecha date,p_turno int) RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
 DECLARE s jsonb;res jsonb; BEGIN s:=sgp_lp_operacion.sesion(p_token,p_etapa,NULL,p_linea);
  IF p_fecha IS NULL OR p_turno IS NULL OR p_turno NOT IN(1,2) THEN RAISE EXCEPTION 'TURNO_INVALIDO'; END IF;
- SELECT jsonb_build_object('contract','LP-OPERACION-1','writeContract','LP-OPERACION-CAS-2','role',s->>'rol','emptyCloseEligible',sgp_lp_operacion.turno_vacio(p_etapa,p_linea,p_fecha,p_turno),'continuity',sgp_lp_operacion.continuidad(p_fecha,p_turno),'writes',(SELECT escrituras FROM sgp_lp_operacion.config WHERE id),'biFormatApproved',(SELECT formato_bi_aprobado FROM sgp_lp_operacion.config WHERE id),'biAdapter',(SELECT adaptador_bi FROM sgp_lp_operacion.config WHERE id),
+ SELECT jsonb_build_object('contract','LP-OPERACION-1','writeContract','LP-OPERACION-CAS-2','role',s->>'rol','automaticOpening',sgp_lp_operacion.apertura_preparada(p_etapa,p_linea),'emptyCloseEligible',sgp_lp_operacion.turno_vacio(p_etapa,p_linea,p_fecha,p_turno),'continuity',sgp_lp_operacion.continuidad(p_fecha,p_turno),'writes',(SELECT escrituras FROM sgp_lp_operacion.config WHERE id),'biFormatApproved',(SELECT formato_bi_aprobado FROM sgp_lp_operacion.config WHERE id),'biAdapter',(SELECT adaptador_bi FROM sgp_lp_operacion.config WHERE id),
  'turn',coalesce((SELECT to_jsonb(t) FROM sgp_lp_operacion.turnos t WHERE etapa=p_etapa AND linea=p_linea AND fecha=p_fecha AND turno=p_turno),jsonb_build_object('estado','NO_ABIERTO','revision',0)),
  'orders',coalesce((SELECT jsonb_agg(to_jsonb(o)||jsonb_build_object('produccion',p.produccion,'programada',(SELECT cantidad FROM public.sgp_linea_plan_asignaciones a WHERE a.id=o.parte),'total_etapa_parte',(SELECT coalesce(sum(q.ejecutado),0) FROM sgp_lp_operacion.ordenes q WHERE q.key=o.key AND q.etapa=o.etapa AND q.parte=o.parte),'oficial',to_jsonb(p),'abierta',o.origen_fecha IS NOT NULL) ORDER BY CASE WHEN o.origen_fecha IS NOT NULL AND o.sale>0 THEN 0 WHEN o.origen_fecha IS NOT NULL THEN 1 ELSE 2 END,coalesce(o.antiguedad_fecha,o.origen_fecha,o.fecha),coalesce(o.antiguedad_turno,o.origen_turno,o.turno),o.prioridad,o.key,o.parte) FROM sgp_lp_operacion.ordenes o JOIN public.sgp_producciones p ON p.key_produccion=o.key WHERE o.etapa=p_etapa AND o.linea=p_linea AND o.fecha=p_fecha AND o.turno=p_turno AND EXISTS(SELECT 1 FROM sgp_lp_operacion.permisos a WHERE a.usuario=s->>'usuario' AND a.etapa=o.etapa AND a.key=o.key)),'[]'),
  'history',coalesce((SELECT jsonb_agg(to_jsonb(a) ORDER BY creado_en) FROM sgp_lp_operacion.auditoria a WHERE a.etapa=p_etapa AND a.linea=p_linea AND a.fecha=p_fecha AND a.turno=p_turno AND((a.key IS NOT NULL AND EXISTS(SELECT 1 FROM sgp_lp_operacion.permisos b WHERE b.usuario=s->>'usuario' AND b.etapa=a.etapa AND b.key=a.key)) OR (a.key IS NULL AND NOT EXISTS(SELECT 1 FROM sgp_lp_operacion.ordenes o WHERE o.etapa=a.etapa AND o.linea=a.linea AND o.fecha=a.fecha AND o.turno=a.turno AND NOT EXISTS(SELECT 1 FROM sgp_lp_operacion.permisos b WHERE b.usuario=s->>'usuario' AND b.etapa=o.etapa AND b.key=o.key))))),'[]'),
@@ -187,6 +207,7 @@ BEGIN
    next_period:=sgp_lp_operacion.siguiente(previous_turn.fecha,previous_turn.turno);
    IF next_period->>'date'<>d::text OR (next_period->>'shift')::int<>t THEN RAISE EXCEPTION 'DESTINO_NO_ES_SIGUIENTE_TURNO_OPERATIVO'; END IF;
    IF previous_turn.estado<>'CERRADO' THEN RAISE EXCEPTION 'TURNO_ORIGEN_REQUIERE_CIERRE'; END IF;
+   IF sgp_lp_operacion.cierre_valido(et,line_id,previous_turn.fecha,previous_turn.turno) IS NULL THEN RAISE EXCEPTION 'CIERRE_ORIGEN_NO_ACREDITADO'; END IF;
   END IF;
   INSERT INTO sgp_lp_operacion.turnos(etapa,linea,fecha,turno) VALUES(et,line_id,d,t) ON CONFLICT DO NOTHING; END IF;
  SELECT * INTO tr FROM sgp_lp_operacion.turnos WHERE etapa=et AND linea=line_id AND fecha=d AND turno=t FOR UPDATE;

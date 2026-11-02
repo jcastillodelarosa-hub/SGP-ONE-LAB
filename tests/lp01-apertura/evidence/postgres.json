@@ -1,0 +1,17 @@
+{
+  "status": "PASS_IN_PREPARATION_SCOPE",
+  "checks": [
+    "Protected read plan exposes bootstrap/previous-open block, never closes or skips it; no automatic execution or durable executor log is claimed",
+    "Configured Sunday/night boundary, valid SIN ACTIVIDAD predecessor, stable intent and late recovery without skipping; preparation artifact contains no execution binding",
+    "Reference manual integration: prepared ABRIR executes once under concurrent synthetic coordinator calls and recovers committed response through existing receipt; NOT proof of technical executor auth",
+    "Sunday night\u2192Monday day and changed weekday configuration determine due time; no fixed operating hours or holiday exclusions are invented",
+    "Closed flag without audited immutable close blocks protected ABRIR; authorized manual recovery restores a valid plan; same common schedule is evaluated independently per line/stage",
+    "Missing schedule fails closed; scope/containment remain protected and manual fallback never changes planning or official quantities"
+  ],
+  "limits": [
+    "No technical identity or privilege model approved/implemented",
+    "Actual ABRIR reference uses synthetic coordinator sessions solely for manual compatibility",
+    "No running automatic executor, persisted executor events, job, credential, secret or production write"
+  ],
+  "postgres": "17.11 (Debian 17.11-1.pgdg13+2)"
+}

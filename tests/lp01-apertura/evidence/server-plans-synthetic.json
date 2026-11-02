@@ -1,0 +1,255 @@
+[
+  {
+    "due": false,
+    "line": "PANELES_2",
+    "mode": "PREPARATION_ONLY",
+    "stage": "ENSAMBLE",
+    "state": "MANUAL_BOOTSTRAP_REQUIRED",
+    "contract": "LP-AUTO-OPEN-PREP-1",
+    "timezone": "America/Bogota",
+    "observedAt": "2026-11-01T20:00:00+00:00",
+    "writesEnabled": true,
+    "scheduleSource": "HORARIOS_TURNOS_GLOBAL_VIGENTE",
+    "technicalIdentity": "PENDING_APPROVAL",
+    "durableExecutorLog": "PENDING_IDENTITY_AND_SINK",
+    "manualOpeningRequired": true,
+    "automaticExecutionEnabled": false
+  },
+  {
+    "due": true,
+    "late": false,
+    "line": "PANELES_2",
+    "mode": "PREPARATION_ONLY",
+    "stage": "ENSAMBLE",
+    "state": "BLOCKED_PREVIOUS_OPEN",
+    "anchor": {
+      "date": "2026-11-01",
+      "close": null,
+      "shift": 1,
+      "state": "ABIERTO",
+      "revision": 1
+    },
+    "target": {
+      "end": "2026-11-02T10:00:00+00:00",
+      "date": "2026-11-01",
+      "shift": 2,
+      "start": "2026-11-01T23:00:00+00:00"
+    },
+    "contract": "LP-AUTO-OPEN-PREP-1",
+    "timezone": "America/Bogota",
+    "observedAt": "2026-11-01T23:30:00+00:00",
+    "delaySeconds": 1800.0,
+    "writesEnabled": true,
+    "scheduleSource": "HORARIOS_TURNOS_GLOBAL_VIGENTE",
+    "technicalIdentity": "PENDING_APPROVAL",
+    "durableExecutorLog": "PENDING_IDENTITY_AND_SINK",
+    "manualOpeningRequired": false,
+    "automaticExecutionEnabled": false
+  },
+  {
+    "due": false,
+    "late": false,
+    "line": "PANELES_2",
+    "mode": "PREPARATION_ONLY",
+    "stage": "ENSAMBLE",
+    "state": "WAITING_SCHEDULE",
+    "anchor": {
+      "date": "2026-11-01",
+      "close": {
+        "id": "7727c304-919b-4552-b0e6-09fa9398d13d",
+        "type": "SIN_ACTIVIDAD",
+        "version": 2
+      },
+      "shift": 1,
+      "state": "CERRADO",
+      "revision": 2
+    },
+    "target": {
+      "end": "2026-11-02T10:00:00+00:00",
+      "date": "2026-11-01",
+      "shift": 2,
+      "start": "2026-11-01T23:00:00+00:00"
+    },
+    "contract": "LP-AUTO-OPEN-PREP-1",
+    "timezone": "America/Bogota",
+    "observedAt": "2026-11-01T22:59:59+00:00",
+    "delaySeconds": 0,
+    "writesEnabled": true,
+    "scheduleSource": "HORARIOS_TURNOS_GLOBAL_VIGENTE",
+    "technicalIdentity": "PENDING_APPROVAL",
+    "durableExecutorLog": "PENDING_IDENTITY_AND_SINK",
+    "manualOpeningRequired": false,
+    "automaticExecutionEnabled": false
+  },
+  {
+    "due": true,
+    "late": false,
+    "line": "PANELES_2",
+    "mode": "PREPARATION_ONLY",
+    "stage": "ENSAMBLE",
+    "state": "READY_PENDING_TECHNICAL_APPROVAL",
+    "anchor": {
+      "date": "2026-11-01",
+      "close": {
+        "id": "7727c304-919b-4552-b0e6-09fa9398d13d",
+        "type": "SIN_ACTIVIDAD",
+        "version": 2
+      },
+      "shift": 1,
+      "state": "CERRADO",
+      "revision": 2
+    },
+    "target": {
+      "end": "2026-11-02T10:00:00+00:00",
+      "date": "2026-11-01",
+      "shift": 2,
+      "start": "2026-11-01T23:00:00+00:00"
+    },
+    "contract": "LP-AUTO-OPEN-PREP-1",
+    "timezone": "America/Bogota",
+    "observedAt": "2026-11-01T23:00:00+00:00",
+    "delaySeconds": 0,
+    "writesEnabled": true,
+    "scheduleSource": "HORARIOS_TURNOS_GLOBAL_VIGENTE",
+    "technicalIdentity": "PENDING_APPROVAL",
+    "durableExecutorLog": "PENDING_IDENTITY_AND_SINK",
+    "manualOpeningRequired": true,
+    "automaticExecutionEnabled": false
+  },
+  {
+    "due": true,
+    "late": true,
+    "line": "PANELES_2",
+    "mode": "PREPARATION_ONLY",
+    "stage": "ENSAMBLE",
+    "state": "READY_PENDING_TECHNICAL_APPROVAL",
+    "anchor": {
+      "date": "2026-11-01",
+      "close": {
+        "id": "7727c304-919b-4552-b0e6-09fa9398d13d",
+        "type": "SIN_ACTIVIDAD",
+        "version": 2
+      },
+      "shift": 1,
+      "state": "CERRADO",
+      "revision": 2
+    },
+    "target": {
+      "end": "2026-11-02T10:00:00+00:00",
+      "date": "2026-11-01",
+      "shift": 2,
+      "start": "2026-11-01T23:00:00+00:00"
+    },
+    "contract": "LP-AUTO-OPEN-PREP-1",
+    "timezone": "America/Bogota",
+    "observedAt": "2026-11-05T16:00:00+00:00",
+    "delaySeconds": 320400.0,
+    "writesEnabled": true,
+    "scheduleSource": "HORARIOS_TURNOS_GLOBAL_VIGENTE",
+    "technicalIdentity": "PENDING_APPROVAL",
+    "durableExecutorLog": "PENDING_IDENTITY_AND_SINK",
+    "manualOpeningRequired": true,
+    "automaticExecutionEnabled": false
+  },
+  {
+    "due": true,
+    "late": false,
+    "line": "PANELES_2",
+    "mode": "PREPARATION_ONLY",
+    "stage": "ENSAMBLE",
+    "state": "READY_PENDING_TECHNICAL_APPROVAL",
+    "anchor": {
+      "date": "2026-11-01",
+      "close": {
+        "id": "4f5c0824-a284-49a9-ac2e-8645b0dd37d3",
+        "type": "SIN_ACTIVIDAD",
+        "version": 2
+      },
+      "shift": 2,
+      "state": "CERRADO",
+      "revision": 2
+    },
+    "target": {
+      "end": "2026-11-03T00:00:00+00:00",
+      "date": "2026-11-02",
+      "shift": 1,
+      "start": "2026-11-02T12:00:00+00:00"
+    },
+    "contract": "LP-AUTO-OPEN-PREP-1",
+    "timezone": "America/Bogota",
+    "observedAt": "2026-11-02T12:00:00+00:00",
+    "delaySeconds": 0,
+    "writesEnabled": true,
+    "scheduleSource": "HORARIOS_TURNOS_GLOBAL_VIGENTE",
+    "technicalIdentity": "PENDING_APPROVAL",
+    "durableExecutorLog": "PENDING_IDENTITY_AND_SINK",
+    "manualOpeningRequired": true,
+    "automaticExecutionEnabled": false
+  },
+  {
+    "due": true,
+    "late": false,
+    "line": "PANELES_2",
+    "mode": "PREPARATION_ONLY",
+    "stage": "ENSAMBLE",
+    "state": "READY_PENDING_TECHNICAL_APPROVAL",
+    "anchor": {
+      "date": "2026-11-02",
+      "close": {
+        "id": "33c5593a-13b5-475e-a0bb-fe3f049724c5",
+        "type": "SIN_ACTIVIDAD",
+        "version": 2
+      },
+      "shift": 1,
+      "state": "CERRADO",
+      "revision": 2
+    },
+    "target": {
+      "end": "2026-11-03T12:00:00+00:00",
+      "date": "2026-11-02",
+      "shift": 2,
+      "start": "2026-11-02T21:20:00+00:00"
+    },
+    "contract": "LP-AUTO-OPEN-PREP-1",
+    "timezone": "America/Bogota",
+    "observedAt": "2026-11-02T21:20:00+00:00",
+    "delaySeconds": 0,
+    "writesEnabled": true,
+    "scheduleSource": "HORARIOS_TURNOS_GLOBAL_VIGENTE",
+    "technicalIdentity": "PENDING_APPROVAL",
+    "durableExecutorLog": "PENDING_IDENTITY_AND_SINK",
+    "manualOpeningRequired": true,
+    "automaticExecutionEnabled": false
+  },
+  {
+    "due": true,
+    "late": false,
+    "line": "FRAMES_2",
+    "mode": "PREPARATION_ONLY",
+    "stage": "EMPAQUE",
+    "state": "BLOCKED_INVALID_CLOSE",
+    "anchor": {
+      "date": "2026-11-01",
+      "close": null,
+      "shift": 1,
+      "state": "CERRADO",
+      "revision": 1
+    },
+    "target": {
+      "end": "2026-11-02T10:00:00+00:00",
+      "date": "2026-11-01",
+      "shift": 2,
+      "start": "2026-11-01T23:00:00+00:00"
+    },
+    "contract": "LP-AUTO-OPEN-PREP-1",
+    "timezone": "America/Bogota",
+    "observedAt": "2026-11-01T23:30:00+00:00",
+    "delaySeconds": 1800.0,
+    "writesEnabled": true,
+    "scheduleSource": "HORARIOS_TURNOS_GLOBAL_VIGENTE",
+    "technicalIdentity": "PENDING_APPROVAL",
+    "durableExecutorLog": "PENDING_IDENTITY_AND_SINK",
+    "manualOpeningRequired": true,
+    "automaticExecutionEnabled": false
+  }
+]

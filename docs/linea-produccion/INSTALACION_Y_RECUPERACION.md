@@ -1,3 +1,8 @@
+> Preparación desde a19a9f6: [apertura automática](APERTURA_AUTOMATICA_PREPARACION.md)
+> agrega observación y validación de cierre acreditado en 01; no agrega jobs, roles,
+> GRANT técnicos, secretos o ejecutor. Seleccionar/aprobar identidad y ámbitos antes
+> de preparar ese enlace. No confundir la prueba manual del motor con permiso técnico.
+
 > Candidato actualizado desde 21c40f4: [cierre SIN ACTIVIDAD](SIN_ACTIVIDAD.md).
 > 01 añade tipo/constraint de archivo opcional exclusivo para el modo vacío y
 > bloqueo transaccional SHARE NOWAIT de fuentes; 03 verifica ese contrato.

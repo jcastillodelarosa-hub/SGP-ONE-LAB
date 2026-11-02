@@ -1,3 +1,27 @@
+# PR #183 — preparación de apertura automática (02/11/2026)
+
+Continúa a19a9f6. Plan horario de servidor por línea/etapa, bloqueo visible de origen
+abierto/cierre no acreditado y preparación offline de intenciones deterministas.
+ABRIR añade acreditación del último cierre mediante auditoría; SIN ACTIVIDAD válido
+permite continuidad. UI conserva apertura manual del coordinador, sin mutar al leer.
+
+EJECUCIÓN TÉCNICA BLOQUEADA: el modelo vigente exige sesiones humanas SGP. No se
+reutilizan ni se usa service_role como worker. No hay privilegios técnicos aprobados,
+roles/GRANT nuevos, job, secreto, runtime ni sink de eventos automático. Preparador
+siempre PREPARATION_ONLY/canExecute=false. Alternativas A (principal DB restringido)
+y B (identidad de carga externa + adaptador restringido) requieren decisión expresa.
+No simular autenticación técnica mediante un stub o un usuario coordinador.
+
+Pruebas nuevas delimitadas: horarios/demoras/intenciones y SQL real, referencia
+manual de ABRIR/reintentos/concurrencia/recibos y UI PC/móvil. No certifican ejecutor
+ni privilegios técnicos. Configuración observada global común por día, sin claves
+por línea/festivos; no inventar excepciones ni saltar turnos. No datos sensibles.
+
+Detalle: docs/linea-produccion/APERTURA_AUTOMATICA_PREPARACION.md. Mismo Draft #183;
+sin SQL productivo, escrituras habilitadas, credenciales, fusión o despliegue.
+
+---
+
 # PR #183 — cierre SIN ACTIVIDAD aprobado (02/11/2026)
 
 Continúa 21c40f4. Regla de Issue #184 implementada en el mismo motor: CERRAR con

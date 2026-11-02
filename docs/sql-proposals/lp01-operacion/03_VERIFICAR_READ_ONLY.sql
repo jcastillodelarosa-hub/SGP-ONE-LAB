@@ -16,3 +16,6 @@ SELECT table_name,column_name,data_type FROM information_schema.columns WHERE ta
 -- Typed closure contract: only SIN_ACTIVIDAD may omit the Power BI file.
 SELECT column_name,data_type,is_nullable,column_default FROM information_schema.columns WHERE table_schema='sgp_lp_operacion' AND table_name='cierres' AND column_name IN('tipo','archivo');
 SELECT pg_get_constraintdef(oid) FROM pg_constraint WHERE conrelid='sgp_lp_operacion.cierres'::regclass AND contype='c';
+
+-- Observation helpers only: no technical role/job or execution grant is installed.
+SELECT p.proname,pg_get_function_identity_arguments(p.oid),p.prosecdef FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='sgp_lp_operacion' AND p.proname IN('apertura_preparada','cierre_valido');
