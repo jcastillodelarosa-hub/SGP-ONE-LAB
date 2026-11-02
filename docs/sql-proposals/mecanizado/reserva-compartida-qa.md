@@ -1,40 +1,29 @@
-# QA focalizada — reservas compartidas (PR #185)
+# Reserva compartida canónica — PR #185
 
-Estado: **REVISIÓN / NO APLICADO**. Consultas de solo lectura contra Supabase el 2026-11-02; CI JavaScript y SGP ONE Tests en verde para commit `6e2853a`. No se ha ejecutado SQL de cambio ni pruebas funcionales sobre backend modificado.
+**Estado: IMPLEMENTADO EN RAMA; SQL NO APLICADO; NO PUBLICADO.** La primera reserva en `sgp_producciones.reserva_al` recibe el 100 % de cada producción. Las demás relaciones son informativas. No se alteran datos ni privilegios.
 
-## Regla aprobada
-La primera reserva en `sgp_producciones.reserva_al` es propietaria del 100 % de las ventanas. Las siguientes son relaciones de materiales, sin duplicar cantidades.
+## Contrato contrastado
 
-## Datos reales contrastados (lectura)
-- `8725215`, prioridad `11`: 6 producciones, **28 ventanas**; incluye `1121855 - Georges Molinard` de 12, cuyo `reserva_al` es `8725215,8725225`.
-- `8725225`, prioridad `9.1`: 1 producción propia, **12 ventanas**.
-- `8725225`, prioridad `9.2`: 3 producciones propias, **15 ventanas**.
-- Por tanto, **8725225 conserva 27 ventanas propias**; el aviso de relación con 1121855 no debe sumarle 12 adicionales.
-- `sgp_mecanizado_programar` contiene cuatro filtros de alcance por `pr.reserva`; todos deben aplicar reserva principal.
-- `sgp_mecanizado_disponibles` filtra por acabado predominante y omite la producción compartida de acabado diferente; el SQL propuesto elimina esa exclusión.
+- La definición completa de `sgp_mecanizado_disponibles(text,integer)` en `20261020_lab_v310_prioridad_tercer_nivel.sql` reproduce en PostgreSQL 17 la huella capturada `1f2ffd91589d99a08834e772a938788d`.
+- La definición capturada de `sgp_mecanizado_programar` de diez argumentos en `tests/mecanizado-parcial/catalog.json` reproduce `4c70cdd648bb5036dfe8e75c4985ade8`. La sobrecarga de nueve argumentos delega a la de diez y permanece intacta.
+- `sgp_mecanizado_partes_programar` se instaló desde la migración versionada de programación parcial en PostgreSQL aislado; su huella base es `ad42a437d5e8e0618af660ea8e67274c`. La nueva migración solo lo actualiza cuando existe y coincide exactamente.
+- El índice único de prioridades impide dos prioridades de una misma producción en la misma semana. El aviso de la reserva secundaria procede de `sgp_reservas_asociadas_listar`, sin atribuirle prioridad ni cantidad.
+- La consulta anterior escogía una reserva desde la prioridad y descartaba acabados distintos del predominante. El guardado anterior usaba cuatro alcances de prioridad sin verificar la primera reserva. La nueva definición elimina ambas discrepancias. La cabecera agregada indica `MIXTO` cuando hay varios sistemas o acabados; cada orden conserva su identidad.
 
-## Validaciones antes de publicar
-1. Ejecutar el SQL de REVIEW en PostgreSQL aislado con funciones, grants y datos sintéticos compatibles; confirmar creación, firma, SECURITY DEFINER y search_path.
-2. Validar lectura: 8725215=28; 8725225=27, más aviso informativo de la orden compartida sin contabilizarla.
-3. Validar guardado: 8725215 prioridad 11 permite 28 en su composición; secundaria rechaza 1121855; las otras prioridades no cambian.
-4. Validar detalle y cobertura, concurrencia, partes parciales, cancelación y reprogramación; ninguna producción puede quedar doblemente contabilizada.
-5. Comprobar que la pantalla mantiene el aviso secundario y muestra los 28 pendientes antes de guardar; no aceptar 16 como total de la parte.
-6. Guardar definiciones originales de ambas RPC y ACL, disponer de SQL de reversión, confirmar que no hay otras migraciones concurrentes.
-7. Autorizar expresamente aplicación SQL productiva, luego fusionar/publicar frontend y verificar con sesión autorizada.
+## Instalación controlada
 
-## Consulta de control (solo lectura)
-```sql
-WITH x AS (
- SELECT pr.reserva, pr.prioridad, sp.key_produccion, sp.cantidad,
-        trim(split_part(coalesce(sp.reserva_al,''),',',1)) principal
- FROM public.sgp_prioridades pr
- JOIN public.sgp_producciones sp ON sp.key_produccion=pr.key_produccion
- WHERE pr.reserva IN ('8725215','8725225') AND pr.id_linea='PANELES_2'
-)
-SELECT reserva,prioridad,count(*) ordenes,
-       sum(cantidad) cantidad_vinculada,
-       coalesce(sum(cantidad) FILTER (WHERE reserva=principal),0) cantidad_propia
-FROM x GROUP BY reserva,prioridad ORDER BY reserva,prioridad;
-```
+1. En una ventana autorizada, comprobar que no hay cambios concurrentes de catálogo y exportar las definiciones, propietario y ACL de las tres funciones afectadas. Tomar respaldo recuperable y verificar restauración antes de intervenir producción.
+2. Ejecutar `reserva-compartida-canonica.sql` en una transacción. Sus guardas de huella abortan si el esquema instalado difiere del contrato contrastado. No saltar ni sustituir las guardas. `CREATE OR REPLACE` conserva firma, propietario, ACL y RLS; no se conceden permisos.
+3. Consultar 8725215 y 8725225 con una sesión autorizada. Esperado: 28 ventanas, incluyendo 1121855 (12), y 27 propias respectivamente. La segunda reserva muestra aviso informativo, sin sumar las 12.
+4. Verificar programación individual, parcial, cancelación y reprogramación de casos controlados, y después publicar el frontend del mismo PR mediante autorización separada. No ejecutar operaciones de prueba sobre datos operativos.
 
-**No declarar VERIFICADO en producción basándose únicamente en estas lecturas o CI.**
+Si falla una guarda o un conteo, `ROLLBACK` y detener la instalación. La reversión de definiciones está en `reserva-compartida-reversion.sql`, también protegida por huellas. Su copia versionada elimina espacios finales del cuerpo original: restaura la semántica, firma y permisos, pero no garantiza la misma huella byte a byte; conservar el export exacto previo es obligatorio para una restauración literal. Revertir el código no revierte programaciones creadas después: evaluar las escrituras posteriores y reconciliarlas antes de cualquier restauración de datos.
+
+## Evidencia aislada
+
+- PostgreSQL 17 con esquema sintético construido por `tests/mecanizado-parcial/setup.py` y migración parcial versionada. La migración nueva instaló y su SQL de reversión devolvió las huellas originales.
+- `tests/mecanizado-shared-reserve.sql`: 28/27, acabado distinto, reserva secundaria rechazada, detalle único, saldo parcial e idempotencia, rol rechazado, reprogramación y cancelación. Transacción revertida con `ROLLBACK`. Las tres funciones auxiliares de vidrio/estado faltantes del fixture se sustituyeron **solo en la base aislada**; no son evidencia productiva de esas funciones.
+- `tests/mecanizado-shared-concurrency.py`: dos sesiones PostgreSQL reales solicitaron simultáneamente 16 ventanas; una aceptada, otra rechazada; un único encabezado y 16 ventanas persistidas en el fixture, luego limpiado.
+- 27 pruebas JavaScript dirigidas aprobadas, `verify:release` aprobado con recursos vendor locales. El cambio actual no altera JavaScript. Los checks previos del PR sobre el frontend ya estaban en verde; la comprobación visual PC/móvil del caso 28/27 con un backend actualizado queda pendiente para después de aplicar la migración en un entorno autorizado.
+
+**Condición previa a publicación:** comprobar las guardas y la igualdad 28/27 contra el catálogo y la sesión vigentes, obtener autorización expresa de SQL productivo y de despliegue. No declarar el caso productivo verificado a partir de fixtures.
