@@ -1,3 +1,27 @@
+# PR #183 — SALE, siguiente turno y contención (02/11/2026)
+
+Continúa 8defa34 en la misma rama. Implementación en rama y SQL propuesto; no SQL
+productivo, activación, ámbitos reales, fusión ni despliegue. Adaptador Power BI y
+Programación Calendario intactos; 06 solo participa en admisión/revalidación común.
+
+Empaque persiste SALE inequívoco desde Export elegible/presupuesto y cantidad LP
+restante, con capacidad explícita del coordinador. Repartos, sobrecapacidad y
+solapamientos quedan pendientes visibles; no inventa asignaciones ni resta NC.
+ABRIR valida siguiente turno configurado/origen cerrado, raíz/antigüedad y contexto;
+no duplica ejecución y deja registro exacto. Navegación al siguiente turno añadida.
+No hay job de apertura autónoma ni permiso nuevo al líder; cadenas ya arrastradas
+siguen bloqueadas para corrección retroactiva hasta definir conciliación.
+
+Admisión transaccional compartida + CAS de turno/asignación + revalidación bajo
+mutex. Apagar espera escritores admitidos e invalida revisiones; recibo de commit
+autorizado permite resolver respuesta perdida con escrituras contenidas.
+Pruebas nuevas y regresiones concretas en PostgreSQL aislado y PC/móvil, sin stubs
+de persistencia. Reutiliza resto de evidencias; no reintenta consulta sensible.
+
+Detalle/estados/pendientes: docs/linea-produccion/SALE_CONTINUIDAD_CONTENCION.md.
+
+---
+
 # PR #183 — adaptador Power BI XLSX real (02/11/2026)
 
 Continúa 47a06af; reglas del encargo actual aprueban comparar por producción,

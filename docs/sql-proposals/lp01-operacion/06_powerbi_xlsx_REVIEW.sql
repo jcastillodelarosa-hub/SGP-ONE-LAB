@@ -3,13 +3,15 @@
 BEGIN;
 SET LOCAL lock_timeout='5s';
 DO $$ BEGIN
- IF NOT EXISTS(SELECT 1 FROM information_schema.columns WHERE table_schema='sgp_lp_operacion' AND table_name='archivos' AND column_name='contenido_binario') OR NOT EXISTS(SELECT 1 FROM pg_roles WHERE rolname='service_role') THEN RAISE EXCEPTION 'CONTRATO_XLSX_BASE_AUSENTE'; END IF;
+ IF to_regprocedure('sgp_lp_operacion.admitir()') IS NULL OR NOT EXISTS(SELECT 1 FROM information_schema.columns WHERE table_schema='sgp_lp_operacion' AND table_name='archivos' AND column_name='contenido_binario') OR NOT EXISTS(SELECT 1 FROM pg_roles WHERE rolname='service_role') THEN RAISE EXCEPTION 'CONTRATO_XLSX_BASE_AUSENTE'; END IF;
  IF NOT has_function_privilege('service_role','public.sgp_sesion_actual(text)','EXECUTE') THEN RAISE EXCEPTION 'LECTURA_SESION_SERVIDOR_NO_DISPONIBLE'; END IF;
 END $$;
 CREATE FUNCTION public.sgp_lp_operacion_importar_xlsx(p_token text,p_contexto jsonb,p_nombre text,p_base64 text,p_documento jsonb) RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
 DECLARE et text:=p_contexto->>'stage';line_id text:=p_contexto->>'line';d date:=(p_contexto->>'date')::date;t int:=(p_contexto->>'shift')::int;rid uuid:=(p_contexto->>'id')::uuid;rev bigint:=(p_contexto->>'revision')::bigint;s jsonb;u text;tr sgp_lp_operacion.turnos%rowtype;prior sgp_lp_operacion.auditoria%rowtype;raw bytea;sha text;payload jsonb;r jsonb;k text;candidates int;groups jsonb:='[]';res jsonb;file_id uuid;qty bigint;source_rows jsonb;
 BEGIN
  s:=sgp_lp_operacion.sesion(p_token,et,NULL,line_id);u:=s->>'usuario';
+ -- Shared admission protocol only; XLSX parsing/reconciliation contract is unchanged.
+ PERFORM sgp_lp_operacion.admitir();
  IF s->>'rol'='CONSULTA' OR NOT EXISTS(SELECT 1 FROM sgp_lp_operacion.config WHERE id AND escrituras AND formato_bi_aprobado AND adaptador_bi='LP-PBI-XLSX-1') THEN RAISE EXCEPTION 'IMPORTACION_XLSX_NO_HABILITADA'; END IF;
  IF jsonb_typeof(p_contexto) IS DISTINCT FROM 'object' OR EXISTS(SELECT 1 FROM jsonb_object_keys(p_contexto) x WHERE x NOT IN('stage','line','date','shift','id','revision')) OR d IS NULL OR t IS NULL OR t NOT IN(1,2) OR rid IS NULL OR rev IS NULL OR rev<0 THEN RAISE EXCEPTION 'CONTEXTO_XLSX_INVALIDO'; END IF;
  IF p_nombre IS NULL OR length(p_nombre)>255 OR p_nombre !~* '\.xlsx$' OR p_base64 IS NULL OR length(p_base64)>2800000 THEN RAISE EXCEPTION 'ARCHIVO_XLSX_INVALIDO'; END IF;
@@ -20,6 +22,8 @@ BEGIN
  payload:=jsonb_build_object('op','IMPORTAR_XLSX','context',p_contexto,'filename',p_nombre,'sha256',sha,'document_sha256',encode(sha256(convert_to(p_documento::text,'UTF8')),'hex'));
  PERFORM pg_advisory_xact_lock(hashtextextended(rid::text,123));
  PERFORM pg_advisory_xact_lock(hashtextextended(et||'|'||line_id,184));
+ s:=sgp_lp_operacion.sesion(p_token,et,NULL,line_id);
+ IF s->>'rol'='CONSULTA' THEN RAISE EXCEPTION 'IMPORTACION_XLSX_NO_HABILITADA'; END IF;
  SELECT * INTO tr FROM sgp_lp_operacion.turnos WHERE etapa=et AND linea=line_id AND fecha=d AND turno=t FOR UPDATE;
  IF NOT FOUND THEN RAISE EXCEPTION 'TURNO_NO_EXISTE'; END IF;
  IF EXISTS(SELECT 1 FROM sgp_lp_operacion.ordenes a WHERE a.etapa=et AND a.linea=line_id AND a.fecha=d AND a.turno=t AND NOT EXISTS(SELECT 1 FROM sgp_lp_operacion.permisos p WHERE p.usuario=u AND p.etapa=et AND p.key=a.key)) THEN RAISE EXCEPTION 'TURNO_FUERA_DE_AMBITO'; END IF;

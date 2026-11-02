@@ -20,6 +20,7 @@ class Database:
   self.sql(json.loads((ROOT/'tests/lp01-operacion/session-readonly.json').read_text())['definition'])
   self.sql("INSERT INTO public.sgp_usuarios(usuario,nombre,rol) SELECT x,'QA synthetic',x FROM unnest(ARRAY['COORDINADOR','LIDER','CONSULTA','RECEPCION']) x;INSERT INTO public.sgp_sesiones_app SELECT id_usuario,encode(extensions.digest(usuario,'sha256'),'hex'),NULL,now()+interval '1 day' FROM public.sgp_usuarios;")
   install=(ROOT/'docs/sql-proposals/lp01-operacion/01_operacion_REVIEW.sql').read_text()
+  self.sql("CREATE TABLE public.sgp_configuracion_general(clave text PRIMARY KEY,valor jsonb);INSERT INTO public.sgp_configuracion_general VALUES('HORARIOS_TURNOS','{\"lunes_sabado\":{\"turno1\":{\"inicio\":\"07:00\",\"fin\":\"19:00\"},\"turno2\":{\"inicio\":\"19:00\",\"fin\":\"07:00\"}},\"domingo\":{\"turno1\":{\"inicio\":\"07:00\",\"fin\":\"18:00\"},\"turno2\":{\"inicio\":\"18:00\",\"fin\":\"05:00\"}}}');")
   r=self.run(install.replace('COMMIT;','SELECT 1/0;COMMIT;'));assert r.returncode and self.sql("SELECT to_regnamespace('sgp_lp_operacion') IS NULL")=='t'
   self.sql(install)
   assert self.sql('SELECT escrituras FROM sgp_lp_operacion.config')=='f'
@@ -34,6 +35,7 @@ class Database:
  def rpc(self,name,args):
   if name=='sgp_detalle_ubicacion_vidrio':q='SELECT public.sgp_detalle_ubicacion_vidrio('+lit(args['p_token'])+','+lit(args['p_key_produccion'])+');'
   elif name=='sgp_lp_operacion_consultar':q='SELECT public.'+name+'('+','.join([lit(args['p_token']),lit(args['p_etapa']),lit(args['p_linea']),lit(args['p_fecha']),str(args['p_turno'])])+');'
+  elif name=='sgp_lp_operacion_resultado':q='SELECT public.sgp_lp_operacion_resultado('+lit(args['p_token'])+','+lit(args['p_id'])+');'
   elif name=='sgp_lp_operacion_comando':q=self.call(args['p_token'],args['p_cmd'])
   else:raise ValueError('RPC no autorizada en QA '+name)
   return json.loads(self.sql('SET ROLE anon;'+q))
@@ -58,14 +60,15 @@ class Database:
   self.sql((ROOT/'docs/sql-proposals/lp01-operacion/05_restaurar_vidrio_REVIEW.sql').read_text())
   assert 'categorias_version' not in self.rpc('sgp_detalle_ubicacion_vidrio',{'p_token':'LIDER','p_key_produccion':key})
   self.sql((ROOT/'docs/sql-proposals/lp01-operacion/04_vidrio_REVIEW.sql').read_text())
- def rev(self,stage='ENSAMBLE',date='2026-11-01',shift=1,key=None,part=None):
-  q='SELECT revision FROM sgp_lp_operacion.'+('ordenes' if key else 'turnos')+" WHERE linea='PANELES_2' AND etapa="+lit(stage)+' AND fecha='+lit(date)+' AND turno='+str(shift)
+ def rev(self,stage='ENSAMBLE',date='2026-11-01',shift=1,key=None,part=None,line='PANELES_2'):
+  q='SELECT revision FROM sgp_lp_operacion.'+('ordenes' if key else 'turnos')+" WHERE linea="+lit(line)+" AND etapa="+lit(stage)+' AND fecha='+lit(date)+' AND turno='+str(shift)
   if key:q+=' AND key='+lit(key)+' AND parte='+lit(part)
-  return int(self.sql(q))
+  return int(self.sql(q) or 0)
  def cmd(self,op,stage='ENSAMBLE',date='2026-11-01',shift=1,key=None,part=None,**kw):
   c={'id':str(uuid.uuid4()),'op':op,'stage':stage,'line':'PANELES_2','date':date,'shift':shift,**kw}
-  if key:c.update(key=key,part=part)
-  if 'revision' not in c:c['revision']=self.rev(stage,date,shift,key,part)
+  if key:c.update(key=key,part=part,turn_revision=self.rev(stage,date,shift,line=c['line']))
+  if op=='ABRIR' and stage=='EMPAQUE' and 'capacity' not in c:c['capacity']=10000 # Explicit synthetic coordinator capacity, never a production default.
+  if 'revision' not in c:c['revision']=self.rev(stage,date,shift,key,part,line=c['line'])
   return c
  def snapshot(self,stage='ENSAMBLE',date='2026-11-01',shift=1,token='LIDER',line='PANELES_2'):return self.rpc('sgp_lp_operacion_consultar',{'p_token':token,'p_etapa':stage,'p_linea':line,'p_fecha':date,'p_turno':shift})
 def lit(v):return "'"+str(v).replace("'","''")+"'"
@@ -166,6 +169,11 @@ def test(db):
  rs=concurrent([race_close,race_exec]);assert sum(r.returncode==0 for r in rs)==1
  assert all(r.returncode==0 or any(c in r.stderr for c in ['CONFLICTO_REVISION','REAPERTURA_REQUERIDA']) for r in rs)
  checks.append('Real PG close vs execution serializes: one succeeds; other observes revision conflict or closed turn')
+ # If execution won the previous race, explicitly close its new revision before carrying.
+ if db.snapshot('EMPAQUE')['turn']['estado']!='CERRADO':
+  packing=db.snapshot('EMPAQUE')['orders'];packing_csv='etapa;fecha;turno;key_produccion;parte;cantidad\n'+'\n'.join('EMPAQUE;2026-11-01;1;'+r['key']+';'+r['parte']+';'+str(r['ejecutado']) for r in packing)
+  f=db.execute(db.cmd('IMPORTAR_BI',stage='EMPAQUE',filename='qa-packing.csv',content=packing_csv))
+  db.execute(db.cmd('CERRAR',stage='EMPAQUE',file_id=f['fileId'],observation='QA cierre tras carrera',reasons={r['key']+'/'+r['parte']:'QA pendiente' for r in packing}))
  db.execute(db.cmd('ABRIR',stage='EMPAQUE',shift=2,revision=0))
  assert len(db.snapshot('EMPAQUE',shift=2)['orders'])==3 and all(r['parte']!=parts[3] for r in db.snapshot('EMPAQUE',shift=2)['orders'])
  checks.append('A fully executed 18-unit part is not carried as open; sibling parts remain independent')

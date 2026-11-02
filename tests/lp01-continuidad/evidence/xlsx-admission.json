@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "checks": [
+    "Existing XLSX RPC denies contained writes and stale imports after reenabling",
+    "Actual XLSX import transaction holds shared admission until commit; disable waits",
+    "Read receipt and original retrieval remain available during containment without replaying the write"
+  ],
+  "scope": "Isolated PG17, existing anonymized fixture and real protected RPC, unchanged adapter"
+}

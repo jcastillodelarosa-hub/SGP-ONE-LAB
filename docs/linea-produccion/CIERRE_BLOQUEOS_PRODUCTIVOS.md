@@ -1,3 +1,8 @@
+> Actualización operativa desde 8defa34: [SALE, continuidad y contención](SALE_CONTINUIDAD_CONTENCION.md)
+> sustituye las brechas técnicas históricas de inicialización, destino/antigüedad
+> y drenaje. Siguen pendientes ejecución desatendida autorizada, reparto cuando
+> corresponda, conciliación de cadenas y puentes/fuentes/ámbitos productivos.
+
 # Preparación del cierre de bloqueos productivos — PR #183
 
 **Actualización posterior del mismo día:** el encargo de integración aportó ambos

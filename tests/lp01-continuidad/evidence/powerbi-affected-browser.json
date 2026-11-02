@@ -1,0 +1,36 @@
+{
+  "results": [
+    {
+      "viewport": 1440,
+      "flow": "Browser\u2192shared XLSX server parser\u2192real PostgreSQL service RPC with SGP auth\u2192grouped versioned closure",
+      "latest_sum": 27,
+      "power_bi": 28,
+      "difference": 1,
+      "assignments_preserved": true,
+      "original_download_identical": true,
+      "wrong_stage_rejected": true,
+      "lost_reply_retried_once": true,
+      "untrusted_origin_and_normalized_payload_rejected": "PASS",
+      "external_network": "blocked",
+      "page_errors": []
+    },
+    {
+      "viewport": 390,
+      "flow": "Browser\u2192shared XLSX server parser\u2192real PostgreSQL service RPC with SGP auth\u2192grouped versioned closure",
+      "latest_sum": 27,
+      "power_bi": 28,
+      "difference": 1,
+      "assignments_preserved": true,
+      "original_download_identical": true,
+      "wrong_stage_rejected": true,
+      "lost_reply_retried_once": true,
+      "untrusted_origin_and_normalized_payload_rejected": "NOT_REPEATED; server checks verified once at 1440",
+      "external_network": "blocked",
+      "page_errors": []
+    }
+  ],
+  "limits": [
+    "Source XLSX layouts are anonymized derivatives of provided files, not production database records",
+    "Edge deployment, gateway, actual roles/assignments and productive matching not certified"
+  ]
+}

@@ -1,3 +1,8 @@
+> Continuación desde 8defa34: [SALE, continuidad y contención](linea-produccion/SALE_CONTINUIDAD_CONTENCION.md)
+> implementados y delimitados en rama, con pruebas aisladas. Sustituye las brechas
+> de inicialización sugerida, antigüedad y drenaje descritas históricamente abajo.
+> Apertura por coordinador, decisiones de reparto y conciliación de cadenas siguen explícitas.
+
 # Línea de Producción — continuidad del PR #183
 
 01/11/2026. Rama `feat/lp01-seguimiento-operacion`, base `main bb224f0`.
@@ -108,13 +113,12 @@ No se certifica correspondencia productiva de nombres ni Edge/gateway desplegado
 Véanse las convenciones no observadas y los resultados reales/locales en el
 documento del adaptador; no es necesario volver a pedir los archivos recibidos.
 
-Al abrir un nuevo turno se incorporan las órdenes anteriores con saldo oficial
-pendiente, conservando observaciones/afectaciones y ejecución nueva cero; SALE
-queda cero/por validar. La ventana no crea registros mediante una lectura ni depende
-de un job instalado. La apertura e incorporación las realiza el coordinador.
-Empaque sugiere saldo Export en el formulario inicial y exige validar su reparto
-entre partes/capacidad; no asigna todo el saldo a cada parte. La inicialización
-masiva y el resumen semanal operativo completo quedan pendientes.
+Al ABRIR autorizado se valida el siguiente período de HORARIOS_TURNOS y el origen
+cerrado. Se conserva raíz/antigüedad/contexto, ejecución nueva cero y afectaciones
+pendientes de revalidación. Empaque persiste SALE elegible solo sin reparto ambiguo
+y con capacidad explícita del coordinador; los demás casos tienen motivo visible.
+La lectura no abre turnos ni se ha instalado un job. La corrección retroactiva de
+cadenas existentes permanece bloqueada hasta definir conciliación.
 
 SALE genera notificación persistida. La vista activa consulta cada 20 segundos;
 no se anuncia entrega por correo/push ni acuse de lectura. Conserva formularios

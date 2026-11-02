@@ -14,6 +14,8 @@ on:
       - 'docs/sql-proposals/lp01-operacion/**'
       - 'tests/lp01-operacion/**'
       - 'tests/lp01-operation.test.mjs'
+      - 'tests/lp01-continuidad/**'
+      - 'tests/lp01-continuidad.test.mjs'
       - 'app.js'
       - 'src/modules/lp01-followup.*'
       - 'production-line-tabs.js'
@@ -25,7 +27,7 @@ permissions:
 jobs:
   ui:
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -41,6 +43,7 @@ jobs:
         run: |
           node tests/lp01-powerbi.test.mjs
           node tests/lp01-operation.test.mjs
+          node tests/lp01-continuidad.test.mjs
           node tests/lp01-followup.test.mjs
           node tests/production-line-tabs.test.mjs
           node tests/planner-integration.test.mjs
@@ -49,11 +52,14 @@ jobs:
         run: |
           python tests/lp01-operacion/postgres.py
           python tests/lp01-powerbi/postgres.py
+          python tests/lp01-continuidad/postgres.py
+          python tests/lp01-continuidad/xlsx-admission.py
       - name: Real persistence PC and mobile acceptance
         run: |
           pip install playwright==1.62.0
           python -m playwright install --with-deps chromium
           python tests/lp01-powerbi/browser.py
+          python tests/lp01-continuidad/browser.py
           python tests/lp01-seguimiento/browser.py
       - uses: actions/upload-artifact@v4
         if: always()
@@ -63,3 +69,4 @@ jobs:
             tests/lp01-seguimiento/evidence
             tests/lp01-operacion/evidence/
             tests/lp01-powerbi/evidence/
+            tests/lp01-continuidad/evidence/

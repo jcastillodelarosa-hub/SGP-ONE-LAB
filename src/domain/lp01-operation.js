@@ -6,7 +6,7 @@ export function operationalRows(data,{line='',search=''}={}){
  if(data?.contract!=='LP-OPERACION-1'||!Array.isArray(data.orders))throw Error('Contrato de operación incompatible');
  const seen=new Set(),q=search.trim().toLocaleLowerCase('es');
  return data.orders.filter(r=>{const id=[r.linea,r.etapa,r.fecha,r.turno,r.key,r.parte].join('/');if(seen.has(id))throw Error('Orden/parte duplicada');seen.add(id);return(!line||r.oficial?.id_linea===line)&&(!q||[r.produccion,r.key,r.parte,r.observacion,r.oficial?.sistema,r.oficial?.reserva_al].some(x=>String(x??'').toLocaleLowerCase('es').includes(q)));})
- .sort((a,b)=>bucket(a)-bucket(b)||String(a.origen_fecha||a.fecha).localeCompare(String(b.origen_fecha||b.fecha))||Number(a.prioridad)-Number(b.prioridad)||a.key.localeCompare(b.key)||a.parte.localeCompare(b.parte));
+ .sort((a,b)=>bucket(a)-bucket(b)||String(a.antiguedad_fecha||a.origen_fecha||a.fecha).localeCompare(String(b.antiguedad_fecha||b.origen_fecha||b.fecha))||Number(a.antiguedad_turno||a.origen_turno||a.turno)-Number(b.antiguedad_turno||b.origen_turno||b.turno)||Number(a.prioridad)-Number(b.prioridad)||a.key.localeCompare(b.key)||a.parte.localeCompare(b.parte));
 }
 const bucket=r=>r.abierta?(r.sale>0?0:1):2;
 export function officialBalance(row,stage){const p=row.oficial;if(p?.saldos_inicializados!==true||p?.presente_ultimo_export!==true)return null;const n=Number(p[stage==='ENSAMBLE'?'saldo_ensamble':'saldo_empaque']);return Number.isSafeInteger(n)&&n>=0?n:null;}
@@ -28,4 +28,10 @@ export function previewBI(content,{stage,date,shift,orders}){
 export function reportCSV(snapshot){
  const cell=v=>'"'+(typeof v==='number'&&Number.isFinite(v)?String(v):String(v??'').replace(/^[=+@-]/,"'$&")).replace(/"/g,'""')+'"';
  return '\uFEFF'+[['Etapa','Línea','Fecha','Turno','Producción','Parte','SALE','Líder','Power BI','Diferencia','Saldo Export','Motivo','Observación general','Versión','SHA256'],...snapshot.rows.map(r=>[snapshot.stage,snapshot.line,snapshot.date,snapshot.shift,r.key,r.assignments?r.assignments.map(a=>a.parte).join(', '):r.parte,r.sale,r.ejecutado,r.power_bi,r.diferencia,r.saldo_oficial,snapshot.reasons?.[r.assignments?r.key:r.key+'/'+r.parte],snapshot.observation,snapshot.version,snapshot.file.sha256])].map(r=>r.map(cell).join(';')).join('\r\n');
+}
+
+export function salePendingReason(row){
+ if(row.sale_estado==='AFECTACIONES_REQUIEREN_COORDINADOR')return 'El coordinador debe evaluar las afectaciones antes de aumentar la ejecución';
+ if(row.sale!==null&&row.sale!==undefined)return row.sale_fuente==='OFICIAL_ELEGIBLE'?'Inicializado desde saldo oficial elegible':'Decisión conservada del coordinador';
+ return ({EXPORT_NO_ELEGIBLE:'Saldo oficial pendiente de validar',EXPORT_CAMBIO_REQUIERE_CONCILIACION:'La nueva carga Export requiere conciliación',REPARTO_COORDINADOR_REQUERIDO:'El coordinador debe definir el reparto entre asignaciones',DECISION_PREVIA_REQUIERE_COORDINADOR:'Revalidar la decisión del turno anterior',AFECTACIONES_REQUIEREN_COORDINADOR:'El coordinador debe evaluar las afectaciones',CAPACIDAD_ASIGNACION_INCOMPATIBLE:'Revisar la capacidad restante de la asignación',CAPACIDAD_TURNO_PENDIENTE:'El coordinador debe indicar la capacidad de Empaque',CAPACIDAD_REQUIERE_COORDINADOR:'La disponibilidad supera la capacidad: ajustar por asignación',CONTINUIDAD_REVALIDAR:'Validar disponibilidad del nuevo turno'})[row.sale_estado]||'SALE pendiente de validar';
 }

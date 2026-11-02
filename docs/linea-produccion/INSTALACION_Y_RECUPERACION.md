@@ -4,7 +4,14 @@ No ejecutar este plan sin autorización expresa. Ningún SQL de esta carpeta se
 aplicó en Supabase. Las pruebas usan contenedores nuevos con datos sintéticos,
 sin red ni puertos publicados. No se creó copia ni respaldo de una base productiva.
 
-## Revisión del 02/11/2026 — todavía no ejecutar
+## Continuación operativa desde 8defa34 — todavía no ejecutar
+
+[SALE, continuidad y contención](SALE_CONTINUIDAD_CONTENCION.md) actualiza 01/02/03 y
+la admisión común de 06. Pruebas nuevas/afectadas en aislamiento; el adaptador XLSX
+no cambia. Esta sección sustituye las brechas de drenaje/SALE/antigüedad indicadas
+en el diagnóstico histórico; no certifica operación productiva.
+
+## Revisión histórica del 02/11/2026 — todavía no ejecutar
 
 Referencia de código/SQL: c5178d8. La revisión actual es de lectura y preparación;
 no vuelve a ejecutar las pruebas aisladas anteriores ni certifica datos de planta.
@@ -16,7 +23,7 @@ Ver [contratos, permisos reales y decisiones pendientes](CIERRE_BLOQUEOS_PRODUCT
 | Power BI | Archivos recibidos y adaptador XLSX v1 implementado; comparación por producción aprobada. Pendientes servicio/SQL y despliegue autorizados, correspondencia real y variantes no observadas. No activar CSV QA |
 | PDT / Export | Existen datos upstream; faltan liberación neta/asociación de partes, compensación e inclusión verificable de avances por corte |
 | Responsables | No hay cuentas activas con rol LIDER/LIDER LINEA. Faltan ámbitos reales por línea/etapa/producción y responsable con cobertura completa del cierre |
-| Arrastre / SALE | Falta garantizar el siguiente turno operativo y persistir la inicialización aprobada de SALE de Empaque; el formulario sugerido no la sustituye |
+| Arrastre / SALE | Inicialización inequívoca persistida y siguiente período validado al ABRIR. Capacidad/repartos requieren decisiones explícitas; apertura desatendida y conciliación de cadena pendientes |
 | Recuperación | Verificar punto de recuperación existente, responsables y contención de comandos en vuelo antes de considerar activación |
 
 Estos controles son requisitos de preparación; no conceden acceso ni autorización
@@ -92,14 +99,13 @@ no se presupone que pueda actualizar por sí solo un esquema ya instalado.
   de datos nuevos**. Autorizar `02_CONTENER_REVIEW.sql`, conservar las lecturas y
   aplicar una corrección hacia adelante versionada. Los snapshots anteriores son
   inmutables; una corrección funcional debe generar otra versión, no reescribirlos.
-  **Límite de contención por revisar:** 01 lee la bandera al inicio del comando y
-  02 no coordina ese cambio con los bloqueos de todos los comandos en vuelo. La
-  prueba anterior cubre solicitudes posteriores al apagado; no demuestra que una
-  solicitud que ya lo superó no pueda confirmar después. Antes de activar, preparar
-  y probar parada de admisiones y drenaje/serialización, con observación de
-  transacciones del módulo por el responsable técnico. No prometer parada instantánea
-  ni terminar sesiones por inferencia; cualquier intervención productiva requiere
-  autorización. Conservar las lecturas y no tocar los otros circuitos SGP.
+  **Contención revisada:** 01/06 toman bloqueo compartido de config antes de sus
+  mutex; 02 obtiene el exclusivo, espera escritores y el trigger invalida revisiones
+  de turno. Tras COMMIT no queda un escritor LP admitido pendiente de confirmar.
+  Si vence lock_timeout, se revierte y no se declara contenido. Un comando en red
+  aún no admitido verá flag/revisión vigente. Lecturas y recibos de commit siguen
+  disponibles. Probado con transacciones PostgreSQL reales bloqueadas, también XLSX;
+  no se matan sesiones ni se promete controlar escritores externos al protocolo LP.
 - Si cambió una carga Export o ya se arrastró una orden: no resetear presupuestos,
   reconciliar cantidades ni borrar sucesores por inferencia. Requiere evidencia
   explícita de inclusión y conciliación de la cadena. Hasta entonces, contención.
@@ -120,10 +126,10 @@ Aplica solo a los SQL propuestos de `docs/sql-proposals/lp01-operacion/`.
 | DELETE | Ningún DML. `BEFORE UPDATE OR DELETE` aparece en triggers de inmutabilidad que rechazan cambios de auditoría, archivos, cierres y notificaciones; no elimina datos. |
 | TRUNCATE | Ninguna instrucción. |
 | UPDATE sin WHERE | Ninguna instrucción DML. |
-| UPDATE con WHERE en 01 | Turno exacto por línea/etapa/fecha/turno; orden exacta además por producción/parte; liberación exacta por UUID. Registra estado, SALE, acumulado, afectaciones, revisión u origen de consumo dentro del comando autorizado. No actualiza `public.sgp_producciones`, Programación, Picking o Mecanizado. |
+| UPDATE con WHERE en 01 | Al cambiar el flag, el trigger invalida revisión de todos los turnos LP con WHERE etapa IN(ENSAMBLE,EMPAQUE), una vez drenados los escritores. En comandos: turno exacto por línea/etapa/fecha/turno; orden exacta además por producción/parte; liberación exacta por UUID. Registra estado, SALE, acumulado, afectaciones, revisión u origen de consumo dentro del comando autorizado. No actualiza `public.sgp_producciones`, Programación, Picking o Mecanizado. |
 | UPDATE con WHERE en 02 | Una fila `config WHERE id=true`; deshabilita escrituras como contención autorizada. |
 | CREATE OR REPLACE en 04/05 | Solo el cuerpo de `public.sgp_detalle_ubicacion_vidrio(text,text)`, con hash previo; preserva identidad, firma y ACL. 05 restaura el cuerpo capturado. |
-| REVOKE/GRANT en 01 | Esquema/tablas/funciones nuevas: deniega acceso directo; EXECUTE solo en dos fachadas, con sesión y ámbito. No desactiva RLS ni amplía privilegios de tablas productivas. |
+| REVOKE/GRANT en 01 | Esquema/tablas/funciones nuevas: deniega acceso directo; EXECUTE en las fachadas de consulta/comando y el recibo de lectura, con sesión, ámbito y actor cuando corresponde. No desactiva RLS ni amplía privilegios de tablas productivas. |
 | REVOKE/GRANT en 06 | Importación XLSX solo servidor `service_role`, con token/rol/ámbito SGP obligatorios; recuperación del original mediante fachada de lectura con ámbito. Sin GRANT directo de tablas ni roles de aplicación nuevos. |
 | INSERT/UPDATE en 06 | Archivos y auditoría nuevos; revisión del turno exacto con WHERE línea/etapa/fecha/turno. No escribe Programación, Producción oficial, Mecanizado o Picking. Sin DROP, DELETE, TRUNCATE ni UPDATE sin WHERE. |
 
@@ -133,7 +139,7 @@ instalación ni evidencia de modificaciones productivas.
 
 ## Operaciones que requieren autorización explícita
 
-- Aplicar 01 o 04 en Supabase y cualquier ajuste de DDL/permisos/propietarios.
+- Aplicar 01, 06 o 04 en Supabase y cualquier ajuste de DDL/permisos/propietarios.
 - Escribir ámbitos reales, activar escrituras/adaptador real o instalar puentes.
 - Crear/restaurar respaldos, aplicar contención 02 o restauración de función 05.
 - Cualquier avance, afectación, cierre, reapertura o prueba con datos productivos.
