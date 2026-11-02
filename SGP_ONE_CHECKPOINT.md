@@ -1,3 +1,27 @@
+# PR #183 — preparación de bloqueos productivos (02/11/2026)
+
+Referencia funcional/código/SQL c5178d8; actualización solo documental en la misma
+rama. No se rehacen vistas, cambian contratos SQL ni repiten las 111 pruebas.
+SELECT dirigidos confirman: esquema LP no instalado; seis roles con cuentas
+activas, ninguna LIDER/LIDER LINEA/CONSULTA; accesos por ventana sin asignación
+acreditada LP por línea/etapa; fuentes PDT/Export y horarios disponibles.
+
+Se preparan campos/muestras Power BI, contratos lógicos de liberación neta PDT e
+inclusión Export, matriz/plantilla de ámbitos sin usuarios inventados y contraste
+de reglas. Empaque aún no inicia SALE persistido desde el saldo oficial; arrastre
+solo al ABRIR y siguiente turno operativo no validado. Contención por bandera no
+certifica drenaje de comandos ya iniciados. Brechas quedan pendientes, sin parche
+en esta fase de lectura/preparación. Plan de instalación/recuperación revisado;
+no instalar ni habilitar con solo cambiar flags.
+
+Entrega y cinco aportes indispensables del responsable funcional:
+`docs/linea-produccion/CIERRE_BLOQUEOS_PRODUCTIVOS.md`. Evidencia agregada y cuerpos
+leídos en `docs/linea-produccion/evidence/2026-11-02-cierre-readonly.json`.
+No DDL/DML productivo, migraciones, permisos concedidos, backups/copias, fusión,
+publish o despliegue. Las pruebas y CI 3/3 de c5178d8 conservan su alcance aislado.
+
+---
+
 # Línea de Producción integral — PR #183 / Issue #184 (01/11/2026)
 
 Rama `feat/lp01-seguimiento-operacion`, base main `bb224f0`. Guía original de 27

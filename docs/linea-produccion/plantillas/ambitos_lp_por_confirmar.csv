@@ -1,0 +1,5 @@
+id_linea,etapa,id_usuario_existente,rol_existente,alcance_producciones,responsable_cierre,suplencia,vigencia_desde,vigencia_hasta,aprobado_por
+PANELES_2,ENSAMBLE,,,,,,,,
+PANELES_2,EMPAQUE,,,,,,,,
+FRAMES_2,ENSAMBLE,,,,,,,,
+FRAMES_2,EMPAQUE,,,,,,,,

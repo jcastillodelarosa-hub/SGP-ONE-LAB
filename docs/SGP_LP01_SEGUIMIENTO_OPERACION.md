@@ -5,6 +5,13 @@ Especificación: [Issue #184](https://github.com/jcastillodelarosa-hub/SGP-ONE-L
 Estado: **IMPLEMENTADO EN RAMA y VERIFICADO EN AISLAMIENTO**. No aplicado en
 Supabase, fusionado, publicado ni verificado en planta.
 
+Actualización documental 02/11/2026: [preparación de bloqueos productivos](linea-produccion/CIERRE_BLOQUEOS_PRODUCTIVOS.md)
+y [plantilla de ámbitos reales](linea-produccion/plantillas/ambitos_lp_por_confirmar.csv).
+Se contrastan Power BI, PDT/Export, roles y arrastre/SALE sin cambiar implementación
+ni repetir las 111 pruebas. Se identifican brechas de inicialización persistida de
+SALE de Empaque y de drenaje de comandos durante contención; no quedan certificadas
+por la evidencia sintética anterior.
+
 El encargo pegado es la instrucción de trabajo. El DOCX adjunto aporta la definición
 funcional aprobada; el HTML aporta imágenes originales y estados de aprobación
 individuales. Se incorporaron ambos con hashes y [matriz de 27 bocetos](linea-produccion/REFERENCIAS_27_BOCETOS.md).

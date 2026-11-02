@@ -4,11 +4,34 @@ No ejecutar este plan sin autorización expresa. Ningún SQL de esta carpeta se
 aplicó en Supabase. Las pruebas usan contenedores nuevos con datos sintéticos,
 sin red ni puertos publicados. No se creó copia ni respaldo de una base productiva.
 
+## Revisión del 02/11/2026 — todavía no ejecutar
+
+Referencia de código/SQL: c5178d8. La revisión actual es de lectura y preparación;
+no vuelve a ejecutar las pruebas aisladas anteriores ni certifica datos de planta.
+Ver [contratos, permisos reales y decisiones pendientes](CIERRE_BLOQUEOS_PRODUCTIVOS.md).
+
+| Control previo | Estado observado / condición para avanzar |
+|---|---|
+| Instalación LP | El esquema privado no existe en Supabase según SELECT del 02/11. No hay configuración LP productiva que se pueda «encender» ahora |
+| Power BI | Faltan archivos reales y adaptador/correspondencia por orden o parte. El formato QA no se habilita solo por aprobar su bandera |
+| PDT / Export | Existen datos upstream; faltan liberación neta/asociación de partes, compensación e inclusión verificable de avances por corte |
+| Responsables | No hay cuentas activas con rol LIDER/LIDER LINEA. Faltan ámbitos reales por línea/etapa/producción y responsable con cobertura completa del cierre |
+| Arrastre / SALE | Falta garantizar el siguiente turno operativo y persistir la inicialización aprobada de SALE de Empaque; el formulario sugerido no la sustituye |
+| Recuperación | Verificar punto de recuperación existente, responsables y contención de comandos en vuelo antes de considerar activación |
+
+Estos controles son requisitos de preparación; no conceden acceso ni autorización
+de instalación. No se revisa ni corrige datos históricos para hacerlos pasar.
+
 ## Preparación previa a una autorización
 
 1. Revisar los SQL y contrastar nuevamente firmas, hashes, columnas, FK, propietarios,
    ACL y RLS mediante SELECT. La evidencia del 01/11/2026 no autoriza cambios futuros.
    Verificar que no se haya instalado entretanto otro motor que duplique contratos.
+   La lectura dirigida del 02/11 conserva esa separación: se inspeccionaron cuerpos,
+   metadatos, agregados de roles/accesos y horarios; no se invocaron las RPC de negocio.
+   Los controles de 01 verifican existencia/columnas y huella de sesión, no certifican
+   los futuros puentes ni el formato Power BI. Preparar un candidato revisado cuando
+   esos desarrollos estén completos; no tratar el SQL c5178d8 como instalador final.
 2. Resolver el formato Power BI real, granularidad por partes, evidencias de inclusión
    Export/liberaciones PDT y ámbitos de responsables. No activar CSV-v1 solo porque
    QA pase. Configuración propuesta por defecto: escrituras=false, formato=false,
@@ -33,6 +56,10 @@ sin red ni puertos publicados. No se creó copia ni respaldo de una base product
    revisada. Es DML/configuración productiva y requiere autorización, no se suministra
    un UPDATE general ni se inventan usuarios/producciones. Habilitar solo después de
    confirmar contratos reales y aprobar por separado el cambio de configuración.
+   Validar también los accesos de ventana efectivos, las suplencias y la cobertura
+   completa del firmante. Las entradas por rol de `sgp_rol_accesos` no sustituyen
+   los overrides efectivos ni los ámbitos privados LP. No crear líderes ficticios,
+   copiar ámbitos de Mecanizado ni asignar todas las producciones por defecto.
 5. Autorizar publicación del frontend y pruebas productivas con responsables reales.
    No hay despliegue automático desde esta rama: los workflows de publicación se
    revisaron; live está asociado a main y los otros flujos requieren sus disparadores.
@@ -52,6 +79,14 @@ sin red ni puertos publicados. No se creó copia ni respaldo de una base product
   de datos nuevos**. Autorizar `02_CONTENER_REVIEW.sql`, conservar las lecturas y
   aplicar una corrección hacia adelante versionada. Los snapshots anteriores son
   inmutables; una corrección funcional debe generar otra versión, no reescribirlos.
+  **Límite de contención por revisar:** 01 lee la bandera al inicio del comando y
+  02 no coordina ese cambio con los bloqueos de todos los comandos en vuelo. La
+  prueba anterior cubre solicitudes posteriores al apagado; no demuestra que una
+  solicitud que ya lo superó no pueda confirmar después. Antes de activar, preparar
+  y probar parada de admisiones y drenaje/serialización, con observación de
+  transacciones del módulo por el responsable técnico. No prometer parada instantánea
+  ni terminar sesiones por inferencia; cualquier intervención productiva requiere
+  autorización. Conservar las lecturas y no tocar los otros circuitos SGP.
 - Si cambió una carga Export o ya se arrastró una orden: no resetear presupuestos,
   reconciliar cantidades ni borrar sucesores por inferencia. Requiere evidencia
   explícita de inclusión y conciliación de la cadena. Hasta entonces, contención.
