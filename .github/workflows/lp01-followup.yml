@@ -3,6 +3,13 @@ on:
   pull_request:
     paths:
       - 'src/domain/lp01-*.js'
+      - 'src/domain/powerbi/**'
+      - 'src/server/lp-powerbi-handler.js'
+      - 'src/modules/lp01-powerbi-client.js'
+      - 'supabase/**'
+      - 'package.json'
+      - 'tests/lp01-powerbi/**'
+      - 'tests/lp01-powerbi.test.mjs'
       - 'src/modules/lp01-operation.js'
       - 'docs/sql-proposals/lp01-operacion/**'
       - 'tests/lp01-operacion/**'
@@ -32,18 +39,21 @@ jobs:
       - run: npm run verify:release
       - name: Focused regressions
         run: |
+          node tests/lp01-powerbi.test.mjs
           node tests/lp01-operation.test.mjs
           node tests/lp01-followup.test.mjs
           node tests/production-line-tabs.test.mjs
           node tests/planner-integration.test.mjs
           node tests/linea-produccion-v328.test.mjs
       - name: Isolated PostgreSQL contracts
-        run: python tests/lp01-operacion/postgres.py
+        run: |
+          python tests/lp01-operacion/postgres.py
+          python tests/lp01-powerbi/postgres.py
       - name: Real persistence PC and mobile acceptance
         run: |
           pip install playwright==1.62.0
           python -m playwright install --with-deps chromium
-          python tests/lp01-operacion/browser.py
+          python tests/lp01-powerbi/browser.py
           python tests/lp01-seguimiento/browser.py
       - uses: actions/upload-artifact@v4
         if: always()
@@ -52,3 +62,4 @@ jobs:
           path: |
             tests/lp01-seguimiento/evidence
             tests/lp01-operacion/evidence/
+            tests/lp01-powerbi/evidence/

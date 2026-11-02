@@ -1,0 +1,4 @@
+# Source configuration only: nothing is deployed by this PR.
+# SGP uses its own session token, validated by the SQL RPC; it is not a Supabase Auth JWT.
+[functions.lp-powerbi]
+verify_jwt = false

@@ -13,7 +13,7 @@ Ver [contratos, permisos reales y decisiones pendientes](CIERRE_BLOQUEOS_PRODUCT
 | Control previo | Estado observado / condición para avanzar |
 |---|---|
 | Instalación LP | El esquema privado no existe en Supabase según SELECT del 02/11. No hay configuración LP productiva que se pueda «encender» ahora |
-| Power BI | Faltan archivos reales y adaptador/correspondencia por orden o parte. El formato QA no se habilita solo por aprobar su bandera |
+| Power BI | Archivos recibidos y adaptador XLSX v1 implementado; comparación por producción aprobada. Pendientes servicio/SQL y despliegue autorizados, correspondencia real y variantes no observadas. No activar CSV QA |
 | PDT / Export | Existen datos upstream; faltan liberación neta/asociación de partes, compensación e inclusión verificable de avances por corte |
 | Responsables | No hay cuentas activas con rol LIDER/LIDER LINEA. Faltan ámbitos reales por línea/etapa/producción y responsable con cobertura completa del cierre |
 | Arrastre / SALE | Falta garantizar el siguiente turno operativo y persistir la inicialización aprobada de SALE de Empaque; el formulario sugerido no la sustituye |
@@ -21,6 +21,11 @@ Ver [contratos, permisos reales y decisiones pendientes](CIERRE_BLOQUEOS_PRODUCT
 
 Estos controles son requisitos de preparación; no conceden acceso ni autorización
 de instalación. No se revisa ni corrige datos históricos para hacerlos pasar.
+
+Continuación del mismo día: [Power BI XLSX v1](POWER_BI_XLSX_V1.md) añade propuesta
+06 y fuente de servicio Edge; solo código versionado, sin aplicar ni desplegar.
+01 actualizado sigue siendo instalación fresca y añade original binario/versión;
+no se presupone que pueda actualizar por sí solo un esquema ya instalado.
 
 ## Preparación previa a una autorización
 
@@ -32,8 +37,10 @@ de instalación. No se revisa ni corrige datos históricos para hacerlos pasar.
    Los controles de 01 verifican existencia/columnas y huella de sesión, no certifican
    los futuros puentes ni el formato Power BI. Preparar un candidato revisado cuando
    esos desarrollos estén completos; no tratar el SQL c5178d8 como instalador final.
-2. Resolver el formato Power BI real, granularidad por partes, evidencias de inclusión
-   Export/liberaciones PDT y ámbitos de responsables. No activar CSV-v1 solo porque
+2. Aplicar la definición aprobada de Power BI por producción (últimos avances de
+   asignaciones LP del período), revisar el adaptador nativo y las variantes no
+   observadas, evidencias de inclusión Export/liberaciones PDT y ámbitos de responsables.
+   No activar CSV-v1 solo porque
    QA pase. Configuración propuesta por defecto: escrituras=false, formato=false,
    permisos vacíos. No usar `service_role` desde navegador.
 3. Antes de cualquier instalación autorizada, el responsable debe confirmar un punto
@@ -50,6 +57,12 @@ de instalación. No se revisa ni corrige datos históricos para hacerlos pasar.
 2. Ejecutar las comprobaciones de `03_VERIFICAR_READ_ONLY.sql`: firmas correctas,
    `SECURITY DEFINER` con search_path vacío, tablas RLS, acceso directo anon=false,
    configuración aún deshabilitada y ninguna mutación de tablas legacy.
+   Para el candidato XLSX, el orden revisado es **01 actualizado → 06 → 03**.
+   06 habilita EXECUTE de la importación solo al servidor, pero exige igualmente
+   sesión y ámbitos SGP completos; el cliente no recibe la credencial técnica.
+   Configuración y código de Edge Functions requieren otra autorización antes de
+   desplegar/configurar secretos/orígenes. `verify_jwt=false` corresponde a la
+   sesión SGP propia, validada por SQL; no permite escribir sin esa sesión.
 3. Autorizar `04_vidrio_REVIEW.sql` si se aprueba esa corrección compatible. Es otra
    transacción atómica con hash de función origen; no cambia permisos ni datos.
 4. Cargar ámbitos aprobados y conectar puentes certificados mediante una propuesta
@@ -111,6 +124,8 @@ Aplica solo a los SQL propuestos de `docs/sql-proposals/lp01-operacion/`.
 | UPDATE con WHERE en 02 | Una fila `config WHERE id=true`; deshabilita escrituras como contención autorizada. |
 | CREATE OR REPLACE en 04/05 | Solo el cuerpo de `public.sgp_detalle_ubicacion_vidrio(text,text)`, con hash previo; preserva identidad, firma y ACL. 05 restaura el cuerpo capturado. |
 | REVOKE/GRANT en 01 | Esquema/tablas/funciones nuevas: deniega acceso directo; EXECUTE solo en dos fachadas, con sesión y ámbito. No desactiva RLS ni amplía privilegios de tablas productivas. |
+| REVOKE/GRANT en 06 | Importación XLSX solo servidor `service_role`, con token/rol/ámbito SGP obligatorios; recuperación del original mediante fachada de lectura con ámbito. Sin GRANT directo de tablas ni roles de aplicación nuevos. |
+| INSERT/UPDATE en 06 | Archivos y auditoría nuevos; revisión del turno exacto con WHERE línea/etapa/fecha/turno. No escribe Programación, Producción oficial, Mecanizado o Picking. Sin DROP, DELETE, TRUNCATE ni UPDATE sin WHERE. |
 
 Las pruebas aisladas sí crean tablas/roles/datos sintéticos y actualizan sesiones,
 ámbitos y fuentes de QA. Sus comandos no apuntan a Supabase; no son pasos de

@@ -1,3 +1,33 @@
+# PR #183 — adaptador Power BI XLSX real (02/11/2026)
+
+Continúa 47a06af; reglas del encargo actual aprueban comparar por producción,
+línea, etapa, fecha operativa y turno, sumando últimos avances de asignaciones LP.
+Recibidos los dos originales: Export, 33/37 filas, total 186; T1/T2 95/91 Ensamble
+frente a 90/96 Empaque. Sin duplicados exactos ni ceros/negativos observados.
+
+Implementado LP-PBI-XLSX-1 en navegador y servidor; servidor verifica sesión SGP
+antes de descomprimir, vuelve a parsear y guarda bytes originales, hash, filas
+fuente y grupos. RPC de importación solo servidor con sesión/rol/ámbito SGP; cierre
+reutiliza el motor versionado, conserva asignaciones y exige motivos por producción.
+No cambia Programación, partes de Mecanizado ni saldos oficiales del Export.
+
+Pruebas focalizadas nuevas de XLSX/conciliación/permisos, SQL PostgreSQL real
+local, originales preservados byte a byte en aislamiento y PC1440/móvil390 con
+servicio real compartido + SQL real. Fixtures/capturas publicadas anonimizadas.
+Las 111 pruebas se reutilizan salvo las 6 de contrato/reporte afectado; regresión
+SQL se ejecuta porque cambió CERRAR/archivos. CI obligatoria no prueba producción.
+
+Pendientes limitados: convenciones no observadas de anulación/fecha nocturna,
+variantes no muestreadas, correspondencia real SGP, instalación/Edge/flags/ámbitos
+productivos y bloqueos PDT/Export/SALE/arrastre previos. La revisión automática
+rechazó enviar nombres reales de XLSX a Supabase por payload potencialmente
+sensible: esa consulta no se ejecutó ni se eludió; solo catálogo y pruebas locales.
+
+Detalle: docs/linea-produccion/POWER_BI_XLSX_V1.md. No DDL/DML productivo, habilitación,
+fusión, publish, Firebase ni despliegue Edge; todo SQL es propuesta sin aplicar.
+
+---
+
 # PR #183 — preparación de bloqueos productivos (02/11/2026)
 
 Referencia funcional/código/SQL c5178d8; actualización solo documental en la misma

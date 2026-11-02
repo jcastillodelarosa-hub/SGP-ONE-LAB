@@ -1,5 +1,12 @@
 # Preparación del cierre de bloqueos productivos — PR #183
 
+**Actualización posterior del mismo día:** el encargo de integración aportó ambos
+XLSX y aprobó comparar por producción, sumando las asignaciones LP del turno y
+etapa. [Implementación XLSX v1 y evidencias](POWER_BI_XLSX_V1.md). El texto inferior
+conserva el diagnóstico de 47a06af; la petición de archivos y la decisión de
+granularidad quedan resueltas por ese encargo, no son bloqueos funcionales actuales.
+Se mantienen las brechas ajenas a Power BI y las convenciones no observadas.
+
 02/11/2026, America/Bogota. Referencia técnica **c5178d8**; mismo Draft y rama.
 Estado: **PREPARACIÓN DOCUMENTAL, NO AUTORIZADO PARA ACTIVAR**. No se modifica
 Seguimiento, Operación, sus SQL ni sus reglas en esta entrega. Las 111 pruebas y

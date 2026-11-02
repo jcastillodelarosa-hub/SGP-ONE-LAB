@@ -5,6 +5,13 @@ Especificación: [Issue #184](https://github.com/jcastillodelarosa-hub/SGP-ONE-L
 Estado: **IMPLEMENTADO EN RAMA y VERIFICADO EN AISLAMIENTO**. No aplicado en
 Supabase, fusionado, publicado ni verificado en planta.
 
+Continuación Power BI del 02/11/2026: [adaptador XLSX v1 y hallazgos](linea-produccion/POWER_BI_XLSX_V1.md).
+Recibidos los dos originales; comparación por producción/línea/etapa/fecha/turno
+aprobada en el encargo actual. La importación revalida el original en servidor,
+agrega últimos avances LP por producción y preserva bytes/hash/asignaciones en
+cierres versionados. No se altera la división de Programación ni Mecanizado.
+La instalación/despliegue/activación y los demás puentes siguen pendientes.
+
 Actualización documental 02/11/2026: [preparación de bloqueos productivos](linea-produccion/CIERRE_BLOQUEOS_PRODUCTIVOS.md)
 y [plantilla de ámbitos reales](linea-produccion/plantillas/ambitos_lp_por_confirmar.csv).
 Se contrastan Power BI, PDT/Export, roles y arrastre/SALE sin cambiar implementación
@@ -88,12 +95,18 @@ usuario y versión quedan en un snapshot inmutable. Solo coordinador/administrad
 reabre con motivo; las correcciones en revisión requieren ese rol. El cierre de
 una línea o etapa no cierra la otra. El archivo nunca actualiza Export.
 
-**No se recibió un archivo real Power BI ni su esquema de columnas.** Se preparó
-un adaptador CSV-v1 estricto para QA, con encabezado
-`etapa;fecha;turno;key_produccion;parte;cantidad`. Permanece desactivado en el SQL
-propuesto. Sus pruebas acreditan el contrato aislado; no certifican el formato
-productivo ni autorizan a exigir ese formato al usuario de planta. Falta contrastar
-una muestra real, su granularidad por parte y la correspondencia inequívoca de órdenes.
+Los dos archivos reales recibidos tienen hoja Export, 33/37 filas y total 186,
+repartido entre dos turnos. El adaptador `LP-PBI-XLSX-1` selecciona el período y
+compara por producción; no pide UUID de parte a Power BI. El original se valida
+otra vez en servidor y se conserva con SHA256 y procedencia. La RPC de importación
+está limitada al servidor, con sesión/roles/ámbitos SGP obligatorios. El motor CERRAR
+conserva las asignaciones y sus últimos valores dentro del snapshot agregado.
+
+El CSV `etapa;fecha;turno;key_produccion;parte;cantidad` queda solo como compatibilidad
+QA histórica; se rechaza en modo XLSX real. Flags permanecen apagados por defecto.
+No se certifica correspondencia productiva de nombres ni Edge/gateway desplegado.
+Véanse las convenciones no observadas y los resultados reales/locales en el
+documento del adaptador; no es necesario volver a pedir los archivos recibidos.
 
 Al abrir un nuevo turno se incorporan las órdenes anteriores con saldo oficial
 pendiente, conservando observaciones/afectaciones y ejecución nueva cero; SALE
@@ -141,8 +154,10 @@ inclusión de avances en Export, dispositivo físico ni rendimiento de planta. L
 
 ## Bloqueos y siguiente paso
 
-1. Muestra/especificación real Power BI y enlace estable orden/parte: indispensable
-   para certificar la conciliación productiva.
+1. Power BI: adaptador real implementado y regla de comparación por producción
+   confirmada. Pendientes despliegue autorizado, correspondencia de identidades
+   productivas y variantes no presentes en los archivos (no volver a pedir muestras
+   ya recibidas ni un vínculo a partes de Mecanizado).
 2. Puentes reales de inclusión Export y liberaciones PDT en ventanas consolidadas,
    con identidad y participación de todos los escritores; no instalados/certificados.
 3. Ámbitos reales de líderes por línea/etapa/producción y autorización de instalación,

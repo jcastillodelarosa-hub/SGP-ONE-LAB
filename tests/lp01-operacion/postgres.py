@@ -24,7 +24,7 @@ class Database:
   self.sql(install)
   assert self.sql('SELECT escrituras FROM sgp_lp_operacion.config')=='f'
   # QA configuration only. Proposed production installer leaves writes and BI adapter disabled.
-  self.sql('UPDATE sgp_lp_operacion.config SET escrituras=true WHERE id;')
+  self.sql("UPDATE sgp_lp_operacion.config SET escrituras=true,adaptador_bi='CSV-QA' WHERE id;")
  def run(self,q):return subprocess.run(self.docker+['exec','-i',self.container,'psql','-X','-qAt','-U','postgres','-v','ON_ERROR_STOP=1'],env=self.env,input=q,text=True,capture_output=True)
  def sql(self,q):
   r=self.run(q)

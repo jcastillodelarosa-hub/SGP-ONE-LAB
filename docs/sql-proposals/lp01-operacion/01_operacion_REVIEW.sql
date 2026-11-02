@@ -16,8 +16,8 @@ DO $$ BEGIN
 END $$;
 CREATE SCHEMA sgp_lp_operacion;
 REVOKE ALL ON SCHEMA sgp_lp_operacion FROM PUBLIC,anon,authenticated;
-CREATE TABLE sgp_lp_operacion.config(id boolean PRIMARY KEY DEFAULT true CHECK(id),escrituras boolean NOT NULL DEFAULT false,formato_bi_aprobado boolean NOT NULL DEFAULT false);
-INSERT INTO sgp_lp_operacion.config VALUES(true,false,false);
+CREATE TABLE sgp_lp_operacion.config(id boolean PRIMARY KEY DEFAULT true CHECK(id),escrituras boolean NOT NULL DEFAULT false,formato_bi_aprobado boolean NOT NULL DEFAULT false,adaptador_bi text NOT NULL DEFAULT 'LP-PBI-XLSX-1' CHECK(adaptador_bi IN('LP-PBI-XLSX-1','CSV-QA')));
+INSERT INTO sgp_lp_operacion.config VALUES(true,false,false,'LP-PBI-XLSX-1');
 -- Sin permisos implícitos por rol: administración configura ámbitos después de aprobación.
 CREATE TABLE sgp_lp_operacion.permisos(usuario text NOT NULL,etapa text NOT NULL CHECK(etapa IN('ENSAMBLE','EMPAQUE')),key text NOT NULL REFERENCES public.sgp_producciones(key_produccion),PRIMARY KEY(usuario,etapa,key));
 CREATE TABLE sgp_lp_operacion.turnos(linea text NOT NULL,etapa text NOT NULL CHECK(etapa IN('ENSAMBLE','EMPAQUE')),fecha date NOT NULL,turno int NOT NULL CHECK(turno IN(1,2)),estado text NOT NULL DEFAULT 'ABIERTO' CHECK(estado IN('ABIERTO','CERRADO','EN_REVISION')),revision bigint NOT NULL DEFAULT 0,PRIMARY KEY(etapa,linea,fecha,turno));
@@ -25,7 +25,7 @@ CREATE TABLE sgp_lp_operacion.ordenes(linea text NOT NULL,etapa text NOT NULL,fe
 -- Presupuesto local conservador: el Export no se descuenta dos veces.
 CREATE TABLE sgp_lp_operacion.presupuestos(key text NOT NULL REFERENCES public.sgp_producciones(key_produccion),etapa text NOT NULL CHECK(etapa IN('ENSAMBLE','EMPAQUE')),firma jsonb NOT NULL,base bigint NOT NULL CHECK(base>=0),PRIMARY KEY(key,etapa));
 CREATE TABLE sgp_lp_operacion.auditoria(id uuid PRIMARY KEY,usuario text NOT NULL,operacion text NOT NULL,linea text NOT NULL,etapa text NOT NULL,fecha date NOT NULL,turno int NOT NULL,key text,parte uuid,payload jsonb NOT NULL,antes jsonb,respuesta jsonb NOT NULL,creado_en timestamptz NOT NULL DEFAULT clock_timestamp());
-CREATE TABLE sgp_lp_operacion.archivos(id uuid PRIMARY KEY,linea text NOT NULL,etapa text NOT NULL,fecha date NOT NULL,turno int NOT NULL,nombre text NOT NULL,sha256 text NOT NULL,contenido text NOT NULL,filas jsonb NOT NULL,usuario text NOT NULL,creado_en timestamptz NOT NULL DEFAULT clock_timestamp(),UNIQUE(etapa,linea,fecha,turno,sha256));
+CREATE TABLE sgp_lp_operacion.archivos(id uuid PRIMARY KEY,linea text NOT NULL,etapa text NOT NULL,fecha date NOT NULL,turno int NOT NULL,nombre text NOT NULL,sha256 text NOT NULL,contenido text NOT NULL,contenido_binario bytea,adaptador text NOT NULL DEFAULT 'CSV-QA' CHECK(adaptador IN('CSV-QA','LP-PBI-XLSX-1')),evidencia jsonb NOT NULL DEFAULT '{}',filas jsonb NOT NULL,usuario text NOT NULL,creado_en timestamptz NOT NULL DEFAULT clock_timestamp(),UNIQUE(etapa,linea,fecha,turno,sha256));
 CREATE TABLE sgp_lp_operacion.cierres(id uuid PRIMARY KEY,linea text NOT NULL,etapa text NOT NULL,fecha date NOT NULL,turno int NOT NULL,version bigint NOT NULL,archivo uuid NOT NULL REFERENCES sgp_lp_operacion.archivos,snapshot jsonb NOT NULL,usuario text NOT NULL,creado_en timestamptz NOT NULL DEFAULT clock_timestamp(),UNIQUE(etapa,linea,fecha,turno,version));
 CREATE TABLE sgp_lp_operacion.notificaciones(id uuid PRIMARY KEY,linea text NOT NULL,etapa text NOT NULL,fecha date NOT NULL,turno int NOT NULL,key text NOT NULL,parte uuid NOT NULL,anterior bigint,nuevo bigint NOT NULL,motivo text NOT NULL,usuario text NOT NULL,creado_en timestamptz NOT NULL DEFAULT clock_timestamp());
 -- Liberaciones: solamente puente servidor con evidencia de ventanas consolidada.
@@ -62,7 +62,7 @@ DECLARE p jsonb;v bigint; BEGIN SELECT to_jsonb(x) INTO p FROM public.sgp_produc
 CREATE FUNCTION public.sgp_lp_operacion_consultar(p_token text,p_etapa text,p_linea text,p_fecha date,p_turno int) RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
 DECLARE s jsonb;res jsonb; BEGIN s:=sgp_lp_operacion.sesion(p_token,p_etapa,NULL,p_linea);
  IF p_fecha IS NULL OR p_turno IS NULL OR p_turno NOT IN(1,2) THEN RAISE EXCEPTION 'TURNO_INVALIDO'; END IF;
- SELECT jsonb_build_object('contract','LP-OPERACION-1','role',s->>'rol','writes',(SELECT escrituras FROM sgp_lp_operacion.config WHERE id),'biFormatApproved',(SELECT formato_bi_aprobado FROM sgp_lp_operacion.config WHERE id),
+ SELECT jsonb_build_object('contract','LP-OPERACION-1','role',s->>'rol','writes',(SELECT escrituras FROM sgp_lp_operacion.config WHERE id),'biFormatApproved',(SELECT formato_bi_aprobado FROM sgp_lp_operacion.config WHERE id),'biAdapter',(SELECT adaptador_bi FROM sgp_lp_operacion.config WHERE id),
  'turn',coalesce((SELECT to_jsonb(t) FROM sgp_lp_operacion.turnos t WHERE etapa=p_etapa AND linea=p_linea AND fecha=p_fecha AND turno=p_turno),jsonb_build_object('estado','NO_ABIERTO','revision',0)),
  'orders',coalesce((SELECT jsonb_agg(to_jsonb(o)||jsonb_build_object('produccion',p.produccion,'programada',(SELECT cantidad FROM public.sgp_linea_plan_asignaciones a WHERE a.id=o.parte),'total_etapa_parte',(SELECT coalesce(sum(q.ejecutado),0) FROM sgp_lp_operacion.ordenes q WHERE q.key=o.key AND q.etapa=o.etapa AND q.parte=o.parte),'oficial',to_jsonb(p),'abierta',o.origen_fecha IS NOT NULL) ORDER BY CASE WHEN o.origen_fecha IS NOT NULL AND o.sale>0 THEN 0 WHEN o.origen_fecha IS NOT NULL THEN 1 ELSE 2 END,o.prioridad,o.key,o.parte) FROM sgp_lp_operacion.ordenes o JOIN public.sgp_producciones p ON p.key_produccion=o.key WHERE o.etapa=p_etapa AND o.linea=p_linea AND o.fecha=p_fecha AND o.turno=p_turno AND EXISTS(SELECT 1 FROM sgp_lp_operacion.permisos a WHERE a.usuario=s->>'usuario' AND a.etapa=o.etapa AND a.key=o.key)),'[]'),
  'history',coalesce((SELECT jsonb_agg(to_jsonb(a) ORDER BY creado_en) FROM sgp_lp_operacion.auditoria a WHERE a.etapa=p_etapa AND a.linea=p_linea AND a.fecha=p_fecha AND a.turno=p_turno AND((a.key IS NOT NULL AND EXISTS(SELECT 1 FROM sgp_lp_operacion.permisos b WHERE b.usuario=s->>'usuario' AND b.etapa=a.etapa AND b.key=a.key)) OR (a.key IS NULL AND NOT EXISTS(SELECT 1 FROM sgp_lp_operacion.ordenes o WHERE o.etapa=a.etapa AND o.linea=a.linea AND o.fecha=a.fecha AND o.turno=a.turno AND NOT EXISTS(SELECT 1 FROM sgp_lp_operacion.permisos b WHERE b.usuario=s->>'usuario' AND b.etapa=o.etapa AND b.key=o.key))))),'[]'),
@@ -70,7 +70,7 @@ DECLARE s jsonb;res jsonb; BEGIN s:=sgp_lp_operacion.sesion(p_token,p_etapa,NULL
  'reports',coalesce((SELECT jsonb_agg(to_jsonb(c) ORDER BY version) FROM sgp_lp_operacion.cierres c WHERE c.etapa=p_etapa AND c.linea=p_linea AND c.fecha=p_fecha AND c.turno=p_turno AND NOT EXISTS(SELECT 1 FROM jsonb_array_elements(c.snapshot->'rows') r WHERE NOT EXISTS(SELECT 1 FROM sgp_lp_operacion.permisos b WHERE b.usuario=s->>'usuario' AND b.etapa=c.etapa AND b.key=r->>'key'))),'[]')) INTO res;
  RETURN res; END $$;
 CREATE FUNCTION public.sgp_lp_operacion_comando(p_token text,p_cmd jsonb) RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
-DECLARE op text:=p_cmd->>'op';et text:=p_cmd->>'stage';line_id text:=p_cmd->>'line';d date:=(p_cmd->>'date')::date;t int:=(p_cmd->>'shift')::int;k text:=p_cmd->>'key';part uuid:=(p_cmd->>'part')::uuid;rid uuid:=(p_cmd->>'id')::uuid;rv bigint:=(p_cmd->>'revision')::bigint;s jsonb;u text;tr sgp_lp_operacion.turnos%rowtype;o sgp_lp_operacion.ordenes%rowtype;prior sgp_lp_operacion.auditoria%rowtype;v bigint;saldo bigint;total bigint;highest bigint;part_capacity bigint;part_used bigint;cols text[];ln text;rows jsonb:='[]';r record;before_state jsonb;res jsonb;af jsonb;file sgp_lp_operacion.archivos%rowtype;rel sgp_lp_operacion.liberaciones%rowtype;firma_actual jsonb;budget sgp_lp_operacion.presupuestos%rowtype;
+DECLARE op text:=p_cmd->>'op';et text:=p_cmd->>'stage';line_id text:=p_cmd->>'line';d date:=(p_cmd->>'date')::date;t int:=(p_cmd->>'shift')::int;k text:=p_cmd->>'key';part uuid:=(p_cmd->>'part')::uuid;rid uuid:=(p_cmd->>'id')::uuid;rv bigint:=(p_cmd->>'revision')::bigint;s jsonb;u text;tr sgp_lp_operacion.turnos%rowtype;o sgp_lp_operacion.ordenes%rowtype;prior sgp_lp_operacion.auditoria%rowtype;v bigint;saldo bigint;total bigint;highest bigint;part_capacity bigint;part_used bigint;cols text[];ln text;rows jsonb:='[]';r record;before_state jsonb;res jsonb;af jsonb;file sgp_lp_operacion.archivos%rowtype;rel sgp_lp_operacion.liberaciones%rowtype;firma_actual jsonb;budget sgp_lp_operacion.presupuestos%rowtype;g record;assignments jsonb;
 BEGIN
  IF jsonb_typeof(p_cmd) IS DISTINCT FROM 'object' OR op IS NULL OR op NOT IN('ABRIR','SALE','EJECUTAR','AFECTAR','VALIDAR','NOTA','IMPORTAR_BI','CERRAR','REABRIR','LIBERAR') THEN RAISE EXCEPTION 'COMANDO_INVALIDO'; END IF;
  IF EXISTS(SELECT 1 FROM jsonb_object_keys(p_cmd) x WHERE x NOT IN('op','stage','line','date','shift','key','part','id','revision','quantity','observation','affectations','consolidated','filename','content','file_id','reasons','release_id')) THEN RAISE EXCEPTION 'CAMPOS_NO_PERMITIDOS'; END IF;
@@ -116,6 +116,7 @@ BEGIN
    UPDATE sgp_lp_operacion.turnos SET estado='EN_REVISION' WHERE etapa=et AND linea=line_id AND fecha=d AND turno=t;
   ELSIF op='IMPORTAR_BI' THEN
    IF NOT (SELECT formato_bi_aprobado FROM sgp_lp_operacion.config WHERE id) THEN RAISE EXCEPTION 'FORMATO_POWER_BI_PENDIENTE_APROBACION'; END IF;
+   IF (SELECT adaptador_bi FROM sgp_lp_operacion.config WHERE id)<>'CSV-QA' THEN RAISE EXCEPTION 'CSV_QA_NO_HABILITADO'; END IF;
    -- Adaptador CSV-v1 aislado. Activarlo exige contrastarlo con un archivo real aprobado.
    IF length(p_cmd->>'content')>2000000 OR nullif(p_cmd->>'content','') IS NULL OR p_cmd->>'filename' !~* '\.csv$' THEN RAISE EXCEPTION 'ARCHIVO_BI_INVALIDO'; END IF;
    IF split_part(replace(p_cmd->>'content',E'\r',''),E'\n',1)<>'etapa;fecha;turno;key_produccion;parte;cantidad' THEN RAISE EXCEPTION 'FORMATO_BI_INVALIDO'; END IF;
@@ -132,6 +133,18 @@ BEGIN
    IF nullif(btrim(p_cmd->>'observation'),'') IS NULL THEN RAISE EXCEPTION 'OBSERVACION_GENERAL_REQUERIDA'; END IF;
    SELECT * INTO file FROM sgp_lp_operacion.archivos a WHERE a.id=(p_cmd->>'file_id')::uuid AND a.etapa=et AND a.linea=line_id AND a.fecha=d AND a.turno=t;
    IF NOT FOUND THEN RAISE EXCEPTION 'ARCHIVO_POWER_BI_REQUERIDO'; END IF;
+   IF (SELECT adaptador_bi FROM sgp_lp_operacion.config WHERE id)='LP-PBI-XLSX-1' AND file.adaptador<>'LP-PBI-XLSX-1' THEN RAISE EXCEPTION 'ARCHIVO_QA_NO_APTO_PARA_CIERRE_XLSX'; END IF;
+   IF file.adaptador='LP-PBI-XLSX-1' THEN
+    IF EXISTS(SELECT 1 FROM sgp_lp_operacion.ordenes a WHERE a.etapa=et AND a.linea=line_id AND a.fecha=d AND a.turno=t AND a.sale IS NULL) THEN RAISE EXCEPTION 'SALE_NO_VALIDADO'; END IF;
+    IF EXISTS(SELECT 1 FROM jsonb_array_elements(file.filas) x WHERE NOT EXISTS(SELECT 1 FROM sgp_lp_operacion.ordenes a WHERE a.etapa=et AND a.linea=line_id AND a.fecha=d AND a.turno=t AND a.key=x->>'key')) THEN RAISE EXCEPTION 'COBERTURA_ARCHIVO_CAMBIO'; END IF;
+    FOR g IN SELECT a.key,sum(a.sale)::bigint sale,sum(a.ejecutado)::bigint ejecutado FROM sgp_lp_operacion.ordenes a WHERE a.etapa=et AND a.linea=line_id AND a.fecha=d AND a.turno=t GROUP BY a.key ORDER BY a.key LOOP
+     SELECT (x->>'quantity')::bigint INTO v FROM jsonb_array_elements(file.filas) x WHERE x->>'key'=g.key;
+     IF v IS NULL THEN RAISE EXCEPTION 'ARCHIVO_BI_INCOMPLETO_AUSENCIA_NO_ES_CERO'; END IF;
+     IF (v<>g.ejecutado OR g.ejecutado<g.sale) AND nullif(btrim(p_cmd->'reasons'->>g.key),'') IS NULL THEN RAISE EXCEPTION 'DIFERENCIA_O_PENDIENTE_SIN_JUSTIFICAR'; END IF;
+     SELECT jsonb_agg(to_jsonb(a) ORDER BY a.parte) INTO assignments FROM sgp_lp_operacion.ordenes a WHERE a.etapa=et AND a.linea=line_id AND a.fecha=d AND a.turno=t AND a.key=g.key;
+     rows:=rows||jsonb_build_array(jsonb_build_object('key',g.key,'sale',g.sale,'ejecutado',g.ejecutado,'power_bi',v,'diferencia',v-g.ejecutado,'saldo_oficial',sgp_lp_operacion.saldo(g.key,et),'assignments',assignments));
+    END LOOP;
+   ELSE
    FOR r IN SELECT * FROM sgp_lp_operacion.ordenes a WHERE a.etapa=et AND a.linea=line_id AND a.fecha=d AND a.turno=t ORDER BY key,parte LOOP
     IF r.sale IS NULL THEN RAISE EXCEPTION 'SALE_NO_VALIDADO'; END IF;
     SELECT (x->>'quantity')::bigint INTO v FROM jsonb_array_elements(file.filas) x WHERE x->>'key'=r.key AND x->>'part'=r.parte::text;
@@ -139,8 +152,9 @@ BEGIN
     IF (v<>r.ejecutado OR r.ejecutado<r.sale) AND nullif(btrim(p_cmd->'reasons'->>(r.key||'/'||r.parte)), '') IS NULL THEN RAISE EXCEPTION 'DIFERENCIA_O_PENDIENTE_SIN_JUSTIFICAR'; END IF;
     rows:=rows||jsonb_build_array(to_jsonb(r)||jsonb_build_object('power_bi',v,'diferencia',v-r.ejecutado,'saldo_oficial',sgp_lp_operacion.saldo(r.key,et)));
    END LOOP;
+   END IF;
    IF jsonb_array_length(rows)=0 THEN RAISE EXCEPTION 'TURNO_VACIO'; END IF;
-   res:=jsonb_build_object('ok',true,'id',rid,'stage',et,'line',line_id,'date',d,'shift',t,'version',tr.revision+1,'rows',rows,'file',jsonb_build_object('id',file.id,'name',file.nombre,'sha256',file.sha256),'reasons',coalesce(p_cmd->'reasons','{}'),'observation',p_cmd->>'observation','user',u);
+   res:=jsonb_build_object('ok',true,'id',rid,'stage',et,'line',line_id,'date',d,'shift',t,'version',tr.revision+1,'rows',rows,'file',jsonb_build_object('id',file.id,'name',file.nombre,'sha256',file.sha256,'adapter',file.adaptador),'reasons',coalesce(p_cmd->'reasons','{}'),'observation',p_cmd->>'observation','user',u);
    INSERT INTO sgp_lp_operacion.cierres(id,etapa,linea,fecha,turno,version,archivo,snapshot,usuario) VALUES(rid,et,line_id,d,t,tr.revision+1,file.id,res,u);
    UPDATE sgp_lp_operacion.turnos SET estado='CERRADO' WHERE etapa=et AND linea=line_id AND fecha=d AND turno=t;
   END IF;

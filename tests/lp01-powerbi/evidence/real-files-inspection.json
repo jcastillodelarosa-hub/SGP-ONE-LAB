@@ -1,0 +1,135 @@
+{
+  "date": "2026-11-02",
+  "timezone": "America/Bogota",
+  "files": [
+    {
+      "adapter": "LP-PBI-XLSX-1",
+      "stage": "ENSAMBLE",
+      "sheet": "Export",
+      "headers": [
+        "Año  prog",
+        "Semana",
+        "Tipo Orden",
+        "Proyecto",
+        "Produccion",
+        "Sistema",
+        "Cant. Procesada",
+        "Linea PDA",
+        "dia_trabajo",
+        "turno_trabajo_extra"
+      ],
+      "records": 33,
+      "total": 186,
+      "sha256": "a4da8416349a731100706f14b50a716c877b20219364b14f5cc4e1321c4a8c3e",
+      "lines": [
+        "PANELES_2"
+      ],
+      "dates": [
+        "2026-10-31"
+      ],
+      "periods": [
+        {
+          "line": "PANELES_2",
+          "date": "2026-10-31",
+          "shift": 1,
+          "rows": 15,
+          "quantity": 95
+        },
+        {
+          "line": "PANELES_2",
+          "date": "2026-10-31",
+          "shift": 2,
+          "rows": 18,
+          "quantity": 91
+        }
+      ],
+      "zero_rows": 0,
+      "negative_rows": 0,
+      "exact_duplicate_rows": 0,
+      "repeated_production_period_groups": 0,
+      "source_has_execution_timestamps": false,
+      "program_weeks": [
+        42,
+        44,
+        45
+      ],
+      "shift_labels": [
+        "1.  07:00 am - 07:00 pm",
+        "2.  07:00 pm - 07:00 am"
+      ],
+      "total_rows": 1,
+      "filter_footer": "Filtros aplicados: \nlinea_pda es PANELES 2\nIncluido (1) octubre (mes) + 31 (dia)",
+      "formula_cells": 0
+    },
+    {
+      "adapter": "LP-PBI-XLSX-1",
+      "stage": "EMPAQUE",
+      "sheet": "Export",
+      "headers": [
+        "Año Prog",
+        "Semana",
+        "Tipo Orden",
+        "Proyecto",
+        "Produccion",
+        "Sistema",
+        "Cant. Procesada",
+        "Linea PDA",
+        "Estación",
+        "dia_trabajo",
+        "turno_trabajo_extra"
+      ],
+      "records": 37,
+      "total": 186,
+      "sha256": "b1bc89f36b1931a71899970398104644209a72f287f28d3d2421c602657280d2",
+      "lines": [
+        "PANELES_2"
+      ],
+      "dates": [
+        "2026-10-31"
+      ],
+      "periods": [
+        {
+          "line": "PANELES_2",
+          "date": "2026-10-31",
+          "shift": 1,
+          "rows": 13,
+          "quantity": 90
+        },
+        {
+          "line": "PANELES_2",
+          "date": "2026-10-31",
+          "shift": 2,
+          "rows": 24,
+          "quantity": 96
+        }
+      ],
+      "zero_rows": 0,
+      "negative_rows": 0,
+      "exact_duplicate_rows": 0,
+      "repeated_production_period_groups": 0,
+      "source_has_execution_timestamps": false,
+      "program_weeks": [
+        42,
+        44,
+        45
+      ],
+      "shift_labels": [
+        "1.  07:00 am - 07:00 pm",
+        "2.  07:00 pm - 07:00 am"
+      ],
+      "total_rows": 1,
+      "filter_footer": "Filtros aplicados: \nlinea_pda es PANELES 2\nIncluido (1) octubre (mes) + 31 (dia)",
+      "formula_cells": 0
+    }
+  ],
+  "production_name_match": {
+    "status": "NOT_EXECUTED",
+    "reason": "Automatic approval review rejected sending real XLSX production labels to Supabase as potentially sensitive payload. No retry or indirect workaround. Only synthetic/anonymized matching tested."
+  },
+  "limits": [
+    "No source execution timestamps or cancellation indicators; night-date generation and cancellation conventions not inferred",
+    "No explicit zero production rows; missing orders are not zero",
+    "FRAMES_2 format tested synthetically only; real samples contain PANELES_2",
+    "Original XLSX uploads remain outside the public repository. Committed fixtures are anonymized derivatives."
+  ]
+}
