@@ -1,7 +1,7 @@
 # Línea de Producción — estado operativo actual
 
-**Actualizado:** 2026-11-03 UTC (entrega de asociación PDT).
-**Referencia técnica:** `987eb473c022e348e8eabaf956df83ea09651d90` (asociación privada PDT, SQL propuesto y pruebas).
+**Actualizado:** 2026-11-02, America/Bogota (Encargo 2B).
+**Referencia técnica:** `e3acacd3d6e72d640c2bd336b1d254e848862639` (asociación privada PDT, SQL propuesto y pruebas).
 **Base de esta entrega:** HEAD local/PR coincidentes en
 `fd07cb38fc8a4414bcb3fcd9984f3bb5f0271371` al inicio; continuidad actualizada en el mismo conjunto de commits.
 **Repositorio:** `jcastillodelarosa-hub/SGP-ONE-LAB`.
@@ -135,16 +135,30 @@ físicas válidas. Inspector de origen implementado devuelve pendiente y crédit
 incluso ante flags/raíces/cantidades declarados por cliente. No hay emisor conectado.
 [Matriz exacta, pruebas y campos faltantes](../../tests/lp01-origen/README.md).
 
-**Encargo 2 iniciado:** planificador servidor de conciliación Export/SALE de solo
-lectura. Valida corte/hash/key/etapa y cadenas por raíz, revisiones e inclusión por
-IDs exactos. 30→50→40 conserva deltas30,+20,-10 sin descontar dos veces; apply=false
-siempre. No actualiza presupuesto, SALE ni saldo. Manifiesto o cobertura insuficiente
-permanece PENDIENTE_EVIDENCIA, sin reset para sortear el bloqueo de Export.
+**Encargo 2B cerrado como BLOQUEADO EN FUENTE para aplicación.** Inspección acotada
+del escritor/delegado, columnas y triggers de cargas/historial, sin filas operativas.
+Hay corte/key/línea/saldos y JSON original, pero faltan official_inclusion_hash,
+LP_event_ids_and_revisions y per_root_complete_inclusion_scope. JSON, fechas o
+variaciones de saldo no acreditan esa correspondencia. No se fabrica manifiesto.
+[Matriz/evidencia y límites](../../tests/lp01-export-reader/README.md).
 
-**Siguiente tarea concreta:** acreditar la correspondencia del corte Export con
-IDs/revisiones de eventos LP e implementar su lector transaccional; no aceptar una
-fecha o diferencia de saldo como prueba. La emisión PDT requiere aparte expediente
-canónico de entrega y unión de ventanas; no bloquea esta preparación de Export.
+Lector privado servidor implementado en preparación: transacción REPEATABLE READ
+READ ONLY, parámetros key/línea/etapa, historial/carga/saldo consistentes y corte
+esperado. Integra el planificador sin aceptar manifiestos del navegador. Siempre
+PENDIENTE_EVIDENCIA/apply=false con el contrato nativo actual; sin reset de presupuesto,
+SALE o Export. Requiere pool y contexto previamente autorizados del servidor: no
+hay endpoint, conexión productiva ni identidad nueva configurada.
+
+**Encargo 3 iniciado, independiente:** revisión privada de matriz de ámbitos con
+cuentas existentes activas, roles actuales, producción/línea, etapa y duplicados.
+Solo propuestas/motivos, apply=false, fixtures en tests. No se crean usuarios ni
+permisos ni se publican identificadores reales.
+
+**Siguiente acción exacta:** contrastar por canal privado la matriz de cuentas/
+producciones ya aprobadas y preparar validación de cobertura de responsables de
+Operación y cierres. Mantener la validación servidor en cada operación, sin aplicar
+accesos. La conciliación Export solo podrá aplicarse tras acreditar un contrato de
+inclusión por IDs/revisiones; ese bloqueo no detiene el Encargo3.
 
 En paralelo documental, seguridad/DB debe revisar `principal-a/DISENO.md` y delimitar
 una propuesta compatible que resuelva PUBLIC. El diseño A completado en e611d27
@@ -164,6 +178,16 @@ ni bloquear integraciones independientes por esta revisión pendiente.
 | Vidrio/Dashboard/Reportes | Conservar modal/ubicaciones/navegación y reportes existentes; completar fuentes/desglose e histórico después de flujos críticos, sin KPI fabricado |
 
 ## 8. Pruebas y CI
+
+Encargo2B/avance3:6 unitarias nuevas +8 regresiones directas del planificador PASS;
+lector JavaScript/SQL sobre PG17.11 aislado PASS: snapshot coherente ante carga
+concurrente, segunda lectura rechaza corte antiguo, sin mutaciones del lector.
+[Evidencia y límites de fixtures](../../tests/lp01-export-reader/evidence/).
+Unitarias de transporte no se confunden con la prueba transaccional real. No se
+certifica un manifiesto ni escritor productivo: el escritor concurrente es sintético.
+Sin UI nueva/endpoint, PC/móvil previo reutilizado. CI nueva se consulta en #183;
+no se repiten pruebas generales manuales ni se atribuye CI previa al código nuevo.
+
 
 Encargos1B/2:8 pruebas unitarias sintéticas aprobadas y3 casos SQL de la función
 real capturada de cobertura manual en PG17.11 aislado: parcial6/10, completa10/10,
