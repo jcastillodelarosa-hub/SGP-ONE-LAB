@@ -1,6 +1,10 @@
 /* Standalone bundle only: no SGP authentication or remote backend. */
-const data=fetch('./snapshots.json').then(r=>r.json());
-window.SGPPlannerBridge={getToken:()=> 'DEMO-SYNTHETIC-NOT-A-SESSION',getClient:async()=>({rpc:async(name,args)=>{
+let sample=null;
+const data=fetch('./snapshots.json').then(r=>r.json()).then(x=>(sample=x,x));
+window.SGPPlannerBridge={getRows:()=>sample?.ENSAMBLE.orders.map(r=>({...r.oficial,cantidad:288}))??[],getRole:()=> 'CONSULTA',getToken:()=> 'DEMO-SYNTHETIC-NOT-A-SESSION',getClient:async()=>({rpc:async(name,args)=>{
+ if(name==='sgp_picking_semanas')return {data:[],error:null};
+ if(name==='sgp_linea_plan_explorador_v327')return {data:{filas:[]},error:null};
+ if(name==='sgp_linea_plan_consultar')return {data:(await data).ENSAMBLE.orders.map(r=>({id:r.parte,key_produccion:r.key,fecha:r.fecha,turno:r.turno,cantidad:r.programada,prioridad:r.prioridad,ejecutado:r.ejecutado,estado:'PROGRAMADA'})),error:null};
  if(name!=='sgp_lp_operacion_consultar')return {data:null,error:{message:'DEMO: operación no disponible; no se guarda ni conecta a producción'}};
  if(args.p_linea!=='PANELES_2'||args.p_fecha!=='2026-11-01'||args.p_turno!==1)return {data:null,error:{message:'DEMO: muestra disponible PANELES_2 · 01/11/2026 · T1'}};
  return {data:structuredClone((await data)[args.p_etapa]),error:null};
@@ -12,6 +16,6 @@ document.addEventListener('DOMContentLoaded',()=>{
  document.querySelectorAll('[data-view-panel]').forEach(p=>p.hidden=true);
  const menu=document.querySelector('#mobileMenuToggle');menu.onclick=()=>{const active=document.body.classList.toggle('mobile-menu-open');menu.setAttribute('aria-expanded',String(active));};
  // Scope the demo to the requested windows; preserve existing tab machinery.
- ['productionPlannerTab','productionLocationsTab','productionDashboardTab','productionAssemblyTab','productionPackingTab'].forEach(id=>{const el=document.getElementById(id);if(el)el.hidden=true;});
- document.querySelector('[data-op-date]').value='2026-11-01';
+ const block=()=>document.querySelectorAll('#sgpPlanSave,#sgpPlanPartSave').forEach(b=>b.disabled=true);block();new MutationObserver(block).observe(document.querySelector('#productionPlannerPanel'),{childList:true,subtree:true});
+ document.querySelector('[data-op-date]').value='2026-11-01';document.querySelector('#sgpPlanDate').value='2026-11-01';
 });

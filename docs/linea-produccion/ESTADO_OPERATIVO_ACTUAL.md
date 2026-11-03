@@ -1,6 +1,6 @@
 # Línea de Producción — estado operativo actual
 
-**Actualizado:** 2026-11-03, America/Bogota (prioridad: demostración visual).
+**Actualizado:** 2026-11-03, America/Bogota (integración horizontal aprobada).
 **Referencia técnica:** `5c74786` (paquete visual aislado y capturas PC/móvil).
 Continuidad actualizada en el mismo conjunto de commits del PR.
 **Base verificada GitHub/checkout:** `4398572ce2945ff5b54c3addde66b246752a731b`.
@@ -110,6 +110,23 @@ históricos por inferencia. Las observaciones Supabase conservan su fecha, no so
 una comprobación productiva nueva de esta entrega.
 
 ## 6. Siguiente acción técnica exacta y límite de continuación
+
+**Vigente: cinco pestañas horizontales aprobadas integradas en la estructuraSGP:**
+LP-01 Programación / Seguimiento / LP-02 Ensamble / LP-02 Empaque / Reporte de
+ubicaciones. Un controlador LP compartido, contexto/título por etapa y acciones
+internas para detalle/cierre, sin nuevas portadas ni menú lateral. Programación y
+ubicaciones conservan módulos/contenedores/contratos. Demo explícita de solo
+lectura con datos sintéticos; no conexiones ni operaciones productivas.
+[Capturas de las cinco pestañas, diferencias y publicación pendiente](../../tests/lp01-demo/PESTANAS_APROBADAS.md).
+PC1440/móvil390 y teclado PASS;34 regresiones JS PASS; SIN ACTIVIDAD PC/móvil con
+SQL real aislado PASS. No cambio de SQL/RLS/datos, no despliegue. La propuesta
+anterior de sitio independiente queda como antecedente, no destino aprobado.
+**Siguiente acción:** revisión funcional y autorización específica de un canal
+remoto aislado de revisión, sin sustituir el SGP actual. Publicación productiva
+requiere revisión de artefacto/destino/rollback y autorización aparte; no habilitar
+escrituras ni fuentes pendientes para mostrar estas pestañas.
+
+Antecedentes de demostración:
 
 **Prioridad inmediata: demo visual antes de encargos5–9.** Paquete separado local
 /tmp/sgp-lp183-preview, navegación menúSGP→Seguimiento/Ensamble/Empaque→detalle/cierre.

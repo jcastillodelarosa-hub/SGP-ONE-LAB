@@ -35,7 +35,7 @@ try:
     page.locator('#productionTrackingTab').click();page.wait_for_selector('[data-op-date]');page.locator('[data-op-date]').fill('2026-11-01');page.locator('[data-op-date]').dispatch_event('change')
     page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('NO_ABIERTO')")
     page.locator('[data-open]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Guardado confirmado')")
-    page.locator('#productionOperationTab').click();page.wait_for_selector('[data-empty-close]')
+    page.locator('[data-turn-operation]').click();page.wait_for_selector('[data-empty-close]')
     assert page.locator('[data-bi-file]').is_disabled() and page.locator('[data-close-empty]').is_enabled()
     page.locator('[data-close-empty]').click();page.wait_for_function("document.querySelector('[data-close-status]').textContent.includes('Confirma explícitamente')")
     page.locator('[data-empty-confirm]').check();page.locator('[data-close-empty]').click();page.wait_for_function("document.querySelector('[data-close-status]').textContent.includes('justificación obligatoria')")
@@ -51,19 +51,19 @@ try:
     page.locator('[data-close-empty]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('No se confirmó')")
     page.locator('[data-operation-pending-retry]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Guardado confirmado')")
     assert db.sql('SELECT count(*) FROM sgp_lp_operacion.cierres')=='1' and db.sql('SELECT count(*) FROM sgp_lp_operacion.auditoria WHERE id='+lit(lost['id']))=='1'
-    page.locator('#productionReportsTab').click();page.locator('[data-report-id] > summary').click();assert 'SIN ACTIVIDAD' in page.locator('#productionReportsPanel').inner_text();assert page.locator('[data-original]:visible').count()==0
+    page.locator('[data-stage-reports]').click();page.locator('[data-report-id] > summary').click();assert 'SIN ACTIVIDAD' in page.locator('#productionReportsPanel').inner_text();assert page.locator('[data-original]:visible').count()==0
     with page.expect_download() as d:page.locator('[data-report]').click()
     d.value.save_as(OUT/f'empty-close-{width}.csv');csv=(OUT/f'empty-close-{width}.csv').read_text(encoding='utf-8-sig');assert 'SIN ACTIVIDAD' in csv and 'QA turno vacío confirmado' in csv and 'No aplica: turno sin órdenes' in csv
     page.locator('#productionReportsPanel').screenshot(path=str(OUT/f'empty-report-{width}.png'))
     page.locator('#productionTrackingTab').click();page.wait_for_selector('[data-next-turn]');page.locator('[data-next-turn]').click()
     page.wait_for_function("document.querySelector('[data-op-shift]').value==='2'&&document.querySelector('[data-op-status]').textContent.includes('NO_ABIERTO')")
     page.locator('[data-open]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Guardado confirmado')")
-    page.locator('#productionOperationTab').click();page.locator('[data-empty-confirm]').check();page.locator('[data-close-note]').fill('QA siguiente turno vacío');page.locator('[data-close-empty]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Guardado confirmado')")
+    page.locator('[data-turn-operation]').click();page.locator('[data-empty-confirm]').check();page.locator('[data-close-note]').fill('QA siguiente turno vacío');page.locator('[data-close-empty]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Guardado confirmado')")
     assert db.snapshot(shift=2)['turn']['estado']=='CERRADO';first=db.snapshot(shift=2)['reports'][0]['snapshot']
     page.evaluate("window.SGPPlannerBridge.getToken=()=> 'LIDER'");page.locator('#productionTrackingTab').click();page.locator('[data-op-load]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('CERRADO')")
-    page.locator('#productionOperationTab').click();assert page.locator('[data-reopen]').count()==0
+    page.locator('[data-turn-operation]').click();assert page.locator('[data-reopen]').count()==0
     page.evaluate("window.SGPPlannerBridge.getToken=()=> 'COORDINADOR'");page.locator('#productionTrackingTab').click();page.locator('[data-op-load]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('CERRADO')")
-    page.locator('#productionOperationTab').click();page.locator('[data-close-note]').fill('QA reapertura autorizada');page.locator('[data-reopen]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Guardado confirmado')")
+    page.locator('[data-turn-operation]').click();page.locator('[data-close-note]').fill('QA reapertura autorizada');page.locator('[data-reopen]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Guardado confirmado')")
     assert db.snapshot(shift=2)['turn']['estado']=='EN_REVISION'
     page.locator('[data-empty-confirm]').check();page.locator('[data-close-note]').fill('QA segunda versión vacía');page.locator('[data-close-empty]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Guardado confirmado')")
     reports=db.snapshot(shift=2)['reports'];assert len(reports)==2 and reports[0]['snapshot']==first and reports[1]['snapshot']['version']>first['version']
@@ -76,7 +76,7 @@ try:
     assert len(db.snapshot(shift=2)['reports'])==2
     page.locator('#productionTrackingTab').click();page.locator('[data-op-load]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('EN_REVISION')")
     page.locator('[data-open]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Guardado confirmado')")
-    page.locator('#productionOperationTab').click();assert page.locator('[data-close-empty]').count()==0
+    page.locator('[data-turn-operation]').click();assert page.locator('[data-close-empty]').count()==0
     assert db.snapshot(shift=2)['orders'][0]['ejecutado']==0 and page.locator('[data-close]').is_disabled()
     assert official==db.sql('SELECT jsonb_agg(to_jsonb(a) ORDER BY key_produccion) FROM public.sgp_producciones a') and new_plan==db.sql('SELECT jsonb_agg(to_jsonb(a) ORDER BY id) FROM public.sgp_linea_plan_asignaciones a')
     assert page.evaluate('document.documentElement.scrollWidth<=innerWidth') and not errors,errors

@@ -3,6 +3,9 @@
     {
       "viewport": 1440,
       "menu_to_lp": true,
+      "five_tabs_in_approved_order": true,
+      "keyboard": true,
+      "planner_and_locations_preserved": true,
       "stages": 2,
       "orders": 4,
       "search": true,
@@ -15,6 +18,9 @@
     {
       "viewport": 390,
       "menu_to_lp": true,
+      "five_tabs_in_approved_order": true,
+      "keyboard": true,
+      "planner_and_locations_preserved": true,
       "stages": 2,
       "orders": 4,
       "search": true,

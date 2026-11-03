@@ -42,7 +42,7 @@ try:
     page.locator('[data-open]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('TURNO_ORIGEN_REQUIERE_CIERRE')")
     assert db.sql('SELECT count(*) FROM sgp_lp_operacion.turnos')=='1'
     page.locator('[data-op-shift]').select_option('1');page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Turno ABIERTO')")
-    page.locator('#productionOperationTab').click();page.locator('[data-empty-confirm]').check();page.locator('[data-close-note]').fill('QA responsable cierra el origen vacío');page.locator('[data-close-empty]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Guardado confirmado')")
+    page.locator('[data-turn-operation]').click();page.locator('[data-empty-confirm]').check();page.locator('[data-close-note]').fill('QA responsable cierra el origen vacío');page.locator('[data-close-empty]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Guardado confirmado')")
     page.locator('#productionTrackingTab').click();page.wait_for_selector('[data-next-turn]')
     assert 'pendiente de autorización técnica' in page.locator('[data-auto-opening]').inner_text()
     assert db.snapshot()['automaticOpening']['state']=='READY_PENDING_TECHNICAL_APPROVAL'

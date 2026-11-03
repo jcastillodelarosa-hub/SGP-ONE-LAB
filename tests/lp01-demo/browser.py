@@ -18,8 +18,17 @@ try:
    if width<700:page.locator('#mobileMenuToggle').click()
    page.locator('[data-view="ensamble"]').click();page.wait_for_selector('[data-order-part]')
    page.locator('[data-search]').fill('sin-coincidencia');assert page.locator('[data-order-part]').count()==0;page.locator('[data-search]').fill('')
+   expected=['LP-01 · Programación','Seguimiento','LP-02 · Ensamble','LP-02 · Empaque','Reporte de ubicaciones']
+   assert page.locator('.production-line-tabs > button:visible').all_text_contents()==expected
+   ids=['productionPlannerTab','productionTrackingTab','productionAssemblyTab','productionPackingTab','productionLocationsTab']
+   for n,tab in enumerate(ids):
+    page.locator('#'+tab).click();page.wait_for_timeout(250);page.evaluate('scrollTo(0,0)')
+    page.screenshot(path=str(OUT/f'tab-{n+1}-{width}.png'),full_page=True)
+   assert page.locator('#assemblyLocationReportPanel').is_visible()
+   page.locator('#productionPlannerTab').click();assert page.locator('#sgpPlannerExplorer').is_visible()
+   page.locator('#productionPlannerTab').focus();page.keyboard.press('ArrowRight');assert page.locator('#productionTrackingTab').get_attribute('aria-selected')=='true'
    for stage in ['ENSAMBLE','EMPAQUE']:
-    page.locator('[data-op-stage]').select_option(stage);page.wait_for_timeout(250)
+    page.locator('#'+('productionAssemblyTab' if stage=='ENSAMBLE' else 'productionPackingTab')).click();page.wait_for_timeout(250)
     assert page.locator('[data-order-part]').count()==4
     page.locator('[data-order-part]').nth(1).locator('summary').click()
     page.evaluate('scrollTo(0,0)')
@@ -28,13 +37,13 @@ try:
     page.evaluate('scrollTo(0,0)')
     page.screenshot(path=str(OUT/f'{stage.lower()}-operation-{width}.png'),full_page=True)
     assert not page.locator('[data-order-form] button[type=submit]:enabled').count()
-    page.locator('#productionReportsTab').click();page.wait_for_selector('[data-report]',state='attached');page.locator('#productionReportsPanel details summary').first.click()
+    page.locator('[data-stage-reports]').click();page.wait_for_selector('[data-report]',state='attached');page.locator('#productionReportsPanel details summary').first.click()
     page.evaluate('scrollTo(0,0)')
     page.screenshot(path=str(OUT/f'{stage.lower()}-closure-{width}.png'),full_page=True)
     assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
     page.locator('#productionTrackingTab').click()
    assert not errors,errors;assert not external,external
-   results.append({'viewport':width,'menu_to_lp':True,'stages':2,'orders':4,'search':True,'details_and_reports':True,'no_horizontal_overflow':True,'enabled_save_buttons':0,'external_requests':0,'page_errors':errors});page.close()
+   results.append({'viewport':width,'menu_to_lp':True,'five_tabs_in_approved_order':True,'keyboard':True,'planner_and_locations_preserved':True,'stages':2,'orders':4,'search':True,'details_and_reports':True,'no_horizontal_overflow':True,'enabled_save_buttons':0,'external_requests':0,'page_errors':errors});page.close()
   browser.close()
 finally:server.shutdown()
 (OUT/'browser.json').write_text(json.dumps({'results':results,'scope':'Existing UI, static snapshots from isolated SQL synthetic data; writes disabled, no production transport; not live persistence verification'},indent=2)+'\n');print(json.dumps(results))

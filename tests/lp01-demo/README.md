@@ -1,3 +1,7 @@
+# Estado actualizado
+
+La distribución horizontal aprobada y el plan vigente están en [PESTANAS_APROBADAS.md](PESTANAS_APROBADAS.md). La propuesta de sitio separado que figura abajo es antecedente, no autorización ni destino vigente.
+
 # Vista previa visual LP183 — preparada, sin publicar
 
 Referencia: interfaces existentes en PR183; scripts de esta entrega solo generan

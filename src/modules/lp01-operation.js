@@ -124,6 +124,8 @@ export function mountOperation({tracking,operation,bridge,legacyLoad}){
  get('[data-retry-pending]').onclick=()=>attempt(()=>transmit());
  get('[data-op-load]').onclick=()=>load();for(const sel of ['[data-op-stage]','[data-op-date]','[data-op-shift]'])get(sel).onchange=()=>load();
  tracking.querySelector('[data-search]')?.addEventListener('input',()=>{if(data)render();});tracking.querySelector('[data-line]')?.addEventListener('change',()=>load());
+ document.addEventListener('sgp:production-panel',e=>{if(e.detail==='seguimiento')tracking.querySelector('.lp-followup-heading h3').textContent='Seguimiento de órdenes';});
+ document.addEventListener('sgp:production-stage',e=>{if(!['ENSAMBLE','EMPAQUE'].includes(e.detail))return;get('[data-op-stage]').value=e.detail;tracking.querySelector('.lp-followup-heading h3').textContent='Operación · '+(e.detail==='ENSAMBLE'?'Ensamble':'Empaque');load();});
  document.addEventListener('sgp:production-panel',e=>{if(['operacion','dashboard','reportes'].includes(e.detail)&&(missing||(data&&session===bridge.getToken()))){renderReports();return;}if(['seguimiento','operacion','dashboard','reportes'].includes(e.detail))load();});
  document.addEventListener('sgp:line-plan-updated',()=>{if(!tracking.hidden||!operation.hidden)load();});
  const timer=setInterval(()=>{if(data&&(!tracking.hidden||!operation.hidden)&&document.visibilityState==='visible')load({quiet:true});},20000);

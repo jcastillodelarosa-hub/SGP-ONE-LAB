@@ -27,10 +27,10 @@ for folder in ['src/domain','src/modules']:
   if p.is_file() and p.suffix in ['.js','.css']:
    q=OUT/p.relative_to(ROOT);q.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(p,q)
 for p in ROOT.glob('*.css'):shutil.copyfile(p,OUT/p.name)
-for name in ['production-line-tabs.js','favicon-sgp.svg']:shutil.copyfile(ROOT/name,OUT/name)
+for name in ['production-line-tabs.js','planner-readonly-v326.js','planner-operations-v326.js','favicon-sgp.svg']:shutil.copyfile(ROOT/name,OUT/name)
 html=(ROOT/'index.html').read_text();html=re.sub(r'<script\b[^>]*>.*?</script>','',html,flags=re.S)
 html=html.replace('<head>','<head><meta http-equiv="Content-Security-Policy" content="default-src \'self\'; connect-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\'; img-src \'self\' data:; object-src \'none\'; base-uri \'none\'; form-action \'none\'">')
-html=html.replace('</body>','<script src="demo.js"></script><script src="production-line-tabs.js"></script><script type="module" src="src/modules/lp01-followup.js"></script></body>')
+html=html.replace('</body>','<script src="demo.js"></script><script src="production-line-tabs.js"></script><script src="planner-readonly-v326.js"></script><script src="planner-operations-v326.js"></script><script src="src/modules/lp01-workspace-e3.js"></script><script type="module" src="src/modules/lp01-followup.js"></script></body>')
 (OUT/'index.html').write_text(html);(OUT/'snapshots.json').write_text(json.dumps(snapshots))
 shutil.copyfile(ROOT/'tests/lp01-demo/demo.js',OUT/'demo.js')
 manifest={'mode':'STATIC_SYNTHETIC_READ_ONLY','output':'/tmp/sgp-lp183-preview','files':{str(p.relative_to(OUT)):hashlib.sha256(p.read_bytes()).hexdigest() for p in OUT.rglob('*') if p.is_file()}}

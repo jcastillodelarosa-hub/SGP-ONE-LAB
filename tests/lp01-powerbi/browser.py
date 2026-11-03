@@ -73,7 +73,7 @@ try:
     page.locator('[data-close-note]').fill('QA cierre XLSX por producción');page.locator('#productionOperationPanel').screenshot(path=str(OUT/f'reconciliation-{width}.png'))
     page.locator('[data-close]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Guardado confirmado')")
     report=db.snapshot(date='2026-10-31')['reports'][0]['snapshot'];assert next(r for r in report['rows'] if r['key']==key)['ejecutado']==27
-    page.locator('#productionReportsTab').click();page.wait_for_selector('[data-report]',state='attached');page.locator('#productionReportsPanel details summary').click()
+    page.locator('[data-stage-reports]').click();page.wait_for_selector('[data-report]',state='attached');page.locator('#productionReportsPanel details summary').click()
     with page.expect_download() as d:page.locator('[data-original]').click()
     d.value.save_as(OUT/f'original-{width}.xlsx');assert (OUT/f'original-{width}.xlsx').read_bytes()==(HERE/'fixtures/ensamble.xlsx').read_bytes()
     page.locator('#productionReportsPanel').screenshot(path=str(OUT/f'report-{width}.png'))
