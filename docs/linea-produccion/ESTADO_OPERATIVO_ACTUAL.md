@@ -1,13 +1,13 @@
 # Línea de Producción — estado operativo actual
 
 **Actualizado:** 2026-11-03 02:32 UTC / 2026-11-02 21:32 America/Bogota.
-**Referencia técnica:** `74f068fb270b4281e0f69e7dc46a4a1d21b026bc` (integración de fuentes y pruebas).
+**Referencia técnica:** `5fc206e7de09fae5cb26f7ed9d80403482e1aea8` (asociación privada PDT, SQL propuesto y pruebas).
 **Base de esta entrega:** HEAD local/PR coincidentes en
 `fd07cb38fc8a4414bcb3fcd9984f3bb5f0271371` al inicio; continuidad actualizada en el mismo conjunto de commits.
 **Repositorio:** `jcastillodelarosa-hub/SGP-ONE-LAB`.
 **Rama:** `feat/lp01-seguimiento-operacion` · [PR #183](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/pull/183), OPEN/DRAFT observado.
 **Base main observada en el PR:** `bb224f00924c1feaa47a4a556a829e93b8e4ca3e`.
-Esta entrega incorpora lectura de fuentes para ambas etapas y corrige saldos desconocidos; 01 amplía solo la respuesta de la RPC de lectura existente, como propuesta sin aplicar.
+Esta entrega prepara 07: asociación privada PDT por producción/etapa/raíz y evidencia; sin emisor ni interfaz habilitados, sin aplicación productiva.
 
 Esta es la **referencia operativa única de LP**. Describe el estado vigente, no un
 historial. Antes de trabajar leer AGENTS.md, este archivo y el estado real del PR;
@@ -22,7 +22,7 @@ segundo plano. No sustituye la supervisión ni concede autorizaciones productiva
 
 | Estado | Significado y situación actual de LP |
 |---|---|
-| PROPUESTO | SQL 01–06 y contratos pendientes, diseño A y planes de instalación/recuperación. No autorizan ejecución |
+| PROPUESTO | SQL 01–07 y contratos pendientes, diseño A y planes de instalación/recuperación. No autorizan ejecución |
 | IMPLEMENTADO | Seguimiento/Operación, adaptador XLSX y controles en rama. Identidad técnica solo como referencia sintética, no integrada en el runtime |
 | APLICADO | **No aplicado por este PR en Supabase productivo**. Último SELECT de catálogo conservado: esquema LP ausente; no se refrescó en esta entrega documental |
 | PUBLICADO | **No publicado por este PR** en Firebase/Edge ni worker desplegado; no hay autorización de despliegue |
@@ -32,8 +32,8 @@ segundo plano. No sustituye la supervisión ni concede autorizaciones productiva
 ## 2. Fase activa y prioridades obligatorias
 
 **FASE ACTIVA: Seguimiento, Ensamble y Empaque.** Objetivo inmediato: completar
-el consumo operativo seguro de fuentes Export y contexto Mecanizado/PDT en ambas
-etapas. El bloqueo PUBLIC afecta exclusivamente la apertura automática, que sigue
+la asociación de liberaciones PDT por producción/etapa/raíz en ambas etapas;
+conectar el emisor exige evidencia canónica pendiente. El bloqueo PUBLIC afecta exclusivamente la apertura automática, que sigue
 inactiva; no detiene las integraciones independientes autorizadas.
 
 1. Seguridad e identidad técnica para apertura automática.
@@ -118,12 +118,20 @@ conservan firmas y permisos; 01 añade solo materialContext a la lectura existen
 con UNAVAILABLE si la fuente no está instalada o el rol carece de acceso. No se
 modificó el cuerpo histórico ni se adjudican ventanas a una parte/etapa.
 
-**Siguiente tarea técnica:** preparar la asociación tipada del emisor de liberaciones
-PDT con producción/etapa/raíz LP y revisión de origen antes de consumir LIBERAR.
-Necesita evidencia canónica de cobertura/liberación neta y solapamientos del caso
-real descrito en el contrato pendiente; no deducirla del resumen por nombre ni de
-piezas. Hasta obtener esa evidencia no certificar la liberación automática, pero
-continuar los componentes independientes sin cambiar saldos o abrir permisos.
+**Asociación implementada en preparación privada:** 07 registra solicitud pendiente,
+recibo de evento/entrega/versiones/historial, cadena consolidada de producción/etapa,
+distribución explícita por raíces y vínculo obligatorio en cada nuevo LIBERAR.
+Sin recibo privado acreditado no crea créditos ni aumenta SALE. Duplicar una entrega
+entre V2/V4, repetir evento, usar otra raíz o consumir tras anulación se rechaza.
+Anulación consumida mantiene SALE/historial y exige conciliación, sin compensación
+negativa automática. Cantidad sin asignar no se reparte por inferencia.
+
+**Siguiente tarea técnica:** contrastar y preparar el emisor servidor contra un caso
+canónico autorizado de entrega/validación/cobertura LEGACY/V2/V4 y consolidación neta
+antes/después, incluyendo anulación. Faltan las referencias reales verificables;
+ninguna función pública ni interfaz acepta recibos físicos del navegador. No
+conectar ni acreditar un emisor real mediante los recibos sintéticos del test.
+[Contrato implementado, límites y recuperación](../../tests/lp01-liberaciones/README.md).
 
 En paralelo documental, seguridad/DB debe revisar `principal-a/DISENO.md` y delimitar
 una propuesta compatible que resuelva PUBLIC. El diseño A completado en e611d27
@@ -143,6 +151,15 @@ ni bloquear integraciones independientes por esta revisión pendiente.
 | Vidrio/Dashboard/Reportes | Conservar modal/ubicaciones/navegación y reportes existentes; completar fuentes/desglose e histórico después de flujos críticos, sin KPI fabricado |
 
 ## 8. Pruebas y CI
+
+Entrega 5fc206e: **8 grupos SQL nuevos aprobados** en PostgreSQL17.11 aislado,
+[evidencia](../../tests/lp01-liberaciones/evidence/postgres.json). Se ejecutan el
+LIBERAR y la auditoría reales: pending sin crédito, reparto4+3 neto7, raíces,
+concurrencia/reintentos, solapamientos, anulaciones, etapas y permisos privados.
+La entrega física del recibo es fixture: no se certifica el emisor PDT real.
+Sin cambios UI/entrada pública, no corresponde repetir PC/móvil; se reutiliza su
+evidencia válida. Workflow añade solo el test nuevo; CI nueva se consulta en #183.
+
 
 **Entrega técnica 74f068f verificada localmente:** siete pruebas nuevas de fuentes;
 24 regresiones afectadas (Operación6, Seguimiento7, continuidad2, Power BI9);

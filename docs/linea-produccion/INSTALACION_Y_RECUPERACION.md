@@ -1,3 +1,9 @@
+> Asociación PDT privada propuesta: 07 después de 01 y antes de permitir LIBERAR
+> integrado. Sin grants, migración histórica ni emisor activado. Revisar
+> [alcance, bloqueo de evidencia y recuperación](../../tests/lp01-liberaciones/README.md).
+> Créditos consumidos requieren corrección hacia adelante; no retirar guards ni
+> borrar ledger/asociaciones para reintentar. Nada de esto autoriza instalación.
+
 > Desde 0a6b48d: [diseño A y recuperación](principal-a/DISENO.md), no instalador.
 > Selección A no autoriza roles/GRANT/secretos/jobs/SQL. PUBLIC impide garantizar
 > solo ABRIR en la base actual; no aplicar revocaciones globales como parte de LP.
