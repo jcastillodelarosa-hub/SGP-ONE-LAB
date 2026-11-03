@@ -70,7 +70,7 @@ DECLARE actor jsonb;line_id text;s sgp_lp_operacion.pdt_solicitudes%rowtype;e sg
 END $$;
 CREATE FUNCTION sgp_lp_operacion.pdt_guard_consumo() RETURNS trigger LANGUAGE plpgsql SET search_path='' AS $$
 BEGIN
- IF NEW.operacion='LIBERAR' AND NOT EXISTS(SELECT 1 FROM sgp_lp_operacion.pdt_asociaciones a JOIN sgp_lp_operacion.pdt_solicitudes s ON s.id=a.solicitud WHERE a.liberacion=(NEW.payload->>'release_id')::uuid AND a.raiz=NEW.parte AND s.key=NEW.key AND s.etapa=NEW.etapa AND s.linea=NEW.linea AND a.fecha=NEW.fecha AND a.turno=NEW.turno AND s.estado='ACREDITADA') THEN RAISE EXCEPTION 'LIBERACION_SIN_ASOCIACION_VIGENTE';END IF;
+ IF NEW.operacion='LIBERAR' AND NOT EXISTS(SELECT 1 FROM sgp_lp_operacion.pdt_asociaciones a JOIN sgp_lp_operacion.pdt_solicitudes s ON s.id=a.solicitud WHERE a.liberacion=(NEW.payload->>'release_id')::uuid AND a.raiz=NEW.parte AND s.key=NEW.key AND s.etapa=NEW.etapa AND s.linea=NEW.linea AND a.fecha=NEW.fecha AND a.turno=NEW.turno AND s.estado='ACREDITADA' AND NOT EXISTS(SELECT 1 FROM sgp_lp_operacion.pdt_solicitudes blocked WHERE blocked.key=s.key AND blocked.etapa=s.etapa AND blocked.estado='REQUIERE_CONCILIACION')) THEN RAISE EXCEPTION 'LIBERACION_SIN_ASOCIACION_VIGENTE';END IF;
  RETURN NEW;
 END $$;
 CREATE TRIGGER pdt_binding AFTER INSERT ON sgp_lp_operacion.auditoria FOR EACH ROW EXECUTE FUNCTION sgp_lp_operacion.pdt_guard_consumo();
