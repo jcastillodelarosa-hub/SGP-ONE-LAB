@@ -3,11 +3,25 @@ No credential discovery. Inspect is GET-only. Recovery requires explicit guarded
 Never used by local tests against Firebase.
 """
 import os,json,re,sys,hashlib,datetime,urllib.request,urllib.parse
+from functools import lru_cache
 from pathlib import Path
 API='https://firebasehosting.googleapis.com/v1beta1/';SITE='sgp-one-lab';PROJECT='sgp-one-lab'
+@lru_cache(maxsize=1)
+def access_token():
+ """OAuth JWT grant using existing service-account JSON; no IAM impersonation API."""
+ from google.oauth2 import service_account
+ from google.auth.transport.requests import Request
+ raw=os.environ.get('FIREBASE_SERVICE_ACCOUNT_JSON')
+ if not raw:raise ValueError('AUTHORIZED_CREDENTIAL_REQUIRED')
+ info=json.loads(raw)
+ if info.get('type')!='service_account' or info.get('project_id')!=PROJECT:
+  raise ValueError('SERVICE_ACCOUNT_PROJECT_MISMATCH')
+ creds=service_account.Credentials.from_service_account_info(info,scopes=['https://www.googleapis.com/auth/firebase.hosting'])
+ creds.refresh(Request())
+ if not creds.token:raise ValueError('OAUTH_TOKEN_NOT_ISSUED')
+ return creds.token
 def request(method,resource,body=None):
- token=os.environ.get('FIREBASE_ACCESS_TOKEN')
- if not token:raise ValueError('AUTHORIZED_TOKEN_REQUIRED')
+ token=access_token()
  payload=None if body is None else json.dumps(body).encode()
  req=urllib.request.Request(API+resource,data=payload,method=method,headers={'Authorization':'Bearer '+token,'Content-Type':'application/json'})
  class NoRedirect(urllib.request.HTTPRedirectHandler):
