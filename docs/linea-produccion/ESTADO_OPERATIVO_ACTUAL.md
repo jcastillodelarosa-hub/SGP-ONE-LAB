@@ -1,15 +1,14 @@
 # Línea de Producción — estado operativo actual
 
-**Actualizado:** 2026-11-03, America/Bogota (Encargo 4).
+**Actualizado:** 2026-11-03, America/Bogota (prioridad: demostración visual).
 **Referencia técnica:** `56a4b77` (recorrido integrado de cierre/Power BI y evidencias).
 Continuidad actualizada en el mismo conjunto de commits del PR.
 **Base verificada GitHub/checkout:** `9dce260307ab98fc54638abcd7c354cd029ef2ea`.
 **Repositorio:** `jcastillodelarosa-hub/SGP-ONE-LAB`.
 **Rama:** `feat/lp01-seguimiento-operacion` · [PR #183](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/pull/183), OPEN/DRAFT observado.
-**Estado inmediato:** cierre normal XLSX, SIN ACTIVIDAD, reapertura, auditoría y
-versiones probados conjuntamente con handler/SQL08 y ambos originales locales en
-PostgreSQL17.11 aislado. Sin defecto demostrado que requiera modificar aplicación,
-adaptador, SQL01–08/08R o permisos. No aplicado/publicado ni verificado en planta.
+**Estado inmediato:** demostración visual aislada preparada y probada PC/móvil,
+con datos sintéticos congelados y escrituras bloqueadas. Publicación de sitio/canal
+independiente pendiente de autorización expresa. No existe URL pública todavía.
 
 Esta es la **referencia operativa única de LP**. Describe el estado vigente, no un
 historial. Antes de trabajar leer AGENTS.md, este archivo y el estado real del PR;
@@ -33,7 +32,8 @@ segundo plano. No sustituye la supervisión ni concede autorizaciones productiva
 
 ## 2. Fase activa y prioridades obligatorias
 
-**FASE ACTIVA: Seguimiento, Ensamble y Empaque.** Objetivo inmediato: completar
+**FASE ACTIVA: Seguimiento, Ensamble y Empaque.** Prioridad: revisión visual antes
+de encargos5–9. Antecedente técnico: completar
 el cierre técnico de ambas etapas con Power BI, ya contrastado de forma integrada
 en aislamiento. Falta correspondencia/ámbitos/cobertura de casos reales y runtime autorizado. El bloqueo PUBLIC afecta exclusivamente la apertura automática, que sigue
 inactiva; no detiene las integraciones independientes autorizadas.
@@ -110,6 +110,25 @@ históricos por inferencia. Las observaciones Supabase conservan su fecha, no so
 una comprobación productiva nueva de esta entrega.
 
 ## 6. Siguiente acción técnica exacta y límite de continuación
+
+**Prioridad inmediata: demo visual antes de encargos5–9.** Paquete separado local
+/tmp/sgp-lp183-preview, navegación menúSGP→Seguimiento/Ensamble/Empaque→detalle/cierre.
+Reutiliza interfaces actuales y snapshots de PostgreSQL sintético, aviso permanente,
+solo lectura; comandos rechazados, sin conexiones productivas ni credenciales.
+PC1440/móvil390: ambas etapas, búsqueda/expansión/informes, cero peticiones externas,
+cero errores y sin overflow. [Capturas, diferencias y plan](../../tests/lp01-demo/README.md).
+B10–B16 contrastados visualmente; densidad/UUID/detalle/NC de piezas difieren del
+boceto y están documentados, sin declarar fidelidad completa ni aprobar B17.
+
+**Siguiente acción vigente:** revisar capturas y autorizar expresamente, si procede,
+nuevo sitio/canal estático Firebase sgp-one-lp183-demo / lp183-review por7d.
+URL propuesta con identificador asignado por Firebase; no creada ni publicada.
+No usar hosting SGP actual, workflows ajenos, SQL o escrituras. No hay URL pública
+aún. Encargos5–9 quedan pospuestos hasta revisión visual. Estado: IMPLEMENTADO Y
+VERIFICADO LOCALMENTE; NO PUBLICADO. Los bloqueos de fuentes/ámbitos reales siguen
+independientes y no se superan para demostrar la interfaz.
+
+Antecedentes conservados:
 
 **Encargo 4: brecha de evidencia integrada cerrada en aislamiento.** Se reutilizan
 los motores y ambos XLSX originales: Node handler real → parser vigente → RPC06/08

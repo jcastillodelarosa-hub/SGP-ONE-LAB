@@ -1,0 +1,29 @@
+{
+  "results": [
+    {
+      "viewport": 1440,
+      "menu_to_lp": true,
+      "stages": 2,
+      "orders": 4,
+      "search": true,
+      "details_and_reports": true,
+      "no_horizontal_overflow": true,
+      "enabled_save_buttons": 0,
+      "external_requests": 0,
+      "page_errors": []
+    },
+    {
+      "viewport": 390,
+      "menu_to_lp": true,
+      "stages": 2,
+      "orders": 4,
+      "search": true,
+      "details_and_reports": true,
+      "no_horizontal_overflow": true,
+      "enabled_save_buttons": 0,
+      "external_requests": 0,
+      "page_errors": []
+    }
+  ],
+  "scope": "Existing UI, static snapshots from isolated SQL synthetic data; writes disabled, no production transport; not live persistence verification"
+}
