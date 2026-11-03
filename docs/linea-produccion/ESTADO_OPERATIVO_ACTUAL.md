@@ -1,9 +1,9 @@
 # Línea de Producción — estado operativo actual
 
 **Actualizado:** 2026-11-03, America/Bogota (prioridad: demostración visual).
-**Referencia técnica:** `56a4b77` (recorrido integrado de cierre/Power BI y evidencias).
+**Referencia técnica:** `5c74786` (paquete visual aislado y capturas PC/móvil).
 Continuidad actualizada en el mismo conjunto de commits del PR.
-**Base verificada GitHub/checkout:** `9dce260307ab98fc54638abcd7c354cd029ef2ea`.
+**Base verificada GitHub/checkout:** `4398572ce2945ff5b54c3addde66b246752a731b`.
 **Repositorio:** `jcastillodelarosa-hub/SGP-ONE-LAB`.
 **Rama:** `feat/lp01-seguimiento-operacion` · [PR #183](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/pull/183), OPEN/DRAFT observado.
 **Estado inmediato:** demostración visual aislada preparada y probada PC/móvil,
