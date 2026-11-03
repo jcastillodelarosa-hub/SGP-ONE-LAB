@@ -1,6 +1,11 @@
+> Desde 0a6b48d: [identidad técnica A, seleccionada solo para diseño](linea-produccion/principal-a/DISENO.md).
+> Referencia compartida y nueve grupos SQL probados únicamente en aislamiento.
+> A bloqueada tal como está en Supabase por privilegios PUBLIC; conexión técnica
+> real sin certificar. Sin cambios en aplicación/SQL instalable ni principal/job activo.
+
 > Desde a19a9f6: [preparación de apertura automática](linea-produccion/APERTURA_AUTOMATICA_PREPARACION.md)
 > con horarios y bloqueo visible, sin ejecutor activo. La elección de identidad y
-> privilegios técnicos está detenida conforme al encargo; fallback manual preservado.
+> privilegios técnicos se actualiza en el diseño A enlazado arriba; fallback manual preservado.
 
 > Desde 21c40f4, la regla [SIN ACTIVIDAD](linea-produccion/SIN_ACTIVIDAD.md), aprobada
 > en #184, permite cerrar un turno realmente vacío sin archivo, con confirmación,

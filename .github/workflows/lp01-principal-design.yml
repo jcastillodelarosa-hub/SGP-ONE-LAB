@@ -1,0 +1,36 @@
+name: LP01 restricted principal - isolated design
+on:
+  pull_request:
+    paths:
+      - 'docs/linea-produccion/principal-a/**'
+      - 'tests/lp01-principal-a/**'
+      - 'docs/sql-proposals/lp01-operacion/01_operacion_REVIEW.sql'
+      - 'src/server/lp01-opening-preparation.js'
+      - 'scripts/lp01-opening-prepare.mjs'
+      - 'tests/lp01-operacion/postgres.py'
+      - 'tests/lp01-operacion/session-readonly.json'
+      - 'tests/lp01-continuidad/postgres.py'
+      - 'tests/lp01-sin-actividad/postgres.py'
+      - 'tests/lp01-apertura/postgres.py'
+      - '.github/workflows/lp01-principal-design.yml'
+permissions:
+  contents: read
+jobs:
+  postgres-design:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Synthetic PostgreSQL authorization and transactional reference
+        run: python tests/lp01-principal-a/postgres.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lp01-principal-a-design-evidence
+          path: tests/lp01-principal-a/evidence/

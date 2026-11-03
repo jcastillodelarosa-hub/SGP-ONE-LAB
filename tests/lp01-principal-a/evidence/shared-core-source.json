@@ -1,0 +1,8 @@
+{
+  "baseline": "0a6b48d",
+  "source": "docs/sql-proposals/lp01-operacion/01_operacion_REVIEW.sql",
+  "opening_branch_sha256": "809c8d64275915082dee960d50e38d7f8444e3ec1b879ee991c10ec7b6fd42b4",
+  "projection": "Exact existing ABRIR incorporation/SALE branch; only two permission predicates replaced by actor-aware checks. Shared opening control surrounds it. Application candidate remains unchanged.",
+  "production_installable": false,
+  "projected_branch_sha256": "453443217821e6071f9300239f3f277e8167df438a0463d6c099fed2f92a587b"
+}

@@ -1,0 +1,36 @@
+{
+  "baseline": "0a6b48d",
+  "status": "UNCHANGED_PROTECTED_RUNTIME_AND_SQL",
+  "protected_paths": [
+    "src",
+    "supabase",
+    "docs/sql-proposals/lp01-operacion",
+    "app.js",
+    "production-line-tabs.js",
+    "scripts/lp01-opening-prepare.mjs",
+    "tests/lp01-powerbi",
+    "tests/lp01-operacion",
+    "tests/lp01-continuidad",
+    "tests/lp01-sin-actividad",
+    "tests/lp01-apertura"
+  ],
+  "proposed_installation_sql_sha256": {
+    "docs/sql-proposals/lp01-operacion/01_operacion_REVIEW.sql": "70818906197467f56c3ac648cff3e974156080c9239f74e01cf84e10d40f3efe",
+    "docs/sql-proposals/lp01-operacion/02_CONTENER_REVIEW.sql": "6b060a34a96c2eba0c86352c5025d8d2322ec2e87be802878497149b66220028",
+    "docs/sql-proposals/lp01-operacion/03_VERIFICAR_READ_ONLY.sql": "fe572bca7a03b7603c0e5e07f6e04c25b1589b7f30023897d245f08f546fbe59",
+    "docs/sql-proposals/lp01-operacion/04_vidrio_REVIEW.sql": "8332e3a0e6898185a54ab1db108515f62d50c6b6a2e6694785dfd1da9686b75b",
+    "docs/sql-proposals/lp01-operacion/05_restaurar_vidrio_REVIEW.sql": "c5344912226898e1c587da2e05c84e9a22919ebcda0b77ca2d93def11982ff11",
+    "docs/sql-proposals/lp01-operacion/06_powerbi_xlsx_REVIEW.sql": "fbe88b89bfa4dade5c55517c078c4e00abdf865c9b20fb0cebce865fed308ca4"
+  },
+  "new_sql": "guarded synthetic reference only, not a productive installer",
+  "checks": [
+    "Local Markdown links resolve",
+    "Evidence JSON parses",
+    "Protected runtime / adapters / installation candidates diff empty"
+  ],
+  "preparation_regression": {
+    "command": "node tests/lp01-apertura.test.mjs",
+    "passed": 6,
+    "reason": "New isolated reference consumes the existing deterministic intent contract; no preparation source changes"
+  }
+}

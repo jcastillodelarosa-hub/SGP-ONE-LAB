@@ -1,5 +1,11 @@
 # Apertura automática — preparación y decisión de identidad
 
+> Actualización desde 0a6b48d: **A seleccionada solo para diseño/preparación**.
+> [Diseño verificable, pruebas y bloqueo real PUBLIC](principal-a/DISENO.md).
+> No autoriza creación de identidad, grants, conexión, secretos, jobs o instalación.
+> El contrato de aplicación descrito abajo conserva PREPARATION_ONLY; la referencia
+> técnica y su journal existen únicamente en el prototipo sintético separado.
+
 02/11/2026, America/Bogota. Base **a19a9f6**, mismo Draft #183 y rama.
 **PREPARADO / PROBADO EN AISLAMIENTO EN SU ALCANCE / EJECUCIÓN TÉCNICA BLOQUEADA.**
 No se declara ejecutor automático funcional, job instalado ni registro persistente
@@ -68,7 +74,7 @@ La salida declara PREPARATION_ONLY, cero escrituras y artefacto local. No es un
 registro persistente de producción ni una confirmación de apertura. No se debe
 conectar a tokens de coordinadores para hacerlo pasar por un ejecutor técnico.
 
-## Decisión detenida: identidad y privilegios mínimos
+## Alternativas del hito anterior: identidad y privilegios mínimos
 
 ABRIR exige actualmente sesión SGP con rol COORDINADOR/ADMINISTRADOR y ámbitos
 por producción/etapa derivados de su línea. Usar su token en un cron sería reutilizar
@@ -80,9 +86,10 @@ implementa ninguna de esas salidas ni una sesión ficticia con rol coordinador.
 | A. Principal PostgreSQL dedicado para worker de servidor | Conexión autenticada exclusivamente como principal técnico, sin superuser/BYPASSRLS | Solo USAGE de API privada y EXECUTE de una entrada técnica ABRIR, con ámbitos explícitos/activos por línea/etapa/producción. Refactorizar ABRIR a núcleo privado compartido con validación de actor humano/técnico en sus fachadas; no conceder acceso al núcleo ni tablas. No se ha aprobado/creado rol, fachada ni autenticación |
 | B. Identidad de carga de trabajo externa | Identidad de servicio verificable por emisor/sub/aud, sin token SGP humano | Adaptador servidor verifica identidad y utiliza canal DB igualmente restringido, sin service_role. Requiere proveedor, validación y el mismo núcleo protegido/ámbitos; tampoco está aprobado/implementado |
 
-A ofrece una frontera de privilegios DB explícita; B puede evitar una credencial DB
-permanente del worker si la plataforma lo soporta. Ninguna está seleccionada como
-autorizada. Un pg_cron nativo solo sería admisible si se acredita ejecución con
+A plantea una frontera DB explícita, condicionada al perímetro efectivo descrito
+en el diseño posterior; B puede evitar una credencial DB permanente del worker si
+la plataforma lo soporta. A está seleccionada solo para diseño/preparación, sin
+autorización operativa. Un pg_cron nativo solo sería admisible si se acredita ejecución con
 el principal restringido: no asumir que un job como postgres cumple el requisito.
 La elección del principal y mecanismo de autenticación es necesaria antes de conectar
 la ejecución; aplicar roles/GRANT, instalar jobs o configurar secretos seguirán

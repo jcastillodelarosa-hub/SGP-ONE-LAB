@@ -1,0 +1,31 @@
+{
+  "observed_date_bogota": "2026-11-02",
+  "mode": "SELECT_CATALOG_ONLY",
+  "session_md5": "e964ea0d6f9af2c88010542cd3c84f9e",
+  "server_version": "17.11",
+  "lp_schema_present": false,
+  "public_schema_acl": [
+    "USAGE"
+  ],
+  "unguarded_example": {
+    "config": [
+      "search_path=public"
+    ],
+    "signature": "sgp_reservas_por_produccion_json(text)",
+    "definition": "CREATE OR REPLACE FUNCTION public.sgp_reservas_por_produccion_json(p_key_produccion text)\n RETURNS jsonb\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\n  select coalesce(jsonb_agg(jsonb_build_object(\n    'reserva',v.reserva,\n    'tipo',v.tipo_relacion,\n    'acabado',v.acabado_reserva,\n    'semana',v.semana_reserva,\n    'es_principal_compartida',v.es_principal_compartida\n  ) order by case when v.tipo_relacion='PRINCIPAL' then 0 else 1 end,v.reserva),'[]'::jsonb)\n  from public.sgp_produccion_reservas_v v\n  where v.key_produccion=p_key_produccion;\n$function$\n",
+    "return_type": "jsonb",
+    "definition_md5": "844fd0c481a9584e0851f80abab459f2",
+    "security_definer": true
+  },
+  "public_database_acl": [
+    "CONNECT",
+    "TEMPORARY"
+  ],
+  "public_table_acl_count": 0,
+  "sgp_public_secdef_total": 83,
+  "sgp_public_secdef_callable": 80,
+  "real_helper_executed": false,
+  "productive_rows_read": false,
+  "managed_restricted_login_tested": false,
+  "conclusion": "A_BLOCKED_AS_IS_PUBLIC_EXECUTE_AND_TEMP; managed custom login documented, actual connection not tested"
+}

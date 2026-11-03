@@ -1,7 +1,14 @@
+> Desde 0a6b48d: [diseño A y recuperación](principal-a/DISENO.md), no instalador.
+> Selección A no autoriza roles/GRANT/secretos/jobs/SQL. PUBLIC impide garantizar
+> solo ABRIR en la base actual; no aplicar revocaciones globales como parte de LP.
+> La referencia sintética NO se añade al orden de instalación 01–06. Hace falta
+> propuesta de integración real revisada y autorización posterior, sin usar este
+> prototipo ni el candidato 01 intacto como si ya integraran autenticación técnica.
+
 > Preparación desde a19a9f6: [apertura automática](APERTURA_AUTOMATICA_PREPARACION.md)
 > agrega observación y validación de cierre acreditado en 01; no agrega jobs, roles,
 > GRANT técnicos, secretos o ejecutor. Seleccionar/aprobar identidad y ámbitos antes
-> de preparar ese enlace. No confundir la prueba manual del motor con permiso técnico.
+> de instalar ese enlace. No confundir la prueba manual del motor con permiso técnico.
 
 > Candidato actualizado desde 21c40f4: [cierre SIN ACTIVIDAD](SIN_ACTIVIDAD.md).
 > 01 añade tipo/constraint de archivo opcional exclusivo para el modo vacío y

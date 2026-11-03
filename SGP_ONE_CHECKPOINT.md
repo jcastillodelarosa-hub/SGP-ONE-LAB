@@ -1,3 +1,29 @@
+# PR #183 — identidad A, diseño verificable y bloqueo PUBLIC (02/11/2026)
+
+Continúa 0a6b48d, misma rama/Draft. A elegida solo para diseño/preparación; NO
+autorizados roles/GRANT, credenciales, secretos, jobs, SQL ni conexión técnica real.
+Referencia compartida ABRIR humano/técnico y journal append-only solo sintéticos,
+separados de SQL instalable/runtime. Sin suplantación de coordinador ni stub de
+sesión técnica: nueve grupos pasan con LOGIN/session_user PG17.11 reales locales.
+Cobertura: permisos/denegaciones, cierre válido/SIN ACTIVIDAD, concurrencia,
+reapertura, contención/revocación en vuelo, idempotencia, recuperación, continuidad.
+
+BLOQUEO REAL: catálogo SELECT muestra 83 SECURITY DEFINER sgp_* EXECUTE PUBLIC,
+80 invocables excluyendo triggers; PUBLIC también USAGE public y TEMP en base.
+NOINHERIT/REVOKE al rol no sustraen PUBLIC. Helper acotado sin sesión observado
+solo en definición, nunca ejecutado. No resolver mediante ACL globales desde LP.
+Supabase documenta LOGIN propio pero canal directo/pooler/TLS/session_user no
+probados en proyecto; no declarar ejecutor operativo. B comparada, no implementada.
+
+Detalle/matriz/operaciones futuras: docs/linea-produccion/principal-a/DISENO.md.
+Evidencia nueva: tests/lp01-principal-a/evidence/. Se reutilizan 111/evidencias
+válidas anteriores; aplicación, Programación, Power BI, Export, PDT y 01–06 intactos.
+No copias DB, producción modificada, migraciones, accesos reales, merge o despliegue.
+Siguiente paso: revisar diseño y resolver el perímetro de A o decidir otra frontera;
+preparar integración instalable solo después, con autorización separada.
+
+---
+
 # PR #183 — preparación de apertura automática (02/11/2026)
 
 Continúa a19a9f6. Plan horario de servidor por línea/etapa, bloqueo visible de origen
