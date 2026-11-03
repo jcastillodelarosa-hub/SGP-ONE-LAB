@@ -30,3 +30,29 @@ SELECT
 -- Validar por separado las entregas existentes por id_programacion y produccion:
 -- NO asumir que un mismo codigo de produccion representa una sola fila/parte.
 -- NO actualizar estados AUDITADA_DIFERENCIA sin preservar evidencia y faltantes.
+
+-- Pendiente de contraste productivo: distribución por línea y eventos vinculados
+-- exactamente por key_produccion + id_programacion + código. Solo agregados.
+WITH scope AS (
+ SELECT key_produccion,produccion,id_linea,cantidad
+ FROM public.sgp_producciones
+ WHERE anio=2026 AND semana_base BETWEEN 41 AND 44
+), evidence AS (
+ SELECT s.*,
+  EXISTS(SELECT 1 FROM public.sgp_mecanizado_programacion_detalle d
+         WHERE d.key_produccion=s.key_produccion) has_plan,
+  EXISTS(SELECT 1 FROM public.sgp_mecanizado_programacion_detalle d
+         JOIN public.sgp_picking_entregas e ON e.id_programacion=d.id_programacion
+          AND e.produccion=s.produccion
+         WHERE d.key_produccion=s.key_produccion AND e.estado='VALIDADA' AND e.completa=true) validated_complete,
+  EXISTS(SELECT 1 FROM public.sgp_mecanizado_programacion_detalle d
+         JOIN public.sgp_picking_entregas e ON e.id_programacion=d.id_programacion
+          AND e.produccion=s.produccion
+         WHERE d.key_produccion=s.key_produccion AND e.estado='AUDITADA_DIFERENCIA') audited_difference
+ FROM scope s
+)
+SELECT id_linea,count(*) productions,sum(cantidad) windows,
+ count(*) FILTER (WHERE NOT has_plan) without_plan,
+ count(*) FILTER (WHERE validated_complete) validated_complete,
+ count(*) FILTER (WHERE audited_difference) audited_difference
+FROM evidence GROUP BY id_linea ORDER BY id_linea;

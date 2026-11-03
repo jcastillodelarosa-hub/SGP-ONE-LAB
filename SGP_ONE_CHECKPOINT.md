@@ -1,3 +1,9 @@
+# Issue #187 — regularización histórica S41–S44 (PR Draft #188)
+
+Rama `feat/regularizacion-historica-s41-s44`. El preflight productivo de lectura informó 798 producciones, 5.745 ventanas, 544 sin detalle de programación y 94 reservas. La FK obligatoria `sgp_picking_entregas.id_programacion` impide crear entregas operativas para esas 544 sin programaciones ficticias. Se preparó un lote histórico privado, transaccional e idempotente, con fecha operativa 2026-10-27, snapshots de eventos previos y reversión exclusiva del lote. PostgreSQL 17 aislado: instalación, reintento, cambio de fuente rechazado, permisos y reversión aprobados. No se modificó producción. **Bloqueo:** los lectores operativos de Picking aún no consumen el lote; falta certificar su integración y la distribución real por línea. No ejecutar como cierre de la Issue sin resolverlo. Detalle y siguiente paso en `docs/sql-proposals/regularizacion-s41-s44/README.md`.
+
+---
+
 # LP-01 E4 — preparación LAB v374 sobre main vigente
 
 PR #170, rama `feat/lp01-e4-programacion-grupos`. Se incorporó `main` `ce559cb7b92b289b6ab81597f6609939184bf6ba`, que ya contiene el PR #168 de Mecanizado parcial. Se preservaron sus módulos, pruebas, SQL y estilos; el único conflicto fue `index.html` y se resolvió manteniendo LAB v374, `styles.css?v=374` y `app.js?v=374-multi-nc`. `scripts/build-release-info.mjs` también declara LAB v374.
