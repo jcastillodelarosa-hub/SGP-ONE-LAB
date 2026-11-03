@@ -14,7 +14,11 @@ if __name__=='__main__':
    try:db.rpc('sgp_consultar_ensamble',{'p_token':token,'p_linea':'PANELES_2'});raise AssertionError('Denied session accepted')
    except RuntimeError as e:assert 'PERMISO_DENEGADO' in str(e)
   for stage in ['ENSAMBLE','EMPAQUE']:
-   rows=db.snapshot(stage)['orders'];assert len(rows)==4 and all(r['ejecutado']==0 for r in rows)
-  out={'status':'PASS','postgres':db.sql('SHOW server_version'),'checks':['Actual captured material RPC/session/reservation helpers execute against synthetic relations','NULL assembly/288 packing returned independently','Actual name-based PDT aggregation reproduced across distinct production keys; no release accredited','Invalid session denied; no modification of production, assignments, PDT, SALE, execution or audit'],'limits':['Synthetic reservation view is upstream fixture only, not verification of its managed definition','No productive business RPC invoked; legacy material read role matrix preserved, no permissions broadened']}
+   snap=db.snapshot(stage);rows=snap['orders'];assert len(rows)==4 and all(r['ejecutado']==0 for r in rows)
+   scoped=snap['materialContext']['filas'];assert len(scoped)==1 and scoped[0]['identity_ambiguous'] and scoped[0]['pendientes_mecanizado'] is None
+  db.sql("DELETE FROM sgp_lp_operacion.permisos WHERE usuario='LIDER' AND etapa='ENSAMBLE' AND key='QA|PANELES_2'")
+  denied=db.snapshot('ENSAMBLE',token='LIDER');assert denied['orders']==[] and denied['materialContext']['filas']==[]
+  assert db.snapshot('EMPAQUE',token='LIDER')['materialContext']['filas']
+  out={'status':'PASS','postgres':db.sql('SHOW server_version'),'checks':['Actual captured material RPC/session/reservation helpers execute against synthetic relations','NULL assembly/288 packing returned independently','Actual name-based PDT aggregation reproduced across distinct production keys; no release accredited','Server facade filters authorized turn/stage/production and suppresses homonymous diagnostic data', 'Invalid session denied; no modification of production, assignments, PDT, SALE, execution or audit'],'limits':['Synthetic reservation view is upstream fixture only, not verification of its managed definition','No productive business RPC invoked; legacy material read role matrix preserved, no permissions broadened']}
   (HERE/'evidence/postgres.json').write_text(json.dumps(out,indent=2)+'\n');print(json.dumps(out,indent=2))
  finally:db.close()

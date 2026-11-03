@@ -5,6 +5,7 @@
     "Actual captured material RPC/session/reservation helpers execute against synthetic relations",
     "NULL assembly/288 packing returned independently",
     "Actual name-based PDT aggregation reproduced across distinct production keys; no release accredited",
+    "Server facade filters authorized turn/stage/production and suppresses homonymous diagnostic data",
     "Invalid session denied; no modification of production, assignments, PDT, SALE, execution or audit"
   ],
   "limits": [

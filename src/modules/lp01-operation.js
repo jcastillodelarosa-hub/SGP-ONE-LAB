@@ -70,9 +70,10 @@ export function mountOperation({tracking,operation,bridge,legacyLoad}){
    host.querySelector('[data-glass-load]').onclick=()=>glass(r);
    host.querySelector('[data-material-load]')?.addEventListener('click',async()=>{
     const box=host.querySelector('[data-material-summary]'),token=bridge.getToken();box.textContent='Consultando fuentes existentes…';
-    try{const sheet=await rpc('sgp_consultar_ensamble',{p_semana:null,p_linea:r.oficial.id_linea});if(token!==bridge.getToken()||selected!==r.parte||!box.isConnected)return;
+    try{const fresh=await rpc('sgp_lp_operacion_consultar',{p_etapa:context.stage,p_linea:context.line,p_fecha:context.date,p_turno:context.shift});if(token!==bridge.getToken()||selected!==r.parte||!box.isConnected)return;
+     const sheet=fresh?.materialContext;if(sheet?.status!=='AVAILABLE')throw Error('Contexto de materiales no disponible para esta sesión o pendiente de actualización autorizada');
      const p=materialContext(sheet,r);
-     box.innerHTML='<p>Mecanizado: '+esc(p.mechanized??'Sin estado informado')+' · '+esc(p.note??'Sin observación informada')+'</p><p>PDT de la consulta histórica: '+esc(p.pending??'La fuente no informó un resumen de pendientes')+'</p><p>El resumen histórico se agrupa por nombre y puede mezclar producciones. No acredita asociación a esta parte o etapa, ventanas liberadas ni modifica SALE.</p><button type="button" data-existing-pdt>Abrir pendientes existentes</button>';
+     box.innerHTML='<p>Mecanizado: '+esc(p.mechanized??'Sin estado informado')+' · '+esc(p.note??'Sin observación informada')+'</p><p>PDT de la consulta histórica: '+esc(p.ambiguousByName?'Resumen omitido: existen producciones homónimas':p.pending??'La fuente no informó un resumen de pendientes')+'</p><p>El resumen histórico se agrupa por nombre y puede mezclar producciones. No acredita asociación a esta parte o etapa, ventanas liberadas ni modifica SALE.</p><button type="button" data-existing-pdt>Abrir pendientes existentes</button>';
      box.querySelector('[data-existing-pdt]').onclick=()=>{const nav=document.querySelector('.nav [data-view="pendientes-aluminio"]');if(!nav||nav.hidden){box.insertAdjacentHTML('beforeend','<p>El acceso a Pendientes no está disponible para esta sesión.</p>');return;}nav.click();};
     }catch(e){box.textContent='No se pudo consultar: '+e.message;}
    });

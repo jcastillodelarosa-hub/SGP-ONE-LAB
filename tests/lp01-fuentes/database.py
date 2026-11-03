@@ -26,6 +26,8 @@ CREATE VIEW public.sgp_produccion_reservas_v AS SELECT * FROM public.qa_reservas
   return super().rpc(name,args)
  def fixture(self):
   self.key='QA|PANELES_2';self.parts=self.seed(self.key,parts=(90,90,90,18))
+  self.seed('QA-FUTURE|PANELES_2',parts=(1,),date='2026-11-04')
+  self.sql("UPDATE public.sgp_producciones SET produccion='QA FUTURE' WHERE key_produccion='QA-FUTURE|PANELES_2'")
   # Names intentionally collide. Actual historical RPC aggregates PDT by name,
   # which the consumer labels explicitly rather than accrediting a release.
   self.seed('QA-OTHER|FRAMES_2',parts=(1,));self.sql("UPDATE public.sgp_producciones SET id_linea='FRAMES_2' WHERE key_produccion='QA-OTHER|FRAMES_2'")

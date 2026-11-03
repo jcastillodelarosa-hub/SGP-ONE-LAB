@@ -7,13 +7,12 @@
     "src/domain/powerbi",
     "src/server/lp-powerbi-handler.js",
     "src/modules/lp01-powerbi-client.js",
-    "docs/sql-proposals",
     "supabase",
     "docs/linea-produccion/principal-a/shared-reference.sql"
   ],
   "captured_definition_hashes": "MATCH",
   "supabase_queries": "SELECT definitions only; no productive rows or function invocation",
-  "new_unit_tests": 6,
+  "new_unit_tests": 7,
   "affected_regressions": {
     "operation": 6,
     "followup": 7,
@@ -23,8 +22,13 @@
   "release_verification": "PASS LAB380 package, not deployment",
   "states": {
     "IMPLEMENTED": "branch only",
-    "APPLIED": "NO productive SQL",
+    "APPLIED": "NO productive SQL; 01 read extension proposed only",
     "PUBLISHED": "NO",
     "VERIFIED": "synthetic SQL and local browser only"
-  }
+  },
+  "proposed_sql_delta": "01: scoped materialContext inside existing read facade only; no new function/grant/table, no ABRIR change",
+  "sql_write_engine_and_grants_unchanged": true,
+  "shared_ABRIR_source_projection": "UNCHANGED",
+  "affected_sql_regression_groups": 15,
+  "server_scoped_reads": "PASS: unauthorized stage/production excluded; homonymous fields suppressed"
 }

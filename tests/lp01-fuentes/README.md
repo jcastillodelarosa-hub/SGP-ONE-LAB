@@ -2,9 +2,11 @@
 
 Implementado en rama: consulta histórica Mecanizado/PDT en Ensamble y Empaque,
 validación de clave/línea única y saldos Export desconocidos sin conversión a cero.
+La consulta LP existente filtra las fuentes en servidor por usuario/etapa/línea y
+producciones incorporadas al turno. El navegador no llama la RPC histórica amplia.
 Se conserva el diseño existente B12–B16; no se cambia layout ni reglas aprobadas.
 
-- `node tests/lp01-fuentes.test.mjs`: seis pruebas nuevas de límites de lectura.
+- `node tests/lp01-fuentes.test.mjs`: siete pruebas nuevas de límites de lectura.
 - `python tests/lp01-fuentes/postgres.py`: función `sgp_consultar_ensamble` y helpers
   capturados del catálogo mediante SELECT, ejecutados realmente en PG17.11 aislado.
 - `python tests/lp01-fuentes/browser.py`: interfaz actual PC1440/móvil390 → transporte
@@ -19,9 +21,9 @@ No se invocó ninguna RPC de negocio en Supabase ni se leyeron filas productivas
 
 Hallazgo real de contrato: `sgp_consultar_ensamble(text,integer,text)` asocia el
 resumen PDT por nombre de producción. La prueba con dos claves de líneas distintas
-y el mismo nombre reproduce mezcla de pendientes. Se etiqueta como referencia
-histórica, sin asociación probada a parte/etapa, sin acreditar liberación ni sumar
-ventanas. No se corrige ese contrato ajeno ni se amplían roles/ACL en este cambio.
+y el mismo nombre reproduce mezcla de pendientes. El servidor omite los diagnósticos cuando detecta producciones homónimas,
+sin exponer claves/nombres adicionales. Los demás resúmenes conservan etiqueta
+histórica, sin asociación probada a parte/etapa, sin acreditar liberación ni sumar ventanas. No se corrige ese contrato ajeno ni se amplían roles/ACL en este cambio.
 Clave duplicada o línea discordante se rechazan en el consumidor. Null/ausencia de
 resumen no equivale a ausencia acreditada de PDT.
 
@@ -39,8 +41,10 @@ La documentación oficial de funciones/RPC se contrastó; changelog público no
 accesible desde este entorno (HTTP403). No se añade una característica nueva de
 Supabase: se reutiliza el contrato SQL capturado y el cliente RPC existente.
 
-Sin migración propuesta/aplicada, cambios de permisos, credenciales, despliegue o
-escritura productiva. Apertura automática sigue bloqueada por PUBLIC y es ajena a
+01 añade únicamente materialContext a la RPC LP de lectura existente, como SQL
+propuesto sin aplicar; sin nueva RPC, cambios de permisos, credenciales, despliegue
+o escritura productiva. Fuente ausente/rol denegado devuelve UNAVAILABLE sin
+romper la consulta LP ni volver a la RPC amplia desde el cliente. Apertura automática sigue bloqueada por PUBLIC y es ajena a
 esta consulta. Pendientes reales: emisor PDT canónico/por etapa, consolidación neta,
 compensaciones, inclusión Export y ámbitos reales. No declarar integración de
 liberaciones operativa con esta evidencia de lectura.

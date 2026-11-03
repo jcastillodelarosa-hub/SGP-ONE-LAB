@@ -11,7 +11,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
   try:
    if self.path!='/rpc':raise ValueError('Local RPC only')
    b=json.loads(self.rfile.read(int(self.headers['Content-Length'])))
-   if b['name'] not in ['sgp_lp_operacion_consultar','sgp_consultar_ensamble']:raise ValueError('Read RPC only')
+   if b['name'] not in ['sgp_lp_operacion_consultar']:raise ValueError('Read RPC only')
    result={'data':self.db.rpc(b['name'],b['args']),'error':None}
   except Exception as e:result={'data':None,'error':{'message':str(e),'code':'QA_READ_ERROR'}}
   raw=json.dumps(result).encode();self.send_response(200);self.send_header('Content-Type','application/json');self.end_headers();self.wfile.write(raw)
@@ -37,7 +37,7 @@ try:
      # Only a genuine zero could mean assembly complete. NULL must remain unknown.
      if stage=='EMPAQUE':assert 'completo según Export' not in page.locator('[data-live-orders]').inner_text()
      page.locator('[data-material-load]').click();page.wait_for_function("document.querySelector('[data-material-summary]').textContent.includes('por nombre')")
-     text=page.locator('[data-material-summary]').inner_text();assert 'PDT 3 REF' in text and 'No acredita asociación' in text
+     text=page.locator('[data-material-summary]').inner_text();assert 'PDT 3 REF' not in text and 'No acredita asociación' in text and 'homónimas' in text
      assert 'SALE' in text and 'La fuente no informó' not in text
      page.locator('[data-operation-detail]').screenshot(path=str(OUT/f'{stage.lower()}-{width}.png'))
     assert before==db.unchanged()
@@ -47,7 +47,7 @@ try:
     if detail.get_attribute('open') is None:detail.locator('summary').click()
     detail.locator('[data-live-operate]').click()
     db.sql("UPDATE public.sgp_sesiones_app SET expira_en=now()-interval '1 minute' WHERE token_hash=encode(extensions.digest('COORDINADOR','sha256'),'hex')")
-    page.locator('[data-material-load]').click();page.wait_for_function("document.querySelector('[data-material-summary]').textContent.includes('PERMISO_DENEGADO')")
+    page.locator('[data-material-load]').click();page.wait_for_function("document.querySelector('[data-material-summary]').textContent.includes('SESION_NO_AUTORIZADA')")
     db.sql("UPDATE public.sgp_sesiones_app SET expira_en=now()+interval '1 day' WHERE token_hash=encode(extensions.digest('COORDINADOR','sha256'),'hex')")
     # Actual join produces two matching keys. Consumer must reject, not pick first.
     db.sql("INSERT INTO public.sgp_prioridades(anio,semana,id_linea,key_produccion,prioridad) VALUES(2026,44,'PANELES_2','QA|PANELES_2',1),(2026,44,'PANELES_2','QA|PANELES_2',2)")
@@ -58,7 +58,7 @@ try:
     page.wait_for_function("document.querySelector('[data-material-summary]').textContent.includes('ambigua')")
     assert before==db.unchanged() and not errors,errors
     assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
-    results.append({'viewport':width,'stages':['ENSAMBLE','EMPAQUE'],'actual_sql_material_read':True,'null_export_not_zero':True,'name_based_pdt_limit_visible':True,'invalid_session_denied':True,'duplicate_sql_identity_rejected':True,'production_plan_pdt_sale_audit_unchanged':True,'page_errors':errors});page.close()
+    results.append({'viewport':width,'stages':['ENSAMBLE','EMPAQUE'],'actual_sql_material_read':True,'server_scoped_snapshot_only':True,'homonymous_diagnostics_suppressed':True,'null_export_not_zero':True,'name_based_pdt_limit_visible':True,'invalid_session_denied':True,'duplicate_sql_identity_rejected':True,'production_plan_pdt_sale_audit_unchanged':True,'page_errors':errors});page.close()
    finally:db.close()
   browser.close()
 finally:server.shutdown()
