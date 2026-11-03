@@ -1,0 +1,18 @@
+{
+  "observed_at": "2026-11-03T17:31:20.270055+00:00",
+  "environment_current": true,
+  "hosting_connector_available": false,
+  "firebase_cli": false,
+  "gcloud_cli": false,
+  "adc_selector": false,
+  "identity_manifest": false,
+  "configured_secrets": 0,
+  "configured_outbound_identities": 0,
+  "project_hint_from_firebaserc": "sgp-one-lab",
+  "firebase_metadata_queried": false,
+  "live_release": null,
+  "live_version": null,
+  "exact_rollback_certified": false,
+  "public_http403_retried": false,
+  "status": "BLOQUEADO_EN_ACCESO_AUTORIZADO"
+}

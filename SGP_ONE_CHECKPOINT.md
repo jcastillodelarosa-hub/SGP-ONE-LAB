@@ -1,3 +1,12 @@
+## Certificación Hosting · dictamen vigente (2026-11-03)
+
+PR183: BLOQUEADO por falta de acceso autenticado de lectura a Hosting; release/
+version live y rollback exacto no acreditados. No reintentar403 ni usar credenciales
+más privilegiadas. Plan local explícito y6grupos offlinePASS; CI64d91e2 4/4PASS.
+[Dictamen/evidencia y siguiente intervención](tests/lp01-hosting/CERTIFICACION.md).
+La referencia única LP sigue siendo ESTADO_OPERATIVO_ACTUAL.md. No publicar ni
+crear sitios/canales. Se requiere evidencia del responsable Hosting, sin secretos.
+
 ## LP · checkpoint vigente de preparación (2026-11-03)
 
 PR183 continúa en feat/lp01-seguimiento-operacion. Preparación al SGP principal sin

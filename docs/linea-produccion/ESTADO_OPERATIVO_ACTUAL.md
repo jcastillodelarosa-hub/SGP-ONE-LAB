@@ -1,15 +1,14 @@
 # Línea de Producción — estado operativo actual
 
-**Actualizado:** 2026-11-03, America/Bogota (integración horizontal aprobada).
-**Referencia técnica:** `bed57a2` (artefacto visual principal y recuperación),
-con bloqueo HTTP XLSX y sellado en el mismo conjunto de commits.
-Continuidad actualizada en el mismo conjunto de commits del PR.
-**Base verificada GitHub/checkout:** `7faa13665758a8493b99d5019a62d06824070eca`.
+**Actualizado:** 2026-11-03, America/Bogota (certificación Hosting).
+**Referencia técnica:** entrega de certificación y preflight offline en este conjunto de commits.
+**Base verificada GitHub/checkout:** `64d91e24567ee31f31401bcca4b54bdb6d490a0c`.
 **Repositorio:** `jcastillodelarosa-hub/SGP-ONE-LAB`.
 **Rama:** `feat/lp01-seguimiento-operacion` · [PR #183](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/pull/183), OPEN/DRAFT observado.
-**Estado inmediato:** demostración visual aislada preparada y probada PC/móvil,
-con datos sintéticos congelados y escrituras bloqueadas. Integración al SGP principal preparada como artefacto visual; prohibidos nuevos
-sitios/canales. Publicación bloqueada hasta revisión y rollback acreditado.
+**Estado inmediato:** BLOQUEADO en certificación de Hosting por falta de mecanismo
+configurado de lectura autenticada. Release/version activas y rollback exacto no
+acreditados. Preflight de publicación local terminado,6gruposPASS; sin Firebase,
+nuevos sitios/canales, SQL ni permisos. CI64d91e2 4/4PASS reutilizada.
 
 Esta es la **referencia operativa única de LP**. Describe el estado vigente, no un
 historial. Antes de trabajar leer AGENTS.md, este archivo y el estado real del PR;
@@ -111,6 +110,23 @@ históricos por inferencia. Las observaciones Supabase conservan su fecha, no so
 una comprobación productiva nueva de esta entrega.
 
 ## 6. Siguiente acción técnica exacta y límite de continuación
+
+**Certificación Hosting: BLOQUEADO por falta de mecanismo autenticado autorizado.**
+Sin conector Hosting, CLI/gcloud, selectorADC/manifiesto o identidad técnica configurada.
+No se reintenta403 público ni se extraen secretos de CI/cuentas humanas. Proyecto
+solo inferido de.firebaserc; sitio/live/release/version NO acreditados. Candidato
+Git4b1e98e no equivale a versión activa ni rollback exacto.
+[Dictamen, evidencia, publicación offline y recuperación](../../tests/lp01-hosting/CERTIFICACION.md).
+Plan local valida ZIP/manifiesto/hashes y publica nada: raízpublic separada, sin
+privados/backend, deploy_command=null, BLOQUEADO.6 grupos nuevos offline PASS.
+CI64d91e2 4/4completadaPASS reutilizada, sin repetir batería general.
+**Siguiente acción:** responsable Hosting con lectura ya autorizada aporta vínculo
+live→release→version, inventario/config y vía de recuperación1o2. Sin secretos ni
+privilegios nuevos. Reconstrucción Git solo alternativa funcional con aceptación
+separada, nunca rollback certificado. No pedir aún despliegue. Sin cambios Firebase,
+sitios/canales, SQL, roles, usuarios, datos o secretos.
+
+Antecedentes de integración preparados:
 
 **Vigente: preparación al SGP principal, sin sitio/canal nuevo.** Artefacto completo
 /tmp/sgp-lp183-main-visual conserva app/index/config y limita únicamente LP a
