@@ -1,7 +1,7 @@
 # Línea de Producción — estado operativo actual
 
 **Actualizado:** 2026-11-03, America/Bogota (publicación controlada preparada).
-**Referencia técnica:** mecanismo de publicación en este conjunto de commits; base
+**Referencia técnica:** implementación `e781fd5`, documentación de cierre en este conjunto de commits; base
 `bb7d052542d06e83e0b4187dfa6776dd99b0a21d` verificada en GitHub/checkout.
 **Repositorio:** `jcastillodelarosa-hub/SGP-ONE-LAB`.
 **Rama:** `feat/lp01-seguimiento-operacion` · [PR #183](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/pull/183), OPEN/DRAFT observado.
@@ -11,7 +11,9 @@ versión retenida recuperable. Política legacy/no certificada: adopción del PR
 despliega; pushes ordinarios posteriores conservan navegación anterior. Prepare
 sin secretos e inspect GET preparados, **no ejecutados en Actions/Firebase**.
 7 grupos de política, 4 de artefacto y PC/móvil PASS locales. CI basebb7d052 4/4PASS
-reutilizada; CI del cambio pendiente de observar tras push.
+reutilizada. CI `e781fd5`: validate/check/test/postgres-design PASS; UI aún en curso
+al consultar. Gate/prepare/ordinary/controlled OMITIDOS en el PR, sin secretos
+ni acciones Hosting. [Evidencia CI](../../tests/lp01-publish/evidence/ci.json).
 
 Esta es la **referencia operativa única de LP**. Describe el estado vigente, no un
 historial. Antes de trabajar leer AGENTS.md, este archivo y el estado real del PR;

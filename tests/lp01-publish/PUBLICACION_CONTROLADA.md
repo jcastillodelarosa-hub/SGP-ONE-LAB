@@ -159,7 +159,10 @@ no llamarla rollback exacto. No SQL, datos/roles/saldos por recuperar frontend.
 
 CI de basebb7d052 observado4/4PASS (41685329268,41685329285,41685329683,41685329355).
 El job validate usa Python3.12/PyYAML6.0.2 y no recibe secretos; los PR ejecutan
-solo ese job. CI nueva se consulta tras push; no se atribuye la anterior al nuevo código.
+solo ese job dentro de este workflow. CI `e781fd5` observada: validate/check/test/
+postgres-design PASS; UI aún en curso al consultar. Los cuatro jobs gate/prepare/
+ordinary/controlled constan OMITIDOS. [Evidencia CI](evidence/ci.json).
+No se atribuye la CI anterior al nuevo código.
 No se ejecuta batería general manual ni auditorías PDT/Export/apertura.
 
 **Estado final:** procedimiento preparado para revisión, publicación/recuperación
