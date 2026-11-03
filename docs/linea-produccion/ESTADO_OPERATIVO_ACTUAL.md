@@ -1,7 +1,7 @@
 # Línea de Producción — estado operativo actual
 
-**Actualizado:** 2026-11-02, America/Bogota (Encargo 2B).
-**Referencia técnica:** `e3acacd3d6e72d640c2bd336b1d254e848862639` (asociación privada PDT, SQL propuesto y pruebas).
+**Actualizado:** 2026-11-02, America/Bogota (Encargo 3A).
+**Referencia técnica:** `44a659f0d4b14a95db40c5934a57b42fd5463ddd` (asociación privada PDT, SQL propuesto y pruebas).
 **Base de esta entrega:** HEAD local/PR coincidentes en
 `fd07cb38fc8a4414bcb3fcd9984f3bb5f0271371` al inicio; continuidad actualizada en el mismo conjunto de commits.
 **Repositorio:** `jcastillodelarosa-hub/SGP-ONE-LAB`.
@@ -149,16 +149,35 @@ PENDIENTE_EVIDENCIA/apply=false con el contrato nativo actual; sin reset de pres
 SALE o Export. Requiere pool y contexto previamente autorizados del servidor: no
 hay endpoint, conexión productiva ni identidad nueva configurada.
 
-**Encargo 3 iniciado, independiente:** revisión privada de matriz de ámbitos con
-cuentas existentes activas, roles actuales, producción/línea, etapa y duplicados.
-Solo propuestas/motivos, apply=false, fixtures en tests. No se crean usuarios ni
-permisos ni se publican identificadores reales.
+**Encargo 3A preparado y verificado aisladamente:** matriz por rol/operación,
+cobertura de las cuatro combinaciones línea/etapa y revisión privada de cuentas
+existentes, roles incompatibles, producciones, responsables/suplencias, duplicados
+y vigencias. PRIMARY y BACKUP distinto deben cubrir individualmente todas las
+producciones del cierre; no se suman coberturas parciales para dar permiso global.
 
-**Siguiente acción exacta:** contrastar por canal privado la matriz de cuentas/
-producciones ya aprobadas y preparar validación de cobertura de responsables de
-Operación y cierres. Mantener la validación servidor en cada operación, sin aplicar
-accesos. La conciliación Export solo podrá aplicarse tras acreditar un contrato de
-inclusión por IDs/revisiones; ese bloqueo no detiene el Encargo3.
+Artefacto privado local generado sin identidades: private/lp01-scopes/review.json,
+ignorado por Git, directorio0700/archivo0600; cuatro combinaciones pendientes, no
+responsables inventados. Plantilla pública contiene listas vacías, no cuentas reales.
+No se imprime el snapshot ni rutas/errores sensibles. [Matriz por operación,
+reproducción y límites](../../tests/lp01-ambitos/README.md).
+
+Servidor SQL real probado con identidades sintéticas: lectura/avance/observaciones/
+afectaciones/cierre, SALE/validación/reapertura exclusivos del coordinador, scopes
+cruzados, cambio de etapa, siguiente turno configurado, cuenta inactiva y cierre con
+cobertura parcial denegados. Las autorizaciones no dependen de controles visuales.
+Sin cambios SQL, RLS, usuarios, roles o ámbitos reales.
+
+**Pendiente de aplicación real:** faltan asignaciones privadas aprobadas y revisión
+funcional de responsables/suplentes. Vigencias/duty se validan en el revisor, pero
+SQL01.permisos no almacena esa política temporal ni duty. No se declara aplicada
+una restricción por intervalo o por duty; sesión vigente/cuenta activa sí se exigen
+actualmente en servidor. No aplicar una matriz temporal hasta resolver ese contrato.
+
+**Siguiente trabajo independiente:** preparar la verificación temporal de ámbitos
+por servidor y cobertura por período, con pruebas de transición de vigencia, sin
+aplicar datos reales ni ampliar permisos. Recibir la matriz real solo por canal
+privado. PDT y Export siguen BLOQUEADOS EN FUENTE exclusivamente por sus contratos
+de origen, no por esta matriz ni como impedimento para continuar Operación.
 
 En paralelo documental, seguridad/DB debe revisar `principal-a/DISENO.md` y delimitar
 una propuesta compatible que resuelva PUBLIC. El diseño A completado en e611d27
@@ -178,6 +197,15 @@ ni bloquear integraciones independientes por esta revisión pendiente.
 | Vidrio/Dashboard/Reportes | Conservar modal/ubicaciones/navegación y reportes existentes; completar fuentes/desglose e histórico después de flujos críticos, sin KPI fabricado |
 
 ## 8. Pruebas y CI
+
+Encargo3A:9 unitarias nuevas PASS, prueba de artefacto privado PASS (0700/0600 y
+sin datos/rutas en logs), 7 grupos SQL con RPC reales en PostgreSQL17.11 aislado
+PASS y6 regresiones directas del lector/revisor PASS. [Evidencia pública solo
+sintética](../../tests/lp01-ambitos/evidence/). No son cuentas/ámbitos de planta.
+CSV-QA suministra evidencia del cierre de prueba, no certifica formato BI nuevo.
+Sin cambios UI, PC/móvil válido reutilizado; sin pruebas generales manuales. CI del
+HEAD se consulta en #183, no se atribuye CI previa a esta entrega.
+
 
 Encargo2B/avance3:6 unitarias nuevas +8 regresiones directas del planificador PASS;
 lector JavaScript/SQL sobre PG17.11 aislado PASS: snapshot coherente ante carga
