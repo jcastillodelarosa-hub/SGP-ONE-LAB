@@ -1,3 +1,8 @@
+> **Revisión posterior:** [compatibilidad/CI](REVISION_SQL10_COMPATIBILIDAD.md).
+> Instalación BLOQUEADA por ACL de escritura directa en los catálogos de accesos.
+> SQL10 ahora falla cerrado ante esa precondición; la evidencia funcional inferior
+> pertenece a fixture protegida. CI bloqueada por conflicto styles.css con main4b1e98e.
+
 # Roles y cierre individual LP — preparación contenida
 
 03/11/2026, America/Bogota. Baseba1c546, mismo Draft183. Regla nueva aprobada por

@@ -1,0 +1,143 @@
+{
+  "observed": "2026-11-03 America/Bogota",
+  "scope": "SELECT metadata only; no account/session/permission rows; no business RPC called",
+  "metadata": {
+    "tables": [
+      {
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}",
+        "rls": false,
+        "name": "sgp_rol_accesos",
+        "owner": "postgres",
+        "force_rls": false
+      },
+      {
+        "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}",
+        "rls": true,
+        "name": "sgp_sesiones_app",
+        "owner": "postgres",
+        "force_rls": false
+      },
+      {
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}",
+        "rls": false,
+        "name": "sgp_usuario_accesos",
+        "owner": "postgres",
+        "force_rls": false
+      },
+      {
+        "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}",
+        "rls": true,
+        "name": "sgp_usuarios",
+        "owner": "postgres",
+        "force_rls": false
+      }
+    ],
+    "policies": null,
+    "functions": [
+      {
+        "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+        "name": "sgp_admin_rol_accesos_guardar",
+        "owner": "postgres",
+        "config": [
+          "search_path=public"
+        ],
+        "definer": true,
+        "body_md5": "96c5531abff3988b31a91211b4a440f4",
+        "signature": "p_token text, p_rol text, p_accesos text[]"
+      },
+      {
+        "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+        "name": "sgp_admin_rol_accesos_listar",
+        "owner": "postgres",
+        "config": [
+          "search_path=public"
+        ],
+        "definer": true,
+        "body_md5": "32a3077fbfc057aca30f6e622796f12e",
+        "signature": "p_token text"
+      },
+      {
+        "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+        "name": "sgp_admin_usuario_guardar",
+        "owner": "postgres",
+        "config": [
+          "search_path=public, extensions"
+        ],
+        "definer": true,
+        "body_md5": "ed07b071fe83cf63709ed976d38fb116",
+        "signature": "p_token text, p_id_usuario uuid, p_usuario text, p_nombre text, p_rol text, p_password text, p_activo boolean, p_accesos text[]"
+      },
+      {
+        "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+        "name": "sgp_admin_usuarios_listar",
+        "owner": "postgres",
+        "config": [
+          "search_path=public"
+        ],
+        "definer": true,
+        "body_md5": "543908bbd6c0de99540d8b6bf3299d15",
+        "signature": "p_token text"
+      },
+      {
+        "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+        "name": "sgp_mis_accesos",
+        "owner": "postgres",
+        "config": [
+          "search_path=public, extensions"
+        ],
+        "definer": true,
+        "body_md5": "4f879ddd1659ef97f05e2f4aaa7c5d33",
+        "signature": "p_token text"
+      },
+      {
+        "acl": "{postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+        "name": "sgp_sesion_actual",
+        "owner": "postgres",
+        "config": [
+          "search_path=public"
+        ],
+        "definer": true,
+        "body_md5": "79efd30d18eac0950907b5248a2c79d5",
+        "signature": "p_token text"
+      },
+      {
+        "acl": "{postgres=X/postgres,service_role=X/postgres}",
+        "name": "sgp_validar_sesion_rol",
+        "owner": "postgres",
+        "config": [
+          "search_path=public, extensions"
+        ],
+        "definer": true,
+        "body_md5": "c11c53edf00a3c90b9b124451e7cef92",
+        "signature": "p_token text, p_roles text[]"
+      }
+    ],
+    "lp_schema": false,
+    "constraints": [
+      {
+        "table": "sgp_usuarios",
+        "definition": "PRIMARY KEY (id_usuario)"
+      },
+      {
+        "table": "sgp_usuarios",
+        "definition": "CHECK ((rol = ANY (ARRAY['COORDINADOR'::text, 'LIDER MECANIZADO'::text, 'LIDER LINEA'::text, 'RECEPCION'::text, 'PATINADOR'::text, 'PICKING'::text, 'SUPERVISOR DE PICKING'::text, 'CONSULTA'::text, 'ADMINISTRADOR'::text])))"
+      },
+      {
+        "table": "sgp_usuarios",
+        "definition": "UNIQUE (usuario)"
+      },
+      {
+        "table": "sgp_usuario_accesos",
+        "definition": "FOREIGN KEY (id_usuario) REFERENCES sgp_usuarios(id_usuario) ON DELETE CASCADE"
+      },
+      {
+        "table": "sgp_usuario_accesos",
+        "definition": "PRIMARY KEY (id_usuario, ventana)"
+      },
+      {
+        "table": "sgp_rol_accesos",
+        "definition": "PRIMARY KEY (rol, ventana)"
+      }
+    ]
+  }
+}

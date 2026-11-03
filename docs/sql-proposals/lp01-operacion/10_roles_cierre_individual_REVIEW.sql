@@ -13,6 +13,18 @@ DO $pre$ BEGIN IF (SELECT md5(prosrc) FROM pg_proc p JOIN pg_namespace n ON n.oi
 DO $pre$ BEGIN IF (SELECT md5(prosrc) FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='public' AND p.proname='sgp_lp_operacion_comando') IS DISTINCT FROM 'd720fa3adaaff85ff27848038fd21031' THEN RAISE EXCEPTION 'CONTRATO_INCOMPATIBLE: sgp_lp_operacion_comando'; END IF; END $pre$;
 DO $pre$ BEGIN IF (SELECT md5(prosrc) FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='public' AND p.proname='sgp_lp_operacion_consultar') IS DISTINCT FROM 'bb262ffb7bdddf5eb6dc169f53f77a03' THEN RAISE EXCEPTION 'CONTRATO_INCOMPATIBLE: sgp_lp_operacion_consultar'; END IF; END $pre$;
 DO $pre$ BEGIN IF (SELECT md5(prosrc) FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='public' AND p.proname='sgp_admin_usuario_guardar') IS DISTINCT FROM 'ed07b071fe83cf63709ed976d38fb116' THEN RAISE EXCEPTION 'CONTRATO_INCOMPATIBLE: sgp_admin_usuario_guardar'; END IF; END $pre$;
+-- The native catalogs are authority: direct API DML would bypass revocation.
+-- Do not silently change global ACL/RLS here. Stop for separately authorized hardening.
+DO $acl$ DECLARE target regclass;who text; BEGIN
+ FOREACH target IN ARRAY ARRAY['public.sgp_rol_accesos'::regclass,'public.sgp_usuario_accesos'::regclass] LOOP
+  FOREACH who IN ARRAY ARRAY['anon','authenticated'] LOOP
+   IF has_table_privilege(who,target,'INSERT,UPDATE,DELETE,TRUNCATE') OR
+      has_any_column_privilege(who,target,'INSERT,UPDATE') THEN
+    RAISE EXCEPTION 'CATALOGO_ACCESOS_DML_CLIENTE: % / %',target,who;
+   END IF;
+  END LOOP;
+ END LOOP;
+END $acl$;
 CREATE TABLE sgp_lp_operacion.perfil_roles(id boolean PRIMARY KEY DEFAULT true CHECK(id),habilitado boolean NOT NULL DEFAULT false);
 INSERT INTO sgp_lp_operacion.perfil_roles VALUES(true,false);
 ALTER TABLE sgp_lp_operacion.perfil_roles ENABLE ROW LEVEL SECURITY;

@@ -1,0 +1,9 @@
+{
+  "base": "b4cf8c8",
+  "sql10_sha256": "08d17548ad781ab3f7d8b400121c448d1f064269fc858055498e36cdbdd67d82",
+  "local_checks": "5 directed isolated compatibility outcomes PASS; Python AST, YAML, links and diff PASS",
+  "installation_verdict": "BLOCKED_REAL_ACL",
+  "ci_verdict": "BLOCKED_STYLES_MERGE_CONFLICT",
+  "productive_writes": 0,
+  "profile_applied_or_enabled": false
+}

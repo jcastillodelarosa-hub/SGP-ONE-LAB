@@ -1,20 +1,22 @@
 # Línea de Producción — estado operativo actual
 
-**Actualizado:** 2026-11-03, America/Bogota (roles y cierre individual).
-**Referencia:** base GitHub/checkout `ba1c546ec9b34752d83280e558ae1826ecc97e06`;
-implementación SQL10/Configuración `c213d9d` y corrección de defaults en este conjunto de commits.
-**Rama:** `feat/lp01-seguimiento-operacion` · [PR #183](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/pull/183), OPEN/DRAFT observado.
-**Regla vigente:** PANELES_2, Supervisores Ensamble/Empaque y LIDER LINEA con cierre
-individual por rol/etapa, ambos turnos, **sin PRIMARY/BACKUP ni asignación temporal
-por turno**. Sustituye09 para esta activación. [Contrato y matriz](ROLES_CIERRE_INDIVIDUAL.md).
-**Estado:** SQL10 propuesto y contenido por defecto; Configuración integra los
-roles/accesos y UI usa capacidades protegidas. Contratos administrativos reales
-contrastados por SELECT de metadatos03/11, sin cuentas. PostgreSQL17.11 sintético:
-6 grupos SQL +2 recorridos handler/XLSX; UI PC/móvil y CI detalladas en evidencia.
-Nada aplicado, activado, publicado o fusionado. Apertura automática sigue bloqueada.
-**Pendiente:** revisión SQL10/accesos reales desde Configuración, runtime/orígenes,
-activación y publicación autorizadas. PDT/Export bloqueados en fuente; no se exigen
-matrices privadas08/09 como condición del cierre individual del perfil10.
+**Actualizado:** 2026-11-03, America/Bogota (revisión SQL10/CI).
+**Referencia:** base GitHub/checkout `b4cf8c800f205cb7d044a134777f4406d5c9998d`;
+revisión y preflight de ACL en este conjunto de commits, mismo Draft183.
+**Dictamen: BLOQUEADO PARA INSTALACIÓN EN EL CATÁLOGO REAL OBSERVADO.**
+Siete cuerpos nativos, firmas y CHECK coinciden con la captura; esquema LP aún
+no instalado. SELECT revela escritura directa anon/authenticated sobre catálogos
+de accesos sin RLS, que permite eludir revocación. Reproducido solo sintéticamente;
+SQL10 ahora aborta antes de crear objetos/defaults. No corrige ACL/RLS productivas.
+**CI bloqueada:** main actual4b1e98e; fusión virtual b4cf8c8/main en conflicto
+styles.css. Disparadores pull_request correctos; no se cambian para sortearlo.
+No se fusiona o rebasa; se conserva todo el trabajo. [Dictamen y evidencias](REVISION_SQL10_COMPATIBILIDAD.md).
+**Regla funcional vigente:** cierre individual por rol/etapa en PANELES_2, ambos
+turnos, sin PRIMARY/BACKUP ni asignación temporal obligatoria. Verificada en fixture
+protegida, no productivamente. SQL10 sigue propuesto/deshabilitado y sin aplicar.
+**Pendiente:** revisión/autorización separada de autoridad de accesos y sincronización
+con main para CI. Después revisar instalación contenida; no usuarios/permisos reales,
+activación, fusión del PR o publicación en este encargo.
 
 Esta es la **referencia operativa única de LP**. Describe el estado vigente, no un
 historial. Antes de trabajar leer AGENTS.md, este archivo y el estado real del PR;
@@ -117,16 +119,15 @@ una comprobación productiva nueva de esta entrega.
 
 ## 6. Siguiente acción técnica exacta y límite de continuación
 
-**Preparación vigente:** [roles, cierre individual, pruebas e instalación](ROLES_CIERRE_INDIVIDUAL.md).
-Instalación propuesta01→06→08→10, **sin09**. Si09 estuviera aplicado, detener y
-preparar un delta compatible, no quitar guards para forzar la instalación.
-SQL10 valida rol activo y acceso efectivo por etapa en los catálogos existentes;
-puede cerrar una sola cuenta autorizada. Los locks/revalidación cubren cambios de
-rol, accesos y sesiones concurrentes. La auditoría conserva rol/identidad canónicos.
-**Siguiente acción exacta:** revisar SQL10 y evidencia/CI, después preparar autorización
-separada para instalación contenida y configuración de accesos reales desde las
-pantallas existentes. No solicitar PRIMARY/BACKUP ni matrices por turno. No activar
-escrituras, workers, publicar o aplicar SQL en este encargo.
+**Revisión vigente:** [compatibilidad SQL10 y CI](REVISION_SQL10_COMPATIBILIDAD.md).
+Preflight nuevo rechaza catálogos modificables directamente desde la API; pruebas
+sintéticas conservan propietarios/ACL/RLS y perfil=false en instalación segura.
+No se declara segura la instalación real hasta resolver esa autoridad por separado.
+**Siguiente acción exacta:** responsable DB/seguridad delimita propuesta autorizada
+para proteger los catálogos existentes y sus consumidores; responsable del PR
+sincroniza main4b1e98e y conserva ambos bloques del conflicto styles.css para obtener
+CI. Este encargo identifica ambos bloqueos, no aplica privilegios ni fusiona ramas.
+La regla aprobada de cierre individual se mantiene; no reintroducir matrices09.
 
 Antecedente Paneles2/09 SUPERSEDIDO: las asignaciones por turno y dos cuentas eran
 la regla anterior, conservada solo en la evidencia histórica. No usar el importador

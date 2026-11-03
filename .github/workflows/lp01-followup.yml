@@ -102,6 +102,7 @@ jobs:
           python tests/lp01-ambitos-temporales/postgres.py
           python tests/lp01-ambitos-import/postgres.py
           python tests/lp01-cierres-integrados/isolated.py
+          python tests/lp01-roles/compatibility.py
           python tests/lp01-roles/postgres.py
           python tests/lp01-roles/xlsx.py
       - name: Real persistence PC and mobile acceptance

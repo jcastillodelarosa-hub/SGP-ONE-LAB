@@ -1,3 +1,16 @@
+## Revisión SQL10/CI · dictamen BLOQUEADO (2026-11-03)
+
+Baseb4cf8c8, mismo Draft183. SELECT de metadatos: siete cuerpos nativos coinciden;
+catálogos de accesos tienen ALL anon/authenticated sin RLS. Bypass de revocación
+reproducido solo en PG sintético. SQL10 añade preflight que aborta; no cambia ACL
+ni instala nada productivo. Fixture protegida conserva OID/owner/ACL/RLS y flagfalse.
+CI sin runs por conflicto real styles.css frente a main4b1e98e (GitHub dirty y
+merge virtual exit1; ba1c546 fusionaba limpio). No defecto de trigger ni workaround.
+[Estado único](docs/linea-produccion/ESTADO_OPERATIVO_ACTUAL.md) y
+[dictamen/evidencias](docs/linea-produccion/REVISION_SQL10_COMPATIBILIDAD.md).
+Siguiente: revisión autorizada de catálogos y sincronización del PR con main para CI.
+Sin SQL productivo, usuarios/permisos, rebase/merge o publicación.
+
 ## LP · regla vigente de roles y cierre individual (2026-11-03)
 
 Baseba1c546, mismo Draft183. SQL10 propuesto/contenido; alternativa a09, no cadena
