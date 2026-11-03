@@ -1,13 +1,13 @@
 # Línea de Producción — estado operativo actual
 
-**Actualizado:** 2026-11-03 02:16 UTC / 2026-11-02 21:16 America/Bogota.
-**Referencia técnica:** `e611d273e6c4ab331291918824ad9ab4207e3560` (última entrega técnica).
-**Sincronización documental:** HEAD local y remoto del PR coincidentes en
-`5d02a3ec11cb3bcfd8979d0a6506997d256c1f60` al inicio de esta revisión.
+**Actualizado:** 2026-11-03 02:32 UTC / 2026-11-02 21:32 America/Bogota.
+**Referencia técnica:** `1b63e0d0de5ab5384f890c2e696fb8d3ca8a5052` (integración de fuentes y pruebas).
+**Base de esta entrega:** HEAD local/PR coincidentes en
+`fd07cb38fc8a4414bcb3fcd9984f3bb5f0271371` al inicio; continuidad actualizada en el mismo conjunto de commits.
 **Repositorio:** `jcastillodelarosa-hub/SGP-ONE-LAB`.
 **Rama:** `feat/lp01-seguimiento-operacion` · [PR #183](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/pull/183), OPEN/DRAFT observado.
 **Base main observada en el PR:** `bb224f00924c1feaa47a4a556a829e93b8e4ca3e`.
-Esta entrega cambia documentación e instrucciones de continuidad; no código operativo.
+Esta entrega incorpora lectura de fuentes para ambas etapas y corrige saldos desconocidos; sin SQL nuevo ni cambios productivos.
 
 Esta es la **referencia operativa única de LP**. Describe el estado vigente, no un
 historial. Antes de trabajar leer AGENTS.md, este archivo y el estado real del PR;
@@ -31,15 +31,17 @@ segundo plano. No sustituye la supervisión ni concede autorizaciones productiva
 
 ## 2. Fase activa y prioridades obligatorias
 
-**FASE ACTIVA: Seguimiento, Ensamble y Empaque.** Objetivo inmediato: cerrar la
-revisión de seguridad e identidad técnica de apertura, manteniendo el ejecutor
-inactivo hasta resolver el perímetro real.
+**FASE ACTIVA: Seguimiento, Ensamble y Empaque.** Objetivo inmediato: completar
+el consumo operativo seguro de fuentes Export y contexto Mecanizado/PDT en ambas
+etapas. El bloqueo PUBLIC afecta exclusivamente la apertura automática, que sigue
+inactiva; no detiene las integraciones independientes autorizadas.
 
 1. Seguridad e identidad técnica para apertura automática.
 2. Integraciones operativas PDT, Export, Power BI y ámbitos reales.
 3. Validación de avances, SALE, afectaciones, arrastre y cierres.
 4. Dependencias de Vidrio, Dashboard y Reportes.
 5. Tabla y Kanban de Programación **al final**.
+6. Cierre: pruebas integrales y publicación únicamente autorizada.
 
 Conservar el calendario existente, sus asignaciones, prioridades y cantidades.
 No crear divisiones adicionales ni equiparar partes de Mecanizado con raíces LP.
@@ -58,6 +60,7 @@ límites indicados; ninguna implica escritura productiva habilitada.
 | Continuidad al ABRIR siguiente turno configurado: raíz/antigüedad/afectaciones y contexto, ejecutado destino cero; contención drena comandos y conserva recibos autorizados | [01](../sql-proposals/lp01-operacion/01_operacion_REVIEW.sql), [documentación](SALE_CONTINUIDAD_CONTENCION.md) | [SQL](../../tests/lp01-continuidad/evidence/postgres.json), [admisión XLSX](../../tests/lp01-continuidad/evidence/xlsx-admission.json) |
 | SIN ACTIVIDAD: vacío real, confirmación/motivo, responsable autorizado, sin BI, auditoría/versiones, reapertura coordinador | [regla y motor](SIN_ACTIVIDAD.md) | [9 grupos SQL](../../tests/lp01-sin-actividad/evidence/postgres.json), [PC/móvil](../../tests/lp01-sin-actividad/evidence/browser.json) |
 | Apertura preparada: HORARIOS_TURNOS, cierre previo acreditado, bloqueos/demora y fallback manual; **sin ejecutor automático** | [preparador](../../src/server/lp01-opening-preparation.js), [contrato](APERTURA_AUTOMATICA_PREPARACION.md) | [6 pruebas](../../tests/lp01-apertura.test.mjs), [6 grupos SQL](../../tests/lp01-apertura/evidence/postgres.json), [PC/móvil](../../tests/lp01-apertura/evidence/browser.json) |
+| Integración independiente: contexto Mecanizado/PDT en ambas etapas, clave/línea única y Export desconocido sin falso cero; agregación histórica por nombre identificada, sin créditos | [límites de lectura](../../src/domain/lp01-sources.js), [interfaz](../../src/modules/lp01-operation.js) | [SQL real](../../tests/lp01-fuentes/evidence/postgres.json), [PC/móvil](../../tests/lp01-fuentes/evidence/browser.json), [reproducción y límites](../../tests/lp01-fuentes/README.md) |
 | Diseño A: fachadas humanas/técnicas separadas, núcleo ABRIR compartido y journal append-only; **solo prototipo sintético, no instalador** | [diseño y matriz](principal-a/DISENO.md), [referencia guardada](principal-a/shared-reference.sql) | [9 grupos SQL reales con LOGIN local](../../tests/lp01-principal-a/evidence/postgres.json), [huellas](../../tests/lp01-principal-a/evidence/verification.json) |
 | Vidrio contextual/ubicaciones y cierres CSV versionados; Dashboard limitado a datos del turno consultado | [alcance delimitado](../SGP_LP01_SEGUIMIENTO_OPERACION.md) | [evidencia inicial](../../tests/lp01-seguimiento/evidence/), [SQL/reportes](../../tests/lp01-operacion/evidence/postgres.json) |
 
@@ -93,7 +96,7 @@ Responsables expresados por función, **sin inventar personas ni conceder acceso
 
 | Bloqueo / causa | Evidencia verificable | Responsable y salida requerida |
 |---|---|---|
-| **Principal: A no garantiza «solo ABRIR» en la base actual.** EXECUTE de PUBLIC alcanza 83 SECURITY DEFINER SGP, 80 invocables sin triggers; PUBLIC también recibe TEMP. NOINHERIT/REVOKE al rol no lo sustraen | [SELECT conservado](../../tests/lp01-principal-a/evidence/supabase-catalog.json), [contraejemplo sintético](../../tests/lp01-principal-a/evidence/postgres.json). Helper real solo inspeccionado, nunca ejecutado | Responsable de seguridad/DB y propietario del proyecto: delimitar propuesta compatible de perímetro y autorizar su alcance, o decidir otra frontera. Codex no revoca ACL globales ni implementa B automáticamente |
+| **Apertura automática: A no garantiza «solo ABRIR» en la base actual.** EXECUTE de PUBLIC alcanza 83 SECURITY DEFINER SGP, 80 invocables sin triggers; PUBLIC también recibe TEMP. NOINHERIT/REVOKE al rol no lo sustraen | [SELECT conservado](../../tests/lp01-principal-a/evidence/supabase-catalog.json), [contraejemplo sintético](../../tests/lp01-principal-a/evidence/postgres.json). Helper real solo inspeccionado, nunca ejecutado | Responsable de seguridad/DB y propietario del proyecto: delimitar propuesta compatible de perímetro y autorizar su alcance, o decidir otra frontera. Codex no revoca ACL globales ni implementa B automáticamente |
 | LOGIN/TLS/red/pooler reales no acreditados; no existe enlace técnico integrado/activado | [viabilidad y límites](principal-a/DISENO.md) | Responsable infraestructura/Supabase: runtime/ruta e identidad aprobados y prueba controlada posterior; sin secretos/roles ahora |
 | PDT no acredita aún liberación neta inequívoca por etapa/raíz LP ni compensación de crédito ya consumido | [contrato LP-PDT-LIBERACION/1 y brecha](CIERRE_BLOQUEOS_PRODUCTIVOS.md#2-pdt-datos-existentes-y-contrato-que-falta) | Responsable funcional/PDT: caso y consolidación de solapamientos; mantenedor integración: adaptador/emisor trazable, sin convertir piezas en ventanas |
 | Cambio de corte Export no prueba qué avances incluye; riesgo de descontar dos veces | [LP-EXPORT-INCLUSION/1](CIERRE_BLOQUEOS_PRODUCTIVOS.md#3-export-diario-contrato-de-inclusión-separado-de-power-bi-de-cierre) | Responsable fuente Export y mantenedor: procedencia/cortes/eventos incluidos y protocolo idempotente; no deducir inclusión por fecha o diferencia de saldo |
@@ -106,20 +109,22 @@ una comprobación productiva nueva de esta entrega.
 
 ## 6. Siguiente acción técnica exacta y límite de continuación
 
-**Paso inmediato:** revisar `principal-a/DISENO.md`, matriz/perímetro y evidencia ya
-existente con el responsable de seguridad/DB; delimitar expresamente el alcance de
-una propuesta compatible que resuelva PUBLIC (consumidores/ACL a preservar,
-verificaciones aisladas y recuperación), **sin ejecutar revocaciones ni grants**.
-No repetir el diagnóstico de 80 funciones ni la batería general para pedir esa
-revisión. Si A no puede satisfacer ese perímetro, llevar la comparación B a decisión
-arquitectónica, sin seleccionarla ni implementarla de oficio.
+**Entrega independiente terminada:** consulta contextual en ambas etapas y lectura
+Export estricta, probadas con SQL real sintético y PC/móvil. El contrato vigente
+agrega PDT por nombre: se reproduce mezcla entre claves diferentes y se advierte
+sin adjudicar ventanas a una parte/etapa. No se modificó su cuerpo ni sus permisos.
 
-El diseño/verificación aislada autorizado está completado en e611d27; la tarea
-activa queda en **revisión y bloqueo de seguridad**. Este protocolo no amplía el
-alcance para intervenir permisos globales. Tras resolver/aprobar ese alcance,
-continuar con propuesta instalable del núcleo/fachadas/journal y pruebas afectadas;
-solo después las integraciones de prioridad 2. No iniciar Tabla/Kanban para eludir
-el bloqueo ni solicitar ejecución productiva como siguiente paso.
+**Siguiente tarea técnica:** preparar la asociación tipada del emisor de liberaciones
+PDT con producción/etapa/raíz LP y revisión de origen antes de consumir LIBERAR.
+Necesita evidencia canónica de cobertura/liberación neta y solapamientos del caso
+real descrito en el contrato pendiente; no deducirla del resumen por nombre ni de
+piezas. Hasta obtener esa evidencia no certificar la liberación automática, pero
+continuar los componentes independientes sin cambiar saldos o abrir permisos.
+
+En paralelo documental, seguridad/DB debe revisar `principal-a/DISENO.md` y delimitar
+una propuesta compatible que resuelva PUBLIC. El diseño A completado en e611d27
+no autoriza cambios de ACL ni selección automática de B. No repetir el diagnóstico
+ni bloquear integraciones independientes por esta revisión pendiente.
 
 ## 7. Dependencias y compatibilidad
 
@@ -135,24 +140,29 @@ el bloqueo ni solicitar ejecución productiva como siguiente paso.
 
 ## 8. Pruebas y CI
 
-Última referencia documental **5d02a3e**, consultada en GitHub al corte de esta
-sincronización: **3 workflows aprobados y 1 en ejecución**:
-[diseño A aprobado](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/actions/runs/41564546228),
-[pruebas generales aprobadas](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/actions/runs/41564546246),
-[sintaxis aprobada](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/actions/runs/41564546101),
-[SQL/PC/móvil LP en ejecución](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/actions/runs/41564546102).
-La referencia técnica **e611d27 conserva CI 4/4 aprobada**, incluido
-[SQL/PC/móvil](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/actions/runs/41562580904);
-su evidencia se reutiliza, no se atribuye al workflow todavía en ejecución.
-Nueve grupos de diseño A y seis del preparador, más evidencias previas enlazadas,
-conservan su alcance. LOGIN local trust no certifica contraseña/TLS/Supavisor real;
-CSV-QA de cierre sintético no certifica el parser XLSX. La CI no prueba planta.
+**Entrega técnica 1b63e0d verificada localmente:** seis pruebas nuevas de fuentes;
+24 regresiones afectadas (Operación6, Seguimiento7, continuidad2, Power BI9);
+cuatro comprobaciones de lectura SQL y recorrido real PC1440/móvil390. Evidencia
+en [tests/lp01-fuentes](../../tests/lp01-fuentes/README.md). Paquete verify:release,
+sintaxis, huellas de funciones capturadas, integridad de fuentes protegidas y diff
+aprobados. No se repitieron manualmente las 111 previas. Se conservan sus evidencias
+y las del diseño A, sin atribuirles integración productiva.
 
-Esta entrega documental reutiliza esas evidencias y las 111 previas válidas; solo
-comprueba enlaces, coherencia de referencias, diff y ausencia de código/SQL nuevo.
-No ejecutar pruebas generales manuales por este documento. La CI obligatoria puede
-volver a dispararse por el diff acumulado del PR; su estado nuevo se consulta en
-el PR, sin atribuirle cambios de código ni verificación productiva.
+**CI de referencia fd07cb3: 4/4 aprobada**, consultada en GitHub:
+[diseño A](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/actions/runs/41565187523),
+[SQL/PC/móvil LP](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/actions/runs/41565187439),
+[general](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/actions/runs/41565187440),
+[sintaxis](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/actions/runs/41565187498).
+CI de la entrega nueva se consultará en el PR tras subir estos commits; no atribuir
+los resultados anteriores al código nuevo. El workflow existente incluye las
+pruebas nuevas, sin jobs operativos ni secretos añadidos.
+
+Los tests nuevos usan funciones capturadas reales y fuentes sintéticas. La vista
+upstream de reservas es fixture: no certifica su SQL productivo. El SQL real
+reproduce la mezcla histórica PDT por nombre y el rechazo de sesión caducada;
+no hay stubs de esos comportamientos. LOGIN local/CSV-QA previos tampoco prueban
+Supabase/TLS/XLSX real fuera de su alcance. Catálogo nuevo: SELECT de definiciones,
+sin filas productivas ni invocación RPC. La CI no acredita operación en planta.
 
 ## 9. Riesgos y autorizaciones pendientes
 
