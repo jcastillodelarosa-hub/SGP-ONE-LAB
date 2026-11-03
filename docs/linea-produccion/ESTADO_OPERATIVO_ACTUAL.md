@@ -1,13 +1,12 @@
 # Línea de Producción — estado operativo actual
 
-**Actualizado:** 2026-11-02, America/Bogota (Encargo 3A).
-**Referencia técnica:** `44a659f0d4b14a95db40c5934a57b42fd5463ddd` (asociación privada PDT, SQL propuesto y pruebas).
-**Base de esta entrega:** HEAD local/PR coincidentes en
-`fd07cb38fc8a4414bcb3fcd9984f3bb5f0271371` al inicio; continuidad actualizada en el mismo conjunto de commits.
+**Actualizado:** 2026-11-03, America/Bogota (Encargo 3B).
+**Referencia técnica:** conjunto de commits de esta entrega, base GitHub/checkout
+`00f6a25b2abf4a9fe633339fe61ae3c709b2b66d`; implementación temporal y evidencia en el mismo PR.
 **Repositorio:** `jcastillodelarosa-hub/SGP-ONE-LAB`.
 **Rama:** `feat/lp01-seguimiento-operacion` · [PR #183](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/pull/183), OPEN/DRAFT observado.
-**Base main observada en el PR:** `bb224f00924c1feaa47a4a556a829e93b8e4ca3e`.
-Esta entrega prepara 07: asociación privada PDT por producción/etapa/raíz y evidencia; sin emisor ni interfaz habilitados, sin aplicación productiva.
+**Estado inmediato:** contrato LP-AMBITO-TEMPORAL/1 implementado y probado solo en
+PostgreSQL17.11 aislado. SQL08/08R propuestos; sin aplicación productiva.
 
 Esta es la **referencia operativa única de LP**. Describe el estado vigente, no un
 historial. Antes de trabajar leer AGENTS.md, este archivo y el estado real del PR;
@@ -22,7 +21,7 @@ segundo plano. No sustituye la supervisión ni concede autorizaciones productiva
 
 | Estado | Significado y situación actual de LP |
 |---|---|
-| PROPUESTO | SQL 01–07 y contratos pendientes, diseño A y planes de instalación/recuperación. No autorizan ejecución |
+| PROPUESTO | SQL 01–08/08R y contratos pendientes, diseño A y planes de instalación/recuperación. No autorizan ejecución |
 | IMPLEMENTADO | Seguimiento/Operación, adaptador XLSX y controles en rama. Identidad técnica solo como referencia sintética, no integrada en el runtime |
 | APLICADO | **No aplicado por este PR en Supabase productivo**. Último SELECT de catálogo conservado: esquema LP ausente; no se refrescó en esta entrega documental |
 | PUBLICADO | **No publicado por este PR** en Firebase/Edge ni worker desplegado; no hay autorización de despliegue |
@@ -32,8 +31,8 @@ segundo plano. No sustituye la supervisión ni concede autorizaciones productiva
 ## 2. Fase activa y prioridades obligatorias
 
 **FASE ACTIVA: Seguimiento, Ensamble y Empaque.** Objetivo inmediato: completar
-la asociación de liberaciones PDT por producción/etapa/raíz en ambas etapas;
-conectar el emisor exige evidencia canónica pendiente. El bloqueo PUBLIC afecta exclusivamente la apertura automática, que sigue
+la validación temporal de ámbitos y cobertura por período en servidor para ambas
+etapas; preparar su revisión privada antes de cualquier aplicación real. El bloqueo PUBLIC afecta exclusivamente la apertura automática, que sigue
 inactiva; no detiene las integraciones independientes autorizadas.
 
 1. Seguridad e identidad técnica para apertura automática.
@@ -109,6 +108,35 @@ una comprobación productiva nueva de esta entrega.
 
 ## 6. Siguiente acción técnica exacta y límite de continuación
 
+**Encargo 3B implementado en rama y verificado en aislamiento.** SQL08 exige vigencia
+[inicio inclusivo, fin exclusivo), reloj real y cobertura de todo el período obtenido
+de HORARIOS_TURNOS y America/Bogota, incluidos nocturnos. Cada cierre requiere PRIMARY
+completo y BACKUP distinto completo, sin sumar cuentas parciales ni ampliar roles.
+Revocación serializada en ambos órdenes de concurrencia; comprobación tras espera
+y antes de COMMIT. Vencimiento revierte órdenes y auditoría, no confirma éxito.
+Las seis funciones de sesión/lectura/comando/recibo/importación/archivo conservan
+firma y ACL. Fachadas XLSX solo reciben autorización temporal, adaptador intacto.
+No se alteran01–07, RLS ni permisos reales; SQL08 requiere01 y06 exactos y escrituras
+contenidas. Filas antiguas sin intervalo fallan cerradas, sin backfill inferido.
+
+[Contrato, reproducción, instalación y reversión](../../tests/lp01-ambitos-temporales/README.md).
+SQL08R conserva datos/columnas: solo revierte fachadas/helpers si no hay scopes y
+escrituras están contenidas; con scopes/deriva/uso operativo exige corrección hacia
+adelante. No se creó respaldo ni se ejecutó ningún SQL productivo.
+
+**Límites pendientes de producción:** matriz real aprobada y prueba del host RPC
+con autocommit/constraints diferidas, revisión y autorización separadas. La garantía
+al confirmar no incluye clientes SQL privilegiados que fuercen constraints
+inmediatas y mantengan la transacción abierta. Contención global conservadora de
+scopes: observar latencia antes de activar; no existe importador productivo nuevo.
+
+**Siguiente acción exacta del Encargo3:** preparar importador privado de ámbitos
+aprobados con parser de zona, prevalidación por período y diff revisable, sin aplicar
+accesos. Falta matriz real por canal privado; no inventar responsables. PDT y Export
+siguen bloqueados únicamente en sus contratos de origen, sin reabrir diagnósticos.
+
+Antecedentes verificados de componentes conservados:
+
 **Entrega independiente terminada:** consulta contextual en ambas etapas y lectura
 Export estricta, probadas con SQL real sintético y PC/móvil. El contrato vigente
 agrega PDT por nombre: se reproduce mezcla entre claves diferentes. La fachada LP
@@ -169,13 +197,14 @@ Sin cambios SQL, RLS, usuarios, roles o ámbitos reales.
 
 **Pendiente de aplicación real:** faltan asignaciones privadas aprobadas y revisión
 funcional de responsables/suplentes. Vigencias/duty se validan en el revisor, pero
-SQL01.permisos no almacena esa política temporal ni duty. No se declara aplicada
+SQL01.permisos por sí solo no almacena esa política temporal ni duty; SQL08 lo
+prepara y verifica aisladamente, todavía sin aplicar. No se declara aplicada
 una restricción por intervalo o por duty; sesión vigente/cuenta activa sí se exigen
-actualmente en servidor. No aplicar una matriz temporal hasta resolver ese contrato.
+actualmente en servidor. No aplicar una matriz temporal sin revisión/autorización de SQL08 y del host.
 
-**Siguiente trabajo independiente:** preparar la verificación temporal de ámbitos
-por servidor y cobertura por período, con pruebas de transición de vigencia, sin
-aplicar datos reales ni ampliar permisos. Recibir la matriz real solo por canal
+**Ese trabajo independiente está preparado en SQL08 (3B), sin aplicar datos
+reales ni ampliar permisos. El siguiente paso vigente es el importador privado
+delimitado al inicio de esta sección. Recibir la matriz real solo por canal
 privado. PDT y Export siguen BLOQUEADOS EN FUENTE exclusivamente por sus contratos
 de origen, no por esta matriz ni como impedimento para continuar Operación.
 
@@ -197,6 +226,17 @@ ni bloquear integraciones independientes por esta revisión pendiente.
 | Vidrio/Dashboard/Reportes | Conservar modal/ubicaciones/navegación y reportes existentes; completar fuentes/desglose e histórico después de flujos críticos, sin KPI fabricado |
 
 ## 8. Pruebas y CI
+
+Encargo3B: **9 grupos SQL PASS**, PostgreSQL17.11 sin red, RPC/locks/constraints
+reales con cuentas/scopes exclusivamente sintéticos. Instalación y recuperación,
+ACL/RLS conservados, cuatro ámbitos, límites temporales, nocturno domingo,
+cobertura individual, revocación concurrente, expiración antes de COMMIT,
+idempotencia y cierre/reapertura/arrastre. [Evidencia con SHA256 SQL](../../tests/lp01-ambitos-temporales/evidence/postgres.json).
+**15 regresiones JS PASS + artefacto privado PASS**. SQL06/07 y adaptador originales
+intactos; autorización de fachadas XLSX cubierta por rechazo real de función06.
+Sin cambios UI: evidencia PC/móvil anterior reutilizada. CI nueva queda pendiente
+de consulta tras push; no se atribuye CI previa al nuevo HEAD.
+
 
 Encargo3A:9 unitarias nuevas PASS, prueba de artefacto privado PASS (0700/0600 y
 sin datos/rutas en logs), 7 grupos SQL con RPC reales en PostgreSQL17.11 aislado

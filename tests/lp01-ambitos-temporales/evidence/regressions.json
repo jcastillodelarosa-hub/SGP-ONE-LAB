@@ -1,0 +1,19 @@
+{
+  "status": "PASS",
+  "environment": "local synthetic fixtures; no production",
+  "checked_at": "2026-11-03T13:25:48.380806+00:00",
+  "commands": [
+    {
+      "command": "node tests/lp01-ambitos.test.mjs",
+      "passed": 9
+    },
+    {
+      "command": "node tests/lp01-export-reader.test.mjs",
+      "passed": 6
+    },
+    {
+      "command": "node tests/lp01-ambitos/private-artifact.mjs",
+      "result": "PASS modes 0700/0600, no personal identities or paths in error output"
+    }
+  ]
+}
