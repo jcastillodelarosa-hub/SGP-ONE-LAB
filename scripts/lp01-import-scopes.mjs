@@ -36,7 +36,7 @@ async function read(path){
 async function write(path,data){const f=await open(path,'wx',0o600);try{await f.writeFile(data);}finally{await f.close();}}
 let staging;
 try{
- const [name,pin,...rest]=process.argv.slice(2);if(!filename(name)||!digest(pin)||rest.length)fail();
+ const [name,pin,...rest]=process.argv.slice(2);if(!filename(name)||!digest(pin)||(rest.length&&!(rest.length===1&&rest[0]==='--paneles2')))fail();
  const parent=resolve('private'),root=resolve('private/lp01-scopes');
  if((await lstat(parent)).isSymbolicLink())fail();await privateStat(root,true);if(await realpath(root)!==root)fail();
  const manifest=await read(join(root,name));if(hash(manifest)!==pin)fail();const m=parse(manifest);
@@ -46,7 +46,7 @@ try{
   const e=m.entries[kind];if(!keys(e,['file','sha256','approvalRef'])||!filename(e.file)||names.has(e.file)||!digest(e.sha256)||typeof e.approvalRef!=='string'||!e.approvalRef.trim())fail();names.add(e.file);
   const data=await read(join(root,e.file));if(hash(data)!==e.sha256)fail();documents[kind]=parse(data);copies['source-'+kind+'.json']=data;
  }
- const result=prepareScopeImport({...documents,asOf:m.asOf});
+ const result=prepareScopeImport({...documents,asOf:m.asOf,...(rest.length?{lines:['PANELES_2']}: {})});
  result.provenance={manifestSha256:pin,referenceRevision:m.referenceRevision,entries:m.entries,approval:'DECLARED_PRIVATE_REFERENCE_REQUIRES_FUNCTIONAL_REVIEW'};
  const markdown=['# Revisión privada LP (sin aplicación)',`Estado: ${result.status}. apply=false.`,
  'Las declaraciones de aprobación y las huellas verifican la referencia recibida, no certifican su autoridad funcional.',
@@ -62,7 +62,7 @@ try{
  for(const conflict of result.conflicts)detail.push('CONFLICTO '+JSON.stringify(conflict));
  copies['diff.txt']=Buffer.from(detail.join('\n')+'\n');
  copies['report.json']=Buffer.from(JSON.stringify(result,null,2)+'\n');copies['review.md']=Buffer.from(markdown);
- const target=join(root,'import-'+pin);
+ const target=join(root,'import-'+pin+(rest.length?'-paneles2':''));
  async function verifyExisting(){await privateStat(target,true);const actual=(await readdir(target)).sort();if(JSON.stringify(actual)!==JSON.stringify(Object.keys(copies).sort()))fail();for(const [n,b] of Object.entries(copies))if(!(await read(join(target,n))).equals(b))fail();}
  try{await lstat(target);await verifyExisting();}catch(e){
   if(e.code!=='ENOENT')throw e;

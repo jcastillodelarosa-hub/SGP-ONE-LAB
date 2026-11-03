@@ -1,3 +1,16 @@
+## PANELES_2 · preparación inicial contenida (2026-11-03)
+
+Base82d8a95, mismo Draft183. SQL09 propuesto/deshabilitado, responsabilidad por
+cuenta/producción/etapa/fecha/turno, filtros temporales y VALIDAR explícito. Supervisor
+solo su etapa; líder ambas, auditado; cierres conservan dos responsables distintos.
+FRAMES_2 fuera del piloto, sin borrar compatibilidad. Importador --paneles2 sigue
+apply=false.8 grupos SQL sintéticos y6 importador/7 privacidad PASS; UI PC/móvil.
+[Referencia única](docs/linea-produccion/ESTADO_OPERATIVO_ACTUAL.md) y
+[matriz, pruebas, instalación y recuperación](docs/linea-produccion/PANELES2_RESPONSABLES.md).
+Bloquean aplicación el catálogo real actual y matrices aprobadas con suplencia;
+PDT/Export en fuente y runtime siguen pendientes. Sin usuarios/roles/grants, SQL
+productivo, activación, merge o publicación. SQL01–08/08R y adaptador conservados.
+
 ## Cierre funcional integral delimitado (2026-11-03)
 
 Base934340c preservada, mismo Draft183. Cuatro recorridos nuevos SQL08/handler

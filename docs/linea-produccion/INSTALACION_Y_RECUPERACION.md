@@ -1,3 +1,10 @@
+> Piloto inicial PANELES_2 (base82d8a95): [SQL09/matriz y recuperación](PANELES2_RESPONSABLES.md).
+> Orden de preparación01→06→08→09, contenido.09 deshabilitado no activa líneas.
+> Antes de escrituras, aprobar scopes08 + responsabilidades09, ambos turnos/etapas,
+> segunda cuenta distinta por cierre y perfilPANELES_2. No desactivar el perfil ni
+> ejecutar08R para recuperar acceso legacy después de usar09; contener02 y corregir
+> hacia adelante. Ninguna de estas operaciones productivas se autoriza aquí.
+
 > Asociación PDT privada propuesta: 07 después de 01 y antes de permitir LIBERAR
 > integrado. Sin grants, migración histórica ni emisor activado. Revisar
 > [alcance, bloqueo de evidencia y recuperación](../../tests/lp01-liberaciones/README.md).

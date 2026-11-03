@@ -18,7 +18,8 @@ function state(x){
  }
  return x.assignments.map(normalized);
 }
-export function prepareScopeImport({reference,proposed,catalog,periods,asOf}){
+export function prepareScopeImport({reference,proposed,catalog,periods,asOf,lines=LP_LINES}){
+ if(!Array.isArray(lines)||!lines.length||new Set(lines).size!==lines.length||lines.some(l=>!LP_LINES.includes(l)))fail();
  if(!Number.isFinite(scopeInstant(asOf))||!exact(catalog,['accounts','productions'])||!Array.isArray(catalog.accounts)||!Array.isArray(catalog.productions))fail();
  for(const a of catalog.accounts)if(!exact(a,['id','role','active'])||!text(a.id)||!text(a.role)||typeof a.active!=='boolean')fail();
  for(const p of catalog.productions)if(!exact(p,['key','line','active'])||!text(p.key)||!text(p.line)||(p.active!==undefined&&typeof p.active!=='boolean'))fail();
@@ -28,6 +29,7 @@ export function prepareScopeImport({reference,proposed,catalog,periods,asOf}){
   if(!exact(p,['line','stage','date','shift','start','end'])||!LP_LINES.includes(p.line)||!LP_STAGES.includes(p.stage)||!isoDate(p.date)||![1,2].includes(p.shift)||!Number.isFinite(scopeInstant(p.start))||!Number.isFinite(scopeInstant(p.end))||scopeInstant(p.end)<=scopeInstant(p.start)||scopeInstant(p.end)-scopeInstant(p.start)>=86400000||localDate(p.start)!==p.date)fail();
   const key=JSON.stringify([p.line,p.stage,p.date,p.shift]);if(seen.has(key))fail();seen.add(key);
  }
+ if(catalog.productions.some(p=>!lines.includes(p.line))||periods.records.some(p=>!lines.includes(p.line)))fail();
  const before=state(reference),after=state(proposed);
  const review=a=>reviewOperationalScopes({...catalog,assignments:a,at:asOf});
  const baseline=review(before),candidate=review(after),conflicts=[];
@@ -50,7 +52,8 @@ export function prepareScopeImport({reference,proposed,catalog,periods,asOf}){
   const r=reviewOperationalScopes({...catalog,assignments:after,at:asOf,period:{start:p.start,end:p.end}});
   return {period:p,...r.coverage.find(c=>c.line===p.line&&c.stage===p.stage),rows:r.rows.filter(row=>after[row.index-1].line===p.line&&after[row.index-1].stage===p.stage)};
  });
- for(const line of LP_LINES)for(const stage of LP_STAGES)if(!coverage.some(p=>p.period.line===line&&p.period.stage===stage))conflicts.push({kind:'period_scope_missing',line,stage});
+ for(const line of lines)for(const stage of LP_STAGES)if(!coverage.some(p=>p.period.line===line&&p.period.stage===stage))conflicts.push({kind:'period_scope_missing',line,stage});
+ if(lines.length===1&&lines[0]==='PANELES_2')for(const date of new Set(periods.records.map(p=>p.date)))for(const stage of LP_STAGES)for(const shift of [1,2])if(!periods.records.some(p=>p.date===date&&p.stage===stage&&p.shift===shift))conflicts.push({kind:'pilot_shift_period_missing',line:'PANELES_2',stage,date,shift});
  const ready=conflicts.length===0&&coverage.every(c=>c.primaryCovered&&c.backupCovered);
- return {contract:SCOPE_IMPORT_CONTRACT,apply:false,asOf,authorization:'NONE',status:ready?'PROPUESTA_REVISION_FUNCIONAL':'PENDIENTE_CORRECCION',readyForFunctionalReview:ready,baseline,candidate,coverage,diff,conflicts};
+ return {contract:SCOPE_IMPORT_CONTRACT,activationLines:lines,apply:false,asOf,authorization:'NONE',status:ready?'PROPUESTA_REVISION_FUNCIONAL':'PENDIENTE_CORRECCION',readyForFunctionalReview:ready,baseline,candidate,coverage,diff,conflicts};
 }

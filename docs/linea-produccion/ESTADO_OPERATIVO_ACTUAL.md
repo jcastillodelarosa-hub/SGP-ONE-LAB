@@ -1,16 +1,19 @@
 # Línea de Producción — estado operativo actual
 
-**Actualizado:** 2026-11-03, America/Bogota (cierre funcional integral delimitado).
-**Referencia:** base GitHub/checkout `934340c5f030b2f69f786a465ae4590237366b99`;
-entrega de integración SQL08/navegador en este conjunto de commits.
+**Actualizado:** 2026-11-03, America/Bogota (preparación piloto PANELES_2).
+**Referencia:** base GitHub/checkout `82d8a954fd527bdbb855376c6c23b255c0264268`;
+propuesta SQL09, perfil privado Paneles2 e integración UI en este conjunto de commits.
 **Rama:** `feat/lp01-seguimiento-operacion` · [PR #183](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/pull/183), OPEN/DRAFT observado.
-**Estado inmediato:** cuatro recorridos nuevos PASS, Ensamble/Empaque × PC1440/móvil390,
-con PostgreSQL17.11 aislado, SQL01/06/08, handler/parser XLSX y persistencia reales;
-catálogo/cuentas/ámbitos/asignaciones sintéticos. Sin cambios de lógica operativa,
-SQL o adaptador. [Matriz, límites y pruebas](CIERRE_FUNCIONAL_INTEGRAL.md).
-**No certificado el cierre integral productivo:** PDT/Export BLOQUEADOS EN FUENTE,
-ámbitos reales/runtime pendientes, histórico y consolidado multietapa incompletos.
-Hosting y apertura automática siguen bloqueados. Nada aplicado/publicado/fusionado.
+**Estado inmediato:** piloto inicial **PANELES_2 × ENSAMBLE/EMPAQUE × T1/T2** preparado,
+NO activado. SQL09 optativo/deshabilitado asigna responsabilidad explícita por turno
+sin crear cuentas/roles/grants. FRAMES_2 se deniega en ese perfil; compatibilidad
+futura conservada.8 grupos SQL,6 perfil importador y7 privacidad PASS; PC/móvil
+supervisor verificados en PostgreSQL17.11 aislado. [Matriz y evidencia](PANELES2_RESPONSABLES.md).
+**Bloqueo principal:** catálogo actual y asignaciones reales aprobadas pendientes,
+con dos responsables distintos elegibles por cierre. SQL08 conserva PRIMARY/BACKUP;
+una persona no puede suplirse a sí misma. PDT/Export siguen bloqueados en fuente,
+runtime e histórico/consolidado pendientes. Sin SQL productivo, aplicación, merge
+ni publicación. CI nueva pendiente; evidencias válidas82d8a95 reutilizadas.
 
 Esta es la **referencia operativa única de LP**. Describe el estado vigente, no un
 historial. Antes de trabajar leer AGENTS.md, este archivo y el estado real del PR;
@@ -35,7 +38,7 @@ segundo plano. No sustituye la supervisión ni concede autorizaciones productiva
 ## 2. Fase activa y prioridades obligatorias
 
 **FASE ACTIVA: Seguimiento, Ensamble y Empaque.** Prioridad vigente: cierre funcional
-integral delimitado, sin publicación. Antecedente técnico: completar
+integral delimitado para PANELES_2, ambos turnos y etapas, sin activación. Antecedente técnico: completar
 el cierre técnico de ambas etapas con Power BI, ya contrastado de forma integrada
 en aislamiento. Falta correspondencia/ámbitos/cobertura de casos reales y runtime autorizado. El bloqueo PUBLIC afecta exclusivamente la apertura automática, que sigue
 inactiva; no detiene las integraciones independientes autorizadas.
@@ -112,6 +115,20 @@ históricos por inferencia. Las observaciones Supabase conservan su fecha, no so
 una comprobación productiva nueva de esta entrega.
 
 ## 6. Siguiente acción técnica exacta y límite de continuación
+
+**Preparación Paneles2:** [SQL09, matriz, procedimiento privado y recuperación](PANELES2_RESPONSABLES.md).
+Supervisor por etapa y líder en ambas con cuenta/rol/producción/fecha/turno/vigencias
+explícitos; VALIDAR limitado, no SALE/reapertura. Auditoría canónica sin modificar
+payload de idempotencia. Supuestos títulos no conceden acceso. Importador3C tiene
+perfil privado --paneles2/apply=false; no aplica las asignaciones SQL09.
+**Siguiente acción exacta:** recibir catálogo vigente y las dos matrices privadas
+(scopes08 y responsabilidades09), pin y aprobación, con segunda cuenta real distinta
+para cada cierre. Revisar diff3C y compatibilidad de roles; no crear responsables.
+La captura agregada02/11 no certifica roles actuales. No reintentar consulta sensible.
+La suplencia del líder se probó con cuentas sintéticas distintas; si no existe
+cobertura real, el cierre afectado permanece bloqueado. No activar escrituras.
+
+Antecedente integral (evidencia vigente en lo no modificado):
 
 **Cierre funcional integral preparado hasta los límites de fuente/runtime.**
 4 recorridos nuevos PC/móvil PASS con SQL08 y handler XLSX real: revocación tras

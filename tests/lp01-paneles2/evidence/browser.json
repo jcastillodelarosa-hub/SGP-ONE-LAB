@@ -1,0 +1,25 @@
+{
+  "status": "PASS",
+  "results": [
+    {
+      "width": 1440,
+      "SQL09_supervisor_validation": "PASS",
+      "SALE_reopen_absent": true,
+      "other_stage_denied": "PASS",
+      "synthetic": true,
+      "errors": []
+    },
+    {
+      "width": 390,
+      "SQL09_supervisor_validation": "PASS",
+      "SALE_reopen_absent": true,
+      "other_stage_denied": "PASS",
+      "synthetic": true,
+      "errors": []
+    }
+  ],
+  "limits": [
+    "Local auth bootstrap/transport only; results and authorization are actual isolated SQL09",
+    "Does not certify real assignments, sessions or deployment"
+  ]
+}
