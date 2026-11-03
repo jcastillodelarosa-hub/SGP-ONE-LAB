@@ -13,6 +13,7 @@ for rel in files:
  if len(p.parts)>1 and p.parts[0] not in ['src','assets','vendor']:continue
  if p.parts[0]=='src' and (len(p.parts)<3 or p.parts[1] not in ['modules','domain','services','ui','config','data']):continue
  dst=OUT/p;dst.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(ROOT/p,dst)
+if (ROOT/'release-info.json').is_file():shutil.copyfile(ROOT/'release-info.json',OUT/'release-info.json')
 # SDK is generated/untracked in this repository: use the existing local build, no credentials.
 (OUT/'vendor').mkdir(exist_ok=True)
 for name in ['supabase.js','html2canvas.min.js','jspdf.umd.min.js']:shutil.copyfile(ROOT/'vendor'/name,OUT/'vendor'/name)

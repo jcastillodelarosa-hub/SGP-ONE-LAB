@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "actual_gate_cli_first_adoption": "HOLD",
+  "release_verification": "LAB v380 PASS",
+  "workflow_dispatches": 0,
+  "firebase_actions": 0,
+  "credentials_read": 0,
+  "syntax": "Python AST and workflow YAML parsed"
+}

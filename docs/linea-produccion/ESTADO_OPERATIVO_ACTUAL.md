@@ -1,14 +1,17 @@
 # Línea de Producción — estado operativo actual
 
-**Actualizado:** 2026-11-03, America/Bogota (certificación Hosting).
-**Referencia técnica:** entrega de certificación y preflight offline en este conjunto de commits.
-**Base verificada GitHub/checkout:** `64d91e24567ee31f31401bcca4b54bdb6d490a0c`.
+**Actualizado:** 2026-11-03, America/Bogota (publicación controlada preparada).
+**Referencia técnica:** mecanismo de publicación en este conjunto de commits; base
+`bb7d052542d06e83e0b4187dfa6776dd99b0a21d` verificada en GitHub/checkout.
 **Repositorio:** `jcastillodelarosa-hub/SGP-ONE-LAB`.
 **Rama:** `feat/lp01-seguimiento-operacion` · [PR #183](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/pull/183), OPEN/DRAFT observado.
-**Estado inmediato:** BLOQUEADO en certificación de Hosting por falta de mecanismo
-configurado de lectura autenticada. Release/version activas y rollback exacto no
-acreditados. Preflight de publicación local terminado,6gruposPASS; sin Firebase,
-nuevos sitios/canales, SQL ni permisos. CI64d91e2 4/4PASS reutilizada.
+**Estado inmediato:** procedimiento IMPLEMENTADO EN RAMA / VERIFICADO LOCALMENTE;
+publicación y recuperación LP BLOQUEADAS hasta acreditar release/version live y
+versión retenida recuperable. Política legacy/no certificada: adopción del PR no
+despliega; pushes ordinarios posteriores conservan navegación anterior. Prepare
+sin secretos e inspect GET preparados, **no ejecutados en Actions/Firebase**.
+7 grupos de política, 4 de artefacto y PC/móvil PASS locales. CI basebb7d052 4/4PASS
+reutilizada; CI del cambio pendiente de observar tras push.
 
 Esta es la **referencia operativa única de LP**. Describe el estado vigente, no un
 historial. Antes de trabajar leer AGENTS.md, este archivo y el estado real del PR;
@@ -110,6 +113,24 @@ históricos por inferencia. Las observaciones Supabase conservan su fecha, no so
 una comprobación productiva nueva de esta entrega.
 
 ## 6. Siguiente acción técnica exacta y límite de continuación
+
+**Publicación controlada preparada, NO ejecutada.** firebase-hosting.yml conserva
+proyecto/cuenta/grupo live existentes; policy legacy/no certificada. Primera
+adopción y cambios LP/política retienen deploy. Pushes habituales posteriores
+publican artefacto positivo con navegación anterior, sin activar LP pendiente;
+no se bloquea main globalmente ni se publica raízrepo. Dispatch defaultprepare
+sin secretos; inspect GET solo; publish/recover bloqueados por policy, identidad
+live y pins. Después de aprobación visual, pushes ordinarios preservarán LP
+readonly congelado por hashes. [Mecanismo, riesgos, pruebas y recuperación](../../tests/lp01-publish/PUBLICACION_CONTROLADA.md).
+7grupos política+4artefacto y PC/móvil habitualPASS; gateCLI/YAML/verifyreleasePASS.
+API en tests es transporte sintético: ninguna identidad/version Hosting nueva
+acreditada. CIbasebb7d052 4/4PASS reutilizada. Cero dispatch, Firebase, infraestructura,
+claves, permisos, SQL o datos productivos. Publicación LP sigue BLOQUEADA.
+**Siguiente acción:** revisión técnica de política/workflow y eventual autorización
+soloinspect con la misma cuenta; no publicación para conocer la versión.403/permisos
+insuficientes deben detenerla sin otro rol. No fusionar ni ejecutar ahora.
+
+Antecedentes de certificación:
 
 **Certificación Hosting: BLOQUEADO por falta de mecanismo autenticado autorizado.**
 Sin conector Hosting, CLI/gcloud, selectorADC/manifiesto o identidad técnica configurada.

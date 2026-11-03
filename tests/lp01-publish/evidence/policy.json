@@ -1,0 +1,17 @@
+{
+  "status": "PASS",
+  "checks": [
+    "First policy adoption holds merge, squash, rebase and batched adoption by before/after tree state; no message/PR-title heuristic",
+    "Later ordinary pushes retain legacy release route without granting LP publication",
+    "Prepare secret-free; inspect GET-only route; current uncertified policy denies publish/recover even with matching source pin",
+    "Policy transition holds; only certified pinned LP assets admit visual releases; drift and wrong source rejected, ordinary non-LP updates can continue",
+    "Synthetic API transport: inspect only GET, verifies site/live/version/finalized inventory, stale live refuses recovery; no real identity/version certified",
+    "Workflow YAML: same project/account/live concurrency; secrets after gate; default prepare; both deployment actions point exclusively at prepared public roots",
+    "Legacy navigation is byte-identical to PR base; no invented legacy UI or RPC contracts"
+  ],
+  "limits": [
+    "Pure policy and synthetic metadata transport; no Firebase action executed",
+    "Future metadata API/service-account access and Hosting recovery still unverified",
+    "Current policy remains legacy and uncertified; no privileged account/secret read"
+  ]
+}

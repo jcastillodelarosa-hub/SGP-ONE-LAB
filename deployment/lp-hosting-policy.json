@@ -1,0 +1,13 @@
+{
+  "contract": "LP-HOSTING-POLICY/1",
+  "mode": "legacy",
+  "integration_pr": 183,
+  "hosting_certified": false,
+  "project": "sgp-one-lab",
+  "site": "sgp-one-lab",
+  "approved_lp_files": {},
+  "legacy_navigation_sha256": "4f0992b1c98f4933fe5a0daa98d95fd85b35fceaffbbbd904fef7d422f21f0af",
+  "certification_reference": null,
+  "baseline_version": null,
+  "rollback_version": null
+}

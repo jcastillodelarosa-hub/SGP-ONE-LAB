@@ -1,3 +1,13 @@
+## Publicación controlada · preparación vigente (2026-11-03)
+
+PR183: workflow existente preparado con política legacy/no certificada. Adopción
+PR y cambios LP/política no despliegan; otros pushes conservan vía habitual con
+navegación anterior y public positivo. LP manual solo tras certificación/pins.
+Defaultprepare sin secretos; inspect GET preparado, no ejecutado. Publicación y
+recuperación LP BLOQUEADAS, IDs live aún no acreditados. No acciones Firebase ni
+credenciales/infraestructura creadas. [Procedimiento y pruebas](tests/lp01-publish/PUBLICACION_CONTROLADA.md).
+Prevalece ESTADO_OPERATIVO_ACTUAL.md; no fusionar/desplegar/dispatch sin autorización.
+
 ## Certificación Hosting · dictamen vigente (2026-11-03)
 
 PR183: BLOQUEADO por falta de acceso autenticado de lectura a Hosting; release/
