@@ -123,10 +123,12 @@ La instalación no habilita escrituras ni crea usuarios, secretos o jobs.
   Las pruebas antiguas09 de doble responsabilidad se conservan como históricas,
   pero se sustituyen en CI por el perfil10. CI nueva pendiente al subir el commit.
 
-Se corrigieron dos defectos demostrados en Configuración: comilla ausente de
+Se corrigieron defectos demostrados en Configuración: comilla ausente de
 `data-role`, que rompía la selección del bloque para guardar, y scroll del modal
 Usuarios que podía dejar Guardar fuera de vista. Correcciones limitadas a esos
-componentes, sin menú nuevo ni cambios globales de apariencia.
+componentes, sin menú nuevo ni cambios globales de apariencia. El flujo directo
+a Usuarios también consulta defaults al abrir el editor, sin depender de visitar
+Roles primero; si la consulta falla, no abre un editor con permisos incompletos.
 
 ## Instalación, activación y recuperación futuras
 

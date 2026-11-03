@@ -2,7 +2,7 @@
 
 **Actualizado:** 2026-11-03, America/Bogota (roles y cierre individual).
 **Referencia:** base GitHub/checkout `ba1c546ec9b34752d83280e558ae1826ecc97e06`;
-perfil SQL10 y Configuración en este conjunto de commits.
+implementación SQL10/Configuración `c213d9d` y corrección de defaults en este conjunto de commits.
 **Rama:** `feat/lp01-seguimiento-operacion` · [PR #183](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/pull/183), OPEN/DRAFT observado.
 **Regla vigente:** PANELES_2, Supervisores Ensamble/Empaque y LIDER LINEA con cierre
 individual por rol/etapa, ambos turnos, **sin PRIMARY/BACKUP ni asignación temporal

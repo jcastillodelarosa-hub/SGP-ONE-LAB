@@ -38,7 +38,7 @@ try:
     page.on('dialog',lambda d:(dialogs.append(d.message),d.accept()))
 
     if page.locator('#mobileMenuToggle').is_visible():page.locator('#mobileMenuToggle').click()
-    page.locator('.nav [data-view="configuracion"]').click();page.locator('[data-config-tab="roles"]').click()
+    page.locator('.nav [data-view="configuracion"]').click();page.locator('[data-config-tab="usuarios"]').click();page.locator('#newUserBtn').click();page.locator('#userRole').select_option('SUPERVISOR ENSAMBLE');assert page.locator('#userAccessGrid input[value="ensamble.operacion-ensamble"]').is_checked();page.locator('#userCancel').click();page.locator('[data-config-tab="roles"]').click();page.wait_for_selector('#roleAccessManager[aria-busy="false"]')
     block=page.locator('#roleAccessManager details').filter(has=page.locator('summary',has_text='SUPERVISOR ENSAMBLE'))
     block.locator(':scope > summary').click();assert 'cierre individual' in block.inner_text()
     # Native roles save revokes operations for already issued supervisor sessions.
@@ -75,7 +75,7 @@ try:
     assert db.sql("SELECT rol_efectivo FROM sgp_lp_operacion.auditoria WHERE usuario='se' AND operacion='CERRAR'")=='SUPERVISOR ENSAMBLE'
     assert db.snapshot(date='2026-11-02',shift=2,token='se')['turn']['estado']=='CERRADO'
     page.screenshot(path=str(HERE/f'evidence/individual-{width}.png'));page.close()
-    results.append({'width':width,'native_role_edit_revocation':'PASS','native_user_create_edit_and_defaults':'PASS','individual_T2_confirmation_cancel_and_close':'PASS','server_role_audit':'PASS','transport':'real local SDK; REST routed to actual captured admin/session and LP SQL; unrelated sources unavailable'})
+    results.append({'width':width,'direct_users_without_prior_roles_visit':'PASS','native_role_edit_revocation':'PASS','native_user_create_edit_and_defaults':'PASS','individual_T2_confirmation_cancel_and_close':'PASS','server_role_audit':'PASS','transport':'real local SDK; REST routed to actual captured admin/session and LP SQL; unrelated sources unavailable'})
    finally:db.close()
   browser.close()
 finally:server.shutdown()
