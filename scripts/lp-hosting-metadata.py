@@ -2,7 +2,7 @@
 No credential discovery. Inspect is GET-only. Recovery requires explicit guarded workflow route.
 Never used by local tests against Firebase.
 """
-import os,json,re,sys,hashlib,datetime,urllib.request,urllib.parse
+import os,json,re,sys,hashlib,datetime,urllib.request,urllib.parse,urllib.error
 from functools import lru_cache
 from pathlib import Path
 API='https://firebasehosting.googleapis.com/v1beta1/';SITE='sgp-one-lab';PROJECT='sgp-one-lab'
@@ -21,29 +21,44 @@ def access_token():
  if not creds.token:raise ValueError('OAUTH_TOKEN_NOT_ISSUED')
  return creds.token
 def request(method,resource,body=None):
- token=access_token()
+ try:token=access_token()
+ except Exception:raise ValueError('OAUTH_TOKEN_FAILED') from None
  payload=None if body is None else json.dumps(body).encode()
  req=urllib.request.Request(API+resource,data=payload,method=method,headers={'Authorization':'Bearer '+token,'Content-Type':'application/json'})
  class NoRedirect(urllib.request.HTTPRedirectHandler):
   def redirect_request(self,*args,**kwargs):raise ValueError('HOSTING_REDIRECT_NOT_ADMITTED')
- with urllib.request.build_opener(NoRedirect).open(req,timeout=30) as r:return json.load(r)
+ try:
+  with urllib.request.build_opener(NoRedirect).open(req,timeout=30) as r:return json.load(r)
+ except urllib.error.HTTPError as exc:raise ValueError('HTTP_'+str(exc.code)) from None
+ except urllib.error.URLError:raise ValueError('NETWORK_FAILED') from None
+
+def checked_get(call,stage,resource):
+ """Constrain diagnostics to stage/status; never log API bodies, URLs, tokens or keys."""
+ try:return call('GET',resource)
+ except ValueError as exc:
+  code=str(exc)
+  if not re.fullmatch(r'(?:HTTP_[1-5][0-9]{2}|OAUTH_TOKEN_FAILED|NETWORK_FAILED|HOSTING_REDIRECT_NOT_ADMITTED)',code):
+   code='UNEXPECTED'
+  raise ValueError('HOSTING_'+stage+'_'+code) from None
+ except Exception:raise ValueError('HOSTING_'+stage+'_UNEXPECTED') from None
+
 def inspect(call=request):
- site=call('GET',f'projects/{PROJECT}/sites/{SITE}')
+ site=checked_get(call,'SITE',f'projects/{PROJECT}/sites/{SITE}')
  if not site.get('name','').endswith('/sites/'+SITE):raise ValueError('SITE_NOT_VERIFIED')
- channel=call('GET',f'sites/{SITE}/channels/live')
+ channel=checked_get(call,'CHANNEL',f'sites/{SITE}/channels/live')
  if channel.get('name')!=f'sites/{SITE}/channels/live':raise ValueError('CHANNEL_NOT_VERIFIED')
  release=channel.get('release',{});version=release.get('version',{});name=version.get('name','')
- if not re.fullmatch('sites/'+SITE+r'/versions/[A-Za-z0-9_-]+',name) or not release.get('name','').startswith('sites/'+SITE+'/releases/'):raise ValueError('LIVE_LINK_NOT_VERIFIED')
+ if not re.fullmatch('sites/'+SITE+r'/versions/[A-Za-z0-9_-]+',name) or not re.fullmatch('sites/'+SITE+r'/(?:channels/live/)?releases/[A-Za-z0-9_-]+',release.get('name','')):raise ValueError('LIVE_LINK_NOT_VERIFIED')
  version,files=read_version(name,call)
  return {'project':PROJECT,'site_resource':site['name'],'site':SITE,'channel':channel.get('name'),'release':release['name'],'version':name,'version_status':version['status'],'files':files,'config':version.get('config',{}),'observed_at':datetime.datetime.now(datetime.timezone.utc).isoformat()}
 def read_version(name,call=request):
  if not re.fullmatch('sites/'+SITE+r'/versions/[A-Za-z0-9_-]+',name):raise ValueError('VERSION_NOT_ADMITTED')
- version=call('GET',name)
+ version=checked_get(call,'VERSION',name)
  if version.get('name')!=name or version.get('status')!='FINALIZED':raise ValueError('LIVE_VERSION_NOT_RESTORABLE')
  files=[];page=None;seen=set()
  while True:
   suffix='?'+urllib.parse.urlencode({'pageToken':page}) if page else ''
-  result=call('GET',name+'/files'+suffix);files.extend(result.get('files',[]));page=result.get('nextPageToken')
+  result=checked_get(call,'FILES',name+'/files'+suffix);files.extend(result.get('files',[]));page=result.get('nextPageToken')
   if not page:break
   if page in seen or len(files)>50000:raise ValueError('FILE_PAGINATION_INVALID')
   seen.add(page)
@@ -73,6 +88,9 @@ if __name__=='__main__':
    if label not in ['before','after']:raise ValueError('METADATA_LABEL_INVALID')
    p=root/('metadata-'+label+'.json');p.write_text(json.dumps(e));p.chmod(0o600)
    Path(os.environ['RUNNER_TEMP'],'lp-hosting-'+label+'-summary.json').write_text(json.dumps(safe_summary(e),indent=2)+'\n');print(json.dumps(safe_summary(e)))
- except Exception:
-  # Never dump bearer tokens, raw API errors or returned identity fields.
-  print('HOSTING_READ_OR_GUARD_FAILED; stop without credential escalation',file=sys.stderr);sys.exit(1)
+ except Exception as exc:
+  # Only internally defined diagnostic markers; never print arbitrary exception bodies.
+  marker=str(exc)
+  if not re.fullmatch(r'(?:HOSTING_(?:SITE|CHANNEL|VERSION|FILES)_(?:HTTP_[1-5][0-9]{2}|OAUTH_TOKEN_FAILED|NETWORK_FAILED|HOSTING_REDIRECT_NOT_ADMITTED|UNEXPECTED)|SITE_NOT_VERIFIED|CHANNEL_NOT_VERIFIED|LIVE_LINK_NOT_VERIFIED|VERSION_NOT_ADMITTED|LIVE_VERSION_NOT_RESTORABLE|LIVE_FILE_INVENTORY_EMPTY|FILE_PAGINATION_INVALID|LIVE_VERSION_MISMATCH|RECOVERY_NOT_ADMITTED|RECOVERY_VERSION_INVALID|RECOVERY_VERSION_NOT_RETAINED|LIVE_CHANGED_NO_RECOVERY|METADATA_LABEL_INVALID)',marker):
+   marker='UNCLASSIFIED'
+  print('HOSTING_INSPECT_BLOCKED:'+marker+'; stop without credential escalation',file=sys.stderr);sys.exit(1)
