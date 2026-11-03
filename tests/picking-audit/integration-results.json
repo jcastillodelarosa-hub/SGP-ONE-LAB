@@ -1,0 +1,63 @@
+{
+  "environment": "PostgreSQL 17.11 network none, synthetic data, real SGP/PDT functions",
+  "passed": 14,
+  "failed": 0,
+  "tests": [
+    {
+      "name": "aceptar, fecha/turno independientes y reintento idempotente",
+      "ok": true
+    },
+    {
+      "name": "modificar mismo ID, pieza f\u00edsica, cantidades, historial y listado V2",
+      "ok": true
+    },
+    {
+      "name": "anulaci\u00f3n l\u00f3gica conserva relaciones y sale de activos V2",
+      "ok": true
+    },
+    {
+      "name": "diferencia adicional V4 real, origen auditor\u00eda e idempotencia",
+      "ok": true
+    },
+    {
+      "name": "tres pendientes con decisiones independientes en una transacci\u00f3n",
+      "ok": true
+    },
+    {
+      "name": "error tard\u00edo revierte decisiones previas y sus historiales",
+      "ok": true
+    },
+    {
+      "name": "Recepci\u00f3n autorizada; Consulta, Patinador y otros roles sin auditor\u00eda ni escritura directa",
+      "ok": true
+    },
+    {
+      "name": "versi\u00f3n detecta cambios concurrentes de pendiente",
+      "ok": true
+    },
+    {
+      "name": "NC, detalle/material y validaci\u00f3n posterior bloquean anulaci\u00f3n",
+      "ok": true
+    },
+    {
+      "name": "rechazar diferencia duplicada y doble decisi\u00f3n",
+      "ok": true
+    },
+    {
+      "name": "dos auditores concurrentes: una sola confirmaci\u00f3n",
+      "ok": true
+    },
+    {
+      "name": "PDT corregido contin\u00faa con validaci\u00f3n y avance reales por 3 piezas",
+      "ok": true
+    },
+    {
+      "name": "guardas V2 persisten fuera de auditor\u00eda y un anulado no se reactiva",
+      "ok": true
+    },
+    {
+      "name": "hist\u00f3rico sin v\u00ednculo expl\u00edcito bloqueado; no deducir relaci\u00f3n por nombre/pieza",
+      "ok": true
+    }
+  ]
+}

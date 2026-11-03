@@ -1,3 +1,70 @@
+# PR #174 — cierre técnico preparado para revisión (2026-10-31 Colombia)
+
+Rama `feat/picking-auditoria-pendientes`; referencia `972c351`; main integrado
+`4f5b8af` mediante merge en la rama de trabajo, sin fusionar el PR ni desplegar.
+Supabase contrastado solo con SELECT: 15 funciones, 11 relaciones, 10 triggers y
+123 columnas coincidentes. Una comprobación remota DO expiró sin ejecutarse y fue
+sustituida por SELECT. No se ejecutó DDL/DML productivo ni se creó respaldo/copia.
+
+Recepción limitada a contexto de auditoría con rol real (evita alias LIDER).
+Capacidad privada por transacción; lectores generales de piezas denegados; botón
+Ver piezas de Recepción usa contexto de auditoría. Sin DML directo de navegador en
+diferencias históricas. SQL propuesto sigue sin aplicar. Instalador atómico único
+con preflight; reversión sin CASCADE protegida por uso y cuerpos divergentes.
+Informe expone fecha/turno y decisiones separadas de la entrega original; errores
+de guardado/refresco ya no se confunden ni permiten volver a guardar tras éxito.
+
+READ ONLY: 36 entregas por auditar bloqueadas, 61 faltantes sin origen; cero ambiguos.
+No conciliados. Ver JSON/consulta y población histórica separada en el plan.
+QA dirigido: 14 funcionales, 3 controles nuevos, 9 instalación/reversión; PC/móvil
+con guardado real local y fallos de cliente inyectados explícitos; fechas/turnos y
+Recepción dirigidos. Evidencia general previa reutilizada sin repetirla manualmente.
+
+Estado: IMPLEMENTADO EN RAMA / VERIFICADO EN AISLAMIENTO / PENDIENTE DE APROBACIÓN.
+Plan completo de respaldo previo, instalación, postchecks y recuperación forward:
+docs/sql-proposals/picking-audit/INSTALLATION_RECOVERY_PLAN.md. Inventario de DROP,
+DELETE, TRUNCATE y UPDATE sin WHERE separado y reproducible. Ninguna operación
+productiva solicitada: respaldo/restauración, instalación, pruebas productivas,
+conciliación, rollback/forward, fusión y publicación requieren autorización expresa.
+
+Siguiente paso único: revisión del PR #174 y aprobación de alcance/plan, incluyendo
+el bloqueo de históricos no conciliados. https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/pull/174
+
+---
+
+# Auditoría individual de Picking — rama de revisión (2026-10-31 Colombia)
+
+Repositorio SGP-ONE-LAB; base main `3e5d438`; rama `feat/picking-auditoria-pendientes`.
+PR Draft #174: https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/pull/174
+Main posterior contrastado: `845d710`; sin conflictos, sin fusionar ramas.
+Encargo N3: decisiones individuales, corrección por identidad PANEL, anulación lógica,
+fecha/turno operativos, diferencias nuevas y scroll PC/móvil. No intervenir recepción
+general, GOOGLE ni LAC. Sin operaciones productivas, migraciones aplicadas, fusión,
+Firebase ni publish; sin copias/respaldos de bases.
+
+IMPLEMENTADO EN RAMA / VERIFICADO EN AISLAMIENTO / PENDIENTE DE REVISIÓN.
+SQL REVIEW aditivo de RPC y ledger privado con RLS; roles y cuerpos vigentes
+contrastados READ ONLY. Bloqueo de entrega/PDT, versión, idempotencia y trazabilidad.
+La guarda V2 permite cantidad corregida solo mediante autorización privada por
+transacción; las invariantes siguen activas fuera de ese procedimiento.
+
+QA: 14 escenarios PostgreSQL reales, 63 regresiones previas a la instalación aislada,
+363 casos JS/65 archivos, cinco pruebas de fechas/decisiones; modal real PC/móvil
+contra SQL local, formulario largo, encabezado/pie accesibles y guardado. Transporte
+HTTP y configuración horaria QA declarados; no certifican Auth/PostgREST ni planta.
+
+Bloqueo técnico delimitado: históricos sin vínculo de entrega inequívoco se rechazan
+con AUDITORIA_ORIGEN_NO_UNIVOCO; no deducir relaciones por nombre/pieza. Su edición
+requiere conciliación autorizada y no se declara certificada. El frontend requiere
+el contrato nuevo: no publicarlo solo. Ningún SQL aplicado en Supabase.
+
+Siguiente paso único: revisión del Draft y de la propuesta SQL, incluyendo la
+conciliación histórica que permanece fuera de la aceptación certificada.
+Detalles y reproducción: docs/sql-proposals/picking-audit/README.md;
+tests/picking-audit/README.md y evidencias JSON/PNG.
+
+---
+
 # LP-01 E4 — preparación LAB v374 sobre main vigente
 
 PR #170, rama `feat/lp01-e4-programacion-grupos`. Se incorporó `main` `ce559cb7b92b289b6ab81597f6609939184bf6ba`, que ya contiene el PR #168 de Mecanizado parcial. Se preservaron sus módulos, pruebas, SQL y estilos; el único conflicto fue `index.html` y se resolvió manteniendo LAB v374, `styles.css?v=374` y `app.js?v=374-multi-nc`. `scripts/build-release-info.mjs` también declara LAB v374.

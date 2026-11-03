@@ -1,0 +1,6 @@
+{
+  "files": 65,
+  "failed": [],
+  "reported_tests": 363,
+  "method": "each root test file executed directly; new domain tests run separately"
+}

@@ -1,0 +1,23 @@
+{
+  "project": "ocvxbwzqxbrfndkvjmfx",
+  "captured_at": "2026-11-01T02:42:27.526828+00:00",
+  "faltantes_total": 110,
+  "faltantes_ambiguos": 0,
+  "faltantes_sin_origen": 81,
+  "entregas_bloqueadas_total": 54,
+  "faltantes_por_auditar_ambiguos": 0,
+  "entregas_por_auditar_bloqueadas": 36,
+  "faltantes_por_auditar_sin_origen": 61,
+  "pendientes_picking_activos_por_contrato": [
+    {
+      "total": 69,
+      "sin_vinculo": 69,
+      "contrato_pdt": "LEGACY"
+    },
+    {
+      "total": 46,
+      "sin_vinculo": 18,
+      "contrato_pdt": "V2"
+    }
+  ]
+}

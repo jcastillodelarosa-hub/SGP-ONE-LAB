@@ -1,0 +1,42 @@
+{
+  "environment": "PostgreSQL 17.11, synthetic network-none fixture",
+  "passed": 9,
+  "tests": [
+    {
+      "name": "rollback sin uso restaura cuerpos y elimina solo los objetos propios",
+      "ok": true
+    },
+    {
+      "name": "preflight de solo lectura acepta cat\u00e1logo vigente",
+      "ok": true
+    },
+    {
+      "name": "preflight rechaza cambio de cuerpo/configuraci\u00f3n",
+      "ok": true
+    },
+    {
+      "name": "preflight rechaza cambio de permisos",
+      "ok": true
+    },
+    {
+      "name": "preflight rechaza trigger deshabilitado",
+      "ok": true
+    },
+    {
+      "name": "error tras todo el DDL revierte contrato y permisos completos",
+      "ok": true
+    },
+    {
+      "name": "instalaci\u00f3n \u00fanica at\u00f3mica completa",
+      "ok": true
+    },
+    {
+      "name": "instalaci\u00f3n repetida bloqueada",
+      "ok": true
+    },
+    {
+      "name": "rollback no sobrescribe un cuerpo posterior divergente",
+      "ok": true
+    }
+  ]
+}
