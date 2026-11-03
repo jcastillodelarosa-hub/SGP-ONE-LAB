@@ -1,0 +1,3 @@
+
+# Private LP scope snapshots and review artifacts; never commit real identities.
+/private/lp01-scopes/
