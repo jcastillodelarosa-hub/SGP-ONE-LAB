@@ -1,3 +1,13 @@
+# LP — referencia operativa única
+
+Consultar [ESTADO_OPERATIVO_ACTUAL](docs/linea-produccion/ESTADO_OPERATIVO_ACTUAL.md)
+antes de continuar #183 y actualizarlo al cerrar cada entrega técnica. Ese documento
+contiene el estado vigente y las prioridades; los hitos inferiores son antecedentes,
+no una autorización ni un estado productivo actual. El protocolo de lectura y
+actualización por entrega queda establecido en AGENTS.md; no es un proceso de fondo.
+
+---
+
 # PR #183 — identidad A, diseño verificable y bloqueo PUBLIC (02/11/2026)
 
 Continúa 0a6b48d, misma rama/Draft. A elegida solo para diseño/preparación; NO

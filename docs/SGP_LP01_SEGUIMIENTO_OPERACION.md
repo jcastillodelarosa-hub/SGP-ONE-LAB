@@ -1,3 +1,6 @@
+> **Estado vigente y prioridades:** [referencia operativa única LP](linea-produccion/ESTADO_OPERATIVO_ACTUAL.md).
+> Este documento conserva alcance y antecedentes; no sustituye esa referencia.
+
 > Desde 0a6b48d: [identidad técnica A, seleccionada solo para diseño](linea-produccion/principal-a/DISENO.md).
 > Referencia compartida y nueve grupos SQL probados únicamente en aislamiento.
 > A bloqueada tal como está en Supabase por privilegios PUBLIC; conexión técnica
