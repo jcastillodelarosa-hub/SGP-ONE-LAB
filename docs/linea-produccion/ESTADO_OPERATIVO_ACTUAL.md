@@ -1,13 +1,13 @@
 # Línea de Producción — estado operativo actual
 
-**Actualizado:** 2026-11-03, America/Bogota (Encargo 3B).
-**Referencia técnica:** `1005cc2` (contrato temporal, SQL08/08R y pruebas).
-**Base verificada GitHub/checkout:** `00f6a25b2abf4a9fe633339fe61ae3c709b2b66d`;
-continuidad actualizada en el mismo conjunto de commits del PR.
+**Actualizado:** 2026-11-03, America/Bogota (Encargo 3C y validación funcional3).
+**Referencia técnica:** conjunto de commits de esta entrega (importador privado y pruebas).
+**Base verificada GitHub/checkout:** `a3a0955f188623288a2ade3c1327300ad5090b8f`.
 **Repositorio:** `jcastillodelarosa-hub/SGP-ONE-LAB`.
 **Rama:** `feat/lp01-seguimiento-operacion` · [PR #183](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/pull/183), OPEN/DRAFT observado.
-**Estado inmediato:** contrato LP-AMBITO-TEMPORAL/1 implementado y probado solo en
-PostgreSQL17.11 aislado. SQL08/08R propuestos; sin aplicación productiva.
+**Estado inmediato:** importador privado apply=false implementado; flujo funcional
+Ensamble/Empaque y cobertura contrastados en PostgreSQL17.11 aislado. SQL01–08/08R
+intactos, no aplicados por esta entrega; sin accesos ni escrituras productivas.
 
 Esta es la **referencia operativa única de LP**. Describe el estado vigente, no un
 historial. Antes de trabajar leer AGENTS.md, este archivo y el estado real del PR;
@@ -32,8 +32,8 @@ segundo plano. No sustituye la supervisión ni concede autorizaciones productiva
 ## 2. Fase activa y prioridades obligatorias
 
 **FASE ACTIVA: Seguimiento, Ensamble y Empaque.** Objetivo inmediato: completar
-la validación temporal de ámbitos y cobertura por período en servidor para ambas
-etapas; preparar su revisión privada antes de cualquier aplicación real. El bloqueo PUBLIC afecta exclusivamente la apertura automática, que sigue
+la revisión privada de ámbitos y validación funcional de ambas etapas. Importador
+y flujo sintético preparados; falta matriz/catalogo/períodos reales aprobados. El bloqueo PUBLIC afecta exclusivamente la apertura automática, que sigue
 inactiva; no detiene las integraciones independientes autorizadas.
 
 1. Seguridad e identidad técnica para apertura automática.
@@ -109,6 +109,39 @@ una comprobación productiva nueva de esta entrega.
 
 ## 6. Siguiente acción técnica exacta y límite de continuación
 
+**Encargo 3C terminado en rama/aislamiento.** [Importador privado](../../src/server/lp01-scope-import.js)
+y [CLI](../../scripts/lp01-import-scopes.mjs) reutilizan el revisor existente, ahora
+con período opcional y revocación. Estados completos referencia/propuesta, catálogo
+y períodos del contrato servidor con manifest/pin SHA256 externo. No DB, endpoint,
+identidad técnica, SQL aplicable ni aplicación de accesos: apply=false siempre.
+Duplicados/roles/cuentas/producciones/vigencias ambiguos se rechazan. No se agrega
+cobertura de cuentas parciales ni se convierte una ausencia en revocación.
+
+Custodia privada: entradas y resultados en private/lp01-scopes, ignorado por Git,
+0700/0600, sin symlinks, originales preservados. Hash alterado/resultado cambiado
+rechaza el reintento sin sobrescribir. Logs genéricos sin identidades/rutas/huellas.
+Pin/referencias acreditan integridad respecto a la entrega privada, no certifican
+por sí solos la autoridad funcional ni el origen productivo de un archivo.
+[Contrato, reproducción y ejemplo sintético de diff](../../tests/lp01-ambitos-import/README.md).
+
+**Continuación funcional del Encargo3 realizada:** flujo real SQL08/RPC sintético
+para PANELES_2/FRAMES_2 × ENSAMBLE/EMPAQUE, 288=90+90+90+18, SALE explícita,
+último acumulado80→90=90, afectaciones superpuestas consolidadas explícitamente,
+nota/auditoría, cierre versionado, reapertura de líder denegada y arrastre exclusivo
+de P2–P4 al nocturno con prioridades/raíces/antigüedad/afectaciones conservadas,
+sin duplicar avances. Export y asignaciones completas no cambian. CSV-QA solo es
+entrada al motor de cierre; no certifica nuevo formato XLSX ni inclusión Export.
+
+**Siguiente acción exacta:** recibir por canal privado autorizado la matriz y el
+estado de referencia aprobados, catálogo completo y períodos acreditados contra
+HORARIOS_TURNOS, con el pin del manifiesto. Ejecutar el CLI privado y revisar su
+diff sin aplicar accesos. No afirmar períodos productivos emitidos por una función
+LP aún no aplicada. Validación funcional con ámbitos/fuentes reales queda pendiente.
+PDT y Export siguen bloqueados exclusivamente en fuente; host, SQL y activación
+requieren revisión/autorización separadas. No desbloquearlos mediante fixtures.
+
+Evidencia temporal y componentes previos conservados:
+
 **Encargo 3B implementado en rama y verificado en aislamiento.** SQL08 exige vigencia
 [inicio inclusivo, fin exclusivo), reloj real y cobertura de todo el período obtenido
 de HORARIOS_TURNOS y America/Bogota, incluidos nocturnos. Cada cierre requiere PRIMARY
@@ -131,9 +164,8 @@ al confirmar no incluye clientes SQL privilegiados que fuercen constraints
 inmediatas y mantengan la transacción abierta. Contención global conservadora de
 scopes: observar latencia antes de activar; no existe importador productivo nuevo.
 
-**Siguiente acción exacta del Encargo3:** preparar importador privado de ámbitos
-aprobados con parser de zona, prevalidación por período y diff revisable, sin aplicar
-accesos. Falta matriz real por canal privado; no inventar responsables. PDT y Export
+**Ese importador está implementado en3C**; el siguiente paso vigente es la
+recepción/revisión privada de la matriz delimitada al inicio de esta sección. Falta matriz real por canal privado; no inventar responsables. PDT y Export
 siguen bloqueados únicamente en sus contratos de origen, sin reabrir diagnósticos.
 
 Antecedentes verificados de componentes conservados:
@@ -204,8 +236,8 @@ una restricción por intervalo o por duty; sesión vigente/cuenta activa sí se 
 actualmente en servidor. No aplicar una matriz temporal sin revisión/autorización de SQL08 y del host.
 
 **Ese trabajo independiente está preparado en SQL08 (3B), sin aplicar datos
-reales ni ampliar permisos. El siguiente paso vigente es el importador privado
-delimitado al inicio de esta sección. Recibir la matriz real solo por canal
+reales ni ampliar permisos. El importador está implementado en3C; continuar
+con la revisión real delimitada al inicio. Recibir la matriz real solo por canal
 privado. PDT y Export siguen BLOQUEADOS EN FUENTE exclusivamente por sus contratos
 de origen, no por esta matriz ni como impedimento para continuar Operación.
 
@@ -227,6 +259,18 @@ ni bloquear integraciones independientes por esta revisión pendiente.
 | Vidrio/Dashboard/Reportes | Conservar modal/ubicaciones/navegación y reportes existentes; completar fuentes/desglose e histórico después de flujos críticos, sin KPI fabricado |
 
 ## 8. Pruebas y CI
+
+Encargo3C: **12 unitarias nuevas PASS,7 grupos privacidad CLI PASS,23 regresiones
+directas PASS y artefacto privado previo PASS**. [Evidencia pública solo sintética](../../tests/lp01-ambitos-import/evidence/).
+**4 grupos PostgreSQL17.11 PASS**: cinco escenarios de cobertura comparados con el
+guard SQL08 en los cuatro ámbitos y flujo funcional integral descrito arriba con
+sesiones/RPC reales, sin stubs de autorización/horario/cierre/cantidades. No se
+aplica salida del importador: los ámbitos son fixtures independientes del harness.
+Demo:1 alta,2 cambios,2 vencimientos,1 revocación,6 sin cambios; categorías solapadas,
+apply=false. SQL01–08/08R comparados byte a byte con a3a0955, sin modificaciones.
+Sin UI nueva: PC/móvil previo reutilizado. CI del nuevo HEAD pendiente de consulta,
+no se atribuyen resultados de CI previa ni funcionamiento productivo.
+
 
 Encargo3B: **9 grupos SQL PASS**, PostgreSQL17.11 sin red, RPC/locks/constraints
 reales con cuentas/scopes exclusivamente sintéticos. Instalación y recuperación,

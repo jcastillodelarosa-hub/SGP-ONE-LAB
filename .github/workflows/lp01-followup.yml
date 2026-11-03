@@ -20,6 +20,10 @@ on:
       - 'tests/lp01-sin-actividad.test.mjs'
       - 'tests/lp01-apertura/**'
       - 'tests/lp01-apertura.test.mjs'
+      - 'tests/lp01-ambitos-import/**'
+      - 'tests/lp01-ambitos-import.test.mjs'
+      - 'scripts/lp01-import-scopes.mjs'
+      - 'src/server/lp01-scope-import.js'
       - 'tests/lp01-ambitos-temporales/**'
       - 'tests/lp01-ambitos/**'
       - 'tests/lp01-ambitos.test.mjs'
@@ -72,6 +76,9 @@ jobs:
           node tests/lp01-export-reader.test.mjs
           node tests/lp01-ambitos.test.mjs
           node tests/lp01-ambitos/private-artifact.mjs
+          node tests/lp01-ambitos-import.test.mjs
+          node tests/lp01-ambitos-import/privacy.mjs
+          node tests/lp01-ambitos-import/demo.mjs
           node tests/lp01-followup.test.mjs
           node tests/production-line-tabs.test.mjs
           node tests/planner-integration.test.mjs
@@ -90,6 +97,7 @@ jobs:
           python tests/lp01-export-reader/postgres.py
           python tests/lp01-ambitos/postgres.py
           python tests/lp01-ambitos-temporales/postgres.py
+          python tests/lp01-ambitos-import/postgres.py
       - name: Real persistence PC and mobile acceptance
         run: |
           pip install playwright==1.62.0
@@ -117,3 +125,4 @@ jobs:
             tests/lp01-export-reader/evidence/
             tests/lp01-ambitos/evidence/
             tests/lp01-ambitos-temporales/evidence/
+            tests/lp01-ambitos-import/evidence/

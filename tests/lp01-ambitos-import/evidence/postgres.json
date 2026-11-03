@@ -1,0 +1,17 @@
+{
+  "status": "PASS",
+  "postgres": "17.11 (Debian 17.11-1.pgdg13+2)",
+  "synthetic": true,
+  "checks": [
+    "Five importer coverage cases match actual SQL08 private guard across four line/stage scopes; periods obtained from existing PostgreSQL periodo function",
+    "Real Encargo3 flow on four scopes: 288=90+90+90+18, explicit coordinator SALE, latest80->90=90, overlapping affectations consolidated2, notes/audit and real closure with QA CSV",
+    "P1 completion leaves P2-P4 open with198 programmed remaining; next Sunday night carries exactly three original roots, age and affectations, zero duplicated advances",
+    "Original Export balances and LP assignments/priorities/dates/quantities unchanged; Ensamble and Empaque execution and closure independent"
+  ],
+  "limitations": [
+    "Importer only computes apply=false; test harness sets synthetic scope fixtures independently",
+    "Five temporal cases test existing SQL08 guard without stubs; real RPC functional flow uses captured session function",
+    "QA CSV is closure input only, not new PowerBI validation",
+    "No product data, SQL, users, scopes, grants or RLS changed; no frontend changes"
+  ]
+}

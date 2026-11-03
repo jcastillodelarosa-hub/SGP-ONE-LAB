@@ -9,9 +9,16 @@ export function operationsForRole(role){
  if(coordinators.includes(role))operations.push('SALE','VALIDAR','REABRIR','LIBERAR','ABRIR');
  return operations;
 }
-const instant=s=>{if(typeof s!=='string'||!/^\d{4}-\d{2}-\d{2}T.+(Z|[+-]\d{2}:\d{2})$/.test(s))return NaN;const d=Date.parse(s.slice(0,10)+'T00:00:00Z');return Number.isFinite(d)&&new Date(d).toISOString().slice(0,10)===s.slice(0,10)?Date.parse(s):NaN;};
-export function reviewOperationalScopes({assignments,accounts,productions,at=new Date().toISOString()}){
+// Supported interchange subset: explicit offset, real calendar, seconds, <=ms precision.
+export const scopeInstant=s=>{
+ if(typeof s!=='string'||!/^\d{4}-\d{2}-\d{2}T([01]\d|2[0-3]):[0-5]\d:[0-5]\d(\.\d{1,3})?(Z|[+-](0\d|1[0-5]):[0-5]\d)$/.test(s)||s.startsWith('0000-'))return NaN;
+ const d=Date.parse(s.slice(0,10)+'T00:00:00Z');
+ return Number.isFinite(d)&&new Date(d).toISOString().slice(0,10)===s.slice(0,10)?Date.parse(s):NaN;
+};
+const instant=scopeInstant;
+export function reviewOperationalScopes({assignments,accounts,productions,at=new Date().toISOString(),period=null}){
  if(!Array.isArray(assignments)||!Array.isArray(accounts)||!Array.isArray(productions)||!Number.isFinite(instant(at)))throw Error('Snapshot de ámbitos incompleto');
+ if(period!==null&&(!Number.isFinite(instant(period.start))||!Number.isFinite(instant(period.end))||instant(period.start)>=instant(period.end)))throw Error('Período operativo incompleto');
  const users=new Map(),prods=new Map(),seen=new Set(),now=instant(at);
  for(const u of accounts){if(!u?.id||users.has(u.id))throw Error('Identidad de cuenta ambigua');users.set(u.id,u);}
  for(const p of productions){if(!p?.key||prods.has(p.key)||!LP_LINES.includes(p.line)||!p.key.endsWith('|'+p.line))throw Error('Identidad de producción ambigua');prods.set(p.key,p);}
@@ -21,12 +28,14 @@ export function reviewOperationalScopes({assignments,accounts,productions,at=new
   const operations=operationsForRole(u?.role);
   if(!operations.length)reasons.push('existing_LP_role_required');
   if(a.role!==undefined&&a.role!==u?.role)reasons.push('role_change_not_allowed');
-  if(!p||p.line!==a.line||!LP_LINES.includes(a.line))reasons.push('canonical_production_line_required');
+  if(!p||p.active===false||p.line!==a.line||!LP_LINES.includes(a.line))reasons.push('canonical_production_line_required');
   if(!LP_STAGES.includes(a.stage))reasons.push('stage_required');
   if(seen.has(id))reasons.push('duplicate_scope');seen.add(id);
   const from=instant(a.validFrom),until=instant(a.validUntil);
   if(!Number.isFinite(from)||!Number.isFinite(until)||from>=until)reasons.push('explicit_validity_required');
   else if(now<from||now>=until)reasons.push('scope_not_current');
+  if(period&&Number.isFinite(from)&&Number.isFinite(until)&&(from>instant(period.start)||until<instant(period.end)))reasons.push('full_period_required');
+  if(a.revokedAt!==undefined&&a.revokedAt!==null){if(!Number.isFinite(instant(a.revokedAt)))reasons.push('explicit_revocation_required');else reasons.push('scope_revoked');}
   if(!['PRIMARY','BACKUP','OPERATOR','READ'].includes(a.duty))reasons.push('duty_required');
   if(a.duty==='OPERATOR'&&!operations.includes('EJECUTAR'))reasons.push('role_cannot_operate');
   if(a.duty==='READ'&&u?.role!=='CONSULTA')reasons.push('read_only_scope_not_enforceable_for_role');
@@ -40,5 +49,5 @@ export function reviewOperationalScopes({assignments,accounts,productions,at=new
   const primaryCovered=primary.length>0,backupCovered=primary.some(p=>backup.some(b=>b!==p));
   return {line,stage,productionCount:keys.length,primaryCovered,backupCovered,status:primaryCovered&&backupCovered?'PROPUESTA_COBERTURA':'PENDIENTE_RESPONSABLES',missing:[...(!keys.length?['production_universe_required']:[]),...(!primaryCovered?['primary_full_scope_missing']:[]),...(!backupCovered?['distinct_backup_full_scope_missing']:[])]};
  }));
- return {apply:false,asOf:at,rows,coverage,readyForFunctionalReview:rows.every(r=>!r.reasons.length)&&coverage.every(c=>c.primaryCovered&&c.backupCovered),serverValidityApplied:false};
+ return {apply:false,asOf:at,period,rows,coverage,readyForFunctionalReview:rows.every(r=>!r.reasons.length)&&coverage.every(c=>c.primaryCovered&&c.backupCovered),serverValidityApplied:false};
 }
