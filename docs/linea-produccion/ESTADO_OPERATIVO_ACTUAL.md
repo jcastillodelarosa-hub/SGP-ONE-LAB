@@ -1,13 +1,13 @@
 # Línea de Producción — estado operativo actual
 
 **Actualizado:** 2026-11-03 02:32 UTC / 2026-11-02 21:32 America/Bogota.
-**Referencia técnica:** `1b63e0d0de5ab5384f890c2e696fb8d3ca8a5052` (integración de fuentes y pruebas).
+**Referencia técnica:** `74f068fb270b4281e0f69e7dc46a4a1d21b026bc` (integración de fuentes y pruebas).
 **Base de esta entrega:** HEAD local/PR coincidentes en
 `fd07cb38fc8a4414bcb3fcd9984f3bb5f0271371` al inicio; continuidad actualizada en el mismo conjunto de commits.
 **Repositorio:** `jcastillodelarosa-hub/SGP-ONE-LAB`.
 **Rama:** `feat/lp01-seguimiento-operacion` · [PR #183](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/pull/183), OPEN/DRAFT observado.
 **Base main observada en el PR:** `bb224f00924c1feaa47a4a556a829e93b8e4ca3e`.
-Esta entrega incorpora lectura de fuentes para ambas etapas y corrige saldos desconocidos; sin SQL nuevo ni cambios productivos.
+Esta entrega incorpora lectura de fuentes para ambas etapas y corrige saldos desconocidos; 01 amplía solo la respuesta de la RPC de lectura existente, como propuesta sin aplicar.
 
 Esta es la **referencia operativa única de LP**. Describe el estado vigente, no un
 historial. Antes de trabajar leer AGENTS.md, este archivo y el estado real del PR;
@@ -60,7 +60,7 @@ límites indicados; ninguna implica escritura productiva habilitada.
 | Continuidad al ABRIR siguiente turno configurado: raíz/antigüedad/afectaciones y contexto, ejecutado destino cero; contención drena comandos y conserva recibos autorizados | [01](../sql-proposals/lp01-operacion/01_operacion_REVIEW.sql), [documentación](SALE_CONTINUIDAD_CONTENCION.md) | [SQL](../../tests/lp01-continuidad/evidence/postgres.json), [admisión XLSX](../../tests/lp01-continuidad/evidence/xlsx-admission.json) |
 | SIN ACTIVIDAD: vacío real, confirmación/motivo, responsable autorizado, sin BI, auditoría/versiones, reapertura coordinador | [regla y motor](SIN_ACTIVIDAD.md) | [9 grupos SQL](../../tests/lp01-sin-actividad/evidence/postgres.json), [PC/móvil](../../tests/lp01-sin-actividad/evidence/browser.json) |
 | Apertura preparada: HORARIOS_TURNOS, cierre previo acreditado, bloqueos/demora y fallback manual; **sin ejecutor automático** | [preparador](../../src/server/lp01-opening-preparation.js), [contrato](APERTURA_AUTOMATICA_PREPARACION.md) | [6 pruebas](../../tests/lp01-apertura.test.mjs), [6 grupos SQL](../../tests/lp01-apertura/evidence/postgres.json), [PC/móvil](../../tests/lp01-apertura/evidence/browser.json) |
-| Integración independiente: contexto Mecanizado/PDT en ambas etapas, clave/línea única y Export desconocido sin falso cero; agregación histórica por nombre identificada, sin créditos | [límites de lectura](../../src/domain/lp01-sources.js), [interfaz](../../src/modules/lp01-operation.js) | [SQL real](../../tests/lp01-fuentes/evidence/postgres.json), [PC/móvil](../../tests/lp01-fuentes/evidence/browser.json), [reproducción y límites](../../tests/lp01-fuentes/README.md) |
+| Integración independiente: contexto Mecanizado/PDT filtrado en servidor por usuario/etapa/línea/turno/producción; homónimas sin diagnóstico expuesto y Export desconocido sin falso cero, sin créditos | [límites de lectura](../../src/domain/lp01-sources.js), [interfaz](../../src/modules/lp01-operation.js) | [SQL real](../../tests/lp01-fuentes/evidence/postgres.json), [PC/móvil](../../tests/lp01-fuentes/evidence/browser.json), [reproducción y límites](../../tests/lp01-fuentes/README.md) |
 | Diseño A: fachadas humanas/técnicas separadas, núcleo ABRIR compartido y journal append-only; **solo prototipo sintético, no instalador** | [diseño y matriz](principal-a/DISENO.md), [referencia guardada](principal-a/shared-reference.sql) | [9 grupos SQL reales con LOGIN local](../../tests/lp01-principal-a/evidence/postgres.json), [huellas](../../tests/lp01-principal-a/evidence/verification.json) |
 | Vidrio contextual/ubicaciones y cierres CSV versionados; Dashboard limitado a datos del turno consultado | [alcance delimitado](../SGP_LP01_SEGUIMIENTO_OPERACION.md) | [evidencia inicial](../../tests/lp01-seguimiento/evidence/), [SQL/reportes](../../tests/lp01-operacion/evidence/postgres.json) |
 
@@ -111,8 +111,12 @@ una comprobación productiva nueva de esta entrega.
 
 **Entrega independiente terminada:** consulta contextual en ambas etapas y lectura
 Export estricta, probadas con SQL real sintético y PC/móvil. El contrato vigente
-agrega PDT por nombre: se reproduce mezcla entre claves diferentes y se advierte
-sin adjudicar ventanas a una parte/etapa. No se modificó su cuerpo ni sus permisos.
+agrega PDT por nombre: se reproduce mezcla entre claves diferentes. La fachada LP
+filtra el resultado a las producciones autorizadas/incorporadas y omite los campos
+diagnósticos ante homónimas. El cliente no invoca la RPC histórica amplia. Se
+conservan firmas y permisos; 01 añade solo materialContext a la lectura existente,
+con UNAVAILABLE si la fuente no está instalada o el rol carece de acceso. No se
+modificó el cuerpo histórico ni se adjudican ventanas a una parte/etapa.
 
 **Siguiente tarea técnica:** preparar la asociación tipada del emisor de liberaciones
 PDT con producción/etapa/raíz LP y revisión de origen antes de consumir LIBERAR.
@@ -140,9 +144,10 @@ ni bloquear integraciones independientes por esta revisión pendiente.
 
 ## 8. Pruebas y CI
 
-**Entrega técnica 1b63e0d verificada localmente:** seis pruebas nuevas de fuentes;
+**Entrega técnica 74f068f verificada localmente:** siete pruebas nuevas de fuentes;
 24 regresiones afectadas (Operación6, Seguimiento7, continuidad2, Power BI9);
-cuatro comprobaciones de lectura SQL y recorrido real PC1440/móvil390. Evidencia
+cinco comprobaciones de lectura SQL, 15 regresiones SQL afectadas del motor LP
+y recorrido real PC1440/móvil390. Evidencia
 en [tests/lp01-fuentes](../../tests/lp01-fuentes/README.md). Paquete verify:release,
 sintaxis, huellas de funciones capturadas, integridad de fuentes protegidas y diff
 aprobados. No se repitieron manualmente las 111 previas. Se conservan sus evidencias
@@ -153,7 +158,7 @@ y las del diseño A, sin atribuirles integración productiva.
 [SQL/PC/móvil LP](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/actions/runs/41565187439),
 [general](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/actions/runs/41565187440),
 [sintaxis](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/actions/runs/41565187498).
-CI de la entrega nueva se consultará en el PR tras subir estos commits; no atribuir
+CI de la entrega nueva se consulta en el PR tras subir estos commits; no atribuir
 los resultados anteriores al código nuevo. El workflow existente incluye las
 pruebas nuevas, sin jobs operativos ni secretos añadidos.
 
