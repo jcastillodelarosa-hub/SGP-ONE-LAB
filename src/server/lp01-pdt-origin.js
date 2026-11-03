@@ -2,7 +2,7 @@
 export function inspectPdtOrigin(snapshot){
  if(!['LEGACY','V2','V4'].includes(snapshot?.contract))throw Error('Contrato PDT no reconocido');
  const missing=[];
- if(!snapshot.key||!['PANELES_2','FRAMES_2'].includes(snapshot.line)||!snapshot.key.endsWith('|'+snapshot.line))missing.push('canonical_production_line');
+ if(typeof snapshot.key!=='string'||!['PANELES_2','FRAMES_2'].includes(snapshot.line)||!snapshot.key.endsWith('|'+snapshot.line))missing.push('canonical_production_line');
  if(!snapshot.deliveryId||snapshot.deliveryState!=='VALIDADA')missing.push('validated_physical_delivery');
  if(snapshot.lineState!=='VALIDADA'||snapshot.assigned!==true)missing.push('validated_assigned_material_line');
  if(snapshot.coverage!==true||!snapshot.closeId)missing.push('accredited_material_coverage');

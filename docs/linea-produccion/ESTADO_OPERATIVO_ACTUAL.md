@@ -1,7 +1,7 @@
 # Línea de Producción — estado operativo actual
 
 **Actualizado:** 2026-11-03 UTC (entrega de asociación PDT).
-**Referencia técnica:** `bb6de3143cf6b1454f0c5b0d466d9acddd00457d` (asociación privada PDT, SQL propuesto y pruebas).
+**Referencia técnica:** `987eb473c022e348e8eabaf956df83ea09651d90` (asociación privada PDT, SQL propuesto y pruebas).
 **Base de esta entrega:** HEAD local/PR coincidentes en
 `fd07cb38fc8a4414bcb3fcd9984f3bb5f0271371` al inicio; continuidad actualizada en el mismo conjunto de commits.
 **Repositorio:** `jcastillodelarosa-hub/SGP-ONE-LAB`.
@@ -126,12 +126,25 @@ entre V2/V4, repetir evento, usar otra raíz o consumir tras anulación se recha
 Anulación consumida mantiene SALE/historial y exige conciliación, sin compensación
 negativa automática. Cantidad sin asignar no se reparte por inferencia.
 
-**Siguiente tarea técnica:** contrastar y preparar el emisor servidor contra un caso
-canónico autorizado de entrega/validación/cobertura LEGACY/V2/V4 y consolidación neta
-antes/después, incluyendo anulación. Faltan las referencias reales verificables;
-ninguna función pública ni interfaz acepta recibos físicos del navegador. No
-conectar ni acreditar un emisor real mediante los recibos sintéticos del test.
-[Contrato implementado, límites y recuperación](../../tests/lp01-liberaciones/README.md).
+**Encargo 1B: bloqueado únicamente en emisión.** Contratos reales de registro,
+validación, cierre/cobertura y anulación se contrastaron mediante SELECT de cuerpos
+/columnas, sin invocar RPC ni leer registros operativos. Cobertura material no
+produce raíz/etapa LP, versiones inmutables ni unión neta de ventanas antes/después.
+No se identificó un caso canónico completo; esto no afirma que no existan entregas
+físicas válidas. Inspector de origen implementado devuelve pendiente y crédito0,
+incluso ante flags/raíces/cantidades declarados por cliente. No hay emisor conectado.
+[Matriz exacta, pruebas y campos faltantes](../../tests/lp01-origen/README.md).
+
+**Encargo 2 iniciado:** planificador servidor de conciliación Export/SALE de solo
+lectura. Valida corte/hash/key/etapa y cadenas por raíz, revisiones e inclusión por
+IDs exactos. 30→50→40 conserva deltas30,+20,-10 sin descontar dos veces; apply=false
+siempre. No actualiza presupuesto, SALE ni saldo. Manifiesto o cobertura insuficiente
+permanece PENDIENTE_EVIDENCIA, sin reset para sortear el bloqueo de Export.
+
+**Siguiente tarea concreta:** acreditar la correspondencia del corte Export con
+IDs/revisiones de eventos LP e implementar su lector transaccional; no aceptar una
+fecha o diferencia de saldo como prueba. La emisión PDT requiere aparte expediente
+canónico de entrega y unión de ventanas; no bloquea esta preparación de Export.
 
 En paralelo documental, seguridad/DB debe revisar `principal-a/DISENO.md` y delimitar
 una propuesta compatible que resuelva PUBLIC. El diseño A completado en e611d27
@@ -151,6 +164,14 @@ ni bloquear integraciones independientes por esta revisión pendiente.
 | Vidrio/Dashboard/Reportes | Conservar modal/ubicaciones/navegación y reportes existentes; completar fuentes/desglose e histórico después de flujos críticos, sin KPI fabricado |
 
 ## 8. Pruebas y CI
+
+Encargos1B/2:8 pruebas unitarias sintéticas aprobadas y3 casos SQL de la función
+real capturada de cobertura manual en PG17.11 aislado: parcial6/10, completa10/10,
+anulada. [Evidencias](../../tests/lp01-origen/evidence/). No se certifican emisor,
+caso productivo ni manifiesto Export real. Sin cambios UI, se reutiliza PC/móvil;
+no se repiten pruebas generales válidas. CI nueva se consulta en #183. SQL01–07 y
+contratos fuente intactos; sin nuevas funciones DB/grants ni escrituras productivas.
+
 
 Entrega bb6de31: **8 grupos SQL nuevos aprobados** en PostgreSQL17.11 aislado,
 [evidencia](../../tests/lp01-liberaciones/evidence/postgres.json). Se ejecutan el
