@@ -1,0 +1,16 @@
+{
+  "status": "SEALED_LOCAL_ONLY",
+  "archives": {
+    "sgp-lp183-main-visual": {
+      "path": "/tmp/sgp-lp183-main-visual.zip",
+      "sha256": "0aa8ead9f067ef4301bc7199f9f1606fa6d807680a02e51f59b12f7a9a397d6c",
+      "bytes": 596505
+    },
+    "sgp-lp183-rollback-candidate": {
+      "path": "/tmp/sgp-lp183-rollback-candidate.zip",
+      "sha256": "d554c4b4a35bb1822504a425e597c60090e9063b78d5266aa0e87003a31f5af4",
+      "bytes": 562320
+    }
+  },
+  "rollback": "Candidate reconstructed from source; live release parity unverified"
+}

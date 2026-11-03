@@ -1,10 +1,10 @@
 # Línea de Producción — estado operativo actual
 
 **Actualizado:** 2026-11-03, America/Bogota (integración horizontal aprobada).
-**Referencia técnica:** `b940635` (cinco pestañas aprobadas y evidencias PC/móvil),
-con ajuste de versiones de assets en el mismo conjunto de commits.
+**Referencia técnica:** `bed57a2` (artefacto visual principal y recuperación),
+con bloqueo HTTP XLSX y sellado en el mismo conjunto de commits.
 Continuidad actualizada en el mismo conjunto de commits del PR.
-**Base verificada GitHub/checkout:** `2127efffeb19b01c0775c8c090e2a8a8a6b9babf`.
+**Base verificada GitHub/checkout:** `7faa13665758a8493b99d5019a62d06824070eca`.
 **Repositorio:** `jcastillodelarosa-hub/SGP-ONE-LAB`.
 **Rama:** `feat/lp01-seguimiento-operacion` · [PR #183](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/pull/183), OPEN/DRAFT observado.
 **Estado inmediato:** demostración visual aislada preparada y probada PC/móvil,

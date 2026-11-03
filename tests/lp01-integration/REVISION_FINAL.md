@@ -32,9 +32,10 @@ entero ni `/tmp/sgp-lp183-preview` anterior. Preparación reproducible sin SQL:
 
 `python scripts/prepare-lp-main-visual.py`
 
-Conserva index/app/config de SGP y los módulos actuales. Única transformación de
-bootstrap en el artefacto: LP monta visualLPBridge y muestra banner permanente;
-no cambia el SGPPlannerBridge global. Programación/ubicaciones mantienen su
+Conserva index/app/config de SGP y los módulos actuales. Transformaciones acotadas en el artefacto: LP monta visualLPBridge y muestra banner permanente;
+no cambia el SGPPlannerBridge global. Además se sustituye el importador HTTP XLSX
+por rechazo local, porque esa ruta no usa el puente RPC; así no depende solo de
+controles deshabilitados. Compatibilidad de su import se comprueba antes de transformar. Programación/ubicaciones mantienen su
 cliente/sesión originales. Fuente propuesta y fuente operativa no se mezclan.
 El código tracked de bootstrap operativo del PR no es por sí solo este release:
 **no usar despliegue normal del repo ni activar backend por publicar UI.**
