@@ -1,3 +1,15 @@
+## Cierre funcional integral delimitado (2026-11-03)
+
+Base934340c preservada, mismo Draft183. Cuatro recorridos nuevos SQL08/handler
+XLSX/navegador reales PASS (Ensamble/Empaque × PC/móvil), todo sintético en PG17.11
+sin red. Revocación tras render denegada, diferencia con motivo, original idéntico,
+reapertura/dos versiones y etapas independientes; Export/Programación intactos.
+Sin cambios de lógica operativa ni SQL; plan de instalación precisa01→06→08.
+[Estado único](docs/linea-produccion/ESTADO_OPERATIVO_ACTUAL.md) y
+[matriz integral](docs/linea-produccion/CIERRE_FUNCIONAL_INTEGRAL.md).
+No cierre productivo certificado: PDT/Export en fuente, matriz real/runtime e
+histórico/consolidado pendientes. No migración, permisos, merge, publish o recover.
+
 ## Publicación controlada · preparación vigente (2026-11-03)
 
 PR183: workflow existente preparado con política legacy/no certificada. Adopción

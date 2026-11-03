@@ -82,6 +82,20 @@ no se presupone que pueda actualizar por sí solo un esquema ya instalado.
 
 ## Orden propuesto
 
+**Precisión de cierre integral (base934340c, no ejecutada):** para el contrato
+temporal completo, usar **01 → 06 → 08 → comprobaciones de03 y08**; no aplicar
+la matriz temporal sobre01 solo.08 exige también firmas/cuerpos de06, aunque su
+cabecera abreviada mencione01. Mantener escrituras contenidas antes de08; ningún
+ámbito antiguo adquiere vigencia por defecto. El importador3C genera exclusivamente
+diff privado/apply=false: no suministra accesos ni reemplaza la autorización DML.
+07 es aditivo después de01, sin emisor/grants; su existencia no autoriza LIBERAR.
+04 es opcional y05 su recuperación independiente;02 es contención, no activación.
+08R es recuperación específica bajo sus precondiciones, nunca un paso de instalación.
+Con uso real de ámbitos temporales, volver al motor sin vigencias podría ampliar
+accesos: preferir corrección hacia adelante y mantener contención. No ejecutar
+08R para desbloquear un ámbito vencido/revocado. Revisar el procedimiento y
+compatibilidad actual con SELECT autorizados antes de cualquier aplicación.
+
 1. Autorizar separadamente la instalación de `01_operacion_REVIEW.sql`. Una sola
    transacción con precondiciones, bloqueo/timeout y configuración contenida. Si una
    verificación falla, detener; no eliminar guardas para forzar ejecución.

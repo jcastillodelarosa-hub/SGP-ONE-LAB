@@ -1,0 +1,59 @@
+{
+  "status": "PASS",
+  "results": [
+    {
+      "stage": "ENSAMBLE",
+      "width": 1440,
+      "status": "PASS",
+      "temporal_revocation_denied": true,
+      "difference_requires_reason": true,
+      "versions": 2,
+      "opposite_stage_open": true,
+      "original_identical": true,
+      "export_and_programming_unchanged": true,
+      "errors": []
+    },
+    {
+      "stage": "ENSAMBLE",
+      "width": 390,
+      "status": "PASS",
+      "temporal_revocation_denied": true,
+      "difference_requires_reason": true,
+      "versions": 2,
+      "opposite_stage_open": true,
+      "original_identical": true,
+      "export_and_programming_unchanged": true,
+      "errors": []
+    },
+    {
+      "stage": "EMPAQUE",
+      "width": 1440,
+      "status": "PASS",
+      "temporal_revocation_denied": true,
+      "difference_requires_reason": true,
+      "versions": 2,
+      "opposite_stage_open": true,
+      "original_identical": true,
+      "export_and_programming_unchanged": true,
+      "errors": []
+    },
+    {
+      "stage": "EMPAQUE",
+      "width": 390,
+      "status": "PASS",
+      "temporal_revocation_denied": true,
+      "difference_requires_reason": true,
+      "versions": 2,
+      "opposite_stage_open": true,
+      "original_identical": true,
+      "export_and_programming_unchanged": true,
+      "errors": []
+    }
+  ],
+  "sql08_sha256": "c8fb6550ffbae031f4eb9255236e1aa3b5d5a2da4b2d128d3d1ccfa591246a57",
+  "limits": [
+    "PostgreSQL17.11 network-none; real session/RPC/handler/parser; synthetic catalog, accounts, scopes and assignments",
+    "Browser auth bridge/HTTP transport local only; no productive login, runtime or source matching certified",
+    "Anonymized XLSX fixtures; no pruning after ABRIR; no PDT credit or Export inclusion claimed"
+  ]
+}

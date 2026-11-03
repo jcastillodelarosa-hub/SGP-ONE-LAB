@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "base": "934340c5f030b2f69f786a465ae4590237366b99",
+  "unchanged_files_sha256": {
+    "docs/sql-proposals/lp01-operacion/01_operacion_REVIEW.sql": "b1d1da0941e75293de5a8d60937fbab3c76d2c0bb14127a11149dd9db05e4098",
+    "docs/sql-proposals/lp01-operacion/07_pdt_asociacion_REVIEW.sql": "e7056804d0311ff382c4a5921ac8c3cd0f28c7519ff6b6af366937330e595933",
+    "docs/sql-proposals/lp01-operacion/05_restaurar_vidrio_REVIEW.sql": "c5344912226898e1c587da2e05c84e9a22919ebcda0b77ca2d93def11982ff11",
+    "docs/sql-proposals/lp01-operacion/02_CONTENER_REVIEW.sql": "6b060a34a96c2eba0c86352c5025d8d2322ec2e87be802878497149b66220028",
+    "docs/sql-proposals/lp01-operacion/06_powerbi_xlsx_REVIEW.sql": "fbe88b89bfa4dade5c55517c078c4e00abdf865c9b20fb0cebce865fed308ca4",
+    "docs/sql-proposals/lp01-operacion/03_VERIFICAR_READ_ONLY.sql": "fe572bca7a03b7603c0e5e07f6e04c25b1589b7f30023897d245f08f546fbe59",
+    "docs/sql-proposals/lp01-operacion/08R_recuperacion_ambitos_REVIEW.sql": "08c0b7565801cc1aade0b17af74abd6d9ef05400bd0792933aebb8aaa1aabab1",
+    "docs/sql-proposals/lp01-operacion/08_ambitos_temporales_REVIEW.sql": "c8fb6550ffbae031f4eb9255236e1aa3b5d5a2da4b2d128d3d1ccfa591246a57",
+    "docs/sql-proposals/lp01-operacion/04_vidrio_REVIEW.sql": "8332e3a0e6898185a54ab1db108515f62d50c6b6a2e6694785dfd1da9686b75b",
+    "src/modules/lp01-followup.js": "6887ae936c6e3695f003a1aed7286147ba723c37cf6473b2d4a8f33f217bbef5",
+    "src/modules/lp01-operation.js": "6549540314b98286eddc7c29b83f00616a6cf1cfa36e2679173d3e46ef904e85",
+    "src/domain/powerbi/adapter.js": "2a351985243ab3035736a12916773feabbb721dc208689582374143a9ba52c8c",
+    "src/server/lp-powerbi-handler.js": "eca692d23a91735aa68335cc20c2226be99332d25bba39853e02f422bcdb76ed",
+    "src/server/lp01-pdt-origin.js": "7951a68c38e0b64008e1d6abc0061160bc85785bd2e72665c2172986f5c868f0",
+    "src/server/lp01-export-reader.js": "e83d4c2fb485d6b6f8afb8a11da4b454176c2c8a724e7830a9c78f3523b781f2"
+  },
+  "scope": "Byte-identical SQL01-08/08R, UI, adapter and source readers. No application rewrite or productive operation."
+}

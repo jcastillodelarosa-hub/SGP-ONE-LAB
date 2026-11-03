@@ -1,20 +1,16 @@
 # Línea de Producción — estado operativo actual
 
-**Actualizado:** 2026-11-03, America/Bogota (corrección autenticación inspect preparada).
-**Incidentes inspect:** run 41696116331 (0b14083) falló en google-github-actions/auth, 403 SERVICE_DISABLED de IAM Service Account Credentials API. Run 41698141346 (de61b53) pasó OAuth setup y llegó al script de lectura, pero devolvió un error genérico; no consta qué GET falló. Se preparó corrección de diagnóstico seguro por etapa/código HTTP y aceptación de ambas rutas oficiales de releases live, sin impresión de tokens, URLs ni respuesta cruda. Ninguna inspección exitosa certificada. Se preparó en esta rama OAuth JWT de la misma cuenta existente mediante google-auth y alcance Firebase Hosting, sin IAM Credentials API, nuevos secretos ni privilegios. **Pendiente CI y nuevo inspect autorizado; no se acredita versión live ni rollback.**
-**Referencia técnica:** implementación `e781fd5`, documentación de cierre en este conjunto de commits; base
-`bb7d052542d06e83e0b4187dfa6776dd99b0a21d` verificada en GitHub/checkout.
-**Repositorio:** `jcastillodelarosa-hub/SGP-ONE-LAB`.
+**Actualizado:** 2026-11-03, America/Bogota (cierre funcional integral delimitado).
+**Referencia:** base GitHub/checkout `934340c5f030b2f69f786a465ae4590237366b99`;
+entrega de integración SQL08/navegador en este conjunto de commits.
 **Rama:** `feat/lp01-seguimiento-operacion` · [PR #183](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/pull/183), OPEN/DRAFT observado.
-**Estado inmediato:** procedimiento IMPLEMENTADO EN RAMA / VERIFICADO LOCALMENTE;
-publicación y recuperación LP BLOQUEADAS hasta acreditar release/version live y
-versión retenida recuperable. Política legacy/no certificada: adopción del PR no
-despliega; pushes ordinarios posteriores conservan navegación anterior. Prepare
-sin secretos e inspect GET preparados, **no ejecutados en Actions/Firebase**.
-7 grupos de política, 4 de artefacto y PC/móvil PASS locales. CI basebb7d052 4/4PASS
-reutilizada. CI `e781fd5`: validate/check/test/postgres-design PASS; UI aún en curso
-al consultar. Gate/prepare/ordinary/controlled OMITIDOS en el PR, sin secretos
-ni acciones Hosting. [Evidencia CI](../../tests/lp01-publish/evidence/ci.json).
+**Estado inmediato:** cuatro recorridos nuevos PASS, Ensamble/Empaque × PC1440/móvil390,
+con PostgreSQL17.11 aislado, SQL01/06/08, handler/parser XLSX y persistencia reales;
+catálogo/cuentas/ámbitos/asignaciones sintéticos. Sin cambios de lógica operativa,
+SQL o adaptador. [Matriz, límites y pruebas](CIERRE_FUNCIONAL_INTEGRAL.md).
+**No certificado el cierre integral productivo:** PDT/Export BLOQUEADOS EN FUENTE,
+ámbitos reales/runtime pendientes, histórico y consolidado multietapa incompletos.
+Hosting y apertura automática siguen bloqueados. Nada aplicado/publicado/fusionado.
 
 Esta es la **referencia operativa única de LP**. Describe el estado vigente, no un
 historial. Antes de trabajar leer AGENTS.md, este archivo y el estado real del PR;
@@ -38,8 +34,8 @@ segundo plano. No sustituye la supervisión ni concede autorizaciones productiva
 
 ## 2. Fase activa y prioridades obligatorias
 
-**FASE ACTIVA: Seguimiento, Ensamble y Empaque.** Prioridad: revisión visual antes
-de encargos5–9. Antecedente técnico: completar
+**FASE ACTIVA: Seguimiento, Ensamble y Empaque.** Prioridad vigente: cierre funcional
+integral delimitado, sin publicación. Antecedente técnico: completar
 el cierre técnico de ambas etapas con Power BI, ya contrastado de forma integrada
 en aislamiento. Falta correspondencia/ámbitos/cobertura de casos reales y runtime autorizado. El bloqueo PUBLIC afecta exclusivamente la apertura automática, que sigue
 inactiva; no detiene las integraciones independientes autorizadas.
@@ -117,6 +113,30 @@ una comprobación productiva nueva de esta entrega.
 
 ## 6. Siguiente acción técnica exacta y límite de continuación
 
+**Cierre funcional integral preparado hasta los límites de fuente/runtime.**
+4 recorridos nuevos PC/móvil PASS con SQL08 y handler XLSX real: revocación tras
+render denegada en SQL sin auditoría nueva, último acumulado, diferencia obligatoria,
+original idéntico, reapertura y dos versiones, etapa opuesta abierta, Export y
+Programación intactos. [Evidencia](../../tests/lp01-cierres-integrados/evidence/browser-sql08.json).
+Se conservan pruebas válidas de SIN ACTIVIDAD, continuidad, locks e idempotencia;
+no se repiten ni se presentan como productivas. CI del nuevo cambio pendiente.
+**Siguiente acción exacta:** recibir matriz/catálogo/períodos aprobados por canal
+privado y pin; ejecutar importador3C con apply=false y revisar diff sin aplicar.
+PDT/Export requieren los campos de origen ya identificados, sin reabrir auditorías.
+Histórico/consolidado requieren fuente contrastada. [Matriz completa](CIERRE_FUNCIONAL_INTEGRAL.md).
+
+Antecedente de Hosting, no tarea productiva autorizada en este encargo:
+
+**Actualización de evidencia GitHub:** inspect41707119884 sobre934340c tiene GET
+Hosting y resumen saneado SUCCESS; publish/recover OMITIDOS. Esta ejecución fue
+previa/externa a este encargo, no se relanzó. No se deducen IDs ni se certifica
+retención/rollback por el estado verde; revisar su resumen antes de otra autorización.
+Los bloqueos históricos de autenticación de41696116331 (IAM Credentials API403)
+y41698141346 (error genérico después de OAuth) se conservan como antecedentes,
+no como prueba de que la lectura actual sigue fallando.934340c cambió OAuth a
+JWT de la misma cuenta/alcance Hosting y diagnóstico seguro; cambios conservados.
+La política continúa legacy/no certificada, sin autorización de publicación.
+
 **Publicación controlada preparada, NO ejecutada.** firebase-hosting.yml conserva
 proyecto/cuenta/grupo live existentes; policy legacy/no certificada. Primera
 adopción y cambios LP/política retienen deploy. Pushes habituales posteriores
@@ -135,7 +155,7 @@ insuficientes deben detenerla sin otro rol. No fusionar ni ejecutar ahora.
 
 Antecedentes de certificación:
 
-**Certificación Hosting: BLOQUEADO por falta de mecanismo autenticado autorizado.**
+**Antecedente de certificación Hosting (superado en acceso por inspect41707119884):**
 Sin conector Hosting, CLI/gcloud, selectorADC/manifiesto o identidad técnica configurada.
 No se reintenta403 público ni se extraen secretos de CI/cuentas humanas. Proyecto
 solo inferido de.firebaserc; sitio/live/release/version NO acreditados. Candidato
