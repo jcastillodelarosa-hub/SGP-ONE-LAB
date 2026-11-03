@@ -33,10 +33,29 @@ def fake(method,resource,body=None):
  if method=='POST':return {'name':'sites/sgp-one-lab/releases/QA-RECOVERY'}
  raise AssertionError(resource)
 e=meta.inspect(fake);assert e['version']==version and all(c[0]=='GET' for c in calls)
+# Firebase allows either site release names or channel-scoped release names.
+def channel_release(method,resource,body=None):
+ result=fake(method,resource,body)
+ if resource=='sites/sgp-one-lab/channels/live':
+  result['release']['name']='sites/sgp-one-lab/channels/live/releases/QA'
+ return result
+assert meta.inspect(channel_release)['version']==version
+def forbidden(method,resource,body=None):
+ if resource=='sites/sgp-one-lab/channels/live':
+  return {'name':resource,'release':{'name':'sites/sgp-one-lab/channels/other/releases/QA','version':{'name':version}}}
+ return fake(method,resource,body)
+try:meta.inspect(forbidden);raise AssertionError('Wrong channel release accepted')
+except ValueError as exc:assert str(exc)=='LIVE_LINK_NOT_VERIFIED'
+try:meta.checked_get(lambda method,resource: (_ for _ in ()).throw(ValueError('HTTP_403')),'SITE','safe')
+except ValueError as exc:assert str(exc)=='HOSTING_SITE_HTTP_403'
+else:raise AssertionError('HTTP status not classified')
+try:meta.checked_get(lambda method,resource: (_ for _ in ()).throw(ValueError('secret-content')),'SITE','safe')
+except ValueError as exc:assert str(exc)=='HOSTING_SITE_UNEXPECTED'
+else:raise AssertionError('Unsafe exception text escaped')
 try:meta.recover('sites/sgp-one-lab/versions/WRONG',version,fake);raise AssertionError('Stale live accepted')
 except ValueError:pass
 assert not any(c[0]=='POST' for c in calls)
-checks.append('Synthetic API transport: inspect only GET, verifies site/live/version/finalized inventory, stale live refuses recovery; no real identity/version certified')
+checks.append('Synthetic API transport: GET-only, site/channel release names, safe stage-and-HTTP diagnostics, no leaked exceptions, stale live blocked; no real Firebase access certified')
 # Read workflow with BaseLoader because YAML1.1 treats on as boolean.
 y=yaml.load((ROOT/'.github/workflows/firebase-hosting.yml').read_text(),Loader=yaml.BaseLoader)
 assert y['on']['workflow_dispatch']['inputs']['operation']['default']=='prepare'
