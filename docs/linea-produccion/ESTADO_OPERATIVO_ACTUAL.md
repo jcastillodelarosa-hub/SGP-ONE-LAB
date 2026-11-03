@@ -8,8 +8,8 @@ Continuidad actualizada en el mismo conjunto de commits del PR.
 **Repositorio:** `jcastillodelarosa-hub/SGP-ONE-LAB`.
 **Rama:** `feat/lp01-seguimiento-operacion` · [PR #183](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/pull/183), OPEN/DRAFT observado.
 **Estado inmediato:** demostración visual aislada preparada y probada PC/móvil,
-con datos sintéticos congelados y escrituras bloqueadas. Publicación de sitio/canal
-independiente pendiente de autorización expresa. No existe URL pública todavía.
+con datos sintéticos congelados y escrituras bloqueadas. Integración al SGP principal preparada como artefacto visual; prohibidos nuevos
+sitios/canales. Publicación bloqueada hasta revisión y rollback acreditado.
 
 Esta es la **referencia operativa única de LP**. Describe el estado vigente, no un
 historial. Antes de trabajar leer AGENTS.md, este archivo y el estado real del PR;
@@ -111,6 +111,27 @@ históricos por inferencia. Las observaciones Supabase conservan su fecha, no so
 una comprobación productiva nueva de esta entrega.
 
 ## 6. Siguiente acción técnica exacta y límite de continuación
+
+**Vigente: preparación al SGP principal, sin sitio/canal nuevo.** Artefacto completo
+/tmp/sgp-lp183-main-visual conserva app/index/config y limita únicamente LP a
+snapshot sintético local, sin cliente/token/RPC productivos. Preparador reproducible
+sin SQL, lista positiva de assets y manifiesto. Programación/ubicaciones no se
+sustituyen. PC/móvil del artefacto completo PASS con sesión anfitriona sintética;
+autenticación/funciones de datos reales no certificadas.3unitarias nuevas y21
+regresiones directas PASS. Base7faa136 CI4/4PASS.
+[Matriz, riesgos, publicación y recuperación](../../tests/lp01-integration/REVISION_FINAL.md).
+
+**Bloqueo antes de aprobación live:** metadata pública devuelve403; candidato
+anterior4b1e98e identificado por run exitoso, fuente reconstruida localmente, pero
+versión activa/bytes exactos de rollback no acreditados. Además no publicar raíz
+repositorio: hosting actual no excluye private/. El artefacto positivo lo excluye.
+Workflow pushmain publica automáticamente: no fusionar como prueba. No SQL/BD,
+usuarios, roles, RLS, secretos, publicación ni nuevos recursos modificados.
+**Siguiente acción:** revisión final de matriz y artefacto, y responsable hosting
+acredita versión live/artefacto de recuperación exacto. No pedir todavía deploy
+productivo sin ese control. Propuestas anteriores de canales quedan anuladas.
+
+Antecedentes:
 
 **Vigente: cinco pestañas horizontales aprobadas integradas en la estructuraSGP:**
 LP-01 Programación / Seguimiento / LP-02 Ensamble / LP-02 Empaque / Reporte de

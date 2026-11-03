@@ -1,3 +1,5 @@
+**Plan vigente:** [Preparación al SGP principal](../lp01-integration/REVISION_FINAL.md). No se autoriza crear sitios o canales; propuestas anteriores siguientes son antecedente.
+
 # Integración horizontal aprobada — PR183
 
 Base2127eff. Cinco pestañas visibles, en este orden:

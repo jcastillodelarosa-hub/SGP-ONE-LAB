@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "artifact_mode": "FULL_SGP_FRONTEND_WITH_SCOPED_SYNTHETIC_LP",
+  "frontend_files": 90,
+  "app_and_config_preserved": true,
+  "no_private_backend_or_test_paths": true,
+  "new_LP_boot_only_in_artifact": true,
+  "index_sha256": "cf4646cf216606efcc75b65d052adaa527ab7937d3b158dce8cd671a3c3d2321",
+  "artifact_manifest_sha256": "86bbf26d4ce84d9bae065cc027a4ed3544530cb6002c1ae6630dff51d1380ff6",
+  "live_metadata_read": "HTTP403; no retry/bypass",
+  "new_unit_tests": 3,
+  "direct_regressions": 21,
+  "checked_at": "2026-11-03T16:57:00.154941+00:00",
+  "app_booted_pc_mobile": true,
+  "missing_js_css": 0
+}

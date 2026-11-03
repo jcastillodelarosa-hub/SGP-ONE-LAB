@@ -1,0 +1,34 @@
+{
+  "status": "PASS",
+  "results": [
+    {
+      "viewport": 1440,
+      "full_sgp_index_app_config": true,
+      "host_session": "SYNTHETIC_FIXTURE_NOT_REAL_AUTH",
+      "five_tabs": true,
+      "app_booted": true,
+      "missing_js_css": 0,
+      "explicit_synthetic_banner": true,
+      "synthetic_orders": 4,
+      "errors": [],
+      "overflow": false
+    },
+    {
+      "viewport": 390,
+      "full_sgp_index_app_config": true,
+      "host_session": "SYNTHETIC_FIXTURE_NOT_REAL_AUTH",
+      "five_tabs": true,
+      "app_booted": true,
+      "missing_js_css": 0,
+      "explicit_synthetic_banner": true,
+      "synthetic_orders": 4,
+      "errors": [],
+      "overflow": false
+    }
+  ],
+  "limits": [
+    "Existing authenticated host access not certified; synthetic host token fixture only",
+    "Outbound network blocked; production data in Programaci\u00f3n/ubicaciones not certified",
+    "Prior demo navigation/captures reused; this test covers new full-app artifact/bootstrap"
+  ]
+}

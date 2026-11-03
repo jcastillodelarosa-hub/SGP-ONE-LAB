@@ -1,3 +1,12 @@
+## LP · checkpoint vigente de preparación (2026-11-03)
+
+PR183 continúa en feat/lp01-seguimiento-operacion. Preparación al SGP principal sin
+sitios/canales nuevos, sin publicar ni SQL. Estado único actualizado:
+[ESTADO_OPERATIVO_ACTUAL.md](docs/linea-produccion/ESTADO_OPERATIVO_ACTUAL.md).
+Matriz/artefacto visual y recuperación: [revisión final](tests/lp01-integration/REVISION_FINAL.md).
+Rollback live exacto pendiente de acreditar (lectura pública403); no aprobar deploy
+basándose solo en run exitoso/commit. Los apartados siguientes son antecedentes.
+
 # LP — referencia operativa única
 
 Consultar [ESTADO_OPERATIVO_ACTUAL](docs/linea-produccion/ESTADO_OPERATIVO_ACTUAL.md)
