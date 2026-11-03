@@ -1,0 +1,17 @@
+{
+  "status": "PASS",
+  "synthetic": true,
+  "checks": [
+    "Actual read-only captured admin RPCs; atomic SQL10 default disabled, new catalog roles created only synthetically through native admin save",
+    "Each supervisor operates, validates and closes own stage individually in T1/T2; opposite stage denied, latest2->3=3, quantities/CAS/idempotence preserved",
+    "LIDER LINEA closes both stages and shifts individually with no PRIMARY/BACKUP or per-shift grant; reopening stays coordinator-only; versions retained",
+    "Canonical role/identity, scope, date/turn, before/response/evidence/version and real execution timestamp auditable; no manual scopes for new users",
+    "Native role edits and role-window revocation invalidate current-session stage capabilities; wrong role/session and FRAMES_2 fail closed",
+    "Real concurrent role/user revocation serialized; next statement rejects inactive account; private RLS and Export intact"
+  ],
+  "limits": [
+    "Captured admin/session SQL, actual isolated PostgreSQL17.11; synthetic accounts/windows/production and QA CSV",
+    "No productive account read or write; SQL10 proposed only, flag disabled by default",
+    "Real XLSX and previous quantity/continuity tests retain their original limits"
+  ]
+}

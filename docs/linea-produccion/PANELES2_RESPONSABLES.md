@@ -1,3 +1,6 @@
+> Regla vigente posterior: [roles y cierre individual](ROLES_CIERRE_INDIVIDUAL.md).
+> La doble responsabilidad y asignación por turno de09 quedan SUPERSEDIDAS para el perfil10; este documento conserva evidencia histórica.
+
 # PANELES_2 — responsables y activación inicial preparada
 
 03/11/2026, America/Bogota. Base82d8a95, mismo Draft183. **PROPUESTO SQL09 /

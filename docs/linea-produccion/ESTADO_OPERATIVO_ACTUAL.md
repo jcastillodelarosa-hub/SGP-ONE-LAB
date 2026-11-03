@@ -1,19 +1,20 @@
 # Línea de Producción — estado operativo actual
 
-**Actualizado:** 2026-11-03, America/Bogota (preparación piloto PANELES_2).
-**Referencia:** base GitHub/checkout `82d8a954fd527bdbb855376c6c23b255c0264268`;
-propuesta SQL09, perfil privado Paneles2 e integración UI en este conjunto de commits.
+**Actualizado:** 2026-11-03, America/Bogota (roles y cierre individual).
+**Referencia:** base GitHub/checkout `ba1c546ec9b34752d83280e558ae1826ecc97e06`;
+perfil SQL10 y Configuración en este conjunto de commits.
 **Rama:** `feat/lp01-seguimiento-operacion` · [PR #183](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/pull/183), OPEN/DRAFT observado.
-**Estado inmediato:** piloto inicial **PANELES_2 × ENSAMBLE/EMPAQUE × T1/T2** preparado,
-NO activado. SQL09 optativo/deshabilitado asigna responsabilidad explícita por turno
-sin crear cuentas/roles/grants. FRAMES_2 se deniega en ese perfil; compatibilidad
-futura conservada.8 grupos SQL,6 perfil importador y7 privacidad PASS; PC/móvil
-supervisor verificados en PostgreSQL17.11 aislado. [Matriz y evidencia](PANELES2_RESPONSABLES.md).
-**Bloqueo principal:** catálogo actual y asignaciones reales aprobadas pendientes,
-con dos responsables distintos elegibles por cierre. SQL08 conserva PRIMARY/BACKUP;
-una persona no puede suplirse a sí misma. PDT/Export siguen bloqueados en fuente,
-runtime e histórico/consolidado pendientes. Sin SQL productivo, aplicación, merge
-ni publicación. CI nueva pendiente; evidencias válidas82d8a95 reutilizadas.
+**Regla vigente:** PANELES_2, Supervisores Ensamble/Empaque y LIDER LINEA con cierre
+individual por rol/etapa, ambos turnos, **sin PRIMARY/BACKUP ni asignación temporal
+por turno**. Sustituye09 para esta activación. [Contrato y matriz](ROLES_CIERRE_INDIVIDUAL.md).
+**Estado:** SQL10 propuesto y contenido por defecto; Configuración integra los
+roles/accesos y UI usa capacidades protegidas. Contratos administrativos reales
+contrastados por SELECT de metadatos03/11, sin cuentas. PostgreSQL17.11 sintético:
+6 grupos SQL +2 recorridos handler/XLSX; UI PC/móvil y CI detalladas en evidencia.
+Nada aplicado, activado, publicado o fusionado. Apertura automática sigue bloqueada.
+**Pendiente:** revisión SQL10/accesos reales desde Configuración, runtime/orígenes,
+activación y publicación autorizadas. PDT/Export bloqueados en fuente; no se exigen
+matrices privadas08/09 como condición del cierre individual del perfil10.
 
 Esta es la **referencia operativa única de LP**. Describe el estado vigente, no un
 historial. Antes de trabajar leer AGENTS.md, este archivo y el estado real del PR;
@@ -107,7 +108,7 @@ Responsables expresados por función, **sin inventar personas ni conceder acceso
 | LOGIN/TLS/red/pooler reales no acreditados; no existe enlace técnico integrado/activado | [viabilidad y límites](principal-a/DISENO.md) | Responsable infraestructura/Supabase: runtime/ruta e identidad aprobados y prueba controlada posterior; sin secretos/roles ahora |
 | Emisor PDT real pendiente de acreditar entrega/cobertura neta; asociación por raíz y contención de anulaciones ya preparadas en 07, verificadas solo sintéticamente | [contrato LP-PDT-LIBERACION/1 y brecha](CIERRE_BLOQUEOS_PRODUCTIVOS.md#2-pdt-datos-existentes-y-contrato-que-falta) | Responsable funcional/PDT: caso y consolidación de solapamientos; mantenedor integración: adaptador/emisor trazable, sin convertir piezas en ventanas |
 | Cambio de corte Export no prueba qué avances incluye; riesgo de descontar dos veces | [LP-EXPORT-INCLUSION/1](CIERRE_BLOQUEOS_PRODUCTIVOS.md#3-export-diario-contrato-de-inclusión-separado-de-power-bi-de-cierre) | Responsable fuente Export y mantenedor: procedencia/cortes/eventos incluidos y protocolo idempotente; no deducir inclusión por fecha o diferencia de saldo |
-| Ámbitos reales y cobertura de responsables no registrados/validados para activar LP | [plantilla privada a completar](plantillas/ambitos_lp_por_confirmar.csv), [catálogo histórico](evidence/2026-11-02-cierre-readonly.json) | Coordinación/administración autorizada: cuentas reales, línea/etapa/producción, cierre y suplencia por canal privado; no publicar identificadores ni tokens |
+| Configuración de accesos reales LP y catálogo de nuevos supervisores aún no aplicados; perfil10 sustituye matrices08/09 | [plantilla privada a completar](plantillas/ambitos_lp_por_confirmar.csv), [catálogo histórico](evidence/2026-11-02-cierre-readonly.json) | Coordinación/administración autorizada: cuentas reales, línea/etapa/producción, cierre y suplencia por canal privado; no publicar identificadores ni tokens |
 | Corrección retroactiva de cadenas ya arrastradas y variantes BI no observadas sin contrato/evidencia suficiente | [continuidad](SALE_CONTINUIDAD_CONTENCION.md), [variantes XLSX](POWER_BI_XLSX_V1.md#hallazgos-pendientes-limitados-a-su-caso) | Funcional + mantenedor de fuente: evidencia específica/conciliación, sin inferencias sobre anulaciones, nocturnos, ceros ausentes o reparto |
 
 No se vuelve a consultar información sensible previamente bloqueada ni a conciliar
@@ -116,17 +117,20 @@ una comprobación productiva nueva de esta entrega.
 
 ## 6. Siguiente acción técnica exacta y límite de continuación
 
-**Preparación Paneles2:** [SQL09, matriz, procedimiento privado y recuperación](PANELES2_RESPONSABLES.md).
-Supervisor por etapa y líder en ambas con cuenta/rol/producción/fecha/turno/vigencias
-explícitos; VALIDAR limitado, no SALE/reapertura. Auditoría canónica sin modificar
-payload de idempotencia. Supuestos títulos no conceden acceso. Importador3C tiene
-perfil privado --paneles2/apply=false; no aplica las asignaciones SQL09.
-**Siguiente acción exacta:** recibir catálogo vigente y las dos matrices privadas
-(scopes08 y responsabilidades09), pin y aprobación, con segunda cuenta real distinta
-para cada cierre. Revisar diff3C y compatibilidad de roles; no crear responsables.
-La captura agregada02/11 no certifica roles actuales. No reintentar consulta sensible.
-La suplencia del líder se probó con cuentas sintéticas distintas; si no existe
-cobertura real, el cierre afectado permanece bloqueado. No activar escrituras.
+**Preparación vigente:** [roles, cierre individual, pruebas e instalación](ROLES_CIERRE_INDIVIDUAL.md).
+Instalación propuesta01→06→08→10, **sin09**. Si09 estuviera aplicado, detener y
+preparar un delta compatible, no quitar guards para forzar la instalación.
+SQL10 valida rol activo y acceso efectivo por etapa en los catálogos existentes;
+puede cerrar una sola cuenta autorizada. Los locks/revalidación cubren cambios de
+rol, accesos y sesiones concurrentes. La auditoría conserva rol/identidad canónicos.
+**Siguiente acción exacta:** revisar SQL10 y evidencia/CI, después preparar autorización
+separada para instalación contenida y configuración de accesos reales desde las
+pantallas existentes. No solicitar PRIMARY/BACKUP ni matrices por turno. No activar
+escrituras, workers, publicar o aplicar SQL en este encargo.
+
+Antecedente Paneles2/09 SUPERSEDIDO: las asignaciones por turno y dos cuentas eran
+la regla anterior, conservada solo en la evidencia histórica. No usar el importador
+3C/--paneles2 como autoridad de los roles del perfil10 ni reinstalar09.
 
 Antecedente integral (evidencia vigente en lo no modificado):
 

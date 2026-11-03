@@ -1,0 +1,26 @@
+{
+  "status": "PASS",
+  "results": [
+    {
+      "width": 1440,
+      "native_role_edit_revocation": "PASS",
+      "native_user_create_edit_and_defaults": "PASS",
+      "individual_T2_confirmation_cancel_and_close": "PASS",
+      "server_role_audit": "PASS",
+      "transport": "real local SDK; REST routed to actual captured admin/session and LP SQL; unrelated sources unavailable"
+    },
+    {
+      "width": 390,
+      "native_role_edit_revocation": "PASS",
+      "native_user_create_edit_and_defaults": "PASS",
+      "individual_T2_confirmation_cancel_and_close": "PASS",
+      "server_role_audit": "PASS",
+      "transport": "real local SDK; REST routed to actual captured admin/session and LP SQL; unrelated sources unavailable"
+    }
+  ],
+  "limits": [
+    "Only synthetic accounts/catalog/production. No productive network or privileged identity",
+    "Ancillary source requests unavailable; no certification of their behavior",
+    "Individual empty close exercised here; normal closure, both stages/turns and quantities covered by real SQL tests; existing XLSX evidence reused"
+  ]
+}

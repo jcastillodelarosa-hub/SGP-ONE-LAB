@@ -1,3 +1,5 @@
+-- SUPERSEDIDO por 10_roles_cierre_individual_REVIEW.sql para la regla nueva.
+-- No instalar09 antes de10; conservar solo como antecedente probado.
 -- LP-PANELES2-RESPONSABLES/1. PROPUESTA; 01 -> 06 -> 08 -> 09. No aplicar.
 -- Opt-in deshabilitado; no usuarios/roles/grants, backfill ni activación.
 BEGIN;

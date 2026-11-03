@@ -1,3 +1,10 @@
+> Regla nueva aprobada: [roles y cierre individual](ROLES_CIERRE_INDIVIDUAL.md).
+> Orden vigente01→06→08→10, contenido, **sin09**. No PRIMARY/BACKUP ni asignación
+> temporal obligatoria por turno en10. Configuración es la autoridad de roles/accesos.
+> Los apartados inferiores sobre09 y matrices manuales son antecedentes superados.
+> Si09 ya estuviera aplicado, el preflight10 aborta: preparar otro delta autorizado.
+> Recuperar después de uso mediante contención02 y corrección hacia adelante.
+
 > Piloto inicial PANELES_2 (base82d8a95): [SQL09/matriz y recuperación](PANELES2_RESPONSABLES.md).
 > Orden de preparación01→06→08→09, contenido.09 deshabilitado no activa líneas.
 > Antes de escrituras, aprobar scopes08 + responsabilidades09, ambos turnos/etapas,

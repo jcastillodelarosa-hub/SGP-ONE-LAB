@@ -1,3 +1,6 @@
+> Regla vigente posterior: [roles y cierre individual](ROLES_CIERRE_INDIVIDUAL.md).
+> La doble responsabilidad y asignación por turno de09 quedan SUPERSEDIDAS para el perfil10; este documento conserva evidencia histórica.
+
 # Cierre funcional integral — alcance preparado y límites
 
 2026-11-03, America/Bogota. Base GitHub verificada934340c, mismo Draft183.

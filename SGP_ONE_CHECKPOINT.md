@@ -1,3 +1,18 @@
+## LP · regla vigente de roles y cierre individual (2026-11-03)
+
+Baseba1c546, mismo Draft183. SQL10 propuesto/contenido; alternativa a09, no cadena
+09→10. SUPERVISOR ENSAMBLE/EMPAQUE integrados al catálogo y pantallas existentes;
+LIDER LINEA opera/cierra ambas etapas de PANELES_2. Cierre individual, sin segunda
+cuenta ni asignación temporal por turno, con capacidad/rol/accesos efectivos de
+servidor, revocación y auditoría. SQL08/09 quedan como base/antecedentes donde10
+sustituye esa política, sin eliminar validaciones de cantidades/fuentes/estado.
+SELECT de contratos de Configuración/autenticación03/11 sin cuentas; pruebas reales
+sintéticas en PG17.11. No SQL productivo, usuarios/permisos reales, merge o publicación.
+[Estado único](docs/linea-produccion/ESTADO_OPERATIVO_ACTUAL.md) y
+[matriz, pruebas, instalación/recuperación](docs/linea-produccion/ROLES_CIERRE_INDIVIDUAL.md).
+Siguiente: revisión SQL10/CI antes de autorización separada para instalación contenida
+/configuración real. No exigir matrices manuales ni reabrir doble validación.
+
 ## PANELES_2 · preparación inicial contenida (2026-11-03)
 
 Base82d8a95, mismo Draft183. SQL09 propuesto/deshabilitado, responsabilidad por

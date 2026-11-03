@@ -1,0 +1,25 @@
+{
+  "status": "PASS",
+  "results": [
+    {
+      "stage": "ENSAMBLE",
+      "status": "PASS",
+      "actual_handler_parser_SQL10": true,
+      "cross_stage_denied": true,
+      "individual_close": true,
+      "synthetic": true
+    },
+    {
+      "stage": "EMPAQUE",
+      "status": "PASS",
+      "actual_handler_parser_SQL10": true,
+      "cross_stage_denied": true,
+      "individual_close": true,
+      "synthetic": true
+    }
+  ],
+  "limits": [
+    "Anonymized XLSX fixtures, synthetic SGP catalog/accounts/assignments",
+    "No new format or real productive matching certified; no productive database access"
+  ]
+}

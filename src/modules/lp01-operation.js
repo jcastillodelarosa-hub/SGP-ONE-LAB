@@ -14,7 +14,7 @@ export function mountOperation({tracking,operation,bridge,legacyLoad}){
  const capture=()=>({line:tracking.querySelector('[data-line]').value,stage:get('[data-op-stage]').value,date:get('[data-op-date]').value,shift:Number(get('[data-op-shift]').value)});
  const coordinator=()=>['COORDINADOR','ADMINISTRADOR'].includes(data?.role);
  const writeCompatible=()=>data?.writeContract==='LP-OPERACION-CAS-2';
- const writable=()=>writeCompatible()&&data?.writes&&data?.role!=='CONSULTA'&&data?.turn.estado!=='CERRADO'&&(data?.turn.estado!=='EN_REVISION'||coordinator());
+ const writable=()=>writeCompatible()&&data?.writes&&(!data.operations||data.operations.includes('EJECUTAR'))&&data?.role!=='CONSULTA'&&data?.turn.estado!=='CERRADO'&&(data?.turn.estado!=='EN_REVISION'||coordinator());
  async function rpc(name,args){const token=bridge.getToken();if(!token)throw Error('Inicia sesión para consultar');const client=await bridge.getClient();const r=await client.rpc(name,{p_token:token,...args});if(r.error)throw r.error;return r.data;}
  async function load({quiet=false}={}){
   if(busy)return;loading=true;const request=++seq,ctx=capture(),token=bridge.getToken();if(!quiet){message.textContent='Consultando operación…';live.replaceChildren();}
@@ -106,6 +106,7 @@ export function mountOperation({tracking,operation,bridge,legacyLoad}){
  function attempt(fn){Promise.resolve().then(fn).catch(e=>{const host=operation.querySelector('[data-operation-detail]');(host.querySelector('[data-save-status]')||host.querySelector('[data-close-status]')||message).textContent=String(e.message).includes('SIN_ACTIVIDAD_EXISTEN_ORDENES')?'El turno tiene órdenes asignadas o abiertas. Actualiza la consulta y usa la conciliación normal.':String(e.message).includes('FUENTES_EN_ACTUALIZACION_RECONSULTAR')?'Programación o Export se están actualizando. Consulta de nuevo antes de cerrar SIN ACTIVIDAD.':e.message;});}
  async function send(op,extra,r){
   if(busy||loading)throw Error('Espera a que termine la consulta o guardado pendiente');if(session!==bridge.getToken())throw Error('La sesión cambió. Consulta de nuevo.');
+  if(op==='CERRAR'&&data.individualClose===true&&!window.confirm('Confirmar cierre individual · '+context.line+' · '+context.stage+' · '+context.date+' / T'+context.shift+'. La intervención quedará auditada.'))throw Error('Cierre cancelado por el usuario');
   const payload={op,...context,revision:r?r.revision:data.turn.revision,turn_revision:data.turn.revision,...(r?{key:r.key,part:r.parte}:{}),...extra};
   const signature=JSON.stringify(payload);if(pending&&pending.signature!==signature)throw Error('Hay un guardado sin respuesta. Reintenta la misma operación antes de modificarla.');
   pending??={signature,token:session,cmd:{...payload,id:crypto.randomUUID()}};return transmit();
