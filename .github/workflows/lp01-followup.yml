@@ -20,6 +20,7 @@ on:
       - 'tests/lp01-sin-actividad.test.mjs'
       - 'tests/lp01-apertura/**'
       - 'tests/lp01-apertura.test.mjs'
+      - 'tests/lp01-cierres-integrados/**'
       - 'tests/lp01-ambitos-import/**'
       - 'tests/lp01-ambitos-import.test.mjs'
       - 'scripts/lp01-import-scopes.mjs'
@@ -98,6 +99,7 @@ jobs:
           python tests/lp01-ambitos/postgres.py
           python tests/lp01-ambitos-temporales/postgres.py
           python tests/lp01-ambitos-import/postgres.py
+          python tests/lp01-cierres-integrados/isolated.py
       - name: Real persistence PC and mobile acceptance
         run: |
           pip install playwright==1.62.0
@@ -126,3 +128,5 @@ jobs:
             tests/lp01-ambitos/evidence/
             tests/lp01-ambitos-temporales/evidence/
             tests/lp01-ambitos-import/evidence/
+            tests/lp01-cierres-integrados/evidence/fixtures.json
+            tests/lp01-cierres-integrados/evidence/verification.json

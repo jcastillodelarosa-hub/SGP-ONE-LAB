@@ -128,9 +128,11 @@ de asumir que las piezas o la descripción de Sistema equivalen a ventanas.
   sortearlo. El parser y preservación de los originales se probaron localmente
   contra catálogo/asignaciones sintéticos en un contenedor sin red. Eso no
   certifica que los nombres reales tengan correspondencia unívoca en producción.
-- Siguen pendientes los puentes PDT/Export, ámbitos reales, inicialización SALE de
-  Empaque, siguiente turno operativo y drenaje de comandos descritos en 47a06af.
-  Este encargo no aplica ni cambia esas reglas fuera de la integración Power BI.
+- Actualización Encargo4 (2026-11-03): SALE persistida, siguiente turno, drenaje
+  y scopes temporales ya están preparados y probados aisladamente; no son brechas
+  de implementación pendientes. PDT/Export siguen bloqueados en fuente, y ámbitos,
+  runtime e instalación reales requieren autorización. Prevalece el
+  [estado operativo vigente](ESTADO_OPERATIVO_ACTUAL.md).
 
 ## Pruebas y evidencia
 
@@ -157,6 +159,16 @@ de asumir que las piezas o la descripción de Sistema equivalen a ventanas.
 usa servicios/SQL reales aislados, sin stubs de persistencia. Las fuentes operativas
 son sintéticas y las capturas/fixtures están anonimizadas. No se probó despliegue
 Edge/gateway, usuarios/ámbitos reales, dispositivos físicos o funcionamiento en planta.
+
+## Evidencia integrada posterior — Encargo 4
+
+[Recorrido, matriz de brechas y límites](../../tests/lp01-cierres-integrados/README.md):
+handler compartido y SQL01/06/08 reales aislados, ambas etapas, dos originales
+preservados, diferencias justificadas, reapertura/versiones e inmutabilidad,
+SIN ACTIVIDAD sin BI y próximo turno configurado. Catálogo/cuentas/LP sintéticos;
+no acredita correspondencia en planta ni runtime Edge. No se modifica el adaptador
+ni SQL. Las instrucciones históricas siguientes no sustituyen los prechecks08 ni
+la revisión/autorización de instalación vigente.
 
 ## Preparación de instalación — no ejecutar
 

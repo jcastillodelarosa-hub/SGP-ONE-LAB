@@ -1,14 +1,14 @@
 # Línea de Producción — estado operativo actual
 
-**Actualizado:** 2026-11-03, America/Bogota (Encargo 3C y validación funcional3).
-**Referencia técnica:** `740b991` (importador privado, pruebas y flujo funcional3).
-Continuidad actualizada en el mismo conjunto de commits del PR.
-**Base verificada GitHub/checkout:** `a3a0955f188623288a2ade3c1327300ad5090b8f`.
+**Actualizado:** 2026-11-03, America/Bogota (Encargo 4).
+**Referencia técnica:** conjunto de commits de esta entrega (prueba integrada de cierre/Power BI).
+**Base verificada GitHub/checkout:** `9dce260307ab98fc54638abcd7c354cd029ef2ea`.
 **Repositorio:** `jcastillodelarosa-hub/SGP-ONE-LAB`.
 **Rama:** `feat/lp01-seguimiento-operacion` · [PR #183](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/pull/183), OPEN/DRAFT observado.
-**Estado inmediato:** importador privado apply=false implementado; flujo funcional
-Ensamble/Empaque y cobertura contrastados en PostgreSQL17.11 aislado. SQL01–08/08R
-intactos, no aplicados por esta entrega; sin accesos ni escrituras productivas.
+**Estado inmediato:** cierre normal XLSX, SIN ACTIVIDAD, reapertura, auditoría y
+versiones probados conjuntamente con handler/SQL08 y ambos originales locales en
+PostgreSQL17.11 aislado. Sin defecto demostrado que requiera modificar aplicación,
+adaptador, SQL01–08/08R o permisos. No aplicado/publicado ni verificado en planta.
 
 Esta es la **referencia operativa única de LP**. Describe el estado vigente, no un
 historial. Antes de trabajar leer AGENTS.md, este archivo y el estado real del PR;
@@ -33,8 +33,8 @@ segundo plano. No sustituye la supervisión ni concede autorizaciones productiva
 ## 2. Fase activa y prioridades obligatorias
 
 **FASE ACTIVA: Seguimiento, Ensamble y Empaque.** Objetivo inmediato: completar
-la revisión privada de ámbitos y validación funcional de ambas etapas. Importador
-y flujo sintético preparados; falta matriz/catalogo/períodos reales aprobados. El bloqueo PUBLIC afecta exclusivamente la apertura automática, que sigue
+el cierre técnico de ambas etapas con Power BI, ya contrastado de forma integrada
+en aislamiento. Falta correspondencia/ámbitos/cobertura de casos reales y runtime autorizado. El bloqueo PUBLIC afecta exclusivamente la apertura automática, que sigue
 inactiva; no detiene las integraciones independientes autorizadas.
 
 1. Seguridad e identidad técnica para apertura automática.
@@ -110,6 +110,37 @@ una comprobación productiva nueva de esta entrega.
 
 ## 6. Siguiente acción técnica exacta y límite de continuación
 
+**Encargo 4: brecha de evidencia integrada cerrada en aislamiento.** Se reutilizan
+los motores y ambos XLSX originales: Node handler real → parser vigente → RPC06/08
+→ PostgreSQL17.11 sin red. Por etapa: motivo obligatorio para diferencia1,
+primera versión, reapertura exclusiva de coordinador, corrección, segunda versión
+sin diferencias y original idéntico, una sola auditoría de importación tras retry.
+Sin roles/ámbitos actuales válidos no importa ni recupera original. SIN ACTIVIDAD
+con órdenes (incluso cero) denegado; vacío genuino cierra sin BI, confirmación/motivo,
+identidad/hora/auditoría, dos versiones y siguiente turno HORARIOS_TURNOS.
+
+Catálogo/cuentas/LP/cantidades son sintéticos y se preparan **antes** de operar,
+sin recortar órdenes tras ABRIR. T1 de originales: Ensamble95 / Empaque90. No se
+publican filas/nombres/bytes reales ni se consulta su correspondencia en Supabase.
+[Recorrido, brechas pendientes y pruebas](../../tests/lp01-cierres-integrados/README.md).
+No hay cambio de aplicación/SQL/permisos que aplicar desde esta entrega.
+
+**Dependencias reales delimitadas:** correspondencia canónica y scopes aprobados;
+universo LP/filas del siguiente turno; variantes XLSX no observadas; host Edge/
+autocommit/orígenes y activación autorizados. En el universo sintéticoT1, T2 no
+concilia producciones no asignadas/arrastres sin cobertura: se mantiene bloqueado
+sin fabricar ceros ni modificar Programación. No se afirma defecto productivo del
+archivo por ese escenario. PDT/Export siguen bloqueados exclusivamente en fuente,
+sin crédito de liberación ni inclusión fabricado por cerrar Power BI.
+
+**Siguiente acción exacta vigente:** revisar la matriz de brechas de Encargo4 y
+recibir por canal privado autorizado matriz/catálogo/períodos acreditados; generar
+su diff con el importador3C (apply=false). Antes de considerar cierreT2 real,
+acreditar universo LP y cobertura del archivo de ese turno; mantener pendiente solo
+ese caso. Sin instalar SQL, permisos, activar runtime/escrituras, fusionar o desplegar.
+
+Componentes conservados y evidencias anteriores:
+
 **Encargo 3C terminado en rama/aislamiento.** [Importador privado](../../src/server/lp01-scope-import.js)
 y [CLI](../../scripts/lp01-import-scopes.mjs) reutilizan el revisor existente, ahora
 con período opcional y revocación. Estados completos referencia/propuesta, catálogo
@@ -133,7 +164,7 @@ de P2–P4 al nocturno con prioridades/raíces/antigüedad/afectaciones conserva
 sin duplicar avances. Export y asignaciones completas no cambian. CSV-QA solo es
 entrada al motor de cierre; no certifica nuevo formato XLSX ni inclusión Export.
 
-**Siguiente acción exacta:** recibir por canal privado autorizado la matriz y el
+**Dependencia de3C conservada:** recibir por canal privado autorizado la matriz y el
 estado de referencia aprobados, catálogo completo y períodos acreditados contra
 HORARIOS_TURNOS, con el pin del manifiesto. Ejecutar el CLI privado y revisar su
 diff sin aplicar accesos. No afirmar períodos productivos emitidos por una función
@@ -260,6 +291,17 @@ ni bloquear integraciones independientes por esta revisión pendiente.
 | Vidrio/Dashboard/Reportes | Conservar modal/ubicaciones/navegación y reportes existentes; completar fuentes/desglose e histórico después de flujos críticos, sin KPI fabricado |
 
 ## 8. Pruebas y CI
+
+Encargo4: **4 recorridos completos PASS** (2 etapas × fixtures anonimizadas /
+originales locales), handler y SQL08 reales en PostgreSQL17.11 sin red. Por recorrido:
+2 cierres normales y2 SIN ACTIVIDAD versionados, roles/revisión/revocación, original
+idéntico y auditoría idempotente, siguiente turno y cobertura incompleta denegada.
+[Fixtures](../../tests/lp01-cierres-integrados/evidence/fixtures.json) /
+[originales, solo hashes y recuentos](../../tests/lp01-cierres-integrados/evidence/originals.json).
+**16 regresiones directas PASS**. Aplicación, adaptador y SQL01–08/08R comparados
+con9dce260 sin modificaciones. PC/móvil previo reutilizado al no cambiar UI.
+CI de9dce260 observado4/4PASS; CI nueva pendiente de consulta tras push, no atribuida.
+
 
 Encargo3C: **12 unitarias nuevas PASS,7 grupos privacidad CLI PASS,23 regresiones
 directas PASS y artefacto privado previo PASS**. [Evidencia pública solo sintética](../../tests/lp01-ambitos-import/evidence/).

@@ -1,0 +1,45 @@
+{
+  "status": "PASS",
+  "mode": "ORIGINAL_LOCAL_FILES",
+  "results": [
+    {
+      "stage": "ENSAMBLE",
+      "source_sha256": "a4da8416349a731100706f14b50a716c877b20219364b14f5cc4e1321c4a8c3e",
+      "source_rows": 33,
+      "t1_power_bi": 95,
+      "first_difference": 1,
+      "second_differences": 0,
+      "normal_versions": 2,
+      "empty_versions": 2,
+      "original_identical": true,
+      "import_audit_once": true,
+      "next_turn_incomplete_source": "BLOCKED_WITHOUT_INFERRED_ZERO",
+      "official_export_and_assignments_unchanged": true,
+      "server_handler_and_sql08": "PASS",
+      "postgres": "17.11 (Debian 17.11-1.pgdg13+2)"
+    },
+    {
+      "stage": "EMPAQUE",
+      "source_sha256": "b1bc89f36b1931a71899970398104644209a72f287f28d3d2421c602657280d2",
+      "source_rows": 37,
+      "t1_power_bi": 90,
+      "first_difference": 1,
+      "second_differences": 0,
+      "normal_versions": 2,
+      "empty_versions": 2,
+      "original_identical": true,
+      "import_audit_once": true,
+      "next_turn_incomplete_source": "BLOCKED_WITHOUT_INFERRED_ZERO",
+      "official_export_and_assignments_unchanged": true,
+      "server_handler_and_sql08": "PASS",
+      "postgres": "17.11 (Debian 17.11-1.pgdg13+2)"
+    }
+  ],
+  "limits": [
+    "Catalog/assignments/accounts and leader quantities synthetic; no live SGP matching certified",
+    "Original rows/names/bytes only local IPC and no-network PG; never posted to production or public artifacts",
+    "Node shared handler exercised; Edge deployment/gateway, actual users and devices not certified",
+    "With synthetic T1-only assignments, T2 coverage mismatches; no live source defect asserted and no missing row converted to zero",
+    "No PDT liberation or Export inclusion credited; official balances unchanged"
+  ]
+}
