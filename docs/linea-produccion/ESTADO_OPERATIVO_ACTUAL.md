@@ -1,7 +1,9 @@
 # Línea de Producción — estado operativo actual
 
-**Actualizado:** 2026-11-03 02:06 UTC / 2026-11-02 21:06 America/Bogota.
+**Actualizado:** 2026-11-03 02:16 UTC / 2026-11-02 21:16 America/Bogota.
 **Referencia técnica:** `e611d273e6c4ab331291918824ad9ab4207e3560` (última entrega técnica).
+**Sincronización documental:** HEAD local y remoto del PR coincidentes en
+`5d02a3ec11cb3bcfd8979d0a6506997d256c1f60` al inicio de esta revisión.
 **Repositorio:** `jcastillodelarosa-hub/SGP-ONE-LAB`.
 **Rama:** `feat/lp01-seguimiento-operacion` · [PR #183](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/pull/183), OPEN/DRAFT observado.
 **Base main observada en el PR:** `bb224f00924c1feaa47a4a556a829e93b8e4ca3e`.
@@ -133,11 +135,15 @@ el bloqueo ni solicitar ejecución productiva como siguiente paso.
 
 ## 8. Pruebas y CI
 
-Referencia técnica **e611d27: CI 4/4 aprobada**, consultada en GitHub en esta entrega:
-[diseño A](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/actions/runs/41562581004),
-[SQL/PC/móvil LP](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/actions/runs/41562580904),
-[pruebas generales](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/actions/runs/41562580925),
-[sintaxis](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/actions/runs/41562580908).
+Última referencia documental **5d02a3e**, consultada en GitHub al corte de esta
+sincronización: **3 workflows aprobados y 1 en ejecución**:
+[diseño A aprobado](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/actions/runs/41564546228),
+[pruebas generales aprobadas](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/actions/runs/41564546246),
+[sintaxis aprobada](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/actions/runs/41564546101),
+[SQL/PC/móvil LP en ejecución](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/actions/runs/41564546102).
+La referencia técnica **e611d27 conserva CI 4/4 aprobada**, incluido
+[SQL/PC/móvil](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/actions/runs/41562580904);
+su evidencia se reutiliza, no se atribuye al workflow todavía en ejecución.
 Nueve grupos de diseño A y seis del preparador, más evidencias previas enlazadas,
 conservan su alcance. LOGIN local trust no certifica contraseña/TLS/Supavisor real;
 CSV-QA de cierre sintético no certifica el parser XLSX. La CI no prueba planta.
