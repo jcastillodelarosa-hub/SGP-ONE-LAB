@@ -185,16 +185,11 @@ jobs:
         run: |
           python scripts/seal-lp-visual.py
           python scripts/lp-prepare-approved-auto.py
-      - name: Existing account, no new credential or IAM grant
-        id: auth
-        uses: google-github-actions/auth@v2
-        with:
-          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SGP_ONE_LAB }}
-          token_format: access_token
-          create_credentials_file: false
+      - name: Install OAuth client for existing service account (no IAM Credentials API)
+        run: python -m pip install google-auth==2.35.0
       - name: Read live identity and retained-version metadata; stop on denied access
         env:
-          FIREBASE_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SGP_ONE_LAB }}
           LP_EXPECTED_LIVE: ${{ inputs.expected_live_version }}
         run: python scripts/lp-hosting-metadata.py
       - name: Publish only the reviewed artifact
@@ -209,7 +204,7 @@ jobs:
       - name: Explicit recovery of an accredited retained version
         if: needs.gate.outputs.route == 'recover'
         env:
-          FIREBASE_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SGP_ONE_LAB }}
           LP_METADATA_OPERATION: recover
           LP_GUARDED_ROUTE: ${{ needs.gate.outputs.route }}
           LP_EXPECTED_LIVE: ${{ inputs.expected_live_version }}
@@ -219,12 +214,12 @@ jobs:
         if: needs.gate.outputs.route == 'publish' || needs.gate.outputs.route == 'visual' || needs.gate.outputs.route == 'recover'
         env:
           LP_METADATA_LABEL: after
-          FIREBASE_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SGP_ONE_LAB }}
         run: python scripts/lp-hosting-metadata.py
       - name: Compare active version and file paths without guessing content encoding
         if: needs.gate.outputs.route == 'publish' || needs.gate.outputs.route == 'visual' || needs.gate.outputs.route == 'recover'
         env:
-          FIREBASE_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SGP_ONE_LAB }}
           LP_ROUTE: ${{ needs.gate.outputs.route }}
           LP_ROLLBACK_VERSION: ${{ inputs.rollback_version }}
         run: python scripts/lp-hosting-postcheck.py
