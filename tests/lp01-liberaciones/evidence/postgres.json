@@ -1,0 +1,18 @@
+{
+  "status": "PASS",
+  "checks": [
+    "Missing physical receipt leaves pending with zero credit",
+    "Canonical root distribution 4+3 <= net 15-8; exact retry, changed payload and reused event protected",
+    "Wrong-root LIBERAR rolls back SALE and consumption",
+    "Real concurrent identical consumption commits once",
+    "Repeated overlapping union rejected by predecessor/before continuity",
+    "Annulment after consumption freezes pending credits without reducing SALE; reconciliation required",
+    "Packing has independent receipt chain; non-coordinator and unopened destination denied",
+    "Private emitter/evidence immutable, no direct browser access; Export unchanged"
+  ],
+  "limits": [
+    "Trusted physical receipt is synthetic; no live PDT emitter or delivery coverage certified",
+    "No UI or public RPC/grants added; private association preparation only; coordinator service wiring pending"
+  ],
+  "postgres": "17.11 (Debian 17.11-1.pgdg13+2)"
+}
