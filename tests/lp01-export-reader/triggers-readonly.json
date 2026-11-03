@@ -1,0 +1,4 @@
+{
+  "scope": "noninternal triggers on public.sgp_cargas_diarias and public.sgp_export_diario_historial only",
+  "rows": []
+}

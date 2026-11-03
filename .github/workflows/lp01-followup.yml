@@ -20,6 +20,10 @@ on:
       - 'tests/lp01-sin-actividad.test.mjs'
       - 'tests/lp01-apertura/**'
       - 'tests/lp01-apertura.test.mjs'
+      - 'tests/lp01-export-reader/**'
+      - 'tests/lp01-export-reader.test.mjs'
+      - 'src/server/lp01-export-reader.js'
+      - 'src/server/lp01-scope-review.js'
       - 'tests/lp01-origen/**'
       - 'tests/lp01-origen.test.mjs'
       - 'src/server/lp01-pdt-origin.js'
@@ -61,6 +65,7 @@ jobs:
           node tests/lp01-apertura.test.mjs
           node tests/lp01-fuentes.test.mjs
           node tests/lp01-origen.test.mjs
+          node tests/lp01-export-reader.test.mjs
           node tests/lp01-followup.test.mjs
           node tests/production-line-tabs.test.mjs
           node tests/planner-integration.test.mjs
@@ -76,6 +81,7 @@ jobs:
           python tests/lp01-fuentes/postgres.py
           python tests/lp01-liberaciones/postgres.py
           python tests/lp01-origen/postgres.py
+          python tests/lp01-export-reader/postgres.py
       - name: Real persistence PC and mobile acceptance
         run: |
           pip install playwright==1.62.0
@@ -100,3 +106,4 @@ jobs:
             tests/lp01-fuentes/evidence/
             tests/lp01-liberaciones/evidence/
             tests/lp01-origen/evidence/
+            tests/lp01-export-reader/evidence/

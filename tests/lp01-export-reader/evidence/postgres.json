@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "checks": [
+    "Actual JavaScript reader executes real repeatable-read/read-only PostgreSQL transaction",
+    "Concurrent synthetic load commits after first SELECT; observed old cut remains coherent",
+    "Next transaction sees new cut and rejects expected old cut",
+    "No source manifest produced, no budget or SALE mutation"
+  ],
+  "scope": "New isolated PG17.11; synthetic production/load/history, actual reader SQL; HTTP adapter only transports SQL to persistent QA connection, no business result stubs"
+}
