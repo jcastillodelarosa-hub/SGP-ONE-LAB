@@ -1,7 +1,8 @@
 # Línea de Producción — estado operativo actual
 
 **Actualizado:** 2026-11-03, America/Bogota (Encargo 3C y validación funcional3).
-**Referencia técnica:** conjunto de commits de esta entrega (importador privado y pruebas).
+**Referencia técnica:** `740b991` (importador privado, pruebas y flujo funcional3).
+Continuidad actualizada en el mismo conjunto de commits del PR.
 **Base verificada GitHub/checkout:** `a3a0955f188623288a2ade3c1327300ad5090b8f`.
 **Repositorio:** `jcastillodelarosa-hub/SGP-ONE-LAB`.
 **Rama:** `feat/lp01-seguimiento-operacion` · [PR #183](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/pull/183), OPEN/DRAFT observado.
