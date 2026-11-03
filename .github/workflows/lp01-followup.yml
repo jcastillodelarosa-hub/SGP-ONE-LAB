@@ -20,6 +20,8 @@ on:
       - 'tests/lp01-sin-actividad.test.mjs'
       - 'tests/lp01-apertura/**'
       - 'tests/lp01-apertura.test.mjs'
+      - 'tests/lp01-fuentes/**'
+      - 'tests/lp01-fuentes.test.mjs'
       - 'src/server/lp01-opening-preparation.js'
       - 'scripts/lp01-opening-prepare.mjs'
       - 'app.js'
@@ -52,6 +54,7 @@ jobs:
           node tests/lp01-continuidad.test.mjs
           node tests/lp01-sin-actividad.test.mjs
           node tests/lp01-apertura.test.mjs
+          node tests/lp01-fuentes.test.mjs
           node tests/lp01-followup.test.mjs
           node tests/production-line-tabs.test.mjs
           node tests/planner-integration.test.mjs
@@ -64,6 +67,7 @@ jobs:
           python tests/lp01-continuidad/xlsx-admission.py
           python tests/lp01-sin-actividad/postgres.py
           python tests/lp01-apertura/postgres.py
+          python tests/lp01-fuentes/postgres.py
       - name: Real persistence PC and mobile acceptance
         run: |
           pip install playwright==1.62.0
@@ -72,6 +76,7 @@ jobs:
           python tests/lp01-continuidad/browser.py
           python tests/lp01-sin-actividad/browser.py
           python tests/lp01-apertura/browser.py
+          python tests/lp01-fuentes/browser.py
           python tests/lp01-seguimiento/browser.py
       - uses: actions/upload-artifact@v4
         if: always()
@@ -84,3 +89,4 @@ jobs:
             tests/lp01-continuidad/evidence/
             tests/lp01-sin-actividad/evidence/
             tests/lp01-apertura/evidence/
+            tests/lp01-fuentes/evidence/

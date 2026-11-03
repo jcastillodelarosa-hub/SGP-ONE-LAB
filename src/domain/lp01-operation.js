@@ -1,3 +1,4 @@
+import {exportBalance} from './lp01-sources.js';
 /** Contracts for the stage-specific engine; never mix local execution with Export. */
 export const BI_HEADER='etapa;fecha;turno;key_produccion;parte;cantidad';
 export const AFFECTATIONS=['NC_AL','NC_V','TECNO','NOVEDAD'];
@@ -9,7 +10,7 @@ export function operationalRows(data,{line='',search=''}={}){
  .sort((a,b)=>bucket(a)-bucket(b)||String(a.antiguedad_fecha||a.origen_fecha||a.fecha).localeCompare(String(b.antiguedad_fecha||b.origen_fecha||b.fecha))||Number(a.antiguedad_turno||a.origen_turno||a.turno)-Number(b.antiguedad_turno||b.origen_turno||b.turno)||Number(a.prioridad)-Number(b.prioridad)||a.key.localeCompare(b.key)||a.parte.localeCompare(b.parte));
 }
 const bucket=r=>r.abierta?(r.sale>0?0:1):2;
-export function officialBalance(row,stage){const p=row.oficial;if(p?.saldos_inicializados!==true||p?.presente_ultimo_export!==true)return null;const n=Number(p[stage==='ENSAMBLE'?'saldo_ensamble':'saldo_empaque']);return Number.isSafeInteger(n)&&n>=0?n:null;}
+export function officialBalance(row,stage){return exportBalance(row?.oficial,stage);}
 export function validateAffectations(affectations,consolidated){
  const values=AFFECTATIONS.map(k=>quantity(affectations[k]??0));
  if(consolidated===undefined)return null;

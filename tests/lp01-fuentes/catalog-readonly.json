@@ -1,0 +1,51 @@
+{
+  "mode": "SELECT_CATALOG_ONLY_NO_BUSINESS_FUNCTION_CALLS",
+  "reference": "fd07cb3",
+  "definitions": [
+    {
+      "signature": "sgp_consultar_ensamble(text,integer,text)",
+      "definition_md5": "768d3d715be95c52a51938800dcef81b",
+      "prosecdef": true,
+      "proconfig": [
+        "search_path=public"
+      ],
+      "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_consultar_ensamble(p_token text, p_semana integer DEFAULT NULL::integer, p_linea text DEFAULT 'PANELES_2'::text)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\ndeclare v_user text;\nbegin\n v_user:=public.sgp_validar_sesion_rol(p_token,array['ADMINISTRADOR','COORDINADOR','LIDER','LIDER MECANIZADO','CONSULTA']);\n return jsonb_build_object('usuario',v_user,'filas',coalesce((\n   select jsonb_agg(to_jsonb(q) order by q.semana_actual,q.prioridad nulls last,q.id) from(\n    select p.*,pr.prioridad,coalesce(g.tipo_vidrio,'—') tipo_vidrio,coalesce(g.medidas,'—') medidas,coalesce(u.ubicacion,'—') ubicacion_vidrio,\n      coalesce(mo.estado,'—') estado_mecanizado,coalesce(mo.observacion,'') observacion_mecanizado,\n      coalesce(pd.pendientes_mecanizado,'') pendientes_mecanizado,coalesce(pd.pdt_repo_ok,false) pdt_repo_ok,\n      coalesce(pd.pdt_por_validar,false) pdt_por_validar,\n      public.sgp_es_reserva_compartida(p.key_produccion) reserva_compartida,\n      public.sgp_reservas_por_produccion_json(p.key_produccion) reservas_compartidas\n    from public.sgp_producciones p\n    left join public.sgp_prioridades pr on pr.anio=p.anio and pr.semana=coalesce(p.semana_actual,p.semana_base) and pr.id_linea=p.id_linea and pr.key_produccion=p.key_produccion\n    left join lateral(select string_agg(distinct nullif(v.datos_origen->>'Tipo V',''),' · ') tipo_vidrio,string_agg(distinct nullif(v.datos_origen->>'Cant y Tamaño',''),' · ') medidas from public.sgp_vidrio v where v.key_produccion=p.key_produccion and v.activo='SI')g on true\n    left join lateral(select string_agg(format('(%s) %s · %s',trim(to_char(sumx,'FM999999990.##')),posicion,estado_orden),' | ' order by ord,posicion) ubicacion from(select uv.posicion,min(uv.estado_orden) estado_orden,sum(coalesce(uv.disponible,0)) sumx,case when lower(min(coalesce(uv.estado_orden,''))) like 'preparado%' then 1 when lower(min(coalesce(uv.estado_orden,''))) like 'novedad%' then 2 else 3 end ord from public.sgp_ubicacion_vidrio_actual uv where uv.key_produccion=p.key_produccion and uv.activo=true group by uv.posicion)z)u on true\n    left join lateral(\n      select eo.estado,eo.observacion from (select eo.* from public.sgp_mecanizado_ejecucion_orden eo where eo.produccion=p.produccion and not exists(select 1 from sgp_mecanizado_parcial.partes pt where pt.id_programacion=eo.id_programacion) order by eo.actualizado_en desc nulls last limit 1) eo\n      where eo.produccion=p.produccion and not exists(select 1 from sgp_mecanizado_parcial.partes where key_produccion=p.key_produccion)\n      union all\n      select case when sum(case when eo.estado='PROCESADO' then pt.cantidad else 0 end)>=p.cantidad then 'PROCESADO'\n        when bool_or(eo.estado in ('MECANIZADO','PROCESADO')) then 'MECANIZADO'\n        when bool_or(eo.estado='CORTE') then 'CORTE' else 'SIN INICIAR' end,\n        string_agg(p.produccion||'-P'||pt.numero||': '||coalesce(eo.observacion,''),' | ' order by pt.numero)\n      from sgp_mecanizado_parcial.partes pt join public.sgp_mecanizado_programacion mp using(id_programacion)\n      left join public.sgp_mecanizado_ejecucion_orden eo on eo.id_programacion=pt.id_programacion and eo.produccion=mp.produccion\n      where pt.key_produccion=p.key_produccion and mp.estado<>'CANCELADA'\n      having count(*)>0\n    )mo on true\n    left join lateral(\n      select\n        string_agg('PDT '||trim(to_char(ap.cantidad,'FM999999990.##'))||' '||coalesce(regexp_replace(ap.perfil,'^.*-',''),'—')||case when ap.nc is not null then ' NC '||ap.nc else '' end,' · ' order by ap.fecha_reporte) pendientes_mecanizado,\n        bool_or(ap.estado_repo='REPO_OK' and coalesce(ap.validacion_estado,'POR_VALIDAR')='VALIDADO') pdt_repo_ok,\n        bool_or(coalesce(ap.validacion_estado,'POR_VALIDAR')='POR_VALIDAR') pdt_por_validar\n      from public.sgp_aluminio_pendientes ap\n      where ap.produccion=p.produccion and ap.estado='PENDIENTE' and coalesce(ap.estado_repo,'PENDIENTE')<>'PICKING'\n    )pd on true\n    where p.id_linea=p_linea and p.activa='SI' and(p_semana is null or coalesce(p.semana_actual,p.semana_base)=p_semana)\n   )q\n ),'[]'::jsonb));\nend $function$\n"
+    },
+    {
+      "signature": "sgp_es_reserva_compartida(text)",
+      "definition_md5": "4fc49de68fac68e5d6b93086232404f3",
+      "prosecdef": true,
+      "proconfig": [
+        "search_path=public"
+      ],
+      "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_es_reserva_compartida(p_key_produccion text)\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\n  with prod as (\n    select sp.key_produccion,sp.id_linea,sp.reserva_al,\n      coalesce(\n        (\n          select pr.reserva\n          from public.sgp_prioridades pr\n          where pr.key_produccion=sp.key_produccion\n            and pr.id_linea=sp.id_linea\n            and pr.semana=coalesce(sp.semana_actual,sp.semana_base)\n          order by pr.fecha_actualizacion desc nulls last\n          limit 1\n        ),\n        nullif(trim(split_part(coalesce(sp.reserva_al,''),',',1)),'')\n      ) reserva_principal\n    from public.sgp_producciones sp\n    where sp.key_produccion=p_key_produccion\n    limit 1\n  ),\n  reservas as (\n    select distinct trim(r.reserva) reserva\n    from prod p\n    cross join lateral regexp_split_to_table(coalesce(p.reserva_al,''),'\\s*,\\s*') r(reserva)\n    where nullif(trim(r.reserva),'') is not null\n  )\n  select coalesce(exists(\n    select 1\n    from prod p\n    join reservas r on r.reserva<>p.reserva_principal\n    where public.sgp_reserva_es_principal(r.reserva,p.id_linea,p.key_produccion)\n  ),false);\n$function$\n"
+    },
+    {
+      "signature": "sgp_reservas_por_produccion_json(text)",
+      "definition_md5": "844fd0c481a9584e0851f80abab459f2",
+      "prosecdef": true,
+      "proconfig": [
+        "search_path=public"
+      ],
+      "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_reservas_por_produccion_json(p_key_produccion text)\n RETURNS jsonb\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\n  select coalesce(jsonb_agg(jsonb_build_object(\n    'reserva',v.reserva,\n    'tipo',v.tipo_relacion,\n    'acabado',v.acabado_reserva,\n    'semana',v.semana_reserva,\n    'es_principal_compartida',v.es_principal_compartida\n  ) order by case when v.tipo_relacion='PRINCIPAL' then 0 else 1 end,v.reserva),'[]'::jsonb)\n  from public.sgp_produccion_reservas_v v\n  where v.key_produccion=p_key_produccion;\n$function$\n"
+    },
+    {
+      "signature": "sgp_validar_sesion_rol(text,text[])",
+      "definition_md5": "951943ae26baccc4797eea5fed57fcb6",
+      "prosecdef": true,
+      "proconfig": [
+        "search_path=public, extensions"
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_validar_sesion_rol(p_token text, p_roles text[])\n RETURNS text\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public', 'extensions'\nAS $function$ declare v_usuario text; v_rol text; begin select u.usuario,u.rol into v_usuario,v_rol from public.sgp_sesiones_app s join public.sgp_usuarios u on u.id_usuario=s.id_usuario where s.token_hash=encode(extensions.digest(coalesce(p_token,''),'sha256'),'hex') and s.revocado_en is null and s.expira_en>now() and u.activo=true; if v_usuario is null then raise exception 'PERMISO_DENEGADO'; end if; if v_rol=any(p_roles) then return v_usuario; end if; if v_rol='RECEPCION' and 'LIDER'=any(p_roles) then return v_usuario; end if; raise exception 'PERMISO_DENEGADO'; end $function$\n"
+    },
+    {
+      "signature": "sgp_reserva_es_principal(text,text,text)",
+      "definition_md5": "e4db7542d667e4a25ae63b008fd5ce6f",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_reserva_es_principal(p_reserva text, p_linea text DEFAULT NULL::text, p_excluir_key text DEFAULT NULL::text)\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\n  select\n    exists(\n      select 1\n      from public.sgp_prioridades pr\n      where trim(pr.reserva)=trim(coalesce(p_reserva,''))\n        and (p_linea is null or pr.id_linea=p_linea)\n    )\n    or exists(\n      select 1\n      from public.sgp_producciones sp\n      where sp.activa='SI'\n        and (p_linea is null or sp.id_linea=p_linea)\n        and (p_excluir_key is null or sp.key_produccion<>p_excluir_key)\n        and trim(split_part(coalesce(sp.reserva_al,''),',',1))=trim(coalesce(p_reserva,''))\n    );\n$function$\n"
+    }
+  ]
+}

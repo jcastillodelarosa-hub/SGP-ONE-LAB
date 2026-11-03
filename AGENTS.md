@@ -42,6 +42,8 @@ Respetar su fase/prioridades y la aprobación individual de bocetos; no reabrir
 reglas ya aprobadas. Si hay trabajo paralelo sobre los mismos archivos, aislarlo
 antes de editar. Este protocolo no autoriza superar bloqueos ni activar turnos,
 modificar producción, crear credenciales/privilegios, fusionar o desplegar.
+Un bloqueo limita la operación afectada: PUBLIC mantiene inactiva la apertura
+automática, pero no detiene las integraciones independientes autorizadas de LP.
 
 ## Skills y reglas de negocio
 Consultar únicamente las Skills relevantes en `.agents/skills/*/SKILL.md`:

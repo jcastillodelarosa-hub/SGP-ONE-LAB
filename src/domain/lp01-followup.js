@@ -1,3 +1,4 @@
+import {exportBalance} from './lp01-sources.js';
 /** Read model only. Assignment execution is not a stage-specific Export balance. */
 const number=v=>['number','string'].includes(typeof v)&&String(v).trim()!==''&&Number.isFinite(Number(v))?Number(v):null;
 export function followupRows(assignments,productions){
@@ -15,10 +16,10 @@ export function followupRows(assignments,productions){
   const p=byKey.get(a.key_produccion),scheduled=number(a.cantidad),executed=number(a.ejecutado);
   const remaining=scheduled!==null&&executed!==null?scheduled-executed:null;
   const issue=scheduled===null||executed===null||!Number.isInteger(scheduled)||!Number.isInteger(executed)||scheduled<0||executed<0||remaining<0||!p;
-  const validExport=p?.saldos_inicializados===true&&p?.presente_ultimo_export!==false;
+  const validExport=p?.saldos_inicializados===true&&p?.presente_ultimo_export===true;
   return [{...a,production:p,scheduled,executed,remaining,
    progress:issue?'SIN CONCILIAR':a.estado==='CANCELADA'?'CANCELADA':remaining===0?'FINALIZADA':executed>0?'EN PROCESO':'PENDIENTE',
-   exportValid:validExport,assemblyBalance:validExport?number(p.saldo_ensamble):null,packingBalance:validExport?number(p.saldo_empaque):null,
+   exportValid:validExport,assemblyBalance:exportBalance(p,'ENSAMBLE'),packingBalance:exportBalance(p,'EMPAQUE'),
    issue,identity:a.id,part:a.origen_id||null}];
  });
 }

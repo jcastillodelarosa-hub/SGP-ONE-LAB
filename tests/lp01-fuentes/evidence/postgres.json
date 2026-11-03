@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "postgres": "17.11 (Debian 17.11-1.pgdg13+2)",
+  "checks": [
+    "Actual captured material RPC/session/reservation helpers execute against synthetic relations",
+    "NULL assembly/288 packing returned independently",
+    "Actual name-based PDT aggregation reproduced across distinct production keys; no release accredited",
+    "Invalid session denied; no modification of production, assignments, PDT, SALE, execution or audit"
+  ],
+  "limits": [
+    "Synthetic reservation view is upstream fixture only, not verification of its managed definition",
+    "No productive business RPC invoked; legacy material read role matrix preserved, no permissions broadened"
+  ]
+}

@@ -1,6 +1,6 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import {followupRows,filterFollowup,draftAdvance,weekRange} from '../src/domain/lp01-followup.js';
-const production={key_produccion:'1|PANELES_2',produccion:'MISMO NOMBRE',id_linea:'PANELES_2',reserva_al:'R1,R2',saldos_inicializados:true,saldo_ensamble:9,saldo_empaque:12,ensamblado:11,empacado:8};
+const production={key_produccion:'1|PANELES_2',produccion:'MISMO NOMBRE',id_linea:'PANELES_2',reserva_al:'R1,R2',saldos_inicializados:true,presente_ultimo_export:true,saldo_ensamble:9,saldo_empaque:12,ensamblado:11,empacado:8};
 const a={id:'A1',key_produccion:production.key_produccion,produccion:production.produccion,fecha:'2026-10-28',turno:1,prioridad:2,cantidad:10,ejecutado:3,estado:'ABIERTA',observacion:'Falta vidrio'};
 test('identidad canónica, duplicados y origen conservados; no unir homónimas',()=>{const r=followupRows([{...a,origen_id:'P0'},a].slice(0,1),[production,{...production,key_produccion:'2|FRAMES_2',saldo_ensamble:90}]);assert.equal(r[0].assemblyBalance,9);assert.equal(r[0].remaining,7);assert.equal(r[0].part,'P0');assert.equal(followupRows([a,a],[production]).length,1);assert.throws(()=>followupRows([a,{...a,cantidad:11}],[production]));});
 test('Export no se descuenta con ejecución; inválido o ausente no vale cero',()=>{assert.equal(followupRows([a],[production])[0].packingBalance,12);assert.equal(followupRows([a],[{...production,presente_ultimo_export:false}])[0].assemblyBalance,null);assert.equal(followupRows([a],[])[0].progress,'SIN CONCILIAR');});
