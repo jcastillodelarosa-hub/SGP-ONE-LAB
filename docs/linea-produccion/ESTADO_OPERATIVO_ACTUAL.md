@@ -1,7 +1,7 @@
 # Línea de Producción — estado operativo actual
 
-**Actualizado:** 2026-11-03 02:32 UTC / 2026-11-02 21:32 America/Bogota.
-**Referencia técnica:** `5fc206e7de09fae5cb26f7ed9d80403482e1aea8` (asociación privada PDT, SQL propuesto y pruebas).
+**Actualizado:** 2026-11-03 UTC (entrega de asociación PDT).
+**Referencia técnica:** `bb6de3143cf6b1454f0c5b0d466d9acddd00457d` (asociación privada PDT, SQL propuesto y pruebas).
 **Base de esta entrega:** HEAD local/PR coincidentes en
 `fd07cb38fc8a4414bcb3fcd9984f3bb5f0271371` al inicio; continuidad actualizada en el mismo conjunto de commits.
 **Repositorio:** `jcastillodelarosa-hub/SGP-ONE-LAB`.
@@ -98,7 +98,7 @@ Responsables expresados por función, **sin inventar personas ni conceder acceso
 |---|---|---|
 | **Apertura automática: A no garantiza «solo ABRIR» en la base actual.** EXECUTE de PUBLIC alcanza 83 SECURITY DEFINER SGP, 80 invocables sin triggers; PUBLIC también recibe TEMP. NOINHERIT/REVOKE al rol no lo sustraen | [SELECT conservado](../../tests/lp01-principal-a/evidence/supabase-catalog.json), [contraejemplo sintético](../../tests/lp01-principal-a/evidence/postgres.json). Helper real solo inspeccionado, nunca ejecutado | Responsable de seguridad/DB y propietario del proyecto: delimitar propuesta compatible de perímetro y autorizar su alcance, o decidir otra frontera. Codex no revoca ACL globales ni implementa B automáticamente |
 | LOGIN/TLS/red/pooler reales no acreditados; no existe enlace técnico integrado/activado | [viabilidad y límites](principal-a/DISENO.md) | Responsable infraestructura/Supabase: runtime/ruta e identidad aprobados y prueba controlada posterior; sin secretos/roles ahora |
-| PDT no acredita aún liberación neta inequívoca por etapa/raíz LP ni compensación de crédito ya consumido | [contrato LP-PDT-LIBERACION/1 y brecha](CIERRE_BLOQUEOS_PRODUCTIVOS.md#2-pdt-datos-existentes-y-contrato-que-falta) | Responsable funcional/PDT: caso y consolidación de solapamientos; mantenedor integración: adaptador/emisor trazable, sin convertir piezas en ventanas |
+| Emisor PDT real pendiente de acreditar entrega/cobertura neta; asociación por raíz y contención de anulaciones ya preparadas en 07, verificadas solo sintéticamente | [contrato LP-PDT-LIBERACION/1 y brecha](CIERRE_BLOQUEOS_PRODUCTIVOS.md#2-pdt-datos-existentes-y-contrato-que-falta) | Responsable funcional/PDT: caso y consolidación de solapamientos; mantenedor integración: adaptador/emisor trazable, sin convertir piezas en ventanas |
 | Cambio de corte Export no prueba qué avances incluye; riesgo de descontar dos veces | [LP-EXPORT-INCLUSION/1](CIERRE_BLOQUEOS_PRODUCTIVOS.md#3-export-diario-contrato-de-inclusión-separado-de-power-bi-de-cierre) | Responsable fuente Export y mantenedor: procedencia/cortes/eventos incluidos y protocolo idempotente; no deducir inclusión por fecha o diferencia de saldo |
 | Ámbitos reales y cobertura de responsables no registrados/validados para activar LP | [plantilla privada a completar](plantillas/ambitos_lp_por_confirmar.csv), [catálogo histórico](evidence/2026-11-02-cierre-readonly.json) | Coordinación/administración autorizada: cuentas reales, línea/etapa/producción, cierre y suplencia por canal privado; no publicar identificadores ni tokens |
 | Corrección retroactiva de cadenas ya arrastradas y variantes BI no observadas sin contrato/evidencia suficiente | [continuidad](SALE_CONTINUIDAD_CONTENCION.md), [variantes XLSX](POWER_BI_XLSX_V1.md#hallazgos-pendientes-limitados-a-su-caso) | Funcional + mantenedor de fuente: evidencia específica/conciliación, sin inferencias sobre anulaciones, nocturnos, ceros ausentes o reparto |
@@ -152,7 +152,7 @@ ni bloquear integraciones independientes por esta revisión pendiente.
 
 ## 8. Pruebas y CI
 
-Entrega 5fc206e: **8 grupos SQL nuevos aprobados** en PostgreSQL17.11 aislado,
+Entrega bb6de31: **8 grupos SQL nuevos aprobados** en PostgreSQL17.11 aislado,
 [evidencia](../../tests/lp01-liberaciones/evidence/postgres.json). Se ejecutan el
 LIBERAR y la auditoría reales: pending sin crédito, reparto4+3 neto7, raíces,
 concurrencia/reintentos, solapamientos, anulaciones, etapas y permisos privados.
