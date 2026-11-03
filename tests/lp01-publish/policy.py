@@ -51,6 +51,12 @@ for job,entry in [('ordinary','sgp-ordinary'),('controlled','lp-reviewed')]:
  assert deploy[0]['with']['projectId']=='sgp-one-lab' and deploy[0]['with']['channelId']=='live'
  assert deploy[0]['with']['firebaseServiceAccount']=='${{ secrets.FIREBASE_SERVICE_ACCOUNT_SGP_ONE_LAB }}'
 assert 'entryPoint: .' not in (ROOT/'.github/workflows/firebase-hosting.yml').read_text()
+controlled=y['jobs']['controlled']['steps']
+assert not any(s.get('uses','').startswith('google-github-actions/auth@') for s in controlled)
+assert any('google-auth==2.35.0' in s.get('run','') for s in controlled)
+assert all('FIREBASE_SERVICE_ACCOUNT_JSON' in s.get('env',{}) for s in controlled if s.get('run','').endswith('scripts/lp-hosting-metadata.py'))
+assert 'FIREBASE_ACCESS_TOKEN' not in (ROOT/'.github/workflows/firebase-hosting.yml').read_text()
+checks.append('OAuth via existing service-account JWT and token endpoint; no IAMCredentials generateAccessToken, no tokens in GitHub outputs')
 checks.append('Workflow YAML: same project/account/live concurrency; secrets after gate; default prepare; both deployment actions point exclusively at prepared public roots')
 for path in (ROOT/'scripts').glob('lp-*.py'):ast.parse(path.read_text())
 for path in ['scripts/prepare-sgp-legacy-artifact.py','scripts/seal-lp-visual.py','scripts/write-sgp-ordinary-config.py']:ast.parse((ROOT/path).read_text())
