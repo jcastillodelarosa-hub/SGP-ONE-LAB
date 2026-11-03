@@ -1,7 +1,7 @@
 # Línea de Producción — estado operativo actual
 
 **Actualizado:** 2026-11-03, America/Bogota (corrección autenticación inspect preparada).
-**Incidente inspect:** run 41696116331 (commit 0b14083) falló antes de Hosting en google-github-actions/auth token_format access_token: 403 SERVICE_DISABLED de IAM Service Account Credentials API. Se preparó en esta rama OAuth JWT de la misma cuenta existente mediante google-auth y alcance Firebase Hosting, sin IAM Credentials API, nuevos secretos ni privilegios. **Pendiente CI y nuevo inspect autorizado; no se acredita versión live ni rollback.**
+**Incidentes inspect:** run 41696116331 (0b14083) falló en google-github-actions/auth, 403 SERVICE_DISABLED de IAM Service Account Credentials API. Run 41698141346 (de61b53) pasó OAuth setup y llegó al script de lectura, pero devolvió un error genérico; no consta qué GET falló. Se preparó corrección de diagnóstico seguro por etapa/código HTTP y aceptación de ambas rutas oficiales de releases live, sin impresión de tokens, URLs ni respuesta cruda. Ninguna inspección exitosa certificada. Se preparó en esta rama OAuth JWT de la misma cuenta existente mediante google-auth y alcance Firebase Hosting, sin IAM Credentials API, nuevos secretos ni privilegios. **Pendiente CI y nuevo inspect autorizado; no se acredita versión live ni rollback.**
 **Referencia técnica:** implementación `e781fd5`, documentación de cierre en este conjunto de commits; base
 `bb7d052542d06e83e0b4187dfa6776dd99b0a21d` verificada en GitHub/checkout.
 **Repositorio:** `jcastillodelarosa-hub/SGP-ONE-LAB`.
