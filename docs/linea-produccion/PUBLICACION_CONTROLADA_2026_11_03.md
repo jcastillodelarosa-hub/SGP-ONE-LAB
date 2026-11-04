@@ -305,3 +305,14 @@ release1793801219172000; el inventario cambió y la configuración permanece id�
 Política baseline/rollback pasa a esta versión retenida, evitando deshacer #190
 al recuperar. Las referencias anteriores0312f467cf0e9c29 son antecedentes acreditados.
 [Recibo actual](../../tests/lp01-roles/evidence/hosting-main190-production.json).
+
+## Activación autorizada aplicada
+
+04/11 14:13:46UTC: deployment/lp-runtime-activation.sql, SHA256
+e9098d68752c891bdff0a4a793a3faf4820610085add8b038d624f3f5487b71b,
+aplicado tras CI6/6 de6edf892. SELECT confirma escrituras/BI/perfil=true, XLSXv1
+y ausencia09; órdenes/auditoría/cierres aún0. SQL/Edge no cambiaron al incorporar
+#190; esa actualización frontend tiene su CI independiente antes del merge.
+[Recibo real](../../tests/lp01-roles/evidence/activation-production.json).
+No acredita guardados con usuarios reales. La recuperación de backend sigue siendo
+02 contención autorizada y corrección hacia adelante, conservando perfil e historial.

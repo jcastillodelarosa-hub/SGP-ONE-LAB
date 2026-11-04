@@ -22,12 +22,15 @@ No retomar apertura automática, PDT/Export ni módulos aplazados.
   sola también llega al control de sesión: no acredita usuario. Verificador corregido,
   sin relajar Edge/SQL; tres regresiones offline PASS.
   [Resultados y límites](../../tests/lp01-roles/evidence/backend-https-production.json).
-- **ACTIVACIÓN PROPUESTA, NO APLICADA:** escrituras/BI/perfil=false confirmados por SELECT.
-  DML limitado y transaccional en deployment/lp-runtime-activation.sql; cuatro grupos
-  nuevos en PG17.11 aislado PASS: atomicidad, ACL/formato, contención concurrente,
-  reintentos y recuperación. [Evidencia sintética](../../tests/lp01-roles/evidence/activation.json).
-- **CI:**8f85586 seis checks PASS;89c7698 cinco concluidos PASS, aceptación SQL/PC/móvil
-  aún en curso. El HEAD posterior requiere sus checks nuevos; no hereda automáticamente CI.
+- **ACTIVADO/VERIFICADO Supabase:**04/11 14:13UTC, escrituras/BI/perfil=true,
+  adaptador LP-PBI-XLSX-1, SQL09 ausente. Solo dos filas de configuración, bajo
+  contención/preflight. Órdenes/auditoría/cierres aún0; no prueba guardados humanos.
+  [Recibo real](../../tests/lp01-roles/evidence/activation-production.json).
+  [Cuatro grupos nuevos PG17.11 sintéticos PASS](../../tests/lp01-roles/evidence/activation.json):
+  atomicidad, ACL/formato, contención concurrente, reintentos y recuperación.
+- **CI:**6edf892 seis checks PASS, incluida activación y SQL/PC-móvil.447c5db
+  incorpora main #190, cinco checks PASS y aceptación SQL/PC-móvil en curso.
+  Documentación posterior no hereda automáticamente CI; se consultan sus propios checks.
   Menú nativo, supervisor limitado a su etapa, líder ambas, XLSX/cierres conservan las
   evidencias aprobadas. No repetir manualmente baterías no afectadas.
 - **HOSTING NO PUBLICADO / PR NO FUSIONADO:** política runtime preparada/huellas exactas;
@@ -41,8 +44,8 @@ el SHA final hace falta que un operador inicie el workflow protegido con paráme
 exactos. La red local sigue restringida; no se cambia/proxifica para sortearla.
 No hay sesión SGP humana disponible para acreditar guardados reales/PC-móvil en planta.
 No se confunden pruebas sintéticas o denegaciones HTTPS con esa aceptación.
-**Siguiente acción:** concluir CI del candidato; activar únicamente configuración
-si pasa, registrar SELECT, fusionar bajo controles y entregar SHA/run/digest exactos
+**Siguiente acción:** concluir CI del candidato sincronizado; fusionar bajo
+controles y entregar SHA/run/digest exactos
 al operador para publish en el mismo Firebase. Después verificar versión e interacción
 real. [Plan y recuperación](PUBLICACION_CONTROLADA_2026_11_03.md).
 
@@ -59,18 +62,18 @@ segundo plano. No sustituye la supervisión ni concede autorizaciones productiva
 
 | Estado | Significado y situación actual de LP |
 |---|---|
-| PROPUESTO | Activación LP tras CI y publicación Hosting protegida pendientes.04/05/07/08R y diseño A no aplicados.09 excluido |
+| PROPUESTO | Publicación Hosting protegida pendiente.04/05/07/08R y diseño A no aplicados.09 excluido |
 | IMPLEMENTADO | Seguimiento/Operación, adaptador XLSX y controles en rama. Identidad técnica solo como referencia sintética, no integrada en el runtime |
-| APLICADO | Supabase: ACL00 y SQL01/06/08/10; escrituras/BI/perfil=false. Sin09 ni asignaciones humanas |
-| PUBLICADO | Edge lp-powerbi v1 ACTIVE/JWT=true, fuente verificada. **Frontend no publicado** en Firebase ni worker automático; operaciones contenidas |
+| APLICADO | Supabase: ACL00 y SQL01/06/08/10; escrituras/BI/perfil=true por activación autorizada14:13UTC. Sin09 ni asignaciones humanas nuevas |
+| PUBLICADO | Edge lp-powerbi v1 ACTIVE/JWT=true, fuente verificada. **Frontend no publicado** en Firebase ni worker automático; backend LP autorizado habilitado |
 | VERIFICADO | CI6/6 baseeffb6a0; verificaciones focalizadas de alternativa local y PG/PC/móvil sintéticos. Supabase real: ocho cuerpos10, ACL/roles/constraint/contención por SELECT. Gateway JWT/SGP: diez denegaciones HTTPS reales PASS. **No guardados productivos o verificación en planta** |
 | FUSIONADO | #183 sigue sin fusionar. La existencia de otro PR fusionado no prueba aplicación/publicación de sus SQL |
 
 ## 2. Fase activa y prioridades obligatorias
 
 **FASE ACTIVA: Seguimiento, Ensamble y Empaque.** Prioridad inmediata: publicación
-segura del alcance aprobado PANELES_2, tras comprobaciones de runtime y aprobación
-de la alternativa que conserva JWT. SQL10 ya instalado, no repetirlo.
+segura del alcance aprobado PANELES_2, tras comprobaciones de runtime y CI
+del código sincronizado. JWT autorizado/desplegado y SQL10 instalado: no repetirlos.
 Conservar las cinco pestañas, Programación/ubicaciones y el adaptador XLSX.
 No publicar una muestra o consulta contenida como si fuese operación integral.
 El bloqueo PUBLIC de apertura automática sigue independiente; no se retoma ese
@@ -88,7 +91,7 @@ No crear divisiones adicionales ni equiparar partes de Mecanizado con raíces LP
 ## 3. Funcionalidades implementadas y evidencia reutilizable
 
 Todas las filas son **IMPLEMENTADO EN RAMA / VERIFICADO EN AISLAMIENTO**, con los
-límites indicados; ninguna implica escritura productiva habilitada.
+límites indicados; esa evidencia no acredita guardados productivos humanos.
 
 | Funcionalidad y límite | Código / contrato | Pruebas y evidencia |
 |---|---|---|

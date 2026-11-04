@@ -1,3 +1,16 @@
+## LP · backend activado y main #190 preservado · 04/11/2026
+
+SQL10/Edge JWT=true acreditados; diez denegaciones HTTPS reales PASS. CI6edf892
+6/6 PASS. Activación autorizada14:13UTC: escrituras/BI/perfil=true, XLSXv1, sin09;
+órdenes/auditoría/cierres0, no guardados humanos certificados. Main4ef528b (#190)
+incorporado en447c5db con fusión limpia y calendario Colombia/saldos futuros íntegros.
+Hosting observado14:10UTC cambió a c698e0b8a4356985 FINALIZED/79 archivos; política
+baseline/rollback actualizada, no recuperar deshaciendo #190.
+CI del sincronizado en curso; frontend LP no fusionado ni publicado. Falta dispatch
+del operador con SHA/run/digest finales: el conector no ofrece esa operación.
+[Estado único](docs/linea-produccion/ESTADO_OPERATIVO_ACTUAL.md), recibos y siguiente
+acción exacta actualizados. Los apartados siguientes son antecedentes.
+
 ## LP · SQL10 aplicado y alternativa con JWT · 04/11/2026
 
 Actualización: usuario autorizó expresamente la alternativa exacta JWT=true de

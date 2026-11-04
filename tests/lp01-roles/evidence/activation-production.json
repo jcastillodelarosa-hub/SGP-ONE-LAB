@@ -1,0 +1,31 @@
+{
+  "status": "LP_RUNTIME_CONFIGURATION_ENABLED",
+  "environment": "Supabase SGP-ONE-LAB",
+  "source": "deployment/lp-runtime-activation.sql",
+  "script_sha256": "e9098d68752c891bdff0a4a793a3faf4820610085add8b038d624f3f5487b71b",
+  "verified_ci_source": "6edf892154808319e525b860fb2941ae3735d684",
+  "postcheck": {
+    "config": {
+      "id": true,
+      "escrituras": true,
+      "adaptador_bi": "LP-PBI-XLSX-1",
+      "formato_bi_aprobado": true
+    },
+    "profile": {
+      "id": true,
+      "habilitado": true
+    },
+    "checked_at": "2026-11-04T14:13:46.749431+00:00",
+    "sql09_absent": true,
+    "business_counts": {
+      "audit": 0,
+      "orders": 0,
+      "closures": 0
+    }
+  },
+  "limits": [
+    "Configuration only; no productive user/session or business operation created",
+    "Does not certify positive human access, real data rendering or productive saves",
+    "Frontend not yet merged/published; recovery contains writes without deleting history"
+  ]
+}
