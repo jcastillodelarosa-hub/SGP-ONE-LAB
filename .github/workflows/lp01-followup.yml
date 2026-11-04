@@ -25,6 +25,7 @@ on:
       - 'tests/lp01-roles/**'
       - 'tests/lp01-seguimiento-incremento/**'
       - 'tests/lp01-tracking-global.test.mjs'
+      - 'tests/lp01-tracking-ui/**'
       - 'src/modules/lp01-tracking.js'
       - 'docs/sql-proposals/lp01-seguimiento/**'
       - 'tests/lp01-ambitos-import/**'
@@ -191,6 +192,7 @@ jobs:
           pip install playwright==1.62.0
           python -m playwright install --with-deps chromium
           python tests/lp01-seguimiento-incremento/browser.py
+          python tests/lp01-tracking-ui/browser.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -199,3 +201,4 @@ jobs:
             tests/lp01-seguimiento-incremento/result.json
             tests/lp01-seguimiento-incremento/api-result.json
             tests/lp01-seguimiento-incremento/browser-result.json
+            tests/lp01-tracking-ui/evidence/

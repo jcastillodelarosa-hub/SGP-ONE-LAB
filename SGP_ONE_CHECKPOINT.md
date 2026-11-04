@@ -1,3 +1,14 @@
+## Seguimiento · integración/publicación autorizada, PR en preparación · 04/11/2026
+
+Autorización explícita de Johan para integrar/publicar el ajuste concreto de
+Seguimiento. Revisión visual PC/móvil completada; main sigue `9e4a8ec` y no existe
+PR duplicado. Se añade la regresión de refresco/filtros/navegación al job aislado
+existente, sin permisos, secretos ni cambios en el workflow de publicación.
+469 pruebas locales y release PASS; gate permanece HOLD por las dos huellas LP.
+No se aprueba formalmente ningún PR ni se fusiona/publica desde este paso.
+Siguiente: crear PR borrador, verificar CI del SHA exacto y coordinar con el hilo
+principal los pins/artefacto/baseline antes de integración y publicación controladas.
+
 ## Seguimiento · ambos bloques retirados según confirmación · 04/11/2026
 
 Johan confirmó «Los 2»: retirar de Seguimiento el bloque «Seguimiento de órdenes»
