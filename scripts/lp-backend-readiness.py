@@ -7,8 +7,9 @@ import base64,datetime,json,os,re,sys,urllib.request,urllib.error
 ROOT=Path(__file__).resolve().parents[1]
 API='https://ocvxbwzqxbrfndkvjmfx.supabase.co'
 ORIGIN='https://sgp-one-lab.web.app'
-checks=[]
+checks=[];last_response_facts={}
 def request(method,path,headers,body=None):
+ global last_response_facts
  if not path.startswith(('/functions/v1/lp-powerbi','/rest/v1/rpc/sgp_')):raise ValueError('PROBE_PATH_NOT_ADMITTED')
  class NoRedirect(urllib.request.HTTPRedirectHandler):
   def redirect_request(self,*args,**kwargs):raise ValueError('PROBE_REDIRECT_NOT_ADMITTED')
@@ -20,10 +21,13 @@ def request(method,path,headers,body=None):
   if len(raw)>65536:raise ValueError('PROBE_RESPONSE_TOO_LARGE')
   try:data=json.loads(raw) if raw else None
   except (ValueError,UnicodeDecodeError):raise ValueError('PROBE_NON_JSON_RESPONSE') from None
+  known={'401','403','P0001','SGP_SESSION_INVALID','SGP_SESSION_UNAVAILABLE','UNAUTHORIZED','INVALID_JWT','AUTH_HEADER_MISSING'}
+  code=data.get('code') if isinstance(data,dict) else None
+  message=str(data.get('message',data.get('error',data.get('msg','')))).lower() if isinstance(data,dict) else ''
+  last_response_facts={'json_keys':sorted(set(data)&{'code','message','error','msg','status_code','error_description'}) if isinstance(data,dict) else [],'code':code if str(code) in known else 'UNRECOGNIZED','mentions_authorization':'authorization' in message,'mentions_jwt':'jwt' in message,'mentions_api_key':'apikey' in message or 'api key' in message}
   return response.status,response.headers,data
 def require(name,ok,status):
- checks.append({'check':name,'status':'PASS' if ok else 'FAIL','http_status':status})
- if not ok:raise ValueError('PROBE_CHECK_FAILED:'+name)
+ checks.append({'check':name,'status':'PASS' if ok else 'FAIL','http_status':status,'response_facts':dict(last_response_facts)})
 def run():
  config=(ROOT/'config.js').read_text()
  def field(name):
@@ -46,6 +50,8 @@ def run():
  for origin in [ORIGIN,'https://sgp-one-lab.firebaseapp.com']:
   status,h,data=request('OPTIONS','/functions/v1/lp-powerbi',{'Origin':origin,'Access-Control-Request-Method':'POST','Access-Control-Request-Headers':'content-type,apikey,authorization'})
   require('CORS_EXACT_'+origin.split('//')[1],status==204 and h.get('Access-Control-Allow-Origin')==origin,status)
+ status,h,data=request('POST','/functions/v1/lp-powerbi',{'content-type':'application/json','Origin':ORIGIN},body)
+ require('PLATFORM_DENIES_NO_CREDENTIALS',status==401 and isinstance(data,dict) and str(data.get('code'))=='401',status)
  status,h,data=request('POST','/functions/v1/lp-powerbi',{k:v for k,v in headers.items() if k!='Authorization'},body)
  require('PLATFORM_REQUIRES_JWT',status==401 and isinstance(data,dict) and str(data.get('code'))=='401' and 'authorization' in str(data.get('message','')).lower(),status)
  bad=parts[0]+'.'+parts[1]+'.'+('A' if parts[2][0]!='A' else 'B')+parts[2][1:]
@@ -67,7 +73,9 @@ if __name__=='__main__':
  try:
   if enabled:
    if os.environ.get('GITHUB_ACTIONS')!='true' or os.environ.get('GITHUB_REPOSITORY')!='jcastillodelarosa-hub/SGP-ONE-LAB':raise ValueError('EXISTING_ACTIONS_CONTEXT_REQUIRED')
-   run();result['status']='PASS_PUBLIC_NEGATIVE_CHECKS'
+   run()
+   if any(c['status']!='PASS' for c in checks):raise ValueError('PROBE_CHECKS_FAILED')
+   result['status']='PASS_PUBLIC_NEGATIVE_CHECKS'
  except Exception as exc:
   result['status']='FAIL';marker=str(exc)
   result['failure']=marker if re.fullmatch(r'(PROBE_[A-Z_]+|PROBE_CHECK_FAILED:[A-Z0-9_.-]+|EXISTING_ACTIONS_CONTEXT_REQUIRED)',marker) else 'PROBE_TRANSPORT_OR_RESPONSE_FAILED'
