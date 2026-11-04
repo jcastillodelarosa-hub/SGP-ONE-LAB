@@ -1,5 +1,12 @@
 ## LP · SQL10 aplicado y alternativa con JWT · 04/11/2026
 
+Actualización: usuario autorizó expresamente la alternativa exacta JWT=true de
+8f85586. Edge lp-powerbi v1 ACTIVE/JWT=true, cinco archivos recuperados coinciden
+byte a byte con la fuente aprobada. [Recibo](tests/lp01-roles/evidence/edge-jwt-production.json).
+Se habilita comprobador público negativo en el workflow existente antes de
+activar; escrituras/BI/perfil siguen false, no Firebase/merge ni guardados reales.
+El párrafo siguiente documenta la preparación previa a esa aprobación/despliegue.
+
 SQL10 aceptado por el conector y aplicado20261104033408: ocho cuerpos exactos,
 cinco contratos nativos conservados, once tablas privadas RLS, CHECK validado;
 escrituras/BI/perfil=false. Sin cuentas, ámbitos, auditoría o cierres de negocio

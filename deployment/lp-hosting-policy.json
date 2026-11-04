@@ -11,5 +11,6 @@
   "baseline_version": "sites/sgp-one-lab/versions/0312f467cf0e9c29",
   "rollback_version": "sites/sgp-one-lab/versions/0312f467cf0e9c29",
   "artifact_kind": "runtime",
-  "backend_contracts_verified": false
+  "backend_contracts_verified": false,
+  "backend_probe_required": true
 }

@@ -12,30 +12,31 @@ nativas intactas, RLS sin cambios. Sin usuarios/sesiones o datos de negocio edit
 coinciden con la fuente, cinco firmas/owner/ACL/seguridad nativas preservadas,
 CHECK ampliado validado, once tablas privadas con RLS. Perfil=false, operaciones,
 auditoría/cierres/ámbitos humanos aún sin filas. [Recibo real](../../tests/lp01-roles/evidence/sql10-production.json).
-**NO PUBLICADO / NO FUSIONADO / NO ACTIVADO:** ningún Edge/Firebase/worker,
-perfil operativo ni escrituras habilitados. SQL09 excluido. Publicación condicionada
+**FRONTEND NO PUBLICADO / NO FUSIONADO / NO ACTIVADO:** Edge se detalla abajo;
+ningún Firebase/worker, perfil operativo o escrituras habilitados. SQL09 excluido. Publicación condicionada
 a controles completos; no presentar implementación sintética como funcionamiento real.
 **Preparado y probado:** supervisor solo su etapa/selector/retorno, líder ambas;
 menú nativo PC1440/móvil390 y SQL10 sintético real, Roles/Usuarios, cierres y
 revocaciones PASS. Deno2.5.6 compila y procesa ambos XLSX anónimos sin red.
-**Servidor pendiente de aprobación específica:** la revisión automática rechazó
-lp-powerbi con verify_jwt=false/credencial privilegiada servidor. El usuario eligió
-mantener JWT; se prepara verify_jwt=true + JWT público anon ya activo del proyecto,
-sin sustituir la clave moderna del resto de SGP. Sesión SGP/SQL siguen autorizando
-a la persona. Clave privilegiada solo servidor, allowlist de dos RPC; no desplegado.
+**Edge PUBLICADO, no Firebase:** usuario autorizó expresamente la alternativa
+JWT=true de8f85586. lp-powerbi v1 ACTIVE/verify_jwt=true; cinco archivos recuperados
+del servidor son byte-idénticos al commit aprobado. Clave privilegiada solo servidor,
+allowlist de dos RPC; sesión SGP/SQL autorizan a la persona, JWT anon al proyecto.
+La propuesta anterior JWT=false fue rechazada y no se ejecutó por otra vía.
+[Recibo real Edge](../../tests/lp01-roles/evidence/edge-jwt-production.json).
 **Propuesta local verificada:** cabeceras/denegaciones cliente, Deno y recorrido XLSX
 PC1440/móvil390 con handler y PG sintéticos PASS. No certifica gateway JWT real.
 [Evidencia y límites](../../tests/lp01-roles/evidence/jwt-alternative.json).
-**HTTPS pendiente:** se preparó un comprobador público negativo en el workflow
-existente de Actions, inicialmente desactivado; no genera guardados ni necesita
-secretos o infraestructura nueva. Se habilita solo después del despliegue aprobado.
+**HTTPS pendiente:** tras el despliegue aprobado se habilita backend_probe_required
+en el mismo workflow Actions; hasta recibir PASS de comprobaciones reales no se
+habilitan escrituras. Solo JWT/clave públicos y sesión inválida, sin guardados,
+credenciales nuevas o infraestructura adicional. No certifica usuarios reales.
 La red local sigue restringida; no se redirige o altera el proxy. El conector no
 ofrece dispatch: el workflow protegido necesita un operador al quedar listo.
 **Hosting observado:** versión0312f467cf0e9c29 FINALIZED/79 archivos acreditada
 por inspect GET, recuperación retenida; refrescar antes de una publicación.
 [Plan, instrucciones de red, resumen SQL10 y recuperación](PUBLICACION_CONTROLADA_2026_11_03.md).
-**Siguiente:** revisar/autorizar alternativa Edge JWT=true y credencial integrada
-exclusivamente servidor; desplegar, comprobar HTTPS y después habilitar/publicar
+**Siguiente:** revisar resultado HTTPS real de Actions y después habilitar/publicar
 bajo los controles. PDT/Export conservan sus
 límites de evidencia; apertura automática inactiva, sin retomar otros módulos.
 
@@ -52,10 +53,10 @@ segundo plano. No sustituye la supervisión ni concede autorizaciones productiva
 
 | Estado | Significado y situación actual de LP |
 |---|---|
-| PROPUESTO | Edge JWT=true con token público anon existente, pendiente de aprobación/despliegue y verificación real.04/05/07/08R y diseño A no aplicados.09 excluido |
+| PROPUESTO | Activación LP y publicación Hosting pendientes de comprobaciones HTTPS/controladas.04/05/07/08R y diseño A no aplicados.09 excluido |
 | IMPLEMENTADO | Seguimiento/Operación, adaptador XLSX y controles en rama. Identidad técnica solo como referencia sintética, no integrada en el runtime |
 | APLICADO | Supabase: ACL00 y SQL01/06/08/10; escrituras/BI/perfil=false. Sin09 ni asignaciones humanas |
-| PUBLICADO | **No publicado por este PR** en Firebase/Edge ni worker. Despliegue inicial Edge rechazado; alternativa conserva JWT y espera revisión específica |
+| PUBLICADO | Edge lp-powerbi v1 ACTIVE/JWT=true, fuente verificada. **Frontend no publicado** en Firebase ni worker automático; operaciones contenidas |
 | VERIFICADO | CI6/6 baseeffb6a0; verificaciones focalizadas de alternativa local y PG/PC/móvil sintéticos. Supabase real: ocho cuerpos10, ACL/roles/constraint/contención por SELECT. **No gateway JWT real, guardados productivos o verificación en planta** |
 | FUSIONADO | #183 sigue sin fusionar. La existencia de otro PR fusionado no prueba aplicación/publicación de sus SQL |
 
@@ -128,7 +129,7 @@ Responsables expresados por función, **sin inventar personas ni conceder acceso
 
 | Bloqueo / causa | Evidencia verificable | Responsable y salida requerida |
 |---|---|---|
-| Despliegue Edge inicial rechazado por revisión automática; usuario eligió conservar JWT | [Alternativa preparada y pruebas](../../tests/lp01-roles/evidence/jwt-alternative.json), plan vigente | Aprobación expresa de la alternativa JWT=true y credencial integrada solo servidor; desplegar por el conector, sin rodear el rechazo |
+| Edge desplegado; verificación de gateway/servidor HTTPS aún pendiente | [Recibo real Edge](../../tests/lp01-roles/evidence/edge-jwt-production.json), [alternativa](../../tests/lp01-roles/evidence/jwt-alternative.json) | Revisar comprobador público del workflow existente antes de activar; no repetir aprobación ya concedida |
 | Gateway/servidor y publicación reales aún no comprobados; sin writes habilitados | Comprobador HTTPS en Actions preparado, inicialmente NOT_REQUESTED; no sesiones válidas ni guardados de prueba productivos | Tras despliegue aprobado, habilitar comprobador público en el workflow existente. Para verificar datos/guardados reales, usar cuenta autorizada sin compartir credenciales |
 | **Apertura automática: A no garantiza «solo ABRIR» en la base actual.** EXECUTE de PUBLIC alcanza 83 SECURITY DEFINER SGP, 80 invocables sin triggers; PUBLIC también recibe TEMP. NOINHERIT/REVOKE al rol no lo sustraen | [SELECT conservado](../../tests/lp01-principal-a/evidence/supabase-catalog.json), [contraejemplo sintético](../../tests/lp01-principal-a/evidence/postgres.json). Helper real solo inspeccionado, nunca ejecutado | Responsable de seguridad/DB y propietario del proyecto: delimitar propuesta compatible de perímetro y autorizar su alcance, o decidir otra frontera. Codex no revoca ACL globales ni implementa B automáticamente |
 | LOGIN/TLS/red/pooler reales no acreditados; no existe enlace técnico integrado/activado | [viabilidad y límites](principal-a/DISENO.md) | Responsable infraestructura/Supabase: runtime/ruta e identidad aprobados y prueba controlada posterior; sin secretos/roles ahora |
@@ -145,10 +146,9 @@ no operaciones exitosas de usuarios reales ni cobertura PDT/Export en planta.
 
 **Vigente:** ACL y sincronización resueltas; SQL01/06/08/10 contenidos y verificados.
 [Recibo SQL10](../../tests/lp01-roles/evidence/sql10-production.json).
-**Siguiente acción exacta:** aprobación específica de Edge JWT=true y credencial
-preexistente solo servidor para las dos RPC; desplegar desde el conector, sin
-rodear el rechazo anterior. Después habilitar comprobador HTTPS en Actions,
-verificar resultados y solo entonces activar/pin/publicación protegida. Un JWT
+**Siguiente acción exacta:** Edge aprobado/desplegado y fuente comprobada; revisar
+comprobador HTTPS habilitado en Actions. Solo con PASS, activar/pin/publicación
+protegida. Un JWT
 anon público no sustituye la identidad SGP ni certifica una sesión humana.
 No reintroducir matrices09 ni usar otra vía para eludir confirmaciones. El
 dictamen anterior de ACL insegura se conserva como antecedente histórico enlazado.

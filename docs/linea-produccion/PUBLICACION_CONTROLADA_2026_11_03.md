@@ -251,5 +251,11 @@ para ejecutar el despliegue rechazado. Verificar pantallas y guardados con datos
 reales requerirá una cuenta SGP autorizada; nunca se simulará esa identidad.
 
 La nueva frontera (JWT=true + credencial integrada privilegiada solo servidor)
-se presenta para aceptación específica antes de llamar deploy_edge_function.
-No hay Edge activo ni frontend publicado; firma/HTTPS/usuarios reales pendientes.
+fue autorizada expresamente por el usuario para el commit8f85586 y desplegada por
+el conector: lp-powerbi v1 ACTIVE, verify_jwt=true. Se recuperaron y compararon
+los cinco archivos del servidor, byte-idénticos a la fuente aprobada.
+[Recibo real](../../tests/lp01-roles/evidence/edge-jwt-production.json).
+Se habilita ahora backend_probe_required en prepare del workflow existente;
+pendiente resultado real HTTPS. No frontend publicado, escrituras/BI/perfil=false,
+firma gateway y usuarios/guardados reales aún sin certificar. El rechazo de la
+propuesta JWT=false no se sorteó: se revisó y aprobó una frontera distinta.
