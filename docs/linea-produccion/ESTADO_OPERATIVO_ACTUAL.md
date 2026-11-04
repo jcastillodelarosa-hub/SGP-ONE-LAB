@@ -1,53 +1,48 @@
 # Línea de Producción — estado operativo actual
 
-**Actualizado:** 2026-11-04, America/Bogota. Mismo Draft PR183 y rama existente.
-**Base verificada:**effb6a0; main4b1e98e incorporado conservando ambos bloques
-styles.css. CI6/6 PASS de esa base; [aceptación SQL/PC/móvil](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/actions/runs/41766159821).
-La entrega documental posterior no hereda automáticamente checks de otro HEAD.
-**APLICADO en Supabase:** ACL00 y SQL01/06/08/10, contenidos. Escrituras=false,
-formato BI=false. Catálogos sin acceso directo anon/authenticated; cinco RPC
-nativas intactas, RLS sin cambios. Sin usuarios/sesiones o datos de negocio editados.
-[Recibos y comprobación SELECT](../../tests/lp01-roles/evidence/installation-production.json).
-**SQL10 APLICADO:** versión20261104033408, aceptada por el conector; ocho cuerpos
-coinciden con la fuente, cinco firmas/owner/ACL/seguridad nativas preservadas,
-CHECK ampliado validado, once tablas privadas con RLS. Perfil=false, operaciones,
-auditoría/cierres/ámbitos humanos aún sin filas. [Recibo real](../../tests/lp01-roles/evidence/sql10-production.json).
-**FRONTEND NO PUBLICADO / NO FUSIONADO / NO ACTIVADO:** Edge se detalla abajo;
-ningún Firebase/worker, perfil operativo o escrituras habilitados. SQL09 excluido. Publicación condicionada
-a controles completos; no presentar implementación sintética como funcionamiento real.
-**Preparado y probado:** supervisor solo su etapa/selector/retorno, líder ambas;
-menú nativo PC1440/móvil390 y SQL10 sintético real, Roles/Usuarios, cierres y
-revocaciones PASS. Deno2.5.6 compila y procesa ambos XLSX anónimos sin red.
-**Edge PUBLICADO, no Firebase:** usuario autorizó expresamente la alternativa
-JWT=true de8f85586. lp-powerbi v1 ACTIVE/verify_jwt=true; cinco archivos recuperados
-del servidor son byte-idénticos al commit aprobado. Clave privilegiada solo servidor,
-allowlist de dos RPC; sesión SGP/SQL autorizan a la persona, JWT anon al proyecto.
-La propuesta anterior JWT=false fue rechazada y no se ejecutó por otra vía.
-[Recibo real Edge](../../tests/lp01-roles/evidence/edge-jwt-production.json).
-**Propuesta local verificada:** cabeceras/denegaciones cliente, Deno y recorrido XLSX
-PC1440/móvil390 con handler y PG sintéticos PASS. No certifica gateway JWT real.
-[Evidencia y límites](../../tests/lp01-roles/evidence/jwt-alternative.json).
-**HTTPS pendiente:** tras el despliegue aprobado se habilita backend_probe_required
-en el mismo workflow Actions; hasta recibir PASS de comprobaciones reales no se
-habilitan escrituras. Solo JWT/clave públicos y sesión inválida, sin guardados,
-credenciales nuevas o infraestructura adicional. No certifica usuarios reales.
-Run41840766105: CORS204, sesión inválida401/SGP_SESSION_INVALID, consulta de ambas
-etapas denegada, origen ajeno403; sin credenciales y firma alterada401 del gateway.
-El verificador anterior exigía código numérico401 y denegación de apikey pública
-sin Authorization, supuestos incompatibles con lo observado. Se corrige solo el
-contrato de respuesta: exige envoltura/rechazo específico del gateway y comprueba
-por separado que la clave pública no autoriza a una persona. Tres regresiones
-offline PASS; no equivalen a gateway real. Se mantiene contención hasta PASS del
-run corregido. No se modifica Edge, JWT ni autorización SQL para pasar las pruebas.
-La red local sigue restringida; no se redirige o altera el proxy. El conector no
-ofrece dispatch: el workflow protegido necesita un operador al quedar listo.
-**Hosting observado:** versión0312f467cf0e9c29 FINALIZED/79 archivos acreditada
-por inspect GET, recuperación retenida. Refresco04/11 13:45UTC, run41707119884
-job126612302080: misma versión, inventario y configuración; publish/recover omitidos.
-[Plan, instrucciones de red, resumen SQL10 y recuperación](PUBLICACION_CONTROLADA_2026_11_03.md).
-**Siguiente:** revisar resultado HTTPS real de Actions y después habilitar/publicar
-bajo los controles. PDT/Export conservan sus
-límites de evidencia; apertura automática inactiva, sin retomar otros módulos.
+**Actualizado:** 2026-11-04, UTC/America/Bogota. PR183, rama existente.
+**Código de referencia verificado:**89c7698; main4b1e98e incorporado conservando
+ambos bloques styles.css. Frontend sin cambios desde la alternativa8f85586.
+**FASE ACTIVA:** publicación segura de Seguimiento, Ensamble y Empaque PANELES_2.
+No retomar apertura automática, PDT/Export ni módulos aplazados.
+
+- **APLICADO/VERIFICADO Supabase:** ACL00 y SQL01/06/08/10. SQL10 versión20261104033408,
+  ocho cuerpos exactos; firmas/owner/ACL administrativas preservadas, CHECK validado,
+  once tablas privadas RLS. Catálogos sin acceso directo anon/authenticated. No09,
+  usuarios/sesiones inventados o datos de negocio modificados.
+  [Recibo10](../../tests/lp01-roles/evidence/sql10-production.json).
+- **PUBLICADO Edge:** lp-powerbi v1 ACTIVE/verify_jwt=true, alternativa8f85586 aprobada
+  expresamente; cinco fuentes recuperadas byte-idénticas. Credencial privilegiada
+  solo servidor/allowlist dos RPC. JWT público identifica proyecto; sesión SGP/SQL
+  autoriza persona. [Recibo](../../tests/lp01-roles/evidence/edge-jwt-production.json).
+- **VERIFICADO HTTPS real:** diez comprobaciones PASS, run41841837220/job126615309539.
+  Sin credenciales401/UNAUTHORIZED_NO_AUTH_HEADER, firma alterada401/UNAUTHORIZED_LEGACY_JWT;
+  sesión inválida rechazada, ambas etapas protegidas y origen ajeno403. Clave pública
+  sola también llega al control de sesión: no acredita usuario. Verificador corregido,
+  sin relajar Edge/SQL; tres regresiones offline PASS.
+  [Resultados y límites](../../tests/lp01-roles/evidence/backend-https-production.json).
+- **ACTIVACIÓN PROPUESTA, NO APLICADA:** escrituras/BI/perfil=false confirmados por SELECT.
+  DML limitado y transaccional en deployment/lp-runtime-activation.sql; cuatro grupos
+  nuevos en PG17.11 aislado PASS: atomicidad, ACL/formato, contención concurrente,
+  reintentos y recuperación. [Evidencia sintética](../../tests/lp01-roles/evidence/activation.json).
+- **CI:**8f85586 seis checks PASS;89c7698 cinco concluidos PASS, aceptación SQL/PC/móvil
+  aún en curso. El HEAD posterior requiere sus checks nuevos; no hereda automáticamente CI.
+  Menú nativo, supervisor limitado a su etapa, líder ambas, XLSX/cierres conservan las
+  evidencias aprobadas. No repetir manualmente baterías no afectadas.
+- **HOSTING NO PUBLICADO / PR NO FUSIONADO:** política runtime preparada/huellas exactas;
+  adopción en main HOLD sin despliegue automático. Live0312f467cf0e9c29 FINALIZED,
+  79 archivos, misma configuración/inventario al refrescar04/11 13:45UTC por inspect GET.
+  [Recibo recuperación](../../tests/lp01-roles/evidence/hosting-refreshed-production.json).
+
+**Bloqueo operativo restante:** el conector no ofrece workflow_dispatch; al sellar
+el SHA final hace falta que un operador inicie el workflow protegido con parámetros
+exactos. La red local sigue restringida; no se cambia/proxifica para sortearla.
+No hay sesión SGP humana disponible para acreditar guardados reales/PC-móvil en planta.
+No se confunden pruebas sintéticas o denegaciones HTTPS con esa aceptación.
+**Siguiente acción:** concluir CI del candidato; activar únicamente configuración
+si pasa, registrar SELECT, fusionar bajo controles y entregar SHA/run/digest exactos
+al operador para publish en el mismo Firebase. Después verificar versión e interacción
+real. [Plan y recuperación](PUBLICACION_CONTROLADA_2026_11_03.md).
 
 Esta es la **referencia operativa única de LP**. Describe el estado vigente, no un
 historial. Antes de trabajar leer AGENTS.md, este archivo y el estado real del PR;
@@ -62,11 +57,11 @@ segundo plano. No sustituye la supervisión ni concede autorizaciones productiva
 
 | Estado | Significado y situación actual de LP |
 |---|---|
-| PROPUESTO | Activación LP y publicación Hosting pendientes de comprobaciones HTTPS/controladas.04/05/07/08R y diseño A no aplicados.09 excluido |
+| PROPUESTO | Activación LP tras CI y publicación Hosting protegida pendientes.04/05/07/08R y diseño A no aplicados.09 excluido |
 | IMPLEMENTADO | Seguimiento/Operación, adaptador XLSX y controles en rama. Identidad técnica solo como referencia sintética, no integrada en el runtime |
 | APLICADO | Supabase: ACL00 y SQL01/06/08/10; escrituras/BI/perfil=false. Sin09 ni asignaciones humanas |
 | PUBLICADO | Edge lp-powerbi v1 ACTIVE/JWT=true, fuente verificada. **Frontend no publicado** en Firebase ni worker automático; operaciones contenidas |
-| VERIFICADO | CI6/6 baseeffb6a0; verificaciones focalizadas de alternativa local y PG/PC/móvil sintéticos. Supabase real: ocho cuerpos10, ACL/roles/constraint/contención por SELECT. **No gateway JWT real, guardados productivos o verificación en planta** |
+| VERIFICADO | CI6/6 baseeffb6a0; verificaciones focalizadas de alternativa local y PG/PC/móvil sintéticos. Supabase real: ocho cuerpos10, ACL/roles/constraint/contención por SELECT. Gateway JWT/SGP: diez denegaciones HTTPS reales PASS. **No guardados productivos o verificación en planta** |
 | FUSIONADO | #183 sigue sin fusionar. La existencia de otro PR fusionado no prueba aplicación/publicación de sus SQL |
 
 ## 2. Fase activa y prioridades obligatorias

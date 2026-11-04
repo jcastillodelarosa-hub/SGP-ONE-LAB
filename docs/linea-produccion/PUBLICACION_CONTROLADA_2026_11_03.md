@@ -224,7 +224,8 @@ no se generó o rotó ninguna clave. Es compatibilidad **legada**, no una migrac
 de identidad. La [guía oficial actual](https://supabase.com/docs/guides/getting-started/migrating-to-new-api-keys)
 indica soporte de claves legadas hasta finales2026 y recomienda retirarlas: revisar
 esta dependencia antes de esa fecha. El resto de SGP conserva la clave moderna.
-No se certifica hoy la aceptación de firma por el gateway real; falta desplegar y probar.
+La aceptación/rechazo real del gateway se acreditó después; véase el resultado
+HTTPS al final. No acredita una identidad humana ni una escritura productiva.
 
 Pruebas nuevas: separación de cabeceras, JWT ausente/rol elevado/proyecto ajeno/
 expiración rechazados antes de enviar, error del gateway sin falsa importación,
@@ -237,7 +238,7 @@ reales sintéticos. Adaptador XLSX y motor SQL no cambian.
 Para verificar HTTPS se prepara scripts/lp-backend-readiness.py en **el mismo**
 job prepare del workflow existente. No despliega Edge ni usa credenciales
 privilegiadas; solo clave pública, JWT anon público y marcador de sesión inválida.
-Comprueba CORS, JWT ausente/firma alterada rechazados, JWT público válido alcanzando
+Comprueba CORS, ausencia de credenciales/firma alterada rechazadas, JWT público válido alcanzando
 la validación SGP, salud de RPC sesión y denegación de lectura sin sesión en ambas
 etapas. No llama RPC de escritura ni crea órdenes/cierres/datos ficticios. Un error
 de sesión se devuelve503 para no confundir servidor roto con una denegación sana.
@@ -255,7 +256,40 @@ fue autorizada expresamente por el usuario para el commit8f85586 y desplegada po
 el conector: lp-powerbi v1 ACTIVE, verify_jwt=true. Se recuperaron y compararon
 los cinco archivos del servidor, byte-idénticos a la fuente aprobada.
 [Recibo real](../../tests/lp01-roles/evidence/edge-jwt-production.json).
-Se habilita ahora backend_probe_required en prepare del workflow existente;
-pendiente resultado real HTTPS. No frontend publicado, escrituras/BI/perfil=false,
-firma gateway y usuarios/guardados reales aún sin certificar. El rechazo de la
-propuesta JWT=false no se sorteó: se revisó y aprobó una frontera distinta.
+backend_probe_required está habilitado. Run41841837220/job126615309539 PASS en las
+10 comprobaciones reales. Sin credenciales:401/UNAUTHORIZED_NO_AUTH_HEADER; firma
+alterada:401/UNAUTHORIZED_LEGACY_JWT. JWT válido y apikey pública sola alcanzan el
+rechazo de sesión SGP inválida; la clave pública nunca acredita una persona.
+El verificador suponía código numérico401 y denegación sin Authorization; se
+corrige su contrato de respuesta, sin relajar Edge/SQL. [Recibo HTTPS](../../tests/lp01-roles/evidence/backend-https-production.json).
+No frontend publicado ni usuarios/guardados reales certificados. La propuesta
+JWT=false rechazada no se ejecutó por otra vía: se aprobó una frontera distinta.
+
+## Activación y entrega al publicador protegido
+
+`deployment/lp-runtime-activation.sql` es DML de configuración en una transacción:
+solo perfil_roles.habilitado y config.escrituras/formato_bi_aprobado. No contiene
+DROP, DELETE, TRUNCATE, DDL, GRANT ni UPDATE sin WHERE; no cambia cuentas, accesos,
+RLS, Export o datos de negocio. Preflight exige SQL10 exacto, ACL seguras, formato
+XLSX y ausencia09; espera contención/admisión, falla completamente ante timeout y
+no vuelve a actualizar filas en reintentos. No aplicar hasta concluir CI.
+[Cuatro comprobaciones reales en PG17.11 sintético](../../tests/lp01-roles/evidence/activation.json):
+rollback forzado, ACL/formato incompatibles, concurrencia/idempotencia y contención
+posterior sin borrar historial ni apagar el perfil. Recuperación backend:02 autorizado;
+después de contener no se reactiva automáticamente un estado mixto.
+
+Política runtime preparada con las huellas exactas de los16 componentes protegidos;
+adopción/transición en main sigue HOLD, sin despliegue accidental. La certificación
+backend reúne cuerpos/ACL reales, pruebas aisladas y denegaciones HTTPS; no significa
+aceptación de operaciones productivas por un usuario real. Inspect renovado04/11
+13:45UTC mantiene live0312f467cf0e9c29/79 archivos y las mismas huellas.
+El workflow relee antes de publicar/recuperar y aborta si cambia la referencia.
+[Recibo](../../tests/lp01-roles/evidence/hosting-refreshed-production.json).
+
+El conector GitHub no tiene workflow_dispatch; no hay identidad CLI configurada.
+Al obtener SHA final, run y digest se entrega al operador una orden exacta para
+firebase-hosting.yml/ref main, operation=publish, source_sha, artifact_run_id,
+zip_sha256, expected_live_version y release_reason. No usar rerun de inspect como
+publicación ni extraer secretos. Tras publish: comprobar release/version/inventario
+y PC/móvil con sesión SGP real. No solicitar contraseñas ni fabricar sesiones en
+producción. La evidencia sintética previa conserva explícitamente ese límite.

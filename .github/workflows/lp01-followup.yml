@@ -110,6 +110,7 @@ jobs:
           python tests/lp01-roles/hardening.py
           python tests/lp01-roles/compatibility.py
           python tests/lp01-roles/postgres.py
+          python tests/lp01-roles/activation.py
           python tests/lp01-roles/xlsx.py
       - name: Real persistence PC and mobile acceptance
         run: |
