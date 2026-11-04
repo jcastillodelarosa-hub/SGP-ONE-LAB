@@ -1,3 +1,39 @@
+## PR191 · postcheck de Hosting corregido bajo controles · 04/11/2026
+
+CI2c4ca32 completa PASS. Evidencia real41856841540 identifica únicamente dos
+rutas Firebase adicionales. Postcheck conserva inventario exacto y solo acredita
+esas dos si su hash/estado coincide con la versión anterior; rechaza cualquier
+otro cambio. Añade comprobación HTTPS de todos los bytes del artefacto y mantiene
+retención/configuración del rollback. Seis regresiones y política local PASS.
+SQL/permiso ya aplicados y verificados; frontend sin nuevos cambios. Esperar CI
+del commit de postcheck, fusionar bajo HOLD y publicar artefacto exacto. Vidrio192
+se mantiene separado y pendiente de esta publicación.
+
+## PR191 · instalado, permiso verificado, publicación pendiente · 04/11/2026
+
+Confirmación explícita nueva de Johan; ausencia de ejecución previa y preflight
+renovado21:13:54UTC comprobados. INSTALL y ENABLE_API exactos APLICADOS: cuatro
+cuerpos fijados, metadata/defaults conservados y solo fachada con EXECUTE anon.
+Sesión inválida denegada en ambas etapas bajo rol anon y ROLLBACK. Sin datos/RLS
+alterados. Preparador incorpora dos denegaciones HTTPS nuevas; pruebas offline PASS.
+Política conserva transición HOLD y pins de artefacto/live/recuperación. Siguiente:
+CI del SHA final, merge, prepare/HTTPS y publicación explícita con postcheck.
+No aceptación humana positiva acreditada. Vidrio sigue en encargo separado.
+[Estado y evidencias](docs/linea-produccion/ESTADO_OPERATIVO_ACTUAL.md).
+
+## PR191 · instalación bloqueada, preparación Hosting · 04/11/2026
+
+Seguimiento global `4b50806`: CI completa PASS. Inspección de solo lectura
+Hosting41911770281 acredita live1a59beda3dffaed9 FINALIZED/91 archivos.
+Política preparada con dos huellas del candidato y baseline/rollback acreditados;
+transición HOLD y backend_contracts_verified=false hasta instalar/verificar SQL.
+Preflight y respaldo SQL privado completos; INSTALL rechazado automáticamente
+por autorización insuficiente para crear dos funciones y modificar dos existentes.
+No SQL/grant/merge/publish ejecutados. La autorización previa EXECUTE se mantiene.
+Siguiente: confirmación específica INSTALL, preflight renovado e instalación;
+después permiso, CI/artefacto final y publicación protegida. Vidrio separado.
+[Estado y hashes exactos](docs/linea-produccion/ESTADO_OPERATIVO_ACTUAL.md).
+
 ## LP · backend activado y main #190 preservado · 04/11/2026
 
 SQL10/Edge JWT=true acreditados; diez denegaciones HTTPS reales PASS. CI6edf892

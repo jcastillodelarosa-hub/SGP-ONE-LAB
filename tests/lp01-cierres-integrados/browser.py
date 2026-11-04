@@ -40,7 +40,7 @@ def run(page,db,stage,origin,endpoint,width):
   window.SGPPlannerBridge.getClient=async()=>({rpc:async(name,args)=>(await fetch('/rpc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,args})})).json()});
   document.querySelector('[data-op-date]').value='2026-10-31';document.querySelector('[data-op-stage]').value=stage;
  }''',{'stage':stage,'endpoint':endpoint})
- page.locator('#productionTrackingTab').click();page.wait_for_selector('[data-live-operate]',state='attached')
+ page.locator('#productionPackingTab' if page.locator('[data-op-stage]').input_value()=='EMPAQUE' else '#productionAssemblyTab').click();page.wait_for_selector('[data-live-operate]',state='attached')
  page.locator(f'[data-order-part="{roots[0]}"] summary').click();page.locator(f'[data-live-operate="{roots[0]}"]').click()
  page.locator('[data-executed]').fill(str(total//2));page.locator('[data-operation-note]').fill('QA acumulado corregido')
  page.locator('[data-order-form] button[type=submit]').click();confirmed(page)
@@ -69,7 +69,7 @@ def run(page,db,stage,origin,endpoint,width):
  page.locator('#productionReportsPanel').scroll_into_view_if_needed()
  page.screenshot(path=str(OUT/f'sql08-{stage.lower()}-{width}.png'))
  # Reopen from the actual coordinator UI and preserve the first immutable version.
- page.evaluate("window.qaRole='COORDINADOR'");page.locator('#productionTrackingTab').click()
+ page.evaluate("window.qaRole='COORDINADOR'");page.locator('#productionPackingTab' if page.locator('[data-op-stage]').input_value()=='EMPAQUE' else '#productionAssemblyTab').click()
  page.wait_for_selector('[data-live-operate]',state='attached');page.locator(f'[data-order-part="{roots[0]}"] summary').click();page.locator(f'[data-live-operate="{roots[0]}"]').click()
  page.locator('[data-close-note]').fill('QA reapertura autorizada');page.locator('[data-reopen]').click();confirmed(page)
  assert len(db.snapshot(stage,date=ctx['date'])['reports'])==1

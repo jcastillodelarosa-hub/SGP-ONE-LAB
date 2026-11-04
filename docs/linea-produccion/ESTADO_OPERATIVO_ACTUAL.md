@@ -1,5 +1,92 @@
 # Línea de Producción — estado operativo actual
 
+## PR191 · corrección acotada del postcheck antes de publicar
+
+CI de `2c4ca32701fd9ffce888f4d370b1794a44aa5218` completa PASS, incluidos SQL/API
+y PC/móvil. El intento prematuro de quitar borrador fue rechazado mientras UI
+estaba en curso; no modificó el PR. Se conserva ese requisito hasta CI completa.
+
+El log real del job126667876705/run41856841540 explica el postcheck anterior:
+89 rutas esperadas,91 observadas, ninguna faltante y exactamente
+`__/firebase/init.js` y `__/firebase/init.json` adicionales. El postcheck ahora
+exige inventario exacto de aplicación más esas rutas SOLO si ya existían en la
+versión acreditada y conservan hash/estado idénticos. No ignora el prefijo __/:
+cualquier otra ruta, faltante, duplicado o alteración aborta. Mantiene comprobación
+de retención/configuración anterior y añade comparación HTTPS byte a byte de todo
+el artefacto publicado, incluido manifest/release-info. Seis regresiones offline
+PASS y política PASS; se ejecutan antes del gate. No cambia frontend ni SQL.
+Siguiente: CI del nuevo commit y publicación con pins exactos; no fusionar el
+encargo separado de vidrio durante esta ventana.
+
+## PR191 · SQL instalado y permiso acotado verificado · 04/11/2026 21:15 UTC
+
+Tras confirmación explícita del usuario para crear dos funciones y modificar dos,
+se comprobó que el intento rechazado no había ejecutado nada. Preflight renovado
+21:13:54 UTC idéntico al anterior; respaldo privado SHA256
+`f1ef0df8ccb0a5e1e7a1596edb4825d4214fd03780499d0409a1ba671483dad5`.
+INSTALL exacto `edeb19dd6ca27eaacf654f8126246437723f3e978314465d608eae8e5955e183`
+APLICADO. SELECT posterior verifica los cuatro cuerpos fijados, metadata de las
+funciones existentes/default ACL conservados y nuevas funciones inicialmente con
+ACL exclusiva del owner. ENABLE_API exacto
+`0a1d772065d463af5f3ae879906169c7b5dbbe5112457db399e0fb1444e591b7`
+APLICADO: solo la fachada recibe EXECUTE anon; authenticated/service_role sin
+acceso a las funciones nuevas, lector privado sin API. No RLS/datos modificados.
+
+Prueba SQL con SET LOCAL ROLE anon y ROLLBACK: sesión inválida rechazada como
+SESION_NO_AUTORIZADA en Ensamble y Empaque. No sesiones humanas ni datos ficticios.
+Preparación añade dos comprobaciones HTTPS negativas de esta RPC al verificador
+existente; no acepta ausencia de función ni error de privilegios como éxito.
+Cuatro pruebas offline del verificador y política PASS. Contratos backend
+acreditados; transición de política sigue HOLD y publish exige SHA/run/ZIP/live.
+
+**Siguiente paso:** CI del candidato final, merge con política HOLD, prepare y
+denegaciones HTTPS reales, inspección vigente, publicación explícita y postcheck.
+Aceptación positiva con usuario real y rendimiento real siguen pendientes.
+El rechazo documentado debajo está resuelto para INSTALL con la autorización nueva.
+
+## PR191 · publicación contenida · 04/11/2026 21:00–21:05 UTC
+
+CI del candidato `4b5080608dafc83e53c2b3d498a4c4a827162399`: sintaxis,
+tests y aceptación SQL/API/PC-móvil completos PASS. La red actual permite
+api.github.com; inspección Hosting [41911770281](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/actions/runs/41911770281)
+PASS: live `1a59beda3dffaed9`, FINALIZED, 91 archivos, inventario/configuración
+leídos mediante la API con la cuenta existente. Se acredita esta versión como
+baseline y recuperación; no se ejecutó una restauración de prueba.
+
+La política actualiza únicamente las dos huellas afectadas por Seguimiento,
+referencia PR191 y baseline/rollback acreditados. La transición permanece HOLD;
+`backend_contracts_verified=false` impide publicar mientras falte la instalación.
+No se cambia el gate ni sus rutas, permisos, workflows o alcance. Vidrio se trabaja
+por separado y no forma parte de este PR.
+
+Preflight Supabase de solo lectura 21:01:57 UTC: siete cuerpos existentes coinciden
+con los pins, nuevas funciones ausentes, RLS de las tablas implicadas habilitado.
+Respaldo privado fuera del repositorio, carpeta0700/archivo0600, SHA256
+`1a3ec26f1949c686218869b89b428216738cc331ecdaf5b34ae2785ec39af1ea`.
+INSTALL fue rechazado por revisión automática por falta de autorización explícita
+para esta instalación exacta (crear dos funciones y modificar dos existentes).
+No se aplicó SQL, EXECUTE, merge ni publicación. La aprobación previa del permiso
+API se conserva; no se amplía para superar el rechazo de instalación.
+
+**Siguiente paso:** obtener confirmación específica del INSTALL de hash
+`edeb19dd6ca27eaacf654f8126246437723f3e978314465d608eae8e5955e183`,
+refrescar preflight y ejecutar instalación/verificación antes del permiso separado.
+Después acreditar contratos, CI del SHA final, prepare/ZIP y publicación protegida.
+Los apartados siguientes conservan antecedentes y límites de aceptación humana.
+
+## Candidato Seguimiento global — revisión en borrador
+
+Rama `feat/lp01-seguimiento-global-review`, base main `ab1d2d6`.
+B08–B11 reutilizado con consulta por línea/etapa de todas las semanas y producciones
+sin asignación. Export conserva prioridad; desconocido/cero con pendientes queda
+en conciliación. Seguimiento coordinador/administrador; VALIDAR solo coordinador.
+Implementado y verificado en aislamiento; sin instalación ni publicación.
+[Alcance y pruebas sintéticas](SEGUIMIENTO_INCREMENTO_AISLADO.md).
+Pruebas anteriores válidas reutilizadas; CI del nuevo SHA pendiente al preparar
+este commit. Próximo paso: revisar CI y el PR, manteniendo por separado las
+aprobaciones de instalación, EXECUTE anon, fusión y publicación.
+
+
 **Actualizado:** 2026-11-04, UTC/America/Bogota. PR183, rama existente.
 **Código de referencia verificado:**6edf892; main4ef528b (#190) incorporado
 conservando LP, ambos bloques styles.css, calendario Colombia y saldos futuros.

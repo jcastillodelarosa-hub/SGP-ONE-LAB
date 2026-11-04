@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "results": [
+    {
+      "width": 390,
+      "role": "COORDINADOR",
+      "global_stages": true,
+      "unknown_and_zero_pending": true,
+      "unassigned_no_action": true,
+      "exact_context_return": true
+    }
+  ],
+  "source_assignment_operation_audit_unchanged": true,
+  "transport": "local owner invokes revoked facade; no API grants or productive endpoints",
+  "screenshots_published": false
+}
