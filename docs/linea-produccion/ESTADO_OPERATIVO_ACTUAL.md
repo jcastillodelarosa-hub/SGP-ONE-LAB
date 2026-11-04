@@ -1,5 +1,31 @@
 # Línea de Producción — estado operativo actual
 
+## PR191 · SQL instalado y permiso acotado verificado · 04/11/2026 21:15 UTC
+
+Tras confirmación explícita del usuario para crear dos funciones y modificar dos,
+se comprobó que el intento rechazado no había ejecutado nada. Preflight renovado
+21:13:54 UTC idéntico al anterior; respaldo privado SHA256
+`f1ef0df8ccb0a5e1e7a1596edb4825d4214fd03780499d0409a1ba671483dad5`.
+INSTALL exacto `edeb19dd6ca27eaacf654f8126246437723f3e978314465d608eae8e5955e183`
+APLICADO. SELECT posterior verifica los cuatro cuerpos fijados, metadata de las
+funciones existentes/default ACL conservados y nuevas funciones inicialmente con
+ACL exclusiva del owner. ENABLE_API exacto
+`0a1d772065d463af5f3ae879906169c7b5dbbe5112457db399e0fb1444e591b7`
+APLICADO: solo la fachada recibe EXECUTE anon; authenticated/service_role sin
+acceso a las funciones nuevas, lector privado sin API. No RLS/datos modificados.
+
+Prueba SQL con SET LOCAL ROLE anon y ROLLBACK: sesión inválida rechazada como
+SESION_NO_AUTORIZADA en Ensamble y Empaque. No sesiones humanas ni datos ficticios.
+Preparación añade dos comprobaciones HTTPS negativas de esta RPC al verificador
+existente; no acepta ausencia de función ni error de privilegios como éxito.
+Cuatro pruebas offline del verificador y política PASS. Contratos backend
+acreditados; transición de política sigue HOLD y publish exige SHA/run/ZIP/live.
+
+**Siguiente paso:** CI del candidato final, merge con política HOLD, prepare y
+denegaciones HTTPS reales, inspección vigente, publicación explícita y postcheck.
+Aceptación positiva con usuario real y rendimiento real siguen pendientes.
+El rechazo documentado debajo está resuelto para INSTALL con la autorización nueva.
+
 ## PR191 · publicación contenida · 04/11/2026 21:00–21:05 UTC
 
 CI del candidato `4b5080608dafc83e53c2b3d498a4c4a827162399`: sintaxis,

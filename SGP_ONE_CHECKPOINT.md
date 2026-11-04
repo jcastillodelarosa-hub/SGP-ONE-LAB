@@ -1,3 +1,15 @@
+## PR191 · instalado, permiso verificado, publicación pendiente · 04/11/2026
+
+Confirmación explícita nueva de Johan; ausencia de ejecución previa y preflight
+renovado21:13:54UTC comprobados. INSTALL y ENABLE_API exactos APLICADOS: cuatro
+cuerpos fijados, metadata/defaults conservados y solo fachada con EXECUTE anon.
+Sesión inválida denegada en ambas etapas bajo rol anon y ROLLBACK. Sin datos/RLS
+alterados. Preparador incorpora dos denegaciones HTTPS nuevas; pruebas offline PASS.
+Política conserva transición HOLD y pins de artefacto/live/recuperación. Siguiente:
+CI del SHA final, merge, prepare/HTTPS y publicación explícita con postcheck.
+No aceptación humana positiva acreditada. Vidrio sigue en encargo separado.
+[Estado y evidencias](docs/linea-produccion/ESTADO_OPERATIVO_ACTUAL.md).
+
 ## PR191 · instalación bloqueada, preparación Hosting · 04/11/2026
 
 Seguimiento global `4b50806`: CI completa PASS. Inspección de solo lectura

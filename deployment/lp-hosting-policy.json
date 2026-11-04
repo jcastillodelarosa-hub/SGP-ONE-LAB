@@ -21,13 +21,13 @@
     "src/server/lp-powerbi-handler.js": "e97567e17a2b93d5b99625904316ac74bbb7161d58f4828d60ee1501b9358ce1",
     "supabase/functions/lp-powerbi/index.ts": "defc3a654ce6d640c68079301b1bc2ebd82349317170aaeaa4d636f8e885505f",
     "supabase/config.toml": "e125a7afc77c2131c1fe403010c072a41984aabd95be35df80e00c7fce154d0d",
-    "scripts/lp-backend-readiness.py": "4e3a0f8f0152ae596f25b4d69da12b2415be36d3ca916896d23628c64ca0cf44"
+    "scripts/lp-backend-readiness.py": "0347837ace3ecb08b52ac16b9fb82b1ca8b8462853a33e9d14a4f608bc92482e"
   },
   "legacy_navigation_sha256": "4f0992b1c98f4933fe5a0daa98d95fd85b35fceaffbbbd904fef7d422f21f0af",
   "certification_reference": "docs/linea-produccion/PUBLICACION_CONTROLADA_2026_11_03.md",
   "baseline_version": "sites/sgp-one-lab/versions/1a59beda3dffaed9",
   "rollback_version": "sites/sgp-one-lab/versions/1a59beda3dffaed9",
   "artifact_kind": "runtime",
-  "backend_contracts_verified": false,
+  "backend_contracts_verified": true,
   "backend_probe_required": true
 }

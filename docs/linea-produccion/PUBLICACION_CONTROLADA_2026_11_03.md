@@ -336,3 +336,13 @@ de instalación pendiente, sin afirmar que las pruebas sintéticas sean producci
 El respaldo SQL privado y preflight se completaron, pero INSTALL fue rechazado
 automáticamente por falta de autorización explícita para sus cuatro cambios de
 funciones. No reintentar con la aprobación previa del permiso API solamente.
+
+### Autorización específica recibida e instalación completada
+
+04/11 21:14–21:15 UTC: con nueva confirmación explícita del usuario, preflight
+renovado y ausencia previa acreditada, INSTALL exacto y ENABLE_API exacto se
+aplicaron. Cuerpos y ACL verificados por SELECT, denegación de sesión inválida
+comprobada bajo anon en ambas etapas sin escrituras de negocio. Se acredita el
+contrato backend y se añaden comprobaciones HTTPS negativas de Seguimiento al
+prepare existente. La transición mantiene HOLD; no hay publicación por esa marca.
+El [estado operativo](ESTADO_OPERATIVO_ACTUAL.md) contiene hashes y límites.
