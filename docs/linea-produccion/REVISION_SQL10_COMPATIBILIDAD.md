@@ -1,5 +1,11 @@
 # SQL10 — revisión dirigida de compatibilidad y CI
 
+> Actualización de continuidad: la ACL insegura descrita abajo se corrigió y verificó
+> mediante00; SQL01/06/08 están instalados contenidos, CI del códigoe4f8a37 PASS.
+> SQL10 sigue sin aplicar, pendiente de aceptación específica tras caducidad de la
+> confirmación del conector. [Estado vigente y recibos](ESTADO_OPERATIVO_ACTUAL.md).
+> El dictamen siguiente documenta la captura anterior; no reabrir esa auditoría.
+
 03/11/2026, America/Bogota. Base del encargo **b4cf8c8**, mismo Draft183.
 **Dictamen: BLOQUEADO PARA INSTALACIÓN EN EL ESTADO REAL OBSERVADO.** No es
 una aprobación productiva. El perfil sigue false y SQL10 no se aplica.

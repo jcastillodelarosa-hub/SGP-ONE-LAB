@@ -1,5 +1,13 @@
 ## Ejecución LP autorizada bajo controles · 03/11/2026
 
+Estado vigente posterior: códigoe4f8a37 CI6/6 PASS. ACL00 y01/06/08 APLICADOS
+contenidos; SELECT confirma flags=false y catálogos protegidos, cinco RPC intactas.
+SQL10 NO aplicado: confirmación caducada, pendiente de aceptación específica del
+usuario sobre el archivo/hash revisados. No09, activación, Edge, merge ni Firebase.
+Salida HTTPS del entorno aún pendiente tras reinicio (revisión5 sin tres destinos).
+[Recibo real](tests/lp01-roles/evidence/installation-production.json) y estado único
+detallan siguiente paso; los párrafos siguientes conservan antecedentes de preparación.
+
 PR183: sincronización con main4b1e98e conserva ambos bloques de estilos. Corrección
 ACL00/00R preparada con consumidores nativos, respaldo privado y reversión probados;
 no DML de datos ni cambios RLS. Runtime sin muestras preparado para el publicador

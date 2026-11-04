@@ -139,3 +139,67 @@ móvil390 PASS, captura de Empaque inspeccionada. Las capturas válidas nuevas s
 generan en el artifact CI. Las fixtures de política ahora fijan explícitamente
 legacy no aprobado y visual/runtime aprobado, sin depender del modo real de la
 política; backend false sigue bloqueando publicación. Ninguna prueba publica.
+
+## Estado real instalado y aceptación exclusiva SQL10
+
+CI códigoe4f8a37: los seis runs completaron SUCCESS, incluido41762498849
+(SQL y PC/móvil), antes de instalar. Preparación41762493647 selló un ZIP runtime,
+no una publicación. [Recibo SELECT y límites](../../tests/lp01-roles/evidence/installation-production.json).
+
+| Instalación confirmada | Versión Supabase | Estado |
+|---|---|---|
+| ACL00 | 20261104025405 | Acceso directo anon/authenticated revocado en dos catálogos; cinco RPC sin cambios, RLS intacto |
+| SQL01 | 20261104025604 | Esquema privado, escrituras=false |
+| SQL06 | 20261104025619 | Contrato XLSX servidor, formato BI=false |
+| SQL08 | 20261104025624 | Ámbitos temporales contenidos; sin responsables reales añadidos |
+| SQL10 | No instalada | Confirmación caducada; SELECT confirma perfil ausente y función administrativa original |
+
+Solicitud futura **solo** `10_roles_cierre_individual_REVIEW.sql`, SHA256
+`08d17548ad781ab3f7d8b400121c448d1f064269fc858055498e36cdbdd67d82`.
+No repite01/06/08/00, no incluye09, no activa ni publica. El usuario ha pedido
+aceptación específica tras revisar este resumen; no se renueva ejecución hasta aceptarla.
+
+- Único DROP previsto en SQL10: CHECK actual de `public.sgp_usuarios`, localizado por
+  definición exacta, sustituido en la misma transacción por
+  `sgp_usuarios_rol_lp10_check`: conserva los nueve roles y añade los dos supervisores.
+  No DROP de tablas, DELETE, TRUNCATE ni actualización masiva de cuentas.
+- Añade defaults a `public.sgp_rol_accesos` con ON CONFLICT DO NOTHING;
+  no sobrescribe accesos existentes, incluidos false, ni asigna usuarios.
+- Crea `sgp_lp_operacion.perfil_roles` privado/habilitado=false y cuatro helpers
+  privados: operaciones_rol, acceso_rol, puede_operar y auditar_rol.
+- Reemplaza cuerpos conservando firma/owner/ACL de contener_ambitos,
+  permisos_en_periodo, verificar_temporal, sesion, confirmar_ambito, y las públicas
+  sgp_lp_operacion_comando, sgp_lp_operacion_consultar, sgp_admin_usuario_guardar.
+  Añade dos columnas de trazabilidad y un trigger a la auditoría LP.
+- Los UPDATE/INSERT de cuentas/órdenes dentro de cuerpos son código para futuras
+  operaciones protegidas, no se ejecutan al instalar. No cambia cuentas,
+  contraseñas o sesiones actuales ni saldos Export; no desactiva RLS o abre catálogos.
+- Preflight, lock/statement timeout y transacción completa: un error revierte
+  instalación entera. Tras COMMIT, mantener escrituras contenidas; ante incidencia,
+  contención02/corrección hacia adelante preservando auditoría. Restaurar función y
+  CHECK originales solo tras comprobar que no hay cuentas con nuevos roles ni
+  dependencias; no borrar usuarios/historial para forzar una reversión.
+
+Respaldo privado de ACL, definiciones/constraint nativos y fuentes versionadas,
+hashes arriba; no copia de base de datos ni datos personales. Restauración00R
+reintroduciría el riesgo y no es rollback de10 o frontend. Pruebas aisladas de
+Roles/Usuarios, revocación y compatibilidad, más menú PC/móvil y CI completa,
+acreditan el contrato probado; no equivalen a guardados humanos en producción.
+
+## Ajuste de red solicitado y ejecución protegida
+
+Solo en configuración del **entorno de esta tarea Codex**, lista de destinos de
+salida: permitir HTTPS443 a `sgp-one-lab.web.app`, `sgp-one-lab.firebaseapp.com`
+y `ocvxbwzqxbrfndkvjmfx.supabase.co`. Conservar reglas/proxy/TLS, sin comodines.
+No altera SGP live, Firebase, Supabase, usuarios, RLS ni secretos. Las herramientas
+del entorno solo leen estado/diagnóstico; el responsable debe guardar/aplicar el
+cambio por el flujo de configuración revisado. Tras reinicio observado, revisión5
+aún no contiene esos destinos; no se infiere configuración concedida por el reinicio.
+
+La publicación seguirá en el workflow existente/proyecto/cuenta existentes. El
+conector no expone workflow_dispatch: un operador tendrá que iniciarlo desde
+GitHub cuando se entreguen SHA/run/digest/live exactos y la política permita publicar.
+No ejecutar publish ahora: faltan10, runtime/orígenes/verificación y activación.
+No crear infraestructura, transferir credenciales, saltar403/proxy o publicar una
+versión incompleta como operativa. El rollback exacto de Hosting conserva su
+referencia0312f467cf0e9c29; refrescarla inmediatamente antes de publicar.

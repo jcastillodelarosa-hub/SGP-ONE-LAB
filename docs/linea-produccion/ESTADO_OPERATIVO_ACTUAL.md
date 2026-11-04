@@ -1,39 +1,32 @@
 # Línea de Producción — estado operativo actual
 
-**Actualizado:** 2026-11-03, America/Bogota (ejecución de publicación autorizada bajo controles).
-**Base:** PR183 HEAD601efbd, main4b1e98e. Sincronización en esta entrega conserva
-los dos bloques styles.css y todos los cambios de main; misma rama y PR.
-**Autorización vigente:** instalar, fusionar y publicar si pruebas, seguridad y
-recuperación pasan; no SQL09, no RLS desactivada ni datos inventados.
-**Preparado:** corrección ACL00/00R con cinco consumidores administrativos y respaldo
-privado de privilegios verificados, paquete runtime real sin muestras, guards
-protegidos de publicación. Perfil sigue contenido hasta completar controles.
-**Hosting:** inspect existente reejecutado solo GET; misma versión0312f467cf0e9c29
-FINALIZED y79 archivos, inventario/config idénticos. Recuperación retenida acreditada.
-[Plan de ejecución y límites](PUBLICACION_CONTROLADA_2026_11_03.md).
-**HEAD sincronizado verificado:**00c8b15; posteriorbb04f1f prepara los orígenes HTTPS
-exactos del servicio XLSX sin secretos nuevos ni cambios al adaptador. PR mergeable.
-**CI:**41748574445 falló únicamente al consultar el commit histórico b4cf8c8 en
-checkout shallow; hardening pasó. Se corrige fetch-depth=0 del job, sin omitir la
-comparación. Los demás checks terminados y la preparación sin publicación pasaron.
-**Pendiente inmediato:** CI del HEAD corregido antes de cambios productivos;
-registrar explícitamente cada instalación/activación/publicación. No atribuir al
-backend real una escritura probada solo sintéticamente. PDT/Export siguen limitados
-por su evidencia de origen y apertura automática inactiva.
-**Ajuste de navegación:** supervisores ven solo su etapa, incluido selector y
-retorno al turno; líder conserva ambas y los accesos históricos restantes no cambian.
-PC1440/móvil390 con RPC administrativas/sesión y SQL10 reales sintéticos PASS.
-El rol visual no autoriza operaciones; SQL revalida rol/accesos al guardar.
-**Runtime local:** Deno2.5.6 compila Edge y procesa ambos XLSX anónimos sin red.
-No se certifican todavía gateway desplegado, sesión humana ni guardados productivos.
-**CI pendiente real:** b1c9480 y71d3a97 terminaron cancelados a15min; el segundo
-interrumpió navegadores después de SQL/roles/continuidad PASS. Se amplía el límite
-del job a25min, conservando todos los checks. No se presenta cancelación como verde.
-**Capturas corregidas:** el recorrido de roles entra por el menú nativo y espera
-la consulta SQL, sin forzar paneles visibles. Captura Empaque PC/móvil revisada
-visualmente: solo pestaña autorizada y contexto real del fixture, no Inicio.
-La prueba de política usa estados sintéticos explícitos y no presupone que la
-política real deba permanecer legacy; sigue rechazando backend no acreditado.
+**Actualizado:** 2026-11-03, America/Bogota. Mismo Draft PR183 y rama existente.
+**Código verificado:**e4f8a37; main4b1e98e incorporado conservando ambos bloques
+styles.css. CI6/6 PASS de ese código; [aceptación SQL/PC/móvil](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/actions/runs/41762498849).
+La entrega documental posterior no hereda automáticamente checks de otro HEAD.
+**APLICADO en Supabase:** ACL00 y SQL01/06/08, contenidos. Escrituras=false,
+formato BI=false. Catálogos sin acceso directo anon/authenticated; cinco RPC
+nativas intactas, RLS sin cambios. Sin usuarios/sesiones o datos de negocio editados.
+[Recibos y comprobación SELECT](../../tests/lp01-roles/evidence/installation-production.json).
+**SQL10 NO APLICADO:** confirmación del conector caducó; SELECT acredita ausencia
+del perfil y función administrativa original. El usuario pidió resumen y aceptación
+específica antes de renovar únicamente SQL10. No se sortea la confirmación.
+**NO PUBLICADO / NO FUSIONADO / NO ACTIVADO:** ningún Edge/Firebase/worker,
+perfil operativo ni escrituras habilitados. SQL09 excluido. Publicación condicionada
+a controles completos; no presentar implementación sintética como funcionamiento real.
+**Preparado y probado:** supervisor solo su etapa/selector/retorno, líder ambas;
+menú nativo PC1440/móvil390 y SQL10 sintético real, Roles/Usuarios, cierres y
+revocaciones PASS. Deno2.5.6 compila y procesa ambos XLSX anónimos sin red.
+**Infraestructura pendiente:** entorno reiniciado, pero revisión5 sigue sin los
+tres dominios HTTPS permitidos. Añadirlos en configuración de salida de esta tarea,
+sin cambiar SGP/Hosting/Supabase ni credenciales. El conector no ofrece dispatch:
+el workflow protegido existente requerirá ejecución autorizada cuando esté listo.
+**Hosting observado:** versión0312f467cf0e9c29 FINALIZED/79 archivos acreditada
+por inspect GET, recuperación retenida; refrescar antes de una publicación.
+[Plan, instrucciones de red, resumen SQL10 y recuperación](PUBLICACION_CONTROLADA_2026_11_03.md).
+**Siguiente:** aceptación exclusiva SQL10 y verificación HTTPS; después runtime,
+permisos/operaciones reales y publicación protegida. PDT/Export conservan sus
+límites de evidencia; apertura automática inactiva, sin retomar otros módulos.
 
 Esta es la **referencia operativa única de LP**. Describe el estado vigente, no un
 historial. Antes de trabajar leer AGENTS.md, este archivo y el estado real del PR;
@@ -48,20 +41,21 @@ segundo plano. No sustituye la supervisión ni concede autorizaciones productiva
 
 | Estado | Significado y situación actual de LP |
 |---|---|
-| PROPUESTO | SQL 01–08/08R y contratos pendientes, diseño A y planes de instalación/recuperación. No autorizan ejecución |
+| PROPUESTO | SQL10 pendiente de aceptación específica; 04/05/07/08R y diseño A no aplicados.09 supersedido y excluido |
 | IMPLEMENTADO | Seguimiento/Operación, adaptador XLSX y controles en rama. Identidad técnica solo como referencia sintética, no integrada en el runtime |
-| APLICADO | **No aplicado por este PR en Supabase productivo**. Último SELECT de catálogo conservado: esquema LP ausente; no se refrescó en esta entrega documental |
-| PUBLICADO | **No publicado por este PR** en Firebase/Edge ni worker desplegado; no hay autorización de despliegue |
-| VERIFICADO | Código y pruebas en PostgreSQL17.11 sintético, navegador PC/móvil y CI. Catálogo Supabase verificado solo por SELECT en su fecha. **No verificado en planta ni autenticado el LOGIN restringido real** |
+| APLICADO | Supabase: ACL00 y SQL01/06/08, versiones en recibo. Flags de escritura/BI=false, sin SQL10/09 ni asignaciones humanas |
+| PUBLICADO | **No publicado por este PR** en Firebase/Edge ni worker. Autorización de publicación condicionada a controles completos; pendiente infraestructura y aceptación SQL10 |
+| VERIFICADO | CI6/6 códigoe4f8a37; PostgreSQL17.11 sintético y PC/móvil. Supabase real: metadatos/ACL/instalación contenida por SELECT. **No guardados productivos ni verificación en planta** |
 | FUSIONADO | #183 sigue sin fusionar. La existencia de otro PR fusionado no prueba aplicación/publicación de sus SQL |
 
 ## 2. Fase activa y prioridades obligatorias
 
-**FASE ACTIVA: Seguimiento, Ensamble y Empaque.** Prioridad vigente: cierre funcional
-integral delimitado para PANELES_2, ambos turnos y etapas, sin activación. Antecedente técnico: completar
-el cierre técnico de ambas etapas con Power BI, ya contrastado de forma integrada
-en aislamiento. Falta correspondencia/ámbitos/cobertura de casos reales y runtime autorizado. El bloqueo PUBLIC afecta exclusivamente la apertura automática, que sigue
-inactiva; no detiene las integraciones independientes autorizadas.
+**FASE ACTIVA: Seguimiento, Ensamble y Empaque.** Prioridad inmediata: publicación
+segura del alcance aprobado PANELES_2, tras SQL10 y comprobaciones de runtime/red.
+Conservar las cinco pestañas, Programación/ubicaciones y el adaptador XLSX.
+No publicar una muestra o consulta contenida como si fuese operación integral.
+El bloqueo PUBLIC de apertura automática sigue independiente; no se retoma ese
+trabajo ni Vidrio/Dashboard/Tabla/Kanban para sortear los controles de publicación.
 
 1. Seguridad e identidad técnica para apertura automática.
 2. Integraciones operativas PDT, Export, Power BI y ámbitos reales.
@@ -80,6 +74,8 @@ límites indicados; ninguna implica escritura productiva habilitada.
 
 | Funcionalidad y límite | Código / contrato | Pruebas y evidencia |
 |---|---|---|
+| SQL10 pendiente de aceptación específica tras caducidad de confirmación; no instalado | [Recibo SELECT](../../tests/lp01-roles/evidence/installation-production.json), resumen exacto en plan | Usuario acepta únicamente10; Codex renueva por el conector y verifica después. No ejecutar otra vía ni instalar09 |
+| Salida HTTPS no admitida y dispatch no expuesto por el conector; impiden cerrar verificación/publicación | Entorno revisión5 enforced: tres hosts ausentes incluso después de reinicio; proyecto/cuenta/workflow existentes se conservan | Responsable de configuración del entorno añade los tres destinos exactos; operador inicia workflow protegido solo con parámetros revisados. Sin secretos nuevos |
 | Seguimiento: línea/etapa/turno, búsqueda, prioridades, abiertas/nuevas, cantidades, observaciones y afectaciones | [vista](../../src/modules/lp01-followup.js), [dominio](../../src/domain/lp01-followup.js) | [pruebas](../../tests/lp01-followup.test.mjs), [PC/móvil](../../tests/lp01-seguimiento/evidence/browser-results.json) |
 | Operación: último acumulado por asignación/turno, etapas independientes, notas, permisos, CAS, UUID y auditoría | [interfaz](../../src/modules/lp01-operation.js), [motor 01 propuesto](../sql-proposals/lp01-operacion/01_operacion_REVIEW.sql) | [15 grupos SQL](../../tests/lp01-operacion/evidence/postgres.json) |
 | XLSX real v1: comparación por producción/línea/etapa/fecha/turno, suma de últimos avances LP, diferencias justificadas, original y versiones | [adaptador](../../src/domain/powerbi/adapter.js), [servidor](../../src/server/lp-powerbi-handler.js), [06 propuesto](../sql-proposals/lp01-operacion/06_powerbi_xlsx_REVIEW.sql) | [hallazgos y límites](POWER_BI_XLSX_V1.md), [8 grupos SQL](../../tests/lp01-powerbi/evidence/postgres.json), [PC/móvil](../../tests/lp01-powerbi/evidence/browser.json) |
@@ -127,24 +123,23 @@ Responsables expresados por función, **sin inventar personas ni conceder acceso
 | LOGIN/TLS/red/pooler reales no acreditados; no existe enlace técnico integrado/activado | [viabilidad y límites](principal-a/DISENO.md) | Responsable infraestructura/Supabase: runtime/ruta e identidad aprobados y prueba controlada posterior; sin secretos/roles ahora |
 | Emisor PDT real pendiente de acreditar entrega/cobertura neta; asociación por raíz y contención de anulaciones ya preparadas en 07, verificadas solo sintéticamente | [contrato LP-PDT-LIBERACION/1 y brecha](CIERRE_BLOQUEOS_PRODUCTIVOS.md#2-pdt-datos-existentes-y-contrato-que-falta) | Responsable funcional/PDT: caso y consolidación de solapamientos; mantenedor integración: adaptador/emisor trazable, sin convertir piezas en ventanas |
 | Cambio de corte Export no prueba qué avances incluye; riesgo de descontar dos veces | [LP-EXPORT-INCLUSION/1](CIERRE_BLOQUEOS_PRODUCTIVOS.md#3-export-diario-contrato-de-inclusión-separado-de-power-bi-de-cierre) | Responsable fuente Export y mantenedor: procedencia/cortes/eventos incluidos y protocolo idempotente; no deducir inclusión por fecha o diferencia de saldo |
-| Configuración de accesos reales LP y catálogo de nuevos supervisores aún no aplicados; perfil10 sustituye matrices08/09 | [plantilla privada a completar](plantillas/ambitos_lp_por_confirmar.csv), [catálogo histórico](evidence/2026-11-02-cierre-readonly.json) | Coordinación/administración autorizada: cuentas reales, línea/etapa/producción, cierre y suplencia por canal privado; no publicar identificadores ni tokens |
+| Configuración real de supervisores pendiente de10 y Gestión de Roles/Usuarios; no asignar cuentas por inferencia | [Regla vigente](ROLES_CIERRE_INDIVIDUAL.md), [recibo real](../../tests/lp01-roles/evidence/installation-production.json) | Administración autorizada configura cuentas existentes desde Configuración. No exige matrices08/09 ni PRIMARY/BACKUP para el cierre individual aprobado |
 | Corrección retroactiva de cadenas ya arrastradas y variantes BI no observadas sin contrato/evidencia suficiente | [continuidad](SALE_CONTINUIDAD_CONTENCION.md), [variantes XLSX](POWER_BI_XLSX_V1.md#hallazgos-pendientes-limitados-a-su-caso) | Funcional + mantenedor de fuente: evidencia específica/conciliación, sin inferencias sobre anulaciones, nocturnos, ceros ausentes o reparto |
 
 No se vuelve a consultar información sensible previamente bloqueada ni a conciliar
-históricos por inferencia. Las observaciones Supabase conservan su fecha, no son
-una comprobación productiva nueva de esta entrega.
+históricos por inferencia. Los SELECT nuevos acreditan solo instalación/metadatos,
+no operaciones exitosas de usuarios reales ni cobertura PDT/Export en planta.
 
 ## 6. Siguiente acción técnica exacta y límite de continuación
 
-**Revisión vigente:** [compatibilidad SQL10 y CI](REVISION_SQL10_COMPATIBILIDAD.md).
-Preflight nuevo rechaza catálogos modificables directamente desde la API; pruebas
-sintéticas conservan propietarios/ACL/RLS y perfil=false en instalación segura.
-No se declara segura la instalación real hasta resolver esa autoridad por separado.
-**Siguiente acción exacta:** responsable DB/seguridad delimita propuesta autorizada
-para proteger los catálogos existentes y sus consumidores; responsable del PR
-sincroniza main4b1e98e y conserva ambos bloques del conflicto styles.css para obtener
-CI. Este encargo identifica ambos bloqueos, no aplica privilegios ni fusiona ramas.
-La regla aprobada de cierre individual se mantiene; no reintroducir matrices09.
+**Vigente:** ACL corregida/verificada y sincronización resuelta; CI del código PASS.
+SQL01/06/08 instalados con flags=false. [Recibo](../../tests/lp01-roles/evidence/installation-production.json).
+**Siguiente acción exacta:** aceptación del usuario y renovación por el conector
+solo SQL10, fuente/hash revisados en el plan. Verificar que continúa contenido.
+Resolver salida HTTPS mediante configuración revisada, comprobar runtime y
+permisos, después activar/publicar exclusivamente bajo los controles pendientes.
+No reintroducir matrices09 ni usar otra vía para eludir confirmaciones. El
+dictamen anterior de ACL insegura se conserva como antecedente histórico enlazado.
 
 Antecedente Paneles2/09 SUPERSEDIDO: las asignaciones por turno y dos cuentas eran
 la regla anterior, conservada solo en la evidencia histórica. No usar el importador
