@@ -1424,7 +1424,12 @@ async function commitProgramming() {
 }
 els.nav.forEach(button => button.addEventListener("click", async () => {openView(button.dataset.view);if(button.dataset.view==='inicio')loadHomeBalances();if(button.dataset.view==='configuracion')loadUserAdmin();if(button.dataset.view==='picking')loadPicking();if(button.dataset.view==='ensamble'){await refreshAssemblyWeeks(true);loadAssembly()}}));
 function getISOWeekNumber(date=new Date()){
-  const d=new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate()));
+  // La semana operativa de la portada sigue el calendario ISO en Colombia,
+  // nunca la semana máxima importada ni la zona horaria del dispositivo.
+  const parts=Object.fromEntries(new Intl.DateTimeFormat('en-US',{
+    timeZone:'America/Bogota',year:'numeric',month:'2-digit',day:'2-digit'
+  }).formatToParts(date).filter(part=>part.type!=='literal').map(part=>[part.type,Number(part.value)]));
+  const d=new Date(Date.UTC(parts.year,parts.month-1,parts.day));
   const day=d.getUTCDay()||7;
   d.setUTCDate(d.getUTCDate()+4-day);
   const yearStart=new Date(Date.UTC(d.getUTCFullYear(),0,1));
@@ -1450,15 +1455,18 @@ async function loadHomeBalances(){
    x.lines[line].pack+=Number(r.saldo_empaque||0);
    sums.set(w,x);
   });
-  const loadedWeeks=[...sums.keys()].filter(Number.isFinite),week=loadedWeeks.length?Math.max(...loadedWeeks):getISOWeekNumber();
+  const week=getISOWeekNumber();
   const homeWeek=document.querySelector('#homeCurrentWeek');if(homeWeek)homeWeek.textContent=String(week);
   const hasBalance=x=>lines.some(line=>x.lines[line].ens>0||x.lines[line].pack>0);
   const past=[...sums.values()].filter(x=>x.week<week&&hasBalance(x)).sort((x,y)=>x.week-y.week);
+  const future=[...sums.values()].filter(x=>x.week>week&&hasBalance(x)).sort((x,y)=>x.week-y.week);
   const now=sums.get(week)||{week,lines:{PANELES_2:{ens:0,pack:0},FRAMES_2:{ens:0,pack:0}}};
   const renderWeek=(x,isOverdue)=>'<div class="home-balance-week '+(isOverdue?'overdue':'current')+'" data-home-balance-week="'+x.week+'"><strong>Semana '+x.week+'</strong><div class="home-balance-lines">'+lines.map(line=>{const z=x.lines[line];return '<div class="home-balance-line"><b class="home-balance-line-name">'+(line==='PANELES_2'?'▦ PANELES':'▣ FRAMES')+'</b><button type="button" class="home-balance-area" data-home-area="ensamble" data-home-line="'+line+'"><i>Ensamble</i><b>'+z.ens.toLocaleString('es-CO')+' <small>und</small></b></button><button type="button" class="home-balance-area" data-home-area="empaque" data-home-line="'+line+'"><i>Empaque</i><b>'+z.pack.toLocaleString('es-CO')+' <small>und</small></b></button></div>'}).join('')+'</div></div>';
   count.textContent=String(past.length);
   overdue.innerHTML=past.length?past.map(x=>renderWeek(x,true)).join(''):'<div class="home-balance-empty ok">Sin saldos de semanas vencidas.</div>';
   current.innerHTML=renderWeek(now,false);
+  const futurePanel=document.querySelector('#homeFutureBalance');
+  if(futurePanel)futurePanel.innerHTML=future.length?future.map(x=>renderWeek(x,false)).join(''):'<div class="home-balance-empty ok">Sin saldos de próximas semanas.</div>';
  }catch(e){console.error('Saldos portada',e);overdue.innerHTML='<div class="home-balance-empty">No fue posible cargar los saldos.</div>';current.innerHTML='';}
 }
 function openHomeBalanceDetail(week,area=null,line=null){
@@ -1468,7 +1476,7 @@ function openHomeBalanceDetail(week,area=null,line=null){
  const title=area==='ensamble'?'Saldo de Ensamble':area==='empaque'?'Saldo de Empaque':'Saldo de producción';
  document.querySelector('#homeBalanceModalEyebrow').textContent=title.toUpperCase();
  document.querySelector('#homeBalanceModalTitle').textContent='Semana '+week+(line?' · '+(line==='PANELES_2'?'PANELES':'FRAMES'):'');
- document.querySelector('#homeBalanceModalMeta').textContent=(week<getISOWeekNumber()?'Semana vencida':'Semana actual')+' · '+rows.length+' producciones con saldo';
+ document.querySelector('#homeBalanceModalMeta').textContent=(week<getISOWeekNumber()?'Semana vencida':week>getISOWeekNumber()?'Próxima semana':'Semana actual')+' · '+rows.length+' producciones con saldo';
  document.querySelector('#homeBalanceModalSummary').innerHTML='<button type="button" class="home-balance-summary-filter'+(area==='ensamble'?' active':'')+'" data-home-area="ensamble"><span>Saldo Ensamble</span><strong>'+ens.toLocaleString('es-CO')+' und</strong></button><button type="button" class="home-balance-summary-filter'+(area==='empaque'?' active':'')+'" data-home-area="empaque"><span>Saldo Empaque</span><strong>'+pack.toLocaleString('es-CO')+' und</strong></button>';
  const head=document.querySelector('#homeBalanceModal table thead');
  if(head)head.innerHTML='<tr><th>Tipo</th><th>Producción</th><th>Sistema</th><th>Acabado</th>'+(area==='ensamble'?'<th>Saldo Ensamble</th>':area==='empaque'?'<th>Saldo Empaque</th>':'<th>Saldo Ensamble</th><th>Saldo Empaque</th>')+'</tr>';
