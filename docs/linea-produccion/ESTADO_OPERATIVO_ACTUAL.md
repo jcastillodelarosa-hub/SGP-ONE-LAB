@@ -561,3 +561,24 @@ Antecedentes, no fuentes paralelas de estado vigente:
 Si sus peticiones antiguas contradicen avances de este documento, usar la evidencia
 más reciente y actualizar este estado; no repetir trabajo ni solicitar otra vez
 reglas/archivos ya aprobados o recibidos.
+
+
+## 9. Continuidad ejecutiva — decisión funcional y publicación (2026-11-03)
+
+**Solicitud vigente del responsable funcional:** «corrijamos y publiquemos». Existe autorización expresa en la conversación para corregir y publicar Línea de Producción, **sujeta a controles de seguridad, respaldo, recuperación, CI y verificaciones reales**. Esta autorización no equivale a que una migración ya esté aprobada técnicamente ni a que el sistema esté publicado. El estado real prevalece sobre esta nota y debe verificarse al iniciar cada nuevo chat.
+
+**Objetivo integral, no parcial:** Línea de Producción = **Seguimiento + Ensamble + Empaque**. No reducir el alcance a las dos últimas ventanas. El usuario necesita ver y utilizar las tres, en PC y móvil, cuanto antes. No sustituir el objetivo por otra ronda de bocetos o un rediseño. Reutilizar lo ya implementado en el Draft PR #183 y las pruebas válidas; demostrar un resultado real pronto.
+
+**Regla funcional de acceso:** reutilizar **Gestión de Roles y Gestión de Usuarios existentes**, sin crear administración paralela. Supervisor Ensamble: acceso operativo a Ensamble, sin acceso a Empaque. Supervisor Empaque: acceso operativo a Empaque, sin acceso a Ensamble. Líder de Línea: acceso operativo a ambas etapas. Seguimiento, Coordinador, Administrador y Consulta conservan la matriz de accesos autorizada, que debe contrastarse con el código; no inferir permisos adicionales de esta nota. Ocultar menús/botones **no** reemplaza autorización de servidor: denegar también acceso directo a ruta/RPC, y respetar intersección rol + accesos individuales, revocaciones y auditoría. Cierre individual autorizado para su etapa, en ambos turnos, sin PRIMARY/BACKUP obligatorio; piloto PANELES_2, no FRAMES_2.
+
+**Bloqueos técnicos confirmados antes de esta nota:**
+
+- Draft PR #183, rama `feat/lp01-seguimiento-operacion`, HEAD observado `601efbd683a2415a20af004a4735a5eca81f721c`, no fusionado, conflicto `styles.css` frente a `main` (`4b1e98e37fdd9f615266c963088c8d1313b51266`). Conservar estilos del modal Usuarios y la corrección móvil de Programación; sincronizar rama y obtener CI del HEAD resultante.
+- En Supabase, `public.sgp_rol_accesos` y `public.sgp_usuario_accesos` tienen RLS deshabilitada y DML directo concedido a `anon`/`authenticated`. La prueba aislada reprodujo bypass de revocación; **no** ejecutar SQL10 mientras esta condición exista. El preflight de SQL10 ya aborta de manera segura. Proteger la autoridad de accesos mediante cambio mínimo compatible con RPC de administración existentes, después de comprobar consumidores, dependencias, respaldo y reversión. No limitarse a visibilidad frontend; no desactivar RLS ni ampliar privilegios.
+- SQL10 reemplaza SQL09 (no instalar 09); esquema LP y escrituras productivas no acreditados como instalados; activación y apertura automática no deben inferirse de fixtures. Las brechas de PDT/Export y de apertura automática siguen documentadas en sus apartados; **no bloquear por ellas una demostración independiente y segura** de Seguimiento/Ensamble/Empaque cuando no dependa de esas funciones.
+
+**Secuencia mínima para finalizar:** (1) resolver conflicto y ejecutar CI dirigida; (2) corregir seguridad de catálogos con pruebas de Gestión de Roles/Usuarios, permisos cruzados y revocación; (3) verificar preflight, respaldo/recuperación y migraciones necesarias para el alcance efectivamente publicable; (4) publicar por el flujo protegido existente; (5) comprobar Seguimiento, Ensamble y Empaque con usuario autorizado en PC y móvil, y confirmar qué acciones persisten realmente. No afirmar operativo completo si solo hay consulta o demo. Si una integración externa no esencial impide una función, publicar únicamente un alcance explícito y seguro **previa decisión funcional**, sin presentar modo consulta como sustituto silencioso del módulo operativo.
+
+**Directriz de trabajo del usuario:** elegir siempre la vía más sencilla y rápida que sea segura; plantear de inmediato una decisión concreta cuando desbloquee el trabajo. Evitar auditorías generales, arquitectura adicional, reabrir decisiones aprobadas, pruebas repetidas y conversaciones largas de Codex. Un único encargo técnico acotado al PR #183, con evidencia y parada ante bloqueo real. Mantener SGP_ONE_GOOGLE y LAC separados.
+
+**Estado al registrar esta decisión:** DOCUMENTACIÓN ACTUALIZADA; IMPLEMENTADO EN RAMA / VERIFICADO EN AISLAMIENTO; **NO FUSIONADO / NO APLICADO / NO PUBLICADO / NO VERIFICADO EN PLANTA**. Esta actualización documental no modifica SQL, permisos, usuarios, producción ni Firebase.
