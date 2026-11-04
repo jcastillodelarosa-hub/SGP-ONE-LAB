@@ -1,0 +1,61 @@
+{
+  "status": "PASS",
+  "synthetic": true,
+  "base_source": "35bb6ad4c13859f387a2deb8bd10137af53b9c97",
+  "results": [
+    {
+      "stage": "ENSAMBLE",
+      "viewport": 1440,
+      "native_session_sql10_reads": true,
+      "independent_export_balances": true,
+      "week_search_filters": true,
+      "affectations_and_history": true,
+      "mobile_dialog_or_pc_sidebar": true,
+      "selection_filter_return_scroll": true,
+      "existing_stage_cards_preserved": true,
+      "write_calls": 0
+    },
+    {
+      "stage": "EMPAQUE",
+      "viewport": 1440,
+      "native_session_sql10_reads": true,
+      "independent_export_balances": true,
+      "week_search_filters": true,
+      "affectations_and_history": true,
+      "mobile_dialog_or_pc_sidebar": true,
+      "selection_filter_return_scroll": true,
+      "existing_stage_cards_preserved": true,
+      "write_calls": 0
+    },
+    {
+      "stage": "ENSAMBLE",
+      "viewport": 390,
+      "native_session_sql10_reads": true,
+      "independent_export_balances": true,
+      "week_search_filters": true,
+      "affectations_and_history": true,
+      "mobile_dialog_or_pc_sidebar": true,
+      "selection_filter_return_scroll": true,
+      "existing_stage_cards_preserved": true,
+      "write_calls": 0
+    },
+    {
+      "stage": "EMPAQUE",
+      "viewport": 390,
+      "native_session_sql10_reads": true,
+      "independent_export_balances": true,
+      "week_search_filters": true,
+      "affectations_and_history": true,
+      "mobile_dialog_or_pc_sidebar": true,
+      "selection_filter_return_scroll": true,
+      "existing_stage_cards_preserved": true,
+      "write_calls": 0
+    }
+  ],
+  "unchanged_audit_export_planning": true,
+  "limits": [
+    "Local transport to actual PostgreSQL17.11 SQL10 and native session/access RPCs; synthetic identities and source data",
+    "No production requests, actual human acceptance or physical PDT release verified",
+    "PDF master and chat19 unavailable; references are the original B08\u2013B11 embedded pages and approved DOCX"
+  ]
+}

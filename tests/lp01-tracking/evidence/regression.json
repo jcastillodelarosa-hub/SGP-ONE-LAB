@@ -1,0 +1,42 @@
+{
+  "base": "35bb6ad4c13859f387a2deb8bd10137af53b9c97",
+  "checked_utc": "2026-11-04T16:46:49.780893+00:00",
+  "operation_functions": {
+    "glass": {
+      "unchanged": true,
+      "sha256": "d3485f92f9286f2af248e3d074828677cc02b6ac20f830a3a211db270d7d7aef"
+    },
+    "renderDetail": {
+      "unchanged": true,
+      "sha256": "a8e8ecc0b86fc992559fadb31a95377bef1bcf3950058ce7b8d752cde8788c3a"
+    },
+    "drawBI": {
+      "unchanged": true,
+      "sha256": "7c175371b2dcdff02fbdd2ff86d8be77f6f4788dcc1ba244515f3324fcfba17a"
+    },
+    "attempt": {
+      "unchanged": true,
+      "sha256": "ae8e010bce3795f941751725612fde16ed852abe7b6708aeec5261527a56cc6e"
+    },
+    "send": {
+      "unchanged": true,
+      "sha256": "cc9bf10eb79d14e3572566e27023f88c5f873d2d5e2a8fccc8fa5e5d556fa023"
+    },
+    "transmit": {
+      "unchanged": true,
+      "sha256": "92e89d332ccbe0eb88e6d025b05617bf20e38d73401eee685d67801786a3dd4a"
+    },
+    "renderReports": {
+      "unchanged": true,
+      "sha256": "aa4977e774df1ab9fd72c27ad000dbbc1c11fa8710f7f10060e201003bbc4dc0"
+    }
+  },
+  "targeted_unit_tests": {
+    "tracking": 8,
+    "followup": 7,
+    "operation": 6,
+    "fuentes": 7
+  },
+  "verify_release": "PASS",
+  "production_operations": 0
+}

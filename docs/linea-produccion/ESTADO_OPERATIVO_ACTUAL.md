@@ -6,7 +6,18 @@ HEAD revisado f5498a6, CI6/6 PASS; árbol de main idéntico. Main #190 incorpora
 con calendario Colombia/saldos futuros y ambos estilos preservados. Este registro
 posterior a la fusión se conserva en la rama de continuidad del mismo PR; no cambia
 el runtime de main ni sustituye el artefacto aprobado.
-**FASE ACTIVA:** validación posterior de la publicación LP, sin redespliegue/recuperación.
+**Entrega actual:** corrección consultiva de Seguimiento B08–B11, preparada sobre
+35bb6ad en esta misma rama; el commit que contiene este bloque es su referencia
+versionada. **IMPLEMENTADO EN RAMA / VERIFICADO EN AISLAMIENTO**, sin publicar.
+**FASE ACTIVA:** Seguimiento Ensamble/Empaque conforme a originales disponibles.
+Tabla PC/tarjetas móviles, dos saldos Export, SALE/avance independientes, abiertas
+por semana original, chips y panel consultivo con retorno conservado.
+[Comparación y límites](SEGUIMIENTO_B08_B11_REVISION.md) ·
+[28 pruebas y cuatro recorridos PC/móvil, SQL real con datos sintéticos](../../tests/lp01-tracking/README.md).
+CI del nuevo commit pendiente al preparar la entrega; no se hereda el verde previo.
+Operación, Programación, Power BI y SQL sin cambios funcionales. Faltan PDF maestro
+completo/chat19, envío de verificación acreditado y cobertura global de abiertas
+fuera de las asignaciones del turno. No inventar esas fuentes ni disponibilidad.
 No retomar apertura automática, PDT/Export ni módulos aplazados.
 
 - **APLICADO/VERIFICADO Supabase:** ACL00 y SQL01/06/08/10. SQL10 versión20261104033408,
@@ -44,24 +55,19 @@ No retomar apertura automática, PDT/Export ni módulos aplazados.
 - **VERIFICADO Supabase por SELECT15:03UTC:** escrituras/BI/perfil=true, XLSXv1;
   RLS privado activo, catálogos sin permisos directos anon/authenticated, sin09.
   No consultas de cuentas/sesiones ni DML durante este diagnóstico.
-- **PENDIENTE inventario/bytes:** aún no se dispone del listado API real completo
-  ni del diff exacto frente al ZIP original. No se declara ausencia de riesgo ni
-  se inventan rutas faltantes/adicionales. Inspector de lectura preparado en rama:
-  pins exactos, ZIP original, comparación de rutas API y bytes públicos, recuperación
-  retenida solo por GET y comprobaciones negativas independientes de Supabase.
-  Seis pruebas nuevas offline y política/YAML PASS; no certifican el live.
+- **VERIFICADO inventario/bytes:** inspección41856841540 recuperada en35bb6ad:
+ 89/89 archivos esperados byte-idénticos, sin faltantes; solo dos rutas reservadas
+ Firebase adicionales. Conservar1a59beda3dffaed9, sin publish/recover.
 
-**Intervención indispensable:** el conector no ofrece workflow_dispatch y la red
-local sigue restringida. Iniciar **inspect**, rama feat/lp01-seguimiento-operacion,
-con los [campos exactos de inspección](INSPECCION_LP183_OPERADOR.md); usa la misma
-cuenta configurada solo en el job protegido, sin nuevas credenciales. Publish y
-recover quedan omitidos. No relanzar el run de publicación fallido.
-**Siguiente acción técnica:** leer lp-live-inspection.json del run; identificar
-rutas faltantes/adicionales y hashes diferentes. Corregir el comparador solo ante
-evidencia del defecto y ejecutar sus regresiones focalizadas. Conservar1a59beda3dffaed9
-salvo riesgo demostrado. PC/móvil con datos reales/guardados continúa pendiente
-de sesión propia de un responsable autorizado; no fabricar usuarios o registros.
-[Plan vigente y límites](PUBLICACION_CONTROLADA_2026_11_03.md).
+**Bloqueo delimitado:** falta SGP_DISENO_MAESTRO(1).pdf/chat19 para contraste
+completo; se solicitaron y solo se implementaron elementos observables B08–B11
+de la guía original/DOCX. Solicitar verificación a Mecanizado permanece deshabilitado
+por falta de contrato de envío. Consulta del turno no acredita un censo global.
+**Siguiente acción técnica:** revisar las capturas B08–B11 y contrastar el PDF al
+recibirlo; después, obtener aprobación de la corrección antes de cualquier
+integración/publicación. Aceptación autenticada PC/móvil y guardados de personas
+reales siguen pendientes. No crear usuarios ni registros para simularla.
+[Plan de publicación y límites](PUBLICACION_CONTROLADA_2026_11_03.md).
 
 Esta es la **referencia operativa única de LP**. Describe el estado vigente, no un
 historial. Antes de trabajar leer AGENTS.md, este archivo y el estado real del PR;
@@ -76,10 +82,10 @@ segundo plano. No sustituye la supervisión ni concede autorizaciones productiva
 
 | Estado | Significado y situación actual de LP |
 |---|---|
-| PROPUESTO | Diagnóstico de inventario/bytes preparado; no redespliegue.04/05/07/08R y diseño A no aplicados.09 excluido |
+| PROPUESTO | Corrección Seguimiento preparada; no redespliegue.04/05/07/08R y diseño A no aplicados.09 excluido |
 | IMPLEMENTADO | Seguimiento/Operación, adaptador XLSX y controles en rama. Identidad técnica solo como referencia sintética, no integrada en el runtime |
 | APLICADO | Supabase: ACL00 y SQL01/06/08/10; escrituras/BI/perfil=true por activación autorizada14:13UTC. Sin09 ni asignaciones humanas nuevas |
-| PUBLICADO | Hosting1a59beda3dffaed9 y Edgev1/JWT=true; backend LP habilitado. Comparación de inventario fallida pendiente de diagnóstico, no certificación funcional productiva |
+| PUBLICADO | Hosting1a59beda3dffaed9 y Edgev1/JWT=true; backend LP habilitado. Inventario89/89 SGP byte-idéntico; no certificación funcional autenticada productiva |
 | VERIFICADO | CI6/6 baseeffb6a0; verificaciones focalizadas de alternativa local y PG/PC/móvil sintéticos. Supabase real: ocho cuerpos10, ACL/roles/constraint/contención por SELECT. Gateway JWT/SGP: diez denegaciones HTTPS reales PASS. **No guardados productivos o verificación en planta** |
 | FUSIONADO | #183 fusionado en ab1d2d6; publicado por run41850541193. Diagnóstico posterior solo en rama de continuidad, sin nuevo deploy |
 
