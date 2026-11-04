@@ -858,9 +858,8 @@ async function loadGlassEfficiencyWeeks(client,token,request,previous='all'){
   if(request!==locationReportRequest)return;
   const indexed=indexGlassProductionWeeks(weekly);
   const missing=[...new Set(glassEfficiencyRows.map(r=>String(r.key_produccion)))].filter(k=>!indexed.has(k));
-  if(missing.length)throw new Error(missing.length+' órdenes sin correspondencia semanal');
   const options=weeksWithGlass(glassEfficiencyRows,indexed);
-  if(!options.length)throw new Error('No existen semanas identificadas para estas órdenes');
+  if(!options.length)throw new Error('No existen semanas identificadas para estas órdenes'+(missing.length?' ('+missing.length+' órdenes sin correspondencia semanal)':''));
   glassWeekByProduction=indexed;
   picker.innerHTML='<option value="all">Todas las semanas</option>'+options.map(value=>{
    const [y,w]=value.split('-');
@@ -868,7 +867,7 @@ async function loadGlassEfficiencyWeeks(client,token,request,previous='all'){
   }).join('');
   picker.value=options.includes(previous)?previous:'all';
   picker.disabled=false;
-  status.textContent=options.length+' semanas disponibles';
+  status.textContent=options.length+' semanas disponibles'+(missing.length?'. Aviso: '+missing.length+' órdenes sin correspondencia semanal; se incluyen en «Todas las semanas» y se excluyen al seleccionar una semana.':'');
   renderGlassEfficiency();
   if(!document.querySelector('#glassExplorerModal')?.hidden)renderGlassExplorer();
  }catch(e){
