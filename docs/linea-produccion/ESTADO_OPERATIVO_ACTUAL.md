@@ -1,5 +1,23 @@
 # Línea de Producción — estado operativo actual
 
+## PR191 · corrección acotada del postcheck antes de publicar
+
+CI de `2c4ca32701fd9ffce888f4d370b1794a44aa5218` completa PASS, incluidos SQL/API
+y PC/móvil. El intento prematuro de quitar borrador fue rechazado mientras UI
+estaba en curso; no modificó el PR. Se conserva ese requisito hasta CI completa.
+
+El log real del job126667876705/run41856841540 explica el postcheck anterior:
+89 rutas esperadas,91 observadas, ninguna faltante y exactamente
+`__/firebase/init.js` y `__/firebase/init.json` adicionales. El postcheck ahora
+exige inventario exacto de aplicación más esas rutas SOLO si ya existían en la
+versión acreditada y conservan hash/estado idénticos. No ignora el prefijo __/:
+cualquier otra ruta, faltante, duplicado o alteración aborta. Mantiene comprobación
+de retención/configuración anterior y añade comparación HTTPS byte a byte de todo
+el artefacto publicado, incluido manifest/release-info. Seis regresiones offline
+PASS y política PASS; se ejecutan antes del gate. No cambia frontend ni SQL.
+Siguiente: CI del nuevo commit y publicación con pins exactos; no fusionar el
+encargo separado de vidrio durante esta ventana.
+
 ## PR191 · SQL instalado y permiso acotado verificado · 04/11/2026 21:15 UTC
 
 Tras confirmación explícita del usuario para crear dos funciones y modificar dos,

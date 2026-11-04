@@ -1,3 +1,14 @@
+## PR191 · postcheck de Hosting corregido bajo controles · 04/11/2026
+
+CI2c4ca32 completa PASS. Evidencia real41856841540 identifica únicamente dos
+rutas Firebase adicionales. Postcheck conserva inventario exacto y solo acredita
+esas dos si su hash/estado coincide con la versión anterior; rechaza cualquier
+otro cambio. Añade comprobación HTTPS de todos los bytes del artefacto y mantiene
+retención/configuración del rollback. Seis regresiones y política local PASS.
+SQL/permiso ya aplicados y verificados; frontend sin nuevos cambios. Esperar CI
+del commit de postcheck, fusionar bajo HOLD y publicar artefacto exacto. Vidrio192
+se mantiene separado y pendiente de esta publicación.
+
 ## PR191 · instalado, permiso verificado, publicación pendiente · 04/11/2026
 
 Confirmación explícita nueva de Johan; ausencia de ejecución previa y preflight
