@@ -90,3 +90,18 @@ La configuración de Hosting queda acreditada, no la nueva funcionalidad LP.
 PDT y Export conservan sus límites de origen; no se infiere liberación o inclusión.
 Apertura automática sigue inactiva. Ninguna bandera local da por cumplida una etapa.
 Estado de ejecución y evidencias CI se consolidan en ESTADO_OPERATIVO_ACTUAL.md.
+
+## Diferencia detectada por CI
+
+Run41748574445: hardening PASS, después compatibility.py abortó con
+`fatal: invalid object name 'b4cf8c8'`. El checkout del job era shallow; el
+contrato de la prueba requiere ese antecedente real. Se añade fetch-depth=0 y
+persist-credentials=false solo a LP01. No se elimina ni se simula la comparación.
+CI anterior no acredita el HEAD corregido. No se instaló SQL durante ese fallo.
+
+El runtime XLSX toma los dos orígenes HTTPS exactos de Firebase LAB por defecto;
+override explícito válido opcional. CORS no admite comodines, credenciales URL,
+paths o HTTP. Pruebas nuevas ejercitan la configuración y el handler HTTP real
+para OPTIONS/origen ajeno, sin RPC ni guardados simulados. Autenticación propia
+SGP permanece en handler y SQL; verify_jwt=false ya era el contrato propuesto,
+no desactiva RLS ni reemplaza sesión por un claim del navegador.

@@ -11,7 +11,12 @@ protegidos de publicación. Perfil sigue contenido hasta completar controles.
 **Hosting:** inspect existente reejecutado solo GET; misma versión0312f467cf0e9c29
 FINALIZED y79 archivos, inventario/config idénticos. Recuperación retenida acreditada.
 [Plan de ejecución y límites](PUBLICACION_CONTROLADA_2026_11_03.md).
-**Pendiente inmediato:** CI del HEAD sincronizado antes de cambios productivos;
+**HEAD sincronizado verificado:**00c8b15; posteriorbb04f1f prepara los orígenes HTTPS
+exactos del servicio XLSX sin secretos nuevos ni cambios al adaptador. PR mergeable.
+**CI:**41748574445 falló únicamente al consultar el commit histórico b4cf8c8 en
+checkout shallow; hardening pasó. Se corrige fetch-depth=0 del job, sin omitir la
+comparación. Los demás checks terminados y la preparación sin publicación pasaron.
+**Pendiente inmediato:** CI del HEAD corregido antes de cambios productivos;
 registrar explícitamente cada instalación/activación/publicación. No atribuir al
 backend real una escritura probada solo sintéticamente. PDT/Export siguen limitados
 por su evidencia de origen y apertura automática inactiva.
