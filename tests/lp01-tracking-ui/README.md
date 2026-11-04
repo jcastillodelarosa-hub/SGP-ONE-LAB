@@ -45,3 +45,22 @@ política offline PASS y 7 postchecks PASS. La simulación pura de gate devuelve
 HOLD / LP_ASSETS_NOT_APPROVED porque cambió `src/modules/lp01-operation.js`.
 No se renuevan pins ni se publica. La versión Firebase de vidrio comunicada por
 el hilo principal no se verificó independientemente desde este entorno.
+
+## Aclaración resuelta: ambos bloques superiores
+
+Confirmación «Los 2». Se retiran de Seguimiento el bloque «Seguimiento de órdenes»
+(Línea, Buscar, Actualizar) y los accesos «Operación del turno»/«Cierres del turno».
+Los controles compartidos y accesos siguen disponibles en Ensamble/Empaque;
+la línea de Seguimiento es la del contexto seleccionado allí. No se eliminan
+funciones, datos ni se afectan roles. El buscador oculto deja de filtrar Seguimiento.
+
+Prueba ampliada con `production-line-tabs.js` real: ambos grupos invisibles en
+Seguimiento, visibles en Ensamble/Empaque, acceso a reportes y regreso conservados;
+PC y móvil PASS. Se mantienen ciclos de refresco, filtros, foco y permisos previos.
+469 JS PASS y release PASS. Simulación de publicación HOLD por dos archivos:
+`production-line-tabs.js` y `src/modules/lp01-operation.js`.
+
+Para aprobar el paquete: revisar capturas y cambios locales; después autorizar
+preparación del PR/CI sin despliegue. Antes de publicar, revisar artefacto exacto,
+huellas, versión viva/recuperación vigentes y controles existentes. No usar los
+pins anteriores de vidrio para este nuevo contenido. Ninguno se modificó aquí.

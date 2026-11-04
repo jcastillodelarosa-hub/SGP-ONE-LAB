@@ -24,6 +24,10 @@ export function mountOperation({tracking,operation,bridge,legacyLoad}){
  const writable=()=>writeCompatible()&&data?.writes&&(!data.operations||data.operations.includes('EJECUTAR'))&&data?.role!=='CONSULTA'&&data?.turn.estado!=='CERRADO'&&(data?.turn.estado!=='EN_REVISION'||coordinator());
  async function rpc(name,args){const token=bridge.getToken();if(!token)throw Error('Inicia sesión para consultar');const client=await bridge.getClient();const r=await client.rpc(name,{p_token:token,...args});if(r.error)throw r.error;return r.data;}
  function globalControls(global){
+  // The shared controls remain available in Ensamble/Empaque, outside Seguimiento.
+  tracking.querySelector('.lp-followup-heading').hidden=global;
+  tracking.querySelector('.lp-followup-filters').hidden=global;
+  get('[data-op-load]').hidden=global;
   for(const sel of ['[data-op-date]','[data-op-shift]','[data-op-stage]'])get(sel).closest('label').hidden=global;
   get('[data-op-load]').textContent=global?'Actualizar Seguimiento':'Consultar turno';
   get('[data-tracking-stages]').hidden=!global;
@@ -53,7 +57,7 @@ export function mountOperation({tracking,operation,bridge,legacyLoad}){
   for(const sel of ['[data-week]','[data-day]','[data-shift]','[data-progress]','[data-sort]'])tracking.querySelector(sel).closest('label').hidden=true;
   for(const sel of ['[data-status]','[data-list]','[data-summary]'])tracking.querySelector(sel).hidden=true;
   get('[data-tracking-stages]').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.trackingStage===globalContext.stage)));
-  renderTracking({host:live,data:globalData,context:globalContext,state:trackingViewState,search:tracking.querySelector('[data-search]')?.value||'',canReviewSale:true,
+  renderTracking({host:live,data:globalData,context:globalContext,state:trackingViewState,search:'',canReviewSale:true,
    onOperate:async(id,focusSale,target)=>{
     if(!target||!globalData.orders.some(r=>trackingIdentity(r)===id&&r.operationTargets.some(t=>t.selectionId===target.selectionId)))return;
     get('[data-op-stage]').value=target.etapa;get('[data-op-date]').value=target.fecha;get('[data-op-shift]').value=String(target.turno);

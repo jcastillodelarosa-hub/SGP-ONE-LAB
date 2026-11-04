@@ -1,3 +1,21 @@
+## Seguimiento · ambos bloques retirados según confirmación · 04/11/2026
+
+Johan confirmó «Los 2»: retirar de Seguimiento el bloque «Seguimiento de órdenes»
+con Línea/Buscar/Actualizar y los accesos «Operación del turno»/«Cierres del turno».
+IMPLEMENTADO EN RAMA LOCAL, sobre main `9e4a8ec`; no se eliminan datos ni funciones.
+Se ocultan únicamente en Seguimiento: los controles compartidos reaparecen en
+Ensamble/Empaque y sus accesos a operación/cierres siguen funcionando. Seguimiento
+conserva etapas, filtros de tabla, detalle y actualización silenciosa. No hereda
+una búsqueda invisible escrita en Operación. La línea continúa siendo la del
+contexto seleccionado en Ensamble/Empaque, visible en el encabezado de la tabla.
+469 pruebas PASS, release PASS, Chromium 1440/390 PASS con navegación real y
+transporte sintético local (no aceptación productiva). Capturas actualizadas en
+`tests/lp01-tracking-ui/evidence/`. Aclaración del bloque superior RESUELTA.
+Gate local HOLD / LP_ASSETS_NOT_APPROVED para `production-line-tabs.js` y
+`src/modules/lp01-operation.js`. Sin cambios de política/workflows, push, PR,
+fusión a main, SQL ni despliegue. Siguiente: aprobar visualmente el paquete local;
+luego revisión de CI/artefacto/pins/baseline vigentes antes de autorizar publicación.
+
 ## Seguimiento · compatible con main #192 · 04/11/2026
 
 Integración LOCAL de main `9e4a8ecb90664d7296d1e77e241c4a9204d7ff50` en

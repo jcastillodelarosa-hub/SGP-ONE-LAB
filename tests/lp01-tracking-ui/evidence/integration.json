@@ -27,12 +27,15 @@
     "route": "hold",
     "reason": "LP_ASSETS_NOT_APPROVED",
     "paths": [
+      "production-line-tabs.js",
       "src/modules/lp01-operation.js"
     ]
   },
   "pending": [
-    "clarify upper block removal",
-    "review integration",
-    "publication pins and artifact review outside current scope"
-  ]
+    "review final local package",
+    "PR/CI preparation when authorized",
+    "publication pins and exact artifact review outside current scope"
+  ],
+  "upper_blocks": "Both removed from Seguimiento only; explicit user clarification",
+  "navigation": "Real production-line-tabs.js, synthetic transport, PC/mobile PASS"
 }

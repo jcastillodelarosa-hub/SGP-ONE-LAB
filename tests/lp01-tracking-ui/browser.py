@@ -14,6 +14,13 @@ with sync_playwright() as p:
   page=browser.new_page(viewport={'width':width,'height':900});errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
   page.route('**/*',lambda r:r.continue_() if r.request.url.startswith(origin) else r.abort())
   page.clock.install();page.goto(origin+'/tests/lp01-tracking-ui/fixture.html');page.wait_for_selector('.lp-tracking-table')
+  assert page.locator('#tracking .lp-followup-heading').is_hidden()
+  assert page.locator('#tracking .lp-followup-filters').is_hidden()
+  assert page.locator('[data-op-load]').is_hidden()
+  assert page.locator('[data-turn-operation]').is_hidden()
+  assert page.locator('[data-stage-reports]').is_hidden()
+  page.evaluate("document.querySelector('[data-search]').value='unmatched old operation search'")
+  page.evaluate('controller.load()');assert page.locator('tbody tr').count()==30
   assert page.locator('thead th').all_text_contents()[:2]==['Semana ▾','Producción / asignación ▾']
   if width<700:assert page.locator('.lp-tracking-mobile-week').first.is_visible()
   page.evaluate("window.node=document.querySelector('.lp-tracking-table');window.observer=new MutationObserver(()=>window.mutations++);window.mutations=0;observer.observe(document.querySelector('[data-live-orders]'),{childList:true,subtree:true})")
@@ -47,10 +54,24 @@ with sync_playwright() as p:
   page.evaluate('window.delay=false;window.release()');page.wait_for_function('window.inflight===0')
   assert page.locator('tbody tr').count()==0
   page.evaluate('controller.load()');assert page.locator('tbody tr').count()==0
-  page.evaluate("document.dispatchEvent(new CustomEvent('sgp:lp-role',{detail:'COORDINADOR'}));void controller.load()");page.wait_for_selector('tbody tr')
+  page.evaluate("document.dispatchEvent(new CustomEvent('sgp:lp-role',{detail:'COORDINADOR'}));document.querySelector('#productionTrackingTab').click()");page.wait_for_selector('tbody tr')
   page.evaluate('window.fail=true;void controller.load({quiet:true})');page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('QA permiso revocado')")
   assert page.locator('tbody tr').count()==0
+  page.evaluate('window.fail=false')
+  page.locator('#productionAssemblyTab').click()
+  assert page.locator('#tracking .lp-followup-heading').is_visible()
+  assert page.locator('[data-line]').is_visible()
+  assert page.locator('[data-search]').is_visible()
+  assert page.locator('[data-op-load]').is_visible()
+  assert page.locator('[data-turn-operation]').is_visible()
+  assert page.locator('[data-stage-reports]').is_visible()
+  page.locator('[data-stage-reports]').click();assert page.locator('#productionReportsPanel').is_visible()
+  page.locator('#productionPackingTab').click();assert page.locator('[data-stage-reports]').is_visible()
+  page.locator('#productionTrackingTab').click();page.wait_for_selector('tbody tr')
+  assert page.locator('tbody tr').count()==30
+  assert page.locator('[data-stage-reports]').is_hidden()
+  assert page.locator('[data-turn-operation]').is_hidden()
   assert not errors,errors
-  results.append({'width':width,'unchanged_20s_cycles':3,'filters_sort_focus_panel':True,'no_overlap':True,'scope_session_role_clear':True,'external_requests':0});page.close()
+  results.append({'width':width,'unchanged_20s_cycles':3,'filters_sort_focus_panel':True,'no_overlap':True,'scope_session_role_clear':True,'external_requests':0,'approved_header_removed_in_tracking':True,'operation_and_closure_navigation_preserved':True});page.close()
  browser.close()
 server.shutdown();(OUT/'browser.json').write_text(json.dumps(results,indent=2)+'\n');print(json.dumps(results))
