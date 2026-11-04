@@ -1,9 +1,11 @@
 # Línea de Producción — estado operativo actual
 
 **Actualizado:** 2026-11-04, UTC/America/Bogota. PR183, rama existente.
-**Código de referencia verificado:**6edf892; main4ef528b (#190) incorporado
-conservando LP, ambos bloques styles.css, calendario Colombia y saldos futuros.
-Fusión local limpia; GitHub indicó no fusionable temporalmente durante su cálculo.
+**Runtime fusionado:**ab1d2d65828d029ee8d6e88369b5bc5bd1113e92; PR183 FUSIONADO.
+HEAD revisado f5498a6, CI6/6 PASS; árbol de main idéntico. Main #190 incorporado
+con calendario Colombia/saldos futuros y ambos estilos preservados. Este registro
+posterior a la fusión se conserva en la rama de continuidad del mismo PR; no cambia
+el runtime de main ni sustituye el artefacto aprobado.
 **FASE ACTIVA:** publicación segura de Seguimiento, Ensamble y Empaque PANELES_2.
 No retomar apertura automática, PDT/Export ni módulos aplazados.
 
@@ -28,15 +30,14 @@ No retomar apertura automática, PDT/Export ni módulos aplazados.
   [Recibo real](../../tests/lp01-roles/evidence/activation-production.json).
   [Cuatro grupos nuevos PG17.11 sintéticos PASS](../../tests/lp01-roles/evidence/activation.json):
   atomicidad, ACL/formato, contención concurrente, reintentos y recuperación.
-- **CI:**6edf892 seis checks PASS, incluida activación y SQL/PC-móvil.447c5db
-  incorpora main #190, cinco checks PASS y aceptación SQL/PC-móvil en curso.
-  Documentación posterior no hereda automáticamente CI; se consultan sus propios checks.
-  Menú nativo, supervisor limitado a su etapa, líder ambas, XLSX/cierres conservan las
-  evidencias aprobadas. No repetir manualmente baterías no afectadas.
-- **HOSTING NO PUBLICADO / PR NO FUSIONADO:** política runtime preparada/huellas exactas;
-  adopción en main HOLD sin despliegue automático. Livec698e0b8a4356985 FINALIZED,
-  79 archivos, acreditado04/11 14:10UTC tras publicación habitual de #190. Baseline
-  y rollback actualizados a esa versión; no asumir que el live anterior sigue vigente.
+- **CI:**f5498a6 seis checks PASS, incluidos SQL, activación y persistencia PC/móvil
+  sintéticos. Main ab1d2d6 tres workflows PASS. Prepare41847862007 selló el paquete
+  runtime y repitió las diez denegaciones HTTPS con backend activo. Gate HOLD;
+  ordinary/controlled omitidos: no se desplegó por fusionar.
+  [Recibo CI/paquete](../../tests/lp01-roles/evidence/publication-prepared.json).
+- **HOSTING LP NO PUBLICADO:** paquete final de main preparado. Live acreditado
+  c698e0b8a4356985 FINALIZED/79 archivos (04/11 14:10UTC, incluye #190), destino
+  de recuperación conservado. Publish vuelve a comprobar esa referencia.
   [Recibo recuperación](../../tests/lp01-roles/evidence/hosting-main190-production.json).
 
 **Bloqueo operativo restante:** el conector no ofrece workflow_dispatch; al sellar
@@ -44,10 +45,12 @@ el SHA final hace falta que un operador inicie el workflow protegido con paráme
 exactos. La red local sigue restringida; no se cambia/proxifica para sortearla.
 No hay sesión SGP humana disponible para acreditar guardados reales/PC-móvil en planta.
 No se confunden pruebas sintéticas o denegaciones HTTPS con esa aceptación.
-**Siguiente acción:** concluir CI del candidato sincronizado; fusionar bajo
-controles y entregar SHA/run/digest exactos
-al operador para publish en el mismo Firebase. Después verificar versión e interacción
-real. [Plan y recuperación](PUBLICACION_CONTROLADA_2026_11_03.md).
+**Siguiente acción exacta:** operador inicia firebase-hosting.yml/main con operation=publish,
+source_sha=ab1d2d65828d029ee8d6e88369b5bc5bd1113e92, run41847862007 y ZIP
+c2a6f642da570c23efcded254b42e01414631ed59278e3270a71b9e3c1e41adc.
+[Pasos y campos listos](PUBLICACION_LP183_OPERADOR.md). Luego verificar run/version
+Hosting y realizar aceptación real PC/móvil con sesión autorizada. Sin datos QA
+en producción ni falsas confirmaciones. [Plan y recuperación](PUBLICACION_CONTROLADA_2026_11_03.md).
 
 Esta es la **referencia operativa única de LP**. Describe el estado vigente, no un
 historial. Antes de trabajar leer AGENTS.md, este archivo y el estado real del PR;
@@ -67,7 +70,7 @@ segundo plano. No sustituye la supervisión ni concede autorizaciones productiva
 | APLICADO | Supabase: ACL00 y SQL01/06/08/10; escrituras/BI/perfil=true por activación autorizada14:13UTC. Sin09 ni asignaciones humanas nuevas |
 | PUBLICADO | Edge lp-powerbi v1 ACTIVE/JWT=true, fuente verificada. **Frontend no publicado** en Firebase ni worker automático; backend LP autorizado habilitado |
 | VERIFICADO | CI6/6 baseeffb6a0; verificaciones focalizadas de alternativa local y PG/PC/móvil sintéticos. Supabase real: ocho cuerpos10, ACL/roles/constraint/contención por SELECT. Gateway JWT/SGP: diez denegaciones HTTPS reales PASS. **No guardados productivos o verificación en planta** |
-| FUSIONADO | #183 sigue sin fusionar. La existencia de otro PR fusionado no prueba aplicación/publicación de sus SQL |
+| FUSIONADO | #183 fusionado en ab1d2d6; no implica publicación Hosting. SQL/Edge/activación tienen sus recibos independientes |
 
 ## 2. Fase activa y prioridades obligatorias
 

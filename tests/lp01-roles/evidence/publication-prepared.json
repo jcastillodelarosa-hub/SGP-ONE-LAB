@@ -1,0 +1,77 @@
+{
+  "status": "PREPARED_AWAITING_OPERATOR_DISPATCH",
+  "runtime_commit": "ab1d2d65828d029ee8d6e88369b5bc5bd1113e92",
+  "runtime_tree": "bd6155a520e045770b25d1d20e38c34da222346d",
+  "reviewed_head": "f5498a655d7ffdb123b92a62c0883ef7564925ed",
+  "pr": 183,
+  "merged": true,
+  "reviewed_ci": [
+    {
+      "id": 41845913223,
+      "name": "SGP ONE Tests",
+      "event": "pull_request",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 41845913276,
+      "name": "Deploy SGP ONE to Firebase Hosting",
+      "event": "pull_request",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 41845913220,
+      "name": "JavaScript syntax check",
+      "event": "pull_request",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 41845913158,
+      "name": "LP01 restricted principal - isolated design",
+      "event": "pull_request",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 41845913228,
+      "name": "LP01 followup - isolated UI acceptance",
+      "event": "pull_request",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 41845898616,
+      "name": "Deploy SGP ONE to Firebase Hosting",
+      "event": "push",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ],
+  "prepare": {
+    "run_id": 41847862007,
+    "job_id": 126636204299,
+    "artifact_id": 13330859980,
+    "artifact_name": "lp-visual-ab1d2d65828d029ee8d6e88369b5bc5bd1113e92",
+    "runtime_zip_sha256": "c2a6f642da570c23efcded254b42e01414631ed59278e3270a71b9e3c1e41adc",
+    "github_outer_archive_sha256": "0c1ee5c66026942e9c3d4d04589a0754b65a9653187f0f94b23901bdb97b7552",
+    "expired": false
+  },
+  "gate": {
+    "route": "hold",
+    "reason": "FIRST_POLICY_ADOPTION_PR183_NO_DEPLOY",
+    "ordinary": "skipped",
+    "controlled": "skipped"
+  },
+  "backend_public_negative_checks": "PASS after activation, including main prepare",
+  "expected_live_version": "sites/sgp-one-lab/versions/c698e0b8a4356985",
+  "rollback_version": "sites/sgp-one-lab/versions/c698e0b8a4356985",
+  "frontend_published": false,
+  "productive_saves_verified": false,
+  "limits": [
+    "No workflow_dispatch tool or configured CLI identity; operator must start existing protected workflow",
+    "Runtime source tree equals fully tested PR head; publication does not imply real-user acceptance",
+    "No productive user/session, order, progress or closure created by verification"
+  ]
+}

@@ -1,3 +1,15 @@
+## LP · PR183 fusionado, publicación pendiente del operador · 04/11/2026
+
+Runtime mainab1d2d6, árbol idéntico al HEAD f5498a6 CI6/6 PASS. SQL10, EdgeJWT=true
+y configuración activa acreditados; sin datos de negocio creados. Main #190
+preservado. Prepare41847862007 PASS; gate HOLD y ambas rutas de despliegue omitidas.
+Paquete final sellado, baseline/rollbackc698e0b8a4356985 y campos de dispatch listos.
+El conector no tiene workflow_dispatch: intervención exacta del operador en
+[PUBLICACION_LP183_OPERADOR.md](docs/linea-produccion/PUBLICACION_LP183_OPERADOR.md).
+Frontend aún NO PUBLICADO; guardados/datos reales PC-móvil pendientes de aceptación
+con sesión autorizada. [Estado vigente](docs/linea-produccion/ESTADO_OPERATIVO_ACTUAL.md).
+Registro posterior a la fusión en la misma rama; no modifica runtime de main.
+
 ## LP · backend activado y main #190 preservado · 04/11/2026
 
 SQL10/Edge JWT=true acreditados; diez denegaciones HTTPS reales PASS. CI6edf892
