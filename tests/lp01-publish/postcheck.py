@@ -1,10 +1,16 @@
 """Offline regressions: platform paths are verified, not broadly ignored."""
 from pathlib import Path
-import importlib.util,unittest,tempfile,json
+import importlib.util,unittest,tempfile,json,gzip
 spec=importlib.util.spec_from_file_location('postcheck',Path(__file__).resolve().parents[2]/'scripts/lp-hosting-postcheck.py')
 m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
 def f(path,h='same'):return {'path':'/'+path,'hash':h,'status':'ACTIVE'}
 class Postcheck(unittest.TestCase):
+ def test_transport_encoding_preserves_byte_verification(self):
+  for body in [b'ok',b'current source'*100]:
+   self.assertEqual(m.decode_public_body(gzip.compress(body),'gzip',len(body)),body)
+   self.assertEqual(m.decode_public_body(body,'identity',len(body)),body)
+  self.assertEqual(len(m.decode_public_body(gzip.compress(b'x'*100000),'gzip',5)),6)
+  with self.assertRaisesRegex(ValueError,'PUBLIC_ENCODING_NOT_VERIFIED'):m.decode_public_body(b'unknown','br',10)
  def setUp(self):
   self.platform=[f(p) for p in sorted(m.PLATFORM_FILES)]
   self.expected={'index.html':'local-hash'}
