@@ -1,0 +1,14 @@
+{
+  "project": "sgp-one-lab",
+  "site": "sgp-one-lab",
+  "channel": "sites/sgp-one-lab/channels/live",
+  "release": "sites/sgp-one-lab/channels/live/releases/1793801219172000",
+  "version": "sites/sgp-one-lab/versions/c698e0b8a4356985",
+  "version_status": "FINALIZED",
+  "observed_at": "2026-11-04T14:10:56.894568+00:00",
+  "files": 79,
+  "inventory_sha256": "3d5cb1fc9c05187df3e0bc97c645466f07da32a0babf0ba80a4381e6d2048cc8",
+  "config_sha256": "333c0f207246ae4f4cdb3d696b1dc30503b7368c1d0818618ebeaa8f8dcaedfe",
+  "workflow_run": 41707119884,
+  "job_id": 126625957267
+}

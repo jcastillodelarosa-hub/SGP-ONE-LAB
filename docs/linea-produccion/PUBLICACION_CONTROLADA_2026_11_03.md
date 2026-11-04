@@ -293,3 +293,15 @@ zip_sha256, expected_live_version y release_reason. No usar rerun de inspect com
 publicación ni extraer secretos. Tras publish: comprobar release/version/inventario
 y PC/móvil con sesión SGP real. No solicitar contraseñas ni fabricar sesiones en
 producción. La evidencia sintética previa conserva explícitamente ese límite.
+
+## Actualización necesaria por main #190
+
+Main avanzó a4ef528b durante la preparación. Fusión local limpia: se preservan
+calendario ISO Colombia y saldos futuros, roles/bootstrap LP y ambos estilos.
+Funciones de portada iguales byte a byte a main, sintaxis y regresiones directas
+de integración PASS; la CI del nuevo merge se comprueba por separado.
+Hosting GET04/11 14:10UTC confirma livec698e0b8a4356985 FINALIZED/79 archivos,
+release1793801219172000; el inventario cambió y la configuración permanece idéntica.
+Política baseline/rollback pasa a esta versión retenida, evitando deshacer #190
+al recuperar. Las referencias anteriores0312f467cf0e9c29 son antecedentes acreditados.
+[Recibo actual](../../tests/lp01-roles/evidence/hosting-main190-production.json).

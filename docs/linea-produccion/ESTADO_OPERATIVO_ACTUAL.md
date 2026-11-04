@@ -1,8 +1,9 @@
 # Línea de Producción — estado operativo actual
 
 **Actualizado:** 2026-11-04, UTC/America/Bogota. PR183, rama existente.
-**Código de referencia verificado:**89c7698; main4b1e98e incorporado conservando
-ambos bloques styles.css. Frontend sin cambios desde la alternativa8f85586.
+**Código de referencia verificado:**6edf892; main4ef528b (#190) incorporado
+conservando LP, ambos bloques styles.css, calendario Colombia y saldos futuros.
+Fusión local limpia; GitHub indicó no fusionable temporalmente durante su cálculo.
 **FASE ACTIVA:** publicación segura de Seguimiento, Ensamble y Empaque PANELES_2.
 No retomar apertura automática, PDT/Export ni módulos aplazados.
 
@@ -30,9 +31,10 @@ No retomar apertura automática, PDT/Export ni módulos aplazados.
   Menú nativo, supervisor limitado a su etapa, líder ambas, XLSX/cierres conservan las
   evidencias aprobadas. No repetir manualmente baterías no afectadas.
 - **HOSTING NO PUBLICADO / PR NO FUSIONADO:** política runtime preparada/huellas exactas;
-  adopción en main HOLD sin despliegue automático. Live0312f467cf0e9c29 FINALIZED,
-  79 archivos, misma configuración/inventario al refrescar04/11 13:45UTC por inspect GET.
-  [Recibo recuperación](../../tests/lp01-roles/evidence/hosting-refreshed-production.json).
+  adopción en main HOLD sin despliegue automático. Livec698e0b8a4356985 FINALIZED,
+  79 archivos, acreditado04/11 14:10UTC tras publicación habitual de #190. Baseline
+  y rollback actualizados a esa versión; no asumir que el live anterior sigue vigente.
+  [Recibo recuperación](../../tests/lp01-roles/evidence/hosting-main190-production.json).
 
 **Bloqueo operativo restante:** el conector no ofrece workflow_dispatch; al sellar
 el SHA final hace falta que un operador inicie el workflow protegido con parámetros
