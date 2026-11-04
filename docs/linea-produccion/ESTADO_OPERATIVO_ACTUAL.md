@@ -1,5 +1,35 @@
 # Línea de Producción — estado operativo actual
 
+## PR191 · publicación contenida · 04/11/2026 21:00–21:05 UTC
+
+CI del candidato `4b5080608dafc83e53c2b3d498a4c4a827162399`: sintaxis,
+tests y aceptación SQL/API/PC-móvil completos PASS. La red actual permite
+api.github.com; inspección Hosting [41911770281](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/actions/runs/41911770281)
+PASS: live `1a59beda3dffaed9`, FINALIZED, 91 archivos, inventario/configuración
+leídos mediante la API con la cuenta existente. Se acredita esta versión como
+baseline y recuperación; no se ejecutó una restauración de prueba.
+
+La política actualiza únicamente las dos huellas afectadas por Seguimiento,
+referencia PR191 y baseline/rollback acreditados. La transición permanece HOLD;
+`backend_contracts_verified=false` impide publicar mientras falte la instalación.
+No se cambia el gate ni sus rutas, permisos, workflows o alcance. Vidrio se trabaja
+por separado y no forma parte de este PR.
+
+Preflight Supabase de solo lectura 21:01:57 UTC: siete cuerpos existentes coinciden
+con los pins, nuevas funciones ausentes, RLS de las tablas implicadas habilitado.
+Respaldo privado fuera del repositorio, carpeta0700/archivo0600, SHA256
+`1a3ec26f1949c686218869b89b428216738cc331ecdaf5b34ae2785ec39af1ea`.
+INSTALL fue rechazado por revisión automática por falta de autorización explícita
+para esta instalación exacta (crear dos funciones y modificar dos existentes).
+No se aplicó SQL, EXECUTE, merge ni publicación. La aprobación previa del permiso
+API se conserva; no se amplía para superar el rechazo de instalación.
+
+**Siguiente paso:** obtener confirmación específica del INSTALL de hash
+`edeb19dd6ca27eaacf654f8126246437723f3e978314465d608eae8e5955e183`,
+refrescar preflight y ejecutar instalación/verificación antes del permiso separado.
+Después acreditar contratos, CI del SHA final, prepare/ZIP y publicación protegida.
+Los apartados siguientes conservan antecedentes y límites de aceptación humana.
+
 ## Candidato Seguimiento global — revisión en borrador
 
 Rama `feat/lp01-seguimiento-global-review`, base main `ab1d2d6`.

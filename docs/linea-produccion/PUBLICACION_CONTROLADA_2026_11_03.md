@@ -316,3 +316,23 @@ y ausencia09; órdenes/auditoría/cierres aún0. SQL/Edge no cambiaron al incorp
 [Recibo real](../../tests/lp01-roles/evidence/activation-production.json).
 No acredita guardados con usuarios reales. La recuperación de backend sigue siendo
 02 contención autorizada y corrección hacia adelante, conservando perfil e historial.
+
+## PR191: renovación de política sin levantar el bloqueo de instalación
+
+La inspección41911770281 del04/11 21:00:09 UTC leyó sitio/canal live, versión
+`sites/sgp-one-lab/versions/1a59beda3dffaed9` FINALIZED, configuración e inventario
+paginado91 archivos. [Recibo sanitizado](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/actions/runs/41911770281/artifacts/13361359998).
+Esa versión efectiva sustituye la referencia antigua c698e0b8a4356985 como baseline
+y recuperación exacta. Se acreditó retención/lectura, no una restauración ejecutada.
+El publicador releerá live y abortará ante cambio; el postcheck debe confirmar que
+la versión previa sigue retenida e idéntica. Un fallo tras deploy exige inspección
+antes de cualquier reintento, especialmente si indica inventario distinto.
+
+Las dos huellas actualizadas corresponden al runtime probado de4b50806; ningún
+archivo runtime cambia en esta preparación. El mecanismo sigue exigiendo SHA,
+run de prepare, ZIP SHA256 y expected_live_version exactos. La transición de
+política mantiene HOLD. backend_contracts_verified=false añade el bloqueo concreto
+de instalación pendiente, sin afirmar que las pruebas sintéticas sean producción.
+El respaldo SQL privado y preflight se completaron, pero INSTALL fue rechazado
+automáticamente por falta de autorización explícita para sus cuatro cambios de
+funciones. No reintentar con la aprobación previa del permiso API solamente.

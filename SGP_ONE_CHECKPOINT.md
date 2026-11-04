@@ -1,3 +1,16 @@
+## PR191 · instalación bloqueada, preparación Hosting · 04/11/2026
+
+Seguimiento global `4b50806`: CI completa PASS. Inspección de solo lectura
+Hosting41911770281 acredita live1a59beda3dffaed9 FINALIZED/91 archivos.
+Política preparada con dos huellas del candidato y baseline/rollback acreditados;
+transición HOLD y backend_contracts_verified=false hasta instalar/verificar SQL.
+Preflight y respaldo SQL privado completos; INSTALL rechazado automáticamente
+por autorización insuficiente para crear dos funciones y modificar dos existentes.
+No SQL/grant/merge/publish ejecutados. La autorización previa EXECUTE se mantiene.
+Siguiente: confirmación específica INSTALL, preflight renovado e instalación;
+después permiso, CI/artefacto final y publicación protegida. Vidrio separado.
+[Estado y hashes exactos](docs/linea-produccion/ESTADO_OPERATIVO_ACTUAL.md).
+
 ## LP · backend activado y main #190 preservado · 04/11/2026
 
 SQL10/Edge JWT=true acreditados; diez denegaciones HTTPS reales PASS. CI6edf892
