@@ -12,7 +12,7 @@
   ],
   "limits": [
     "Pure policy and synthetic metadata transport; no Firebase action executed",
-    "Future metadata API/service-account access and Hosting recovery still unverified",
-    "Current policy remains legacy and uncertified; no privileged account/secret read"
+    "Synthetic transport does not certify actual Hosting access/recovery",
+    "Fixtures explicitly cover unapproved legacy and certified visual/runtime states; no privileged account/secret read"
   ]
 }

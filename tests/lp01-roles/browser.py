@@ -33,7 +33,13 @@ try:
     def page_for(token):
      page=browser.new_page(viewport={'width':width,'height':900});page.add_init_script("sessionStorage.setItem('sgp_one_session',"+json.dumps(token)+")")
      page.route('**/*',lambda r:r.continue_() if r.request.url.startswith(origin) else r.abort());page.route('**/rest/v1/rpc/*',intercept)
-     page.goto(origin+'/');page.wait_for_function("document.querySelector('#authStatus').textContent.includes(' · ')");return page
+     page.goto(origin+'/');page.wait_for_function("document.querySelector('#authStatus').textContent.includes(' · ')")
+     if token in ['se','sp','ll']:
+      if page.locator('#mobileMenuToggle').is_visible():page.locator('#mobileMenuToggle').click()
+      page.locator('.nav [data-view="ensamble"]').click()
+      page.locator('#productionPackingTab' if token=='sp' else '#productionAssemblyTab').click()
+      page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Turno ')")
+     return page
     page=page_for('QAADMIN');dialogs=[]
     page.on('dialog',lambda d:(dialogs.append(d.message),d.accept()))
 
@@ -71,7 +77,7 @@ try:
      if len(confirmations)==1:d.dismiss()
      else:d.accept()
     page.on('dialog',confirm)
-    page.evaluate("document.querySelector('[data-view-panel=ensamble]').hidden=false;document.querySelector('[data-op-date]').value='2026-11-02';document.querySelector('[data-op-shift]').value='2'")
+    page.evaluate("document.querySelector('[data-op-date]').value='2026-11-02';document.querySelector('[data-op-shift]').value='2'")
     page.locator('#productionAssemblyTab').click();page.wait_for_selector('[data-empty-close]',state='attached');page.locator('[data-turn-operation]').click();page.wait_for_selector('[data-empty-close]')
     page.locator('[data-empty-confirm]').check();page.locator('[data-close-note]').fill('QA cierre individual T2 sin actividad')
     page.locator('[data-close-empty]').click();page.wait_for_function("document.querySelector('[data-save-status]')?.textContent.includes('cancelado')||document.querySelector('[data-close-status]')?.textContent.includes('cancelado')")
@@ -84,15 +90,15 @@ try:
     assert not page.locator('#productionTrackingTab').is_visible()
     page.screenshot(path=str(HERE/f'evidence/individual-{width}.png'));page.close()
     page=page_for('sp');page.wait_for_function("document.querySelector('#productionAssemblyTab').hidden && document.querySelector('[data-op-stage]').value==='EMPAQUE'")
-    page.evaluate("document.querySelector('[data-view-panel=ensamble]').hidden=false;document.querySelector('#productionAssemblyTab').click()")
+    page.evaluate("document.querySelector('#productionAssemblyTab').click()")
     assert page.locator('[data-op-stage]').input_value()=='EMPAQUE'
     page.screenshot(path=str(HERE/f'evidence/packing-{width}.png'));page.close()
-    page=page_for('ll');page.evaluate("document.querySelector('[data-view-panel=ensamble]').hidden=false")
+    page=page_for('ll')
     for tab,stage in [('productionAssemblyTab','ENSAMBLE'),('productionPackingTab','EMPAQUE')]:
      assert not page.locator('#'+tab).evaluate('(e)=>e.hidden')
      page.locator('#'+tab).click();assert page.locator('[data-op-stage]').input_value()==stage
     page.close()
-    results.append({'width':width,'direct_users_without_prior_roles_visit':'PASS','native_role_edit_revocation':'PASS','native_user_create_edit_and_defaults':'PASS','individual_T2_confirmation_cancel_and_close':'PASS','server_role_audit':'PASS','supervisor_single_stage_navigation':'PASS','leader_both_stages_navigation':'PASS','transport':'real local SDK; REST routed to actual captured admin/session and LP SQL; unrelated sources unavailable'})
+    results.append({'width':width,'native_menu_navigation':'PASS','direct_users_without_prior_roles_visit':'PASS','native_role_edit_revocation':'PASS','native_user_create_edit_and_defaults':'PASS','individual_T2_confirmation_cancel_and_close':'PASS','server_role_audit':'PASS','supervisor_single_stage_navigation':'PASS','leader_both_stages_navigation':'PASS','transport':'real local SDK; REST routed to actual captured admin/session and LP SQL; unrelated sources unavailable'})
    finally:db.close()
   browser.close()
 finally:server.shutdown()

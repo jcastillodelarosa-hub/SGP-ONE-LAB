@@ -3,6 +3,7 @@
   "results": [
     {
       "width": 1440,
+      "native_menu_navigation": "PASS",
       "direct_users_without_prior_roles_visit": "PASS",
       "native_role_edit_revocation": "PASS",
       "native_user_create_edit_and_defaults": "PASS",
@@ -14,6 +15,7 @@
     },
     {
       "width": 390,
+      "native_menu_navigation": "PASS",
       "direct_users_without_prior_roles_visit": "PASS",
       "native_role_edit_revocation": "PASS",
       "native_user_create_edit_and_defaults": "PASS",

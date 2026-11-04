@@ -131,3 +131,11 @@ CI41749387056 y41750971099 agotaron los15min del job; el segundo canceló
 durante navegadores tras SQL, roles PC/móvil y continuidad PASS. No es evidencia
 de un check completo aprobado. El límite pasa a25min sin quitar escenarios ni
 alterar disparadores/despliegues; se exige resultado concluyente del nuevo HEAD.
+
+La primera captura adicional de Empaque mostraba Inicio por no navegar desde el
+menú; se descarta como evidencia visual de etapa. El recorrido corregido usa el
+menú nativo, espera la consulta SQL y no fuerza visibilidad de paneles: PC1440 y
+móvil390 PASS, captura de Empaque inspeccionada. Las capturas válidas nuevas se
+generan en el artifact CI. Las fixtures de política ahora fijan explícitamente
+legacy no aprobado y visual/runtime aprobado, sin depender del modo real de la
+política; backend false sigue bloqueando publicación. Ninguna prueba publica.

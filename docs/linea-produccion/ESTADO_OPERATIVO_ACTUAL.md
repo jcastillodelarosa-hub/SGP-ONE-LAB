@@ -29,6 +29,11 @@ No se certifican todavía gateway desplegado, sesión humana ni guardados produc
 **CI pendiente real:** b1c9480 y71d3a97 terminaron cancelados a15min; el segundo
 interrumpió navegadores después de SQL/roles/continuidad PASS. Se amplía el límite
 del job a25min, conservando todos los checks. No se presenta cancelación como verde.
+**Capturas corregidas:** el recorrido de roles entra por el menú nativo y espera
+la consulta SQL, sin forzar paneles visibles. Captura Empaque PC/móvil revisada
+visualmente: solo pestaña autorizada y contexto real del fixture, no Inicio.
+La prueba de política usa estados sintéticos explícitos y no presupone que la
+política real deba permanecer legacy; sigue rechazando backend no acreditado.
 
 Esta es la **referencia operativa única de LP**. Describe el estado vigente, no un
 historial. Antes de trabajar leer AGENTS.md, este archivo y el estado real del PR;

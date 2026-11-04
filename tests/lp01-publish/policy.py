@@ -5,7 +5,9 @@ ROOT=Path(__file__).resolve().parents[2];OUT=Path(__file__).parent/'evidence'
 def load(name,path):
  spec=importlib.util.spec_from_file_location(name,ROOT/path);m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m);return m
 m=load('gate','scripts/lp-hosting-gate.py');meta=load('metadata','scripts/lp-hosting-metadata.py')
-p=json.loads((ROOT/'deployment/lp-hosting-policy.json').read_text());sha='a'*40;hashes={k:'b'*64 for k in m.PROTECTED};checks=[]
+source_policy=json.loads((ROOT/'deployment/lp-hosting-policy.json').read_text())
+# Test the unapproved state explicitly, regardless of later real certification.
+p=source_policy|{'mode':'legacy','hosting_certified':False,'approved_lp_files':{},'backend_contracts_verified':False};sha='a'*40;hashes={k:'b'*64 for k in m.PROTECTED};checks=[]
 for mode in ['legacy','visual']:
  cur=p|{'mode':mode};assert m.decide('push','',cur,None,hashes,sha)['route']=='hold'
 checks.append('First policy adoption holds merge, squash, rebase and batched adoption by before/after tree state; no message/PR-title heuristic')
@@ -24,6 +26,7 @@ except ValueError:pass
 checks.append('Policy transition holds; only certified pinned LP assets admit visual releases; drift and wrong source rejected, ordinary non-LP updates can continue')
 runtime=approved|{'mode':'runtime','artifact_kind':'runtime','backend_contracts_verified':True}
 assert m.decide('workflow_dispatch','publish',runtime,runtime,hashes,sha,sha)['route']=='publish'
+assert m.decide('workflow_dispatch','publish',runtime|{'backend_contracts_verified':False},runtime,hashes,sha,sha)['route']=='hold'
 try:m.decide('workflow_dispatch','publish',runtime|{'artifact_kind':'visual'},runtime,hashes,sha,sha);raise AssertionError('Wrong runtime kind accepted')
 except ValueError:pass
 # Test REST algorithm with synthetic transport; it proves guards only, not Firebase compatibility/access.
@@ -87,5 +90,5 @@ legacy=(ROOT/'deployment/lp-legacy-navigation.js').read_bytes()
 assert legacy==subprocess.check_output(['git','show','bb224f00924c1feaa47a4a556a829e93b8e4ca3e:production-line-tabs.js'],cwd=ROOT)
 assert hashlib.sha256(legacy).hexdigest()==p['legacy_navigation_sha256']
 checks.append('Legacy navigation is byte-identical to PR base; no invented legacy UI or RPC contracts')
-result={'status':'PASS','checks':checks,'limits':['Pure policy and synthetic metadata transport; no Firebase action executed','Future metadata API/service-account access and Hosting recovery still unverified','Current policy remains legacy and uncertified; no privileged account/secret read']}
+result={'status':'PASS','checks':checks,'limits':['Pure policy and synthetic metadata transport; no Firebase action executed','Synthetic transport does not certify actual Hosting access/recovery','Fixtures explicitly cover unapproved legacy and certified visual/runtime states; no privileged account/secret read']}
 OUT.mkdir(exist_ok=True);(OUT/'policy.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result,indent=2))
