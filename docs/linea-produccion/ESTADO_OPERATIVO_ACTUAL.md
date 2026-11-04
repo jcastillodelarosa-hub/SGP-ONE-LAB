@@ -31,14 +31,19 @@ PC1440/móvil390 con handler y PG sintéticos PASS. No certifica gateway JWT rea
 en el mismo workflow Actions; hasta recibir PASS de comprobaciones reales no se
 habilitan escrituras. Solo JWT/clave públicos y sesión inválida, sin guardados,
 credenciales nuevas o infraestructura adicional. No certifica usuarios reales.
-Primer run41839556790: ambos CORS204 PASS; ausencia de JWT respondió401 pero no
-coincidió con el formato esperado. Se mantiene FAIL/contención y se prepara
-diagnóstico seguro de códigos/clasificación, ejecutando las comprobaciones
-pendientes sin dar por válidos errores desconocidos. No se altera JWT para pasarlo.
+Run41840766105: CORS204, sesión inválida401/SGP_SESSION_INVALID, consulta de ambas
+etapas denegada, origen ajeno403; sin credenciales y firma alterada401 del gateway.
+El verificador anterior exigía código numérico401 y denegación de apikey pública
+sin Authorization, supuestos incompatibles con lo observado. Se corrige solo el
+contrato de respuesta: exige envoltura/rechazo específico del gateway y comprueba
+por separado que la clave pública no autoriza a una persona. Tres regresiones
+offline PASS; no equivalen a gateway real. Se mantiene contención hasta PASS del
+run corregido. No se modifica Edge, JWT ni autorización SQL para pasar las pruebas.
 La red local sigue restringida; no se redirige o altera el proxy. El conector no
 ofrece dispatch: el workflow protegido necesita un operador al quedar listo.
 **Hosting observado:** versión0312f467cf0e9c29 FINALIZED/79 archivos acreditada
-por inspect GET, recuperación retenida; refrescar antes de una publicación.
+por inspect GET, recuperación retenida. Refresco04/11 13:45UTC, run41707119884
+job126612302080: misma versión, inventario y configuración; publish/recover omitidos.
 [Plan, instrucciones de red, resumen SQL10 y recuperación](PUBLICACION_CONTROLADA_2026_11_03.md).
 **Siguiente:** revisar resultado HTTPS real de Actions y después habilitar/publicar
 bajo los controles. PDT/Export conservan sus

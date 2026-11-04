@@ -8,6 +8,12 @@ ROOT=Path(__file__).resolve().parents[1]
 API='https://ocvxbwzqxbrfndkvjmfx.supabase.co'
 ORIGIN='https://sgp-one-lab.web.app'
 checks=[];last_response_facts={}
+def platform_denial(status,data,subject):
+ # Gateway error codes vary between platform versions. Require its envelope and
+ # the relevant reason, rather than accepting any 401 (including an SGP error).
+ return (status==401 and isinstance(data,dict) and 'error' not in data
+  and re.fullmatch(r'[A-Za-z0-9_]{1,64}',str(data.get('code',''))) is not None
+  and subject in str(data.get('message','')).lower())
 def request(method,path,headers,body=None):
  global last_response_facts
  if not path.startswith(('/functions/v1/lp-powerbi','/rest/v1/rpc/sgp_')):raise ValueError('PROBE_PATH_NOT_ADMITTED')
@@ -21,10 +27,9 @@ def request(method,path,headers,body=None):
   if len(raw)>65536:raise ValueError('PROBE_RESPONSE_TOO_LARGE')
   try:data=json.loads(raw) if raw else None
   except (ValueError,UnicodeDecodeError):raise ValueError('PROBE_NON_JSON_RESPONSE') from None
-  known={'401','403','P0001','SGP_SESSION_INVALID','SGP_SESSION_UNAVAILABLE','UNAUTHORIZED','INVALID_JWT','AUTH_HEADER_MISSING'}
   code=data.get('code') if isinstance(data,dict) else None
   message=str(data.get('message',data.get('error',data.get('msg','')))).lower() if isinstance(data,dict) else ''
-  last_response_facts={'json_keys':sorted(set(data)&{'code','message','error','msg','status_code','error_description'}) if isinstance(data,dict) else [],'code':code if str(code) in known else 'UNRECOGNIZED','mentions_authorization':'authorization' in message,'mentions_jwt':'jwt' in message,'mentions_api_key':'apikey' in message or 'api key' in message}
+  last_response_facts={'json_keys':sorted(set(data)&{'code','message','error','msg','status_code','error_description'}) if isinstance(data,dict) else [],'code':str(code) if code is not None and re.fullmatch(r'[A-Za-z0-9_]{1,64}',str(code)) else 'UNRECOGNIZED','mentions_authorization':'authorization' in message,'mentions_jwt':'jwt' in message,'mentions_api_key':'apikey' in message or 'api key' in message}
   return response.status,response.headers,data
 def require(name,ok,status):
  checks.append({'check':name,'status':'PASS' if ok else 'FAIL','http_status':status,'response_facts':dict(last_response_facts)})
@@ -51,12 +56,15 @@ def run():
   status,h,data=request('OPTIONS','/functions/v1/lp-powerbi',{'Origin':origin,'Access-Control-Request-Method':'POST','Access-Control-Request-Headers':'content-type,apikey,authorization'})
   require('CORS_EXACT_'+origin.split('//')[1],status==204 and h.get('Access-Control-Allow-Origin')==origin,status)
  status,h,data=request('POST','/functions/v1/lp-powerbi',{'content-type':'application/json','Origin':ORIGIN},body)
- require('PLATFORM_DENIES_NO_CREDENTIALS',status==401 and isinstance(data,dict) and str(data.get('code'))=='401',status)
+ require('PLATFORM_DENIES_NO_CREDENTIALS',platform_denial(status,data,'authorization'),status)
  status,h,data=request('POST','/functions/v1/lp-powerbi',{k:v for k,v in headers.items() if k!='Authorization'},body)
- require('PLATFORM_REQUIRES_JWT',status==401 and isinstance(data,dict) and str(data.get('code'))=='401' and 'authorization' in str(data.get('message','')).lower(),status)
+ # Observed on this hosted project: a valid publishable apikey can reach SGP
+ # authentication without an explicit Authorization header. It must never confer
+ # human authorization. Do not label this as a missing-JWT platform rejection.
+ require('PUBLIC_KEY_ALONE_DOES_NOT_AUTHORIZE_SGP_USER',status==401 and isinstance(data,dict) and data.get('code')=='SGP_SESSION_INVALID',status)
  bad=parts[0]+'.'+parts[1]+'.'+('A' if parts[2][0]!='A' else 'B')+parts[2][1:]
  status,h,data=request('POST','/functions/v1/lp-powerbi',headers|{'Authorization':'Bearer '+bad},body)
- require('PLATFORM_REJECTS_BAD_SIGNATURE',status==401 and isinstance(data,dict) and str(data.get('code'))=='401',status)
+ require('PLATFORM_REJECTS_BAD_SIGNATURE',platform_denial(status,data,'jwt'),status)
  status,h,data=request('POST','/functions/v1/lp-powerbi',headers,body)
  require('VALID_PUBLIC_JWT_REACHES_SGP_AUTH',status==401 and isinstance(data,dict) and data.get('code')=='SGP_SESSION_INVALID',status)
  status,h,data=request('POST','/rest/v1/rpc/sgp_sesion_actual',headers,{'p_token':token})

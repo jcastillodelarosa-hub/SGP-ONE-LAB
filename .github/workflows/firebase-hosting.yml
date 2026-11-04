@@ -96,6 +96,7 @@ jobs:
       - run: npm run verify:release
       - run: npm test
       - run: python tests/lp01-publish/artifact.py
+      - run: python tests/lp01-publish/backend-readiness.py
       - name: Public backend readiness only when explicitly enabled after approved Edge deployment
         run: python scripts/lp-backend-readiness.py
       - uses: actions/upload-artifact@v4
