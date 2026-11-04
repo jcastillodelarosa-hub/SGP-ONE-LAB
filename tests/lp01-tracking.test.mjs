@@ -12,3 +12,20 @@ test('Empaque tiene filtro de saldo propio; desconocido no equivale a cero',()=>
 test('respuesta cruzada de etapa/fecha/línea rechazada en la proyección; sin autorización inventada',()=>{for(const extra of [{etapa:'EMPAQUE'},{fecha:'2026-11-02'},{turno:2},{linea:'FRAMES_2'}])assert.throws(()=>trackingRows(data([row('P1',extra)]),context),/ámbito/);});
 
 test('filtro abiertas incluye avances en curso; semanas desconocidas no desestabilizan antigüedad',()=>{const a=row('con_avance'),b=row('sin_semana',{oficial:{...a.oficial,semana_base:null},antiguedad_fecha:'2020-01-01'}),c=row('antigua',{oficial:{...a.oficial,anio:2025,semana_base:52}});assert.equal(trackingRows(data([a]),context,{status:'ABIERTA'}).length,1);for(const rows of [[b,a,c],[c,b,a],[a,c,b]])assert.deepEqual(trackingRows(data(rows),context).map(r=>r.parte),['antigua','con_avance','sin_semana']);});
+
+test('orden explícito respeta columna sobre abiertas, desconocidos al final en ambos sentidos',()=>{
+ const a=row('Z',{abierta:true,sale:2}),b=row('A',{abierta:false,sale:10}),c=row('X',{sale:null});
+ for(const direction of ['asc','desc']){const out=trackingRows(data([a,b,c]),context,{sort:'sale',direction});assert.equal(out.at(-1),c);assert.equal(out[0],direction==='asc'?a:b);}
+ assert.equal(trackingRows(data([a,b]),context,{sort:'production'})[0],b);
+ assert.deepEqual([a.prioridad,b.prioridad],[1,1]);
+});
+test('filtros de valores combinan columnas y distinguen desconocido de cero',()=>{
+ const a=row('A',{oficial:{...row('x').oficial,sistema:'A',saldo_ensamble:0}}),b=row('B',{oficial:{...row('x').oficial,sistema:'A',saldo_ensamble:null}}),c=row('C',{oficial:{...row('x').oficial,sistema:'B',saldo_ensamble:0}});
+ assert.deepEqual(trackingRows(data([a,b,c]),context,{columnFilters:{system:['"A"'],assembly:['0']}}),[a]);
+ assert.deepEqual(trackingRows(data([a,b,c]),context,{columnFilters:{assembly:['null']}}),[b]);
+ assert.deepEqual(trackingRows(data([a]),context,{columnFilters:{week:[]}}),[]);
+});
+test('semana explícita ordena con año de Export, no con fecha del turno',()=>{
+ const a=row('A',{oficial:{...row('x').oficial,semana_base:52,anio:2025}}),b=row('B',{oficial:{...row('x').oficial,semana_base:1,anio:2026}});
+ assert.deepEqual(trackingRows(data([a,b]),context,{sort:'week',direction:'desc'}),[b,a]);
+});

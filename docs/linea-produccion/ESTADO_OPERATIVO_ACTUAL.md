@@ -1,5 +1,20 @@
 # Línea de Producción — estado operativo actual
 
+## Ajuste local de Seguimiento · 04/11/2026
+
+IMPLEMENTADO EN RAMA LOCAL `fix/seguimiento-silent-filters`, base `fe82ffab`.
+Sin push/PR, fusión, SQL, datos productivos ni publicación; vidrio #192 intacto.
+Actualización de 20 s silenciosa, sin repintado de respuestas iguales, consultas
+serializadas y descarte de respuestas obsoletas; limpieza por sesión/rol/ámbito.
+Semana Export precede a Producción en PC y abre la identidad móvil. Orden y filtros
+combinables por columna, ausentes distintos de cero, sin mutar prioridades ni
+agregar SALE/avances/afectaciones entre turnos. Conserva estado/foco/scroll/detalle.
+Pruebas: 462 JS PASS y verify:release PASS; Chromium 1440/390 con transporte local
+sintético y reloj controlado. No equivalen a aceptación autenticada/productiva.
+[Alcance, referencias y evidencia](../../tests/lp01-tracking-ui/README.md).
+Siguiente: revisión aislada y aclaración de qué bloque superior retirar antes de
+integrar. Los bloques ambiguos se conservan; no se solicita publicar desde aquí.
+
 ## PR191 · corrección acotada del postcheck antes de publicar
 
 CI de `2c4ca32701fd9ffce888f4d370b1794a44aa5218` completa PASS, incluidos SQL/API

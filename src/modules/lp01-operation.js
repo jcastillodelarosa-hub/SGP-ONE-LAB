@@ -10,9 +10,9 @@ const n=v=>v===null||v===undefined?'Por validar':String(v);
 /** Real RPC controller. Missing installation is explicit, never replaced with a write stub. */
 export function mountOperation({tracking,operation,bridge,legacyLoad}){
  let data=null,context=null,selected=null,seq=0,pending=null,busy=false,bi=null,fileId=null,session=null,loading=false,missing=false,dirty=false,fileSequence=0;
- let viewPanel='planificador',trackingViewState={},globalData=null,globalContext=null,globalSession=null,trackingRole=null;
+ let viewPanel='planificador',trackingViewState={},globalData=null,globalContext=null,globalSession=null,trackingRole=null,globalRequest=null,globalQueued=false;
  const trackingStates=new Map();
- document.addEventListener('sgp:lp-role',e=>{trackingRole=e.detail;if(!['COORDINADOR','ADMINISTRADOR'].includes(trackingRole)){globalData=null;trackingStates.clear();if(viewPanel==='seguimiento'){++seq;live.replaceChildren();message.textContent='Seguimiento no autorizado';}}});
+ document.addEventListener('sgp:lp-role',e=>{trackingRole=e.detail;if(globalSession!==bridge.getToken()||!['COORDINADOR','ADMINISTRADOR'].includes(trackingRole)){globalData=null;trackingStates.clear();if(viewPanel==='seguimiento'){++seq;loading=false;live.replaceChildren();message.textContent='Seguimiento no autorizado';}}});
  const today=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'America/Bogota',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
  tracking.querySelector('.lp-followup-filters').insertAdjacentHTML('afterend','<div class="lp-operational-context"><label>Etapa<select data-op-stage><option>ENSAMBLE</option><option>EMPAQUE</option></select></label><label>Fecha operativa<input type="date" data-op-date value="'+today()+'"></label><label>Turno<select data-op-shift><option value="1">Turno 1</option><option value="2">Turno 2</option></select></label><button type="button" data-op-load>Consultar turno</button><span data-op-status role="status"></span><button type="button" data-retry-pending hidden>Reintentar guardado sin respuesta</button></div><section data-live-orders></section>');
  const get=s=>tracking.querySelector(s),live=get('[data-live-orders]'),message=get('[data-op-status]');
@@ -28,20 +28,25 @@ export function mountOperation({tracking,operation,bridge,legacyLoad}){
   get('[data-op-load]').textContent=global?'Actualizar Seguimiento':'Consultar turno';
   get('[data-tracking-stages]').hidden=!global;
  }
- async function loadGlobal(){
-  if(busy)return;const request=++seq,token=bridge.getToken(),ctx=capture();loading=true;globalControls(true);live.replaceChildren();
-  message.textContent='Consultando todas las semanas…';
-  if(token!==globalSession){trackingStates.clear();globalData=null;}
+ async function loadGlobal({quiet=false}={}){
+  const token=bridge.getToken(),ctx=capture(),scope=JSON.stringify([token,ctx.line,ctx.stage]);
+  const sameScope=token===globalSession&&ctx.line===globalContext?.line&&ctx.stage===globalContext?.stage;
+  if(!sameScope){globalData=null;live.replaceChildren();if(token!==globalSession)trackingStates.clear();}
+  if(busy)return;
+  if(globalRequest){if(globalRequest.scope!==scope||globalRequest.request!==seq){++seq;globalQueued=true;}return;}
+  const request=++seq;globalRequest={scope,request};loading=true;globalControls(true);
+  if(!quiet||!sameScope){live.replaceChildren();message.textContent='Consultando todas las semanas…';}
   try{
    if(!['COORDINADOR','ADMINISTRADOR'].includes(trackingRole))throw Error('Seguimiento no autorizado');
    const next=await rpc('sgp_lp_seguimiento_consultar',{p_etapa:ctx.stage,p_linea:ctx.line});
    if(request!==seq||viewPanel!=='seguimiento')return;
    if(token!==bridge.getToken())throw Error('La sesión cambió. Vuelve a consultar.');
-   globalData=globalTrackingData(next,ctx);globalContext=ctx;globalSession=token;
+   const normalized=globalTrackingData(next,ctx),changed=JSON.stringify(normalized)!==JSON.stringify(globalData);
+   globalData=normalized;globalContext=ctx;globalSession=token;
    const key=JSON.stringify([ctx.line,ctx.stage]);if(!trackingStates.has(key))trackingStates.set(key,{});trackingViewState=trackingStates.get(key);
-   message.textContent='Todas las semanas · '+ctx.line+' · '+ctx.stage;renderGlobal();
+   message.textContent='Todas las semanas · '+ctx.line+' · '+ctx.stage;if(changed||!quiet||!sameScope)renderGlobal();
   }catch(e){if(request!==seq)return;globalData=null;live.replaceChildren();message.textContent='No se pudo consultar Seguimiento: '+e.message;}
-  finally{if(request===seq)loading=false;}
+  finally{if(globalRequest?.request===request)globalRequest=null;if(request===seq)loading=false;if(globalQueued){globalQueued=false;loading=false;if(viewPanel==='seguimiento')loadGlobal();}}
  }
  function renderGlobal(){
   if(!globalData||globalSession!==bridge.getToken())return;
@@ -59,7 +64,7 @@ export function mountOperation({tracking,operation,bridge,legacyLoad}){
    },onGlass:r=>glass(r)});
  }
  async function load({quiet=false}={}){
-  if(viewPanel==='seguimiento')return loadGlobal();
+  if(viewPanel==='seguimiento')return loadGlobal({quiet});
   globalControls(false);
   if(busy)return;loading=true;const request=++seq,ctx=capture(),token=bridge.getToken();if(!quiet){message.textContent='Consultando operación…';live.replaceChildren();}
   try{

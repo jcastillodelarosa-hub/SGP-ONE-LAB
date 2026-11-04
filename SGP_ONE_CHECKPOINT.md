@@ -1,3 +1,12 @@
+## Seguimiento · ajuste local aislado · 04/11/2026
+
+Base main `fe82ffab`; rama `fix/seguimiento-silent-filters`.
+IMPLEMENTADO y VERIFICADO EN AISLAMIENTO: refresco silencioso, Semana Export antes
+de Producción, orden/filtros combinables PC y móvil; 462 JS y release PASS.
+Sin SQL, datos productivos, push, PR, fusión ni publicación; no toca vidrio #192.
+Pendiente aclarar bloque superior a retirar. Siguiente: revisión del cambio local.
+[Detalle y evidencia](tests/lp01-tracking-ui/README.md).
+
 ## PR191 · postcheck de Hosting corregido bajo controles · 04/11/2026
 
 CI2c4ca32 completa PASS. Evidencia real41856841540 identifica únicamente dos
