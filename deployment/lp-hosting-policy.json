@@ -1,14 +1,14 @@
 {
   "contract": "LP-HOSTING-POLICY/1",
   "mode": "runtime",
-  "integration_pr": 183,
+  "integration_pr": 191,
   "hosting_certified": true,
   "project": "sgp-one-lab",
   "site": "sgp-one-lab",
   "approved_lp_files": {
-    "production-line-tabs.js": "93923c9c685e4940c991ef7cbd6600dd848c0f8338d53fcd2f687dff7d96a1fb",
+    "production-line-tabs.js": "115ce4c47c8eb2c80365d077668a18ba011bd0844a551edc38357f575f181ec1",
     "src/modules/lp01-followup.js": "6887ae936c6e3695f003a1aed7286147ba723c37cf6473b2d4a8f33f217bbef5",
-    "src/modules/lp01-operation.js": "808e047d74a5227088862cc58e05a859dd0b9491e3621c28296d6ab6feb529f4",
+    "src/modules/lp01-operation.js": "25fcfc65d3a4d3bf8c8557107ea56c0d8f1a6a47d9efa655cde46eb78bc5a2c7",
     "src/domain/lp01-visual-bridge.js": "6d4694f08e2724a34cd23a10f15ac5dd13b5936ad161fd73f322526dc84917aa",
     "scripts/prepare-lp-main-visual.py": "942601e7986e36cff74f2475c9f8a9c638993c15e4b7b91e5ffde6cbd62da5c5",
     "tests/lp01-integration/fixtures/lp-synthetic.json": "ed5812201e96feff0ab8b7bf5b4bcb06567978a4ab52207ac91056a22251d81b",
@@ -21,12 +21,12 @@
     "src/server/lp-powerbi-handler.js": "e97567e17a2b93d5b99625904316ac74bbb7161d58f4828d60ee1501b9358ce1",
     "supabase/functions/lp-powerbi/index.ts": "defc3a654ce6d640c68079301b1bc2ebd82349317170aaeaa4d636f8e885505f",
     "supabase/config.toml": "e125a7afc77c2131c1fe403010c072a41984aabd95be35df80e00c7fce154d0d",
-    "scripts/lp-backend-readiness.py": "4e3a0f8f0152ae596f25b4d69da12b2415be36d3ca916896d23628c64ca0cf44"
+    "scripts/lp-backend-readiness.py": "0347837ace3ecb08b52ac16b9fb82b1ca8b8462853a33e9d14a4f608bc92482e"
   },
   "legacy_navigation_sha256": "4f0992b1c98f4933fe5a0daa98d95fd85b35fceaffbbbd904fef7d422f21f0af",
   "certification_reference": "docs/linea-produccion/PUBLICACION_CONTROLADA_2026_11_03.md",
-  "baseline_version": "sites/sgp-one-lab/versions/c698e0b8a4356985",
-  "rollback_version": "sites/sgp-one-lab/versions/c698e0b8a4356985",
+  "baseline_version": "sites/sgp-one-lab/versions/1a59beda3dffaed9",
+  "rollback_version": "sites/sgp-one-lab/versions/1a59beda3dffaed9",
   "artifact_kind": "runtime",
   "backend_contracts_verified": true,
   "backend_probe_required": true

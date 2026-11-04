@@ -34,7 +34,7 @@ try:
      window.SGPPlannerBridge.getToken=()=> 'COORDINADOR';
      window.SGPPlannerBridge.getClient=async()=>({rpc:async(name,args)=>(await fetch('/rpc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,args})})).json()});
     }''')
-    page.locator('#productionTrackingTab').click();page.wait_for_selector('[data-op-date]')
+    page.locator('#productionPackingTab' if page.locator('[data-op-stage]').input_value()=='EMPAQUE' else '#productionAssemblyTab').click();page.wait_for_selector('[data-op-date]')
     page.locator('[data-op-stage]').select_option('EMPAQUE');page.locator('[data-op-date]').fill('2026-11-01');page.locator('[data-op-date]').dispatch_event('change')
     page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('NO_ABIERTO')")
     page.locator('[data-turn-capacity]').fill('20');page.locator('[data-open]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Guardado confirmado')")
@@ -43,7 +43,7 @@ try:
     page.locator('[data-executed]').fill('8');page.locator('[data-operation-note]').fill('QA ejecución del primer turno');page.locator('[data-order-form] button[type=submit]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Guardado confirmado')")
     for x in parts:db.execute(db.cmd('SALE',stage='EMPAQUE',key=multi,part=x,quantity=0,observation='QA decisión explícita de aplazar'))
     checks.close_turn(db,stage='EMPAQUE') # Actual SQL QA close, not XLSX adapter certification.
-    page.locator('#productionTrackingTab').click();page.locator('[data-op-load]').click();page.wait_for_selector('[data-next-turn]')
+    page.locator('#productionPackingTab' if page.locator('[data-op-stage]').input_value()=='EMPAQUE' else '#productionAssemblyTab').click();page.locator('[data-op-load]').click();page.wait_for_selector('[data-next-turn]')
     page.locator('[data-next-turn]').click();page.wait_for_function("document.querySelector('[data-op-shift]').value==='2' && document.querySelector('[data-op-status]').textContent.includes('NO_ABIERTO')")
     page.locator('[data-turn-capacity]').fill('20');page.locator('[data-open]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Guardado confirmado')")
     row=next(r for r in db.snapshot('EMPAQUE',shift=2)['orders'] if r['parte']==part);assert row['sale']==12 and row['ejecutado']==0 and row['contexto_origen']['ejecutado']==8

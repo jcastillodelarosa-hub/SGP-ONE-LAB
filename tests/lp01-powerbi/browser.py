@@ -50,7 +50,7 @@ try:
      window.SGPPlannerBridge.getClient=async()=>({rpc:async(name,args)=>{window.calls.push({name,args});return(await fetch('/rpc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,args})})).json();}});
      document.querySelector('[data-op-date]').value='2026-10-31';
     }''',{'endpoint':endpoint})
-    page.locator('#productionTrackingTab').click();page.wait_for_selector('[data-live-operate]',state='attached')
+    page.locator('#productionPackingTab' if page.locator('[data-op-stage]').input_value()=='EMPAQUE' else '#productionAssemblyTab').click();page.wait_for_selector('[data-live-operate]',state='attached')
     page.locator('[data-order-part="'+part1+'"] summary').click();page.locator('[data-live-operate="'+part1+'"]').click();page.wait_for_selector('[data-executed]')
     page.locator('[data-executed]').fill('10');page.locator('[data-operation-note]').fill('QA acumulado de esta asignación');page.locator('[data-order-form] button[type=submit]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Guardado confirmado')")
     page.locator('[data-bi-file]').set_input_files(str(HERE/'fixtures/empaque.xlsx'));page.wait_for_function("document.querySelector('[data-close-status]').textContent.includes('otra etapa')")

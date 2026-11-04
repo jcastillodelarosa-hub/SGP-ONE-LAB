@@ -5,6 +5,10 @@ path=Path(__file__).resolve().parents[2]/'scripts/lp-backend-readiness.py'
 spec=importlib.util.spec_from_file_location('readiness',path)
 module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
 class GatewayDenials(unittest.TestCase):
+ def test_tracking_requires_server_session_rejection(self):
+  self.assertTrue(module.session_denial(400,{'code':'P0001','message':'SESION_NO_AUTORIZADA'}))
+  for status,body in [(200,{}),(404,{'code':'PGRST202'}),(401,{'code':'42501'}),(400,{'code':'P0001','message':'OTHER'}),(400,None)]:
+   self.assertFalse(module.session_denial(status,body))
  def test_platform_versions(self):
   for code in [401,'401','unauthorized','INVALID_JWT']:
    self.assertTrue(module.platform_denial(401,{'code':code,'message':'Invalid JWT'},'jwt'))

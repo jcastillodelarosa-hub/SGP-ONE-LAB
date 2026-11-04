@@ -1,0 +1,20 @@
+-- PROTOTIPO AISLADO: no instalador productivo. Sin grants ni cambios de datos.
+BEGIN;
+DO $patch$ DECLARE d text;b text; BEGIN
+ SELECT pg_get_functiondef(oid),prosrc INTO STRICT d,b FROM pg_proc WHERE oid='public.sgp_lp_operacion_comando(text,jsonb)'::regprocedure;
+ IF md5(b)<>'6327a5478c11ae6ba9a13e6966d42162' THEN RAISE EXCEPTION 'BASE_INCOMPATIBLE'; END IF;
+ EXECUTE replace(d,b,replace(b,$needle$ IF op IN('ABRIR','SALE','VALIDAR','REABRIR','LIBERAR')$needle$,$guard$ IF op='VALIDAR' AND s->>'rol' IS DISTINCT FROM 'COORDINADOR' THEN RAISE EXCEPTION 'CONSOLIDADO_SOLO_COORDINADOR'; END IF;
+ IF op IN('ABRIR','SALE','VALIDAR','REABRIR','LIBERAR')$guard$));
+END $patch$;
+DO $patch$ DECLARE d text;b text; BEGIN
+ SELECT pg_get_functiondef(oid),prosrc INTO STRICT d,b FROM pg_proc WHERE oid='sgp_lp_operacion.operaciones_rol(text,text)'::regprocedure;
+ IF md5(b)<>'5e404be5761038bf569ac1d5c7b5fdd3' THEN RAISE EXCEPTION 'BASE_INCOMPATIBLE'; END IF;
+ EXECUTE replace(d,b,$body$
+ SELECT CASE WHEN et NOT IN('ENSAMBLE','EMPAQUE') THEN ARRAY[]::text[]
+ WHEN r='COORDINADOR' THEN ARRAY['LEER','ABRIR','SALE','EJECUTAR','NOTA','AFECTAR','VALIDAR','IMPORTAR_BI','IMPORTAR_XLSX','CERRAR','REABRIR','LIBERAR']
+ WHEN r='ADMINISTRADOR' THEN ARRAY['LEER','ABRIR','SALE','EJECUTAR','NOTA','AFECTAR','IMPORTAR_BI','IMPORTAR_XLSX','CERRAR','REABRIR','LIBERAR']
+ WHEN r='LIDER LINEA' OR(r='SUPERVISOR ENSAMBLE' AND et='ENSAMBLE') OR(r='SUPERVISOR EMPAQUE' AND et='EMPAQUE') THEN ARRAY['LEER','EJECUTAR','NOTA','AFECTAR','IMPORTAR_BI','IMPORTAR_XLSX','CERRAR']
+ WHEN r='CONSULTA' THEN ARRAY['LEER'] ELSE ARRAY[]::text[] END
+$body$);
+END $patch$;
+COMMIT;

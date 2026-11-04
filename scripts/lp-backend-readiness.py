@@ -8,6 +8,8 @@ ROOT=Path(__file__).resolve().parents[1]
 API='https://ocvxbwzqxbrfndkvjmfx.supabase.co'
 ORIGIN='https://sgp-one-lab.web.app'
 checks=[];last_response_facts={}
+def session_denial(status,data):
+ return status==400 and isinstance(data,dict) and data.get('code')=='P0001' and data.get('message')=='SESION_NO_AUTORIZADA'
 def platform_denial(status,data,subject):
  # Gateway error codes vary between platform versions. Require its envelope and
  # the relevant reason, rather than accepting any 401 (including an SGP error).
@@ -71,7 +73,9 @@ def run():
  require('NATIVE_SESSION_RPC_REJECTS_INVALID_SESSION',status==200 and isinstance(data,dict) and data.get('valida') is False,status)
  for stage in ['ENSAMBLE','EMPAQUE']:
   status,h,data=request('POST','/rest/v1/rpc/sgp_lp_operacion_consultar',headers,{'p_token':token,'p_etapa':stage,'p_linea':'PANELES_2','p_fecha':date,'p_turno':1})
-  require('PROTECTED_READ_DENIES_'+stage,status==400 and isinstance(data,dict) and data.get('code')=='P0001' and data.get('message')=='SESION_NO_AUTORIZADA',status)
+  require('PROTECTED_READ_DENIES_'+stage,session_denial(status,data),status)
+  status,h,data=request('POST','/rest/v1/rpc/sgp_lp_seguimiento_consultar',headers,{'p_token':token,'p_etapa':stage,'p_linea':'PANELES_2'})
+  require('GLOBAL_TRACKING_DENIES_'+stage,session_denial(status,data),status)
  status,h,data=request('OPTIONS','/functions/v1/lp-powerbi',{'Origin':'https://untrusted.invalid'})
  require('FOREIGN_ORIGIN_DENIED',status==403 and isinstance(data,dict) and data.get('error')=='Origen no permitido',status)
 if __name__=='__main__':
