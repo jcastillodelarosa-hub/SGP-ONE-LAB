@@ -1,0 +1,18 @@
+{
+  "previous_main": "LAB v380",
+  "candidate": "LAB v381",
+  "browser": [
+    {
+      "width": 1440,
+      "visible_label": "LAB v381",
+      "scope": "local actual index, external requests blocked"
+    },
+    {
+      "width": 390,
+      "visible_label": "LAB v381",
+      "scope": "local actual index, external requests blocked"
+    }
+  ],
+  "stamp_test": "PASS: v381 plus full SHA and app/CSS cache-bust",
+  "production_verification": "pending publication; do not infer from local badge"
+}

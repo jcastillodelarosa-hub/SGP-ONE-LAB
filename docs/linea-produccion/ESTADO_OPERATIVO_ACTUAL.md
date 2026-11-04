@@ -1,5 +1,18 @@
 # Línea de Producción — estado operativo actual
 
+## Seguimiento · versión LAB v380 → LAB v381 · 04/11/2026
+
+Norma explícita de Johan: incrementar versión en cada entrega. Main `9e4a8ec`
+conserva LAB v380; este PR prepara LAB v381. Sincronizados badge/título y cache-bust
+app/CSS de `index.html` con `releaseLabel`; verify:release ahora también compara
+el sello con la versión visible. Norma permanente en AGENTS.md; no habilita deploy.
+469 pruebas PASS y release v381 PASS. Sello reproducible probado con SHA completo;
+badge real local verificado visible en PC/móvil. Evidencia `version.json` y capturas
+en `tests/lp01-tracking-ui/evidence/`. NO PUBLICADO: comprobar v381 y el SHA exacto
+en el artefacto y Hosting después del despliegue coordinado. CI del nuevo SHA debe
+completarse; no reutilizar como aprobación la CI del candidato anterior.
+
+
 ## Seguimiento · integración/publicación autorizada, PR en preparación · 04/11/2026
 
 Autorización explícita de Johan para integrar/publicar el ajuste concreto de

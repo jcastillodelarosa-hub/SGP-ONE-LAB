@@ -64,3 +64,11 @@ Para aprobar el paquete: revisar capturas y cambios locales; después autorizar
 preparación del PR/CI sin despliegue. Antes de publicar, revisar artefacto exacto,
 huellas, versión viva/recuperación vigentes y controles existentes. No usar los
 pins anteriores de vidrio para este nuevo contenido. Ninguno se modificó aquí.
+
+## Versión de esta entrega
+
+Main LAB v380 → candidato LAB v381. Badge y cache-bust de app/CSS alineados con
+releaseLabel; el sello conserva SHA/fecha. Verificación local real PC/móvil en
+`evidence/version.json`. Tras publicación comprobar LAB v381 visible y
+`#releaseVersion[data-release-commit]` igual al SHA fuente del artefacto final.
+La comprobación productiva sigue pendiente; no se confunde con la local.
