@@ -1,6 +1,6 @@
 """Strict artifact inventory, retained platform files and public-byte postcheck."""
 from pathlib import Path
-import os,json,importlib.util,urllib.request,urllib.parse
+import os,json,importlib.util,urllib.request,urllib.parse,gzip,io
 
 # Observed in retained version 1a59beda3dffaed9 (run 41856841540).
 # Firebase-managed URLs, never files accepted from the application ZIP.
@@ -20,20 +20,28 @@ def verify_inventory(before_files,after_files,manifest_files):
    raise ValueError('PLATFORM_FILE_CHANGED')
  return len(expected),len(retained)
 
+def decode_public_body(body,encoding,size):
+ encoding=encoding.lower().strip()
+ if encoding in ('','identity'):return body
+ if encoding=='gzip':return gzip.GzipFile(fileobj=io.BytesIO(body)).read(size+1)
+ raise ValueError('PUBLIC_ENCODING_NOT_VERIFIED')
+
 def verify_public_bytes(public,fetch=None):
  if fetch is None:
   class NoRedirect(urllib.request.HTTPRedirectHandler):
    def redirect_request(self,*args,**kwargs):raise ValueError('PUBLIC_REDIRECT_NOT_ADMITTED')
   opener=urllib.request.build_opener(NoRedirect)
   def fetch(path,size):
-   url='https://sgp-one-lab.web.app/'+urllib.parse.quote(path,safe='/')
-   with opener.open(urllib.request.Request(url,headers={'Cache-Control':'no-cache'}),timeout=15) as response:
+   url='https://sgp-one-lab.web.app/'+('' if path=='index.html' else urllib.parse.quote(path,safe='/'))
+   with opener.open(urllib.request.Request(url,headers={'Cache-Control':'no-cache','Accept-Encoding':'identity'}),timeout=15) as response:
     if response.status!=200:raise ValueError('PUBLIC_HTTP_STATUS')
-    return response.read(size+1)
+    body=response.read(32*1024*1024+1)
+    if len(body)>32*1024*1024:raise ValueError('PUBLIC_RESPONSE_TOO_LARGE')
+    return decode_public_body(body,response.headers.get('Content-Encoding','identity'),size)
  manifest=json.loads((public/'manifest.json').read_text())
  for path in sorted(set(manifest['files'])|{'manifest.json'}):
   expected=(public/path).read_bytes()
-  if fetch(path,len(expected))!=expected:raise ValueError('PUBLIC_BYTES_DIFFER')
+  if fetch(path,len(expected))!=expected:raise ValueError('PUBLIC_BYTES_DIFFER:'+path)
  return len(manifest['files'])+1
 
 def main():

@@ -1,0 +1,38 @@
+{
+  "base": "9e4a8ecb90664d7296d1e77e241c4a9204d7ff50",
+  "original_change": "1ff8cfc",
+  "scope": "local merge only; no production access",
+  "tests": {
+    "js": {
+      "pass": 469,
+      "fail": 0
+    },
+    "release": "PASS",
+    "chromium_viewports": [
+      1440,
+      390
+    ],
+    "policy_offline": "PASS",
+    "postcheck_offline": 7
+  },
+  "preserved_identical_to_main": [
+    "app.js",
+    "deployment/",
+    "scripts/",
+    "tests/glass-week-partial-mapping.test.mjs",
+    "tests/lp01-publish/",
+    ".github/"
+  ],
+  "gate_simulation": {
+    "route": "hold",
+    "reason": "LP_ASSETS_NOT_APPROVED",
+    "paths": [
+      "src/modules/lp01-operation.js"
+    ]
+  },
+  "pending": [
+    "clarify upper block removal",
+    "review integration",
+    "publication pins and artifact review outside current scope"
+  ]
+}

@@ -1,5 +1,29 @@
 # Publicación LP — ejecución autorizada y controles
 
+## Baseline para corrección de vidrio PR192 · 04/11/2026
+
+Seguimiento PR191 se fusionó en `fe82ffab4b439cf3900ad036bdf2d1df96328b40`.
+La inspección GET independiente [41921168956](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/actions/runs/41921168956)
+observó `sites/sgp-one-lab/versions/5f20f122c0f91fb9`, FINALIZED, estable al terminar
+la lectura. Sus 92 archivos de aplicación coinciden byte por byte con el artefacto
+del SHA publicado. Inventario API: 94 rutas, sin faltantes; las dos adicionales son
+`__/firebase/init.js` y `__/firebase/init.json`. El inspector terminó con
+`READONLY_INSPECTION_NOT_COMPLETE` por exigir igualdad de rutas sin distinguirlas;
+el resultado global del run es FAILURE, no una certificación CI satisfactoria.
+El postcheck vigente de main ya exige inventario exacto de aplicación y conserva
+solo esas dos rutas si sus hashes y estados son idénticos a la versión anterior.
+No se cambia ni relaja ese control para publicar vidrio.
+
+Huella de inventario observada:
+`1d1ed2a67ed53eef6ad2172a39a44a1f1fef4c9da4e32d8d8e3db4274b4dc7d8`.
+Huella de configuración:
+`b1c8097ce32ce29d3d39d04e54f86699c1cd013dcbfc8a4f9b89f033cadc34fd`.
+PR192 adopta esa versión como baseline y rollback, sin alterar archivos aprobados
+de LP ni contratos backend. Esta transición activa HOLD al fusionar: preparar el
+artefacto final, comprobar SHA/run/digest y releer la versión esperada antes de la
+publicación manual autorizada. No repetir una publicación si el resultado es incierto.
+No acredita guardados humanos ni aceptación autenticada en planta.
+
 03/11/2026, America/Bogota. Encargo actual autoriza sincronizar main, corregir ACL,
 instalar únicamente contratos seguros, fusionar y publicar **si los controles pasan**.
 No autoriza inventar datos, SQL09, desactivar RLS, credenciales cliente privilegiadas

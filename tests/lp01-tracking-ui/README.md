@@ -34,3 +34,14 @@ Los dos enlaces locales a dependencias/vendor no forman parte de la entrega.
 
 Siguiente acción: revisar este cambio aislado y resolver qué encabezado retirar;
 la integración y publicación permanecen fuera de este encargo.
+
+## Integración local con vidrio publicado
+
+Main `9e4a8ecb90664d7296d1e77e241c4a9204d7ff50` incorporado a la rama local.
+No implementación duplicada en main; solo conflictos de continuidad resueltos
+conservando ambos historiales. `app.js` y controles de publicación idénticos a main.
+Validación combinada: **469 tests PASS**, release PASS, navegador PC/móvil PASS,
+política offline PASS y 7 postchecks PASS. La simulación pura de gate devuelve
+HOLD / LP_ASSETS_NOT_APPROVED porque cambió `src/modules/lp01-operation.js`.
+No se renuevan pins ni se publica. La versión Firebase de vidrio comunicada por
+el hilo principal no se verificó independientemente desde este entorno.

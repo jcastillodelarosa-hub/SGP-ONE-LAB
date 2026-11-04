@@ -1,3 +1,19 @@
+## Seguimiento · compatible con main #192 · 04/11/2026
+
+Integración LOCAL de main `9e4a8ecb90664d7296d1e77e241c4a9204d7ff50` en
+`fix/seguimiento-silent-filters`. Cambio original `1ff8cfc` conservado; main no
+contiene una implementación duplicada. Solo conflictos documentales, resueltos
+conservando ambos historiales. Vidrio `app.js`, su prueba, política, workflows y
+postcheck quedan idénticos a main. Ningún bloque superior ni control eliminado.
+469 pruebas JS PASS, verify:release PASS, Chromium 1440/390 PASS (transporte
+sintético), política offline PASS y 7 pruebas postcheck PASS. Simulación pura de
+gate: HOLD / LP_ASSETS_NOT_APPROVED por `src/modules/lp01-operation.js`; no se
+actualizan pins ni se habilita publicación. Publicación de vidrio en versión
+`1d4abf7aa4a92f52` informada por el hilo principal, no reinspeccionada aquí.
+SIN PUSH/PR/FUSIÓN A MAIN/SQL/DESPLIEGUE. Siguiente: revisar la integración local y
+aclarar el bloque superior; publicación requiere evaluación de artefacto y pins
+vigentes bajo los controles existentes. Evidencia: `tests/lp01-tracking-ui/`.
+
 ## Seguimiento · ajuste local aislado · 04/11/2026
 
 Base main `fe82ffab`; rama `fix/seguimiento-silent-filters`.
@@ -6,6 +22,65 @@ de Producción, orden/filtros combinables PC y móvil; 462 JS y release PASS.
 Sin SQL, datos productivos, push, PR, fusión ni publicación; no toca vidrio #192.
 Pendiente aclarar bloque superior a retirar. Siguiente: revisión del cambio local.
 [Detalle y evidencia](tests/lp01-tracking-ui/README.md).
+
+## PR192 · vidrio preparado sobre Seguimiento publicado · 04/11/2026
+
+PR191 fusionado en fe82ffab y publicado en Hosting5f20f122c0f91fb9.
+Inspección41921168956: versión FINALIZED estable durante la lectura, 92 archivos
+de aplicación idénticos al artefacto fe82ffab; sin faltantes, únicamente dos rutas
+reservadas Firebase adicionales. El inspector independiente terminó con
+READONLY_INSPECTION_NOT_COMPLETE por esas rutas; no se presenta como CI PASS.
+El postcheck vigente valida exactamente esas dos rutas por hash/estado retenidos.
+Baseline/rollback de PR192 se fijan a5f20f122c0f91fb9 para preservar Seguimiento;
+la transición de política obliga HOLD y preparación antes de publicar manualmente.
+Vidrio permite semanas identificadas con cobertura parcial y conserva el reporte
+general. 466 pruebas locales PASS tras incorporar main; PC/móvil sintético PASS.
+Sin cambios Supabase ni aprobación formal de PR. Próximo: CI del SHA final,
+merge bajo HOLD, revisar artefacto/SHA/run/digest y publicar con versión esperada.
+
+## PR191 · publicado para pruebas · 04/11/2026 22:01 UTC
+
+**FUSIONADO / APLICADO EN SUPABASE / PUBLICADO.** [Aplicación](https://sgp-one-lab.web.app).
+PR191 fusionado después de CI completa del candidato `7f3352546597746a1785075bdf7f55b1020b74e3`;
+main publicado `fe82ffab4b439cf3900ad036bdf2d1df96328b40` (mismo árbol probado).
+[CI SQL/API/PC/móvil](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/actions/runs/41917114760).
+SQL y permiso acotado se conservan según recibos siguientes; ninguna escritura de
+negocio ni sesión humana inventada. Vidrio192 no se integró en esta publicación.
+
+Preparación41920285385: 459 tests y denegaciones HTTPS PASS; gate automático HOLD
+por transición de política. Publicación manual protegida con SHA/run/ZIP/live exactos:
+[41920517071](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/actions/runs/41920517071).
+ZIP SHA256 `dbdb6e9933ec2fa725470a6be8f660f92e89f7d1eead9101cd519ba81b260f48`.
+Hosting live **`sites/sgp-one-lab/versions/5f20f122c0f91fb9`**, FINALIZED,
+release `1793829363336000`, observado nuevamente 22:00:44 UTC.
+Publicación ejecutada UNA vez; el workflow quedó FAILURE después del deploy por
+`PUBLIC_BYTES_DIFFER`. No repetirlo: la versión ya está activa.
+
+La inspección independiente de solo lectura
+[41921168956](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/actions/runs/41921168956)
+acredita **92/92 archivos públicos byte idénticos al ZIP**, incluyendo manifest;
+misma versión antes/después, sin faltantes. API contiene 94 rutas: las otras dos
+son únicamente `__/firebase/init.js` y `__/firebase/init.json`. El postcheck del
+publish ya comprobó ambas sin cambios frente al baseline, así como inventario y
+configuración anteriores idénticos. Recuperación `1a59beda3dffaed9` sigue FINALIZED,
+91 archivos; no se hizo restauración de prueba. Evidencia saneada:
+[artifact13367546177](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/actions/runs/41921168956/artifacts/13367546177).
+El inspector antiguo también termina FAILURE por comparar las dos rutas de
+plataforma como extras; su resultado global NO se presenta como PASS.
+
+La causa exacta del primer desajuste HTTPS no quedó registrada por archivo ni
+codificación. La inspección posterior recibió identity y comparó todos los bytes.
+Se prepara en rama una corrección acotada: pedir identity, decodificar gzip con
+límite si se recibe, usar la raíz canónica para index y registrar el archivo que
+difiera. Conserva igualdad exacta, denegación de redirects y los demás controles;
+siete regresiones locales PASS. **Esta corrección y este cierre documental NO están
+fusionados ni desplegados**; integrar antes de la siguiente publicación, con CI.
+No se afirma que gzip fuese la causa observada.
+
+**Siguiente acción:** Johan prueba Seguimiento con usuario real autorizado en PC y
+móvil; aceptación positiva, guardados productivos y rendimiento real PENDIENTES.
+El padre puede continuar la rama separada de vidrio tomando como live el5f20...;
+no reutilizar1a59... como expected_live ni repetir el deploy191.
 
 ## PR191 · postcheck de Hosting corregido bajo controles · 04/11/2026
 
