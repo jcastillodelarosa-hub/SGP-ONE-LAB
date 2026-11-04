@@ -126,3 +126,8 @@ Deno2.5.6: check del entrypoint y parser real sin modificar, ambos XLSX anónimo
 Respaldo privado adicional de definiciones y restricciones administrativas originales,
 sin cuentas/sesiones,0600: SHA256
 `a498db1d39409800565c52e49e60510bcdce7f48e664c55a87cccbf3c865e3dd`.
+
+CI41749387056 y41750971099 agotaron los15min del job; el segundo canceló
+durante navegadores tras SQL, roles PC/móvil y continuidad PASS. No es evidencia
+de un check completo aprobado. El límite pasa a25min sin quitar escenarios ni
+alterar disparadores/despliegues; se exige resultado concluyente del nuevo HEAD.

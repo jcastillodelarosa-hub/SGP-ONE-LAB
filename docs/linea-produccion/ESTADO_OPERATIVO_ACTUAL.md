@@ -26,6 +26,9 @@ PC1440/móvil390 con RPC administrativas/sesión y SQL10 reales sintéticos PASS
 El rol visual no autoriza operaciones; SQL revalida rol/accesos al guardar.
 **Runtime local:** Deno2.5.6 compila Edge y procesa ambos XLSX anónimos sin red.
 No se certifican todavía gateway desplegado, sesión humana ni guardados productivos.
+**CI pendiente real:** b1c9480 y71d3a97 terminaron cancelados a15min; el segundo
+interrumpió navegadores después de SQL/roles/continuidad PASS. Se amplía el límite
+del job a25min, conservando todos los checks. No se presenta cancelación como verde.
 
 Esta es la **referencia operativa única de LP**. Describe el estado vigente, no un
 historial. Antes de trabajar leer AGENTS.md, este archivo y el estado real del PR;
