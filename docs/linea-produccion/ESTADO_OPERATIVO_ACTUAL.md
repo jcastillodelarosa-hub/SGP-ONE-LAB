@@ -629,3 +629,16 @@ reglas/archivos ya aprobados o recibidos.
 **Directriz de trabajo del usuario:** elegir siempre la vía más sencilla y rápida que sea segura; plantear de inmediato una decisión concreta cuando desbloquee el trabajo. Evitar auditorías generales, arquitectura adicional, reabrir decisiones aprobadas, pruebas repetidas y conversaciones largas de Codex. Un único encargo técnico acotado al PR #183, con evidencia y parada ante bloqueo real. Mantener SGP_ONE_GOOGLE y LAC separados.
 
 **Estado al registrar esta decisión:** DOCUMENTACIÓN ACTUALIZADA; IMPLEMENTADO EN RAMA / VERIFICADO EN AISLAMIENTO; **NO FUSIONADO / NO APLICADO / NO PUBLICADO / NO VERIFICADO EN PLANTA**. Esta actualización documental no modifica SQL, permisos, usuarios, producción ni Firebase.
+
+
+## Prioridad inmediata — presentación ejecutiva 05/11/2026 a las 08:00 (America/Bogota)
+
+**Solicitud explícita del responsable:** presentar mañana Línea de Producción ante sus jefes. Dejar de ampliar auditorías, infraestructura o rediseños; concentrarse en demostrar las tres ventanas reales: **Seguimiento, Ensamble y Empaque** en https://sgp-one-lab.web.app/.
+
+**Evidencia recuperada de la inspección de solo lectura run 41856841540 (04/11):** versión live `1a59beda3dffaed9` estable; los 89 archivos esperados existen y **los 89 comparados por HTTP coinciden byte a byte** con el artefacto revisado. El inventario Firebase informa 91 rutas por dos archivos adicionales reservados `__/firebase/init.js` y `__/firebase/init.json`; faltantes 0. El job rojo `LIVE_INVENTORY_DIFFERENT` corresponde a la igualdad estricta de rutas que no contempla esas dos rutas reservadas. No volver a publicar/recover por este diagnóstico ni afirmar una alteración de los 89 archivos SGP. La versión anterior `c698e0b8a4356985` sigue FINALIZED. Backend: comprobaciones negativas de autenticación y separación de etapas PASS, pero **sin guardados positivos de usuario real**.
+
+**Siguiente tarea concreta:** comprobar con cuenta propia autorizada del responsable que el menú Línea de Producción abre Seguimiento, Ensamble y Empaque; que la programación real del período aparece; que filtros, selección de orden, observaciones, estados y navegación funcionan en PC/móvil; que los roles no cruzan etapas. No crear datos de prueba ni cerrar turnos productivos artificialmente. Registrar captura/observación de errores concretos; corregir solo fallos que impidan la demostración y validar puntualmente. Si una operación de guardado/cierre aún no ha sido probada con flujo real, indicarlo expresamente a los jefes como pendiente de validación, sin simular éxito.
+
+**Instrucción de coordinación:** el usuario está cansado del tecnicismo y requiere un resultado demostrable antes de la reunión. No pedir otro workflow, migración, investigación de permisos ni cambios de firewall salvo fallo funcional real y causal. Corregir el comparador Firebase en rama independiente más adelante, únicamente con pruebas focalizadas, sin tocar live para diagnosticarlo.
+
+**Estado:** PUBLICADO y archivos SGP verificados en Hosting; aceptación funcional autenticada de las tres ventanas y guardados reales **PENDIENTE**. Nota documental solamente, sin modificación de Supabase/Firebase.
