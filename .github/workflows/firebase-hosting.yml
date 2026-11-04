@@ -61,6 +61,7 @@ jobs:
       - run: python -m pip install PyYAML==6.0.2
       - name: Pure policy and workflow validation, no credentials or Firebase
         run: python tests/lp01-publish/policy.py
+      - run: python tests/lp01-publish/live-inspection.py
   gate:
     needs: validate
     if: github.event_name != 'pull_request'
@@ -176,10 +177,10 @@ jobs:
       - run: npm test
         if: needs.gate.outputs.route == 'publish' || needs.gate.outputs.route == 'visual'
       - name: Download only the explicitly selected prepare artifact
-        if: needs.gate.outputs.route == 'publish'
+        if: needs.gate.outputs.route == 'publish' || (needs.gate.outputs.route == 'inspect' && inputs.artifact_run_id != '')
         uses: actions/download-artifact@v4
         with:
-          name: lp-visual-${{ github.sha }}
+          name: lp-visual-${{ inputs.source_sha }}
           path: ${{ runner.temp }}/lp-download
           github-token: ${{ secrets.GITHUB_TOKEN }}
           run-id: ${{ inputs.artifact_run_id }}
@@ -195,12 +196,34 @@ jobs:
           python scripts/seal-lp-visual.py
           python scripts/lp-prepare-approved-auto.py
       - name: Install OAuth client for existing service account (no IAM Credentials API)
+        # The existing inspect route remains GET only, including package diagnostics.
         run: python -m pip install google-auth==2.35.0
+      - name: Check fixed read-only inspection pins before account use
+        if: needs.gate.outputs.route == 'inspect' && inputs.artifact_run_id != ''
+        env:
+          LP_SOURCE_SHA: ${{ inputs.source_sha }}
+          LP_RUN: ${{ inputs.artifact_run_id }}
+          LP_ZIP_SHA: ${{ inputs.zip_sha256 }}
+          LP_EXPECTED_LIVE: ${{ inputs.expected_live_version }}
+        run: python scripts/lp-hosting-inspect-published.py --check-pins
       - name: Read live identity and retained-version metadata; stop on denied access
         env:
           FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SGP_ONE_LAB }}
           LP_EXPECTED_LIVE: ${{ inputs.expected_live_version }}
         run: python scripts/lp-hosting-metadata.py
+      - name: Inspect already published package without deployment or recovery
+        if: needs.gate.outputs.route == 'inspect' && inputs.artifact_run_id != ''
+        env:
+          LP_ROUTE: inspect
+          LP_SOURCE_SHA: ${{ inputs.source_sha }}
+          LP_RUN: ${{ inputs.artifact_run_id }}
+          LP_ZIP_SHA: ${{ inputs.zip_sha256 }}
+          LP_EXPECTED_LIVE: ${{ inputs.expected_live_version }}
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SGP_ONE_LAB }}
+        run: python scripts/lp-hosting-inspect-published.py
+      - name: Public negative-only backend checks independent of inventory outcome
+        if: always() && needs.gate.outputs.route == 'inspect' && inputs.artifact_run_id != ''
+        run: python scripts/lp-backend-readiness.py
       - name: Publish only the reviewed artifact
         if: needs.gate.outputs.route == 'publish' || needs.gate.outputs.route == 'visual'
         uses: FirebaseExtended/action-hosting-deploy@v0
@@ -233,10 +256,13 @@ jobs:
           LP_ROLLBACK_VERSION: ${{ inputs.rollback_version }}
         run: python scripts/lp-hosting-postcheck.py
       - name: Sanitized metadata only; never upload raw inventory or credentials
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: hosting-identity-${{ github.run_id }}
           path: |
             ${{ runner.temp }}/lp-hosting-before-summary.json
             ${{ runner.temp }}/lp-hosting-after-summary.json
+            ${{ runner.temp }}/lp-live-inspection.json
+            ${{ runner.temp }}/lp-backend-readiness.json
           retention-days: 14

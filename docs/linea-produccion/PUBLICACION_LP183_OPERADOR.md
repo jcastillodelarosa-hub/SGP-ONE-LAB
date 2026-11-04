@@ -1,4 +1,8 @@
-# LP183 — paso de publicación del operador
+# LP183 — publicación YA EJECUTADA (antecedente)
+
+**No repetir estos pasos:** run41850541193 publicó1a59beda3dffaed9. Para el fallo
+posterior de inventario usar solo [INSPECCION_LP183_OPERADOR.md](INSPECCION_LP183_OPERADOR.md).
+El estado siguiente describe la preparación anterior al despliegue.
 
 Estado04/11/2026: PR183 fusionado en ab1d2d65828d029ee8d6e88369b5bc5bd1113e92.
 CI del HEAD revisado f5498a6:6/6 PASS; árbol de main idéntico. Backend configurado,

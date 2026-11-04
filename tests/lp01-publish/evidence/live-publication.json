@@ -1,0 +1,56 @@
+{
+  "status": "PUBLISHED_POSTCHECK_FAILED_DIAGNOSIS_PENDING",
+  "workflow_run": 41850541193,
+  "job_id": 126645609117,
+  "source_sha": "ab1d2d65828d029ee8d6e88369b5bc5bd1113e92",
+  "deploy_step": "success",
+  "metadata_after_step": "success",
+  "postcheck_step": "failure",
+  "failure": "LIVE_INVENTORY_DIFFERENT",
+  "before": {
+    "project": "sgp-one-lab",
+    "site": "sgp-one-lab",
+    "channel": "sites/sgp-one-lab/channels/live",
+    "release": "sites/sgp-one-lab/channels/live/releases/1793801219172000",
+    "version": "sites/sgp-one-lab/versions/c698e0b8a4356985",
+    "version_status": "FINALIZED",
+    "observed_at": "2026-11-04T14:45:04.976555+00:00",
+    "files": 79,
+    "inventory_sha256": "3d5cb1fc9c05187df3e0bc97c645466f07da32a0babf0ba80a4381e6d2048cc8",
+    "config_sha256": "333c0f207246ae4f4cdb3d696b1dc30503b7368c1d0818618ebeaa8f8dcaedfe"
+  },
+  "published": {
+    "project": "sgp-one-lab",
+    "site": "sgp-one-lab",
+    "channel": "sites/sgp-one-lab/channels/live",
+    "release": "sites/sgp-one-lab/channels/live/releases/1793803525878000",
+    "version": "sites/sgp-one-lab/versions/1a59beda3dffaed9",
+    "version_status": "FINALIZED",
+    "observed_at": "2026-11-04T14:45:28.559105+00:00",
+    "files": 91,
+    "inventory_sha256": "c4f027f921eb335ff480d910ba90f2262a8c524cc7ac5a5614bc240868c36bbd",
+    "config_sha256": "b1c8097ce32ce29d3d39d04e54f86699c1cd013dcbfc8a4f9b89f033cadc34fd"
+  },
+  "production_controls_select": {
+    "config": {
+      "id": true,
+      "escrituras": true,
+      "adaptador_bi": "LP-PBI-XLSX-1",
+      "formato_bi_aprobado": true
+    },
+    "profile": {
+      "id": true,
+      "habilitado": true
+    },
+    "checked_at": "2026-11-04T15:03:54.18213+00:00",
+    "sql09_absent": true,
+    "private_rls_enabled": true,
+    "catalogs_direct_access_denied": true
+  },
+  "limits": [
+    "Deployment and live link verified by Hosting API, not inferred from overall workflow status",
+    "Exact missing/additional paths and current public bytes not yet collected",
+    "No new deployment/recovery or DML requested/executed by this diagnosis",
+    "Authenticated PC/mobile rendering and productive saves remain unverified"
+  ]
+}

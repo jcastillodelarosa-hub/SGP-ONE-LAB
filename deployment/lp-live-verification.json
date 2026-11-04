@@ -1,0 +1,8 @@
+{
+  "contract": "LP-LIVE-READONLY/1",
+  "source_sha": "ab1d2d65828d029ee8d6e88369b5bc5bd1113e92",
+  "artifact_run_id": "41847862007",
+  "zip_sha256": "c2a6f642da570c23efcded254b42e01414631ed59278e3270a71b9e3c1e41adc",
+  "expected_live_version": "sites/sgp-one-lab/versions/1a59beda3dffaed9",
+  "rollback_version": "sites/sgp-one-lab/versions/c698e0b8a4356985"
+}

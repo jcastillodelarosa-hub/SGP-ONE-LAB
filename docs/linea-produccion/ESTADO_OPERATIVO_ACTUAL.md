@@ -6,7 +6,7 @@ HEAD revisado f5498a6, CI6/6 PASS; árbol de main idéntico. Main #190 incorpora
 con calendario Colombia/saldos futuros y ambos estilos preservados. Este registro
 posterior a la fusión se conserva en la rama de continuidad del mismo PR; no cambia
 el runtime de main ni sustituye el artefacto aprobado.
-**FASE ACTIVA:** publicación segura de Seguimiento, Ensamble y Empaque PANELES_2.
+**FASE ACTIVA:** validación posterior de la publicación LP, sin redespliegue/recuperación.
 No retomar apertura automática, PDT/Export ni módulos aplazados.
 
 - **APLICADO/VERIFICADO Supabase:** ACL00 y SQL01/06/08/10. SQL10 versión20261104033408,
@@ -35,22 +35,33 @@ No retomar apertura automática, PDT/Export ni módulos aplazados.
   runtime y repitió las diez denegaciones HTTPS con backend activo. Gate HOLD;
   ordinary/controlled omitidos: no se desplegó por fusionar.
   [Recibo CI/paquete](../../tests/lp01-roles/evidence/publication-prepared.json).
-- **HOSTING LP NO PUBLICADO:** paquete final de main preparado. Live acreditado
-  c698e0b8a4356985 FINALIZED/79 archivos (04/11 14:10UTC, incluye #190), destino
-  de recuperación conservado. Publish vuelve a comprobar esa referencia.
-  [Recibo recuperación](../../tests/lp01-roles/evidence/hosting-main190-production.json).
+- **PUBLICADO Hosting:** run41850541193 desplegó correctamente el paquete ab1d2d6
+  en live1a59beda3dffaed9, release1793803525878000, FINALIZED/91 archivos a14:45UTC.
+  El job falló después exclusivamente en lp-hosting-postcheck.py:
+  LIVE_INVENTORY_DIFFERENT. El upload de evidencias quedó omitido por ese fallo;
+  se corrige en rama para ejecutarse siempre. No equivale a despliegue fallido ni
+  autoriza a repetir publish/recover. [Recibo real](../../tests/lp01-publish/evidence/live-publication.json).
+- **VERIFICADO Supabase por SELECT15:03UTC:** escrituras/BI/perfil=true, XLSXv1;
+  RLS privado activo, catálogos sin permisos directos anon/authenticated, sin09.
+  No consultas de cuentas/sesiones ni DML durante este diagnóstico.
+- **PENDIENTE inventario/bytes:** aún no se dispone del listado API real completo
+  ni del diff exacto frente al ZIP original. No se declara ausencia de riesgo ni
+  se inventan rutas faltantes/adicionales. Inspector de lectura preparado en rama:
+  pins exactos, ZIP original, comparación de rutas API y bytes públicos, recuperación
+  retenida solo por GET y comprobaciones negativas independientes de Supabase.
+  Seis pruebas nuevas offline y política/YAML PASS; no certifican el live.
 
-**Bloqueo operativo restante:** el conector no ofrece workflow_dispatch; al sellar
-el SHA final hace falta que un operador inicie el workflow protegido con parámetros
-exactos. La red local sigue restringida; no se cambia/proxifica para sortearla.
-No hay sesión SGP humana disponible para acreditar guardados reales/PC-móvil en planta.
-No se confunden pruebas sintéticas o denegaciones HTTPS con esa aceptación.
-**Siguiente acción exacta:** operador inicia firebase-hosting.yml/main con operation=publish,
-source_sha=ab1d2d65828d029ee8d6e88369b5bc5bd1113e92, run41847862007 y ZIP
-c2a6f642da570c23efcded254b42e01414631ed59278e3270a71b9e3c1e41adc.
-[Pasos y campos listos](PUBLICACION_LP183_OPERADOR.md). Luego verificar run/version
-Hosting y realizar aceptación real PC/móvil con sesión autorizada. Sin datos QA
-en producción ni falsas confirmaciones. [Plan y recuperación](PUBLICACION_CONTROLADA_2026_11_03.md).
+**Intervención indispensable:** el conector no ofrece workflow_dispatch y la red
+local sigue restringida. Iniciar **inspect**, rama feat/lp01-seguimiento-operacion,
+con los [campos exactos de inspección](INSPECCION_LP183_OPERADOR.md); usa la misma
+cuenta configurada solo en el job protegido, sin nuevas credenciales. Publish y
+recover quedan omitidos. No relanzar el run de publicación fallido.
+**Siguiente acción técnica:** leer lp-live-inspection.json del run; identificar
+rutas faltantes/adicionales y hashes diferentes. Corregir el comparador solo ante
+evidencia del defecto y ejecutar sus regresiones focalizadas. Conservar1a59beda3dffaed9
+salvo riesgo demostrado. PC/móvil con datos reales/guardados continúa pendiente
+de sesión propia de un responsable autorizado; no fabricar usuarios o registros.
+[Plan vigente y límites](PUBLICACION_CONTROLADA_2026_11_03.md).
 
 Esta es la **referencia operativa única de LP**. Describe el estado vigente, no un
 historial. Antes de trabajar leer AGENTS.md, este archivo y el estado real del PR;
@@ -65,12 +76,12 @@ segundo plano. No sustituye la supervisión ni concede autorizaciones productiva
 
 | Estado | Significado y situación actual de LP |
 |---|---|
-| PROPUESTO | Publicación Hosting protegida pendiente.04/05/07/08R y diseño A no aplicados.09 excluido |
+| PROPUESTO | Diagnóstico de inventario/bytes preparado; no redespliegue.04/05/07/08R y diseño A no aplicados.09 excluido |
 | IMPLEMENTADO | Seguimiento/Operación, adaptador XLSX y controles en rama. Identidad técnica solo como referencia sintética, no integrada en el runtime |
 | APLICADO | Supabase: ACL00 y SQL01/06/08/10; escrituras/BI/perfil=true por activación autorizada14:13UTC. Sin09 ni asignaciones humanas nuevas |
-| PUBLICADO | Edge lp-powerbi v1 ACTIVE/JWT=true, fuente verificada. **Frontend no publicado** en Firebase ni worker automático; backend LP autorizado habilitado |
+| PUBLICADO | Hosting1a59beda3dffaed9 y Edgev1/JWT=true; backend LP habilitado. Comparación de inventario fallida pendiente de diagnóstico, no certificación funcional productiva |
 | VERIFICADO | CI6/6 baseeffb6a0; verificaciones focalizadas de alternativa local y PG/PC/móvil sintéticos. Supabase real: ocho cuerpos10, ACL/roles/constraint/contención por SELECT. Gateway JWT/SGP: diez denegaciones HTTPS reales PASS. **No guardados productivos o verificación en planta** |
-| FUSIONADO | #183 fusionado en ab1d2d6; no implica publicación Hosting. SQL/Edge/activación tienen sus recibos independientes |
+| FUSIONADO | #183 fusionado en ab1d2d6; publicado por run41850541193. Diagnóstico posterior solo en rama de continuidad, sin nuevo deploy |
 
 ## 2. Fase activa y prioridades obligatorias
 
