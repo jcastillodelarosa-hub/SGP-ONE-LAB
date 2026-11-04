@@ -1,0 +1,35 @@
+{
+  "status": "PROPOSED_JWT_RETAINED_VERIFIED_LOCALLY",
+  "production_deployed": false,
+  "platform_signature_verification_certified": false,
+  "platform_verify_jwt": true,
+  "public_gateway_key": {
+    "role": "anon",
+    "project": "ocvxbwzqxbrfndkvjmfx",
+    "provider_observed_disabled": false,
+    "kind": "existing legacy anon JWT; no generation or rotation"
+  },
+  "modern_sdk_key_unchanged": true,
+  "server_credential_in_client": false,
+  "files_sha256": {
+    "supabase/config.toml": "e125a7afc77c2131c1fe403010c072a41984aabd95be35df80e00c7fce154d0d",
+    "supabase/functions/lp-powerbi/index.ts": "defc3a654ce6d640c68079301b1bc2ebd82349317170aaeaa4d636f8e885505f",
+    "src/server/lp-powerbi-handler.js": "e97567e17a2b93d5b99625904316ac74bbb7161d58f4828d60ee1501b9358ce1",
+    "src/modules/lp01-powerbi-client.js": "ff668a2fcc0baf30c7eea43bdc8e6e0a9d7ad196cab5c979028934ad64d3c11f",
+    "config.js": "ae100a61f58592f7a74385da7063383febbb21c8c28f9fd16d094993c02443cd"
+  },
+  "checks": [
+    "New client unit checks: header separation, wrong/missing/elevated/foreign/expired configuration denial, gateway HTTP error preserved",
+    "Deno2.5.6 entrypoint typecheck PASS",
+    "Affected XLSX PC1440/mobile390 through real shared handler/parser and isolated PostgreSQL PASS",
+    "Session RPC transport failure classified503; invalid session401; HTTP fixture tests only, no real authentication claim"
+  ],
+  "limits": [
+    "Public anon JWT identifies project application, not a human; real SGP session and protected SQL authorize the user",
+    "Local gateway headers use transport fixtures; no live Supabase gateway signature verification or productive saves certified",
+    "Official migration guide recommends removing legacy keys; documented support horizon end2026 requires a follow-up decision before that date",
+    "Initial deployment with verify_jwt=false was automatically rejected; user chose to retain JWT. No indirect deployment or retry of rejected boundary",
+    "New deployment with JWT=true and privileged built-in server credential still requires explicit approval/review; no Edge function published"
+  ],
+  "public_probe": "Prepared in existing Actions workflow, opt-in only after approved deployment; local result NOT_REQUESTED, no live check certified"
+}

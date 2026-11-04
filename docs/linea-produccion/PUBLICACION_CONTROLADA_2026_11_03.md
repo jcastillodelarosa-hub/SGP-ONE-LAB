@@ -152,12 +152,13 @@ no una publicación. [Recibo SELECT y límites](../../tests/lp01-roles/evidence/
 | SQL01 | 20261104025604 | Esquema privado, escrituras=false |
 | SQL06 | 20261104025619 | Contrato XLSX servidor, formato BI=false |
 | SQL08 | 20261104025624 | Ámbitos temporales contenidos; sin responsables reales añadidos |
-| SQL10 | No instalada | Confirmación caducada; SELECT confirma perfil ausente y función administrativa original |
+| SQL10 | 20261104033408 | Aceptada por conector; ocho cuerpos exactos, cinco contratos nativos preservados, CHECK validado; perfil=false |
 
-Solicitud futura **solo** `10_roles_cierre_individual_REVIEW.sql`, SHA256
+Se ejecutó **solo** `10_roles_cierre_individual_REVIEW.sql`, SHA256
 `08d17548ad781ab3f7d8b400121c448d1f064269fc858055498e36cdbdd67d82`.
-No repite01/06/08/00, no incluye09, no activa ni publica. El usuario ha pedido
-aceptación específica tras revisar este resumen; no se renueva ejecución hasta aceptarla.
+No repitió01/06/08/00, no incluyó09, no activó ni publicó. Tras caducidades, el
+usuario indicó que podía aceptar la tarjeta y el conector devolvió success.
+[Recibo y comprobaciones reales](../../tests/lp01-roles/evidence/sql10-production.json).
 
 - Único DROP previsto en SQL10: CHECK actual de `public.sgp_usuarios`, localizado por
   definición exacta, sustituido en la misma transacción por
@@ -199,7 +200,56 @@ aún no contiene esos destinos; no se infiere configuración concedida por el re
 La publicación seguirá en el workflow existente/proyecto/cuenta existentes. El
 conector no expone workflow_dispatch: un operador tendrá que iniciarlo desde
 GitHub cuando se entreguen SHA/run/digest/live exactos y la política permita publicar.
-No ejecutar publish ahora: faltan10, runtime/orígenes/verificación y activación.
+No ejecutar publish ahora: faltan runtime/orígenes/verificación y activación;10 ya está instalado.
 No crear infraestructura, transferir credenciales, saltar403/proxy o publicar una
 versión incompleta como operativa. El rollback exacto de Hosting conserva su
 referencia0312f467cf0e9c29; refrescarla inmediatamente antes de publicar.
+
+## Alternativa vigente: conservar JWT (propuesta, no desplegada)
+
+La revisión automática rechazó la primera solicitud Edge con verify_jwt=false y
+credencial privilegiada integrada por faltar aprobación explícita de esa frontera.
+No se reintentó con otra vía. El usuario eligió **mantener JWT y revisar alternativa**.
+
+| Capa | Propuesta concreta | Límite |
+|---|---|---|
+| Gateway de Edge | verify_jwt=true; Authorization Bearer con JWT público anon existente/activo, mismo proyecto | Identifica la aplicación/proyecto, **no a una persona**; la firma debe verificarse realmente en plataforma |
+| Cliente | Campo lpPowerBiGatewayJwt adicional, rol anon/proyecto/expiración comprobados antes de transmitir; clave sb_publishable del SDK sin cambios | No service_role, secretos o sesiones humanas en configuración; los checks locales no validan criptografía del servidor |
+| Persona | Token propio SGP en p_token, separado del JWT público; sgp_sesion_actual y SQL10 verifican estado/accesos | No se convierte el token SGP en JWT ni se inventan usuarios Supabase Auth |
+| Servidor | Credencial integrada SUPABASE_SERVICE_ROLE_KEY solo en Edge, allowlist exacta sgp_sesion_actual/sgp_lp_operacion_importar_xlsx | Credencial con privilegios elevados preexistentes; no es un principal restringido nuevo y requiere aprobación expresa. Nunca se envía al navegador |
+| SQL | Sesión, rol, línea, etapa, producción, revisión y contención transaccionales ya instalados | Escrituras/BI/perfil=false hasta comprobar servidor y autorización; no se amplían grants |
+
+El JWT anon existente se observó activo y su payload es rol anon/proyecto correcto;
+no se generó o rotó ninguna clave. Es compatibilidad **legada**, no una migración
+de identidad. La [guía oficial actual](https://supabase.com/docs/guides/getting-started/migrating-to-new-api-keys)
+indica soporte de claves legadas hasta finales2026 y recomienda retirarlas: revisar
+esta dependencia antes de esa fecha. El resto de SGP conserva la clave moderna.
+No se certifica hoy la aceptación de firma por el gateway real; falta desplegar y probar.
+
+Pruebas nuevas: separación de cabeceras, JWT ausente/rol elevado/proyecto ajeno/
+expiración rechazados antes de enviar, error del gateway sin falsa importación,
+RPC sesión indisponible503 frente a sesión inválida401. Estas últimas son fixtures
+de transporte, **no** una prueba de autenticación real. Deno2.5.6 compila; solo se
+repitió el recorrido XLSX afectado PC1440/móvil390 con handler/parser y PostgreSQL
+reales sintéticos. Adaptador XLSX y motor SQL no cambian.
+[Evidencia limitada](../../tests/lp01-roles/evidence/jwt-alternative.json).
+
+Para verificar HTTPS se prepara scripts/lp-backend-readiness.py en **el mismo**
+job prepare del workflow existente. No despliega Edge ni usa credenciales
+privilegiadas; solo clave pública, JWT anon público y marcador de sesión inválida.
+Comprueba CORS, JWT ausente/firma alterada rechazados, JWT público válido alcanzando
+la validación SGP, salud de RPC sesión y denegación de lectura sin sesión en ambas
+etapas. No llama RPC de escritura ni crea órdenes/cierres/datos ficticios. Un error
+de sesión se devuelve503 para no confundir servidor roto con una denegación sana.
+
+Inicialmente backend_probe_required no está habilitado: resultado NOT_REQUESTED,
+sin conexión ni certificación. Se habilita únicamente tras despliegue Edge aprobado;
+las llamadas se hacen desde la red propia del runner Actions ya autorizado para
+la publicación, sin modificar/proxificar la red restringida de Codex ni sortear403.
+El comprobador es una comprobación de endpoints públicos, **no** una vía alternativa
+para ejecutar el despliegue rechazado. Verificar pantallas y guardados con datos
+reales requerirá una cuenta SGP autorizada; nunca se simulará esa identidad.
+
+La nueva frontera (JWT=true + credencial integrada privilegiada solo servidor)
+se presenta para aceptación específica antes de llamar deploy_edge_function.
+No hay Edge activo ni frontend publicado; firma/HTTPS/usuarios reales pendientes.

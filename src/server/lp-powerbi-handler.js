@@ -17,7 +17,8 @@ export function createPowerBIHandler({rpc,DOMParser,allowedOrigins}){
    if(typeof b.filename!=='string'||b.filename.length>255||!/^.+\.xlsx$/i.test(b.filename))throw Error('Se requiere archivo XLSX');
    const c=b.command;if(!c||typeof c!=='object'||Array.isArray(c)||Object.keys(c).some(k=>!['id','stage','line','date','shift','revision'].includes(k))||!['ENSAMBLE','EMPAQUE'].includes(c.stage)||!['PANELES_2','FRAMES_2'].includes(c.line)||!Number.isInteger(c.shift)||![1,2].includes(c.shift)||!Number.isSafeInteger(c.revision)||c.revision<0||typeof c.id!=='string'||!/^[a-f0-9-]{36}$/i.test(c.id)||typeof c.date!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(c.date))throw Error('Contexto de cierre inválido');
    const auth=await rpc('sgp_sesion_actual',{p_token:b.p_token});
-   if(auth.error||auth.data?.valida!==true)return new Response(JSON.stringify({error:'Sesión SGP inválida',code:'SGP_SESSION_INVALID'}),{status:401,headers});
+   if(auth.error)return new Response(JSON.stringify({error:'No se pudo comprobar la sesión SGP',code:'SGP_SESSION_UNAVAILABLE'}),{status:503,headers});
+   if(auth.data?.valida!==true)return new Response(JSON.stringify({error:'Sesión SGP inválida',code:'SGP_SESSION_INVALID'}),{status:401,headers});
    if(!['LIDER','LIDER LINEA','COORDINADOR','ADMINISTRADOR','SUPERVISOR ENSAMBLE','SUPERVISOR EMPAQUE'].includes(auth.data.rol))return new Response(JSON.stringify({error:'Rol SGP no autorizado',code:'SGP_ROLE_DENIED'}),{status:403,headers});
    const raw=Uint8Array.from(atob(b.base64),ch=>ch.charCodeAt(0)),parsed=await parsePowerBI(raw,{DOMParser});if(parsed.stage!==c.stage)throw Error('El archivo corresponde a otra etapa');
    // Client totals and normalized rows are never trusted; parse and hash the original again.

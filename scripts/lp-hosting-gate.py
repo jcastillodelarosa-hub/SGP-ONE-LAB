@@ -2,7 +2,7 @@
 from pathlib import Path
 import json,hashlib,subprocess,os,re
 POLICY='deployment/lp-hosting-policy.json'
-PROTECTED=['production-line-tabs.js','src/modules/lp01-followup.js','src/modules/lp01-operation.js','src/domain/lp01-visual-bridge.js','scripts/prepare-lp-main-visual.py','tests/lp01-integration/fixtures/lp-synthetic.json','scripts/stamp-lp-release.mjs','scripts/seal-lp-visual.py','scripts/prepare-lp-runtime.py','scripts/prepare-lp-hosting-plan.py','scripts/lp-verify-downloaded-artifact.py']
+PROTECTED=['production-line-tabs.js','src/modules/lp01-followup.js','src/modules/lp01-operation.js','src/domain/lp01-visual-bridge.js','scripts/prepare-lp-main-visual.py','tests/lp01-integration/fixtures/lp-synthetic.json','scripts/stamp-lp-release.mjs','scripts/seal-lp-visual.py','scripts/prepare-lp-runtime.py','scripts/prepare-lp-hosting-plan.py','scripts/lp-verify-downloaded-artifact.py','src/modules/lp01-powerbi-client.js','src/server/lp-powerbi-handler.js','supabase/functions/lp-powerbi/index.ts','supabase/config.toml','scripts/lp-backend-readiness.py']
 def decide(event,operation,current,previous,hashes,source_sha,expected_sha='',changed_lp=False):
  if current.get('contract')!='LP-HOSTING-POLICY/1' or current.get('mode') not in ['legacy','visual','runtime'] or current.get('project')!='sgp-one-lab' or current.get('site')!='sgp-one-lab':raise ValueError('POLICY_INVALID')
  if event=='push':

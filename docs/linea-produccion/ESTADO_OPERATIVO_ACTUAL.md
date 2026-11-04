@@ -1,31 +1,42 @@
 # Línea de Producción — estado operativo actual
 
-**Actualizado:** 2026-11-03, America/Bogota. Mismo Draft PR183 y rama existente.
-**Código verificado:**e4f8a37; main4b1e98e incorporado conservando ambos bloques
-styles.css. CI6/6 PASS de ese código; [aceptación SQL/PC/móvil](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/actions/runs/41762498849).
+**Actualizado:** 2026-11-04, America/Bogota. Mismo Draft PR183 y rama existente.
+**Base verificada:**effb6a0; main4b1e98e incorporado conservando ambos bloques
+styles.css. CI6/6 PASS de esa base; [aceptación SQL/PC/móvil](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/actions/runs/41766159821).
 La entrega documental posterior no hereda automáticamente checks de otro HEAD.
-**APLICADO en Supabase:** ACL00 y SQL01/06/08, contenidos. Escrituras=false,
+**APLICADO en Supabase:** ACL00 y SQL01/06/08/10, contenidos. Escrituras=false,
 formato BI=false. Catálogos sin acceso directo anon/authenticated; cinco RPC
 nativas intactas, RLS sin cambios. Sin usuarios/sesiones o datos de negocio editados.
 [Recibos y comprobación SELECT](../../tests/lp01-roles/evidence/installation-production.json).
-**SQL10 NO APLICADO:** confirmación del conector caducó; SELECT acredita ausencia
-del perfil y función administrativa original. El usuario pidió resumen y aceptación
-específica antes de renovar únicamente SQL10. No se sortea la confirmación.
+**SQL10 APLICADO:** versión20261104033408, aceptada por el conector; ocho cuerpos
+coinciden con la fuente, cinco firmas/owner/ACL/seguridad nativas preservadas,
+CHECK ampliado validado, once tablas privadas con RLS. Perfil=false, operaciones,
+auditoría/cierres/ámbitos humanos aún sin filas. [Recibo real](../../tests/lp01-roles/evidence/sql10-production.json).
 **NO PUBLICADO / NO FUSIONADO / NO ACTIVADO:** ningún Edge/Firebase/worker,
 perfil operativo ni escrituras habilitados. SQL09 excluido. Publicación condicionada
 a controles completos; no presentar implementación sintética como funcionamiento real.
 **Preparado y probado:** supervisor solo su etapa/selector/retorno, líder ambas;
 menú nativo PC1440/móvil390 y SQL10 sintético real, Roles/Usuarios, cierres y
 revocaciones PASS. Deno2.5.6 compila y procesa ambos XLSX anónimos sin red.
-**Infraestructura pendiente:** entorno reiniciado, pero revisión5 sigue sin los
-tres dominios HTTPS permitidos. Añadirlos en configuración de salida de esta tarea,
-sin cambiar SGP/Hosting/Supabase ni credenciales. El conector no ofrece dispatch:
-el workflow protegido existente requerirá ejecución autorizada cuando esté listo.
+**Servidor pendiente de aprobación específica:** la revisión automática rechazó
+lp-powerbi con verify_jwt=false/credencial privilegiada servidor. El usuario eligió
+mantener JWT; se prepara verify_jwt=true + JWT público anon ya activo del proyecto,
+sin sustituir la clave moderna del resto de SGP. Sesión SGP/SQL siguen autorizando
+a la persona. Clave privilegiada solo servidor, allowlist de dos RPC; no desplegado.
+**Propuesta local verificada:** cabeceras/denegaciones cliente, Deno y recorrido XLSX
+PC1440/móvil390 con handler y PG sintéticos PASS. No certifica gateway JWT real.
+[Evidencia y límites](../../tests/lp01-roles/evidence/jwt-alternative.json).
+**HTTPS pendiente:** se preparó un comprobador público negativo en el workflow
+existente de Actions, inicialmente desactivado; no genera guardados ni necesita
+secretos o infraestructura nueva. Se habilita solo después del despliegue aprobado.
+La red local sigue restringida; no se redirige o altera el proxy. El conector no
+ofrece dispatch: el workflow protegido necesita un operador al quedar listo.
 **Hosting observado:** versión0312f467cf0e9c29 FINALIZED/79 archivos acreditada
 por inspect GET, recuperación retenida; refrescar antes de una publicación.
 [Plan, instrucciones de red, resumen SQL10 y recuperación](PUBLICACION_CONTROLADA_2026_11_03.md).
-**Siguiente:** aceptación exclusiva SQL10 y verificación HTTPS; después runtime,
-permisos/operaciones reales y publicación protegida. PDT/Export conservan sus
+**Siguiente:** revisar/autorizar alternativa Edge JWT=true y credencial integrada
+exclusivamente servidor; desplegar, comprobar HTTPS y después habilitar/publicar
+bajo los controles. PDT/Export conservan sus
 límites de evidencia; apertura automática inactiva, sin retomar otros módulos.
 
 Esta es la **referencia operativa única de LP**. Describe el estado vigente, no un
@@ -41,28 +52,28 @@ segundo plano. No sustituye la supervisión ni concede autorizaciones productiva
 
 | Estado | Significado y situación actual de LP |
 |---|---|
-| PROPUESTO | SQL10 pendiente de aceptación específica; 04/05/07/08R y diseño A no aplicados.09 supersedido y excluido |
+| PROPUESTO | Edge JWT=true con token público anon existente, pendiente de aprobación/despliegue y verificación real.04/05/07/08R y diseño A no aplicados.09 excluido |
 | IMPLEMENTADO | Seguimiento/Operación, adaptador XLSX y controles en rama. Identidad técnica solo como referencia sintética, no integrada en el runtime |
-| APLICADO | Supabase: ACL00 y SQL01/06/08, versiones en recibo. Flags de escritura/BI=false, sin SQL10/09 ni asignaciones humanas |
-| PUBLICADO | **No publicado por este PR** en Firebase/Edge ni worker. Autorización de publicación condicionada a controles completos; pendiente infraestructura y aceptación SQL10 |
-| VERIFICADO | CI6/6 códigoe4f8a37; PostgreSQL17.11 sintético y PC/móvil. Supabase real: metadatos/ACL/instalación contenida por SELECT. **No guardados productivos ni verificación en planta** |
+| APLICADO | Supabase: ACL00 y SQL01/06/08/10; escrituras/BI/perfil=false. Sin09 ni asignaciones humanas |
+| PUBLICADO | **No publicado por este PR** en Firebase/Edge ni worker. Despliegue inicial Edge rechazado; alternativa conserva JWT y espera revisión específica |
+| VERIFICADO | CI6/6 baseeffb6a0; verificaciones focalizadas de alternativa local y PG/PC/móvil sintéticos. Supabase real: ocho cuerpos10, ACL/roles/constraint/contención por SELECT. **No gateway JWT real, guardados productivos o verificación en planta** |
 | FUSIONADO | #183 sigue sin fusionar. La existencia de otro PR fusionado no prueba aplicación/publicación de sus SQL |
 
 ## 2. Fase activa y prioridades obligatorias
 
 **FASE ACTIVA: Seguimiento, Ensamble y Empaque.** Prioridad inmediata: publicación
-segura del alcance aprobado PANELES_2, tras SQL10 y comprobaciones de runtime/red.
+segura del alcance aprobado PANELES_2, tras comprobaciones de runtime y aprobación
+de la alternativa que conserva JWT. SQL10 ya instalado, no repetirlo.
 Conservar las cinco pestañas, Programación/ubicaciones y el adaptador XLSX.
 No publicar una muestra o consulta contenida como si fuese operación integral.
 El bloqueo PUBLIC de apertura automática sigue independiente; no se retoma ese
 trabajo ni Vidrio/Dashboard/Tabla/Kanban para sortear los controles de publicación.
 
-1. Seguridad e identidad técnica para apertura automática.
-2. Integraciones operativas PDT, Export, Power BI y ámbitos reales.
-3. Validación de avances, SALE, afectaciones, arrastre y cierres.
-4. Dependencias de Vidrio, Dashboard y Reportes.
-5. Tabla y Kanban de Programación **al final**.
-6. Cierre: pruebas integrales y publicación únicamente autorizada.
+1. Completar servidor XLSX con JWT y controles de publicación aprobados.
+2. Verificación HTTPS, activación controlada y publicación en el SGP existente.
+3. Comprobación real PC/móvil y trazabilidad de operaciones por rol autorizado.
+4. Integraciones PDT/Export conservan sus bloqueos de origen; no reabrirlas aquí.
+5. Apertura automática, Vidrio/Dashboard y Tabla/Kanban siguen aplazados.
 
 Conservar el calendario existente, sus asignaciones, prioridades y cantidades.
 No crear divisiones adicionales ni equiparar partes de Mecanizado con raíces LP.
@@ -74,8 +85,6 @@ límites indicados; ninguna implica escritura productiva habilitada.
 
 | Funcionalidad y límite | Código / contrato | Pruebas y evidencia |
 |---|---|---|
-| SQL10 pendiente de aceptación específica tras caducidad de confirmación; no instalado | [Recibo SELECT](../../tests/lp01-roles/evidence/installation-production.json), resumen exacto en plan | Usuario acepta únicamente10; Codex renueva por el conector y verifica después. No ejecutar otra vía ni instalar09 |
-| Salida HTTPS no admitida y dispatch no expuesto por el conector; impiden cerrar verificación/publicación | Entorno revisión5 enforced: tres hosts ausentes incluso después de reinicio; proyecto/cuenta/workflow existentes se conservan | Responsable de configuración del entorno añade los tres destinos exactos; operador inicia workflow protegido solo con parámetros revisados. Sin secretos nuevos |
 | Seguimiento: línea/etapa/turno, búsqueda, prioridades, abiertas/nuevas, cantidades, observaciones y afectaciones | [vista](../../src/modules/lp01-followup.js), [dominio](../../src/domain/lp01-followup.js) | [pruebas](../../tests/lp01-followup.test.mjs), [PC/móvil](../../tests/lp01-seguimiento/evidence/browser-results.json) |
 | Operación: último acumulado por asignación/turno, etapas independientes, notas, permisos, CAS, UUID y auditoría | [interfaz](../../src/modules/lp01-operation.js), [motor 01 propuesto](../sql-proposals/lp01-operacion/01_operacion_REVIEW.sql) | [15 grupos SQL](../../tests/lp01-operacion/evidence/postgres.json) |
 | XLSX real v1: comparación por producción/línea/etapa/fecha/turno, suma de últimos avances LP, diferencias justificadas, original y versiones | [adaptador](../../src/domain/powerbi/adapter.js), [servidor](../../src/server/lp-powerbi-handler.js), [06 propuesto](../sql-proposals/lp01-operacion/06_powerbi_xlsx_REVIEW.sql) | [hallazgos y límites](POWER_BI_XLSX_V1.md), [8 grupos SQL](../../tests/lp01-powerbi/evidence/postgres.json), [PC/móvil](../../tests/lp01-powerbi/evidence/browser.json) |
@@ -119,11 +128,13 @@ Responsables expresados por función, **sin inventar personas ni conceder acceso
 
 | Bloqueo / causa | Evidencia verificable | Responsable y salida requerida |
 |---|---|---|
+| Despliegue Edge inicial rechazado por revisión automática; usuario eligió conservar JWT | [Alternativa preparada y pruebas](../../tests/lp01-roles/evidence/jwt-alternative.json), plan vigente | Aprobación expresa de la alternativa JWT=true y credencial integrada solo servidor; desplegar por el conector, sin rodear el rechazo |
+| Gateway/servidor y publicación reales aún no comprobados; sin writes habilitados | Comprobador HTTPS en Actions preparado, inicialmente NOT_REQUESTED; no sesiones válidas ni guardados de prueba productivos | Tras despliegue aprobado, habilitar comprobador público en el workflow existente. Para verificar datos/guardados reales, usar cuenta autorizada sin compartir credenciales |
 | **Apertura automática: A no garantiza «solo ABRIR» en la base actual.** EXECUTE de PUBLIC alcanza 83 SECURITY DEFINER SGP, 80 invocables sin triggers; PUBLIC también recibe TEMP. NOINHERIT/REVOKE al rol no lo sustraen | [SELECT conservado](../../tests/lp01-principal-a/evidence/supabase-catalog.json), [contraejemplo sintético](../../tests/lp01-principal-a/evidence/postgres.json). Helper real solo inspeccionado, nunca ejecutado | Responsable de seguridad/DB y propietario del proyecto: delimitar propuesta compatible de perímetro y autorizar su alcance, o decidir otra frontera. Codex no revoca ACL globales ni implementa B automáticamente |
 | LOGIN/TLS/red/pooler reales no acreditados; no existe enlace técnico integrado/activado | [viabilidad y límites](principal-a/DISENO.md) | Responsable infraestructura/Supabase: runtime/ruta e identidad aprobados y prueba controlada posterior; sin secretos/roles ahora |
 | Emisor PDT real pendiente de acreditar entrega/cobertura neta; asociación por raíz y contención de anulaciones ya preparadas en 07, verificadas solo sintéticamente | [contrato LP-PDT-LIBERACION/1 y brecha](CIERRE_BLOQUEOS_PRODUCTIVOS.md#2-pdt-datos-existentes-y-contrato-que-falta) | Responsable funcional/PDT: caso y consolidación de solapamientos; mantenedor integración: adaptador/emisor trazable, sin convertir piezas en ventanas |
 | Cambio de corte Export no prueba qué avances incluye; riesgo de descontar dos veces | [LP-EXPORT-INCLUSION/1](CIERRE_BLOQUEOS_PRODUCTIVOS.md#3-export-diario-contrato-de-inclusión-separado-de-power-bi-de-cierre) | Responsable fuente Export y mantenedor: procedencia/cortes/eventos incluidos y protocolo idempotente; no deducir inclusión por fecha o diferencia de saldo |
-| Configuración real de supervisores pendiente de10 y Gestión de Roles/Usuarios; no asignar cuentas por inferencia | [Regla vigente](ROLES_CIERRE_INDIVIDUAL.md), [recibo real](../../tests/lp01-roles/evidence/installation-production.json) | Administración autorizada configura cuentas existentes desde Configuración. No exige matrices08/09 ni PRIMARY/BACKUP para el cierre individual aprobado |
+| Configuración real de supervisores mediante Gestión de Roles/Usuarios; SQL10 ya disponible, no asignar cuentas por inferencia | [Regla vigente](ROLES_CIERRE_INDIVIDUAL.md), [recibo real10](../../tests/lp01-roles/evidence/sql10-production.json) | Administración autorizada configura cuentas existentes desde Configuración. No exige matrices08/09 ni PRIMARY/BACKUP para el cierre individual aprobado |
 | Corrección retroactiva de cadenas ya arrastradas y variantes BI no observadas sin contrato/evidencia suficiente | [continuidad](SALE_CONTINUIDAD_CONTENCION.md), [variantes XLSX](POWER_BI_XLSX_V1.md#hallazgos-pendientes-limitados-a-su-caso) | Funcional + mantenedor de fuente: evidencia específica/conciliación, sin inferencias sobre anulaciones, nocturnos, ceros ausentes o reparto |
 
 No se vuelve a consultar información sensible previamente bloqueada ni a conciliar
@@ -132,12 +143,13 @@ no operaciones exitosas de usuarios reales ni cobertura PDT/Export en planta.
 
 ## 6. Siguiente acción técnica exacta y límite de continuación
 
-**Vigente:** ACL corregida/verificada y sincronización resuelta; CI del código PASS.
-SQL01/06/08 instalados con flags=false. [Recibo](../../tests/lp01-roles/evidence/installation-production.json).
-**Siguiente acción exacta:** aceptación del usuario y renovación por el conector
-solo SQL10, fuente/hash revisados en el plan. Verificar que continúa contenido.
-Resolver salida HTTPS mediante configuración revisada, comprobar runtime y
-permisos, después activar/publicar exclusivamente bajo los controles pendientes.
+**Vigente:** ACL y sincronización resueltas; SQL01/06/08/10 contenidos y verificados.
+[Recibo SQL10](../../tests/lp01-roles/evidence/sql10-production.json).
+**Siguiente acción exacta:** aprobación específica de Edge JWT=true y credencial
+preexistente solo servidor para las dos RPC; desplegar desde el conector, sin
+rodear el rechazo anterior. Después habilitar comprobador HTTPS en Actions,
+verificar resultados y solo entonces activar/pin/publicación protegida. Un JWT
+anon público no sustituye la identidad SGP ni certifica una sesión humana.
 No reintroducir matrices09 ni usar otra vía para eludir confirmaciones. El
 dictamen anterior de ACL insegura se conserva como antecedente histórico enlazado.
 

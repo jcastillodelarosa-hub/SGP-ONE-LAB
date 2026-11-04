@@ -96,6 +96,14 @@ jobs:
       - run: npm run verify:release
       - run: npm test
       - run: python tests/lp01-publish/artifact.py
+      - name: Public backend readiness only when explicitly enabled after approved Edge deployment
+        run: python scripts/lp-backend-readiness.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lp-backend-readiness-${{ github.sha }}
+          path: ${{ runner.temp }}/lp-backend-readiness.json
+          retention-days: 14
       - run: python scripts/seal-lp-visual.py
       - uses: actions/upload-artifact@v4
         with:

@@ -1,4 +1,19 @@
-## Ejecución LP autorizada bajo controles · 03/11/2026
+## LP · SQL10 aplicado y alternativa con JWT · 04/11/2026
+
+SQL10 aceptado por el conector y aplicado20261104033408: ocho cuerpos exactos,
+cinco contratos nativos conservados, once tablas privadas RLS, CHECK validado;
+escrituras/BI/perfil=false. Sin cuentas, ámbitos, auditoría o cierres de negocio
+creados. [Recibo](tests/lp01-roles/evidence/sql10-production.json).
+Edge inicial verify_jwt=false fue rechazado automáticamente; usuario eligió
+mantener JWT. Alternativa preparada JWT=true + anon público existente solo en
+cabecera de gateway; sesión SGP y SQL siguen autorizando al usuario. Clave
+privilegiada integrada solo servidor y dos RPC; aprobación/despliegue pendientes.
+Cliente/errores/Deno y recorrido XLSX afectado PC/móvil PASS en aislamiento,
+sin certificar firma JWT del gateway real ni guardados productivos. CI baseeffb6a0
+6/6 reutilizada solo en lo no alterado. No despliegue indirecto, secretos nuevos,
+SQL09, merge o Firebase. Estado único y plan contienen límites/siguiente paso.
+
+## Ejecución LP autorizada bajo controles · 03/11/2026 (antecedente)
 
 Estado vigente posterior: códigoe4f8a37 CI6/6 PASS. ACL00 y01/06/08 APLICADOS
 contenidos; SELECT confirma flags=false y catálogos protegidos, cinco RPC intactas.

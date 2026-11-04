@@ -1,4 +1,4 @@
-# Source configuration only: nothing is deployed by this PR.
-# SGP uses its own session token, validated by the SQL RPC; it is not a Supabase Auth JWT.
+# Proposal: retain platform JWT verification in addition to the real SGP session.
+# A public project anon JWT identifies the caller application, never an SGP user.
 [functions.lp-powerbi]
-verify_jwt = false
+verify_jwt = true

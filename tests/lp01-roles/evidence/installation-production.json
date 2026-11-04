@@ -128,5 +128,6 @@
     "Native administrative contracts unchanged; positive Roles/Users/LP flows verified only with synthetic isolated PostgreSQL and PC/mobile",
     "Network revision5 still excludes required three HTTPS hosts after restart; no bypass/credential escalation",
     "Prepared source ZIP is not a publication or proof of productive saves"
-  ]
+  ],
+  "snapshot_stage": "Historical before SQL10; current applied state is in sql10-production.json"
 }

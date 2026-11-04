@@ -2,8 +2,10 @@
 
 > Actualización de continuidad: la ACL insegura descrita abajo se corrigió y verificó
 > mediante00; SQL01/06/08 están instalados contenidos, CI del códigoe4f8a37 PASS.
-> SQL10 sigue sin aplicar, pendiente de aceptación específica tras caducidad de la
-> confirmación del conector. [Estado vigente y recibos](ESTADO_OPERATIVO_ACTUAL.md).
+> SQL10 fue aceptado y aplicado en versión20261104033408, contenido/verificado
+> por SELECT. [Recibo real](../../tests/lp01-roles/evidence/sql10-production.json).
+> Pendiente: alternativa Edge conservando JWT y publicación protegida, no SQL10.
+> [Estado vigente](ESTADO_OPERATIVO_ACTUAL.md).
 > El dictamen siguiente documenta la captura anterior; no reabrir esa auditoría.
 
 03/11/2026, America/Bogota. Base del encargo **b4cf8c8**, mismo Draft183.
