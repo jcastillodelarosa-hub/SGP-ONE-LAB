@@ -1,3 +1,15 @@
+## Ejecución LP autorizada bajo controles · 03/11/2026
+
+PR183: sincronización con main4b1e98e conserva ambos bloques de estilos. Corrección
+ACL00/00R preparada con consumidores nativos, respaldo privado y reversión probados;
+no DML de datos ni cambios RLS. Runtime sin muestras preparado para el publicador
+existente; feature push solo prepara, no publica. Inspect real intento2 acredita
+live0312f467cf0e9c29 FINALIZED/inventario estable; no publish/recover aún.
+[Estado único](docs/linea-produccion/ESTADO_OPERATIVO_ACTUAL.md) y
+[plan autorizado y secuencia](docs/linea-produccion/PUBLICACION_CONTROLADA_2026_11_03.md).
+Siguiente: CI del nuevo HEAD, después registrar cambios productivos solo si pasan
+seguridad/recuperación. No SQL09, apertura automática, GOOGLE/LAC ni datos inventados.
+
 ## Revisión SQL10/CI · dictamen BLOQUEADO (2026-11-03)
 
 Baseb4cf8c8, mismo Draft183. SELECT de metadatos: siete cuerpos nativos coinciden;

@@ -14,7 +14,7 @@ assert m.decide('push','',p,p,hashes,sha,changed_lp=True)['route']=='hold'
 checks.append('Later ordinary pushes retain legacy release route without granting LP publication')
 for op,route in [('prepare','prepare'),('inspect','inspect'),('publish','hold'),('recover','hold')]:assert m.decide('workflow_dispatch',op,p,p,hashes,sha,sha)['route']==route
 checks.append('Prepare secret-free; inspect GET-only route; current uncertified policy denies publish/recover even with matching source pin')
-approved=p|{'mode':'visual','hosting_certified':True,'certification_reference':'QA-NOT-REAL','approved_lp_files':hashes,'baseline_version':'sites/sgp-one-lab/versions/QA','rollback_version':'sites/sgp-one-lab/versions/QA'}
+approved=p|{'mode':'visual','artifact_kind':'visual','hosting_certified':True,'certification_reference':'QA-NOT-REAL','approved_lp_files':hashes,'baseline_version':'sites/sgp-one-lab/versions/QA','rollback_version':'sites/sgp-one-lab/versions/QA'}
 assert m.decide('push','',approved,p,hashes,sha)['route']=='hold'
 assert m.decide('push','',approved,approved,hashes,sha)['route']=='visual'
 assert m.decide('workflow_dispatch','publish',approved,approved,hashes,sha,sha)['route']=='publish'
@@ -22,6 +22,10 @@ wrong=hashes|{m.PROTECTED[0]:'c'*64};assert m.decide('push','',approved,approved
 try:m.decide('workflow_dispatch','publish',approved,approved,hashes,sha,'0'*40);raise AssertionError('Bad source accepted')
 except ValueError:pass
 checks.append('Policy transition holds; only certified pinned LP assets admit visual releases; drift and wrong source rejected, ordinary non-LP updates can continue')
+runtime=approved|{'mode':'runtime','artifact_kind':'runtime','backend_contracts_verified':True}
+assert m.decide('workflow_dispatch','publish',runtime,runtime,hashes,sha,sha)['route']=='publish'
+try:m.decide('workflow_dispatch','publish',runtime|{'artifact_kind':'visual'},runtime,hashes,sha,sha);raise AssertionError('Wrong runtime kind accepted')
+except ValueError:pass
 # Test REST algorithm with synthetic transport; it proves guards only, not Firebase compatibility/access.
 version='sites/sgp-one-lab/versions/QA';release='sites/sgp-one-lab/releases/QA';calls=[]
 def fake(method,resource,body=None):

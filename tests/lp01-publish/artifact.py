@@ -20,12 +20,13 @@ try:
   env.update(LP_ZIP_SHA=digest['zip_sha256'],LP_SOURCE_SHA=sha)
   subprocess.run(['python','scripts/lp-verify-downloaded-artifact.py'],cwd=ROOT,env=env,check=True,capture_output=True)
   reviewed=temp/'lp-reviewed/public';manifest=json.loads((reviewed/'manifest.json').read_text())
-  assert manifest['mode']=='FULL_SGP_FRONTEND_WITH_SCOPED_SYNTHETIC_LP'
-  assert 'bridge:visualLPBridge(base,read)' in (reviewed/'src/modules/lp01-followup.js').read_text()
-  assert "const importPowerBI=async()=>{throw Error(" in (reviewed/'src/modules/lp01-operation.js').read_text()
+  assert manifest['mode']=='FULL_SGP_RUNTIME_LP'
+  assert 'visualLPBridge' not in (reviewed/'src/modules/lp01-followup.js').read_text()
+  assert not (reviewed/'lp-visual-synthetic.json').exists()
+  assert (reviewed/'src/modules/lp01-operation.js').read_bytes()==(ROOT/'src/modules/lp01-operation.js').read_bytes()
   assert 'data-release-commit="'+sha+'"' in (reviewed/'index.html').read_text()
   assert not any(p.split('/')[0] in ['private','tests','docs','supabase','deployment','scripts','functions'] or p.startswith('src/server/') for p in manifest['files'])
-  checks.append('Sealed visual ZIP and source pins revalidated byte-for-byte; deterministic commit stamp and RPC/HTTP write guards preserved; private/backend paths absent')
+  checks.append('Sealed runtime ZIP/source byte match; real RPC modules unchanged, no synthetic data, private/backend paths absent')
   # Wrong run/source metadata or a different external hash cannot reuse the prepared artifact.
   env['LP_ZIP_SHA']='0'*64
   r=subprocess.run(['python','scripts/lp-verify-downloaded-artifact.py'],cwd=ROOT,env=env,capture_output=True,text=True)
@@ -43,7 +44,7 @@ try:
   checks.append('Self-consistent new ZIP/manifest/digest omitting an original source asset rejected before account use')
 
  result={'status':'PASS','checks':checks,'firebase_actions':0,'limits':['Local source/ZIP integration only; no GitHub artifact download, Hosting credentials or active version certified']}
- (ROOT/'tests/lp01-publish/evidence/artifact.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result,indent=2))
+ (ROOT/'tests/lp01-publish/evidence/artifact-runtime.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result,indent=2))
 finally:
  (ROOT/'index.html').write_bytes(index)
  if old_info is not None:info.write_bytes(old_info)

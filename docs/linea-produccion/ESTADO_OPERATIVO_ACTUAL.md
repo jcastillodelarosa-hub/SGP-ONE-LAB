@@ -1,22 +1,20 @@
 # Línea de Producción — estado operativo actual
 
-**Actualizado:** 2026-11-03, America/Bogota (revisión SQL10/CI).
-**Referencia:** base GitHub/checkout `b4cf8c800f205cb7d044a134777f4406d5c9998d`;
-revisión y preflight de ACL en este conjunto de commits, mismo Draft183.
-**Dictamen: BLOQUEADO PARA INSTALACIÓN EN EL CATÁLOGO REAL OBSERVADO.**
-Siete cuerpos nativos, firmas y CHECK coinciden con la captura; esquema LP aún
-no instalado. SELECT revela escritura directa anon/authenticated sobre catálogos
-de accesos sin RLS, que permite eludir revocación. Reproducido solo sintéticamente;
-SQL10 ahora aborta antes de crear objetos/defaults. No corrige ACL/RLS productivas.
-**CI bloqueada:** main actual4b1e98e; fusión virtual b4cf8c8/main en conflicto
-styles.css. Disparadores pull_request correctos; no se cambian para sortearlo.
-No se fusiona o rebasa; se conserva todo el trabajo. [Dictamen y evidencias](REVISION_SQL10_COMPATIBILIDAD.md).
-**Regla funcional vigente:** cierre individual por rol/etapa en PANELES_2, ambos
-turnos, sin PRIMARY/BACKUP ni asignación temporal obligatoria. Verificada en fixture
-protegida, no productivamente. SQL10 sigue propuesto/deshabilitado y sin aplicar.
-**Pendiente:** revisión/autorización separada de autoridad de accesos y sincronización
-con main para CI. Después revisar instalación contenida; no usuarios/permisos reales,
-activación, fusión del PR o publicación en este encargo.
+**Actualizado:** 2026-11-03, America/Bogota (ejecución de publicación autorizada bajo controles).
+**Base:** PR183 HEAD601efbd, main4b1e98e. Sincronización en esta entrega conserva
+los dos bloques styles.css y todos los cambios de main; misma rama y PR.
+**Autorización vigente:** instalar, fusionar y publicar si pruebas, seguridad y
+recuperación pasan; no SQL09, no RLS desactivada ni datos inventados.
+**Preparado:** corrección ACL00/00R con cinco consumidores administrativos y respaldo
+privado de privilegios verificados, paquete runtime real sin muestras, guards
+protegidos de publicación. Perfil sigue contenido hasta completar controles.
+**Hosting:** inspect existente reejecutado solo GET; misma versión0312f467cf0e9c29
+FINALIZED y79 archivos, inventario/config idénticos. Recuperación retenida acreditada.
+[Plan de ejecución y límites](PUBLICACION_CONTROLADA_2026_11_03.md).
+**Pendiente inmediato:** CI del HEAD sincronizado antes de cambios productivos;
+registrar explícitamente cada instalación/activación/publicación. No atribuir al
+backend real una escritura probada solo sintéticamente. PDT/Export siguen limitados
+por su evidencia de origen y apertura automática inactiva.
 
 Esta es la **referencia operativa única de LP**. Describe el estado vigente, no un
 historial. Antes de trabajar leer AGENTS.md, este archivo y el estado real del PR;

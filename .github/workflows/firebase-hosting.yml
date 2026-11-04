@@ -1,7 +1,7 @@
 name: Deploy SGP ONE to Firebase Hosting
 on:
   push:
-    branches: [main]
+    branches: [main, feat/lp01-seguimiento-operacion]
     paths-ignore:
       - 'AGENTS.md'
       - '.agents/skills/**'
@@ -82,7 +82,7 @@ jobs:
         run: python scripts/lp-hosting-gate.py
   prepare:
     needs: gate
-    if: needs.gate.outputs.route == 'prepare'
+    if: needs.gate.outputs.route == 'prepare' || needs.gate.outputs.route == 'hold'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

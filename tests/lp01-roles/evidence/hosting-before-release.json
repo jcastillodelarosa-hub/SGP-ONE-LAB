@@ -1,0 +1,19 @@
+{
+  "run": 41707119884,
+  "attempt": 2,
+  "job": 126297855680,
+  "operation": "inspect",
+  "publication_or_recovery": false,
+  "summary": {
+    "project": "sgp-one-lab",
+    "site": "sgp-one-lab",
+    "channel": "sites/sgp-one-lab/channels/live",
+    "release": "sites/sgp-one-lab/channels/live/releases/1793649258040000",
+    "version": "sites/sgp-one-lab/versions/0312f467cf0e9c29",
+    "version_status": "FINALIZED",
+    "observed_at": "2026-11-04T00:17:23.451052+00:00",
+    "files": 79,
+    "inventory_sha256": "50ead5440546416780ecf0b03b7cc67364b662bafc8e2ad4797d94cd97a47f28",
+    "config_sha256": "333c0f207246ae4f4cdb3d696b1dc30503b7368c1d0818618ebeaa8f8dcaedfe"
+  }
+}

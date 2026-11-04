@@ -5,7 +5,8 @@
     "Later ordinary pushes retain legacy release route without granting LP publication",
     "Prepare secret-free; inspect GET-only route; current uncertified policy denies publish/recover even with matching source pin",
     "Policy transition holds; only certified pinned LP assets admit visual releases; drift and wrong source rejected, ordinary non-LP updates can continue",
-    "Synthetic API transport: inspect only GET, verifies site/live/version/finalized inventory, stale live refuses recovery; no real identity/version certified",
+    "Synthetic API transport: GET-only, site/channel release names, safe stage-and-HTTP diagnostics, no leaked exceptions, stale live blocked; no real Firebase access certified",
+    "OAuth via existing service-account JWT and token endpoint; no IAMCredentials generateAccessToken, no tokens in GitHub outputs",
     "Workflow YAML: same project/account/live concurrency; secrets after gate; default prepare; both deployment actions point exclusively at prepared public roots",
     "Legacy navigation is byte-identical to PR base; no invented legacy UI or RPC contracts"
   ],

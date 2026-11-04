@@ -7,13 +7,14 @@ if source!=os.environ['GITHUB_SHA']:raise ValueError('DISPATCH_SOURCE_MISMATCH')
 metadata=json.loads((download/'lp-visual-digest.json').read_text())
 if metadata.get('source_sha')!=source or metadata.get('zip_sha256')!=sha:raise ValueError('ARTIFACT_PROVENANCE_MISMATCH')
 spec=importlib.util.spec_from_file_location('preflight',root/'scripts/prepare-lp-hosting-plan.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
-review=temp/'lp-reviewed';m.prepare(download/'lp-visual.zip',sha,review)
+kind=json.loads((root/'deployment/lp-hosting-policy.json').read_text()).get('artifact_kind','visual')
+review=temp/'lp-reviewed';m.prepare(download/'lp-visual.zip',sha,review,kind=kind)
 manifest=json.loads((review/'public/manifest.json').read_text())
 if manifest.get('source_head')!=source:raise ValueError('ARTIFACT_SOURCE_MISMATCH')
 # Byte-bind ordinary SGP resources and all LP resources to this exact reviewed source.
 # The known visual transformations are reconstructed, not arbitrary artifact code.
 subprocess.run(['node',str(root/'scripts/stamp-lp-release.mjs')],cwd=root,check=True)
-subprocess.run(['python',str(root/'scripts/prepare-lp-main-visual.py')],cwd=root,check=True)
+subprocess.run(['python',str(root/('scripts/prepare-lp-runtime.py' if kind=='runtime' else 'scripts/prepare-lp-main-visual.py'))],cwd=root,check=True)
 reference=Path('/tmp/sgp-lp183-main-visual')
 if set(manifest['files'])!=set(json.loads((reference/'manifest.json').read_text())['files']):raise ValueError('ARTIFACT_SOURCE_INVENTORY_DIFFERS')
 for rel in manifest['files']:

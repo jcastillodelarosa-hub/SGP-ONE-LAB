@@ -3,7 +3,9 @@ from pathlib import Path
 import subprocess,json,hashlib,zipfile,os
 ROOT=Path(__file__).resolve().parents[1]
 subprocess.run(['node',str(ROOT/'scripts/stamp-lp-release.mjs')],cwd=ROOT,check=True)
-subprocess.run(['python',str(ROOT/'scripts/prepare-lp-main-visual.py')],cwd=ROOT,check=True)
+kind=json.loads((ROOT/'deployment/lp-hosting-policy.json').read_text()).get('artifact_kind','visual')
+if kind not in ['visual','runtime']:raise ValueError('ARTIFACT_KIND_INVALID')
+subprocess.run(['python',str(ROOT/('scripts/prepare-lp-runtime.py' if kind=='runtime' else 'scripts/prepare-lp-main-visual.py'))],cwd=ROOT,check=True)
 root=Path('/tmp/sgp-lp183-main-visual');target=Path(os.environ.get('RUNNER_TEMP','/tmp'))/'lp-visual.zip'
 with zipfile.ZipFile(target,'w',zipfile.ZIP_DEFLATED) as z:
  for p in sorted(root.rglob('*')):

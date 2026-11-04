@@ -1,3 +1,9 @@
 
 # Private LP scope snapshots and review artifacts; never commit real identities.
 /private/lp01-scopes/
+
+# Private recovery metadata for LP183 release
+private/lp183-recovery/
+
+# Python execution cache
+__pycache__/

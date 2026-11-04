@@ -3,7 +3,7 @@ from pathlib import Path,PurePosixPath
 import zipfile,hashlib,json,stat,sys,shutil,tempfile,argparse
 MAX=32*1024*1024
 DENY={'private','tests','docs','supabase','scripts','functions','.git','.github','.agents','node_modules'}
-def prepare(archive,expected,destination):
+def prepare(archive,expected,destination,kind="visual"):
  archive=Path(archive);dest=Path(destination)
  if len(expected)!=64 or any(c not in '0123456789abcdef' for c in expected):raise ValueError('DIGEST_REQUIRED')
  if archive.stat().st_size>MAX or hashlib.sha256(archive.read_bytes()).hexdigest()!=expected:raise ValueError('ZIP_DIGEST_MISMATCH')
@@ -14,15 +14,19 @@ def prepare(archive,expected,destination):
    p=PurePosixPath(i.filename)
    if any(part.startswith('.') for part in p.parts) or (p.suffix not in {'.html','.js','.css','.svg','.png','.jpg','.webp','.woff','.woff2','.ico','.json'}) or (p.suffix=='.json' and i.filename not in {'manifest.json','lp-visual-synthetic.json','release-info.json'}) or i.is_dir() or not p.parts or p.is_absolute() or '..' in p.parts or '\\' in i.filename or p.as_posix()!=i.filename or p.parts[0] in DENY or i.filename.startswith('src/server/') or stat.S_ISLNK(i.external_attr>>16):raise ValueError('UNSAFE_PATH')
   manifest=json.loads(z.read('manifest.json'))
-  if manifest.get('mode')!='FULL_SGP_FRONTEND_WITH_SCOPED_SYNTHETIC_LP' or manifest.get('production_deploy') is not False:raise ValueError('VISUAL_ARTIFACT_REQUIRED')
+  if kind not in ['visual','runtime']:raise ValueError('ARTIFACT_KIND_INVALID')
+  if manifest.get('mode')!=('FULL_SGP_RUNTIME_LP' if kind=='runtime' else 'FULL_SGP_FRONTEND_WITH_SCOPED_SYNTHETIC_LP') or manifest.get('production_deploy') is not (kind=='runtime'):raise ValueError('ARTIFACT_KIND_MISMATCH')
   files=manifest.get('files')
   if not isinstance(files,dict) or set(names)!=set(files)|{'manifest.json'}:raise ValueError('UNMANIFESTED_FILE')
   for p,h in files.items():
    if hashlib.sha256(z.read(p)).hexdigest()!=h:raise ValueError('FILE_DIGEST_MISMATCH')
-  for required in ['index.html','app.js','config.js','src/domain/lp01-visual-bridge.js','src/modules/lp01-followup.js','src/modules/lp01-operation.js','lp-visual-synthetic.json']:
+  for required in ['index.html','app.js','config.js','src/modules/lp01-followup.js','src/modules/lp01-operation.js']:
    if required not in files:raise ValueError('FRONTEND_INCOMPLETE')
   bootstrap=z.read('src/modules/lp01-followup.js').decode();operation=z.read('src/modules/lp01-operation.js').decode()
-  if 'bridge:visualLPBridge(base,read)' not in bootstrap or "const importPowerBI=async()=>{throw Error(" not in operation:raise ValueError('VISUAL_GUARD_MISSING')
+  if kind=='visual':
+   if 'lp-visual-synthetic.json' not in files or 'src/domain/lp01-visual-bridge.js' not in files or 'bridge:visualLPBridge(base,read)' not in bootstrap or "const importPowerBI=async()=>{throw Error(" not in operation:raise ValueError('VISUAL_GUARD_MISSING')
+  else:
+   if 'lp-visual-synthetic.json' in files or 'src/domain/lp01-visual-bridge.js' in files or 'visualLPBridge' in bootstrap or "import {importPowerBI} from './lp01-powerbi-client.js'" not in operation or "sgp_lp_operacion_consultar" not in operation:raise ValueError('REAL_RPC_ARTIFACT_REQUIRED')
   if dest.exists():raise ValueError('DESTINATION_MUST_BE_NEW')
   dest.parent.mkdir(parents=True,exist_ok=True);temporary=Path(tempfile.mkdtemp(prefix='.lp-publish-',dir=dest.parent))
   try:
