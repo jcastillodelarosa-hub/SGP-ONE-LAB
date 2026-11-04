@@ -1,8 +1,8 @@
 {
   "contract": "LP-LIVE-READONLY/1",
-  "source_sha": "ab1d2d65828d029ee8d6e88369b5bc5bd1113e92",
-  "artifact_run_id": "41847862007",
-  "zip_sha256": "c2a6f642da570c23efcded254b42e01414631ed59278e3270a71b9e3c1e41adc",
-  "expected_live_version": "sites/sgp-one-lab/versions/1a59beda3dffaed9",
-  "rollback_version": "sites/sgp-one-lab/versions/c698e0b8a4356985"
+  "source_sha": "fe82ffab4b439cf3900ad036bdf2d1df96328b40",
+  "artifact_run_id": "41920285385",
+  "zip_sha256": "dbdb6e9933ec2fa725470a6be8f660f92e89f7d1eead9101cd519ba81b260f48",
+  "expected_live_version": "sites/sgp-one-lab/versions/5f20f122c0f91fb9",
+  "rollback_version": "sites/sgp-one-lab/versions/1a59beda3dffaed9"
 }

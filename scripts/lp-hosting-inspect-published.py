@@ -48,7 +48,7 @@ def public_asset(path,expected):
    elif encoding not in ('','identity'):raise ValueError('PUBLIC_ENCODING_NOT_VERIFIED')
    if len(body)>4*1024*1024:raise ValueError('PUBLIC_RESPONSE_TOO_LARGE')
    digest=hashlib.sha256(body).hexdigest()
-   return {'path':path,'http_status':response.status,'bytes_match':digest==expected,'sha256':digest,'cache_control':response.headers.get('Cache-Control','')}
+   return {'path':path,'http_status':response.status,'content_encoding':encoding,'bytes_match':digest==expected,'sha256':digest,'cache_control':response.headers.get('Cache-Control','')}
  except urllib.error.HTTPError as exc:return {'path':path,'http_status':exc.code,'bytes_match':False}
  except Exception:return {'path':path,'http_status':None,'bytes_match':False,'error':'PUBLIC_TRANSPORT_OR_RESPONSE_NOT_VERIFIED'}
 def run():
