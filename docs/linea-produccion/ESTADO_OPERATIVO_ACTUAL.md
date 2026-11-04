@@ -20,6 +20,12 @@ comparación. Los demás checks terminados y la preparación sin publicación pa
 registrar explícitamente cada instalación/activación/publicación. No atribuir al
 backend real una escritura probada solo sintéticamente. PDT/Export siguen limitados
 por su evidencia de origen y apertura automática inactiva.
+**Ajuste de navegación:** supervisores ven solo su etapa, incluido selector y
+retorno al turno; líder conserva ambas y los accesos históricos restantes no cambian.
+PC1440/móvil390 con RPC administrativas/sesión y SQL10 reales sintéticos PASS.
+El rol visual no autoriza operaciones; SQL revalida rol/accesos al guardar.
+**Runtime local:** Deno2.5.6 compila Edge y procesa ambos XLSX anónimos sin red.
+No se certifican todavía gateway desplegado, sesión humana ni guardados productivos.
 
 Esta es la **referencia operativa única de LP**. Describe el estado vigente, no un
 historial. Antes de trabajar leer AGENTS.md, este archivo y el estado real del PR;

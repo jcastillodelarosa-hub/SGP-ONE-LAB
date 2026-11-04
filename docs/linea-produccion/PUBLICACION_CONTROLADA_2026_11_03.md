@@ -105,3 +105,24 @@ paths o HTTP. Pruebas nuevas ejercitan la configuración y el handler HTTP real
 para OPTIONS/origen ajeno, sin RPC ni guardados simulados. Autenticación propia
 SGP permanece en handler y SQL; verify_jwt=false ya era el contrato propuesto,
 no desactiva RLS ni reemplaza sesión por un claim del navegador.
+
+## Navegación y runtime dirigidos
+
+Se detectó que las pestañas mostraban ambas etapas a los supervisores aunque SQL10
+ya denegaba la etapa contraria. Se usa el rol obtenido por la sesión nativa para
+limitar pestañas y selector; el retorno de Operación vuelve al turno autorizado.
+El líder conserva ambas. Los accesos históricos de Seguimiento de los demás roles
+no se sustituyen. Esto solo presenta capacidades; no cambia el motor de autorización.
+
+Prueba PC1440/móvil390 con cuentas sintéticas y las RPC nativas/SQL10 reales:
+supervisores limitados, clic programático contrario sin cambiar etapa, líder ambas,
+Gestión de Usuarios/Roles, revocación y cierre individual T2 con cancelación/auditoría.
+Las nuevas capturas de ambos tamaños se conservan en el artifact de CI del check LP;
+las capturas anteriores siguen como evidencia de sus versiones, sin sobrescribirlas.
+Deno2.5.6: check del entrypoint y parser real sin modificar, ambos XLSX anónimos
+33/37 filas,186 ventanas por archivo, sin red. No equivale al gateway desplegado.
+[Evidencia Deno](../../tests/lp01-roles/evidence/runtime-deno.json).
+
+Respaldo privado adicional de definiciones y restricciones administrativas originales,
+sin cuentas/sesiones,0600: SHA256
+`a498db1d39409800565c52e49e60510bcdce7f48e664c55a87cccbf3c865e3dd`.

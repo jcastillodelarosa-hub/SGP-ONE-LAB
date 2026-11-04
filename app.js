@@ -390,6 +390,8 @@ function accessTreeHtml(selected=[],mode='user'){return SGP_ACCESS_TREE.map(x=>{
 let currentAuth=null,userAdminRows=[],editingUserId=null,roleAccessRows=[];
 async function applyUserAccess(auth){
  currentAuth=auth||null;const token=sessionStorage.getItem(APP_SESSION_KEY),buttons=[...document.querySelectorAll('.nav [data-view]')];
+ // Presentation only: protected RPCs still validate current role and effective access.
+ document.dispatchEvent(new CustomEvent('sgp:lp-role',{detail:auth?.rol||null}));
  if(!token){buttons.forEach(b=>b.hidden=false);return}
  if(String(auth?.rol||'').toUpperCase()==='ADMINISTRADOR'){buttons.forEach(b=>b.hidden=false);return}
  try{

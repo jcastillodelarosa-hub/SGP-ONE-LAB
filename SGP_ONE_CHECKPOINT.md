@@ -9,6 +9,10 @@ live0312f467cf0e9c29 FINALIZED/inventario estable; no publish/recover aún.
 [plan autorizado y secuencia](docs/linea-produccion/PUBLICACION_CONTROLADA_2026_11_03.md).
 Siguiente: CI del nuevo HEAD, después registrar cambios productivos solo si pasan
 seguridad/recuperación. No SQL09, apertura automática, GOOGLE/LAC ni datos inventados.
+Navegación ajustada: supervisor solo su etapa/selector/retorno; líder ambas, sin
+cambiar los accesos históricos de Seguimiento para otros roles. PC1440/móvil390
+con SQL10 sintético PASS. Deno2.5.6 compila Edge y lee ambos XLSX anónimos sin red.
+CI shallow corregida con fetch-depth=0; los checks nuevos deben terminar antes de instalar.
 
 ## Revisión SQL10/CI · dictamen BLOQUEADO (2026-11-03)
 

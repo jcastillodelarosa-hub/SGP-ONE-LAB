@@ -3,21 +3,25 @@
   "results": [
     {
       "width": 1440,
+      "direct_users_without_prior_roles_visit": "PASS",
       "native_role_edit_revocation": "PASS",
       "native_user_create_edit_and_defaults": "PASS",
       "individual_T2_confirmation_cancel_and_close": "PASS",
       "server_role_audit": "PASS",
-      "transport": "real local SDK; REST routed to actual captured admin/session and LP SQL; unrelated sources unavailable",
-      "direct_users_without_prior_roles_visit": "PASS"
+      "supervisor_single_stage_navigation": "PASS",
+      "leader_both_stages_navigation": "PASS",
+      "transport": "real local SDK; REST routed to actual captured admin/session and LP SQL; unrelated sources unavailable"
     },
     {
       "width": 390,
+      "direct_users_without_prior_roles_visit": "PASS",
       "native_role_edit_revocation": "PASS",
       "native_user_create_edit_and_defaults": "PASS",
       "individual_T2_confirmation_cancel_and_close": "PASS",
       "server_role_audit": "PASS",
-      "transport": "real local SDK; REST routed to actual captured admin/session and LP SQL; unrelated sources unavailable",
-      "direct_users_without_prior_roles_visit": "PASS"
+      "supervisor_single_stage_navigation": "PASS",
+      "leader_both_stages_navigation": "PASS",
+      "transport": "real local SDK; REST routed to actual captured admin/session and LP SQL; unrelated sources unavailable"
     }
   ],
   "limits": [
