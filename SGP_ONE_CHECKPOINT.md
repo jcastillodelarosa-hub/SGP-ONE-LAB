@@ -1,3 +1,18 @@
+## PR192 · vidrio preparado sobre Seguimiento publicado · 04/11/2026
+
+PR191 fusionado en fe82ffab y publicado en Hosting5f20f122c0f91fb9.
+Inspección41921168956: versión FINALIZED estable durante la lectura, 92 archivos
+de aplicación idénticos al artefacto fe82ffab; sin faltantes, únicamente dos rutas
+reservadas Firebase adicionales. El inspector independiente terminó con
+READONLY_INSPECTION_NOT_COMPLETE por esas rutas; no se presenta como CI PASS.
+El postcheck vigente valida exactamente esas dos rutas por hash/estado retenidos.
+Baseline/rollback de PR192 se fijan a5f20f122c0f91fb9 para preservar Seguimiento;
+la transición de política obliga HOLD y preparación antes de publicar manualmente.
+Vidrio permite semanas identificadas con cobertura parcial y conserva el reporte
+general. 466 pruebas locales PASS tras incorporar main; PC/móvil sintético PASS.
+Sin cambios Supabase ni aprobación formal de PR. Próximo: CI del SHA final,
+merge bajo HOLD, revisar artefacto/SHA/run/digest y publicar con versión esperada.
+
 ## PR191 · postcheck de Hosting corregido bajo controles · 04/11/2026
 
 CI2c4ca32 completa PASS. Evidencia real41856841540 identifica únicamente dos
