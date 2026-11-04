@@ -7,14 +7,16 @@ con calendario Colombia/saldos futuros y ambos estilos preservados. Este registr
 posterior a la fusión se conserva en la rama de continuidad del mismo PR; no cambia
 el runtime de main ni sustituye el artefacto aprobado.
 **Entrega actual:** corrección consultiva de Seguimiento B08–B11, preparada sobre
-35bb6ad en esta misma rama; el commit que contiene este bloque es su referencia
-versionada. **IMPLEMENTADO EN RAMA / VERIFICADO EN AISLAMIENTO**, sin publicar.
+35bb6ad en esta misma rama. Código/evidencias:031dcfbe070bed1b68599af0299bcd6348ba8391;
+este commit documental posterior conserva exactamente ese runtime. **IMPLEMENTADO EN RAMA / VERIFICADO EN AISLAMIENTO**, sin publicar.
 **FASE ACTIVA:** Seguimiento Ensamble/Empaque conforme a originales disponibles.
 Tabla PC/tarjetas móviles, dos saldos Export, SALE/avance independientes, abiertas
 por semana original, chips y panel consultivo con retorno conservado.
 [Comparación y límites](SEGUIMIENTO_B08_B11_REVISION.md) ·
 [28 pruebas y cuatro recorridos PC/móvil, SQL real con datos sintéticos](../../tests/lp01-tracking/README.md).
-CI del nuevo commit pendiente al preparar la entrega; no se hereda el verde previo.
+**CI runtime031dcfb:** [41871900999](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/actions/runs/41871900999)
+validate/gate/prepare SUCCESS; ordinary/controlled SKIPPED: sin despliegue.
+La CI del commit documental posterior se consulta aparte; no altera esa evidencia.
 Operación, Programación, Power BI y SQL sin cambios funcionales. Faltan PDF maestro
 completo/chat19, envío de verificación acreditado y cobertura global de abiertas
 fuera de las asignaciones del turno. No inventar esas fuentes ni disponibilidad.
