@@ -13,6 +13,50 @@ general. 466 pruebas locales PASS tras incorporar main; PC/móvil sintético PAS
 Sin cambios Supabase ni aprobación formal de PR. Próximo: CI del SHA final,
 merge bajo HOLD, revisar artefacto/SHA/run/digest y publicar con versión esperada.
 
+## PR191 · publicado para pruebas · 04/11/2026 22:01 UTC
+
+**FUSIONADO / APLICADO EN SUPABASE / PUBLICADO.** [Aplicación](https://sgp-one-lab.web.app).
+PR191 fusionado después de CI completa del candidato `7f3352546597746a1785075bdf7f55b1020b74e3`;
+main publicado `fe82ffab4b439cf3900ad036bdf2d1df96328b40` (mismo árbol probado).
+[CI SQL/API/PC/móvil](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/actions/runs/41917114760).
+SQL y permiso acotado se conservan según recibos siguientes; ninguna escritura de
+negocio ni sesión humana inventada. Vidrio192 no se integró en esta publicación.
+
+Preparación41920285385: 459 tests y denegaciones HTTPS PASS; gate automático HOLD
+por transición de política. Publicación manual protegida con SHA/run/ZIP/live exactos:
+[41920517071](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/actions/runs/41920517071).
+ZIP SHA256 `dbdb6e9933ec2fa725470a6be8f660f92e89f7d1eead9101cd519ba81b260f48`.
+Hosting live **`sites/sgp-one-lab/versions/5f20f122c0f91fb9`**, FINALIZED,
+release `1793829363336000`, observado nuevamente 22:00:44 UTC.
+Publicación ejecutada UNA vez; el workflow quedó FAILURE después del deploy por
+`PUBLIC_BYTES_DIFFER`. No repetirlo: la versión ya está activa.
+
+La inspección independiente de solo lectura
+[41921168956](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/actions/runs/41921168956)
+acredita **92/92 archivos públicos byte idénticos al ZIP**, incluyendo manifest;
+misma versión antes/después, sin faltantes. API contiene 94 rutas: las otras dos
+son únicamente `__/firebase/init.js` y `__/firebase/init.json`. El postcheck del
+publish ya comprobó ambas sin cambios frente al baseline, así como inventario y
+configuración anteriores idénticos. Recuperación `1a59beda3dffaed9` sigue FINALIZED,
+91 archivos; no se hizo restauración de prueba. Evidencia saneada:
+[artifact13367546177](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/actions/runs/41921168956/artifacts/13367546177).
+El inspector antiguo también termina FAILURE por comparar las dos rutas de
+plataforma como extras; su resultado global NO se presenta como PASS.
+
+La causa exacta del primer desajuste HTTPS no quedó registrada por archivo ni
+codificación. La inspección posterior recibió identity y comparó todos los bytes.
+Se prepara en rama una corrección acotada: pedir identity, decodificar gzip con
+límite si se recibe, usar la raíz canónica para index y registrar el archivo que
+difiera. Conserva igualdad exacta, denegación de redirects y los demás controles;
+siete regresiones locales PASS. **Esta corrección y este cierre documental NO están
+fusionados ni desplegados**; integrar antes de la siguiente publicación, con CI.
+No se afirma que gzip fuese la causa observada.
+
+**Siguiente acción:** Johan prueba Seguimiento con usuario real autorizado en PC y
+móvil; aceptación positiva, guardados productivos y rendimiento real PENDIENTES.
+El padre puede continuar la rama separada de vidrio tomando como live el5f20...;
+no reutilizar1a59... como expected_live ni repetir el deploy191.
+
 ## PR191 · postcheck de Hosting corregido bajo controles · 04/11/2026
 
 CI2c4ca32 completa PASS. Evidencia real41856841540 identifica únicamente dos
