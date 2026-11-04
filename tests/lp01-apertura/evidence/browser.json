@@ -1,0 +1,31 @@
+{
+  "status": "PASS_FOR_OBSERVER_AND_MANUAL_FALLBACK",
+  "results": [
+    {
+      "viewport": 1440,
+      "actual_protected_sql": true,
+      "read_plan_no_writes": true,
+      "prior_open_block_visible": true,
+      "prior_open_not_closed_or_skipped": true,
+      "technical_binding_explicitly_pending": true,
+      "manual_fallback_after_valid_empty_close": true,
+      "leader_not_granted_opening": true,
+      "planning_and_export_unchanged": true,
+      "page_errors": [],
+      "automatic_executor": "NOT IMPLEMENTED OR CERTIFIED; manual actions only"
+    },
+    {
+      "viewport": 390,
+      "actual_protected_sql": true,
+      "read_plan_no_writes": true,
+      "prior_open_block_visible": true,
+      "prior_open_not_closed_or_skipped": true,
+      "technical_binding_explicitly_pending": true,
+      "manual_fallback_after_valid_empty_close": true,
+      "leader_not_granted_opening": true,
+      "planning_and_export_unchanged": true,
+      "page_errors": [],
+      "automatic_executor": "NOT IMPLEMENTED OR CERTIFIED; manual actions only"
+    }
+  ]
+}

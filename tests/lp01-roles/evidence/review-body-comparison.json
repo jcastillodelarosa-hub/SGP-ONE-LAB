@@ -1,0 +1,41 @@
+{
+  "status": "MATCH_ALL_7_NATIVE_BODIES",
+  "functions": {
+    "sgp_admin_rol_accesos_guardar": {
+      "captured_md5": "96c5531abff3988b31a91211b4a440f4",
+      "observed_md5": "96c5531abff3988b31a91211b4a440f4",
+      "equal": true
+    },
+    "sgp_admin_rol_accesos_listar": {
+      "captured_md5": "32a3077fbfc057aca30f6e622796f12e",
+      "observed_md5": "32a3077fbfc057aca30f6e622796f12e",
+      "equal": true
+    },
+    "sgp_admin_usuario_guardar": {
+      "captured_md5": "ed07b071fe83cf63709ed976d38fb116",
+      "observed_md5": "ed07b071fe83cf63709ed976d38fb116",
+      "equal": true
+    },
+    "sgp_admin_usuarios_listar": {
+      "captured_md5": "543908bbd6c0de99540d8b6bf3299d15",
+      "observed_md5": "543908bbd6c0de99540d8b6bf3299d15",
+      "equal": true
+    },
+    "sgp_mis_accesos": {
+      "captured_md5": "4f879ddd1659ef97f05e2f4aaa7c5d33",
+      "observed_md5": "4f879ddd1659ef97f05e2f4aaa7c5d33",
+      "equal": true
+    },
+    "sgp_sesion_actual": {
+      "captured_md5": "79efd30d18eac0950907b5248a2c79d5",
+      "observed_md5": "79efd30d18eac0950907b5248a2c79d5",
+      "equal": true
+    },
+    "sgp_validar_sesion_rol": {
+      "captured_md5": "c11c53edf00a3c90b9b124451e7cef92",
+      "observed_md5": "c11c53edf00a3c90b9b124451e7cef92",
+      "equal": true
+    }
+  },
+  "lp_functions": "Not installed in real Supabase; compare proposed SQL08, not claimed live"
+}

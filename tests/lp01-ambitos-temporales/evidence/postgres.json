@@ -1,0 +1,23 @@
+{
+  "status": "PASS",
+  "postgres": "17.11 (Debian 17.11-1.pgdg13+2)",
+  "checks": [
+    "Atomic installation/rollback, exact source guards, repeat-install refusal; legacy rows fail closed without validity",
+    "Four line/stage scopes through real RPC; duty never grants coordinator operations; consultation stays read-only; explicit offset parser and Sunday night schedule",
+    "Expired/exclusive end, future/inclusive start, revocation and old transaction snapshots denied; valid sibling scope does not leak expired rows",
+    "Whole-turn/night period coverage enforced independently per PRIMARY/BACKUP; no aggregate partial responsibility",
+    "Real versioned closure, coordinator-only reopen and Sunday night continuity preserve scopes and original identities",
+    "Actual queued command expires under contention; deferred final check rolls back writes and immutable audit on expiry before COMMIT",
+    "Actual concurrent revocation both lock orders serializes safely; exact retry idempotent, changed payload denied",
+    "Revoked Empaque does not widen or invalidate Ensamble; no cross-stage access",
+    "Restricted recovery works with contained writes and no scopes; refuses existing scopes; columns retained, RLS and original facade ACL preserved"
+  ],
+  "synthetic": true,
+  "sql_sha256": "c8fb6550ffbae031f4eb9255236e1aa3b5d5a2da4b2d128d3d1ccfa591246a57",
+  "limits": [
+    "No production connection, rows, privileges or RLS modified",
+    "QA CSV supplies closure input only; existing XLSX adapter untouched",
+    "No frontend change; prior PC/mobile evidence reused",
+    "RPC autocommit host must preserve deferred constraints until commit; no new SQL execution endpoint"
+  ]
+}

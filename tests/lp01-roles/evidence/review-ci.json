@@ -1,0 +1,30 @@
+{
+  "observed": "2026-11-03 America/Bogota",
+  "head": "b4cf8c800f205cb7d044a134777f4406d5c9998d",
+  "pr": 183,
+  "draft": true,
+  "mergeable": false,
+  "mergeable_state": "dirty",
+  "check_runs": [],
+  "workflow_runs_for_head": [],
+  "pr_base_field": "bb224f00924c1feaa47a4a556a829e93b8e4ca3e",
+  "main_branch_and_fetch": "4b1e98e37fdd9f615266c963088c8d1313b51266",
+  "virtual_merge": {
+    "ba1c546_vs_main": {
+      "exit_code": 0,
+      "tree": "18403d9d59cf61d559d15024682c339bf62f1119"
+    },
+    "b4cf8c8_vs_main": {
+      "exit_code": 1,
+      "tree": "1d20c7ab5d7d4ff275108e1fab6b1ae280276c5a",
+      "conflicts": [
+        "styles.css"
+      ]
+    }
+  },
+  "trigger_defect_found": false,
+  "trigger_modified": false,
+  "publication_workflows_dispatched": 0,
+  "limits": "Virtual merge writes only disposable git objects; no index/worktree merge. Current-main branch reference verified independently of PR base field.",
+  "trigger_definition_byte_equivalent_after_yaml_parse": true
+}

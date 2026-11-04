@@ -1,0 +1,7 @@
+rol,lectura,avance,observaciones,afectaciones,cierre,SALE,validar_afectaciones,reapertura
+CONSULTA,SI,NO,NO,NO,NO,NO,NO,NO
+LIDER,SI,SI,SI,SI,SI,NO,NO,NO
+LIDER LINEA,SI,SI,SI,SI,SI,NO,NO,NO
+COORDINADOR,SI,SI,SI,SI,SI,SI,SI,SI
+ADMINISTRADOR,SI,SI,SI,SI,SI,SI,SI,SI
+RECEPCION,NO,NO,NO,NO,NO,NO,NO,NO

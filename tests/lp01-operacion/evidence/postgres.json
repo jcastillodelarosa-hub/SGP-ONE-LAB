@@ -1,0 +1,26 @@
+{
+  "status": "PASS",
+  "postgres": "17.11 (Debian 17.11-1.pgdg13+2)",
+  "checks": [
+    "Atomic installation failure leaves no objects; default writes disabled",
+    "288 = 90 + 90 + 90 + 18; stage/part identities persist independently",
+    "Real captured session: exact role, missing production scope, read-only user, forged role, expired and invalid token rejected",
+    "Cumulative 30\u219250\u219240\u219290 replaces; retries once; P1 never closes P2\u2013P4, original or other stage",
+    "Affected windows overlap: 12/8/3 consolidated 15 with mandatory coordinator reason and immutable history",
+    "Separate physical lines: independent turn and files, wrong line rejected; leader closes only its scoped line",
+    "Real SQL CSV adapter QA: period/identity/duplicates/differences/file hash; stage closure, coordinator reopening, immutable versions",
+    "Actual concurrent PG sessions: identical retry once; stale CAS rejects a competing edit",
+    "Next-turn opening carries once with original root even after legacy planner carry; execution resets, original part capacity enforced",
+    "Trusted synthetic PDT release associates key/stage once, no piece\u2192window conversion; notification persisted",
+    "Real PG close vs execution serializes: one succeeds; other observes revision conflict or closed turn",
+    "A fully executed 18-unit part is not carried as open; sibling parts remain independent",
+    "Official Export never written by engine; changed load fails closed without inclusion manifest",
+    "Immutable history/files/reports/notifications; RLS enabled, private schema inaccessible to browser",
+    "Containment stops all writes while preserving reports; SELECT postchecks execute; reinstall refuses existing schema"
+  ],
+  "limits": [
+    "Synthetic approved CSV-v1 adapter, NOT real Power BI format certification",
+    "PDT release private synthetic evidence, NOT real Picking/Mecanizado delivery certification",
+    "No productive installation, scopes or daily Export inclusion bridge"
+  ]
+}

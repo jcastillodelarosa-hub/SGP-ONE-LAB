@@ -1,0 +1,38 @@
+{
+  "status": "PASS",
+  "results": [
+    {
+      "viewport": 1440,
+      "stages": [
+        "ENSAMBLE",
+        "EMPAQUE"
+      ],
+      "actual_sql_material_read": true,
+      "null_export_not_zero": true,
+      "name_based_pdt_limit_visible": true,
+      "invalid_session_denied": true,
+      "duplicate_sql_identity_rejected": true,
+      "production_plan_pdt_sale_audit_unchanged": true,
+      "page_errors": [],
+      "server_scoped_snapshot_only": true,
+      "homonymous_diagnostics_suppressed": true
+    },
+    {
+      "viewport": 390,
+      "stages": [
+        "ENSAMBLE",
+        "EMPAQUE"
+      ],
+      "actual_sql_material_read": true,
+      "null_export_not_zero": true,
+      "name_based_pdt_limit_visible": true,
+      "invalid_session_denied": true,
+      "duplicate_sql_identity_rejected": true,
+      "production_plan_pdt_sale_audit_unchanged": true,
+      "page_errors": [],
+      "server_scoped_snapshot_only": true,
+      "homonymous_diagnostics_suppressed": true
+    }
+  ],
+  "scope": "Real current UI and captured read RPC/session functions in PG17.11, synthetic upstream relations; external network blocked. Not productive Supabase or plant verification."
+}

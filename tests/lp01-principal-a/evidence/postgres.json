@@ -1,0 +1,20 @@
+{
+  "status": "PASS_ISOLATED_DESIGN_ONLY",
+  "postgres": "17.11 (Debian 17.11-1.pgdg13+2)",
+  "checks": [
+    "Actual dedicated session_user login, restricted attributes and separate human SGP authorization; table/core/human RPC/SET ROLE and all non-ABRIR commands denied; forged JSON/GUC do not confer authority",
+    "Valid SIN ACTIVIDAD predecessor and existing deterministic intent open exactly once; request/attempt binding, immutable actorKind/OID audit and own receipt recover retries without coordinator impersonation",
+    "Real concurrent distinct/identical request sessions serialize on the existing line/stage mutex: one opening, no reinclusion on an existing turn, repeat returns committed result",
+    "Same ABRIR/SALE source branch carries 288=90+90+90+18 roots/age/affectations and prior context without duplicating 20 executed; Empaque needs coordinator capacity rather than invented repartition; plan and Export sources unchanged",
+    "Closed flag alone, reopened predecessor and stale version fail inside transaction with durable BLOCKED events; valid manual recovery creates a new intent; transaction abort leaves no intent/opening/event and committed lost response recovers by receipt",
+    "Actual coordinator REABRIR first holds the shared stage mutex; waiting technical open sees committed EN_REVISION and records a block; reclose/new deterministic intent safely recovers",
+    "All productions required, partial scope rejected; registered principal expiry and scope revocation enforced on retries/receipts; admission revocation waits in-flight transaction, blocks new writes after commit and preserves authorized receipts; global containment causes zero event writes",
+    "Actual NOINHERIT/PUBLIC counterexample: direct role REVOKE cannot deny inherited callable SECURITY DEFINER or TEMP; new gate fails closed on drift; events/intents immutable and RLS enabled",
+    "Server configured clock blocks a valid future intent; line authorization does not imply another stage or production"
+  ],
+  "shared_branch_sha256": "453443217821e6071f9300239f3f277e8167df438a0463d6c099fed2f92a587b",
+  "productive_authentication": "NOT_TESTED_NO_PRINCIPAL_OR_CREDENTIAL_CREATED",
+  "productive_viability": "BLOCKED_PUBLIC_PRIVILEGE_PERIMETER",
+  "runtime_changed": false,
+  "scope": "Fresh PG17.11 --network none, actual passwordless local synthetic LOGIN roles/session_user, captured SGP session and actual ABRIR incorporation/closure helpers. No TLS, pooler, managed custom role authentication or productive behavior certified."
+}

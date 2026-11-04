@@ -1,0 +1,189 @@
+{
+  "mode": "SELECT catalog only; no productive rows read or official writer invoked",
+  "writers": [
+    {
+      "nspname": "public",
+      "proname": "sgp_aplicar_export_diario",
+      "signature": "sgp_aplicar_export_diario(text,text,text,jsonb)",
+      "md5": "e1c87927361b9f183be6681b2cc97233",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_aplicar_export_diario(p_token text, p_linea text, p_nombre_archivo text, p_datos jsonb)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\nDECLARE item jsonb; expected_year integer; expected_week integer; key text;\n seen text[]:=ARRAY[]::text[]; existing public.sgp_producciones%rowtype; response jsonb;\nBEGIN\n IF jsonb_typeof(p_datos) IS DISTINCT FROM 'array' OR jsonb_array_length(p_datos)=0\n THEN RAISE EXCEPTION 'PDT_EXPORT_YEAR_DATA_INVALID'; END IF;\n FOR item IN SELECT value FROM jsonb_array_elements(p_datos) LOOP\n  key:=nullif(btrim(item->>'key_produccion'),'');\n  IF jsonb_typeof(item) IS DISTINCT FROM 'object' OR key IS NULL\n   OR coalesce(item->>'anio','') !~ '^[0-9]{4}$'\n   OR coalesce(item->>'semana_actual','') !~ '^[0-9]{1,2}$'\n   OR nullif(btrim(item->>'id_linea'),'') IS DISTINCT FROM p_linea\n  THEN RAISE EXCEPTION 'PDT_EXPORT_YEAR_EXPLICIT_PERIOD_REQUIRED'; END IF;\n  expected_year:=(item->>'anio')::integer;expected_week:=(item->>'semana_actual')::integer;\n  IF expected_year NOT BETWEEN 2020 AND 2100 OR expected_week NOT BETWEEN 1 AND 53\n   OR key=ANY(seen) THEN RAISE EXCEPTION 'PDT_EXPORT_YEAR_PERIOD_AMBIGUOUS'; END IF;\n  seen:=array_append(seen,key);\n  -- Lock the existing production before delegating. This prevents a concurrent\n  -- reprogramming from changing the year between validation and Export writes.\n  SELECT * INTO existing FROM public.sgp_producciones WHERE key_produccion=key FOR UPDATE;\n  IF FOUND AND (existing.id_linea IS DISTINCT FROM p_linea\n    OR existing.anio IS DISTINCT FROM expected_year) THEN\n   RAISE EXCEPTION 'PDT_EXPORT_YEAR_IMMUTABLE: %',key;\n  END IF;\n END LOOP;\n -- Preserve installed Export authorization, reconciliation, history and response.\n response:=sgp_pdt_manual.original_aplicar_export_diario(p_token,p_linea,p_nombre_archivo,p_datos);\n -- The certified writer returns ok=true only after all writes complete. Fail closed\n -- on any future JSON rejection and roll back the delegated transaction as well.\n IF response->>'ok' IS DISTINCT FROM 'true' THEN\n  RAISE EXCEPTION 'PDT_EXPORT_YEAR_DELEGATED_NOT_OK';\n END IF;\n -- Verify the original writer applied the week without changing the year.\n -- Missing rows remain the original writer's responsibility (e.g. FUERA_BASE).\n FOR item IN SELECT value FROM jsonb_array_elements(p_datos) LOOP\n  key:=btrim(item->>'key_produccion');expected_year:=(item->>'anio')::integer;\n  expected_week:=(item->>'semana_actual')::integer;\n  SELECT * INTO existing FROM public.sgp_producciones WHERE key_produccion=key FOR UPDATE;\n  IF FOUND THEN\n   IF existing.id_linea IS DISTINCT FROM p_linea OR existing.anio IS DISTINCT FROM expected_year\n    OR coalesce(existing.semana_actual,existing.semana_base) IS DISTINCT FROM expected_week\n   THEN RAISE EXCEPTION 'PDT_EXPORT_YEAR_RESULT_MISMATCH: %',key; END IF;\n  END IF;\n END LOOP;\n RETURN response;\nEND $function$\n"
+    },
+    {
+      "nspname": "sgp_pdt_manual",
+      "proname": "original_aplicar_export_diario",
+      "signature": "sgp_pdt_manual.original_aplicar_export_diario(text,text,text,jsonb)",
+      "md5": "36c6bf327313f83d0b4adb7b7f7eb49d",
+      "definition": "CREATE OR REPLACE FUNCTION sgp_pdt_manual.original_aplicar_export_diario(p_token text, p_linea text, p_nombre_archivo text, p_datos jsonb)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\ndeclare v_usuario text;v_preview jsonb;v_carga uuid;v_actualizados int:=0;v_nuevos int:=0;v_ausentes int:=0;r record;oldrow sgp_producciones%rowtype;newrow jsonb;newens numeric;newemp numeric;newensamblado numeric;\nbegin v_usuario:=sgp_validar_sesion_rol(p_token,array['ADMINISTRADOR','COORDINADOR']);v_preview:=sgp_previsualizar_export_diario(p_token,p_linea,p_datos);\ninsert into sgp_cargas_diarias(tipo_fuente,id_linea,usuario,nombre_archivo,registros_recibidos)values('EXPORT',p_linea,v_usuario,p_nombre_archivo,(v_preview->>'recibidos')::int)returning id_carga_diaria into v_carga;\nupdate sgp_producciones p set presente_ultimo_export=false,ultima_carga_diaria=v_carga where p.id_linea=p_linea and coalesce(p.activa,'SI')='SI' and p.semana_base in(select distinct(x->>'semana_actual')::int from jsonb_array_elements(p_datos)x where nullif(x->>'semana_actual','')is not null)and not exists(select 1 from jsonb_array_elements(p_datos)x where x->>'key_produccion'=p.key_produccion);get diagnostics v_ausentes=row_count;\nfor r in select x from jsonb_array_elements(p_datos)x loop\n select * into oldrow from sgp_producciones p where p.key_produccion=r.x->>'key_produccion';\n if found then\n  newens:=nullif(r.x->>'saldo_ensamble','')::numeric;newemp:=nullif(r.x->>'saldo_empaque','')::numeric;newensamblado:=nullif(r.x->>'ensamblado','')::numeric;\n  update sgp_producciones p set semana_actual=nullif(r.x->>'semana_actual','')::int,saldo_ensamble=newens,saldo_empaque=newemp,estado_reserva_al=r.x->>'estado_reserva_al',porc_vidrio=nullif(r.x->>'porc_vidrio','')::numeric,estado_produccion=r.x->>'estado_produccion',ensamblado=newensamblado,empacado=nullif(r.x->>'empacado','')::numeric,reserva_al=coalesce(r.x->>'reserva_al',p.reserva_al),presente_ultimo_export=true,ultima_vez_export=now(),ultima_carga_diaria=v_carga,saldos_inicializados=true,fecha_inicializacion_saldos=coalesce(p.fecha_inicializacion_saldos,now()),fecha_actualizacion=now() where p.key_produccion=r.x->>'key_produccion';\n  select to_jsonb(p) into newrow from sgp_producciones p where p.key_produccion=r.x->>'key_produccion';\n  if oldrow.saldos_inicializados and coalesce(oldrow.ensamblado,0)=0 and coalesce(newensamblado,0)>0 and coalesce(newens,0)>0 then insert into sgp_eventos_actualizacion(id_lote,fuente,tipo_evento,clave,datos)values(v_carga,'EXPORT','ABIERTA_ENSAMBLE',oldrow.key_produccion,newrow);end if;\n  if oldrow.saldos_inicializados and coalesce(oldrow.saldo_ensamble,0)>0 and coalesce(newens,0)=0 then insert into sgp_eventos_actualizacion(id_lote,fuente,tipo_evento,clave,datos)values(v_carga,'EXPORT','ENSAMBLADA_COMPLETA',oldrow.key_produccion,newrow);end if;\n  if oldrow.saldos_inicializados and (coalesce(oldrow.saldo_ensamble,0)>0 or coalesce(oldrow.saldo_empaque,0)>0) and coalesce(newens,0)=0 and coalesce(newemp,0)=0 then insert into sgp_eventos_actualizacion(id_lote,fuente,tipo_evento,clave,datos)values(v_carga,'EXPORT','ORDEN_COMPLETADA',oldrow.key_produccion,newrow);end if;\n  v_actualizados:=v_actualizados+1;\n  insert into sgp_export_diario_historial(id_carga_diaria,key_produccion,id_linea,produccion_id,produccion,sistema,semana_actual,saldo_ensamble,saldo_empaque,estado_reserva_al,porc_vidrio,presente,datos)values(v_carga,r.x->>'key_produccion',p_linea,r.x->>'id',r.x->>'produccion',r.x->>'sistema',nullif(r.x->>'semana_actual','')::int,newens,newemp,r.x->>'estado_reserva_al',nullif(r.x->>'porc_vidrio','')::numeric,true,r.x);\n else v_nuevos:=v_nuevos+1;end if;\nend loop;\ninsert into sgp_export_diario_historial(id_carga_diaria,key_produccion,id_linea,produccion_id,produccion,sistema,semana_actual,saldo_ensamble,saldo_empaque,estado_reserva_al,porc_vidrio,presente,datos)select v_carga,p.key_produccion,p.id_linea,p.id,p.produccion,p.sistema,p.semana_actual,p.saldo_ensamble,p.saldo_empaque,p.estado_reserva_al,p.porc_vidrio,false,'{}'::jsonb from sgp_producciones p where p.id_linea=p_linea and p.ultima_carga_diaria=v_carga and p.presente_ultimo_export=false;\nupdate sgp_cargas_diarias set registros_actualizados=v_actualizados,registros_nuevos=v_nuevos,registros_ausentes=v_ausentes,detalle=jsonb_build_object('linea',p_linea,'semanas',v_preview->'semanas','saldos_inicializados',true)where id_carga_diaria=v_carga;\nreturn jsonb_build_object('ok',true,'id_carga_diaria',v_carga,'linea',p_linea,'actualizados',v_actualizados,'fuera_base',v_nuevos,'ausentes',v_ausentes,'saldos_inicializados',true,'semanas',v_preview->'semanas');end$function$\n"
+    }
+  ],
+  "columns": [
+    {
+      "table_schema": "public",
+      "table_name": "sgp_cargas_diarias",
+      "column_name": "id_carga_diaria",
+      "data_type": "uuid"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "sgp_cargas_diarias",
+      "column_name": "tipo_fuente",
+      "data_type": "text"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "sgp_cargas_diarias",
+      "column_name": "id_linea",
+      "data_type": "text"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "sgp_cargas_diarias",
+      "column_name": "usuario",
+      "data_type": "text"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "sgp_cargas_diarias",
+      "column_name": "nombre_archivo",
+      "data_type": "text"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "sgp_cargas_diarias",
+      "column_name": "fecha_hora",
+      "data_type": "timestamp with time zone"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "sgp_cargas_diarias",
+      "column_name": "registros_recibidos",
+      "data_type": "integer"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "sgp_cargas_diarias",
+      "column_name": "registros_actualizados",
+      "data_type": "integer"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "sgp_cargas_diarias",
+      "column_name": "registros_nuevos",
+      "data_type": "integer"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "sgp_cargas_diarias",
+      "column_name": "registros_ausentes",
+      "data_type": "integer"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "sgp_cargas_diarias",
+      "column_name": "errores",
+      "data_type": "integer"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "sgp_cargas_diarias",
+      "column_name": "estado",
+      "data_type": "text"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "sgp_cargas_diarias",
+      "column_name": "detalle",
+      "data_type": "jsonb"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "sgp_export_diario_historial",
+      "column_name": "registro_id",
+      "data_type": "bigint"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "sgp_export_diario_historial",
+      "column_name": "id_carga_diaria",
+      "data_type": "uuid"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "sgp_export_diario_historial",
+      "column_name": "key_produccion",
+      "data_type": "text"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "sgp_export_diario_historial",
+      "column_name": "id_linea",
+      "data_type": "text"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "sgp_export_diario_historial",
+      "column_name": "produccion_id",
+      "data_type": "text"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "sgp_export_diario_historial",
+      "column_name": "produccion",
+      "data_type": "text"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "sgp_export_diario_historial",
+      "column_name": "sistema",
+      "data_type": "text"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "sgp_export_diario_historial",
+      "column_name": "semana_actual",
+      "data_type": "integer"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "sgp_export_diario_historial",
+      "column_name": "saldo_ensamble",
+      "data_type": "numeric"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "sgp_export_diario_historial",
+      "column_name": "saldo_empaque",
+      "data_type": "numeric"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "sgp_export_diario_historial",
+      "column_name": "estado_reserva_al",
+      "data_type": "text"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "sgp_export_diario_historial",
+      "column_name": "porc_vidrio",
+      "data_type": "numeric"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "sgp_export_diario_historial",
+      "column_name": "presente",
+      "data_type": "boolean"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "sgp_export_diario_historial",
+      "column_name": "datos",
+      "data_type": "jsonb"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "sgp_export_diario_historial",
+      "column_name": "fecha_hora",
+      "data_type": "timestamp with time zone"
+    }
+  ]
+}

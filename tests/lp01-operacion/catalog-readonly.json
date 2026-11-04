@@ -1,0 +1,221 @@
+{
+  "read_only": true,
+  "date": "2026-11-01",
+  "project": "ocvxbwzqxbrfndkvjmfx",
+  "data": [
+    {
+      "contracts": {
+        "columns": [
+          {
+            "type": "uuid",
+            "table": "sgp_linea_plan_asignaciones",
+            "column": "id"
+          },
+          {
+            "type": "text",
+            "table": "sgp_linea_plan_asignaciones",
+            "column": "key_produccion"
+          },
+          {
+            "type": "date",
+            "table": "sgp_linea_plan_asignaciones",
+            "column": "fecha"
+          },
+          {
+            "type": "integer",
+            "table": "sgp_linea_plan_asignaciones",
+            "column": "turno"
+          },
+          {
+            "type": "integer",
+            "table": "sgp_linea_plan_asignaciones",
+            "column": "cantidad"
+          },
+          {
+            "type": "integer",
+            "table": "sgp_linea_plan_asignaciones",
+            "column": "prioridad"
+          },
+          {
+            "type": "timestamp with time zone",
+            "table": "sgp_linea_plan_asignaciones",
+            "column": "creado_en"
+          },
+          {
+            "type": "text",
+            "table": "sgp_linea_plan_asignaciones",
+            "column": "estado"
+          },
+          {
+            "type": "uuid",
+            "table": "sgp_linea_plan_asignaciones",
+            "column": "origen_id"
+          },
+          {
+            "type": "text",
+            "table": "sgp_linea_plan_asignaciones",
+            "column": "observacion"
+          },
+          {
+            "type": "text",
+            "table": "sgp_linea_plan_asignaciones",
+            "column": "creado_por"
+          },
+          {
+            "type": "timestamp with time zone",
+            "table": "sgp_linea_plan_asignaciones",
+            "column": "actualizado_en"
+          },
+          {
+            "type": "text",
+            "table": "sgp_producciones",
+            "column": "key_produccion"
+          },
+          {
+            "type": "text",
+            "table": "sgp_producciones",
+            "column": "id_linea"
+          },
+          {
+            "type": "text",
+            "table": "sgp_producciones",
+            "column": "produccion"
+          },
+          {
+            "type": "numeric",
+            "table": "sgp_producciones",
+            "column": "ensamblado"
+          },
+          {
+            "type": "numeric",
+            "table": "sgp_producciones",
+            "column": "empacado"
+          },
+          {
+            "type": "numeric",
+            "table": "sgp_producciones",
+            "column": "saldo_ensamble"
+          },
+          {
+            "type": "numeric",
+            "table": "sgp_producciones",
+            "column": "saldo_empaque"
+          },
+          {
+            "type": "numeric",
+            "table": "sgp_producciones",
+            "column": "saldo_cargue"
+          },
+          {
+            "type": "numeric",
+            "table": "sgp_producciones",
+            "column": "saldo_despacho"
+          },
+          {
+            "type": "text",
+            "table": "sgp_producciones",
+            "column": "estado_produccion"
+          },
+          {
+            "type": "text",
+            "table": "sgp_producciones",
+            "column": "id_carga"
+          },
+          {
+            "type": "boolean",
+            "table": "sgp_producciones",
+            "column": "presente_ultimo_export"
+          },
+          {
+            "type": "timestamp with time zone",
+            "table": "sgp_producciones",
+            "column": "ultima_vez_export"
+          },
+          {
+            "type": "uuid",
+            "table": "sgp_producciones",
+            "column": "ultima_carga_diaria"
+          },
+          {
+            "type": "boolean",
+            "table": "sgp_producciones",
+            "column": "saldos_inicializados"
+          },
+          {
+            "type": "timestamp with time zone",
+            "table": "sgp_producciones",
+            "column": "fecha_inicializacion_saldos"
+          }
+        ],
+        "functions": [
+          {
+            "acl": [
+              "=X/postgres",
+              "postgres=X/postgres",
+              "anon=X/postgres",
+              "authenticated=X/postgres",
+              "service_role=X/postgres"
+            ],
+            "md5": "768d3d715be95c52a51938800dcef81b",
+            "name": "sgp_consultar_ensamble",
+            "config": [
+              "search_path=public"
+            ],
+            "result": "jsonb",
+            "signature": "p_token text, p_semana integer, p_linea text",
+            "security_definer": true
+          },
+          {
+            "acl": [
+              "=X/postgres",
+              "postgres=X/postgres",
+              "anon=X/postgres",
+              "authenticated=X/postgres",
+              "service_role=X/postgres"
+            ],
+            "md5": "4c851dbf9fd12bac2e42412388f416d2",
+            "name": "sgp_detalle_ubicacion_vidrio",
+            "config": [
+              "search_path=public"
+            ],
+            "result": "jsonb",
+            "signature": "p_token text, p_key_produccion text",
+            "security_definer": true
+          },
+          {
+            "acl": [
+              "postgres=X/postgres",
+              "anon=X/postgres",
+              "authenticated=X/postgres",
+              "service_role=X/postgres"
+            ],
+            "md5": "13cfed10fc37d9ef449a2827f0970361",
+            "name": "sgp_linea_plan_consultar",
+            "config": [
+              "search_path=public, extensions"
+            ],
+            "result": "jsonb",
+            "signature": "p_token text, p_desde date, p_hasta date, p_linea text",
+            "security_definer": true
+          },
+          {
+            "acl": [
+              "postgres=X/postgres",
+              "anon=X/postgres",
+              "authenticated=X/postgres",
+              "service_role=X/postgres"
+            ],
+            "md5": "e964ea0d6f9af2c88010542cd3c84f9e",
+            "name": "sgp_sesion_actual",
+            "config": [
+              "search_path=public"
+            ],
+            "result": "jsonb",
+            "signature": "p_token text",
+            "security_definer": true
+          }
+        ]
+      }
+    }
+  ]
+}

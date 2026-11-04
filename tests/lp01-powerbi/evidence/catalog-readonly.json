@@ -1,0 +1,38 @@
+{
+  "date": "2026-11-02",
+  "mode": "READ ONLY catalog; no source production names transmitted or matched",
+  "session_md5": "e964ea0d6f9af2c88010542cd3c84f9e",
+  "service_role": {
+    "exists": true,
+    "bypassrls": true,
+    "superuser": false
+  },
+  "production_columns": [
+    {
+      "type": "text",
+      "column": "key_produccion"
+    },
+    {
+      "type": "text",
+      "column": "id"
+    },
+    {
+      "type": "text",
+      "column": "id_linea"
+    },
+    {
+      "type": "integer",
+      "column": "anio"
+    },
+    {
+      "type": "text",
+      "column": "produccion"
+    },
+    {
+      "type": "text",
+      "column": "sistema"
+    }
+  ],
+  "lp_schema_installed": false,
+  "edge_functions": []
+}

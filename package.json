@@ -12,5 +12,8 @@
     "@supabase/supabase-js": "2.76.1",
     "html2canvas": "1.4.1",
     "jspdf": "2.5.2"
+  },
+  "devDependencies": {
+    "@xmldom/xmldom": "0.9.12"
   }
 }

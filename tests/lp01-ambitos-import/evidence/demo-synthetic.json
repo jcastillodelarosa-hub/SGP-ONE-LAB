@@ -1,0 +1,140 @@
+{
+  "synthetic": true,
+  "apply": false,
+  "status": "PROPUESTA_REVISION_FUNCIONAL",
+  "counts": {
+    "additions": 1,
+    "changes": 2,
+    "expirations": 2,
+    "revocations": 1,
+    "unchanged": 6
+  },
+  "examples": {
+    "addition": {
+      "identity": {
+        "user": "QA-BACKUP",
+        "key": "QA-1|FRAMES_2",
+        "line": "FRAMES_2",
+        "stage": "EMPAQUE"
+      },
+      "before": null,
+      "after": {
+        "user": "QA-BACKUP",
+        "key": "QA-1|FRAMES_2",
+        "line": "FRAMES_2",
+        "stage": "EMPAQUE",
+        "duty": "BACKUP",
+        "validFrom": "2026-11-01T05:00:00.000Z",
+        "validUntil": "2026-11-04T05:00:00.000Z",
+        "revokedAt": null
+      }
+    },
+    "change": {
+      "identity": {
+        "user": "QA-PRIMARY",
+        "key": "QA-0|PANELES_2",
+        "line": "PANELES_2",
+        "stage": "ENSAMBLE"
+      },
+      "before": {
+        "user": "QA-PRIMARY",
+        "key": "QA-0|PANELES_2",
+        "line": "PANELES_2",
+        "stage": "ENSAMBLE",
+        "duty": "PRIMARY",
+        "validFrom": "2026-11-01T05:00:00.000Z",
+        "validUntil": "2026-11-04T05:00:00.000Z",
+        "revokedAt": null
+      },
+      "after": {
+        "user": "QA-PRIMARY",
+        "key": "QA-0|PANELES_2",
+        "line": "PANELES_2",
+        "stage": "ENSAMBLE",
+        "duty": "PRIMARY",
+        "validFrom": "2026-11-01T05:00:00.000Z",
+        "validUntil": "2026-11-03T05:00:00.000Z",
+        "revokedAt": null
+      }
+    },
+    "revocation": {
+      "identity": {
+        "user": "QA-OBSERVER",
+        "key": "QA-0|PANELES_2",
+        "line": "PANELES_2",
+        "stage": "ENSAMBLE"
+      },
+      "before": {
+        "user": "QA-OBSERVER",
+        "key": "QA-0|PANELES_2",
+        "line": "PANELES_2",
+        "stage": "ENSAMBLE",
+        "duty": "READ",
+        "validFrom": "2026-11-01T05:00:00.000Z",
+        "validUntil": "2026-11-04T05:00:00.000Z",
+        "revokedAt": null
+      },
+      "after": {
+        "user": "QA-OBSERVER",
+        "key": "QA-0|PANELES_2",
+        "line": "PANELES_2",
+        "stage": "ENSAMBLE",
+        "duty": "READ",
+        "validFrom": "2026-11-01T05:00:00.000Z",
+        "validUntil": "2026-11-01T23:00:00.000Z",
+        "revokedAt": "2026-11-01T23:00:00.000Z"
+      }
+    }
+  },
+  "conflicts": [],
+  "periods": [
+    {
+      "period": {
+        "line": "PANELES_2",
+        "stage": "ENSAMBLE",
+        "date": "2026-11-01",
+        "shift": 2,
+        "start": "2026-11-01T18:00:00-05:00",
+        "end": "2026-11-02T05:00:00-05:00"
+      },
+      "primaryCovered": true,
+      "backupCovered": true
+    },
+    {
+      "period": {
+        "line": "PANELES_2",
+        "stage": "EMPAQUE",
+        "date": "2026-11-01",
+        "shift": 2,
+        "start": "2026-11-01T18:00:00-05:00",
+        "end": "2026-11-02T05:00:00-05:00"
+      },
+      "primaryCovered": true,
+      "backupCovered": true
+    },
+    {
+      "period": {
+        "line": "FRAMES_2",
+        "stage": "ENSAMBLE",
+        "date": "2026-11-01",
+        "shift": 2,
+        "start": "2026-11-01T18:00:00-05:00",
+        "end": "2026-11-02T05:00:00-05:00"
+      },
+      "primaryCovered": true,
+      "backupCovered": true
+    },
+    {
+      "period": {
+        "line": "FRAMES_2",
+        "stage": "EMPAQUE",
+        "date": "2026-11-01",
+        "shift": 2,
+        "start": "2026-11-01T18:00:00-05:00",
+        "end": "2026-11-02T05:00:00-05:00"
+      },
+      "primaryCovered": true,
+      "backupCovered": true
+    }
+  ]
+}

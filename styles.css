@@ -2724,6 +2724,11 @@ button.active,[aria-pressed="true"]{border-color:#0865ed}
  }
 }
 
+/* User editor: keep the native actions reachable while access sections grow. */
+#userModal .user-modal-card{display:flex;flex-direction:column;max-height:calc(100dvh - 24px)!important;min-height:0}
+#userModal .user-form{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain}
+#userModal .modal-header,#userModal .modal-actions{flex:0 0 auto}
+
 /* Programacion movil: accion principal siempre accesible sin desplazamiento horizontal. */
 @media(max-width:760px){
  #progPool,#progPool .prog-group,#progPool .prog-table-row,#progPool .prog-table-row summary{min-width:0!important;max-width:100%;box-sizing:border-box}

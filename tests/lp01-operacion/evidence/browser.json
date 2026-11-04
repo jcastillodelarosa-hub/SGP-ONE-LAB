@@ -1,0 +1,31 @@
+{
+  "results": [
+    {
+      "viewport": 1440,
+      "persistence": "browser\u2192HTTP\u2192real PostgreSQL RPC\u2192reload 40 (not 30+50+40)",
+      "closure": "actual immutable SQL report and CSV download",
+      "roles": "real captured auth; synthetic coordinator/leader sessions",
+      "glass": "real captured auth + proposed existing RPC correction + synthetic location rows; actual modal filtered PREPARADO=32, return context preserved",
+      "lost_commit_reply": "actual committed SQL request retried with same UUID; exactly three execution audit events",
+      "glass_rollback": "captured function restored and proposal reapplied in isolated PostgreSQL",
+      "external_network": "blocked",
+      "page_errors": []
+    },
+    {
+      "viewport": 390,
+      "persistence": "browser\u2192HTTP\u2192real PostgreSQL RPC\u2192reload 40 (not 30+50+40)",
+      "closure": "actual immutable SQL report and CSV download",
+      "roles": "real captured auth; synthetic coordinator/leader sessions",
+      "glass": "real captured auth + proposed existing RPC correction + synthetic location rows; actual modal filtered PREPARADO=32, return context preserved",
+      "lost_commit_reply": "actual committed SQL request retried with same UUID; exactly three execution audit events",
+      "glass_rollback": "captured function restored and proposal reapplied in isolated PostgreSQL",
+      "external_network": "blocked",
+      "page_errors": []
+    }
+  ],
+  "limits": [
+    "No real Power BI file supplied; CSV-v1 QA adapter only",
+    "No productive Supabase installation or plant verification",
+    "Glass tested only with synthetic source data; no plant browser/session verification"
+  ]
+}

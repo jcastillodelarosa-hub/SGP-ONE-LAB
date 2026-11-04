@@ -1,0 +1,61 @@
+{
+  "date": "2026-11-02",
+  "timezone": "America/Bogota",
+  "baseline": "a19a9f6c7a36eabfdd06202a93ab4e5c281db2c0",
+  "status": "PREPARATION_ONLY_TECHNICAL_IDENTITY_DECISION_REQUIRED",
+  "manual_tests": {
+    "preparation_unit": 6,
+    "new_postgres_groups": 6,
+    "new_browser_viewports": [
+      1440,
+      390
+    ],
+    "affected_regression": "15 actual operation SQL scenarios; other valid prior evidence reused"
+  },
+  "readonly_catalog": {
+    "lp_schema_absent": true,
+    "session_md5": "e964ea0d6f9af2c88010542cd3c84f9e",
+    "schedule_keys": [
+      "HORARIOS_TURNOS"
+    ],
+    "line_overrides_or_holiday_keys_found": false,
+    "schedules": {
+      "lunes_sabado": {
+        "turno1": {
+          "inicio": "07:00",
+          "fin": "19:00"
+        },
+        "turno2": {
+          "inicio": "19:00",
+          "fin": "07:00"
+        }
+      },
+      "domingo": {
+        "turno1": {
+          "inicio": "07:00",
+          "fin": "18:00"
+        },
+        "turno2": {
+          "inicio": "18:00",
+          "fin": "05:00"
+        }
+      }
+    }
+  },
+  "protected_source_sha256": {
+    "app.js": "6c6f6db30437021b1041aba22123d89bf47dcb53459129d41699aa8495d917b7",
+    "planner-readonly-v326.js": "27a2ef1e1a4eea2e37a877793dbf04a2d99e74e489a3d580d1116afce9c3c98e",
+    "planner-operations-v326.js": "42dd96c5ff15dc99262de0369784dd0ea569f3d513cf254d022cbdd825d5c1dc",
+    "production-line-tabs.js": "7a94e94d78309373b6f57110d8346c20cad189a002977d5872c6f726ee5feb1b",
+    "src/domain/powerbi/adapter.js": "2a351985243ab3035736a12916773feabbb721dc208689582374143a9ba52c8c",
+    "src/domain/powerbi/xlsx-reader.js": "c2810f57e72c92a779f4ee905ef57e85b01a2663375906f10699c729141cfa7f",
+    "src/modules/lp01-powerbi-client.js": "931dbc157357465dc657586ec1434ba9c6d05a051b7e64179a7c1e36494c5e5f",
+    "src/server/lp-powerbi-handler.js": "eca692d23a91735aa68335cc20c2226be99332d25bba39853e02f422bcdb76ed",
+    "docs/sql-proposals/lp01-operacion/06_powerbi_xlsx_REVIEW.sql": "fbe88b89bfa4dade5c55517c078c4e00abdf865c9b20fb0cebce865fed308ca4",
+    "src/modules/pdt-v2-controller.js": "8a3254250401b62178283b431dd6ddf1c64b227bf37e01cd9e3d41f0415776ef"
+  },
+  "technical_execution_certified": false,
+  "new_technical_roles_grants_credentials_secrets_jobs_created": false,
+  "productive_changes": false,
+  "source_of_block": "User restriction: if new technical privileges are required, document alternatives and stop that decision. Existing engine only authorizes human SGP coordinator/admin sessions."
+}

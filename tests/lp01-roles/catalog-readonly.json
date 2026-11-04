@@ -1,0 +1,153 @@
+{
+  "columns": [
+    {
+      "type": "text",
+      "table": "sgp_rol_accesos",
+      "column": "rol"
+    },
+    {
+      "type": "text",
+      "table": "sgp_rol_accesos",
+      "column": "ventana"
+    },
+    {
+      "type": "boolean",
+      "table": "sgp_rol_accesos",
+      "column": "permitido"
+    },
+    {
+      "type": "timestamp with time zone",
+      "table": "sgp_rol_accesos",
+      "column": "actualizado_en"
+    },
+    {
+      "type": "uuid",
+      "table": "sgp_usuario_accesos",
+      "column": "id_usuario"
+    },
+    {
+      "type": "text",
+      "table": "sgp_usuario_accesos",
+      "column": "ventana"
+    },
+    {
+      "type": "boolean",
+      "table": "sgp_usuario_accesos",
+      "column": "permitido"
+    },
+    {
+      "type": "timestamp with time zone",
+      "table": "sgp_usuario_accesos",
+      "column": "actualizado_en"
+    },
+    {
+      "type": "uuid",
+      "table": "sgp_usuarios",
+      "column": "id_usuario"
+    },
+    {
+      "type": "text",
+      "table": "sgp_usuarios",
+      "column": "usuario"
+    },
+    {
+      "type": "text",
+      "table": "sgp_usuarios",
+      "column": "nombre"
+    },
+    {
+      "type": "text",
+      "table": "sgp_usuarios",
+      "column": "rol"
+    },
+    {
+      "type": "text",
+      "table": "sgp_usuarios",
+      "column": "password_hash"
+    },
+    {
+      "type": "boolean",
+      "table": "sgp_usuarios",
+      "column": "activo"
+    },
+    {
+      "type": "timestamp with time zone",
+      "table": "sgp_usuarios",
+      "column": "creado_en"
+    },
+    {
+      "type": "timestamp with time zone",
+      "table": "sgp_usuarios",
+      "column": "actualizado_en"
+    },
+    {
+      "type": "timestamp with time zone",
+      "table": "sgp_usuarios",
+      "column": "ultimo_acceso"
+    }
+  ],
+  "functions": [
+    {
+      "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "name": "sgp_admin_rol_accesos_guardar",
+      "owner": "postgres",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_admin_rol_accesos_guardar(p_token text, p_rol text, p_accesos text[])\n RETURNS void\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nbegin\n if not exists(\n   select 1 from sgp_sesiones_app s join sgp_usuarios u on u.id_usuario=s.id_usuario\n   where s.token_hash=encode(extensions.digest(coalesce(p_token,''),'sha256'),'hex')\n     and s.revocado_en is null and s.expira_en>now() and u.activo=true and u.rol='ADMINISTRADOR'\n ) then raise exception 'Sin permisos'; end if;\n delete from sgp_rol_accesos where rol=p_rol;\n insert into sgp_rol_accesos(rol,ventana,permitido)\n select p_rol,x,true from unnest(coalesce(p_accesos,array[]::text[])) x;\nend $function$\n"
+    },
+    {
+      "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "name": "sgp_admin_rol_accesos_listar",
+      "owner": "postgres",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_admin_rol_accesos_listar(p_token text)\n RETURNS TABLE(rol text, ventana text, permitido boolean)\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$ begin if not exists (select 1 from sgp_sesiones_app s join sgp_usuarios u on u.id_usuario=s.id_usuario where s.token_hash=encode(extensions.digest(coalesce(p_token,''),'sha256'),'hex') and s.revocado_en is null and s.expira_en>now() and u.activo=true and u.rol='ADMINISTRADOR') then raise exception 'Sin permisos'; end if; return query select r.rol,r.ventana,r.permitido from sgp_rol_accesos r order by r.rol,r.ventana; end $function$\n"
+    },
+    {
+      "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "name": "sgp_admin_usuario_guardar",
+      "owner": "postgres",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_admin_usuario_guardar(p_token text, p_id_usuario uuid, p_usuario text, p_nombre text, p_rol text, p_password text, p_activo boolean, p_accesos text[])\n RETURNS uuid\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public', 'extensions'\nAS $function$\ndeclare admin text; uid uuid; vrol text:=upper(trim(p_rol));\nbegin\n admin:=sgp_validar_sesion_rol(p_token,array['ADMINISTRADOR']);\n if trim(coalesce(p_usuario,''))='' or trim(coalesce(p_nombre,''))='' then raise exception 'Usuario y nombre son obligatorios'; end if;\n if vrol not in('COORDINADOR','LIDER MECANIZADO','LIDER LINEA','RECEPCION','PATINADOR','PICKING','SUPERVISOR DE PICKING','CONSULTA','ADMINISTRADOR') then raise exception 'Rol no válido'; end if;\n if p_id_usuario is null then\n   if coalesce(length(p_password),0)<4 then raise exception 'La contraseña debe tener mínimo 4 caracteres'; end if;\n   insert into sgp_usuarios(usuario,nombre,rol,password_hash,activo)\n   values(lower(trim(p_usuario)),trim(p_nombre),vrol,crypt(p_password,gen_salt('bf')),coalesce(p_activo,true))\n   returning id_usuario into uid;\n else\n   uid:=p_id_usuario;\n   update sgp_usuarios set usuario=lower(trim(p_usuario)),nombre=trim(p_nombre),rol=vrol,activo=coalesce(p_activo,true),\n   password_hash=case when coalesce(p_password,'')<>'' then crypt(p_password,gen_salt('bf')) else password_hash end,actualizado_en=now()\n   where id_usuario=uid;\n   if not found then raise exception 'Usuario no encontrado'; end if;\n end if;\n delete from sgp_usuario_accesos where id_usuario=uid;\n insert into sgp_usuario_accesos(id_usuario,ventana,permitido) select uid,x,true from unnest(coalesce(p_accesos,array[]::text[])) x on conflict do nothing;\n return uid;\nend $function$\n"
+    },
+    {
+      "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "name": "sgp_admin_usuarios_listar",
+      "owner": "postgres",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_admin_usuarios_listar(p_token text)\n RETURNS TABLE(id_usuario uuid, usuario text, nombre text, rol text, activo boolean, ultimo_acceso timestamp with time zone, accesos text[])\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nbegin\n perform sgp_validar_sesion_rol(p_token,array['ADMINISTRADOR']);\n return query select u.id_usuario,u.usuario,u.nombre,u.rol,u.activo,u.ultimo_acceso,\n coalesce(array_agg(a.ventana order by a.ventana) filter(where a.permitido),array[]::text[])\n from sgp_usuarios u left join sgp_usuario_accesos a on a.id_usuario=u.id_usuario\n group by u.id_usuario order by u.nombre,u.usuario;\nend $function$\n"
+    },
+    {
+      "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "name": "sgp_mis_accesos",
+      "owner": "postgres",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_mis_accesos(p_token text)\n RETURNS TABLE(ventana text)\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public', 'extensions'\nAS $function$ declare uid uuid; r text; begin select s.id_usuario,u.rol into uid,r from public.sgp_sesiones_app s join public.sgp_usuarios u on u.id_usuario=s.id_usuario where s.token_hash=encode(extensions.digest(coalesce(p_token,''),'sha256'),'hex') and s.revocado_en is null and s.expira_en>now() and u.activo=true; if uid is null then raise exception 'Sesión inválida o vencida'; end if; if r='ADMINISTRADOR' then return query select unnest(array['inicio','mecanizado','programacion','ensamble','nc-aluminio','nc-vidrio','seguimiento-aluminio','carga-semanal','actualizacion','configuracion']::text[]); else return query select a.ventana from public.sgp_usuario_accesos a where a.id_usuario=uid and a.permitido=true; end if; end $function$\n"
+    },
+    {
+      "acl": "{postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "name": "sgp_sesion_actual",
+      "owner": "postgres",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_sesion_actual(p_token text)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\ndeclare u sgp_usuarios%rowtype;\nbegin\n select x.* into u from sgp_sesiones_app s join sgp_usuarios x on x.id_usuario=s.id_usuario\n where s.token_hash=encode(extensions.digest(coalesce(p_token,''),'sha256'),'hex')\n and s.revocado_en is null and s.expira_en>now() and x.activo=true;\n if u.id_usuario is null then return jsonb_build_object('valida',false); end if;\n return jsonb_build_object('valida',true,'usuario',u.usuario,'nombre',u.nombre,'rol',u.rol);\nend $function$\n"
+    }
+  ],
+  "constraints": [
+    {
+      "table": "sgp_usuarios",
+      "definition": "PRIMARY KEY (id_usuario)"
+    },
+    {
+      "table": "sgp_usuarios",
+      "definition": "CHECK ((rol = ANY (ARRAY['COORDINADOR'::text, 'LIDER MECANIZADO'::text, 'LIDER LINEA'::text, 'RECEPCION'::text, 'PATINADOR'::text, 'PICKING'::text, 'SUPERVISOR DE PICKING'::text, 'CONSULTA'::text, 'ADMINISTRADOR'::text])))"
+    },
+    {
+      "table": "sgp_usuarios",
+      "definition": "UNIQUE (usuario)"
+    },
+    {
+      "table": "sgp_usuario_accesos",
+      "definition": "FOREIGN KEY (id_usuario) REFERENCES sgp_usuarios(id_usuario) ON DELETE CASCADE"
+    },
+    {
+      "table": "sgp_usuario_accesos",
+      "definition": "PRIMARY KEY (id_usuario, ventana)"
+    },
+    {
+      "table": "sgp_rol_accesos",
+      "definition": "PRIMARY KEY (rol, ventana)"
+    }
+  ]
+}

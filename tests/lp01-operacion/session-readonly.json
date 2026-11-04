@@ -1,0 +1,3 @@
+{
+  "definition": "CREATE OR REPLACE FUNCTION public.sgp_sesion_actual(p_token text)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\ndeclare u sgp_usuarios%rowtype;\nbegin\n select x.* into u from sgp_sesiones_app s join sgp_usuarios x on x.id_usuario=s.id_usuario\n where s.token_hash=encode(extensions.digest(coalesce(p_token,''),'sha256'),'hex')\n and s.revocado_en is null and s.expira_en>now() and x.activo=true;\n if u.id_usuario is null then return jsonb_build_object('valida',false); end if;\n return jsonb_build_object('valida',true,'usuario',u.usuario,'nombre',u.nombre,'rol',u.rol);\nend $function$\n"
+}

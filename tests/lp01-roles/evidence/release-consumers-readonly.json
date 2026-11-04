@@ -1,0 +1,95 @@
+{
+  "scope": "SELECT of consumers/ACL metadata only; no user/permission data",
+  "metadata": {
+    "views": null,
+    "tables": [
+      {
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}",
+        "rls": false,
+        "name": "sgp_rol_accesos",
+        "owner": "postgres",
+        "columns": [
+          {
+            "acl": null,
+            "name": "rol"
+          },
+          {
+            "acl": null,
+            "name": "ventana"
+          },
+          {
+            "acl": null,
+            "name": "permitido"
+          },
+          {
+            "acl": null,
+            "name": "actualizado_en"
+          }
+        ]
+      },
+      {
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}",
+        "rls": false,
+        "name": "sgp_usuario_accesos",
+        "owner": "postgres",
+        "columns": [
+          {
+            "acl": null,
+            "name": "id_usuario"
+          },
+          {
+            "acl": null,
+            "name": "ventana"
+          },
+          {
+            "acl": null,
+            "name": "permitido"
+          },
+          {
+            "acl": null,
+            "name": "actualizado_en"
+          }
+        ]
+      }
+    ],
+    "policies": null,
+    "functions": [
+      {
+        "name": "public.sgp_admin_usuarios_listar",
+        "owner": "postgres",
+        "definer": true,
+        "body_md5": "543908bbd6c0de99540d8b6bf3299d15",
+        "signature": "p_token text"
+      },
+      {
+        "name": "public.sgp_mis_accesos",
+        "owner": "postgres",
+        "definer": true,
+        "body_md5": "4f879ddd1659ef97f05e2f4aaa7c5d33",
+        "signature": "p_token text"
+      },
+      {
+        "name": "public.sgp_admin_rol_accesos_guardar",
+        "owner": "postgres",
+        "definer": true,
+        "body_md5": "96c5531abff3988b31a91211b4a440f4",
+        "signature": "p_token text, p_rol text, p_accesos text[]"
+      },
+      {
+        "name": "public.sgp_admin_rol_accesos_listar",
+        "owner": "postgres",
+        "definer": true,
+        "body_md5": "32a3077fbfc057aca30f6e622796f12e",
+        "signature": "p_token text"
+      },
+      {
+        "name": "public.sgp_admin_usuario_guardar",
+        "owner": "postgres",
+        "definer": true,
+        "body_md5": "ed07b071fe83cf63709ed976d38fb116",
+        "signature": "p_token text, p_id_usuario uuid, p_usuario text, p_nombre text, p_rol text, p_password text, p_activo boolean, p_accesos text[]"
+      }
+    ],
+    "session_definition_md5": "e964ea0d6f9af2c88010542cd3c84f9e"
+  }
+}

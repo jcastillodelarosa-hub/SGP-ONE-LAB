@@ -1,0 +1,38 @@
+{
+  "status": "PASS",
+  "results": [
+    {
+      "viewport": 1440,
+      "actual_sql": true,
+      "explicit_confirmation_and_motive": true,
+      "no_powerbi_file": true,
+      "lost_close_reply_one_version_one_audit": true,
+      "csv_metadata_download": true,
+      "next_configured_shift_opens": true,
+      "leader_cannot_reopen": true,
+      "coordinator_reopen_immutable_versions": true,
+      "assignment_after_preview_rejected": true,
+      "zero_execution_order_requires_normal_close": true,
+      "planning_and_export_unchanged_by_app": true,
+      "page_errors": [],
+      "network": "local only; external blocked"
+    },
+    {
+      "viewport": 390,
+      "actual_sql": true,
+      "explicit_confirmation_and_motive": true,
+      "no_powerbi_file": true,
+      "lost_close_reply_one_version_one_audit": true,
+      "csv_metadata_download": true,
+      "next_configured_shift_opens": true,
+      "leader_cannot_reopen": true,
+      "coordinator_reopen_immutable_versions": true,
+      "assignment_after_preview_rejected": true,
+      "zero_execution_order_requires_normal_close": true,
+      "planning_and_export_unchanged_by_app": true,
+      "page_errors": [],
+      "network": "local only; external blocked"
+    }
+  ],
+  "scope": "Chromium \u2192 actual shared controller \u2192 local transport \u2192 real PostgreSQL with captured SGP session and synthetic sources; no plant/deployment verification"
+}

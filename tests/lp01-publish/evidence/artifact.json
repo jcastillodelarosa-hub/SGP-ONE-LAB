@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "checks": [
+    "Ordinary artifact retains byte-identical legacy navigation and current app/config, removes LP boot/sample, separate public root",
+    "Sealed visual ZIP and source pins revalidated byte-for-byte; deterministic commit stamp and RPC/HTTP write guards preserved; private/backend paths absent",
+    "Mismatched reviewed artifact digest refused before credentials or Firebase",
+    "Self-consistent new ZIP/manifest/digest omitting an original source asset rejected before account use"
+  ],
+  "firebase_actions": 0,
+  "limits": [
+    "Local source/ZIP integration only; no GitHub artifact download, Hosting credentials or active version certified"
+  ]
+}

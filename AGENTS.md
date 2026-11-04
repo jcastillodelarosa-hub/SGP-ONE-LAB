@@ -32,6 +32,19 @@ recuperación completa en cada ajuste; verificar solo diferencias que invaliden 
 Si la API no está disponible, registrar la limitación; no inventar estado de PR ni duplicarlos.
 Historial y etiquetas de versión no prueban estado actual. Conservar cambios locales.
 
+### Continuidad obligatoria de Línea de Producción
+Para LP, la referencia operativa única es
+`docs/linea-produccion/ESTADO_OPERATIVO_ACTUAL.md`: leerla junto con este archivo y
+el estado real del PR antes de trabajar. Al cerrar cada entrega técnica, actualizarla
+en el mismo PR y commit o conjunto de commits, con evidencia, entorno, bloqueos y
+siguiente acción exacta; mantenerla breve y enlazar los antecedentes históricos.
+Respetar su fase/prioridades y la aprobación individual de bocetos; no reabrir
+reglas ya aprobadas. Si hay trabajo paralelo sobre los mismos archivos, aislarlo
+antes de editar. Este protocolo no autoriza superar bloqueos ni activar turnos,
+modificar producción, crear credenciales/privilegios, fusionar o desplegar.
+Un bloqueo limita la operación afectada: PUBLIC mantiene inactiva la apertura
+automática, pero no detiene las integraciones independientes autorizadas de LP.
+
 ## Skills y reglas de negocio
 Consultar únicamente las Skills relevantes en `.agents/skills/*/SKILL.md`:
 orchestrator/continuity para alcance y continuidad; database-rpc/security-auth para

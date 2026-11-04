@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "synthetic": true,
+  "checks": [
+    "Real CLI repeat preserves exact private report/source copies; files0600 directories0700; no identities, hashes or paths in stdout/stderr",
+    "Altered source rejected by pinned hash without modifying previous artifact",
+    "Altered manifest rejected by externally supplied pin",
+    "Duplicate JSON keys rejected even with matching hashes",
+    "Broad file mode and symlink inputs rejected",
+    "Altered prior output is not overwritten or accepted as an idempotent retry",
+    "Missing responsibilities produce private pending artifact with exit2 and zero application"
+  ]
+}

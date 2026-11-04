@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "checks": [
+    {
+      "stage": "ENSAMBLE",
+      "original_sha256": "a4da8416349a731100706f14b50a716c877b20219364b14f5cc4e1321c4a8c3e",
+      "source_rows": 33,
+      "original_bytes_identical": true,
+      "closure_quantity": 95,
+      "database": "isolated no-network PostgreSQL; catalog and LP assignments synthetic"
+    },
+    {
+      "stage": "EMPAQUE",
+      "original_sha256": "b1bc89f36b1931a71899970398104644209a72f287f28d3d2421c602657280d2",
+      "source_rows": 37,
+      "original_bytes_identical": true,
+      "closure_quantity": 90,
+      "database": "isolated no-network PostgreSQL; catalog and LP assignments synthetic"
+    }
+  ],
+  "live_sgp_name_match": "NOT TESTED; guarded production query was rejected; no workaround or production transmission"
+}

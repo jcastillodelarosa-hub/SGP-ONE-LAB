@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "cases": [
+    "Real captured coverage rejects partial 6/10 material delivery",
+    "Real captured coverage accepts assigned/validated 10/10 pieces; not proof of LP windows",
+    "Real captured coverage rejects annulled material delivery"
+  ],
+  "scope": "PG17.11 synthetic dependency tables and exact captured manual coverage function; no productive cases or source events certified"
+}

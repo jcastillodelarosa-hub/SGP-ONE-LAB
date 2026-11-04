@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "base": "ba1c546",
+  "read_only_metadata": "2026-11-03; definitions/columns/constraint/ACL only; no account rows",
+  "sql10_sha256": "756bf1125f169850c9bb01a8b04e4f14bcf87828c378803d05380d77cb8d2c23",
+  "checks": [
+    "SQL08, parser and PDT/Export readers unchanged",
+    "Node syntax and two direct regression files PASS; release verification PASS",
+    "Workflow YAML/Python AST/documentation links PASS",
+    "Default profile false; no production DDL/DML or deployment; SQL09 superseded, not chained"
+  ],
+  "ci": "Pending new HEAD push"
+}

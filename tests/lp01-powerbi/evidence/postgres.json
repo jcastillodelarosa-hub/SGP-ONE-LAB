@@ -1,0 +1,15 @@
+{
+  "status": "PASS",
+  "postgres": "17.11 (Debian 17.11-1.pgdg13+2)",
+  "checks": [
+    "Actual XLSX bytes, SHA256 and normalized source provenance preserved; exact UUID retry inserts once",
+    "anon cannot fabricate imports; valid SGP role/scopes required even with server credential; other-shift original access denied and shared history exposes only document digest",
+    "CSV QA cannot bypass XLSX mode; incomplete scope, ambiguous catalog identity and wrong original SHA reject",
+    "Four existing LP assignments consolidate latest values once per production; differences need a production reason; other stage remains open",
+    "Reopening/correction creates a new immutable grouped closure; original version and XLSX are unchanged",
+    "Turn-2 selection does not reuse turn-1 quantities; absent carried productions block rather than become zero; prior close unchanged",
+    "Missing production prevents import/closure rather than injecting zero",
+    "Original LP assignment identities/priorities/dates/quantities and official Export source never modified by XLSX integration"
+  ],
+  "scope": "Real SQL, captured SGP auth, anonymized XLSX layout and synthetic production/assignment data; no productive Supabase writes"
+}

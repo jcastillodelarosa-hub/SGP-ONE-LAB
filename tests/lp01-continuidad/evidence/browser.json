@@ -1,0 +1,38 @@
+{
+  "status": "PASS",
+  "results": [
+    {
+      "viewport": 1440,
+      "actual_rpc_persistence": true,
+      "single_sale_initialized": 20,
+      "ambiguous_split_pending": true,
+      "next_operational_shift": 2,
+      "next_sale": 12,
+      "next_executed": 0,
+      "original_age_preserved": true,
+      "lost_commit_receipt_while_contained": true,
+      "planning_and_export_unchanged": true,
+      "page_errors": [],
+      "network": "local only; external blocked"
+    },
+    {
+      "viewport": 390,
+      "actual_rpc_persistence": true,
+      "single_sale_initialized": 20,
+      "ambiguous_split_pending": true,
+      "next_operational_shift": 2,
+      "next_sale": 12,
+      "next_executed": 0,
+      "original_age_preserved": true,
+      "lost_commit_receipt_while_contained": true,
+      "planning_and_export_unchanged": true,
+      "page_errors": [],
+      "network": "local only; external blocked"
+    }
+  ],
+  "limits": [
+    "Captured actual session function, synthetic identities/config/planning",
+    "QA CSV only for closure setup; Power BI unchanged and checked by its affected regression",
+    "No deployment, real users or plant operations verified"
+  ]
+}

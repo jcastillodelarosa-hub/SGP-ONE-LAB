@@ -1,57 +1,242 @@
 name: Deploy SGP ONE to Firebase Hosting
-
 on:
   push:
-    branches: [main]
+    branches: [main, feat/lp01-seguimiento-operacion]
     paths-ignore:
       - 'AGENTS.md'
       - '.agents/skills/**'
       - '.github/workflows/firebase-preview-linea-produccion.yml'
+  pull_request:
+    paths:
+      - '.github/workflows/firebase-hosting.yml'
+      - 'deployment/**'
+      - 'scripts/lp-*.py'
+      - 'scripts/prepare-lp-*.py'
+      - 'scripts/prepare-sgp-legacy-artifact.py'
+      - 'scripts/write-sgp-ordinary-config.py'
+      - 'scripts/seal-lp-visual.py'
+      - 'scripts/stamp-lp-release.mjs'
+      - 'tests/lp01-publish/**'
   workflow_dispatch:
     inputs:
+      operation:
+        description: 'prepare builds only; inspect GET only; publish/recover require certified policy and explicit pins'
+        type: choice
+        options: [prepare, inspect, publish, recover]
+        default: prepare
       release_reason:
-        description: 'Motivo del despliegue manual'
-        required: false
-        default: 'Publicacion controlada LAB'
-
+        description: 'Required review/authorization reference for future publication/recovery'
+        default: ''
+      source_sha:
+        description: 'Exact 40-hex dispatch source SHA for publish/recover'
+        default: ''
+      artifact_run_id:
+        description: 'Reviewed prepare run ID (publish only)'
+        default: ''
+      zip_sha256:
+        description: 'Externally reviewed sealed ZIP SHA256 (publish only)'
+        default: ''
+      expected_live_version:
+        description: 'Accredited sites/sgp-one-lab/versions/ID; publish/recover must match current API GET'
+        default: ''
+      rollback_version:
+        description: 'Previously accredited retained version (recover only)'
+        default: ''
 permissions:
   contents: read
-
 concurrency:
-  group: firebase-hosting-live
+  group: ${{ github.event_name == 'pull_request' && format('firebase-hosting-policy-pr-{0}', github.event.pull_request.number) || 'firebase-hosting-live' }}
   cancel-in-progress: false
-
 jobs:
-  test-and-deploy:
+  validate:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout main
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install PyYAML==6.0.2
+      - name: Pure policy and workflow validation, no credentials or Firebase
+        run: python tests/lp01-publish/policy.py
+  gate:
+    needs: validate
+    if: github.event_name != 'pull_request'
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+    runs-on: ubuntu-latest
+    outputs:
+      route: ${{ steps.policy.outputs.route }}
+      reason: ${{ steps.policy.outputs.reason }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - id: policy
+        name: Decide without secrets or Firebase
+        env:
+          LP_OPERATION: ${{ inputs.operation }}
+          LP_SOURCE_SHA: ${{ inputs.source_sha }}
+        run: python scripts/lp-hosting-gate.py
+  prepare:
+    needs: gate
+    if: needs.gate.outputs.route == 'prepare' || needs.gate.outputs.route == 'hold'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
         with:
           node-version: '22'
-
-      - name: Install dependencies
-        run: npm install --no-audit --no-fund
-
-      - name: Build local Supabase browser SDK
-        run: npm run build:vendor
-
-      - name: Stamp actual release commit in the visible version indicator
-        run: node scripts/build-release-info.mjs
-
-      - name: Verify LAB release package
-        run: npm run verify:release
-
-      - name: Run tests
-        run: npm test
-
-      - name: Deploy to Firebase Hosting
+      - run: npm install --no-audit --no-fund
+      - run: npm run build:vendor
+      - run: npm run verify:release
+      - run: npm test
+      - run: python tests/lp01-publish/artifact.py
+      - run: python tests/lp01-publish/backend-readiness.py
+      - name: Public backend readiness only when explicitly enabled after approved Edge deployment
+        run: python scripts/lp-backend-readiness.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lp-backend-readiness-${{ github.sha }}
+          path: ${{ runner.temp }}/lp-backend-readiness.json
+          retention-days: 14
+      - run: python scripts/seal-lp-visual.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lp-visual-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/lp-visual.zip
+            ${{ runner.temp }}/lp-visual-digest.json
+          retention-days: 14
+  ordinary:
+    needs: gate
+    if: needs.gate.outputs.route == 'legacy'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - run: npm run build:vendor
+      - run: node scripts/build-release-info.mjs
+      - run: npm run verify:release
+      - run: npm test
+      - name: Positive-list artifact preserving ordinary LP navigation
+        run: |
+          python scripts/prepare-sgp-legacy-artifact.py
+          mkdir -p "$RUNNER_TEMP/sgp-ordinary/public"
+          cp -a /tmp/sgp-lp183-main-visual/. "$RUNNER_TEMP/sgp-ordinary/public/"
+          python scripts/write-sgp-ordinary-config.py
+      - name: Existing ordinary live publication, artifact root only
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SGP_ONE_LAB }}
           projectId: sgp-one-lab
           channelId: live
+          entryPoint: ${{ runner.temp }}/sgp-ordinary
+  controlled:
+    needs: gate
+    if: contains(fromJSON('["inspect","publish","visual","recover"]'), needs.gate.outputs.route)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Check publication-specific inputs before accessing account
+        if: needs.gate.outputs.route != 'inspect'
+        env:
+          LP_ROUTE: ${{ needs.gate.outputs.route }}
+          LP_REASON: ${{ inputs.release_reason }}
+          LP_EXPECTED_LIVE: ${{ inputs.expected_live_version }}
+          LP_RUN: ${{ inputs.artifact_run_id }}
+          LP_ZIP_SHA: ${{ inputs.zip_sha256 }}
+          LP_ROLLBACK_VERSION: ${{ inputs.rollback_version }}
+        run: python scripts/lp-hosting-inputs.py
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+        if: needs.gate.outputs.route == 'publish' || needs.gate.outputs.route == 'visual'
+      - run: npm run build:vendor
+        if: needs.gate.outputs.route == 'publish' || needs.gate.outputs.route == 'visual'
+      - run: npm run verify:release
+        if: needs.gate.outputs.route == 'publish' || needs.gate.outputs.route == 'visual'
+      - run: npm test
+        if: needs.gate.outputs.route == 'publish' || needs.gate.outputs.route == 'visual'
+      - name: Download only the explicitly selected prepare artifact
+        if: needs.gate.outputs.route == 'publish'
+        uses: actions/download-artifact@v4
+        with:
+          name: lp-visual-${{ github.sha }}
+          path: ${{ runner.temp }}/lp-download
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ inputs.artifact_run_id }}
+      - name: Verify sealed artifact and source without Firebase
+        if: needs.gate.outputs.route == 'publish'
+        env:
+          LP_ZIP_SHA: ${{ inputs.zip_sha256 }}
+          LP_SOURCE_SHA: ${{ inputs.source_sha }}
+        run: python scripts/lp-verify-downloaded-artifact.py
+      - name: Approved visual policy on later ordinary pushes
+        if: needs.gate.outputs.route == 'visual'
+        run: |
+          python scripts/seal-lp-visual.py
+          python scripts/lp-prepare-approved-auto.py
+      - name: Install OAuth client for existing service account (no IAM Credentials API)
+        run: python -m pip install google-auth==2.35.0
+      - name: Read live identity and retained-version metadata; stop on denied access
+        env:
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SGP_ONE_LAB }}
+          LP_EXPECTED_LIVE: ${{ inputs.expected_live_version }}
+        run: python scripts/lp-hosting-metadata.py
+      - name: Publish only the reviewed artifact
+        if: needs.gate.outputs.route == 'publish' || needs.gate.outputs.route == 'visual'
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SGP_ONE_LAB }}
+          projectId: sgp-one-lab
+          channelId: live
+          entryPoint: ${{ runner.temp }}/lp-reviewed
+      - name: Explicit recovery of an accredited retained version
+        if: needs.gate.outputs.route == 'recover'
+        env:
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SGP_ONE_LAB }}
+          LP_METADATA_OPERATION: recover
+          LP_GUARDED_ROUTE: ${{ needs.gate.outputs.route }}
+          LP_EXPECTED_LIVE: ${{ inputs.expected_live_version }}
+          LP_ROLLBACK_VERSION: ${{ inputs.rollback_version }}
+        run: python scripts/lp-hosting-metadata.py
+      - name: Read post-publication identity
+        if: needs.gate.outputs.route == 'publish' || needs.gate.outputs.route == 'visual' || needs.gate.outputs.route == 'recover'
+        env:
+          LP_METADATA_LABEL: after
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SGP_ONE_LAB }}
+        run: python scripts/lp-hosting-metadata.py
+      - name: Compare active version and file paths without guessing content encoding
+        if: needs.gate.outputs.route == 'publish' || needs.gate.outputs.route == 'visual' || needs.gate.outputs.route == 'recover'
+        env:
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SGP_ONE_LAB }}
+          LP_ROUTE: ${{ needs.gate.outputs.route }}
+          LP_ROLLBACK_VERSION: ${{ inputs.rollback_version }}
+        run: python scripts/lp-hosting-postcheck.py
+      - name: Sanitized metadata only; never upload raw inventory or credentials
+        uses: actions/upload-artifact@v4
+        with:
+          name: hosting-identity-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/lp-hosting-before-summary.json
+            ${{ runner.temp }}/lp-hosting-after-summary.json
+          retention-days: 14

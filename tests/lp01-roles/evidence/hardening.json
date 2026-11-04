@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "synthetic": true,
+  "checks": [
+    "Hardening denies direct read/write for anon/authenticated; source data, RLS flags and owners unchanged; forced failure restores original ACL atomically",
+    "All five native SECURITY DEFINER consumers remain functional: list/save roles, list/save users and effective user accesses; non-admin administrative calls denied",
+    "Default rollback refuses insecure restoration; explicit synthetic emergency restores exact initial ACL; re-hardening succeeds without data loss",
+    "Hardened catalog admits contained SQL10; profile remains false, no SQL09 installed"
+  ],
+  "sql_sha256": "97873b4ad175bfff56f89be0e7a93dd3bd03330440d33365f9f612654fcf2d92",
+  "limits": [
+    "Isolated PG only, actual captured native consumers, no real accounts",
+    "Backed-up material is ACL metadata, not a backup of production data",
+    "Emergency restoration reintroduces known risk and is not automatically authorized"
+  ]
+}

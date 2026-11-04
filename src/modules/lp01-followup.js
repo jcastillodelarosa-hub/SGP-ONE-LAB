@@ -1,0 +1,42 @@
+import {mountOperation} from './lp01-operation.js?v=tabs-aprobadas-1';
+import {followupRows,filterFollowup,weekRange} from '../domain/lp01-followup.js';
+const esc=v=>String(v??'—').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const show=v=>v===null||v===undefined?'Sin dato':String(v);
+export function mountFollowup({tracking,operation,bridge}){
+ if(!tracking||!operation)return;
+ let rows=[],sequence=0,loaded=false,selected=null;
+ const now=new Date(new Date().toLocaleString('en-US',{timeZone:'America/Bogota'}));const th=new Date(Date.UTC(now.getFullYear(),now.getMonth(),now.getDate()));th.setUTCDate(th.getUTCDate()+4-(th.getUTCDay()||7));const year=th.getUTCFullYear(),start=new Date(Date.UTC(year,0,1));const week=Math.ceil((((th-start)/86400000)+1)/7);
+ tracking.className='lp-followup';operation.className='lp-followup';
+ tracking.innerHTML='<header class="lp-followup-heading"><div><span class="eyebrow">Línea de Producción</span><h3>Seguimiento de órdenes</h3><p>Asignaciones consultadas y saldos oficiales separados por fuente.</p></div><button type="button" data-refresh>Actualizar</button></header><div class="lp-followup-filters"><label>Línea<select data-line><option>PANELES_2</option><option>FRAMES_2</option></select></label><label>Semana calendario<input type="week" data-week value="'+year+'-W'+String(week).padStart(2,'0')+'"></label><label>Fecha<input type="date" data-day></label><label>Turno<select data-shift><option value="">Todos</option><option value="1">Turno 1</option><option value="2">Turno 2</option></select></label><label>Progreso de asignación<select data-progress><option value="">Todos</option>'+['PENDIENTE','EN PROCESO','FINALIZADA','CANCELADA','SIN CONCILIAR'].map(v=>'<option>'+v+'</option>').join('')+'</select></label><label>Buscar<input type="search" data-search placeholder="Orden, reserva, clave, observación…"></label><label>Ordenar<select data-sort><option value="sequence">Fecha · turno · prioridad</option><option value="production">Producción</option><option value="remaining">Mayor pendiente</option></select></label></div><p data-status role="status">Selecciona Actualizar para consultar.</p><div data-summary class="lp-followup-summary"></div><div data-list></div>';
+ operation.innerHTML='<header class="lp-followup-heading"><div><span class="eyebrow">Línea de Producción</span><h3>Operación · Ensamble / Empaque</h3><p>Consulta el contexto antes de preparar un avance.</p></div></header><div data-operation-detail>Selecciona una asignación en Seguimiento.</div>';
+ const get=selector=>tracking.querySelector(selector),status=get('[data-status]');
+ const rpc=async(name,args)=>{const token=bridge.getToken();if(!token)throw Error('Inicia sesión para consultar');const client=await bridge.getClient();const {data,error}=await client.rpc(name,{p_token:token,...args});if(error)throw error;return data;};
+ async function load(){
+  const request=++sequence,session=bridge?.getToken?.();loaded=true;rows=[];selected=null;render();renderOperation();status.textContent='Consultando…';
+  try{const range=weekRange(get('[data-week]').value),line=get('[data-line]').value;
+   const [assignments,sheet]=await Promise.all([rpc('sgp_linea_plan_consultar',{p_desde:range.from,p_hasta:range.to,p_linea:line}),rpc('sgp_consultar_ensamble',{p_semana:null,p_linea:line})]);
+   if(request!==sequence)return;if(session!==bridge?.getToken?.()){rows=[];render();status.textContent='La sesión cambió. Vuelve a consultar.';return;}if(!Array.isArray(sheet?.filas))throw Error('Contrato de hoja de producción inválido');
+   rows=followupRows(assignments,sheet.filas);render();status.textContent=rows.length+' asignaciones consultadas · '+range.from+' a '+range.to+' · Actualizado '+new Date().toLocaleTimeString('es-CO',{timeZone:'America/Bogota'});
+  }catch(e){if(request!==sequence)return;rows=[];render();status.textContent='No fue posible consultar: '+e.message;}
+ }
+ function render(){
+  const visible=filterFollowup(rows,{search:get('[data-search]').value,day:get('[data-day]').value,shift:get('[data-shift]').value,progress:get('[data-progress]').value,sort:get('[data-sort]').value});
+  const valid=visible.filter(r=>!r.issue&&r.estado!=='CANCELADA');
+  get('[data-summary]').innerHTML=[['Asignaciones visibles',visible.length],['Programadas',valid.reduce((n,r)=>n+r.scheduled,0)],['Ejecutadas (legacy)',valid.reduce((n,r)=>n+r.executed,0)],['Pendientes de asignación',valid.reduce((n,r)=>n+r.remaining,0)]].map(([label,n])=>'<div><span>'+label+'</span><b>'+n+'</b></div>').join('');
+  get('[data-list]').innerHTML=visible.length?visible.map(r=>'<details class="lp-followup-order"><summary><span><b>'+esc(r.produccion)+'</b><small>'+esc(r.production?.reserva_al)+' · '+esc(r.sistema)+' · '+esc(r.fecha)+' / T'+esc(r.turno)+'</small></span><span>Prioridad '+esc(r.prioridad)+'</span><span class="lp-followup-state">'+esc(r.progress)+'</span><span>'+show(r.executed)+' / '+show(r.scheduled)+'<small>Pendiente '+show(r.remaining)+'</small></span></summary><div class="lp-followup-detail"><p>Clave '+esc(r.key_produccion)+' · Asignación '+esc(r.id)+(r.part?' · Origen '+esc(r.part):'')+'</p><div class="lp-followup-stages"><div><b>Mecanizado</b><p>'+esc(r.production?.estado_mecanizado)+'</p></div><div><b>Ensamble · Export</b><p>Ensambladas '+esc(r.exportValid?r.production?.ensamblado:'Sin Export validado')+' · Saldo '+show(r.assemblyBalance)+'</p></div><div><b>Empaque · Export</b><p>Empacadas '+esc(r.exportValid?r.production?.empacado:'Sin Export validado')+' · Saldo '+show(r.packingBalance)+'</p></div></div><p>'+esc(r.observacion||'Sin observación de asignación')+'</p><p>'+esc(r.production?.observacion_mecanizado||'Sin observación de Mecanizado')+'</p><p>'+esc(r.production?.pendientes_mecanizado||'Sin novedades PDT informadas por la consulta')+'</p><p>Estado de producción consultado: '+esc(r.production?.estado_produccion)+'.</p><p>El progreso legacy no identifica etapa. Los saldos Export son por producción, no por asignación; no se suman ni se descuentan nuevamente.</p><button type="button" data-operate="'+esc(r.id)+'">Consultar operación</button></div></details>').join(''):'<p class="empty-state">'+(loaded?'No hay asignaciones para estos filtros.':'Consulta las asignaciones para comenzar.')+'</p>';
+  get('[data-list]').querySelectorAll('[data-operate]').forEach(b=>b.onclick=()=>{selected=rows.find(r=>r.id===b.dataset.operate);renderOperation();document.getElementById('productionOperationTab')?.click();});
+ }
+ function renderOperation(){
+  const host=operation.querySelector('[data-operation-detail]');if(!selected){host.textContent='Consulta un turno operativo o una asignación histórica en Seguimiento.';return;}
+  const r=selected;
+  host.innerHTML='<h4>'+esc(r.produccion)+' · Consulta histórica</h4><p>'+esc(r.key_produccion)+' · '+esc(r.fecha)+' / T'+esc(r.turno)+' · '+esc(r.id)+'</p><p>Saldo oficial Ensamble '+show(r.assemblyBalance)+' · Empaque '+show(r.packingBalance)+'</p><p>Asignación legacy: '+show(r.executed)+' ejecutadas / '+show(r.remaining)+' pendientes. No identifica etapa.</p><p>'+esc(r.observacion)+'</p><p>Las escrituras requieren el contrato operativo por etapa instalado y ámbitos autorizados. No se usa el registro aditivo legacy desde esta ventana.</p><button type="button" data-existing-glass>Ver vidrio / OVES</button>';
+  host.querySelector('[data-existing-glass]').onclick=()=>bridge.openGlass?.(r.key_produccion,r.produccion);
+ }
+ get('[data-refresh]').onclick=()=>operational.load();get('[data-week]').onchange=()=>operational.load();
+ for(const selector of ['[data-search]','[data-day]','[data-shift]','[data-progress]','[data-sort]'])get(selector).addEventListener(selector==='[data-search]'?'input':'change',render);
+ const operational=mountOperation({tracking,operation,bridge,legacyLoad:()=>{get('[data-list]').hidden=false;get('[data-summary]').hidden=false;return load();}});
+
+ return {load:operational.load};
+}
+function boot(){mountFollowup({tracking:document.getElementById('productionTrackingPanel'),operation:document.getElementById('productionOperationPanel'),bridge:{getToken:()=>window.SGPPlannerBridge?.getToken?.(),getClient:()=>window.SGPPlannerBridge.getClient(),openGlass:(...args)=>window.SGPPlannerBridge.openGlass(...args)}});}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();

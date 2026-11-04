@@ -1,0 +1,92 @@
+[
+  {
+    "table_name": "sgp_linea_plan_asignaciones",
+    "column_name": "id",
+    "data_type": "uuid"
+  },
+  {
+    "table_name": "sgp_linea_plan_asignaciones",
+    "column_name": "key_produccion",
+    "data_type": "text"
+  },
+  {
+    "table_name": "sgp_linea_plan_asignaciones",
+    "column_name": "fecha",
+    "data_type": "date"
+  },
+  {
+    "table_name": "sgp_linea_plan_asignaciones",
+    "column_name": "turno",
+    "data_type": "integer"
+  },
+  {
+    "table_name": "sgp_linea_plan_asignaciones",
+    "column_name": "cantidad",
+    "data_type": "integer"
+  },
+  {
+    "table_name": "sgp_linea_plan_asignaciones",
+    "column_name": "prioridad",
+    "data_type": "integer"
+  },
+  {
+    "table_name": "sgp_linea_plan_asignaciones",
+    "column_name": "creado_en",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sgp_linea_plan_asignaciones",
+    "column_name": "estado",
+    "data_type": "text"
+  },
+  {
+    "table_name": "sgp_linea_plan_asignaciones",
+    "column_name": "origen_id",
+    "data_type": "uuid"
+  },
+  {
+    "table_name": "sgp_linea_plan_asignaciones",
+    "column_name": "observacion",
+    "data_type": "text"
+  },
+  {
+    "table_name": "sgp_linea_plan_asignaciones",
+    "column_name": "creado_por",
+    "data_type": "text"
+  },
+  {
+    "table_name": "sgp_linea_plan_asignaciones",
+    "column_name": "actualizado_en",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sgp_linea_plan_ejecuciones",
+    "column_name": "id",
+    "data_type": "uuid"
+  },
+  {
+    "table_name": "sgp_linea_plan_ejecuciones",
+    "column_name": "asignacion_id",
+    "data_type": "uuid"
+  },
+  {
+    "table_name": "sgp_linea_plan_ejecuciones",
+    "column_name": "cantidad",
+    "data_type": "integer"
+  },
+  {
+    "table_name": "sgp_linea_plan_ejecuciones",
+    "column_name": "observacion",
+    "data_type": "text"
+  },
+  {
+    "table_name": "sgp_linea_plan_ejecuciones",
+    "column_name": "usuario",
+    "data_type": "text"
+  },
+  {
+    "table_name": "sgp_linea_plan_ejecuciones",
+    "column_name": "creado_en",
+    "data_type": "timestamp with time zone"
+  }
+]

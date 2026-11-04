@@ -1,0 +1,36 @@
+{
+  "date": "2026-11-02",
+  "timezone": "America/Bogota",
+  "baseline": "21c40f427c63367e7bd653377cad64053fbcadf0",
+  "approval": "Issue #184: Regla funcional aprobada \u2014 cierre de turno SIN ACTIVIDAD (2026-11-02)",
+  "manual_tests": {
+    "new_report_unit": 1,
+    "affected_operation_unit": 6,
+    "new_actual_postgres_groups": 9,
+    "new_browser_viewports": [
+      1440,
+      390
+    ],
+    "affected_regressions": "Actual operation SQL and XLSX contracts; other valid prior evidence reused"
+  },
+  "source_integrity_sha256": {
+    "app.js": "6c6f6db30437021b1041aba22123d89bf47dcb53459129d41699aa8495d917b7",
+    "planner-readonly-v326.js": "27a2ef1e1a4eea2e37a877793dbf04a2d99e74e489a3d580d1116afce9c3c98e",
+    "planner-operations-v326.js": "42dd96c5ff15dc99262de0369784dd0ea569f3d513cf254d022cbdd825d5c1dc",
+    "production-line-tabs.js": "7a94e94d78309373b6f57110d8346c20cad189a002977d5872c6f726ee5feb1b",
+    "src/domain/powerbi/adapter.js": "2a351985243ab3035736a12916773feabbb721dc208689582374143a9ba52c8c",
+    "src/domain/powerbi/xlsx-reader.js": "c2810f57e72c92a779f4ee905ef57e85b01a2663375906f10699c729141cfa7f",
+    "src/modules/lp01-powerbi-client.js": "931dbc157357465dc657586ec1434ba9c6d05a051b7e64179a7c1e36494c5e5f",
+    "src/server/lp-powerbi-handler.js": "eca692d23a91735aa68335cc20c2226be99332d25bba39853e02f422bcdb76ed",
+    "docs/sql-proposals/lp01-operacion/06_powerbi_xlsx_REVIEW.sql": "fbe88b89bfa4dade5c55517c078c4e00abdf865c9b20fb0cebce865fed308ca4",
+    "src/modules/pdt-v2-controller.js": "8a3254250401b62178283b431dd6ddf1c64b227bf37e01cd9e3d41f0415776ef"
+  },
+  "production_operations": {
+    "sql_applied": false,
+    "writes_activated": false,
+    "deployed": false,
+    "merged": false,
+    "sensitive_names_queried": false
+  },
+  "scope": "All new functional proofs are isolated/synthetic; no productive or plant verification"
+}

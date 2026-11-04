@@ -1,0 +1,27 @@
+{
+  "status": "EDGE_DEPLOYED_JWT_VERIFIED_METADATA",
+  "source_commit": "8f85586b8fc472a83430faa02a04bbafa291ef14",
+  "approval": "User explicitly authorized this exact JWT=true alternative and server-only integrated credential",
+  "function": {
+    "id": "5ac38edc-e45a-43c7-bc97-90cf842a0883",
+    "name": "lp-powerbi",
+    "version": 1,
+    "status": "ACTIVE",
+    "verify_jwt": true,
+    "ezbr_sha256": "ffc5dfe7ed070126c9cd6c02e43f2158884ecaf301629d54354408bad30d41f2"
+  },
+  "source_files_byte_identical": [
+    "supabase/functions/lp-powerbi/index.ts",
+    "src/server/lp-powerbi-origins.js",
+    "src/server/lp-powerbi-handler.js",
+    "src/domain/powerbi/adapter.js",
+    "src/domain/powerbi/xlsx-reader.js"
+  ],
+  "limits": [
+    "Metadata and five deployed source files verified; live HTTPS/JWT/CORS probes pending",
+    "No valid SGP user session, business data or productive saves verified",
+    "SQL10 installed; writes, BI and profile remain false until required checks",
+    "No new credentials, identities, RLS changes, Hosting publication or PR merge"
+  ],
+  "next_step": "Enable public negative-only backend probe in existing Actions preparation workflow; review evidence before activation/publication"
+}

@@ -1,0 +1,6 @@
+{
+  "status": "PASS",
+  "tests": 8,
+  "scope": "synthetic read-only inspectors/planner; no real source receipts or manifest certified",
+  "applies_changes": false
+}

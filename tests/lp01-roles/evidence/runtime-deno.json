@@ -1,0 +1,19 @@
+{
+  "status": "PASS_LOCAL_DENO",
+  "runtime": {
+    "deno": "2.5.6",
+    "v8": "14.0.365.5-rusty",
+    "typescript": "5.9.2"
+  },
+  "commit": "b1c948095189cde59406f408b7d38cf9052e98e6",
+  "checks": [
+    "deno check supabase/functions/lp-powerbi/index.ts",
+    "Unmodified real adapter reads both anonymized XLSX fixtures in Deno with cached dependencies and read access limited to fixture directory",
+    "Ensamble 33 rows/186 windows; Empaque 37 rows/186 windows",
+    "Two new origin/real-handler HTTP boundary tests pass without RPC execution"
+  ],
+  "limits": [
+    "Local runtime only; does not certify deployed Edge gateway, live SGP session or productive saves",
+    "No network access or productive data in parser execution; initial npm sandbox resolution attempt did not run the parser"
+  ]
+}

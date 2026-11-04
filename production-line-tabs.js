@@ -1,4 +1,4 @@
-/* Four-tab navigation; presentation-only, no database writes. */
+/* Unified LP navigation. Existing sheets remain available as historical consultations. */
 (()=>{
  const byId=id=>document.getElementById(id);
  const tabs=byId('productionAssemblyTab')?.parentElement;
@@ -16,6 +16,16 @@
  plannerPanel.id='productionPlannerPanel';plannerPanel.className='production-packing-empty';
  plannerPanel.innerHTML='<h3>Línea de Producción · Programación</h3><p>Calendario, tabla y Kanban comparten las asignaciones consultadas. La carga programada y los saldos oficiales del Export se muestran por separado.</p>';
  tabs.after(plannerPanel);
+ const extraPanels={};
+ for(const [key,id,label] of [['seguimiento','Tracking','Seguimiento'],['operacion','Operation','Operación'],['dashboard','Dashboard','Dashboard'],['reportes','Reports','Reportes']]){
+  const button=document.createElement('button');button.type='button';button.id='production'+id+'Tab';button.textContent=label;
+  const panel=document.createElement('section');panel.id='production'+id+'Panel';panel.hidden=true;plannerPanel.after(panel);tabs.insertBefore(button,assembly);extraPanels[key]={button,panel};
+ }
+ // Approved horizontal order; internal operation/report controllers retain their IDs.
+ for(const b of [planner,extraPanels.seguimiento.button,assembly,packing,report])tabs.append(b);
+ for(const key of ['operacion','dashboard','reportes'])extraPanels[key].button.hidden=true;
+
+ const stageActions=document.createElement('div');stageActions.hidden=true;stageActions.innerHTML='<button type="button" data-turn-operation>Operación del turno</button> <button type="button" data-stage-reports>Cierres del turno</button>';tabs.after(stageActions);stageActions.querySelector('[data-turn-operation]').onclick=()=>select('operacion');stageActions.querySelector('[data-stage-reports]').onclick=()=>select('reportes');
  const oldSubtabs=byId('assemblySheetTab')?.parentElement;
  if(oldSubtabs)oldSubtabs.hidden=true;
  const style=document.createElement('style');
@@ -120,27 +130,48 @@
  quickStyle.textContent='.sgp-assembly-quickviews{padding:14px;margin:12px 0;border:1px solid #cbdcf0;border-radius:14px;background:#f8fbff;color:#103b73}.sgp-assembly-quicktabs{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.sgp-assembly-quicktabs button{min-height:44px;padding:9px 12px;border:1px solid #bad2ee;border-radius:10px;background:#eaf2ff;color:#124b8b;font-weight:650}.sgp-assembly-quickviews small{display:block;color:#526781}@media(max-width:680px){.sgp-assembly-quickviews{position:relative;margin:10px 0;padding:12px}.sgp-assembly-quicktabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.sgp-assembly-quicktabs button{font-size:12px;padding:8px 3px}.assembly-table-wrap tbody tr{padding:6px 10px}.assembly-table-wrap tbody td{padding:6px 2px!important;font-size:13px}.assembly-table-wrap tbody td:first-child{font-weight:700;color:#103b73}.production-table-sortbar{padding:9px;gap:7px}.production-table-sortbar label{min-width:0}}';
  document.head.append(quickStyle);
 
- const all=[['planificador',planner,plannerPanel],['ensamble',assembly,assemblyPanel],['empaque',packing,packingPanel],['ubicaciones',report,locations]];
+ let activeStage='ensamble',supervisorStage=null;
+ const all=[['planificador',planner,plannerPanel],['ensamble',assembly,assemblyPanel],['empaque',packing,packingPanel],['ubicaciones',report,locations],...Object.entries(extraPanels).map(([key,{button,panel}])=>[key,button,panel])];
  all.forEach(([name,button,panel])=>{button.setAttribute('role','tab');button.setAttribute('aria-controls',panel.id);button.addEventListener('click',()=>select(name));});
  tabs.addEventListener('keydown',event=>{
   if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
-  const index=all.findIndex(([,button])=>button===document.activeElement);
+  const visible=all.filter(([,button])=>!button.hidden).sort((a,b)=>[...tabs.children].indexOf(a[1])-[...tabs.children].indexOf(b[1]));
+  const index=visible.findIndex(([,button])=>button===document.activeElement);
   if(index<0)return;
   event.preventDefault();
-  const next=event.key==='Home'?0:event.key==='End'?all.length-1:(index+(event.key==='ArrowRight'?1:-1)+all.length)%all.length;
-  all[next][1].focus();all[next][1].click();
+  const next=event.key==='Home'?0:event.key==='End'?visible.length-1:(index+(event.key==='ArrowRight'?1:-1)+visible.length)%visible.length;
+  visible[next][1].focus();visible[next][1].click();
  });
  function select(name){
-  for(const [key,button] of all){const active=key===name;button.classList.toggle('active',active);button.setAttribute('aria-selected',String(active));button.tabIndex=active?0:-1;}
+  if(supervisorStage&&(![supervisorStage,'operacion','reportes'].includes(name)))return;
+  if(['operacion','reportes'].includes(name))activeStage=extraPanels.seguimiento.panel.querySelector('[data-op-stage]')?.value==='EMPAQUE'?'empaque':'ensamble';
+  if(name==='ensamble'||name==='empaque')activeStage=name;
+  const logical=['operacion','reportes'].includes(name)?activeStage:name;
+  for(const [key,button] of all){const active=key===logical;button.classList.toggle('active',active);button.setAttribute('aria-selected',String(active));button.tabIndex=active?0:-1;}
+  stageActions.hidden=['planificador','ubicaciones'].includes(name);
   plannerPanel.hidden=name!=='planificador';
-  assemblyPanel.hidden=!(name==='ensamble'||name==='ubicaciones');
-  packingPanel.hidden=name!=='empaque';
-  sheet.hidden=name!=='ensamble';
-  locations.hidden=name!=='ubicaciones';
+  for(const [key,{panel}] of Object.entries(extraPanels))panel.hidden=key!==name;
+  if(name==='ensamble'||name==='empaque'){
+   extraPanels.seguimiento.panel.hidden=false;
+   document.dispatchEvent(new CustomEvent('sgp:production-stage',{detail:name==='ensamble'?'ENSAMBLE':'EMPAQUE'}));
+  }
+  document.dispatchEvent(new CustomEvent('sgp:production-panel',{detail:name}));
+  // Locations retain their original container and legacy handler. Operational sheets
+  // are replaced by the shared LP controller, never duplicated or remounted.
+  assemblyPanel.hidden=name!=='ubicaciones';packingPanel.hidden=true;sheet.hidden=true;locations.hidden=name!=='ubicaciones';
   if(name==='ubicaciones')byId('assemblyLocationReportTab')?.click();
-  if(name==='ensamble')byId('assemblySheetTab')?.click();
-  // Restore visibility after legacy handlers, without overriding the active top-level tab.
-  queueMicrotask(()=>{assemblyPanel.hidden=!(name==='ensamble'||name==='ubicaciones');packingPanel.hidden=name!=='empaque';sheet.hidden=name!=='ensamble';locations.hidden=name!=='ubicaciones';});
+  queueMicrotask(()=>{assemblyPanel.hidden=name!=='ubicaciones';packingPanel.hidden=true;sheet.hidden=true;locations.hidden=name!=='ubicaciones';});
  }
+ document.addEventListener('sgp:lp-role',event=>{
+  supervisorStage=event.detail==='SUPERVISOR ENSAMBLE'?'ensamble':event.detail==='SUPERVISOR EMPAQUE'?'empaque':null;
+  for(const button of [planner,extraPanels.seguimiento.button,report])button.hidden=Boolean(supervisorStage);
+  assembly.hidden=supervisorStage==='empaque';packing.hidden=supervisorStage==='ensamble';
+  // Do not offer the opposite stage in the shared controller either.
+  for(const option of extraPanels.seguimiento.panel.querySelectorAll('[data-op-stage] option')){
+   option.disabled=Boolean(supervisorStage)&&option.value.toLowerCase()!==supervisorStage;
+   option.hidden=option.disabled;
+  }
+  if(supervisorStage)select(supervisorStage);
+ });
  select('planificador');
 })();

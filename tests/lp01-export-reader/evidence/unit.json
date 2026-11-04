@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "new_unit_tests": 6,
+  "direct_planner_regressions": 8,
+  "source_contract": "BLOQUEADO_EN_FUENTE",
+  "writes": false,
+  "accounts": "synthetic scope review only"
+}

@@ -1,0 +1,149 @@
+name: LP01 followup - isolated UI acceptance
+on:
+  pull_request:
+    paths:
+      - 'src/domain/lp01-*.js'
+      - 'src/domain/powerbi/**'
+      - 'src/server/lp-powerbi-handler.js'
+      - 'src/modules/lp01-powerbi-client.js'
+      - 'supabase/**'
+      - 'package.json'
+      - 'tests/lp01-powerbi/**'
+      - 'tests/lp01-powerbi.test.mjs'
+      - 'src/modules/lp01-operation.js'
+      - 'docs/sql-proposals/lp01-operacion/**'
+      - 'tests/lp01-operacion/**'
+      - 'tests/lp01-operation.test.mjs'
+      - 'tests/lp01-continuidad/**'
+      - 'tests/lp01-continuidad.test.mjs'
+      - 'tests/lp01-sin-actividad/**'
+      - 'tests/lp01-sin-actividad.test.mjs'
+      - 'tests/lp01-apertura/**'
+      - 'tests/lp01-apertura.test.mjs'
+      - 'tests/lp01-cierres-integrados/**'
+      - 'tests/lp01-paneles2/**'
+      - 'tests/lp01-roles/**'
+      - 'tests/lp01-ambitos-import/**'
+      - 'tests/lp01-ambitos-import.test.mjs'
+      - 'scripts/lp01-import-scopes.mjs'
+      - 'src/server/lp01-scope-import.js'
+      - 'tests/lp01-ambitos-temporales/**'
+      - 'tests/lp01-ambitos/**'
+      - 'tests/lp01-ambitos.test.mjs'
+      - 'scripts/lp01-review-scopes.mjs'
+      - 'tests/lp01-export-reader/**'
+      - 'tests/lp01-export-reader.test.mjs'
+      - 'src/server/lp01-export-reader.js'
+      - 'src/server/lp01-scope-review.js'
+      - 'tests/lp01-origen/**'
+      - 'tests/lp01-origen.test.mjs'
+      - 'src/server/lp01-pdt-origin.js'
+      - 'src/server/lp01-export-reconciliation.js'
+      - 'tests/lp01-liberaciones/**'
+      - 'tests/lp01-fuentes/**'
+      - 'tests/lp01-fuentes.test.mjs'
+      - 'src/server/lp01-opening-preparation.js'
+      - 'scripts/lp01-opening-prepare.mjs'
+      - 'app.js'
+      - 'src/modules/lp01-followup.*'
+      - 'production-line-tabs.js'
+      - 'tests/lp01-followup.test.mjs'
+      - 'tests/lp01-seguimiento/**'
+      - '.github/workflows/lp01-followup.yml'
+permissions:
+  contents: read
+jobs:
+  ui:
+    runs-on: ubuntu-24.04
+    # The complete SQL + PC/mobile acceptance now exceeds the former 15-minute cap.
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Compatibility evidence compares SQL10 with the pinned pre-review commit.
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm install --no-package-lock --no-audit --no-fund
+      - run: npm run build:vendor
+      - run: npm run verify:release
+      - name: Focused regressions
+        run: |
+          node tests/lp01-powerbi.test.mjs
+          node tests/lp01-operation.test.mjs
+          node tests/lp01-continuidad.test.mjs
+          node tests/lp01-sin-actividad.test.mjs
+          node tests/lp01-apertura.test.mjs
+          node tests/lp01-fuentes.test.mjs
+          node tests/lp01-origen.test.mjs
+          node tests/lp01-export-reader.test.mjs
+          node tests/lp01-ambitos.test.mjs
+          node tests/lp01-ambitos/private-artifact.mjs
+          node tests/lp01-ambitos-import.test.mjs
+          node tests/lp01-ambitos-import/privacy.mjs
+          node tests/lp01-ambitos-import/demo.mjs
+          node tests/lp01-followup.test.mjs
+          node tests/production-line-tabs.test.mjs
+          node tests/planner-integration.test.mjs
+          node tests/linea-produccion-v328.test.mjs
+      - name: Isolated PostgreSQL contracts
+        run: |
+          python tests/lp01-operacion/postgres.py
+          python tests/lp01-powerbi/postgres.py
+          python tests/lp01-continuidad/postgres.py
+          python tests/lp01-continuidad/xlsx-admission.py
+          python tests/lp01-sin-actividad/postgres.py
+          python tests/lp01-apertura/postgres.py
+          python tests/lp01-fuentes/postgres.py
+          python tests/lp01-liberaciones/postgres.py
+          python tests/lp01-origen/postgres.py
+          python tests/lp01-export-reader/postgres.py
+          python tests/lp01-ambitos/postgres.py
+          python tests/lp01-ambitos-temporales/postgres.py
+          python tests/lp01-ambitos-import/postgres.py
+          python tests/lp01-cierres-integrados/isolated.py
+          python tests/lp01-roles/hardening.py
+          python tests/lp01-roles/compatibility.py
+          python tests/lp01-roles/postgres.py
+          python tests/lp01-roles/activation.py
+          python tests/lp01-roles/xlsx.py
+      - name: Real persistence PC and mobile acceptance
+        run: |
+          pip install playwright==1.62.0
+          python -m playwright install --with-deps chromium
+          python tests/lp01-powerbi/browser.py
+          python tests/lp01-cierres-integrados/browser.py
+          python tests/lp01-roles/browser.py
+          python tests/lp01-continuidad/browser.py
+          python tests/lp01-sin-actividad/browser.py
+          python tests/lp01-apertura/browser.py
+          python tests/lp01-fuentes/browser.py
+          python tests/lp01-seguimiento/browser.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lp01-followup-synthetic-evidence
+          path: |
+            tests/lp01-seguimiento/evidence
+            tests/lp01-operacion/evidence/
+            tests/lp01-powerbi/evidence/
+            tests/lp01-continuidad/evidence/
+            tests/lp01-sin-actividad/evidence/
+            tests/lp01-apertura/evidence/
+            tests/lp01-fuentes/evidence/
+            tests/lp01-liberaciones/evidence/
+            tests/lp01-origen/evidence/
+            tests/lp01-export-reader/evidence/
+            tests/lp01-ambitos/evidence/
+            tests/lp01-ambitos-temporales/evidence/
+            tests/lp01-ambitos-import/evidence/
+            tests/lp01-cierres-integrados/evidence/fixtures.json
+            tests/lp01-cierres-integrados/evidence/verification.json
+            tests/lp01-roles/evidence/
+            tests/lp01-cierres-integrados/evidence/browser-sql08.json
+            tests/lp01-cierres-integrados/evidence/sql08-*.png

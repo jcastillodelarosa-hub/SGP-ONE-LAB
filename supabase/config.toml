@@ -1,0 +1,4 @@
+# Proposal: retain platform JWT verification in addition to the real SGP session.
+# A public project anon JWT identifies the caller application, never an SGP user.
+[functions.lp-powerbi]
+verify_jwt = true

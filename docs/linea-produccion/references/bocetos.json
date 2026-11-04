@@ -1,0 +1,191 @@
+[
+  {
+    "id": "b01",
+    "section": "Navegación",
+    "status": "Continuidad",
+    "text": "B01 · Página 5Arquitectura PC / celularContinuidadNavegaciónMenú lateral de SGP y pestañas Programación, Seguimiento, Operación, Vidrio, Dashboard y Reportes. La línea seleccionada conserva el contexto. En móvil, menú compacto. Permisos por ventana se definen posteriormente.",
+    "reference": "SGP_Guia_Visual_27_Bocetos.html#b01"
+  },
+  {
+    "id": "b02",
+    "section": "Navegación",
+    "status": "Antecedente",
+    "text": "B02 · Página 6Boceto funcional inicialAntecedenteNavegaciónPrimera aproximación de Ensamble y Empaque. No sustituye las ventanas detalladas aprobadas posteriormente.",
+    "reference": "SGP_Guia_Visual_27_Bocetos.html#b02"
+  },
+  {
+    "id": "b03",
+    "section": "Programación",
+    "status": "Antecedente",
+    "text": "B03 · Página 7Calendario original AAntecedenteProgramaciónPrimera variante de calendario con órdenes por asignar, turnos y editor inferior. No hay aprobación inequívoca de esta variante.",
+    "reference": "SGP_Guia_Visual_27_Bocetos.html#b03"
+  },
+  {
+    "id": "b04",
+    "section": "Programación",
+    "status": "Antecedente",
+    "text": "B04 · Página 8Calendario original BAntecedenteProgramaciónSegunda variante de calendario. Se conserva para referencia, sin elegirla como definitiva.",
+    "reference": "SGP_Guia_Visual_27_Bocetos.html#b04"
+  },
+  {
+    "id": "b05",
+    "section": "Programación",
+    "status": "Aceptado al continuar",
+    "text": "B05 · Página 9Calendario semanal / día / explorador ampliadoAceptado al continuarProgramaciónTres modos coordinados: semana con turnos, día seleccionado con carga por sistema y explorador jerárquico de reserva → parte → producción. Cambiar vista conserva la selección.",
+    "reference": "SGP_Guia_Visual_27_Bocetos.html#b05"
+  },
+  {
+    "id": "b06",
+    "section": "Programación",
+    "status": "Aceptado al continuar",
+    "text": "B06 · Página 10Tabla de programación PC / celularAceptado al continuarProgramaciónFiltrar, seleccionar, ordenar por varios criterios y personalizar columnas. Jerarquía reserva/parte/producción. Programar o mover con confirmación; ordenar visualmente no cambia la prioridad guardada.",
+    "reference": "SGP_Guia_Visual_27_Bocetos.html#b06"
+  },
+  {
+    "id": "b07",
+    "section": "Programación",
+    "status": "Aceptado al continuar",
+    "text": "B07 · Página 11Kanban PC / celularAceptado al continuarProgramaciónColumnas Por asignar y Turno 1 / Turno 2 del día. Arrastrar propone una programación, no cambia el estado físico. Mostrar carga por turno y resumen por sistema; capacidad configurable.",
+    "reference": "SGP_Guia_Visual_27_Bocetos.html#b07"
+  },
+  {
+    "id": "b08",
+    "section": "Seguimiento",
+    "status": "Revisado posteriormente",
+    "text": "B08 · Página 12Ensamble generalRevisado posteriormenteSeguimientoÓrdenes abiertas antiguas primero, saldo oficial Ensamble y Empaque de Export por separado, Sale del coordinador, ejecución por turno y verificación con Mecanizado.",
+    "reference": "SGP_Guia_Visual_27_Bocetos.html#b08"
+  },
+  {
+    "id": "b09",
+    "section": "Seguimiento",
+    "status": "Revisado posteriormente",
+    "text": "B09 · Página 13Detalle de pendientes de aluminio y vidrioRevisado posteriormenteSeguimientoPanel de orden con pestañas de materiales, piezas y NC, ubicaciones de vidrio y solicitudes de verificación. Posteriormente se ajustó el resumen contraído.",
+    "reference": "SGP_Guia_Visual_27_Bocetos.html#b09"
+  },
+  {
+    "id": "b10",
+    "section": "Seguimiento",
+    "status": "Aceptado con ajustes",
+    "text": "B10 · Página 14Ensamble: resumen contraído de afectacionesAceptado con ajustesSeguimientoChips solo para afectaciones aplicables: NC AL, NC V, Tecno y Novedad, con cantidades de ventanas. Tecno cuando vidrio distinto de 100 % como sugerencia revisable. Coordinador valida o modifica discrepancias.",
+    "reference": "SGP_Guia_Visual_27_Bocetos.html#b10"
+  },
+  {
+    "id": "b11",
+    "section": "Seguimiento",
+    "status": "Aceptado con ajuste",
+    "text": "B11 · Página 15Empaque: seguimientoAceptado con ajusteSeguimientoÓrdenes abiertas y parciales, Sale y saldo de Empaque, pendientes y afectaciones. Añadir indicador Ensamble completo solo con saldo Export válido igual a cero; de lo contrario pendiente o sin confirmar. No mostrar estado de Mecanizado.",
+    "reference": "SGP_Guia_Visual_27_Bocetos.html#b11"
+  },
+  {
+    "id": "b12",
+    "section": "Operación",
+    "status": "Aprobado expresamente",
+    "text": "B12 · Página 16Ensamble: detalle de registroAprobado expresamenteOperaciónPanel lateral con saldo Export, Sale, reportado, afectaciones y registro de cantidad ensamblada por orden/turno. Total acumulado sustituye registro anterior. Observación obligatoria si queda bajo Sale; bloqueo de material no se considera disponible.",
+    "reference": "SGP_Guia_Visual_27_Bocetos.html#b12"
+  },
+  {
+    "id": "b13",
+    "section": "Operación",
+    "status": "Aprobado expresamente",
+    "text": "B13 · Página 17Ensamble: lista contraídaAprobado expresamenteOperaciónDos bloques: órdenes abiertas en ámbar, antiguas primero; programadas sin iniciar en azul, ordenadas por prioridad del turno. Sin duplicar órdenes en ambos bloques. Saldo Export, Sale, reportado y afectaciones.",
+    "reference": "SGP_Guia_Visual_27_Bocetos.html#b13"
+  },
+  {
+    "id": "b14",
+    "section": "Operación",
+    "status": "Aprobado expresamente",
+    "text": "B14 · Página 18Empaque: lista contraídaAprobado expresamenteOperaciónMisma jerarquía de Ensamble: abiertas y programadas. Mostrar saldo Empaque, Sale, empacado en el turno y estado de Ensamble completo / pendiente / sin confirmar. No sustituir por Mecanizado.",
+    "reference": "SGP_Guia_Visual_27_Bocetos.html#b14"
+  },
+  {
+    "id": "b15",
+    "section": "Operación",
+    "status": "Aprobado expresamente",
+    "text": "B15 · Página 19Revisar y cerrar turnoAprobado expresamenteOperaciónResumen de Sale, ejecución y cumplimiento por sistema y orden; observación general obligatoria y motivo en incompletas. Confirmación de cierre y descargas Excel/PDF/imagen. Reapertura/corrección autorizada por coordinador.",
+    "reference": "SGP_Guia_Visual_27_Bocetos.html#b15"
+  },
+  {
+    "id": "b16",
+    "section": "Operación",
+    "status": "Aprobado expresamente",
+    "text": "B16 · Página 20Registrar NC de aluminioAprobado expresamenteOperaciónSeleccionar piezas reales de Picking tipo PANEL, fabricación, longitud y cantidad. Enlazar NC y mostrar estado, ventanas afectadas y validación del coordinador. Pendientes de Ensamble y Empaque se resuelven independientemente.",
+    "reference": "SGP_Guia_Visual_27_Bocetos.html#b16"
+  },
+  {
+    "id": "b17",
+    "section": "Operación",
+    "status": "Sin aprobación",
+    "text": "B17 · Página 21Registrar NC de vidrioSin aprobaciónOperaciónPropuesta previa no aprobada. Número y estado de NC, vidrios afectados, ventanas afectadas y observación. No implementar como definitiva sin decisión.",
+    "reference": "SGP_Guia_Visual_27_Bocetos.html#b17"
+  },
+  {
+    "id": "b18",
+    "section": "Vidrio",
+    "status": "Superado",
+    "text": "B18 · Página 22Ubicaciones y relaciones inicialSuperadoVidrioPropuesta de ubicaciones con relaciones ilustrativas. No reemplaza el Reporte de ubicaciones ni el explorador real Reserva/Parte/Producción/Burro.",
+    "reference": "SGP_Guia_Visual_27_Bocetos.html#b18"
+  },
+  {
+    "id": "b19",
+    "section": "Vidrio",
+    "status": "Aprobado con ajustes",
+    "text": "B19 · Página 23Reporte de ubicaciones jerárquicoAprobado con ajustesVidrioResumen por preparación, novedades, traslados y otros. Expandir reserva → parte → producción → burro, con acabado, prioridad semanal original, cantidades, ubicación y estado. Conservar generación del reporte y explorador.",
+    "reference": "SGP_Guia_Visual_27_Bocetos.html#b19"
+  },
+  {
+    "id": "b20",
+    "section": "Vidrio",
+    "status": "Superado",
+    "text": "B20 · Página 24Preparación inicialSuperadoVidrioVersión anterior con estados de bodega no confirmados. Sustituida por fechas de preparación por prioridad/parte/subparte.",
+    "reference": "SGP_Guia_Visual_27_Bocetos.html#b20"
+  },
+  {
+    "id": "b21",
+    "section": "Vidrio",
+    "status": "Aprobado expresamente",
+    "text": "B21 · Página 25Fechas de preparación corregidasAprobado expresamenteVidrioUna fila por prioridad/parte/subparte, con reserva, sistema, acabado, ventanas y fecha sin turno. Selección múltiple, aplicar fecha, guardar y exportar Excel. Lotes de Mecanizado y Vidrio separados.",
+    "reference": "SGP_Guia_Visual_27_Bocetos.html#b21"
+  },
+  {
+    "id": "b22",
+    "section": "Dashboard",
+    "status": "Superado",
+    "text": "B22 · Página 26Resumen semanal inicialSuperadoDashboardResumen básico reemplazado por indicadores oficiales, barras de avance y distribución por sistema, día y turno.",
+    "reference": "SGP_Guia_Visual_27_Bocetos.html#b22"
+  },
+  {
+    "id": "b23",
+    "section": "Dashboard",
+    "status": "Revisado posteriormente",
+    "text": "B23 · Página 27Avance por sistema con barras ExportRevisado posteriormenteDashboardBarras oficiales de Export: gris como base y azul ensamblado, con fecha de carga. No mezclar cifras reportadas por líderes ni interpretar acumulados como producción del día.",
+    "reference": "SGP_Guia_Visual_27_Bocetos.html#b23"
+  },
+  {
+    "id": "b24",
+    "section": "Dashboard",
+    "status": "Aprobado expresamente",
+    "text": "B24 · Página 28Resumen por sistema / día / turnoAprobado expresamenteDashboardAvance oficial por sistema y tabla semanal de siete días; cada día muestra Turno 1, Turno 2 y total. Clic en cantidad abre órdenes correspondientes. En móvil se selecciona día.",
+    "reference": "SGP_Guia_Visual_27_Bocetos.html#b24"
+  },
+  {
+    "id": "b25",
+    "section": "Dashboard",
+    "status": "Continuidad",
+    "text": "B25 · Página 29Condiciones y afectacionesContinuidadDashboardConsultar condiciones de accesorios (Muntin, silicona, compartidas) por producciones; NC AL/NC V/Tecno/Novedad por ventanas, sin sumar solapamientos. Configuración define condiciones; Dashboard las consulta.",
+    "reference": "SGP_Guia_Visual_27_Bocetos.html#b25"
+  },
+  {
+    "id": "b26",
+    "section": "Reportes",
+    "status": "Aceptado al continuar",
+    "text": "B26 · Página 30Histórico y descargasAceptado al continuarReportesHistorial de turnos de Ensamble, Empaque y Preparación con filtros de fecha/turno/estado, vista previa y detalle por sistema/orden/comentarios. Exportar Excel, PDF o imagen. Snapshot de cierre inmutable.",
+    "reference": "SGP_Guia_Visual_27_Bocetos.html#b26"
+  },
+  {
+    "id": "b27",
+    "section": "Configuración",
+    "status": "Aprobado expresamente",
+    "text": "B27 · Página 31Condiciones por accesoriosAprobado expresamenteConfiguraciónCrear y editar condición: nombre, código SAP, mensaje, etiqueta y activa. Buscar accesorios, probar sin guardar y guardar. Sin datos significa sin evaluar; no reduce Sale automáticamente.",
+    "reference": "SGP_Guia_Visual_27_Bocetos.html#b27"
+  }
+]

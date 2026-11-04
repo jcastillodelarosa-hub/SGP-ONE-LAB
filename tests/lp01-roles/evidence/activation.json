@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "synthetic": true,
+  "postgres": "17.11",
+  "script_sha256": "e9098d68752c891bdff0a4a793a3faf4820610085add8b038d624f3f5487b71b",
+  "checks": [
+    "Forced failure rolls back both configuration rows; no partial activation",
+    "Unsafe catalog ACL and incompatible BI adapter rejected before any activation",
+    "Exclusive activation waits for role containment; timeout changes nothing; success and retry preserve data/tuple versions and stage scopes",
+    "Recovery contains writes while retaining profile/history; mixed state cannot silently reactivate"
+  ],
+  "limits": [
+    "Synthetic accounts and source data only; not proof of real user operations",
+    "No credentials, external network or production changes; temporary ACL changes confined to synthetic PostgreSQL"
+  ]
+}

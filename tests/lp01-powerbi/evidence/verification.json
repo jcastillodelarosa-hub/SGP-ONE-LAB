@@ -1,0 +1,31 @@
+{
+  "date": "2026-11-02",
+  "base": "47a06af9523e25be6f7fa0bb4435025325e54ee7",
+  "status": "PASS_IN_ISOLATION",
+  "unit_tests": {
+    "new_xlsx_adapter_and_grouped_reconciliation": 9,
+    "affected_operation_contract_and_report": 6,
+    "other_prior_111_tests": "105 reused; not manually repeated"
+  },
+  "postgres": {
+    "historical_affected_contract_scenarios": 15,
+    "new_xlsx_scenarios": 8,
+    "engine": "PostgreSQL 17.11 in disposable isolated containers"
+  },
+  "browser_viewports": [
+    1440,
+    390
+  ],
+  "real_originals": "2 tested locally in isolated PostgreSQL with synthetic production catalog; byte-identical originals recovered; no live identity certification",
+  "protected_files_identical_to_base_sha256": {
+    "app.js": "6c6f6db30437021b1041aba22123d89bf47dcb53459129d41699aa8495d917b7",
+    "planner-readonly-v326.js": "27a2ef1e1a4eea2e37a877793dbf04a2d99e74e489a3d580d1116afce9c3c98e",
+    "planner-operations-v326.js": "42dd96c5ff15dc99262de0369784dd0ea569f3d513cf254d022cbdd825d5c1dc",
+    "production-line-tabs.js": "7a94e94d78309373b6f57110d8346c20cad189a002977d5872c6f726ee5feb1b",
+    "src/domain/mecanizado-partes.js": "c7ff60c052f32cb63070c39ec6e54ae1ca9a3539560930158e2f4e492ca3f117",
+    "src/modules/pdt-v2-controller.js": "8a3254250401b62178283b431dd6ddf1c64b227bf37e01cd9e3d41f0415776ef"
+  },
+  "release_verification": "PASS; package assets only, not deployment",
+  "productive_changes": false,
+  "external_ci": "Mandatory PR workflows may run broader regressions automatically; not production verification"
+}

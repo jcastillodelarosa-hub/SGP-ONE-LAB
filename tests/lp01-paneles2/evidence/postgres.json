@@ -1,0 +1,20 @@
+{
+  "status": "PASS",
+  "postgres": "17.11 (Debian 17.11-1.pgdg13+2)",
+  "synthetic": true,
+  "checks": [
+    "Atomic installation, pinned SQL08 preconditions; pilot disabled; no existing account/role automatically receives capability",
+    "Each supervisor reads/validates/closes own stage, denied opposite stage; leader validates both; no SALE/reopen escalation; CAS retry idempotent",
+    "Absent supervisors: leader closes both T2 only with a second distinct eligible responsible account; no single-person PRIMARY/BACKUP bypass",
+    "Canonical server responsibility recorded for leader substitution; historical closure actor identity preserved",
+    "FRAMES_2, wrong date/shift and expired responsibility denied; official Export unchanged",
+    "Responsibility expires after statement: deferred SQL08 commit guard rolls back reopening under SQL09",
+    "Real concurrent revocation serialized by SQL09 shared locks, no authorization stub; next transaction denied",
+    "Private tables inaccessible to anon; original RLS/ACL and other module sources unchanged; no technical grants"
+  ],
+  "limitations": [
+    "Synthetic SGP accounts/scopes and QA CSV closure only; original XLSX adapter untouched and previous 82d8a95 evidence reused",
+    "No actual role/user/catalog consultation or permissions application",
+    "SQL09 disabled by default, proposed only; isolated fixture activates it"
+  ]
+}

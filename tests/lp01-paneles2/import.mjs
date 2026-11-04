@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import {prepareScopeImport} from '../../src/server/lp01-scope-import.js';
+import {fixture} from '../lp01-ambitos-import/fixtures.mjs';
+const f=fixture();f.catalog.productions=f.catalog.productions.filter(p=>p.line==='PANELES_2');
+for(const state of [f.reference,f.proposed])state.assignments=state.assignments.filter(p=>p.line==='PANELES_2');
+f.periods.records=f.periods.records.filter(p=>p.line==='PANELES_2');
+f.periods.records.push(...f.periods.records.map(p=>({...p,shift:1,start:'2026-11-01T07:00:00-05:00',end:'2026-11-01T18:00:00-05:00'})));
+const proposal=prepareScopeImport({...f,lines:['PANELES_2']});assert.equal(proposal.readyForFunctionalReview,true);assert.equal(proposal.apply,false);assert.equal(proposal.coverage.length,4);
+assert(prepareScopeImport(f).conflicts.some(x=>x.kind==='period_scope_missing'&&x.line==='FRAMES_2'));
+const missing=structuredClone(f);missing.periods.records.pop();assert(prepareScopeImport({...missing,lines:['PANELES_2']}).conflicts.some(x=>x.kind==='pilot_shift_period_missing'));
+const cross=fixture();assert.throws(()=>prepareScopeImport({...cross,lines:['PANELES_2']}));
+const lone=structuredClone(f);lone.proposed.assignments=lone.proposed.assignments.filter(p=>p.duty!=='BACKUP');assert.equal(prepareScopeImport({...lone,lines:['PANELES_2']}).readyForFunctionalReview,false);
+assert.throws(()=>prepareScopeImport({...f,lines:['BAD']}));
+console.log('6 Paneles2 importer groups PASS; private proposal only, no identities printed or applied');

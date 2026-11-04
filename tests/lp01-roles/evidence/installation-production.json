@@ -1,0 +1,133 @@
+{
+  "status": "APPLIED_00_01_06_08_CONTAINED_SQL10_PENDING",
+  "environment": "Supabase SGP-ONE-LAB ocvxbwzqxbrfndkvjmfx",
+  "observed_metadata": {
+    "sql09": null,
+    "config": {
+      "id": true,
+      "escrituras": false,
+      "adaptador_bi": "LP-PBI-XLSX-1",
+      "formato_bi_aprobado": false
+    },
+    "catalogs": [
+      {
+        "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}",
+        "rls": false,
+        "owner": "postgres",
+        "table": "sgp_rol_accesos",
+        "anon_direct_access": false,
+        "authenticated_direct_access": false
+      },
+      {
+        "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}",
+        "rls": false,
+        "owner": "postgres",
+        "table": "sgp_usuario_accesos",
+        "anon_direct_access": false,
+        "authenticated_direct_access": false
+      }
+    ],
+    "sql10_profile": null,
+    "native_functions": [
+      {
+        "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+        "name": "sgp_admin_rol_accesos_guardar",
+        "owner": "postgres",
+        "config": [
+          "search_path=public"
+        ],
+        "definer": true,
+        "body_md5": "96c5531abff3988b31a91211b4a440f4",
+        "signature": "p_token text, p_rol text, p_accesos text[]"
+      },
+      {
+        "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+        "name": "sgp_admin_rol_accesos_listar",
+        "owner": "postgres",
+        "config": [
+          "search_path=public"
+        ],
+        "definer": true,
+        "body_md5": "32a3077fbfc057aca30f6e622796f12e",
+        "signature": "p_token text"
+      },
+      {
+        "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+        "name": "sgp_admin_usuario_guardar",
+        "owner": "postgres",
+        "config": [
+          "search_path=public, extensions"
+        ],
+        "definer": true,
+        "body_md5": "ed07b071fe83cf63709ed976d38fb116",
+        "signature": "p_token text, p_id_usuario uuid, p_usuario text, p_nombre text, p_rol text, p_password text, p_activo boolean, p_accesos text[]"
+      },
+      {
+        "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+        "name": "sgp_admin_usuarios_listar",
+        "owner": "postgres",
+        "config": [
+          "search_path=public"
+        ],
+        "definer": true,
+        "body_md5": "543908bbd6c0de99540d8b6bf3299d15",
+        "signature": "p_token text"
+      },
+      {
+        "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+        "name": "sgp_mis_accesos",
+        "owner": "postgres",
+        "config": [
+          "search_path=public, extensions"
+        ],
+        "definer": true,
+        "body_md5": "4f879ddd1659ef97f05e2f4aaa7c5d33",
+        "signature": "p_token text"
+      }
+    ],
+    "installed_migrations": [
+      {
+        "name": "lp183_harden_native_access_catalogs",
+        "version": "20261104025405"
+      },
+      {
+        "name": "lp183_operacion_01_contained",
+        "version": "20261104025604"
+      },
+      {
+        "name": "lp183_powerbi_06_contained",
+        "version": "20261104025619"
+      },
+      {
+        "name": "lp183_temporal_08_contained",
+        "version": "20261104025624"
+      }
+    ]
+  },
+  "code_reference": "e4f8a379f9369082b00809f96e630ba1a2315eb7",
+  "sql10": {
+    "installed": false,
+    "source": "docs/sql-proposals/lp01-operacion/10_roles_cierre_individual_REVIEW.sql",
+    "sha256": "08d17548ad781ab3f7d8b400121c448d1f064269fc858055498e36cdbdd67d82",
+    "confirmation": "Expired; new user acceptance pending; never bypassed"
+  },
+  "backup_hashes": {
+    "acl": "503bc9afbf2a85bf8b87f0d84ee8648978ec303e0ab51f3ad54e0a7baf0d8404",
+    "native_contracts": "a498db1d39409800565c52e49e60510bcdce7f48e664c55a87cccbf3c865e3dd",
+    "storage": "private directory0700/files0600, excluded from Git/CI/Hosting"
+  },
+  "ci": {
+    "all_six_runs_success_for_code_reference": true,
+    "lp_acceptance_run": 41762498849,
+    "prepare_run": 41762493647,
+    "prepare_zip_sha256": "fd033f4ba27c6b2f8cca40ea28dfbd67d264725cb3d58950a58fbd85e595939a"
+  },
+  "limits": [
+    "Only technical ACL and contained SQL01/06/08 applied; no business records or user/session assignments edited",
+    "No SQL09/10, enabled LP writes/BI/profile, Edge/Firebase publication or PR merge",
+    "Native administrative contracts unchanged; positive Roles/Users/LP flows verified only with synthetic isolated PostgreSQL and PC/mobile",
+    "Network revision5 still excludes required three HTTPS hosts after restart; no bypass/credential escalation",
+    "Prepared source ZIP is not a publication or proof of productive saves"
+  ],
+  "snapshot_stage": "Historical before SQL10; current applied state is in sql10-production.json"
+}

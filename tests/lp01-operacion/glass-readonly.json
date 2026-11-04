@@ -1,0 +1,25 @@
+{
+  "states": [
+    {
+      "estado": "en transito",
+      "registros": 4
+    },
+    {
+      "estado": "n/a",
+      "registros": 104
+    },
+    {
+      "estado": "novedad",
+      "registros": 253
+    },
+    {
+      "estado": "preparado",
+      "registros": 356
+    },
+    {
+      "estado": "preparado - sin movimiento",
+      "registros": 85
+    }
+  ],
+  "definition": "CREATE OR REPLACE FUNCTION public.sgp_detalle_ubicacion_vidrio(p_token text, p_key_produccion text)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\ndeclare v_user text;\nbegin\n v_user:=public.sgp_validar_sesion_rol(p_token,array['ADMINISTRADOR','COORDINADOR','LIDER','CONSULTA']);\n return jsonb_build_object(\n  'produccion',(select to_jsonb(x) from (select id,produccion,sistema,cantidad from sgp_producciones where key_produccion=p_key_produccion limit 1)x),\n  'resumen',coalesce((select jsonb_agg(x order by x.orden) from (\n    select case when lower(coalesce(estado_orden,''))='preparado' then 'PREPARADO' when lower(coalesce(estado_orden,''))='novedad' then 'NOVEDAD' else 'OTROS' end categoria,\n    sum(coalesce(disponible,0)) unidades,count(distinct posicion) burros,\n    case when lower(coalesce(estado_orden,''))='preparado' then 1 when lower(coalesce(estado_orden,''))='novedad' then 2 else 3 end orden\n    from sgp_ubicacion_vidrio_actual where activo=true and key_produccion=p_key_produccion group by 1,4\n  )x),'[]'::jsonb),\n  'burros',(select count(distinct posicion) from sgp_ubicacion_vidrio_actual where activo=true and key_produccion=p_key_produccion),\n  'unidades',(select coalesce(sum(disponible),0) from sgp_ubicacion_vidrio_actual where activo=true and key_produccion=p_key_produccion),\n  'detalle',coalesce((select jsonb_agg(jsonb_build_object('categoria',categoria,'estado',estado_orden,'posicion',posicion,'unidades',unidades,'composiciones',composiciones) order by orden,posicion) from (\n    select case when lower(coalesce(estado_orden,''))='preparado' then 'PREPARADO' when lower(coalesce(estado_orden,''))='novedad' then 'NOVEDAD' else 'OTROS' end categoria,\n    min(estado_orden) estado_orden,posicion,sum(coalesce(disponible,0)) unidades,string_agg(distinct coalesce(composicion,'—'),' · ' order by coalesce(composicion,'—')) composiciones,\n    case when lower(coalesce(estado_orden,''))='preparado' then 1 when lower(coalesce(estado_orden,''))='novedad' then 2 else 3 end orden\n    from sgp_ubicacion_vidrio_actual where activo=true and key_produccion=p_key_produccion group by posicion,1,6\n  )d),'[]'::jsonb)\n );\nend $function$\n"
+}

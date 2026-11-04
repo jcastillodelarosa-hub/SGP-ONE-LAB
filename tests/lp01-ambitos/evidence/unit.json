@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "tests": 9,
+  "private_artifact_checks": "PASS 0700/0600; no identifiers or paths logged",
+  "real_assignments": "NOT_PROVIDED; four combinations pending in generated private matrix",
+  "applies": false,
+  "temporal_scope_enforcement": "NOT_APPLIED; reviewer only"
+}

@@ -13,7 +13,7 @@ test('navigation renames Ensamble without changing view identity',()=>{
 });
 test('Ensamble and Empaque have independent accessible tabs',()=>{
  for(const id of ['productionAssemblyTab','productionPackingTab','productionAssemblyPanel','productionPackingPanel'])assert.ok(html.includes('id="'+id+'"'));
- assert.match(html,/production-line-tabs\.js\?v=1/);
+ assert.match(html,/production-line-tabs\.js\?v=3/);
  assert.match(tabs,/assemblyPanel.hidden=/);
  assert.match(tabs,/packingPanel.hidden=/);
  assert.match(html,/id="packingPreviewBody"/);
@@ -82,11 +82,11 @@ test('packing has its own visible week and line controls',()=>{
  assert.match(app,/function syncPackingWeekOptions\(\)/);
 });
 
-test('four primary tabs are created without altering existing RPC and report markup',()=>{
+test('five approved primary tabs are created without altering existing RPC and report markup',()=>{
  for(const id of ['productionPlannerTab','productionLocationsTab','productionPlannerPanel'])assert.ok(tabs.includes(id));
  assert.match(tabs,/select\('planificador'\)/);
  assert.match(tabs,/locations.hidden=name!==/);
- assert.match(tabs,/packingPanel.hidden=name!==/);
+ assert.match(tabs,/packingPanel.hidden=true/);
  assert.match(tabs,/role','tab'/);
 });
 
@@ -123,13 +123,13 @@ test('responsive production cards preserve table headers as mobile labels',()=>{
  assert.match(tabs,/production-table-empty/);
 });
 
-test('four production tabs support keyboard arrow and boundary navigation',()=>{
+test('five production tabs support keyboard arrow and boundary navigation',()=>{
  assert.match(tabs,/tabs\.addEventListener\('keydown'/);
  assert.match(tabs,/ArrowLeft/);
  assert.match(tabs,/ArrowRight/);
  assert.match(tabs,/Home/);
  assert.match(tabs,/End/);
- assert.match(tabs,/all\[next\]\[1\]\.focus\(\)/);
+ assert.match(tabs,/visible\[next\]\[1\]\.focus\(\)/);
 });
 
 test('spreadsheet column filter keeps its values scrollable in short viewports',()=>{

@@ -1,0 +1,13 @@
+{
+  "status": "PASS_ISOLATED_CHECKS",
+  "installation_verdict": "BLOCKED_REAL_ACL",
+  "synthetic": true,
+  "checks": [
+    "Observed unsafe grants/RLS replayed only synthetically: direct anon update restores revoked supervisor access; no user-role escalation alleged",
+    "b4cf8c8 installer admitted real-ACL replica; revised preflight rejects it atomically before creating objects or catalog defaults",
+    "Column-only UPDATE grant also rejected atomically; no false safety from removing only table-level grants",
+    "No ACL repair, no RLS toggle in SQL10; privilege correction requires separate authorized cross-module review",
+    "Secured fixture: installation preserves all previous function OIDs/signatures/owners/ACL/SECURITY/search_path and native table ACL/RLS; profile false/private RLS enabled"
+  ],
+  "production_operations": "SELECT catalog only; zero DDL/DML"
+}

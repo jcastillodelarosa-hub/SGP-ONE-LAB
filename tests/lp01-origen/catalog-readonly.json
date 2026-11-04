@@ -1,0 +1,223 @@
+{
+  "scope": "SELECT definitions and columns only; no operational rows or source RPC execution",
+  "definitions": [
+    {
+      "signature": "sgp_aluminio_pendiente_validar_detalles_v1(text,uuid,jsonb,text,text)",
+      "md5": "8735ff7cc79f2069e94f4de78caa266d",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_aluminio_pendiente_validar_detalles_v1(p_token text, p_id uuid, p_detalles jsonb, p_reserva text DEFAULT NULL::text, p_observacion text DEFAULT NULL::text)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\nBEGIN\n IF EXISTS(SELECT 1 FROM sgp_pdt_manual.detalles WHERE id_pendiente=p_id)\n THEN RETURN sgp_pdt_manual.validar(p_token,p_id,p_detalles,p_reserva,p_observacion); END IF;\n RETURN sgp_pdt_manual.original_validar(p_token,p_id,p_detalles,p_reserva,p_observacion);\nEND $function$\n"
+    },
+    {
+      "signature": "sgp_pdt_cerrar_v2(text,uuid,uuid)",
+      "md5": "cad60e24cefcd15a441189b320753808",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_pdt_cerrar_v2(p_token text, p_id uuid, p_clave uuid)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\nBEGIN\n IF EXISTS(SELECT 1 FROM sgp_pdt_manual.detalles WHERE id_pendiente=p_id)\n THEN RETURN public.sgp_pdt_manual_cerrar_v1(p_token,p_id,p_clave); END IF;\n RETURN sgp_pdt_manual.original_cerrar_v2(p_token,p_id,p_clave);\nEND $function$\n"
+    },
+    {
+      "signature": "sgp_pdt_picking_v2(text,uuid)",
+      "md5": "a8d91c6e10974e05d7b0249739b9d4d7",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_pdt_picking_v2(p_token text, p_id uuid)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\nBEGIN\n IF sgp_pdt_multiorigen.es_registro_v4(p_id) THEN\n RETURN sgp_pdt_multiorigen.nuevo_sgp_pdt_picking_v2(p_token,p_id);\n END IF;\n RETURN sgp_pdt_multiorigen.original_sgp_pdt_picking_v2(p_token,p_id);\nEND $function$\n"
+    },
+    {
+      "signature": "sgp_pdt_entrega_validar_v2(text,uuid)",
+      "md5": "d1636ba2f38234b43a69a95ab6b42019",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_pdt_entrega_validar_v2(p_token text, p_linea uuid)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\nDECLARE l public.sgp_pdt_entrega_lineas%rowtype; parent uuid; u text; p public.sgp_aluminio_pendientes%rowtype;\nBEGIN\n u:=public.sgp_validar_sesion_rol(p_token,ARRAY['ADMINISTRADOR','COORDINADOR','RECEPCION','SUPERVISOR DE PICKING']);\n SELECT d.id_pendiente INTO STRICT parent FROM public.sgp_pdt_entrega_lineas x JOIN public.sgp_aluminio_pendiente_detalles d USING(id_detalle) WHERE x.id_linea=p_linea;\n SELECT * INTO STRICT p FROM public.sgp_aluminio_pendientes WHERE id_pendiente=parent FOR UPDATE;\n SELECT * INTO STRICT l FROM public.sgp_pdt_entrega_lineas WHERE id_linea=p_linea FOR UPDATE;\n IF l.estado='VALIDADA' THEN RETURN jsonb_build_object('ok',true,'duplicado',true); END IF;\n IF p.estado<>'PENDIENTE' OR l.estado<>'REGISTRADA' THEN RAISE EXCEPTION 'Línea no apta'; END IF;\n PERFORM 1 FROM public.sgp_picking_entregas WHERE id_entrega=l.id_entrega AND estado='VALIDADA' FOR UPDATE;\n IF NOT FOUND THEN RAISE EXCEPTION 'Entrega Picking sin validación inequívoca'; END IF;\n UPDATE public.sgp_pdt_entrega_lineas SET estado='VALIDADA',validado_por=u,validado_en=now() WHERE id_linea=p_linea;\n RETURN jsonb_build_object('ok',true);\nEND $function$\n"
+    },
+    {
+      "signature": "sgp_pdt_entrega_anular_v2(text,uuid,text)",
+      "md5": "33434cec647698daf03a2125077d35c7",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_pdt_entrega_anular_v2(p_token text, p_linea uuid, p_motivo text)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\nDECLARE parent uuid; p public.sgp_aluminio_pendientes%rowtype; l public.sgp_pdt_entrega_lineas%rowtype; u text;\nBEGIN\n u:=public.sgp_validar_sesion_rol(p_token,ARRAY['ADMINISTRADOR','COORDINADOR']);\n IF nullif(btrim(p_motivo),'') IS NULL THEN RAISE EXCEPTION 'Motivo requerido'; END IF;\n SELECT d.id_pendiente INTO STRICT parent FROM public.sgp_pdt_entrega_lineas x JOIN public.sgp_aluminio_pendiente_detalles d USING(id_detalle) WHERE x.id_linea=p_linea;\n SELECT * INTO STRICT p FROM public.sgp_aluminio_pendientes WHERE id_pendiente=parent FOR UPDATE;\n SELECT * INTO STRICT l FROM public.sgp_pdt_entrega_lineas WHERE id_linea=p_linea FOR UPDATE;\n IF l.estado='ANULADA' THEN RETURN jsonb_build_object('ok',true,'duplicado',true); END IF;\n IF p.estado<>'PENDIENTE' THEN RAISE EXCEPTION 'Conciliar cierre antes de anular'; END IF;\n UPDATE public.sgp_pdt_entrega_lineas SET estado='ANULADA',motivo=p_motivo,anulado_por=u,anulado_en=now() WHERE id_linea=p_linea;\n INSERT INTO public.sgp_aluminio_pendientes_historial(id_pendiente,usuario,tipo_evento,observacion,datos_nuevos)\n VALUES(parent,u,'ANULACION_ENTREGA_V2',p_motivo,jsonb_build_object('linea',p_linea));\n RETURN jsonb_build_object('ok',true);\nEND $function$\n"
+    },
+    {
+      "signature": "sgp_pdt_entrega_registrar_v2(text,uuid,uuid,integer,uuid)",
+      "md5": "7dc66ea3b4be1befaa88f33258652d3b",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_pdt_entrega_registrar_v2(p_token text, p_detalle uuid, p_entrega uuid, p_cantidad integer, p_clave uuid)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\nDECLARE grouped boolean;\nBEGIN\n SELECT id_pieza='' INTO grouped FROM public.sgp_aluminio_pendiente_detalles WHERE id_detalle=p_detalle;\n IF grouped THEN\n  IF sgp_pdt_multiorigen.es_registro_v4((SELECT id_pendiente FROM public.sgp_aluminio_pendiente_detalles WHERE id_detalle=p_detalle)) THEN\n   RETURN sgp_pdt_multiorigen.grouped_nuevo_entrega(p_token,p_detalle,p_entrega,p_cantidad,p_clave);\n  END IF;\n  RETURN sgp_pdt_multiorigen.grouped_original_entrega(p_token,p_detalle,p_entrega,p_cantidad,p_clave);\n END IF;\n IF sgp_pdt_multiorigen.es_registro_v4((SELECT id_pendiente FROM public.sgp_aluminio_pendiente_detalles WHERE id_detalle=p_detalle)) THEN\n  RETURN sgp_pdt_multiorigen.nuevo_sgp_pdt_entrega_registrar_v2(p_token,p_detalle,p_entrega,p_cantidad,p_clave);\n END IF;\n RETURN sgp_pdt_multiorigen.original_sgp_pdt_entrega_registrar_v2(p_token,p_detalle,p_entrega,p_cantidad,p_clave);\nEND $function$\n"
+    },
+    {
+      "signature": "sgp_pdt_manual.original_cerrar_v2(text,uuid,uuid)",
+      "md5": "7cfb562666d1861e2e93ab3dd13e650e",
+      "definition": "CREATE OR REPLACE FUNCTION sgp_pdt_manual.original_cerrar_v2(p_token text, p_id uuid, p_clave uuid)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\nDECLARE p public.sgp_aluminio_pendientes%rowtype; u text; e public.sgp_pdt_cierres%rowtype;\nBEGIN\n u:=public.sgp_validar_sesion_rol(p_token,ARRAY['COORDINADOR','PICKING','SUPERVISOR DE PICKING','ADMINISTRADOR']);\n IF p_clave IS NULL THEN RAISE EXCEPTION 'Clave requerida'; END IF;\n SELECT * INTO STRICT p FROM public.sgp_aluminio_pendientes WHERE id_pendiente=p_id FOR UPDATE;\n SELECT * INTO e FROM public.sgp_pdt_cierres WHERE id_pendiente=p_id;\n IF FOUND THEN\n  IF e.clave<>p_clave THEN RAISE EXCEPTION 'Cierre ya registrado'; END IF;\n  RETURN jsonb_build_object('ok',true,'duplicado',true);\n END IF;\n IF p.contrato_pdt<>'V2' OR p.estado<>'PENDIENTE' OR p.validacion_estado<>'VALIDADO' OR p.estado_repo<>'PROCESADO' THEN RAISE EXCEPTION 'PDT no apto para cierre'; END IF;\n PERFORM 1 FROM public.sgp_picking_entregas pe WHERE pe.id_entrega IN (\n SELECT l.id_entrega FROM public.sgp_pdt_entrega_lineas l JOIN public.sgp_aluminio_pendiente_detalles d USING(id_detalle)\n WHERE d.id_pendiente=p_id) ORDER BY pe.id_entrega FOR UPDATE;\n INSERT INTO public.sgp_pdt_cierres(id_pendiente,clave,usuario,evidencia)\n VALUES(p_id,p_clave,u,(SELECT coalesce(jsonb_agg(to_jsonb(a)),'[]'::jsonb) FROM public.sgp_pdt_asignaciones a\n JOIN public.sgp_aluminio_pendiente_detalles d USING(id_detalle) WHERE d.id_pendiente=p_id));\n IF NOT public.sgp_pdt_cierre_acreditado(p_id) THEN RAISE EXCEPTION 'Cobertura Picking incompleta'; END IF;\n UPDATE public.sgp_aluminio_pendientes SET estado='RESUELTO',estado_repo='PICKING',usuario_cierre=u,fecha_cierre=now() WHERE id_pendiente=p_id;\n INSERT INTO public.sgp_aluminio_pendientes_historial(id_pendiente,usuario,estado_anterior,estado_nuevo,tipo_evento,datos_nuevos)\n VALUES(p_id,u,p.estado_repo,'PICKING','CIERRE_V2',jsonb_build_object('clave',p_clave));\n RETURN jsonb_build_object('ok',true);\nEND $function$\n"
+    },
+    {
+      "signature": "sgp_pdt_manual_cerrar_v1(text,uuid,uuid)",
+      "md5": "e3822711b04fef239cac96175d6b2687",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_pdt_manual_cerrar_v1(p_token text, p_id uuid, p_clave uuid)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\nDECLARE p public.sgp_aluminio_pendientes%rowtype; actor text; prior public.sgp_pdt_cierres%rowtype; final_state text;\nBEGIN\n actor:=public.sgp_pdt_validar_rol_real(p_token,ARRAY['ADMINISTRADOR','COORDINADOR','PICKING','SUPERVISOR DE PICKING']);\n IF p_clave IS NULL THEN RAISE EXCEPTION 'PDT_MANUAL_CLAVE_REQUERIDA'; END IF;\n SELECT * INTO STRICT p FROM public.sgp_aluminio_pendientes WHERE id_pendiente=p_id FOR UPDATE;\n IF NOT EXISTS(SELECT 1 FROM sgp_pdt_manual.detalles WHERE id_pendiente=p_id)\n THEN RAISE EXCEPTION 'PDT_MANUAL_INEXISTENTE'; END IF;\n SELECT * INTO prior FROM public.sgp_pdt_cierres WHERE id_pendiente=p_id;\n IF FOUND THEN\n  IF prior.clave<>p_clave THEN RAISE EXCEPTION 'PDT_MANUAL_CIERRE_EXISTENTE'; END IF;\n  RETURN jsonb_build_object('ok',true,'duplicado',true);\n END IF;\n IF p.contrato_pdt<>'V2' OR p.estado<>'PENDIENTE' OR p.validacion_estado<>'VALIDADO'\n OR p.estado_repo<>'PROCESADO' THEN RAISE EXCEPTION 'PDT_MANUAL_NO_APTO_PARA_CIERRE'; END IF;\n PERFORM 1 FROM public.sgp_picking_entregas e WHERE e.id_entrega IN (\n  SELECT l.id_entrega FROM sgp_pdt_manual.entregas l\n  JOIN public.sgp_aluminio_pendiente_detalles d USING(id_detalle) WHERE d.id_pendiente=p_id)\n ORDER BY e.id_entrega FOR UPDATE;\n INSERT INTO public.sgp_pdt_cierres(id_pendiente,clave,usuario,evidencia)\n VALUES(p_id,p_clave,actor,(SELECT coalesce(jsonb_agg(to_jsonb(l)),'[]'::jsonb)\n  FROM sgp_pdt_manual.entregas l JOIN public.sgp_aluminio_pendiente_detalles d USING(id_detalle)\n  WHERE d.id_pendiente=p_id AND l.estado='VALIDADA' AND l.asignado_en IS NOT NULL));\n IF NOT sgp_pdt_manual.cierre_acreditado(p_id) THEN RAISE EXCEPTION 'PDT_MANUAL_COBERTURA_PICKING_INCOMPLETA'; END IF;\n UPDATE public.sgp_aluminio_pendientes SET estado='RESUELTO',estado_repo='PICKING',usuario_cierre=actor,fecha_cierre=now()\n WHERE id_pendiente=p_id RETURNING estado INTO STRICT final_state;\n INSERT INTO public.sgp_aluminio_pendientes_historial(id_pendiente,usuario,estado_anterior,estado_nuevo,tipo_evento,datos_nuevos)\n VALUES(p_id,actor,p.estado,final_state,'CIERRE_MANUAL_PDT',jsonb_build_object('clave',p_clave));\n RETURN jsonb_build_object('ok',true);\nEND $function$\n"
+    },
+    {
+      "signature": "sgp_pdt_multiorigen.nuevo_sgp_pdt_picking_v2(text,uuid)",
+      "md5": "6f131520755c99b0db28e1e02e7f1bb5",
+      "definition": "CREATE OR REPLACE FUNCTION sgp_pdt_multiorigen.nuevo_sgp_pdt_picking_v2(p_token text, p_id uuid)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\nDECLARE p public.sgp_aluminio_pendientes%rowtype;\nBEGIN\n PERFORM public.sgp_validar_sesion_rol(p_token,ARRAY['ADMINISTRADOR','COORDINADOR','RECEPCION','PICKING','SUPERVISOR DE PICKING','LIDER MECANIZADO','LIDER']);\n SELECT * INTO STRICT p FROM public.sgp_aluminio_pendientes WHERE id_pendiente=p_id;\n IF p.contrato_pdt<>'V2' THEN RAISE EXCEPTION 'PDT no V2'; END IF;\n RETURN jsonb_build_object('ok',true,'entregas',coalesce((SELECT jsonb_agg(to_jsonb(x)) FROM (\n  SELECT pe.id_entrega,pe.estado,pe.completa,pe.produccion FROM public.sgp_picking_entregas pe\n  JOIN public.sgp_mecanizado_programacion mp USING(id_programacion)\n  JOIN public.sgp_producciones prod ON prod.key_produccion=p.key_produccion\n  WHERE pe.produccion=prod.produccion AND upper(btrim(mp.sistema))=upper(btrim(prod.sistema))\n  AND (mp.reserva=p.reserva OR (mp.reserva=p.reserva_principal AND EXISTS(SELECT 1 FROM public.sgp_produccion_reservas_v rel WHERE rel.key_produccion=p.key_produccion AND rel.reserva=p.reserva AND rel.reserva_principal=mp.reserva))) AND sgp_mecanizado_parcial.material_pdt(p.id_pendiente,pe.id_entrega,p.acabado_pendiente)\n )x),'[]'::jsonb),'lineas',coalesce((SELECT jsonb_agg(to_jsonb(l)||jsonb_build_object('asignada',EXISTS(\n SELECT 1 FROM public.sgp_pdt_asignaciones a WHERE a.id_linea=l.id_linea)))\n FROM public.sgp_pdt_entrega_lineas l JOIN public.sgp_aluminio_pendiente_detalles d USING(id_detalle)\n WHERE d.id_pendiente=p_id),'[]'::jsonb));\nEND $function$\n"
+    },
+    {
+      "signature": "sgp_pdt_multiorigen.original_sgp_pdt_picking_v2(text,uuid)",
+      "md5": "d2f156d634f28698f74e25274c2a9059",
+      "definition": "CREATE OR REPLACE FUNCTION sgp_pdt_multiorigen.original_sgp_pdt_picking_v2(p_token text, p_id uuid)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\nDECLARE p public.sgp_aluminio_pendientes%rowtype;\nBEGIN\n PERFORM public.sgp_validar_sesion_rol(p_token,ARRAY['ADMINISTRADOR','COORDINADOR','RECEPCION','PICKING','SUPERVISOR DE PICKING','LIDER MECANIZADO','LIDER']);\n SELECT * INTO STRICT p FROM public.sgp_aluminio_pendientes WHERE id_pendiente=p_id;\n IF p.contrato_pdt<>'V2' THEN RAISE EXCEPTION 'PDT no V2'; END IF;\n RETURN jsonb_build_object('ok',true,'entregas',coalesce((SELECT jsonb_agg(to_jsonb(x)) FROM (\n  SELECT pe.id_entrega,pe.estado,pe.completa,pe.produccion FROM public.sgp_picking_entregas pe\n  JOIN public.sgp_mecanizado_programacion mp USING(id_programacion)\n  JOIN public.sgp_producciones prod ON prod.key_produccion=p.key_produccion\n  WHERE pe.produccion=prod.produccion AND upper(btrim(mp.sistema))=upper(btrim(prod.sistema))\n  AND (mp.reserva=p.reserva OR public.sgp_mecanizado_es_parte(mp.id_programacion)) AND sgp_mecanizado_parcial.material_pdt(p.id_pendiente,pe.id_entrega,p.acabado_pendiente)\n )x),'[]'::jsonb),'lineas',coalesce((SELECT jsonb_agg(to_jsonb(l)||jsonb_build_object('asignada',EXISTS(\n SELECT 1 FROM public.sgp_pdt_asignaciones a WHERE a.id_linea=l.id_linea)))\n FROM public.sgp_pdt_entrega_lineas l JOIN public.sgp_aluminio_pendiente_detalles d USING(id_detalle)\n WHERE d.id_pendiente=p_id),'[]'::jsonb));\nEND $function$\n"
+    },
+    {
+      "signature": "sgp_pdt_cierre_acreditado(uuid)",
+      "md5": "24e18c5a31ffd2b7f313078ac42721c5",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_pdt_cierre_acreditado(p_id uuid)\n RETURNS boolean\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\nBEGIN\n IF EXISTS(SELECT 1 FROM sgp_pdt_manual.detalles WHERE id_pendiente=p_id)\n THEN RETURN sgp_pdt_manual.cierre_acreditado(p_id); END IF;\n RETURN sgp_pdt_manual.original_cierre_acreditado(p_id);\nEND $function$\n"
+    },
+    {
+      "signature": "sgp_pdt_manual.cierre_acreditado(uuid)",
+      "md5": "33f2c2e35fdb7a9ed5148f55ba5067ed",
+      "definition": "CREATE OR REPLACE FUNCTION sgp_pdt_manual.cierre_acreditado(p_id uuid)\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO ''\nAS $function$\n SELECT EXISTS(SELECT 1 FROM public.sgp_pdt_cierres WHERE id_pendiente=p_id)\n AND EXISTS(SELECT 1 FROM public.sgp_aluminio_pendiente_detalles WHERE id_pendiente=p_id)\n AND NOT EXISTS(SELECT 1 FROM public.sgp_aluminio_pendiente_detalles d WHERE d.id_pendiente=p_id AND (\n  d.cantidad_validada<>(SELECT coalesce(sum(CASE WHEN m.tipo='AVANCE' THEN m.cantidad ELSE -m.cantidad END),0)\n   FROM public.sgp_aluminio_pendiente_movimientos m WHERE m.id_detalle=d.id_detalle)\n  OR d.cantidad_validada<>(SELECT coalesce(sum(l.cantidad),0) FROM sgp_pdt_manual.entregas l\n   JOIN public.sgp_picking_entregas e USING(id_entrega)\n   WHERE l.id_detalle=d.id_detalle AND l.estado='VALIDADA' AND l.asignado_en IS NOT NULL AND e.estado='VALIDADA')));\n$function$\n"
+    }
+  ],
+  "columns": [
+    {
+      "table_schema": "public",
+      "table_name": "sgp_pdt_asignaciones",
+      "column_name": "id_asignacion",
+      "data_type": "uuid"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "sgp_pdt_asignaciones",
+      "column_name": "id_linea",
+      "data_type": "uuid"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "sgp_pdt_asignaciones",
+      "column_name": "id_detalle",
+      "data_type": "uuid"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "sgp_pdt_asignaciones",
+      "column_name": "cantidad",
+      "data_type": "integer"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "sgp_pdt_asignaciones",
+      "column_name": "clave",
+      "data_type": "uuid"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "sgp_pdt_asignaciones",
+      "column_name": "asignado_por",
+      "data_type": "text"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "sgp_pdt_asignaciones",
+      "column_name": "creado_en",
+      "data_type": "timestamp with time zone"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "sgp_pdt_cierres",
+      "column_name": "id_pendiente",
+      "data_type": "uuid"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "sgp_pdt_cierres",
+      "column_name": "clave",
+      "data_type": "uuid"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "sgp_pdt_cierres",
+      "column_name": "usuario",
+      "data_type": "text"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "sgp_pdt_cierres",
+      "column_name": "evidencia",
+      "data_type": "jsonb"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "sgp_pdt_cierres",
+      "column_name": "creado_en",
+      "data_type": "timestamp with time zone"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "sgp_pdt_entrega_lineas",
+      "column_name": "id_linea",
+      "data_type": "uuid"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "sgp_pdt_entrega_lineas",
+      "column_name": "id_entrega",
+      "data_type": "uuid"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "sgp_pdt_entrega_lineas",
+      "column_name": "id_detalle",
+      "data_type": "uuid"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "sgp_pdt_entrega_lineas",
+      "column_name": "id_pieza",
+      "data_type": "text"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "sgp_pdt_entrega_lineas",
+      "column_name": "cantidad",
+      "data_type": "integer"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "sgp_pdt_entrega_lineas",
+      "column_name": "estado",
+      "data_type": "text"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "sgp_pdt_entrega_lineas",
+      "column_name": "clave",
+      "data_type": "uuid"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "sgp_pdt_entrega_lineas",
+      "column_name": "registrado_por",
+      "data_type": "text"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "sgp_pdt_entrega_lineas",
+      "column_name": "validado_por",
+      "data_type": "text"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "sgp_pdt_entrega_lineas",
+      "column_name": "motivo",
+      "data_type": "text"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "sgp_pdt_entrega_lineas",
+      "column_name": "anulado_por",
+      "data_type": "text"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "sgp_pdt_entrega_lineas",
+      "column_name": "anulado_en",
+      "data_type": "timestamp with time zone"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "sgp_pdt_entrega_lineas",
+      "column_name": "creado_en",
+      "data_type": "timestamp with time zone"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "sgp_pdt_entrega_lineas",
+      "column_name": "validado_en",
+      "data_type": "timestamp with time zone"
+    }
+  ]
+}

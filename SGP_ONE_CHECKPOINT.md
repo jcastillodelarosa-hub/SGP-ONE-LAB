@@ -1,3 +1,368 @@
+## LP · backend activado y main #190 preservado · 04/11/2026
+
+SQL10/Edge JWT=true acreditados; diez denegaciones HTTPS reales PASS. CI6edf892
+6/6 PASS. Activación autorizada14:13UTC: escrituras/BI/perfil=true, XLSXv1, sin09;
+órdenes/auditoría/cierres0, no guardados humanos certificados. Main4ef528b (#190)
+incorporado en447c5db con fusión limpia y calendario Colombia/saldos futuros íntegros.
+Hosting observado14:10UTC cambió a c698e0b8a4356985 FINALIZED/79 archivos; política
+baseline/rollback actualizada, no recuperar deshaciendo #190.
+CI del sincronizado en curso; frontend LP no fusionado ni publicado. Falta dispatch
+del operador con SHA/run/digest finales: el conector no ofrece esa operación.
+[Estado único](docs/linea-produccion/ESTADO_OPERATIVO_ACTUAL.md), recibos y siguiente
+acción exacta actualizados. Los apartados siguientes son antecedentes.
+
+## LP · SQL10 aplicado y alternativa con JWT · 04/11/2026
+
+Actualización: usuario autorizó expresamente la alternativa exacta JWT=true de
+8f85586. Edge lp-powerbi v1 ACTIVE/JWT=true, cinco archivos recuperados coinciden
+byte a byte con la fuente aprobada. [Recibo](tests/lp01-roles/evidence/edge-jwt-production.json).
+Se habilita comprobador público negativo en el workflow existente antes de
+activar; escrituras/BI/perfil siguen false, no Firebase/merge ni guardados reales.
+El párrafo siguiente documenta la preparación previa a esa aprobación/despliegue.
+
+SQL10 aceptado por el conector y aplicado20261104033408: ocho cuerpos exactos,
+cinco contratos nativos conservados, once tablas privadas RLS, CHECK validado;
+escrituras/BI/perfil=false. Sin cuentas, ámbitos, auditoría o cierres de negocio
+creados. [Recibo](tests/lp01-roles/evidence/sql10-production.json).
+Edge inicial verify_jwt=false fue rechazado automáticamente; usuario eligió
+mantener JWT. Alternativa preparada JWT=true + anon público existente solo en
+cabecera de gateway; sesión SGP y SQL siguen autorizando al usuario. Clave
+privilegiada integrada solo servidor y dos RPC; aprobación/despliegue pendientes.
+Cliente/errores/Deno y recorrido XLSX afectado PC/móvil PASS en aislamiento,
+sin certificar firma JWT del gateway real ni guardados productivos. CI baseeffb6a0
+6/6 reutilizada solo en lo no alterado. No despliegue indirecto, secretos nuevos,
+SQL09, merge o Firebase. Estado único y plan contienen límites/siguiente paso.
+
+## Ejecución LP autorizada bajo controles · 03/11/2026 (antecedente)
+
+Estado vigente posterior: códigoe4f8a37 CI6/6 PASS. ACL00 y01/06/08 APLICADOS
+contenidos; SELECT confirma flags=false y catálogos protegidos, cinco RPC intactas.
+SQL10 NO aplicado: confirmación caducada, pendiente de aceptación específica del
+usuario sobre el archivo/hash revisados. No09, activación, Edge, merge ni Firebase.
+Salida HTTPS del entorno aún pendiente tras reinicio (revisión5 sin tres destinos).
+[Recibo real](tests/lp01-roles/evidence/installation-production.json) y estado único
+detallan siguiente paso; los párrafos siguientes conservan antecedentes de preparación.
+
+PR183: sincronización con main4b1e98e conserva ambos bloques de estilos. Corrección
+ACL00/00R preparada con consumidores nativos, respaldo privado y reversión probados;
+no DML de datos ni cambios RLS. Runtime sin muestras preparado para el publicador
+existente; feature push solo prepara, no publica. Inspect real intento2 acredita
+live0312f467cf0e9c29 FINALIZED/inventario estable; no publish/recover aún.
+[Estado único](docs/linea-produccion/ESTADO_OPERATIVO_ACTUAL.md) y
+[plan autorizado y secuencia](docs/linea-produccion/PUBLICACION_CONTROLADA_2026_11_03.md).
+Siguiente: CI del nuevo HEAD, después registrar cambios productivos solo si pasan
+seguridad/recuperación. No SQL09, apertura automática, GOOGLE/LAC ni datos inventados.
+Navegación ajustada: supervisor solo su etapa/selector/retorno; líder ambas, sin
+cambiar los accesos históricos de Seguimiento para otros roles. PC1440/móvil390
+con SQL10 sintético PASS. Deno2.5.6 compila Edge y lee ambos XLSX anónimos sin red.
+CI shallow corregida con fetch-depth=0; los checks nuevos deben terminar antes de instalar.
+
+## Revisión SQL10/CI · dictamen BLOQUEADO (2026-11-03)
+
+Baseb4cf8c8, mismo Draft183. SELECT de metadatos: siete cuerpos nativos coinciden;
+catálogos de accesos tienen ALL anon/authenticated sin RLS. Bypass de revocación
+reproducido solo en PG sintético. SQL10 añade preflight que aborta; no cambia ACL
+ni instala nada productivo. Fixture protegida conserva OID/owner/ACL/RLS y flagfalse.
+CI sin runs por conflicto real styles.css frente a main4b1e98e (GitHub dirty y
+merge virtual exit1; ba1c546 fusionaba limpio). No defecto de trigger ni workaround.
+[Estado único](docs/linea-produccion/ESTADO_OPERATIVO_ACTUAL.md) y
+[dictamen/evidencias](docs/linea-produccion/REVISION_SQL10_COMPATIBILIDAD.md).
+Siguiente: revisión autorizada de catálogos y sincronización del PR con main para CI.
+Sin SQL productivo, usuarios/permisos, rebase/merge o publicación.
+
+## LP · regla vigente de roles y cierre individual (2026-11-03)
+
+Baseba1c546, mismo Draft183. SQL10 propuesto/contenido; alternativa a09, no cadena
+09→10. SUPERVISOR ENSAMBLE/EMPAQUE integrados al catálogo y pantallas existentes;
+LIDER LINEA opera/cierra ambas etapas de PANELES_2. Cierre individual, sin segunda
+cuenta ni asignación temporal por turno, con capacidad/rol/accesos efectivos de
+servidor, revocación y auditoría. SQL08/09 quedan como base/antecedentes donde10
+sustituye esa política, sin eliminar validaciones de cantidades/fuentes/estado.
+SELECT de contratos de Configuración/autenticación03/11 sin cuentas; pruebas reales
+sintéticas en PG17.11. No SQL productivo, usuarios/permisos reales, merge o publicación.
+[Estado único](docs/linea-produccion/ESTADO_OPERATIVO_ACTUAL.md) y
+[matriz, pruebas, instalación/recuperación](docs/linea-produccion/ROLES_CIERRE_INDIVIDUAL.md).
+Siguiente: revisión SQL10/CI antes de autorización separada para instalación contenida
+/configuración real. No exigir matrices manuales ni reabrir doble validación.
+
+## PANELES_2 · preparación inicial contenida (2026-11-03)
+
+Base82d8a95, mismo Draft183. SQL09 propuesto/deshabilitado, responsabilidad por
+cuenta/producción/etapa/fecha/turno, filtros temporales y VALIDAR explícito. Supervisor
+solo su etapa; líder ambas, auditado; cierres conservan dos responsables distintos.
+FRAMES_2 fuera del piloto, sin borrar compatibilidad. Importador --paneles2 sigue
+apply=false.8 grupos SQL sintéticos y6 importador/7 privacidad PASS; UI PC/móvil.
+[Referencia única](docs/linea-produccion/ESTADO_OPERATIVO_ACTUAL.md) y
+[matriz, pruebas, instalación y recuperación](docs/linea-produccion/PANELES2_RESPONSABLES.md).
+Bloquean aplicación el catálogo real actual y matrices aprobadas con suplencia;
+PDT/Export en fuente y runtime siguen pendientes. Sin usuarios/roles/grants, SQL
+productivo, activación, merge o publicación. SQL01–08/08R y adaptador conservados.
+
+## Cierre funcional integral delimitado (2026-11-03)
+
+Base934340c preservada, mismo Draft183. Cuatro recorridos nuevos SQL08/handler
+XLSX/navegador reales PASS (Ensamble/Empaque × PC/móvil), todo sintético en PG17.11
+sin red. Revocación tras render denegada, diferencia con motivo, original idéntico,
+reapertura/dos versiones y etapas independientes; Export/Programación intactos.
+Sin cambios de lógica operativa ni SQL; plan de instalación precisa01→06→08.
+[Estado único](docs/linea-produccion/ESTADO_OPERATIVO_ACTUAL.md) y
+[matriz integral](docs/linea-produccion/CIERRE_FUNCIONAL_INTEGRAL.md).
+No cierre productivo certificado: PDT/Export en fuente, matriz real/runtime e
+histórico/consolidado pendientes. No migración, permisos, merge, publish o recover.
+
+## Publicación controlada · preparación vigente (2026-11-03)
+
+PR183: workflow existente preparado con política legacy/no certificada. Adopción
+PR y cambios LP/política no despliegan; otros pushes conservan vía habitual con
+navegación anterior y public positivo. LP manual solo tras certificación/pins.
+Defaultprepare sin secretos; inspect GET preparado, no ejecutado. Publicación y
+recuperación LP BLOQUEADAS, IDs live aún no acreditados. No acciones Firebase ni
+credenciales/infraestructura creadas. [Procedimiento y pruebas](tests/lp01-publish/PUBLICACION_CONTROLADA.md).
+Prevalece ESTADO_OPERATIVO_ACTUAL.md; no fusionar/desplegar/dispatch sin autorización.
+
+## Certificación Hosting · dictamen vigente (2026-11-03)
+
+PR183: BLOQUEADO por falta de acceso autenticado de lectura a Hosting; release/
+version live y rollback exacto no acreditados. No reintentar403 ni usar credenciales
+más privilegiadas. Plan local explícito y6grupos offlinePASS; CI64d91e2 4/4PASS.
+[Dictamen/evidencia y siguiente intervención](tests/lp01-hosting/CERTIFICACION.md).
+La referencia única LP sigue siendo ESTADO_OPERATIVO_ACTUAL.md. No publicar ni
+crear sitios/canales. Se requiere evidencia del responsable Hosting, sin secretos.
+
+## LP · checkpoint vigente de preparación (2026-11-03)
+
+PR183 continúa en feat/lp01-seguimiento-operacion. Preparación al SGP principal sin
+sitios/canales nuevos, sin publicar ni SQL. Estado único actualizado:
+[ESTADO_OPERATIVO_ACTUAL.md](docs/linea-produccion/ESTADO_OPERATIVO_ACTUAL.md).
+Matriz/artefacto visual y recuperación: [revisión final](tests/lp01-integration/REVISION_FINAL.md).
+Rollback live exacto pendiente de acreditar (lectura pública403); no aprobar deploy
+basándose solo en run exitoso/commit. Los apartados siguientes son antecedentes.
+
+# LP — referencia operativa única
+
+Consultar [ESTADO_OPERATIVO_ACTUAL](docs/linea-produccion/ESTADO_OPERATIVO_ACTUAL.md)
+antes de continuar #183 y actualizarlo al cerrar cada entrega técnica. Ese documento
+contiene el estado vigente y las prioridades; los hitos inferiores son antecedentes,
+no una autorización ni un estado productivo actual. El protocolo de lectura y
+actualización por entrega queda establecido en AGENTS.md; no es un proceso de fondo.
+
+---
+
+# PR #183 — identidad A, diseño verificable y bloqueo PUBLIC (02/11/2026)
+
+Continúa 0a6b48d, misma rama/Draft. A elegida solo para diseño/preparación; NO
+autorizados roles/GRANT, credenciales, secretos, jobs, SQL ni conexión técnica real.
+Referencia compartida ABRIR humano/técnico y journal append-only solo sintéticos,
+separados de SQL instalable/runtime. Sin suplantación de coordinador ni stub de
+sesión técnica: nueve grupos pasan con LOGIN/session_user PG17.11 reales locales.
+Cobertura: permisos/denegaciones, cierre válido/SIN ACTIVIDAD, concurrencia,
+reapertura, contención/revocación en vuelo, idempotencia, recuperación, continuidad.
+
+BLOQUEO REAL: catálogo SELECT muestra 83 SECURITY DEFINER sgp_* EXECUTE PUBLIC,
+80 invocables excluyendo triggers; PUBLIC también USAGE public y TEMP en base.
+NOINHERIT/REVOKE al rol no sustraen PUBLIC. Helper acotado sin sesión observado
+solo en definición, nunca ejecutado. No resolver mediante ACL globales desde LP.
+Supabase documenta LOGIN propio pero canal directo/pooler/TLS/session_user no
+probados en proyecto; no declarar ejecutor operativo. B comparada, no implementada.
+
+Detalle/matriz/operaciones futuras: docs/linea-produccion/principal-a/DISENO.md.
+Evidencia nueva: tests/lp01-principal-a/evidence/. Se reutilizan 111/evidencias
+válidas anteriores; aplicación, Programación, Power BI, Export, PDT y 01–06 intactos.
+No copias DB, producción modificada, migraciones, accesos reales, merge o despliegue.
+Siguiente paso: revisar diseño y resolver el perímetro de A o decidir otra frontera;
+preparar integración instalable solo después, con autorización separada.
+
+---
+
+# PR #183 — preparación de apertura automática (02/11/2026)
+
+Continúa a19a9f6. Plan horario de servidor por línea/etapa, bloqueo visible de origen
+abierto/cierre no acreditado y preparación offline de intenciones deterministas.
+ABRIR añade acreditación del último cierre mediante auditoría; SIN ACTIVIDAD válido
+permite continuidad. UI conserva apertura manual del coordinador, sin mutar al leer.
+
+EJECUCIÓN TÉCNICA BLOQUEADA: el modelo vigente exige sesiones humanas SGP. No se
+reutilizan ni se usa service_role como worker. No hay privilegios técnicos aprobados,
+roles/GRANT nuevos, job, secreto, runtime ni sink de eventos automático. Preparador
+siempre PREPARATION_ONLY/canExecute=false. Alternativas A (principal DB restringido)
+y B (identidad de carga externa + adaptador restringido) requieren decisión expresa.
+No simular autenticación técnica mediante un stub o un usuario coordinador.
+
+Pruebas nuevas delimitadas: horarios/demoras/intenciones y SQL real, referencia
+manual de ABRIR/reintentos/concurrencia/recibos y UI PC/móvil. No certifican ejecutor
+ni privilegios técnicos. Configuración observada global común por día, sin claves
+por línea/festivos; no inventar excepciones ni saltar turnos. No datos sensibles.
+
+Detalle: docs/linea-produccion/APERTURA_AUTOMATICA_PREPARACION.md. Mismo Draft #183;
+sin SQL productivo, escrituras habilitadas, credenciales, fusión o despliegue.
+
+---
+
+# PR #183 — cierre SIN ACTIVIDAD aprobado (02/11/2026)
+
+Continúa 21c40f4. Regla de Issue #184 implementada en el mismo motor: CERRAR con
+close_type=SIN_ACTIVIDAD, confirmación booleana explícita y motivo. Sin Power BI
+solo ante ausencia real de filas LP, asignaciones activas y abiertas pendientes.
+Chequeo dentro de transacción con bloqueo SHARE NOWAIT de fuentes externas,
+permisos/roles, revisión/UUID, auditoría y cierre tipado/versionado sin archivo.
+
+UI PC/móvil diferencia cierre vacío, motivo y confirmación, reporte CSV y recibo de
+commit perdido; conserva reapertura del coordinador e incorporación en revisión.
+La carrera asignación/cierre se serializa: posteriores al corte no reescriben
+historia, invalidan elegibilidad y requieren reapertura. Siguiente turno configurado
+abre después del cierre vacío; no se crea producción, SALE ni partes artificiales.
+
+Pruebas nuevas y regresiones afectadas en PostgreSQL aislado y navegador. Parser,
+cliente/handler XLSX, 06, LP Programación, Export y PDT intactos. No se reintenta la
+consulta sensible ni se aplica SQL, habilitan escrituras, fusiona o despliega.
+Detalles/evidencias/instalación: docs/linea-produccion/SIN_ACTIVIDAD.md.
+Persisten solo pendientes independientes: apertura desatendida, ámbitos reales,
+puentes PDT/Export y conciliación de cadenas arrastradas.
+
+---
+
+# PR #183 — SALE, siguiente turno y contención (02/11/2026)
+
+Continúa 8defa34 en la misma rama. Implementación en rama y SQL propuesto; no SQL
+productivo, activación, ámbitos reales, fusión ni despliegue. Adaptador Power BI y
+Programación Calendario intactos; 06 solo participa en admisión/revalidación común.
+
+Empaque persiste SALE inequívoco desde Export elegible/presupuesto y cantidad LP
+restante, con capacidad explícita del coordinador. Repartos, sobrecapacidad y
+solapamientos quedan pendientes visibles; no inventa asignaciones ni resta NC.
+ABRIR valida siguiente turno configurado/origen cerrado, raíz/antigüedad y contexto;
+no duplica ejecución y deja registro exacto. Navegación al siguiente turno añadida.
+No hay job de apertura autónoma ni permiso nuevo al líder; cadenas ya arrastradas
+siguen bloqueadas para corrección retroactiva hasta definir conciliación.
+
+Admisión transaccional compartida + CAS de turno/asignación + revalidación bajo
+mutex. Apagar espera escritores admitidos e invalida revisiones; recibo de commit
+autorizado permite resolver respuesta perdida con escrituras contenidas.
+Pruebas nuevas y regresiones concretas en PostgreSQL aislado y PC/móvil, sin stubs
+de persistencia. Reutiliza resto de evidencias; no reintenta consulta sensible.
+
+Detalle/estados/pendientes: docs/linea-produccion/SALE_CONTINUIDAD_CONTENCION.md.
+
+---
+
+# PR #183 — adaptador Power BI XLSX real (02/11/2026)
+
+Continúa 47a06af; reglas del encargo actual aprueban comparar por producción,
+línea, etapa, fecha operativa y turno, sumando últimos avances de asignaciones LP.
+Recibidos los dos originales: Export, 33/37 filas, total 186; T1/T2 95/91 Ensamble
+frente a 90/96 Empaque. Sin duplicados exactos ni ceros/negativos observados.
+
+Implementado LP-PBI-XLSX-1 en navegador y servidor; servidor verifica sesión SGP
+antes de descomprimir, vuelve a parsear y guarda bytes originales, hash, filas
+fuente y grupos. RPC de importación solo servidor con sesión/rol/ámbito SGP; cierre
+reutiliza el motor versionado, conserva asignaciones y exige motivos por producción.
+No cambia Programación, partes de Mecanizado ni saldos oficiales del Export.
+
+Pruebas focalizadas nuevas de XLSX/conciliación/permisos, SQL PostgreSQL real
+local, originales preservados byte a byte en aislamiento y PC1440/móvil390 con
+servicio real compartido + SQL real. Fixtures/capturas publicadas anonimizadas.
+Las 111 pruebas se reutilizan salvo las 6 de contrato/reporte afectado; regresión
+SQL se ejecuta porque cambió CERRAR/archivos. CI obligatoria no prueba producción.
+
+Pendientes limitados: convenciones no observadas de anulación/fecha nocturna,
+variantes no muestreadas, correspondencia real SGP, instalación/Edge/flags/ámbitos
+productivos y bloqueos PDT/Export/SALE/arrastre previos. La revisión automática
+rechazó enviar nombres reales de XLSX a Supabase por payload potencialmente
+sensible: esa consulta no se ejecutó ni se eludió; solo catálogo y pruebas locales.
+
+Detalle: docs/linea-produccion/POWER_BI_XLSX_V1.md. No DDL/DML productivo, habilitación,
+fusión, publish, Firebase ni despliegue Edge; todo SQL es propuesta sin aplicar.
+
+---
+
+# PR #183 — preparación de bloqueos productivos (02/11/2026)
+
+Referencia funcional/código/SQL c5178d8; actualización solo documental en la misma
+rama. No se rehacen vistas, cambian contratos SQL ni repiten las 111 pruebas.
+SELECT dirigidos confirman: esquema LP no instalado; seis roles con cuentas
+activas, ninguna LIDER/LIDER LINEA/CONSULTA; accesos por ventana sin asignación
+acreditada LP por línea/etapa; fuentes PDT/Export y horarios disponibles.
+
+Se preparan campos/muestras Power BI, contratos lógicos de liberación neta PDT e
+inclusión Export, matriz/plantilla de ámbitos sin usuarios inventados y contraste
+de reglas. Empaque aún no inicia SALE persistido desde el saldo oficial; arrastre
+solo al ABRIR y siguiente turno operativo no validado. Contención por bandera no
+certifica drenaje de comandos ya iniciados. Brechas quedan pendientes, sin parche
+en esta fase de lectura/preparación. Plan de instalación/recuperación revisado;
+no instalar ni habilitar con solo cambiar flags.
+
+Entrega y cinco aportes indispensables del responsable funcional:
+`docs/linea-produccion/CIERRE_BLOQUEOS_PRODUCTIVOS.md`. Evidencia agregada y cuerpos
+leídos en `docs/linea-produccion/evidence/2026-11-02-cierre-readonly.json`.
+No DDL/DML productivo, migraciones, permisos concedidos, backups/copias, fusión,
+publish o despliegue. Las pruebas y CI 3/3 de c5178d8 conservan su alcance aislado.
+
+---
+
+# Línea de Producción integral — PR #183 / Issue #184 (01/11/2026)
+
+Rama `feat/lp01-seguimiento-operacion`, base main `bb224f0`. Guía original de 27
+bocetos y DOCX aprobado recuperados e incorporados con hashes y matriz de estados.
+
+Implementado en rama: contrato real por línea/etapa/orden/parte/fecha/turno,
+último acumulado, SALE, notas y afectaciones agregadas con validación/justificación,
+auditoría, idempotencia, arrastre raíz al abrir turno y notificaciones. Cierre exige
+archivo previo, diferencias justificadas y comentario; reapertura de coordinador
+con versiones inmutables. Dashboard del turno y reportes CSV con fuentes reales.
+Vidrio reutiliza modal/reporte; corrección SQL propuesta para clasificar Traslado
+como el reporte vigente. Calendario y escritores legacy conservados.
+
+Verificado únicamente en PostgreSQL 17.11 aislado y navegador PC1440/móvil390:
+288 = 90 + 90 + 90 + 18, permisos/sesiones/ámbitos, dos líneas, reemplazos de
+acumulado, UUID/reintento tras respuesta perdida, concurrencia, arrastre sin duplicar,
+consolidación de ventanas, cierre/reapertura/versiones, descarga y Vidrio SQL real.
+Supabase solo SELECT de catálogo/contratos y estados agregados de vidrio.
+
+Bloqueos reales: archivo/esquema Power BI no suministrado (CSV-v1 solo QA, apagado
+por defecto), inclusión de avances en cargas Export y liberaciones reales PDT en
+ventanas consolidadas no certificadas; ámbitos reales pendientes. Falta también
+conciliar correcciones de orígenes ya arrastrados, histórico operativo semanal,
+reportes consolidados/PDF/imagen y completar Tabla/Kanban. No declarar módulo
+completo ni disponibilidad de planta. No se aplica SQL, fusiona, publica ni despliega.
+
+Detalle y pruebas: `docs/SGP_LP01_SEGUIMIENTO_OPERACION.md`,
+`docs/linea-produccion/INSTALACION_Y_RECUPERACION.md`, `tests/lp01-operacion/`.
+El hito consultivo anterior se conserva debajo como historia, superado en alcance.
+
+---
+
+# Seguimiento y Operación LP-01 — entrega delimitada (2026-10-31 Colombia)
+
+Rama independiente `feat/lp01-seguimiento-operacion`, base main `bb224f0`.
+PR Draft #183: https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/pull/183
+Seguimiento implementado con las dos RPC de lectura vigentes: asignaciones por
+fecha/turno y hoja Export por clave. Filtros, secuencia, detalles, observaciones
+existentes, identidad/origen, estados legacy descriptivos y saldos por producción
+separados de ejecución. Navegación nueva conserva Programación, hojas y ubicaciones.
+
+Operación permite consultar Ensamble/Empaque y validar borradores sin guardar.
+Inicio/avance/cierre, notas persistidas e historial por etapa bloqueados: no hay
+etapa en las tablas actuales y registrar suma incrementos sin idempotencia/revisión,
+incompatible con el modelo documentado por etapa. No se inventaron transiciones.
+
+Guía de 27 bocetos no localizada tras búsqueda dirigida en repo/ramas/PR/Drive.
+B05–B11 se conocen solo por continuidad E2; no se afirma haber revisado imágenes.
+Mapa de aprobados/referencias/pendientes y dependencias con PR117–157 en
+`docs/SGP_LP01_SEGUIMIENTO_OPERACION.md`. Refero remoto sin suscripción; diseño
+basado en SGP vigente y guía craft. No duplicar motores propuestos de otros PR.
+
+QA: 31 pruebas focalizadas y Chromium PC1440/móvil390 con respuestas RPC sintéticas,
+red externa bloqueada y cero escrituras. Carga descarta sesiones antiguas y errores
+limpian filas. Capturas y resultados en `tests/lp01-seguimiento/`.
+IMPLEMENTADO EN RAMA / VERIFICADO EN AISLAMIENTO / PENDIENTE DE REVISIÓN.
+Sin cambios productivos, SQL aplicado, RPC/migraciones nuevas, fusión o despliegue;
+no GOOGLE/LAC. Programación/Mecanizado/Picking e importadores permanecen intactos.
+
+Siguiente paso único: revisar el Draft y recuperar guía/contrato aprobado por etapa
+antes de habilitar escrituras o certificar fidelidad completa a los bocetos.
+
+---
+
 # LP-01 E4 — preparación LAB v374 sobre main vigente
 
 PR #170, rama `feat/lp01-e4-programacion-grupos`. Se incorporó `main` `ce559cb7b92b289b6ab81597f6609939184bf6ba`, que ya contiene el PR #168 de Mecanizado parcial. Se preservaron sus módulos, pruebas, SQL y estilos; el único conflicto fue `index.html` y se resolvió manteniendo LAB v374, `styles.css?v=374` y `app.js?v=374-multi-nc`. `scripts/build-release-info.mjs` también declara LAB v374.

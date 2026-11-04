@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "postgres": "17.11 (Debian 17.11-1.pgdg13+2)",
+  "checks": [
+    "True empty scope closes without BI even with format gate off; strict confirmation/motive/session/role/line/stage, original sources unchanged, typed immutable version and exact retry once",
+    "Only coordinator reopens with reason; reclose creates another empty version without rewriting first closure/audit",
+    "Active assignment not yet incorporated and persisted order with zero execution both deny SIN ACTIVIDAD; normal close still requires real stored evidence and preserves prior empty versions",
+    "Prior open pending root blocks empty close before and after incorporation, even if official zero hid it from a prior carry; no missing-order-as-zero interpretation",
+    "Empty close enables exactly the configured Saturday night\u2192Sunday day/night\u2192Monday sequence; other stage/line and all production quantities remain independent",
+    "Concurrent identical UUID creates one close/audit; competing stale closures serialize and only one new version commits",
+    "Actual uncommitted planning INSERT wins first: empty close refuses busy source and after commit rejects the now assigned order",
+    "Actual close-first race holds source locks through commit; later planning remains allowed, invalidates current eligibility, requires coordinator reopening and cannot rewrite the historical empty version",
+    "Containment, authorized read receipts, RLS and immutable closure history continue to protect the new mode"
+  ],
+  "scope": "Actual isolated PostgreSQL with captured session function and synthetic configuration/planning/production; no productive SQL. Race uses real DML against the same source relation, not a stub."
+}

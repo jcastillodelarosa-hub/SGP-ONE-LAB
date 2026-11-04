@@ -1,0 +1,156 @@
+{
+  "source_sha": "89c7698c44ba8bb4baad07a4a52e17c315ea68ff",
+  "project": "ocvxbwzqxbrfndkvjmfx",
+  "status": "PASS_PUBLIC_NEGATIVE_CHECKS",
+  "checks": [
+    {
+      "check": "CORS_EXACT_sgp-one-lab.web.app",
+      "status": "PASS",
+      "http_status": 204,
+      "response_facts": {
+        "json_keys": [],
+        "code": "UNRECOGNIZED",
+        "mentions_authorization": false,
+        "mentions_jwt": false,
+        "mentions_api_key": false
+      }
+    },
+    {
+      "check": "CORS_EXACT_sgp-one-lab.firebaseapp.com",
+      "status": "PASS",
+      "http_status": 204,
+      "response_facts": {
+        "json_keys": [],
+        "code": "UNRECOGNIZED",
+        "mentions_authorization": false,
+        "mentions_jwt": false,
+        "mentions_api_key": false
+      }
+    },
+    {
+      "check": "PLATFORM_DENIES_NO_CREDENTIALS",
+      "status": "PASS",
+      "http_status": 401,
+      "response_facts": {
+        "json_keys": [
+          "code",
+          "message"
+        ],
+        "code": "UNAUTHORIZED_NO_AUTH_HEADER",
+        "mentions_authorization": true,
+        "mentions_jwt": false,
+        "mentions_api_key": false
+      }
+    },
+    {
+      "check": "PUBLIC_KEY_ALONE_DOES_NOT_AUTHORIZE_SGP_USER",
+      "status": "PASS",
+      "http_status": 401,
+      "response_facts": {
+        "json_keys": [
+          "code",
+          "error"
+        ],
+        "code": "SGP_SESSION_INVALID",
+        "mentions_authorization": false,
+        "mentions_jwt": false,
+        "mentions_api_key": false
+      }
+    },
+    {
+      "check": "PLATFORM_REJECTS_BAD_SIGNATURE",
+      "status": "PASS",
+      "http_status": 401,
+      "response_facts": {
+        "json_keys": [
+          "code",
+          "message"
+        ],
+        "code": "UNAUTHORIZED_LEGACY_JWT",
+        "mentions_authorization": false,
+        "mentions_jwt": true,
+        "mentions_api_key": false
+      }
+    },
+    {
+      "check": "VALID_PUBLIC_JWT_REACHES_SGP_AUTH",
+      "status": "PASS",
+      "http_status": 401,
+      "response_facts": {
+        "json_keys": [
+          "code",
+          "error"
+        ],
+        "code": "SGP_SESSION_INVALID",
+        "mentions_authorization": false,
+        "mentions_jwt": false,
+        "mentions_api_key": false
+      }
+    },
+    {
+      "check": "NATIVE_SESSION_RPC_REJECTS_INVALID_SESSION",
+      "status": "PASS",
+      "http_status": 200,
+      "response_facts": {
+        "json_keys": [],
+        "code": "UNRECOGNIZED",
+        "mentions_authorization": false,
+        "mentions_jwt": false,
+        "mentions_api_key": false
+      }
+    },
+    {
+      "check": "PROTECTED_READ_DENIES_ENSAMBLE",
+      "status": "PASS",
+      "http_status": 400,
+      "response_facts": {
+        "json_keys": [
+          "code",
+          "message"
+        ],
+        "code": "P0001",
+        "mentions_authorization": false,
+        "mentions_jwt": false,
+        "mentions_api_key": false
+      }
+    },
+    {
+      "check": "PROTECTED_READ_DENIES_EMPAQUE",
+      "status": "PASS",
+      "http_status": 400,
+      "response_facts": {
+        "json_keys": [
+          "code",
+          "message"
+        ],
+        "code": "P0001",
+        "mentions_authorization": false,
+        "mentions_jwt": false,
+        "mentions_api_key": false
+      }
+    },
+    {
+      "check": "FOREIGN_ORIGIN_DENIED",
+      "status": "PASS",
+      "http_status": 403,
+      "response_facts": {
+        "json_keys": [
+          "error"
+        ],
+        "code": "UNRECOGNIZED",
+        "mentions_authorization": false,
+        "mentions_jwt": false,
+        "mentions_api_key": false
+      }
+    }
+  ],
+  "productive_saves_verified": false,
+  "limits": [
+    "Negative requests only; no valid user/session or business writes",
+    "Does not certify positive user scope, real data or productive closures",
+    "Runs solely in the existing authorized Actions preparation job; no managed network changes"
+  ],
+  "workflow_run": 41841837220,
+  "job_id": 126615309539,
+  "observed_at": "2026-11-04T13:51:27Z"
+}

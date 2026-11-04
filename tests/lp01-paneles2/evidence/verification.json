@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "base": "82d8a95",
+  "checks": [
+    "SQL01-08/08R and XLSX adapter/handler byte-identical",
+    "New SQL09 only proposed; no CREATE ROLE/USER/GRANT; opt-in false",
+    "Workflow YAML/Python AST/Node syntax and documentation links PASS"
+  ],
+  "sql09_sha256": "a471e656cd2553345140d3f89509350a4509fa5f13554e8b7b537b59008047c4",
+  "reused": "82d8a95 XLSX closures PC/mobile, SIN ACTIVIDAD and continuity with their original limitations"
+}

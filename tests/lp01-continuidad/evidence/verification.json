@@ -1,0 +1,34 @@
+{
+  "baseline": "8defa34",
+  "environment": "PostgreSQL17.11 --network none; browser local transport only; synthetic data",
+  "manual_new_unit_tests": 2,
+  "manual_affected_unit_tests": 6,
+  "previous_111": "Other valid evidence reused; full 111 not manually repeated",
+  "manual_xlsx_admission_checks": 3,
+  "affected_regressions": [
+    "15 actual operation SQL scenarios",
+    "8 actual XLSX SQL groups",
+    "Actual XLSX shared-engine browser 1440/390"
+  ],
+  "browser_new": [
+    "SALE20 \u2192 execute8 \u2192 next SALE12/executed0",
+    "ambiguous existing split stays pending",
+    "commit receipt during containment, exactly one audit"
+  ],
+  "constraints": {
+    "productive_sql_applied": false,
+    "writes_activated": false,
+    "deployed": false,
+    "merged": false,
+    "sensitive_names_queried": false
+  },
+  "ci": "Existing mandatory workflows execute their configured checks; no manual broad rerun",
+  "current_source_sha256": {
+    "docs/sql-proposals/lp01-operacion/01_operacion_REVIEW.sql": "944c063d73e77ab52a22f1bb9162988db92703197a1b6d95c9beb31a7c19beac",
+    "docs/sql-proposals/lp01-operacion/06_powerbi_xlsx_REVIEW.sql": "fbe88b89bfa4dade5c55517c078c4e00abdf865c9b20fb0cebce865fed308ca4",
+    "src/domain/lp01-operation.js": "3dd63a1ca6aa8ee846bc7490e0225cabf3f75a5639b7beca2a208fa2086a4fba",
+    "src/modules/lp01-operation.js": "30feca0535a48a5731cb280a3042022e7778b58c0fc5adae949fa2f3fd3342a0"
+  },
+  "manual_new_sql_scenarios": 10,
+  "status": "PASS_IN_ISOLATION"
+}

@@ -1,0 +1,67 @@
+{
+  "contract": "LP-AUTO-OPEN-PREP-1",
+  "mode": "PREPARATION_ONLY",
+  "automaticWrites": 0,
+  "observations": [
+    {
+      "contract": "LP-AUTO-OPEN-PREP-1",
+      "kind": "OBSERVATION_ONLY",
+      "state": "READY_PENDING_TECHNICAL_APPROVAL",
+      "line": "PANELES_2",
+      "stage": "ENSAMBLE",
+      "target": {
+        "end": "2026-11-02T10:00:00+00:00",
+        "date": "2026-11-01",
+        "shift": 2,
+        "start": "2026-11-01T23:00:00+00:00"
+      },
+      "observedAt": "2026-11-01T23:00:00+00:00",
+      "description": "Apertura vencida preparada; ejecutor t\u00e9cnico pendiente de autorizaci\u00f3n",
+      "due": true,
+      "late": false,
+      "execution": "BLOCKED_TECHNICAL_IDENTITY_UNAPPROVED",
+      "persistence": "LOCAL_REVIEW_ARTIFACT_ONLY"
+    }
+  ],
+  "intents": [
+    {
+      "mode": "PREPARATION_ONLY",
+      "canExecute": false,
+      "fingerprint": "d24902ebcbf157f58122a7abcc14084ec276eece8323cae769097ce532c43deb",
+      "reference": {
+        "contract": "LP-AUTO-OPEN-PREP-1",
+        "line": "PANELES_2",
+        "stage": "ENSAMBLE",
+        "date": "2026-11-01",
+        "shift": 2,
+        "previousClose": "7727c304-919b-4552-b0e6-09fa9398d13d",
+        "previousVersion": 2,
+        "start": "2026-11-01T23:00:00.000Z",
+        "end": "2026-11-02T10:00:00.000Z"
+      },
+      "command": {
+        "id": "d24902eb-cbf1-87f5-8122-a7abcc14084e",
+        "op": "ABRIR",
+        "line": "PANELES_2",
+        "stage": "ENSAMBLE",
+        "date": "2026-11-01",
+        "shift": 2,
+        "revision": 0
+      },
+      "requiredBinding": "APPROVED_RESTRICTED_TECHNICAL_PRINCIPAL",
+      "recovery": {
+        "receiptRpc": "sgp_lp_operacion_resultado",
+        "reuseId": true,
+        "refreshServerPlanBeforeUncommittedRetry": true
+      },
+      "serverMustRevalidate": [
+        "technical principal and full scope",
+        "writes admission",
+        "configured start reached",
+        "same latest valid predecessor close",
+        "target absent or prior exact receipt",
+        "revision and transaction locks"
+      ]
+    }
+  ]
+}

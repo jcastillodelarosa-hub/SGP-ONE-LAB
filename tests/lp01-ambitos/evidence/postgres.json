@@ -1,0 +1,19 @@
+{
+  "status": "PASS",
+  "checks": [
+    "Four line/stage combinations exercise actual server read/advance/note/affectation/close permissions",
+    "Consultation read-only; leader cannot SALE, validate or reopen; reception rejected",
+    "Coordinator-only correction in review; legitimate leader close uses actual QA CSV closure engine",
+    "Unopened turn, wrong line and revoked stage denied; other stage independent",
+    "Partial-scope coordinator sees only own production and cannot close the whole turn",
+    "Manual next configured shift preserves scope; closed prior turn rejects stale actions",
+    "Inactive account rejected for both read and write"
+  ],
+  "limits": [
+    "All accounts/production identifiers and permissions are synthetic QA fixtures",
+    "No real roles, permissions or scope assignments modified",
+    "Validity intervals checked in private reviewer only; current permissions table does not store interval policy",
+    "QA CSV supplies closure evidence; not new XLSX format verification"
+  ],
+  "postgres": "17.11 (Debian 17.11-1.pgdg13+2)"
+}

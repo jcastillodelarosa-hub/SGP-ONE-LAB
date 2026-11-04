@@ -1,0 +1,1706 @@
+{
+  "date": "2026-11-02",
+  "timezone": "America/Bogota",
+  "mode": "SELECT ONLY; no business RPC invocation, DDL, DML, session data or user identifiers",
+  "reference_commit": "c5178d8eb54f015887dd84f4fbf17a52c2a15f95",
+  "project": "ocvxbwzqxbrfndkvjmfx",
+  "catalog": {
+    "tables": [
+      {
+        "type": "uuid",
+        "table": "sgp_aluminio_pendientes",
+        "column": "id_pendiente",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_aluminio_pendientes",
+        "column": "reserva",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_aluminio_pendientes",
+        "column": "produccion",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_aluminio_pendientes",
+        "column": "perfil",
+        "schema": "public"
+      },
+      {
+        "type": "numeric",
+        "table": "sgp_aluminio_pendientes",
+        "column": "cantidad",
+        "schema": "public"
+      },
+      {
+        "type": "numeric",
+        "table": "sgp_aluminio_pendientes",
+        "column": "longitud",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_aluminio_pendientes",
+        "column": "origen",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_aluminio_pendientes",
+        "column": "causa",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_aluminio_pendientes",
+        "column": "observacion",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_aluminio_pendientes",
+        "column": "estado",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_aluminio_pendientes",
+        "column": "usuario_reporte",
+        "schema": "public"
+      },
+      {
+        "type": "timestamp with time zone",
+        "table": "sgp_aluminio_pendientes",
+        "column": "fecha_reporte",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_aluminio_pendientes",
+        "column": "usuario_cierre",
+        "schema": "public"
+      },
+      {
+        "type": "timestamp with time zone",
+        "table": "sgp_aluminio_pendientes",
+        "column": "fecha_cierre",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_aluminio_pendientes",
+        "column": "id_pieza",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_aluminio_pendientes",
+        "column": "marca",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_aluminio_pendientes",
+        "column": "fabricacion",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_aluminio_pendientes",
+        "column": "nc",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_aluminio_pendientes",
+        "column": "estado_repo",
+        "schema": "public"
+      },
+      {
+        "type": "timestamp with time zone",
+        "table": "sgp_aluminio_pendientes",
+        "column": "fecha_repo_ok",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_aluminio_pendientes",
+        "column": "usuario_estado",
+        "schema": "public"
+      },
+      {
+        "type": "timestamp with time zone",
+        "table": "sgp_aluminio_pendientes",
+        "column": "fecha_estado",
+        "schema": "public"
+      },
+      {
+        "type": "integer",
+        "table": "sgp_aluminio_pendientes",
+        "column": "ventanas_afectadas",
+        "schema": "public"
+      },
+      {
+        "type": "boolean",
+        "table": "sgp_aluminio_pendientes",
+        "column": "auditado",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_aluminio_pendientes",
+        "column": "key_produccion",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_aluminio_pendientes",
+        "column": "reserva_principal",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_aluminio_pendientes",
+        "column": "acabado_pendiente",
+        "schema": "public"
+      },
+      {
+        "type": "boolean",
+        "table": "sgp_aluminio_pendientes",
+        "column": "es_reserva_compartida",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_aluminio_pendientes",
+        "column": "validacion_estado",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_aluminio_pendientes",
+        "column": "validado_por",
+        "schema": "public"
+      },
+      {
+        "type": "timestamp with time zone",
+        "table": "sgp_aluminio_pendientes",
+        "column": "fecha_validacion",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_aluminio_pendientes",
+        "column": "observacion_validacion",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_aluminio_pendientes",
+        "column": "reserva_solucion_manual",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_aluminio_pendientes",
+        "column": "contrato_pdt",
+        "schema": "public"
+      },
+      {
+        "type": "bigint",
+        "table": "sgp_capacidad_linea",
+        "column": "id",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_capacidad_linea",
+        "column": "linea",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_capacidad_linea",
+        "column": "proceso",
+        "schema": "public"
+      },
+      {
+        "type": "numeric",
+        "table": "sgp_capacidad_linea",
+        "column": "capacidad_dia",
+        "schema": "public"
+      },
+      {
+        "type": "numeric",
+        "table": "sgp_capacidad_linea",
+        "column": "capacidad_turno",
+        "schema": "public"
+      },
+      {
+        "type": "boolean",
+        "table": "sgp_capacidad_linea",
+        "column": "activo",
+        "schema": "public"
+      },
+      {
+        "type": "timestamp with time zone",
+        "table": "sgp_capacidad_linea",
+        "column": "actualizado_en",
+        "schema": "public"
+      },
+      {
+        "type": "bigint",
+        "table": "sgp_export_diario_historial",
+        "column": "registro_id",
+        "schema": "public"
+      },
+      {
+        "type": "uuid",
+        "table": "sgp_export_diario_historial",
+        "column": "id_carga_diaria",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_export_diario_historial",
+        "column": "key_produccion",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_export_diario_historial",
+        "column": "id_linea",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_export_diario_historial",
+        "column": "produccion_id",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_export_diario_historial",
+        "column": "produccion",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_export_diario_historial",
+        "column": "sistema",
+        "schema": "public"
+      },
+      {
+        "type": "integer",
+        "table": "sgp_export_diario_historial",
+        "column": "semana_actual",
+        "schema": "public"
+      },
+      {
+        "type": "numeric",
+        "table": "sgp_export_diario_historial",
+        "column": "saldo_ensamble",
+        "schema": "public"
+      },
+      {
+        "type": "numeric",
+        "table": "sgp_export_diario_historial",
+        "column": "saldo_empaque",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_export_diario_historial",
+        "column": "estado_reserva_al",
+        "schema": "public"
+      },
+      {
+        "type": "numeric",
+        "table": "sgp_export_diario_historial",
+        "column": "porc_vidrio",
+        "schema": "public"
+      },
+      {
+        "type": "boolean",
+        "table": "sgp_export_diario_historial",
+        "column": "presente",
+        "schema": "public"
+      },
+      {
+        "type": "jsonb",
+        "table": "sgp_export_diario_historial",
+        "column": "datos",
+        "schema": "public"
+      },
+      {
+        "type": "timestamp with time zone",
+        "table": "sgp_export_diario_historial",
+        "column": "fecha_hora",
+        "schema": "public"
+      },
+      {
+        "type": "uuid",
+        "table": "sgp_linea_plan_asignaciones",
+        "column": "id",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_linea_plan_asignaciones",
+        "column": "key_produccion",
+        "schema": "public"
+      },
+      {
+        "type": "date",
+        "table": "sgp_linea_plan_asignaciones",
+        "column": "fecha",
+        "schema": "public"
+      },
+      {
+        "type": "integer",
+        "table": "sgp_linea_plan_asignaciones",
+        "column": "turno",
+        "schema": "public"
+      },
+      {
+        "type": "integer",
+        "table": "sgp_linea_plan_asignaciones",
+        "column": "cantidad",
+        "schema": "public"
+      },
+      {
+        "type": "integer",
+        "table": "sgp_linea_plan_asignaciones",
+        "column": "prioridad",
+        "schema": "public"
+      },
+      {
+        "type": "timestamp with time zone",
+        "table": "sgp_linea_plan_asignaciones",
+        "column": "creado_en",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_linea_plan_asignaciones",
+        "column": "estado",
+        "schema": "public"
+      },
+      {
+        "type": "uuid",
+        "table": "sgp_linea_plan_asignaciones",
+        "column": "origen_id",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_linea_plan_asignaciones",
+        "column": "observacion",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_linea_plan_asignaciones",
+        "column": "creado_por",
+        "schema": "public"
+      },
+      {
+        "type": "timestamp with time zone",
+        "table": "sgp_linea_plan_asignaciones",
+        "column": "actualizado_en",
+        "schema": "public"
+      },
+      {
+        "type": "uuid",
+        "table": "sgp_linea_plan_ejecuciones",
+        "column": "id",
+        "schema": "public"
+      },
+      {
+        "type": "uuid",
+        "table": "sgp_linea_plan_ejecuciones",
+        "column": "asignacion_id",
+        "schema": "public"
+      },
+      {
+        "type": "integer",
+        "table": "sgp_linea_plan_ejecuciones",
+        "column": "cantidad",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_linea_plan_ejecuciones",
+        "column": "observacion",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_linea_plan_ejecuciones",
+        "column": "usuario",
+        "schema": "public"
+      },
+      {
+        "type": "timestamp with time zone",
+        "table": "sgp_linea_plan_ejecuciones",
+        "column": "creado_en",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_lineas",
+        "column": "id_linea",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_lineas",
+        "column": "nombre",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_lineas",
+        "column": "activa",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_lineas_config",
+        "column": "id_linea",
+        "schema": "public"
+      },
+      {
+        "type": "boolean",
+        "table": "sgp_lineas_config",
+        "column": "usar_sgp",
+        "schema": "public"
+      },
+      {
+        "type": "boolean",
+        "table": "sgp_lineas_config",
+        "column": "requiere_export",
+        "schema": "public"
+      },
+      {
+        "type": "boolean",
+        "table": "sgp_lineas_config",
+        "column": "requiere_ubicacion_vidrio",
+        "schema": "public"
+      },
+      {
+        "type": "boolean",
+        "table": "sgp_lineas_config",
+        "column": "requiere_nc_aluminio",
+        "schema": "public"
+      },
+      {
+        "type": "boolean",
+        "table": "sgp_lineas_config",
+        "column": "requiere_nc_vidrio",
+        "schema": "public"
+      },
+      {
+        "type": "boolean",
+        "table": "sgp_lineas_config",
+        "column": "requiere_seguimiento_aluminio",
+        "schema": "public"
+      },
+      {
+        "type": "timestamp with time zone",
+        "table": "sgp_lineas_config",
+        "column": "fecha_actualizacion",
+        "schema": "public"
+      },
+      {
+        "type": "uuid",
+        "table": "sgp_pdt_entrega_lineas",
+        "column": "id_linea",
+        "schema": "public"
+      },
+      {
+        "type": "uuid",
+        "table": "sgp_pdt_entrega_lineas",
+        "column": "id_entrega",
+        "schema": "public"
+      },
+      {
+        "type": "uuid",
+        "table": "sgp_pdt_entrega_lineas",
+        "column": "id_detalle",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_pdt_entrega_lineas",
+        "column": "id_pieza",
+        "schema": "public"
+      },
+      {
+        "type": "integer",
+        "table": "sgp_pdt_entrega_lineas",
+        "column": "cantidad",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_pdt_entrega_lineas",
+        "column": "estado",
+        "schema": "public"
+      },
+      {
+        "type": "uuid",
+        "table": "sgp_pdt_entrega_lineas",
+        "column": "clave",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_pdt_entrega_lineas",
+        "column": "registrado_por",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_pdt_entrega_lineas",
+        "column": "validado_por",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_pdt_entrega_lineas",
+        "column": "motivo",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_pdt_entrega_lineas",
+        "column": "anulado_por",
+        "schema": "public"
+      },
+      {
+        "type": "timestamp with time zone",
+        "table": "sgp_pdt_entrega_lineas",
+        "column": "anulado_en",
+        "schema": "public"
+      },
+      {
+        "type": "timestamp with time zone",
+        "table": "sgp_pdt_entrega_lineas",
+        "column": "creado_en",
+        "schema": "public"
+      },
+      {
+        "type": "timestamp with time zone",
+        "table": "sgp_pdt_entrega_lineas",
+        "column": "validado_en",
+        "schema": "public"
+      },
+      {
+        "type": "uuid",
+        "table": "sgp_picking_entregas",
+        "column": "id_entrega",
+        "schema": "public"
+      },
+      {
+        "type": "uuid",
+        "table": "sgp_picking_entregas",
+        "column": "id_programacion",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_picking_entregas",
+        "column": "produccion",
+        "schema": "public"
+      },
+      {
+        "type": "boolean",
+        "table": "sgp_picking_entregas",
+        "column": "completa",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_picking_entregas",
+        "column": "estado",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_picking_entregas",
+        "column": "observacion",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_picking_entregas",
+        "column": "usuario_entrega",
+        "schema": "public"
+      },
+      {
+        "type": "timestamp with time zone",
+        "table": "sgp_picking_entregas",
+        "column": "fecha_entrega",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_picking_entregas",
+        "column": "usuario_validacion",
+        "schema": "public"
+      },
+      {
+        "type": "timestamp with time zone",
+        "table": "sgp_picking_entregas",
+        "column": "fecha_validacion",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_picking_entregas",
+        "column": "observacion_validacion",
+        "schema": "public"
+      },
+      {
+        "type": "timestamp with time zone",
+        "table": "sgp_picking_entregas",
+        "column": "creado_en",
+        "schema": "public"
+      },
+      {
+        "type": "timestamp with time zone",
+        "table": "sgp_picking_entregas",
+        "column": "actualizado_en",
+        "schema": "public"
+      },
+      {
+        "type": "date",
+        "table": "sgp_picking_entregas",
+        "column": "fecha_operativa",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_picking_entregas",
+        "column": "turno_entrega",
+        "schema": "public"
+      },
+      {
+        "type": "uuid",
+        "table": "sgp_picking_faltantes",
+        "column": "id_faltante",
+        "schema": "public"
+      },
+      {
+        "type": "uuid",
+        "table": "sgp_picking_faltantes",
+        "column": "id_entrega",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_picking_faltantes",
+        "column": "id_pieza",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_picking_faltantes",
+        "column": "produccion",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_picking_faltantes",
+        "column": "perfil",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_picking_faltantes",
+        "column": "marca",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_picking_faltantes",
+        "column": "fabricacion",
+        "schema": "public"
+      },
+      {
+        "type": "numeric",
+        "table": "sgp_picking_faltantes",
+        "column": "longitud",
+        "schema": "public"
+      },
+      {
+        "type": "numeric",
+        "table": "sgp_picking_faltantes",
+        "column": "cantidad",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_picking_faltantes",
+        "column": "observacion",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_picking_faltantes",
+        "column": "nc",
+        "schema": "public"
+      },
+      {
+        "type": "integer",
+        "table": "sgp_picking_faltantes",
+        "column": "ventanas_afectadas",
+        "schema": "public"
+      },
+      {
+        "type": "boolean",
+        "table": "sgp_picking_faltantes",
+        "column": "auditado",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_picking_faltantes",
+        "column": "usuario_auditoria",
+        "schema": "public"
+      },
+      {
+        "type": "timestamp with time zone",
+        "table": "sgp_picking_faltantes",
+        "column": "fecha_auditoria",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_picking_faltantes",
+        "column": "reserva_pendiente",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_picking_faltantes",
+        "column": "acabado_pendiente",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_relaciones_lineas",
+        "column": "id_linea_a",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_relaciones_lineas",
+        "column": "id_linea_b",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_relaciones_lineas",
+        "column": "tipo_relacion",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_relaciones_lineas",
+        "column": "activa",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_rol_accesos",
+        "column": "rol",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_rol_accesos",
+        "column": "ventana",
+        "schema": "public"
+      },
+      {
+        "type": "boolean",
+        "table": "sgp_rol_accesos",
+        "column": "permitido",
+        "schema": "public"
+      },
+      {
+        "type": "timestamp with time zone",
+        "table": "sgp_rol_accesos",
+        "column": "actualizado_en",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_sublineas",
+        "column": "id_sublinea",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_sublineas",
+        "column": "id_linea",
+        "schema": "public"
+      },
+      {
+        "type": "integer",
+        "table": "sgp_sublineas",
+        "column": "nivel",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_sublineas",
+        "column": "activa",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_sublineas",
+        "column": "codigo",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_sublineas",
+        "column": "nombre",
+        "schema": "public"
+      },
+      {
+        "type": "integer",
+        "table": "sgp_sublineas",
+        "column": "orden",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_sublineas",
+        "column": "observacion",
+        "schema": "public"
+      },
+      {
+        "type": "uuid",
+        "table": "sgp_usuario_accesos",
+        "column": "id_usuario",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_usuario_accesos",
+        "column": "ventana",
+        "schema": "public"
+      },
+      {
+        "type": "boolean",
+        "table": "sgp_usuario_accesos",
+        "column": "permitido",
+        "schema": "public"
+      },
+      {
+        "type": "timestamp with time zone",
+        "table": "sgp_usuario_accesos",
+        "column": "actualizado_en",
+        "schema": "public"
+      },
+      {
+        "type": "uuid",
+        "table": "sgp_usuarios",
+        "column": "id_usuario",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_usuarios",
+        "column": "usuario",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_usuarios",
+        "column": "nombre",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_usuarios",
+        "column": "rol",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_usuarios",
+        "column": "password_hash",
+        "schema": "public"
+      },
+      {
+        "type": "boolean",
+        "table": "sgp_usuarios",
+        "column": "activo",
+        "schema": "public"
+      },
+      {
+        "type": "timestamp with time zone",
+        "table": "sgp_usuarios",
+        "column": "creado_en",
+        "schema": "public"
+      },
+      {
+        "type": "timestamp with time zone",
+        "table": "sgp_usuarios",
+        "column": "actualizado_en",
+        "schema": "public"
+      },
+      {
+        "type": "timestamp with time zone",
+        "table": "sgp_usuarios",
+        "column": "ultimo_acceso",
+        "schema": "public"
+      },
+      {
+        "type": "uuid",
+        "table": "entregas",
+        "column": "id_entrega",
+        "schema": "sgp_mecanizado_parcial"
+      },
+      {
+        "type": "uuid",
+        "table": "entregas",
+        "column": "id_programacion",
+        "schema": "sgp_mecanizado_parcial"
+      },
+      {
+        "type": "integer",
+        "table": "entregas",
+        "column": "cantidad",
+        "schema": "sgp_mecanizado_parcial"
+      },
+      {
+        "type": "uuid",
+        "table": "partes",
+        "column": "id_programacion",
+        "schema": "sgp_mecanizado_parcial"
+      },
+      {
+        "type": "text",
+        "table": "partes",
+        "column": "key_produccion",
+        "schema": "sgp_mecanizado_parcial"
+      },
+      {
+        "type": "integer",
+        "table": "partes",
+        "column": "numero",
+        "schema": "sgp_mecanizado_parcial"
+      },
+      {
+        "type": "integer",
+        "table": "partes",
+        "column": "cantidad",
+        "schema": "sgp_mecanizado_parcial"
+      },
+      {
+        "type": "text",
+        "table": "partes",
+        "column": "creado_por",
+        "schema": "sgp_mecanizado_parcial"
+      },
+      {
+        "type": "timestamp with time zone",
+        "table": "partes",
+        "column": "creado_en",
+        "schema": "sgp_mecanizado_parcial"
+      }
+    ],
+    "functions": [
+      {
+        "md5": "e1c87927361b9f183be6681b2cc97233",
+        "name": "sgp_aplicar_export_diario",
+        "definer": true,
+        "signature": "p_token text, p_linea text, p_nombre_archivo text, p_datos jsonb"
+      },
+      {
+        "md5": "317692396a48dd96ac40e882e62e3df0",
+        "name": "sgp_configuracion_carga_diaria",
+        "definer": true,
+        "signature": "p_token text"
+      },
+      {
+        "md5": "cad60e24cefcd15a441189b320753808",
+        "name": "sgp_pdt_cerrar_v2",
+        "definer": true,
+        "signature": "p_token text, p_id uuid, p_clave uuid"
+      },
+      {
+        "md5": "a8d91c6e10974e05d7b0249739b9d4d7",
+        "name": "sgp_pdt_picking_v2",
+        "definer": true,
+        "signature": "p_token text, p_id uuid"
+      },
+      {
+        "md5": "30a705f967c3b726b5440e07753f32b1",
+        "name": "sgp_pdt_validar_rol_real",
+        "definer": true,
+        "signature": "p_token text, p_roles text[]"
+      },
+      {
+        "md5": "7fd685ee75eaba41551c0fda02570d12",
+        "name": "sgp_picking_validar_recepcion",
+        "definer": true,
+        "signature": "p_token text, p_id_entrega uuid, p_faltantes jsonb, p_diferencias jsonb, p_observacion text"
+      },
+      {
+        "md5": "5803616624cf6842021ccd0484121d14",
+        "name": "sgp_previsualizar_export_diario",
+        "definer": true,
+        "signature": "p_token text, p_linea text, p_datos jsonb"
+      },
+      {
+        "md5": "e964ea0d6f9af2c88010542cd3c84f9e",
+        "name": "sgp_sesion_actual",
+        "definer": true,
+        "signature": "p_token text"
+      }
+    ],
+    "lp_schema_installed": false
+  },
+  "sources": {
+    "lineas": [
+      {
+        "activa": "SI",
+        "id_linea": "CASEMENT"
+      },
+      {
+        "activa": "SI",
+        "id_linea": "CASEMENT_2"
+      },
+      {
+        "activa": "SI",
+        "id_linea": "CASEMENT_3"
+      },
+      {
+        "activa": "SI",
+        "id_linea": "CUERPOS_FIJOS"
+      },
+      {
+        "activa": "SI",
+        "id_linea": "CUERPOS_FIJOS_2"
+      },
+      {
+        "activa": "SI",
+        "id_linea": "DIRECTO_A_DESPACHO"
+      },
+      {
+        "activa": "SI",
+        "id_linea": "ECOMAX"
+      },
+      {
+        "activa": "SI",
+        "id_linea": "FACHADAS_Y_ESTRUCTURAS"
+      },
+      {
+        "activa": "SI",
+        "id_linea": "FRAMES"
+      },
+      {
+        "activa": "SI",
+        "id_linea": "FRAMES_2"
+      },
+      {
+        "activa": "SI",
+        "id_linea": "GARAGE"
+      },
+      {
+        "activa": "SI",
+        "id_linea": "GUILLOTINA"
+      },
+      {
+        "activa": "SI",
+        "id_linea": "GUILLOTINA_2"
+      },
+      {
+        "activa": "SI",
+        "id_linea": "GUILLOTINA_3"
+      },
+      {
+        "activa": "SI",
+        "id_linea": "LEGACY"
+      },
+      {
+        "activa": "SI",
+        "id_linea": "PANELES"
+      },
+      {
+        "activa": "SI",
+        "id_linea": "PANELES_2"
+      },
+      {
+        "activa": "SI",
+        "id_linea": "PIVOT"
+      },
+      {
+        "activa": "SI",
+        "id_linea": "PUERTAS"
+      },
+      {
+        "activa": "SI",
+        "id_linea": "PUERTAS_2"
+      },
+      {
+        "activa": "SI",
+        "id_linea": "PUERTAS_3"
+      },
+      {
+        "activa": "SI",
+        "id_linea": "RAILINGS"
+      },
+      {
+        "activa": "SI",
+        "id_linea": "SCREENS"
+      },
+      {
+        "activa": "SI",
+        "id_linea": "STARTERS_Y_RECEPTORS"
+      }
+    ],
+    "funciones": [
+      {
+        "acl": [
+          "=X/postgres",
+          "postgres=X/postgres",
+          "anon=X/postgres",
+          "authenticated=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "name": "sgp_aplicar_export_diario",
+        "config": [
+          "search_path=\"\""
+        ],
+        "signature": "p_token text, p_linea text, p_nombre_archivo text, p_datos jsonb",
+        "definition": "CREATE OR REPLACE FUNCTION public.sgp_aplicar_export_diario(p_token text, p_linea text, p_nombre_archivo text, p_datos jsonb)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\nDECLARE item jsonb; expected_year integer; expected_week integer; key text;\n seen text[]:=ARRAY[]::text[]; existing public.sgp_producciones%rowtype; response jsonb;\nBEGIN\n IF jsonb_typeof(p_datos) IS DISTINCT FROM 'array' OR jsonb_array_length(p_datos)=0\n THEN RAISE EXCEPTION 'PDT_EXPORT_YEAR_DATA_INVALID'; END IF;\n FOR item IN SELECT value FROM jsonb_array_elements(p_datos) LOOP\n  key:=nullif(btrim(item->>'key_produccion'),'');\n  IF jsonb_typeof(item) IS DISTINCT FROM 'object' OR key IS NULL\n   OR coalesce(item->>'anio','') !~ '^[0-9]{4}$'\n   OR coalesce(item->>'semana_actual','') !~ '^[0-9]{1,2}$'\n   OR nullif(btrim(item->>'id_linea'),'') IS DISTINCT FROM p_linea\n  THEN RAISE EXCEPTION 'PDT_EXPORT_YEAR_EXPLICIT_PERIOD_REQUIRED'; END IF;\n  expected_year:=(item->>'anio')::integer;expected_week:=(item->>'semana_actual')::integer;\n  IF expected_year NOT BETWEEN 2020 AND 2100 OR expected_week NOT BETWEEN 1 AND 53\n   OR key=ANY(seen) THEN RAISE EXCEPTION 'PDT_EXPORT_YEAR_PERIOD_AMBIGUOUS'; END IF;\n  seen:=array_append(seen,key);\n  -- Lock the existing production before delegating. This prevents a concurrent\n  -- reprogramming from changing the year between validation and Export writes.\n  SELECT * INTO existing FROM public.sgp_producciones WHERE key_produccion=key FOR UPDATE;\n  IF FOUND AND (existing.id_linea IS DISTINCT FROM p_linea\n    OR existing.anio IS DISTINCT FROM expected_year) THEN\n   RAISE EXCEPTION 'PDT_EXPORT_YEAR_IMMUTABLE: %',key;\n  END IF;\n END LOOP;\n -- Preserve installed Export authorization, reconciliation, history and response.\n response:=sgp_pdt_manual.original_aplicar_export_diario(p_token,p_linea,p_nombre_archivo,p_datos);\n -- The certified writer returns ok=true only after all writes complete. Fail closed\n -- on any future JSON rejection and roll back the delegated transaction as well.\n IF response->>'ok' IS DISTINCT FROM 'true' THEN\n  RAISE EXCEPTION 'PDT_EXPORT_YEAR_DELEGATED_NOT_OK';\n END IF;\n -- Verify the original writer applied the week without changing the year.\n -- Missing rows remain the original writer's responsibility (e.g. FUERA_BASE).\n FOR item IN SELECT value FROM jsonb_array_elements(p_datos) LOOP\n  key:=btrim(item->>'key_produccion');expected_year:=(item->>'anio')::integer;\n  expected_week:=(item->>'semana_actual')::integer;\n  SELECT * INTO existing FROM public.sgp_producciones WHERE key_produccion=key FOR UPDATE;\n  IF FOUND THEN\n   IF existing.id_linea IS DISTINCT FROM p_linea OR existing.anio IS DISTINCT FROM expected_year\n    OR coalesce(existing.semana_actual,existing.semana_base) IS DISTINCT FROM expected_week\n   THEN RAISE EXCEPTION 'PDT_EXPORT_YEAR_RESULT_MISMATCH: %',key; END IF;\n  END IF;\n END LOOP;\n RETURN response;\nEND $function$\n"
+      },
+      {
+        "acl": [
+          "=X/postgres",
+          "postgres=X/postgres",
+          "anon=X/postgres",
+          "authenticated=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "name": "sgp_mis_accesos",
+        "config": [
+          "search_path=public, extensions"
+        ],
+        "signature": "p_token text",
+        "definition": "CREATE OR REPLACE FUNCTION public.sgp_mis_accesos(p_token text)\n RETURNS TABLE(ventana text)\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public', 'extensions'\nAS $function$ declare uid uuid; r text; begin select s.id_usuario,u.rol into uid,r from public.sgp_sesiones_app s join public.sgp_usuarios u on u.id_usuario=s.id_usuario where s.token_hash=encode(extensions.digest(coalesce(p_token,''),'sha256'),'hex') and s.revocado_en is null and s.expira_en>now() and u.activo=true; if uid is null then raise exception 'Sesi\u00f3n inv\u00e1lida o vencida'; end if; if r='ADMINISTRADOR' then return query select unnest(array['inicio','mecanizado','programacion','ensamble','nc-aluminio','nc-vidrio','seguimiento-aluminio','carga-semanal','actualizacion','configuracion']::text[]); else return query select a.ventana from public.sgp_usuario_accesos a where a.id_usuario=uid and a.permitido=true; end if; end $function$\n"
+      },
+      {
+        "acl": [
+          "postgres=X/postgres",
+          "anon=X/postgres",
+          "authenticated=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "name": "sgp_pdt_cerrar_v2",
+        "config": [
+          "search_path=\"\""
+        ],
+        "signature": "p_token text, p_id uuid, p_clave uuid",
+        "definition": "CREATE OR REPLACE FUNCTION public.sgp_pdt_cerrar_v2(p_token text, p_id uuid, p_clave uuid)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\nBEGIN\n IF EXISTS(SELECT 1 FROM sgp_pdt_manual.detalles WHERE id_pendiente=p_id)\n THEN RETURN public.sgp_pdt_manual_cerrar_v1(p_token,p_id,p_clave); END IF;\n RETURN sgp_pdt_manual.original_cerrar_v2(p_token,p_id,p_clave);\nEND $function$\n"
+      },
+      {
+        "acl": [
+          "postgres=X/postgres",
+          "anon=X/postgres",
+          "authenticated=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "name": "sgp_pdt_entrega_anular_v2",
+        "config": [
+          "search_path=\"\""
+        ],
+        "signature": "p_token text, p_linea uuid, p_motivo text",
+        "definition": "CREATE OR REPLACE FUNCTION public.sgp_pdt_entrega_anular_v2(p_token text, p_linea uuid, p_motivo text)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\nDECLARE parent uuid; p public.sgp_aluminio_pendientes%rowtype; l public.sgp_pdt_entrega_lineas%rowtype; u text;\nBEGIN\n u:=public.sgp_validar_sesion_rol(p_token,ARRAY['ADMINISTRADOR','COORDINADOR']);\n IF nullif(btrim(p_motivo),'') IS NULL THEN RAISE EXCEPTION 'Motivo requerido'; END IF;\n SELECT d.id_pendiente INTO STRICT parent FROM public.sgp_pdt_entrega_lineas x JOIN public.sgp_aluminio_pendiente_detalles d USING(id_detalle) WHERE x.id_linea=p_linea;\n SELECT * INTO STRICT p FROM public.sgp_aluminio_pendientes WHERE id_pendiente=parent FOR UPDATE;\n SELECT * INTO STRICT l FROM public.sgp_pdt_entrega_lineas WHERE id_linea=p_linea FOR UPDATE;\n IF l.estado='ANULADA' THEN RETURN jsonb_build_object('ok',true,'duplicado',true); END IF;\n IF p.estado<>'PENDIENTE' THEN RAISE EXCEPTION 'Conciliar cierre antes de anular'; END IF;\n UPDATE public.sgp_pdt_entrega_lineas SET estado='ANULADA',motivo=p_motivo,anulado_por=u,anulado_en=now() WHERE id_linea=p_linea;\n INSERT INTO public.sgp_aluminio_pendientes_historial(id_pendiente,usuario,tipo_evento,observacion,datos_nuevos)\n VALUES(parent,u,'ANULACION_ENTREGA_V2',p_motivo,jsonb_build_object('linea',p_linea));\n RETURN jsonb_build_object('ok',true);\nEND $function$\n"
+      },
+      {
+        "acl": [
+          "postgres=X/postgres",
+          "anon=X/postgres",
+          "authenticated=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "name": "sgp_pdt_entrega_registrar_v2",
+        "config": [
+          "search_path=\"\""
+        ],
+        "signature": "p_token text, p_detalle uuid, p_entrega uuid, p_cantidad integer, p_clave uuid",
+        "definition": "CREATE OR REPLACE FUNCTION public.sgp_pdt_entrega_registrar_v2(p_token text, p_detalle uuid, p_entrega uuid, p_cantidad integer, p_clave uuid)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\nDECLARE grouped boolean;\nBEGIN\n SELECT id_pieza='' INTO grouped FROM public.sgp_aluminio_pendiente_detalles WHERE id_detalle=p_detalle;\n IF grouped THEN\n  IF sgp_pdt_multiorigen.es_registro_v4((SELECT id_pendiente FROM public.sgp_aluminio_pendiente_detalles WHERE id_detalle=p_detalle)) THEN\n   RETURN sgp_pdt_multiorigen.grouped_nuevo_entrega(p_token,p_detalle,p_entrega,p_cantidad,p_clave);\n  END IF;\n  RETURN sgp_pdt_multiorigen.grouped_original_entrega(p_token,p_detalle,p_entrega,p_cantidad,p_clave);\n END IF;\n IF sgp_pdt_multiorigen.es_registro_v4((SELECT id_pendiente FROM public.sgp_aluminio_pendiente_detalles WHERE id_detalle=p_detalle)) THEN\n  RETURN sgp_pdt_multiorigen.nuevo_sgp_pdt_entrega_registrar_v2(p_token,p_detalle,p_entrega,p_cantidad,p_clave);\n END IF;\n RETURN sgp_pdt_multiorigen.original_sgp_pdt_entrega_registrar_v2(p_token,p_detalle,p_entrega,p_cantidad,p_clave);\nEND $function$\n"
+      },
+      {
+        "acl": [
+          "postgres=X/postgres",
+          "anon=X/postgres",
+          "authenticated=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "name": "sgp_pdt_entrega_validar_v2",
+        "config": [
+          "search_path=\"\""
+        ],
+        "signature": "p_token text, p_linea uuid",
+        "definition": "CREATE OR REPLACE FUNCTION public.sgp_pdt_entrega_validar_v2(p_token text, p_linea uuid)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\nDECLARE l public.sgp_pdt_entrega_lineas%rowtype; parent uuid; u text; p public.sgp_aluminio_pendientes%rowtype;\nBEGIN\n u:=public.sgp_validar_sesion_rol(p_token,ARRAY['ADMINISTRADOR','COORDINADOR','RECEPCION','SUPERVISOR DE PICKING']);\n SELECT d.id_pendiente INTO STRICT parent FROM public.sgp_pdt_entrega_lineas x JOIN public.sgp_aluminio_pendiente_detalles d USING(id_detalle) WHERE x.id_linea=p_linea;\n SELECT * INTO STRICT p FROM public.sgp_aluminio_pendientes WHERE id_pendiente=parent FOR UPDATE;\n SELECT * INTO STRICT l FROM public.sgp_pdt_entrega_lineas WHERE id_linea=p_linea FOR UPDATE;\n IF l.estado='VALIDADA' THEN RETURN jsonb_build_object('ok',true,'duplicado',true); END IF;\n IF p.estado<>'PENDIENTE' OR l.estado<>'REGISTRADA' THEN RAISE EXCEPTION 'L\u00ednea no apta'; END IF;\n PERFORM 1 FROM public.sgp_picking_entregas WHERE id_entrega=l.id_entrega AND estado='VALIDADA' FOR UPDATE;\n IF NOT FOUND THEN RAISE EXCEPTION 'Entrega Picking sin validaci\u00f3n inequ\u00edvoca'; END IF;\n UPDATE public.sgp_pdt_entrega_lineas SET estado='VALIDADA',validado_por=u,validado_en=now() WHERE id_linea=p_linea;\n RETURN jsonb_build_object('ok',true);\nEND $function$\n"
+      },
+      {
+        "acl": [
+          "postgres=X/postgres",
+          "anon=X/postgres",
+          "authenticated=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "name": "sgp_pdt_manual_entrega_anular_v1",
+        "config": [
+          "search_path=\"\""
+        ],
+        "signature": "p_token text, p_linea uuid, p_motivo text",
+        "definition": "CREATE OR REPLACE FUNCTION public.sgp_pdt_manual_entrega_anular_v1(p_token text, p_linea uuid, p_motivo text)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\nDECLARE line sgp_pdt_manual.entregas%rowtype; parent uuid; actor text; parent_state text;\nBEGIN\n actor:=public.sgp_pdt_validar_rol_real(p_token,ARRAY['ADMINISTRADOR','COORDINADOR']);\n IF nullif(btrim(p_motivo),'') IS NULL THEN RAISE EXCEPTION 'PDT_MANUAL_MOTIVO_REQUERIDO'; END IF;\n SELECT d.id_pendiente INTO STRICT parent FROM sgp_pdt_manual.entregas l\n JOIN public.sgp_aluminio_pendiente_detalles d USING(id_detalle) WHERE l.id_linea=p_linea;\n SELECT estado INTO parent_state FROM public.sgp_aluminio_pendientes WHERE id_pendiente=parent AND estado='PENDIENTE' FOR UPDATE;\n IF NOT FOUND THEN RAISE EXCEPTION 'PDT_MANUAL_CERRADO'; END IF;\n SELECT * INTO STRICT line FROM sgp_pdt_manual.entregas WHERE id_linea=p_linea FOR UPDATE;\n IF line.estado='ANULADA' THEN RETURN jsonb_build_object('ok',true,'duplicado',true); END IF;\n UPDATE sgp_pdt_manual.entregas SET estado='ANULADA',anulado_por=actor,anulado_en=now(),motivo_anulacion=p_motivo\n WHERE id_linea=p_linea;\n INSERT INTO public.sgp_aluminio_pendientes_historial(id_pendiente,usuario,observacion,estado_anterior,estado_nuevo,tipo_evento,datos_nuevos)\n VALUES(parent,actor,p_motivo,parent_state,parent_state,'ANULACION_ENTREGA_MANUAL_PDT',jsonb_build_object('linea',p_linea,'cantidad',line.cantidad));\n RETURN jsonb_build_object('ok',true);\nEND $function$\n"
+      },
+      {
+        "acl": [
+          "postgres=X/postgres",
+          "anon=X/postgres",
+          "authenticated=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "name": "sgp_pdt_manual_entrega_registrar_v1",
+        "config": [
+          "search_path=\"\""
+        ],
+        "signature": "p_token text, p_detalle uuid, p_entrega uuid, p_cantidad integer, p_clave uuid",
+        "definition": "CREATE OR REPLACE FUNCTION public.sgp_pdt_manual_entrega_registrar_v1(p_token text, p_detalle uuid, p_entrega uuid, p_cantidad integer, p_clave uuid)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\nDECLARE d public.sgp_aluminio_pendiente_detalles%rowtype; p public.sgp_aluminio_pendientes%rowtype;\n prior sgp_pdt_manual.entregas%rowtype; actor text; neto bigint; nuevo uuid;\nBEGIN\n actor:=public.sgp_pdt_validar_rol_real(p_token,ARRAY['ADMINISTRADOR','COORDINADOR','PICKING','SUPERVISOR DE PICKING']);\n IF p_cantidad IS NULL OR p_cantidad<=0 OR p_clave IS NULL THEN RAISE EXCEPTION 'PDT_MANUAL_CANTIDAD_O_CLAVE_INVALIDA'; END IF;\n SELECT * INTO STRICT d FROM public.sgp_aluminio_pendiente_detalles WHERE id_detalle=p_detalle;\n SELECT * INTO STRICT p FROM public.sgp_aluminio_pendientes WHERE id_pendiente=d.id_pendiente FOR UPDATE;\n IF NOT EXISTS(SELECT 1 FROM sgp_pdt_manual.detalles WHERE id_pendiente=p.id_pendiente)\n OR NOT EXISTS(SELECT 1 FROM sgp_pdt_manual.fuentes_validadas WHERE id_detalle=p_detalle)\n THEN RAISE EXCEPTION 'PDT_MANUAL_FUENTE_NO_VALIDADA'; END IF;\n SELECT * INTO prior FROM sgp_pdt_manual.entregas WHERE clave=p_clave;\n IF FOUND THEN\n  IF prior.id_detalle<>p_detalle OR prior.id_entrega<>p_entrega OR prior.cantidad<>p_cantidad\n  THEN RAISE EXCEPTION 'PDT_MANUAL_CLAVE_REUTILIZADA'; END IF;\n  RETURN jsonb_build_object('ok',true,'duplicado',true,'id_linea',prior.id_linea);\n END IF;\n IF p.contrato_pdt<>'V2' OR p.estado<>'PENDIENTE' OR p.validacion_estado<>'VALIDADO'\n  OR p.estado_repo NOT IN ('MECANIZADO','PROCESADO') OR p.fecha_cierre IS NOT NULL\n THEN RAISE EXCEPTION 'PDT_MANUAL_NO_APTO_PARA_ENTREGA'; END IF;\n PERFORM 1 FROM public.sgp_picking_entregas WHERE id_entrega=p_entrega FOR UPDATE;\n IF NOT FOUND THEN RAISE EXCEPTION 'PDT_MANUAL_ENTREGA_INEXISTENTE'; END IF;\n PERFORM 1 FROM public.sgp_mecanizado_programacion mp JOIN public.sgp_picking_entregas pe USING(id_programacion)\n  WHERE pe.id_entrega=p_entrega FOR UPDATE OF mp;\n PERFORM 1 FROM public.sgp_picking_entregas pe JOIN public.sgp_mecanizado_programacion mp USING(id_programacion)\n JOIN public.sgp_producciones prod ON prod.key_produccion=p.key_produccion\n WHERE pe.id_entrega=p_entrega AND pe.produccion=prod.produccion\n AND upper(btrim(mp.sistema))=upper(btrim(prod.sistema)) AND upper(btrim(mp.acabado))=upper(btrim(d.acabado))\n AND (mp.reserva=p.reserva OR (mp.reserva=p.reserva_principal AND EXISTS(\n  SELECT 1 FROM public.sgp_produccion_reservas_v rel WHERE rel.key_produccion=p.key_produccion\n  AND rel.reserva=p.reserva AND rel.reserva_principal=mp.reserva)));\n IF NOT FOUND THEN RAISE EXCEPTION 'PDT_MANUAL_ENTREGA_AJENA'; END IF;\n SELECT coalesce(sum(CASE WHEN tipo='AVANCE' THEN cantidad ELSE -cantidad END),0) INTO neto\n FROM public.sgp_aluminio_pendiente_movimientos WHERE id_detalle=p_detalle;\n IF p_cantidad+coalesce((SELECT sum(cantidad) FROM sgp_pdt_manual.entregas\n  WHERE id_detalle=p_detalle AND estado<>'ANULADA'),0)>neto\n THEN RAISE EXCEPTION 'PDT_MANUAL_ENTREGA_SUPERA_PROCESADO'; END IF;\n INSERT INTO sgp_pdt_manual.entregas(id_detalle,id_entrega,cantidad,clave,registrado_por)\n VALUES(p_detalle,p_entrega,p_cantidad,p_clave,actor) RETURNING id_linea INTO nuevo;\n INSERT INTO public.sgp_aluminio_pendientes_historial(id_pendiente,usuario,estado_anterior,estado_nuevo,tipo_evento,datos_nuevos)\n VALUES(p.id_pendiente,actor,p.estado,p.estado,'ENTREGA_MANUAL_PDT',jsonb_build_object('linea',nuevo,'detalle',p_detalle,'entrega',p_entrega,'cantidad',p_cantidad));\n RETURN jsonb_build_object('ok',true,'id_linea',nuevo);\nEND $function$\n"
+      },
+      {
+        "acl": [
+          "postgres=X/postgres",
+          "anon=X/postgres",
+          "authenticated=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "name": "sgp_pdt_manual_entrega_validar_v1",
+        "config": [
+          "search_path=\"\""
+        ],
+        "signature": "p_token text, p_linea uuid",
+        "definition": "CREATE OR REPLACE FUNCTION public.sgp_pdt_manual_entrega_validar_v1(p_token text, p_linea uuid)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\nDECLARE line sgp_pdt_manual.entregas%rowtype; parent uuid; actor text; parent_state text;\nBEGIN\n actor:=public.sgp_pdt_validar_rol_real(p_token,ARRAY['ADMINISTRADOR','COORDINADOR','RECEPCION','SUPERVISOR DE PICKING']);\n SELECT d.id_pendiente INTO STRICT parent FROM sgp_pdt_manual.entregas l\n JOIN public.sgp_aluminio_pendiente_detalles d USING(id_detalle) WHERE l.id_linea=p_linea;\n SELECT estado INTO parent_state FROM public.sgp_aluminio_pendientes WHERE id_pendiente=parent AND estado='PENDIENTE' FOR UPDATE;\n IF NOT FOUND THEN RAISE EXCEPTION 'PDT_MANUAL_CERRADO'; END IF;\n SELECT * INTO STRICT line FROM sgp_pdt_manual.entregas WHERE id_linea=p_linea FOR UPDATE;\n IF line.estado='VALIDADA' THEN RETURN jsonb_build_object('ok',true,'duplicado',true); END IF;\n IF line.estado<>'REGISTRADA' THEN RAISE EXCEPTION 'PDT_MANUAL_LINEA_NO_APTA'; END IF;\n PERFORM 1 FROM public.sgp_picking_entregas WHERE id_entrega=line.id_entrega AND estado='VALIDADA' FOR UPDATE;\n IF NOT FOUND THEN RAISE EXCEPTION 'PDT_MANUAL_PICKING_SIN_VALIDACION'; END IF;\n UPDATE sgp_pdt_manual.entregas SET estado='VALIDADA',validado_por=actor,validado_en=now() WHERE id_linea=p_linea;\n INSERT INTO public.sgp_aluminio_pendientes_historial(id_pendiente,usuario,estado_anterior,estado_nuevo,tipo_evento,datos_nuevos)\n VALUES(parent,actor,parent_state,parent_state,'VALIDACION_ENTREGA_MANUAL_PDT',jsonb_build_object('linea',p_linea));\n RETURN jsonb_build_object('ok',true);\nEND $function$\n"
+      },
+      {
+        "acl": [
+          "postgres=X/postgres",
+          "anon=X/postgres",
+          "authenticated=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "name": "sgp_pdt_picking_v2",
+        "config": [
+          "search_path=\"\""
+        ],
+        "signature": "p_token text, p_id uuid",
+        "definition": "CREATE OR REPLACE FUNCTION public.sgp_pdt_picking_v2(p_token text, p_id uuid)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\nBEGIN\n IF sgp_pdt_multiorigen.es_registro_v4(p_id) THEN\n RETURN sgp_pdt_multiorigen.nuevo_sgp_pdt_picking_v2(p_token,p_id);\n END IF;\n RETURN sgp_pdt_multiorigen.original_sgp_pdt_picking_v2(p_token,p_id);\nEND $function$\n"
+      },
+      {
+        "acl": [
+          "postgres=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "name": "sgp_pdt_proteger_entrega_origen",
+        "config": [
+          "search_path=\"\""
+        ],
+        "signature": "",
+        "definition": "CREATE OR REPLACE FUNCTION public.sgp_pdt_proteger_entrega_origen()\n RETURNS trigger\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\nBEGIN\n IF EXISTS(SELECT 1 FROM public.sgp_pdt_entrega_lineas WHERE id_entrega=OLD.id_entrega AND estado<>'ANULADA') THEN\n  IF TG_OP='DELETE' THEN RAISE EXCEPTION 'Entrega con evidencia PDT vigente'; END IF;\n  IF ROW(NEW.produccion,NEW.id_programacion) IS DISTINCT FROM ROW(OLD.produccion,OLD.id_programacion) THEN\n   RAISE EXCEPTION 'Conciliar evidencia PDT antes de modificar entrega';\n  END IF;\n  -- Registered quantities do not certify delivery: let the legacy audit produce\n  -- VALIDADA or AUDITADA_DIFERENCIA. Once certified, annul explicitly first.\n  IF NEW.estado IS DISTINCT FROM OLD.estado AND EXISTS(\n   SELECT 1 FROM public.sgp_pdt_entrega_lineas WHERE id_entrega=OLD.id_entrega AND estado='VALIDADA') THEN\n   RAISE EXCEPTION 'Conciliar evidencia PDT antes de modificar entrega';\n  END IF;\n END IF;\n IF TG_OP='DELETE' THEN RETURN OLD; END IF;\n RETURN NEW;\nEND $function$\n"
+      },
+      {
+        "acl": [
+          "=X/postgres",
+          "postgres=X/postgres",
+          "anon=X/postgres",
+          "authenticated=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "name": "sgp_picking_validar_recepcion",
+        "config": [
+          "search_path=public"
+        ],
+        "signature": "p_token text, p_id_entrega uuid, p_faltantes jsonb, p_diferencias jsonb, p_observacion text",
+        "definition": "CREATE OR REPLACE FUNCTION public.sgp_picking_validar_recepcion(p_token text, p_id_entrega uuid, p_faltantes jsonb DEFAULT '[]'::jsonb, p_diferencias jsonb DEFAULT '[]'::jsonb, p_observacion text DEFAULT NULL::text)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\ndeclare u text; e record; f jsonb; d jsonb; v_diff boolean:=false; v_key text; v_shared boolean:=false; v_principal text; v_pending_res text; v_finish text; v_nuevo uuid;\nbegin\n u:=public.sgp_validar_sesion_rol(p_token,array['ADMINISTRADOR','COORDINADOR','PICKING','SUPERVISOR DE PICKING','LIDER LINEA','LIDER']);\n select pe.*,mp.reserva into e from public.sgp_picking_entregas pe join public.sgp_mecanizado_programacion mp on mp.id_programacion=pe.id_programacion where pe.id_entrega=p_id_entrega for update;\n if e.id_entrega is null then raise exception 'Entrega no encontrada'; end if;\n if e.estado<>'PENDIENTE_VALIDACION' then raise exception 'La entrega ya fue auditada'; end if;\n select v.key_produccion,v.reserva_principal,bool_or(v.es_reserva_compartida)\n into v_key,v_principal,v_shared\n from public.sgp_produccion_reservas_v v\n where v.produccion=e.produccion and v.reserva_principal=e.reserva\n group by v.key_produccion,v.reserva_principal\n order by max(v.semana_produccion) desc limit 1;\n v_principal:=coalesce(v_principal,e.reserva);v_shared:=coalesce(v_shared,false);\n\n if public.sgp_mecanizado_es_parte(e.id_programacion) then\n  select pt.key_produccion,mp.reserva,public.sgp_es_reserva_compartida(pt.key_produccion)\n  into strict v_key,v_principal,v_shared from sgp_mecanizado_parcial.partes pt\n  join public.sgp_mecanizado_programacion mp using(id_programacion) where pt.id_programacion=e.id_programacion;\n end if;\n for f in select value from jsonb_array_elements(coalesce(p_faltantes,'[]')) loop\n  if public.sgp_mecanizado_es_parte(e.id_programacion) and (f->>'ventanas_afectadas')::integer>(select cantidad from sgp_mecanizado_parcial.partes where id_programacion=e.id_programacion) then raise exception 'VENTANAS_AFECTADAS_SUPERAN_PARTE'; end if;\n  if public.sgp_mecanizado_es_parte(e.id_programacion) and not exists(\n   select 1 from public.sgp_picking_faltantes pf where pf.id_faltante=(f->>'id_faltante')::uuid\n   and pf.id_entrega=p_id_entrega and pf.id_pieza is not distinct from nullif(f->>'id_pieza','')\n  ) then raise exception 'FALTANTE_AJENO_A_ENTREGA'; end if;\n  if coalesce((f->>'ventanas_afectadas')::int,0)<1 then raise exception 'Indique las ventanas afectadas de cada faltante'; end if;\n  update public.sgp_picking_faltantes set ventanas_afectadas=(f->>'ventanas_afectadas')::int,auditado=true,usuario_auditoria=u,fecha_auditoria=now()\n   where id_faltante=(f->>'id_faltante')::uuid and id_entrega=p_id_entrega;\n  update public.sgp_aluminio_pendientes set ventanas_afectadas=(f->>'ventanas_afectadas')::int,auditado=true\n   where produccion=e.produccion and id_pieza is not distinct from nullif(f->>'id_pieza','') and estado='PENDIENTE'\n     and (reserva=e.reserva or reserva=(select pf.reserva_pendiente from public.sgp_picking_faltantes pf where pf.id_faltante=(f->>'id_faltante')::uuid)) and (not public.sgp_mecanizado_es_parte(e.id_programacion) or exists(select 1 from sgp_mecanizado_parcial.contextos_pdt src where src.id_pendiente=public.sgp_aluminio_pendientes.id_pendiente and src.id_entrega=p_id_entrega));\n end loop;\n for d in select value from jsonb_array_elements(coalesce(p_diferencias,'[]')) loop\n  if public.sgp_mecanizado_es_parte(e.id_programacion) and (nullif(d->>'id_pieza','') is null or (d->>'cantidad') is null or (d->>'cantidad')::numeric<=0 or (d->>'cantidad')::numeric<>trunc((d->>'cantidad')::numeric) or (d->>'cantidad')::numeric>(select cantidad from public.sgp_aluminio where id_pieza=d->>'id_pieza')) then raise exception 'CANTIDAD_MATERIAL_INVALIDA'; end if;\n  if public.sgp_mecanizado_es_parte(e.id_programacion) and coalesce((d->>'ventanas_afectadas')::integer,1)>(select cantidad from sgp_mecanizado_parcial.partes where id_programacion=e.id_programacion) then raise exception 'VENTANAS_AFECTADAS_SUPERAN_PARTE'; end if;\n  v_diff:=true;\n  v_pending_res:=coalesce(nullif(trim(d->>'reserva'),''),e.reserva);\n  if v_key is not null and not exists(select 1 from public.sgp_produccion_reservas_v v where v.key_produccion=v_key and v.reserva=v_pending_res) then\n    raise exception 'Seleccione una reserva v\u00e1lida para la diferencia de la orden con reserva compartida';\n  end if;\n  select v.acabado_reserva into v_finish from public.sgp_produccion_reservas_v v where v.key_produccion=v_key and v.reserva=v_pending_res limit 1;\n  v_finish:=coalesce(nullif(trim(d->>'acabado'),''),v_finish);\n  insert into public.sgp_picking_auditoria_diferencias(id_entrega,id_pieza,perfil,marca,fabricacion,longitud,cantidad,ventanas_afectadas,observacion,usuario_auditoria,reserva_pendiente,acabado_pendiente)\n  values(p_id_entrega,nullif(d->>'id_pieza',''),d->>'perfil',nullif(d->>'marca',''),nullif(d->>'fabricacion',''),nullif(d->>'longitud','')::numeric,\n         greatest(coalesce((d->>'cantidad')::numeric,1),1),greatest(coalesce((d->>'ventanas_afectadas')::int,1),1),nullif(d->>'observacion',''),u,v_pending_res,v_finish);\n  insert into public.sgp_aluminio_pendientes(\n    reserva,reserva_principal,key_produccion,es_reserva_compartida,acabado_pendiente,\n    produccion,perfil,cantidad,longitud,origen,causa,observacion,estado,usuario_reporte,id_pieza,marca,fabricacion,estado_repo,ventanas_afectadas,auditado\n  ) values(\n    v_pending_res,v_principal,v_key,v_shared,v_finish,e.produccion,d->>'perfil',\n    greatest(coalesce((d->>'cantidad')::numeric,1),1),nullif(d->>'longitud','')::numeric,\n    'PICKING_AUDITORIA','DIFERENCIA_AUDITORIA',nullif(d->>'observacion',''),'PENDIENTE',u,\n    nullif(d->>'id_pieza',''),nullif(d->>'marca',''),nullif(d->>'fabricacion',''),'PENDIENTE',\n    greatest(coalesce((d->>'ventanas_afectadas')::int,1),1),true\n  ) returning id_pendiente into v_nuevo;\n  if public.sgp_mecanizado_es_parte(e.id_programacion) then insert into sgp_mecanizado_parcial.origenes_pdt values(v_nuevo,p_id_entrega); end if;\n end loop;\n update public.sgp_picking_entregas set estado=case when v_diff then 'AUDITADA_DIFERENCIA' else 'VALIDADA' end,usuario_validacion=u,fecha_validacion=now(),\n  observacion_validacion=nullif(trim(coalesce(p_observacion,'')),'') where id_entrega=p_id_entrega;\n return jsonb_build_object('ok',true,'estado',case when v_diff then 'AUDITADA_DIFERENCIA' else 'VALIDADA' end);\nend $function$\n"
+      }
+    ],
+    "roles_activos": [
+      {
+        "rol": "ADMINISTRADOR",
+        "usuarios_activos": 1
+      },
+      {
+        "rol": "COORDINADOR",
+        "usuarios_activos": 1
+      },
+      {
+        "rol": "LIDER MECANIZADO",
+        "usuarios_activos": 4
+      },
+      {
+        "rol": "PATINADOR",
+        "usuarios_activos": 3
+      },
+      {
+        "rol": "RECEPCION",
+        "usuarios_activos": 2
+      },
+      {
+        "rol": "SUPERVISOR DE PICKING",
+        "usuarios_activos": 1
+      }
+    ],
+    "rol_ventanas_lp": [
+      {
+        "rol": "COORDINADOR",
+        "ventana": "ensamble",
+        "permitido": true
+      },
+      {
+        "rol": "LIDER LINEA",
+        "ventana": "ensamble",
+        "permitido": true
+      }
+    ],
+    "overrides_lp_solo_conteo": [
+      {
+        "ventana": "ensamble",
+        "permitido": true,
+        "asignaciones": 1
+      },
+      {
+        "ventana": "pendientes-aluminio",
+        "permitido": true,
+        "asignaciones": 8
+      },
+      {
+        "ventana": "picking",
+        "permitido": true,
+        "asignaciones": 2
+      },
+      {
+        "ventana": "picking.entrega",
+        "permitido": true,
+        "asignaciones": 8
+      },
+      {
+        "ventana": "picking.recepcion",
+        "permitido": true,
+        "asignaciones": 2
+      }
+    ]
+  },
+  "dependencies": {
+    "dependencies": [
+      {
+        "md5": "42189319cab7102d1489ef2bc0cf0f71",
+        "name": "sgp_configuracion_general_obtener",
+        "schema": "public",
+        "signature": "p_token text",
+        "definition": "CREATE OR REPLACE FUNCTION public.sgp_configuracion_general_obtener(p_token text)\n RETURNS TABLE(clave text, valor jsonb, descripcion text)\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nbegin\n perform sgp_validar_sesion_rol(p_token,array['ADMINISTRADOR','COORDINADOR','LIDER MECANIZADO','LIDER LINEA','RECEPCION','PATINADOR','PICKING','SUPERVISOR DE PICKING','CONSULTA']);\n return query select c.clave,c.valor,c.descripcion from sgp_configuracion_general c order by c.clave;\nend $function$\n"
+      },
+      {
+        "md5": "e3822711b04fef239cac96175d6b2687",
+        "name": "sgp_pdt_manual_cerrar_v1",
+        "schema": "public",
+        "signature": "p_token text, p_id uuid, p_clave uuid",
+        "definition": "CREATE OR REPLACE FUNCTION public.sgp_pdt_manual_cerrar_v1(p_token text, p_id uuid, p_clave uuid)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\nDECLARE p public.sgp_aluminio_pendientes%rowtype; actor text; prior public.sgp_pdt_cierres%rowtype; final_state text;\nBEGIN\n actor:=public.sgp_pdt_validar_rol_real(p_token,ARRAY['ADMINISTRADOR','COORDINADOR','PICKING','SUPERVISOR DE PICKING']);\n IF p_clave IS NULL THEN RAISE EXCEPTION 'PDT_MANUAL_CLAVE_REQUERIDA'; END IF;\n SELECT * INTO STRICT p FROM public.sgp_aluminio_pendientes WHERE id_pendiente=p_id FOR UPDATE;\n IF NOT EXISTS(SELECT 1 FROM sgp_pdt_manual.detalles WHERE id_pendiente=p_id)\n THEN RAISE EXCEPTION 'PDT_MANUAL_INEXISTENTE'; END IF;\n SELECT * INTO prior FROM public.sgp_pdt_cierres WHERE id_pendiente=p_id;\n IF FOUND THEN\n  IF prior.clave<>p_clave THEN RAISE EXCEPTION 'PDT_MANUAL_CIERRE_EXISTENTE'; END IF;\n  RETURN jsonb_build_object('ok',true,'duplicado',true);\n END IF;\n IF p.contrato_pdt<>'V2' OR p.estado<>'PENDIENTE' OR p.validacion_estado<>'VALIDADO'\n OR p.estado_repo<>'PROCESADO' THEN RAISE EXCEPTION 'PDT_MANUAL_NO_APTO_PARA_CIERRE'; END IF;\n PERFORM 1 FROM public.sgp_picking_entregas e WHERE e.id_entrega IN (\n  SELECT l.id_entrega FROM sgp_pdt_manual.entregas l\n  JOIN public.sgp_aluminio_pendiente_detalles d USING(id_detalle) WHERE d.id_pendiente=p_id)\n ORDER BY e.id_entrega FOR UPDATE;\n INSERT INTO public.sgp_pdt_cierres(id_pendiente,clave,usuario,evidencia)\n VALUES(p_id,p_clave,actor,(SELECT coalesce(jsonb_agg(to_jsonb(l)),'[]'::jsonb)\n  FROM sgp_pdt_manual.entregas l JOIN public.sgp_aluminio_pendiente_detalles d USING(id_detalle)\n  WHERE d.id_pendiente=p_id AND l.estado='VALIDADA' AND l.asignado_en IS NOT NULL));\n IF NOT sgp_pdt_manual.cierre_acreditado(p_id) THEN RAISE EXCEPTION 'PDT_MANUAL_COBERTURA_PICKING_INCOMPLETA'; END IF;\n UPDATE public.sgp_aluminio_pendientes SET estado='RESUELTO',estado_repo='PICKING',usuario_cierre=actor,fecha_cierre=now()\n WHERE id_pendiente=p_id RETURNING estado INTO STRICT final_state;\n INSERT INTO public.sgp_aluminio_pendientes_historial(id_pendiente,usuario,estado_anterior,estado_nuevo,tipo_evento,datos_nuevos)\n VALUES(p_id,actor,p.estado,final_state,'CIERRE_MANUAL_PDT',jsonb_build_object('clave',p_clave));\n RETURN jsonb_build_object('ok',true);\nEND $function$\n"
+      },
+      {
+        "md5": "36c6bf327313f83d0b4adb7b7f7eb49d",
+        "name": "original_aplicar_export_diario",
+        "schema": "sgp_pdt_manual",
+        "signature": "p_token text, p_linea text, p_nombre_archivo text, p_datos jsonb",
+        "definition": "CREATE OR REPLACE FUNCTION sgp_pdt_manual.original_aplicar_export_diario(p_token text, p_linea text, p_nombre_archivo text, p_datos jsonb)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\ndeclare v_usuario text;v_preview jsonb;v_carga uuid;v_actualizados int:=0;v_nuevos int:=0;v_ausentes int:=0;r record;oldrow sgp_producciones%rowtype;newrow jsonb;newens numeric;newemp numeric;newensamblado numeric;\nbegin v_usuario:=sgp_validar_sesion_rol(p_token,array['ADMINISTRADOR','COORDINADOR']);v_preview:=sgp_previsualizar_export_diario(p_token,p_linea,p_datos);\ninsert into sgp_cargas_diarias(tipo_fuente,id_linea,usuario,nombre_archivo,registros_recibidos)values('EXPORT',p_linea,v_usuario,p_nombre_archivo,(v_preview->>'recibidos')::int)returning id_carga_diaria into v_carga;\nupdate sgp_producciones p set presente_ultimo_export=false,ultima_carga_diaria=v_carga where p.id_linea=p_linea and coalesce(p.activa,'SI')='SI' and p.semana_base in(select distinct(x->>'semana_actual')::int from jsonb_array_elements(p_datos)x where nullif(x->>'semana_actual','')is not null)and not exists(select 1 from jsonb_array_elements(p_datos)x where x->>'key_produccion'=p.key_produccion);get diagnostics v_ausentes=row_count;\nfor r in select x from jsonb_array_elements(p_datos)x loop\n select * into oldrow from sgp_producciones p where p.key_produccion=r.x->>'key_produccion';\n if found then\n  newens:=nullif(r.x->>'saldo_ensamble','')::numeric;newemp:=nullif(r.x->>'saldo_empaque','')::numeric;newensamblado:=nullif(r.x->>'ensamblado','')::numeric;\n  update sgp_producciones p set semana_actual=nullif(r.x->>'semana_actual','')::int,saldo_ensamble=newens,saldo_empaque=newemp,estado_reserva_al=r.x->>'estado_reserva_al',porc_vidrio=nullif(r.x->>'porc_vidrio','')::numeric,estado_produccion=r.x->>'estado_produccion',ensamblado=newensamblado,empacado=nullif(r.x->>'empacado','')::numeric,reserva_al=coalesce(r.x->>'reserva_al',p.reserva_al),presente_ultimo_export=true,ultima_vez_export=now(),ultima_carga_diaria=v_carga,saldos_inicializados=true,fecha_inicializacion_saldos=coalesce(p.fecha_inicializacion_saldos,now()),fecha_actualizacion=now() where p.key_produccion=r.x->>'key_produccion';\n  select to_jsonb(p) into newrow from sgp_producciones p where p.key_produccion=r.x->>'key_produccion';\n  if oldrow.saldos_inicializados and coalesce(oldrow.ensamblado,0)=0 and coalesce(newensamblado,0)>0 and coalesce(newens,0)>0 then insert into sgp_eventos_actualizacion(id_lote,fuente,tipo_evento,clave,datos)values(v_carga,'EXPORT','ABIERTA_ENSAMBLE',oldrow.key_produccion,newrow);end if;\n  if oldrow.saldos_inicializados and coalesce(oldrow.saldo_ensamble,0)>0 and coalesce(newens,0)=0 then insert into sgp_eventos_actualizacion(id_lote,fuente,tipo_evento,clave,datos)values(v_carga,'EXPORT','ENSAMBLADA_COMPLETA',oldrow.key_produccion,newrow);end if;\n  if oldrow.saldos_inicializados and (coalesce(oldrow.saldo_ensamble,0)>0 or coalesce(oldrow.saldo_empaque,0)>0) and coalesce(newens,0)=0 and coalesce(newemp,0)=0 then insert into sgp_eventos_actualizacion(id_lote,fuente,tipo_evento,clave,datos)values(v_carga,'EXPORT','ORDEN_COMPLETADA',oldrow.key_produccion,newrow);end if;\n  v_actualizados:=v_actualizados+1;\n  insert into sgp_export_diario_historial(id_carga_diaria,key_produccion,id_linea,produccion_id,produccion,sistema,semana_actual,saldo_ensamble,saldo_empaque,estado_reserva_al,porc_vidrio,presente,datos)values(v_carga,r.x->>'key_produccion',p_linea,r.x->>'id',r.x->>'produccion',r.x->>'sistema',nullif(r.x->>'semana_actual','')::int,newens,newemp,r.x->>'estado_reserva_al',nullif(r.x->>'porc_vidrio','')::numeric,true,r.x);\n else v_nuevos:=v_nuevos+1;end if;\nend loop;\ninsert into sgp_export_diario_historial(id_carga_diaria,key_produccion,id_linea,produccion_id,produccion,sistema,semana_actual,saldo_ensamble,saldo_empaque,estado_reserva_al,porc_vidrio,presente,datos)select v_carga,p.key_produccion,p.id_linea,p.id,p.produccion,p.sistema,p.semana_actual,p.saldo_ensamble,p.saldo_empaque,p.estado_reserva_al,p.porc_vidrio,false,'{}'::jsonb from sgp_producciones p where p.id_linea=p_linea and p.ultima_carga_diaria=v_carga and p.presente_ultimo_export=false;\nupdate sgp_cargas_diarias set registros_actualizados=v_actualizados,registros_nuevos=v_nuevos,registros_ausentes=v_ausentes,detalle=jsonb_build_object('linea',p_linea,'semanas',v_preview->'semanas','saldos_inicializados',true)where id_carga_diaria=v_carga;\nreturn jsonb_build_object('ok',true,'id_carga_diaria',v_carga,'linea',p_linea,'actualizados',v_actualizados,'fuera_base',v_nuevos,'ausentes',v_ausentes,'saldos_inicializados',true,'semanas',v_preview->'semanas');end$function$\n"
+      },
+      {
+        "md5": "7cfb562666d1861e2e93ab3dd13e650e",
+        "name": "original_cerrar_v2",
+        "schema": "sgp_pdt_manual",
+        "signature": "p_token text, p_id uuid, p_clave uuid",
+        "definition": "CREATE OR REPLACE FUNCTION sgp_pdt_manual.original_cerrar_v2(p_token text, p_id uuid, p_clave uuid)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\nDECLARE p public.sgp_aluminio_pendientes%rowtype; u text; e public.sgp_pdt_cierres%rowtype;\nBEGIN\n u:=public.sgp_validar_sesion_rol(p_token,ARRAY['COORDINADOR','PICKING','SUPERVISOR DE PICKING','ADMINISTRADOR']);\n IF p_clave IS NULL THEN RAISE EXCEPTION 'Clave requerida'; END IF;\n SELECT * INTO STRICT p FROM public.sgp_aluminio_pendientes WHERE id_pendiente=p_id FOR UPDATE;\n SELECT * INTO e FROM public.sgp_pdt_cierres WHERE id_pendiente=p_id;\n IF FOUND THEN\n  IF e.clave<>p_clave THEN RAISE EXCEPTION 'Cierre ya registrado'; END IF;\n  RETURN jsonb_build_object('ok',true,'duplicado',true);\n END IF;\n IF p.contrato_pdt<>'V2' OR p.estado<>'PENDIENTE' OR p.validacion_estado<>'VALIDADO' OR p.estado_repo<>'PROCESADO' THEN RAISE EXCEPTION 'PDT no apto para cierre'; END IF;\n PERFORM 1 FROM public.sgp_picking_entregas pe WHERE pe.id_entrega IN (\n SELECT l.id_entrega FROM public.sgp_pdt_entrega_lineas l JOIN public.sgp_aluminio_pendiente_detalles d USING(id_detalle)\n WHERE d.id_pendiente=p_id) ORDER BY pe.id_entrega FOR UPDATE;\n INSERT INTO public.sgp_pdt_cierres(id_pendiente,clave,usuario,evidencia)\n VALUES(p_id,p_clave,u,(SELECT coalesce(jsonb_agg(to_jsonb(a)),'[]'::jsonb) FROM public.sgp_pdt_asignaciones a\n JOIN public.sgp_aluminio_pendiente_detalles d USING(id_detalle) WHERE d.id_pendiente=p_id));\n IF NOT public.sgp_pdt_cierre_acreditado(p_id) THEN RAISE EXCEPTION 'Cobertura Picking incompleta'; END IF;\n UPDATE public.sgp_aluminio_pendientes SET estado='RESUELTO',estado_repo='PICKING',usuario_cierre=u,fecha_cierre=now() WHERE id_pendiente=p_id;\n INSERT INTO public.sgp_aluminio_pendientes_historial(id_pendiente,usuario,estado_anterior,estado_nuevo,tipo_evento,datos_nuevos)\n VALUES(p_id,u,p.estado_repo,'PICKING','CIERRE_V2',jsonb_build_object('clave',p_clave));\n RETURN jsonb_build_object('ok',true);\nEND $function$\n"
+      }
+    ],
+    "pdt_evidence_columns": [
+      {
+        "type": "uuid",
+        "table": "sgp_aluminio_pendiente_detalles",
+        "column": "id_detalle",
+        "schema": "public"
+      },
+      {
+        "type": "uuid",
+        "table": "sgp_aluminio_pendiente_detalles",
+        "column": "id_pendiente",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_aluminio_pendiente_detalles",
+        "column": "id_pieza",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_aluminio_pendiente_detalles",
+        "column": "fabricacion",
+        "schema": "public"
+      },
+      {
+        "type": "numeric",
+        "table": "sgp_aluminio_pendiente_detalles",
+        "column": "longitud",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_aluminio_pendiente_detalles",
+        "column": "acabado",
+        "schema": "public"
+      },
+      {
+        "type": "integer",
+        "table": "sgp_aluminio_pendiente_detalles",
+        "column": "cantidad_validada",
+        "schema": "public"
+      },
+      {
+        "type": "text",
+        "table": "sgp_aluminio_pendiente_detalles",
+        "column": "creado_por",
+        "schema": "public"
+      },
+      {
+        "type": "timestamp with time zone",
+        "table": "sgp_aluminio_pendiente_detalles",
+        "column": "creado_en",
+        "schema": "public"
+      },
+      {
+        "type": "uuid",
+        "table": "detalles",
+        "column": "id_detalle",
+        "schema": "sgp_pdt_manual"
+      },
+      {
+        "type": "uuid",
+        "table": "detalles",
+        "column": "id_reporte",
+        "schema": "sgp_pdt_manual"
+      },
+      {
+        "type": "uuid",
+        "table": "detalles",
+        "column": "id_pendiente",
+        "schema": "sgp_pdt_manual"
+      },
+      {
+        "type": "text",
+        "table": "detalles",
+        "column": "perfil",
+        "schema": "sgp_pdt_manual"
+      },
+      {
+        "type": "text",
+        "table": "detalles",
+        "column": "fabricacion",
+        "schema": "sgp_pdt_manual"
+      },
+      {
+        "type": "text",
+        "table": "detalles",
+        "column": "marca",
+        "schema": "sgp_pdt_manual"
+      },
+      {
+        "type": "numeric",
+        "table": "detalles",
+        "column": "longitud",
+        "schema": "sgp_pdt_manual"
+      },
+      {
+        "type": "text",
+        "table": "detalles",
+        "column": "acabado",
+        "schema": "sgp_pdt_manual"
+      },
+      {
+        "type": "integer",
+        "table": "detalles",
+        "column": "cantidad",
+        "schema": "sgp_pdt_manual"
+      },
+      {
+        "type": "text",
+        "table": "detalles",
+        "column": "nc",
+        "schema": "sgp_pdt_manual"
+      },
+      {
+        "type": "text",
+        "table": "detalles",
+        "column": "observacion",
+        "schema": "sgp_pdt_manual"
+      },
+      {
+        "type": "uuid",
+        "table": "fuentes",
+        "column": "id_detalle",
+        "schema": "sgp_pdt_manual"
+      },
+      {
+        "type": "text",
+        "table": "fuentes",
+        "column": "id_pieza",
+        "schema": "sgp_pdt_manual"
+      },
+      {
+        "type": "jsonb",
+        "table": "fuentes",
+        "column": "snapshot",
+        "schema": "sgp_pdt_manual"
+      },
+      {
+        "type": "uuid",
+        "table": "detalles",
+        "column": "id_pendiente",
+        "schema": "sgp_pdt_multiorigen"
+      },
+      {
+        "type": "uuid",
+        "table": "detalles",
+        "column": "id_evento",
+        "schema": "sgp_pdt_multiorigen"
+      },
+      {
+        "type": "uuid",
+        "table": "detalles",
+        "column": "id_entrega",
+        "schema": "sgp_pdt_multiorigen"
+      },
+      {
+        "type": "jsonb",
+        "table": "detalles",
+        "column": "fuente",
+        "schema": "sgp_pdt_multiorigen"
+      }
+    ]
+  },
+  "period": {
+    "horarios": {
+      "domingo": {
+        "turno1": {
+          "fin": "18:00",
+          "inicio": "07:00"
+        },
+        "turno2": {
+          "fin": "05:00",
+          "inicio": "18:00"
+        }
+      },
+      "lunes_sabado": {
+        "turno1": {
+          "fin": "19:00",
+          "inicio": "07:00"
+        },
+        "turno2": {
+          "fin": "07:00",
+          "inicio": "19:00"
+        }
+      }
+    },
+    "cargas_columnas": [
+      {
+        "type": "uuid",
+        "column": "id_carga_diaria"
+      },
+      {
+        "type": "text",
+        "column": "tipo_fuente"
+      },
+      {
+        "type": "text",
+        "column": "id_linea"
+      },
+      {
+        "type": "text",
+        "column": "usuario"
+      },
+      {
+        "type": "text",
+        "column": "nombre_archivo"
+      },
+      {
+        "type": "timestamp with time zone",
+        "column": "fecha_hora"
+      },
+      {
+        "type": "integer",
+        "column": "registros_recibidos"
+      },
+      {
+        "type": "integer",
+        "column": "registros_actualizados"
+      },
+      {
+        "type": "integer",
+        "column": "registros_nuevos"
+      },
+      {
+        "type": "integer",
+        "column": "registros_ausentes"
+      },
+      {
+        "type": "integer",
+        "column": "errores"
+      },
+      {
+        "type": "text",
+        "column": "estado"
+      },
+      {
+        "type": "jsonb",
+        "column": "detalle"
+      }
+    ],
+    "funciones_evidencia": [
+      {
+        "md5": "24e18c5a31ffd2b7f313078ac42721c5",
+        "name": "sgp_pdt_cierre_acreditado",
+        "schema": "public",
+        "signature": "p_id uuid"
+      },
+      {
+        "md5": "d2f156d634f28698f74e25274c2a9059",
+        "name": "original_sgp_pdt_picking_v2",
+        "schema": "sgp_pdt_multiorigen",
+        "signature": "p_token text, p_id uuid"
+      },
+      {
+        "md5": "6f131520755c99b0db28e1e02e7f1bb5",
+        "name": "nuevo_sgp_pdt_picking_v2",
+        "schema": "sgp_pdt_multiorigen",
+        "signature": "p_token text, p_id uuid"
+      }
+    ]
+  }
+}

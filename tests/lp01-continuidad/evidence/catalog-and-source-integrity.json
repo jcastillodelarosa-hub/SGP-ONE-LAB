@@ -1,0 +1,57 @@
+{
+  "date": "2026-11-02",
+  "timezone": "America/Bogota",
+  "baseline": "8defa3475fda81859db739a0a240ef6eedce5565",
+  "mode": "SELECT catalog/configuration only; no production names sent or queried",
+  "lp_schema_absent": true,
+  "session_md5": "e964ea0d6f9af2c88010542cd3c84f9e",
+  "schedules": {
+    "lunes_sabado": {
+      "turno1": {
+        "inicio": "07:00",
+        "fin": "19:00"
+      },
+      "turno2": {
+        "inicio": "19:00",
+        "fin": "07:00"
+      }
+    },
+    "domingo": {
+      "turno1": {
+        "inicio": "07:00",
+        "fin": "18:00"
+      },
+      "turno2": {
+        "inicio": "18:00",
+        "fin": "05:00"
+      }
+    }
+  },
+  "capacity_source": [
+    {
+      "linea": "PANELES 2",
+      "proceso": "MECANIZADO",
+      "capacidad_turno": 90
+    },
+    {
+      "linea": "FRAMES 2",
+      "proceso": "MECANIZADO",
+      "capacidad_turno": 40
+    }
+  ],
+  "capacity_system_active_count": 0,
+  "calendar_or_holiday_config_found": false,
+  "conclusion": "Existing capacities do not establish Empaque limits. Coordinator must enter actual authorized turn capacity; no Mecanizado fallback. Seven-day schedule only; no holiday rule inferred.",
+  "protected_sources_identical_sha256": {
+    "app.js": "6c6f6db30437021b1041aba22123d89bf47dcb53459129d41699aa8495d917b7",
+    "planner-readonly-v326.js": "27a2ef1e1a4eea2e37a877793dbf04a2d99e74e489a3d580d1116afce9c3c98e",
+    "planner-operations-v326.js": "42dd96c5ff15dc99262de0369784dd0ea569f3d513cf254d022cbdd825d5c1dc",
+    "production-line-tabs.js": "7a94e94d78309373b6f57110d8346c20cad189a002977d5872c6f726ee5feb1b",
+    "src/domain/powerbi/adapter.js": "2a351985243ab3035736a12916773feabbb721dc208689582374143a9ba52c8c",
+    "src/domain/powerbi/xlsx-reader.js": "c2810f57e72c92a779f4ee905ef57e85b01a2663375906f10699c729141cfa7f",
+    "src/server/lp-powerbi-handler.js": "eca692d23a91735aa68335cc20c2226be99332d25bba39853e02f422bcdb76ed",
+    "src/modules/lp01-powerbi-client.js": "931dbc157357465dc657586ec1434ba9c6d05a051b7e64179a7c1e36494c5e5f",
+    "supabase/functions/lp-powerbi/index.ts": "d197d124234a8ef831ee466f166e519d401c5b24ecd9e667e8f0d107f774359d"
+  },
+  "sensitive_query_block": "Preserved; no retry, workaround or production-name matching attempted"
+}

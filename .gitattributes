@@ -1,0 +1,2 @@
+tests/lp01-operacion/evidence/*.csv text eol=crlf
+tests/lp01-sin-actividad/evidence/*.csv text eol=crlf

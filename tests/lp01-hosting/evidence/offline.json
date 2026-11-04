@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "checks": [
+    "Exact sealed ZIP/file hashes verified; dedicated public root; no rewrites or Firebase actions; deploy remains blocked",
+    "Altered ZIP fails externally pinned digest",
+    "Traversal, private inputs and server code rejected",
+    "Unmanifested root asset rejected even with newly computed ZIP digest",
+    "File alteration fails embedded manifest hash",
+    "Existing review artifact cannot be overwritten"
+  ],
+  "scope": "local sealed synthetic frontend ZIP; no Firebase metadata or active version certified",
+  "firebase_actions": 0
+}

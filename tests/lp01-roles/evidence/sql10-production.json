@@ -1,0 +1,409 @@
+{
+  "status": "SQL10_APPLIED_VERIFIED_CONTAINED",
+  "environment": "Supabase SGP-ONE-LAB ocvxbwzqxbrfndkvjmfx",
+  "source": "docs/sql-proposals/lp01-operacion/10_roles_cierre_individual_REVIEW.sql",
+  "source_sha256": "08d17548ad781ab3f7d8b400121c448d1f064269fc858055498e36cdbdd67d82",
+  "postcheck": {
+    "sql09": null,
+    "config": {
+      "id": true,
+      "escrituras": false,
+      "adaptador_bi": "LP-PBI-XLSX-1",
+      "formato_bi_aprobado": false
+    },
+    "profile": {
+      "id": true,
+      "habilitado": false
+    },
+    "xlsx_acl": {
+      "anon": false,
+      "server": true,
+      "authenticated": false
+    },
+    "functions": [
+      {
+        "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+        "name": "public.sgp_admin_usuario_guardar",
+        "owner": "postgres",
+        "config": [
+          "search_path=public, extensions"
+        ],
+        "definer": true,
+        "body_md5": "17ce2c933ccfab94c9b3518c6c793303"
+      },
+      {
+        "acl": "{postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+        "name": "public.sgp_lp_operacion_comando",
+        "owner": "postgres",
+        "config": [
+          "search_path=\"\""
+        ],
+        "definer": true,
+        "body_md5": "6327a5478c11ae6ba9a13e6966d42162"
+      },
+      {
+        "acl": "{postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+        "name": "public.sgp_lp_operacion_consultar",
+        "owner": "postgres",
+        "config": [
+          "search_path=\"\""
+        ],
+        "definer": true,
+        "body_md5": "9f9f3ef8861c4fb410a4132f74204930"
+      },
+      {
+        "acl": "{postgres=X/postgres}",
+        "name": "sgp_lp_operacion.confirmar_ambito",
+        "owner": "postgres",
+        "config": [
+          "search_path=\"\""
+        ],
+        "definer": true,
+        "body_md5": "28a9f5f9b66d201362b44138e5eb00df"
+      },
+      {
+        "acl": "{postgres=X/postgres}",
+        "name": "sgp_lp_operacion.contener_ambitos",
+        "owner": "postgres",
+        "config": [
+          "search_path=\"\""
+        ],
+        "definer": false,
+        "body_md5": "4bd286da759a7f14d9bb0b49dd9fff16"
+      },
+      {
+        "acl": "{postgres=X/postgres}",
+        "name": "sgp_lp_operacion.permisos_en_periodo",
+        "owner": "postgres",
+        "config": [
+          "search_path=\"\""
+        ],
+        "definer": false,
+        "body_md5": "2bcf1551c9de003898e4bf663fe544b6"
+      },
+      {
+        "acl": "{postgres=X/postgres}",
+        "name": "sgp_lp_operacion.sesion",
+        "owner": "postgres",
+        "config": [
+          "search_path=\"\""
+        ],
+        "definer": true,
+        "body_md5": "f06e86fb101d602de053faa50d6696b3"
+      },
+      {
+        "acl": "{postgres=X/postgres}",
+        "name": "sgp_lp_operacion.verificar_temporal",
+        "owner": "postgres",
+        "config": [
+          "search_path=\"\""
+        ],
+        "definer": false,
+        "body_md5": "c39ce5692affad2b1edc4a7dbf66faf2"
+      }
+    ],
+    "migration": [
+      {
+        "name": "lp183_native_roles_10_contained",
+        "version": "20261104033408"
+      }
+    ],
+    "role_matrix": [
+      {
+        "role": "SUPERVISOR ENSAMBLE",
+        "stage": "ENSAMBLE",
+        "operations": [
+          "LEER",
+          "EJECUTAR",
+          "NOTA",
+          "AFECTAR",
+          "VALIDAR",
+          "IMPORTAR_BI",
+          "IMPORTAR_XLSX",
+          "CERRAR"
+        ]
+      },
+      {
+        "role": "SUPERVISOR EMPAQUE",
+        "stage": "ENSAMBLE",
+        "operations": []
+      },
+      {
+        "role": "LIDER LINEA",
+        "stage": "ENSAMBLE",
+        "operations": [
+          "LEER",
+          "EJECUTAR",
+          "NOTA",
+          "AFECTAR",
+          "VALIDAR",
+          "IMPORTAR_BI",
+          "IMPORTAR_XLSX",
+          "CERRAR"
+        ]
+      },
+      {
+        "role": "COORDINADOR",
+        "stage": "ENSAMBLE",
+        "operations": [
+          "LEER",
+          "ABRIR",
+          "SALE",
+          "EJECUTAR",
+          "NOTA",
+          "AFECTAR",
+          "VALIDAR",
+          "IMPORTAR_BI",
+          "IMPORTAR_XLSX",
+          "CERRAR",
+          "REABRIR",
+          "LIBERAR"
+        ]
+      },
+      {
+        "role": "CONSULTA",
+        "stage": "ENSAMBLE",
+        "operations": [
+          "LEER"
+        ]
+      },
+      {
+        "role": "SUPERVISOR ENSAMBLE",
+        "stage": "EMPAQUE",
+        "operations": []
+      },
+      {
+        "role": "SUPERVISOR EMPAQUE",
+        "stage": "EMPAQUE",
+        "operations": [
+          "LEER",
+          "EJECUTAR",
+          "NOTA",
+          "AFECTAR",
+          "VALIDAR",
+          "IMPORTAR_BI",
+          "IMPORTAR_XLSX",
+          "CERRAR"
+        ]
+      },
+      {
+        "role": "LIDER LINEA",
+        "stage": "EMPAQUE",
+        "operations": [
+          "LEER",
+          "EJECUTAR",
+          "NOTA",
+          "AFECTAR",
+          "VALIDAR",
+          "IMPORTAR_BI",
+          "IMPORTAR_XLSX",
+          "CERRAR"
+        ]
+      },
+      {
+        "role": "COORDINADOR",
+        "stage": "EMPAQUE",
+        "operations": [
+          "LEER",
+          "ABRIR",
+          "SALE",
+          "EJECUTAR",
+          "NOTA",
+          "AFECTAR",
+          "VALIDAR",
+          "IMPORTAR_BI",
+          "IMPORTAR_XLSX",
+          "CERRAR",
+          "REABRIR",
+          "LIBERAR"
+        ]
+      },
+      {
+        "role": "CONSULTA",
+        "stage": "EMPAQUE",
+        "operations": [
+          "LEER"
+        ]
+      }
+    ],
+    "private_tables": [
+      {
+        "rls": true,
+        "anon": false,
+        "name": "archivos",
+        "owner": "postgres",
+        "authenticated": false
+      },
+      {
+        "rls": true,
+        "anon": false,
+        "name": "auditoria",
+        "owner": "postgres",
+        "authenticated": false
+      },
+      {
+        "rls": true,
+        "anon": false,
+        "name": "cierres",
+        "owner": "postgres",
+        "authenticated": false
+      },
+      {
+        "rls": true,
+        "anon": false,
+        "name": "config",
+        "owner": "postgres",
+        "authenticated": false
+      },
+      {
+        "rls": true,
+        "anon": false,
+        "name": "liberaciones",
+        "owner": "postgres",
+        "authenticated": false
+      },
+      {
+        "rls": true,
+        "anon": false,
+        "name": "notificaciones",
+        "owner": "postgres",
+        "authenticated": false
+      },
+      {
+        "rls": true,
+        "anon": false,
+        "name": "ordenes",
+        "owner": "postgres",
+        "authenticated": false
+      },
+      {
+        "rls": true,
+        "anon": false,
+        "name": "perfil_roles",
+        "owner": "postgres",
+        "authenticated": false
+      },
+      {
+        "rls": true,
+        "anon": false,
+        "name": "permisos",
+        "owner": "postgres",
+        "authenticated": false
+      },
+      {
+        "rls": true,
+        "anon": false,
+        "name": "presupuestos",
+        "owner": "postgres",
+        "authenticated": false
+      },
+      {
+        "rls": true,
+        "anon": false,
+        "name": "turnos",
+        "owner": "postgres",
+        "authenticated": false
+      }
+    ]
+  },
+  "native_contracts": {
+    "business_counts": {
+      "audit": 0,
+      "orders": 0,
+      "closures": 0,
+      "human_scopes": 0
+    },
+    "protected_flags": {
+      "bi": false,
+      "writes": false,
+      "profile": false
+    },
+    "role_constraint": [
+      {
+        "name": "sgp_usuarios_rol_lp10_check",
+        "validated": true,
+        "definition": "CHECK ((rol = ANY (ARRAY['COORDINADOR'::text, 'LIDER MECANIZADO'::text, 'LIDER LINEA'::text, 'RECEPCION'::text, 'PATINADOR'::text, 'PICKING'::text, 'SUPERVISOR DE PICKING'::text, 'CONSULTA'::text, 'ADMINISTRADOR'::text, 'SUPERVISOR ENSAMBLE'::text, 'SUPERVISOR EMPAQUE'::text])))"
+      }
+    ],
+    "native_functions": [
+      {
+        "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+        "name": "sgp_admin_rol_accesos_guardar",
+        "owner": "postgres",
+        "config": [
+          "search_path=public"
+        ],
+        "definer": true,
+        "body_md5": "96c5531abff3988b31a91211b4a440f4",
+        "signature": "p_token text, p_rol text, p_accesos text[]"
+      },
+      {
+        "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+        "name": "sgp_admin_rol_accesos_listar",
+        "owner": "postgres",
+        "config": [
+          "search_path=public"
+        ],
+        "definer": true,
+        "body_md5": "32a3077fbfc057aca30f6e622796f12e",
+        "signature": "p_token text"
+      },
+      {
+        "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+        "name": "sgp_admin_usuario_guardar",
+        "owner": "postgres",
+        "config": [
+          "search_path=public, extensions"
+        ],
+        "definer": true,
+        "body_md5": "17ce2c933ccfab94c9b3518c6c793303",
+        "signature": "p_token text, p_id_usuario uuid, p_usuario text, p_nombre text, p_rol text, p_password text, p_activo boolean, p_accesos text[]"
+      },
+      {
+        "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+        "name": "sgp_admin_usuarios_listar",
+        "owner": "postgres",
+        "config": [
+          "search_path=public"
+        ],
+        "definer": true,
+        "body_md5": "543908bbd6c0de99540d8b6bf3299d15",
+        "signature": "p_token text"
+      },
+      {
+        "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+        "name": "sgp_mis_accesos",
+        "owner": "postgres",
+        "config": [
+          "search_path=public, extensions"
+        ],
+        "definer": true,
+        "body_md5": "4f879ddd1659ef97f05e2f4aaa7c5d33",
+        "signature": "p_token text"
+      }
+    ],
+    "schema_direct_access": {
+      "anon": false,
+      "authenticated": false
+    }
+  },
+  "verified": [
+    "Eight installed replacement bodies match versioned SQL10 exactly",
+    "Five native administrative/access signatures, owners, ACL, SECURITY and search_path preserved; only approved user-save body changed",
+    "Role CHECK validated and retains all previous roles plus both supervisors",
+    "Eleven LP tables have RLS and deny direct anon/authenticated access; schema USAGE denied",
+    "Supervisor cross-stage operations empty; line leader both stages; consultation read-only",
+    "Writes, BI format and profile false; no business/audit/closure/scope rows created"
+  ],
+  "pending": [
+    "Runtime lp-powerbi deployment rejected by automatic approval review pending explicit authorization of verify_jwt=false and server-only builtin service_role",
+    "No enabled writes, Edge/Firebase publication, PR merge or real-user PC/mobile save verification",
+    "Current managed environment network revision5 excludes three required HTTPS destinations; no policy or credential bypass"
+  ],
+  "ci_reused": {
+    "commit": "effb6a048a4fa5aaae6561af610b2e4710bf3cf7",
+    "lp_run": 41766159821,
+    "all_six_runs_success": true
+  },
+  "limits": "Metadata and code checks in real Supabase; positive business operations remain isolated synthetic evidence until authorized user verification."
+}
