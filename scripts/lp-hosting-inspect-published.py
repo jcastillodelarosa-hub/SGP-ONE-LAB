@@ -58,17 +58,24 @@ def run():
  before=json.loads((temp/'lp-hosting-private/metadata-before.json').read_text())
  if before['version']!=pin['expected_live_version']:raise ValueError('LIVE_VERSION_CHANGED')
  report={'status':'INSPECTION_IN_PROGRESS','source_sha':pin['source_sha'],'live':{k:before[k] for k in ['project','site','channel','release','version','observed_at']},'inventory':paths_report(manifest,before['files']),'public_assets':[],'productive_saves_verified':False,'limits':['Public byte checks and API inventory only; no valid SGP session or business write','Authenticated PC/mobile operations remain pending; isolated UI evidence is separate']}
+ target=temp/'lp-live-inspection.json'
+ def save():target.write_text(json.dumps(report,indent=2)+'\n')
+ save() # Preserve the exact diff even if an independent later check is denied.
  hashes=manifest['files']|{'manifest.json':hashlib.sha256((public/'manifest.json').read_bytes()).hexdigest()}
  with concurrent.futures.ThreadPoolExecutor(max_workers=6) as pool:
   results=list(pool.map(lambda item:public_asset(*item),sorted(hashes.items())))
  report['public_assets']=results
+ report['public_bytes_match']=all(x['bytes_match'] for x in results);save()
  meta=module('hosting_metadata',ROOT/'scripts/lp-hosting-metadata.py')
- old,old_files=meta.read_version(pin['rollback_version'])
- report['recovery']={'version':pin['rollback_version'],'status':old['status'],'files':len(old_files),'config_sha256':hashlib.sha256(json.dumps(old.get('config',{}),sort_keys=True).encode()).hexdigest()}
- after=meta.inspect();report['same_live_after_read']=after['version']==before['version']
- report['public_bytes_match']=all(x['bytes_match'] for x in results)
- report['status']='PASS_INVENTORY_AND_PUBLIC_BYTES' if report['same_live_after_read'] and report['inventory']['matches'] and report['public_bytes_match'] else 'DIFFERENCE_OR_UNVERIFIED'
- (temp/'lp-live-inspection.json').write_text(json.dumps(report,indent=2)+'\n')
+ try:
+  old,old_files=meta.read_version(pin['rollback_version'])
+  report['recovery']={'version':pin['rollback_version'],'status':old['status'],'files':len(old_files),'config_sha256':hashlib.sha256(json.dumps(old.get('config',{}),sort_keys=True).encode()).hexdigest()}
+ except Exception:report['recovery']={'version':pin['rollback_version'],'status':'NOT_VERIFIED_NO_ESCALATION'}
+ try:
+  after=meta.inspect();report['same_live_after_read']=after['version']==before['version']
+ except Exception:report['same_live_after_read']=False
+ report['status']='PASS_INVENTORY_AND_PUBLIC_BYTES' if report['same_live_after_read'] and report['inventory']['matches'] and report['public_bytes_match'] and report['recovery']['status']=='FINALIZED' else 'DIFFERENCE_OR_UNVERIFIED'
+ save()
  print(json.dumps(report,indent=2))
  if report['status']!='PASS_INVENTORY_AND_PUBLIC_BYTES':raise ValueError('READONLY_INSPECTION_NOT_COMPLETE')
 if __name__=='__main__':
