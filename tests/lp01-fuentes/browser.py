@@ -26,11 +26,11 @@ try:
     page=browser.new_page(viewport={'width':width,'height':950 if width>400 else 844});errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
     page.route('**/*',lambda r:r.continue_() if r.request.url.startswith(base) else r.abort());page.goto(base+'/')
     page.evaluate('''()=>{document.querySelector('[data-view-panel="ensamble"]').hidden=false;window.qaToken='COORDINADOR';window.SGPPlannerBridge.getToken=()=>window.qaToken;window.SGPPlannerBridge.getClient=async()=>({rpc:async(name,args)=>(await fetch('/rpc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,args})})).json()});}''')
-    page.locator('#productionTrackingTab').click();page.wait_for_selector('[data-op-date]')
+    page.locator('#productionPackingTab' if page.locator('[data-op-stage]').input_value()=='EMPAQUE' else '#productionAssemblyTab').click();page.wait_for_selector('[data-op-date]')
     page.locator('[data-op-date]').fill('2026-11-01');page.locator('[data-op-date]').dispatch_event('change')
     page.wait_for_selector('[data-order-part="'+part+'"]')
     for stage in ['ENSAMBLE','EMPAQUE']:
-     page.locator('#productionTrackingTab').click();page.locator('[data-op-stage]').select_option(stage)
+     page.locator('#productionPackingTab' if page.locator('[data-op-stage]').input_value()=='EMPAQUE' else '#productionAssemblyTab').click();page.locator('[data-op-stage]').select_option(stage)
      page.wait_for_function("s=>document.querySelector('[data-op-status]').textContent.includes('ABIERTO') && document.querySelector('[data-live-orders]').textContent.includes(s)",arg=stage)
      details=page.locator('[data-order-part="'+part+'"]');details.locator('summary').click();details.locator('[data-live-operate]').click()
      page.wait_for_function("s=>document.querySelector('[data-operation-detail] h4').textContent.includes(s)",arg=stage)
@@ -42,7 +42,7 @@ try:
      page.locator('[data-operation-detail]').screenshot(path=str(OUT/f'{stage.lower()}-{width}.png'))
     assert before==db.unchanged()
     # Actual SQL authentication failure, no synthetic denial response.
-    page.locator('#productionTrackingTab').click()
+    page.locator('#productionPackingTab' if page.locator('[data-op-stage]').input_value()=='EMPAQUE' else '#productionAssemblyTab').click()
     detail=page.locator('[data-order-part="'+part+'"]');detail.wait_for()
     if detail.get_attribute('open') is None:detail.locator('summary').click()
     detail.locator('[data-live-operate]').click()
@@ -51,7 +51,7 @@ try:
     db.sql("UPDATE public.sgp_sesiones_app SET expira_en=now()+interval '1 day' WHERE token_hash=encode(extensions.digest('COORDINADOR','sha256'),'hex')")
     # Actual join produces two matching keys. Consumer must reject, not pick first.
     db.sql("INSERT INTO public.sgp_prioridades(anio,semana,id_linea,key_produccion,prioridad) VALUES(2026,44,'PANELES_2','QA|PANELES_2',1),(2026,44,'PANELES_2','QA|PANELES_2',2)")
-    page.locator('#productionTrackingTab').click()
+    page.locator('#productionPackingTab' if page.locator('[data-op-stage]').input_value()=='EMPAQUE' else '#productionAssemblyTab').click()
     detail=page.locator('[data-order-part="'+part+'"]');detail.wait_for()
     if detail.get_attribute('open') is None:detail.locator('summary').click()
     detail.locator('[data-live-operate]').click();page.locator('[data-material-load]').click()

@@ -1,0 +1,42 @@
+[
+  {
+    "fixture": "roles",
+    "status": "PASS",
+    "log": "/tmp/sgp-compat-roles.log"
+  },
+  {
+    "fixture": "powerbi",
+    "status": "PASS",
+    "log": "/tmp/sgp-compat-powerbi.log"
+  },
+  {
+    "fixture": "cierres-integrados",
+    "status": "PASS",
+    "log": "/tmp/sgp-compat-cierres-integrados.log"
+  },
+  {
+    "fixture": "continuidad",
+    "status": "PASS",
+    "log": "/tmp/sgp-compat-continuidad.log"
+  },
+  {
+    "fixture": "sin-actividad",
+    "status": "PASS",
+    "log": "/tmp/sgp-compat-sin-actividad.log"
+  },
+  {
+    "fixture": "apertura",
+    "status": "PASS",
+    "log": "/tmp/sgp-compat-apertura.log"
+  },
+  {
+    "fixture": "fuentes",
+    "status": "PASS",
+    "log": "/tmp/sgp-compat-fuentes.log"
+  },
+  {
+    "fixture": "seguimiento",
+    "status": "PASS",
+    "log": "/tmp/sgp-compat-seguimiento.log"
+  }
+]

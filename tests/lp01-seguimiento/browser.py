@@ -28,7 +28,7 @@ with sync_playwright() as p:
      {id:'A3',key_produccion:'QA2|PANELES_2',fecha:args.p_desde,turno:1,prioridad:3,cantidad:18,ejecutado:18,estado:'FINALIZADA',produccion:'TORRE NORTE',sistema:'ES7100'}]};
    }});
   }''')
-  page.locator('#productionTrackingTab').click();page.wait_for_selector('.lp-followup-order');assert page.locator('.lp-followup-order').count()==3
+  page.locator('#productionPackingTab' if page.locator('[data-op-stage]').input_value()=='EMPAQUE' else '#productionAssemblyTab').click();page.wait_for_selector('.lp-followup-order');assert page.locator('.lp-followup-order').count()==3
   page.locator('[data-week]').fill('2026-W44');page.locator('[data-week]').dispatch_event('change');page.wait_for_function("document.querySelector('[data-status]').textContent.includes('2026-10-26')")
   page.locator('[data-search]').fill('vidrio');assert page.locator('.lp-followup-order').count()==1;page.locator('[data-search]').fill('')
   page.locator('[data-shift]').select_option('2');assert page.locator('.lp-followup-order').count()==1;page.locator('[data-shift]').select_option('')
@@ -41,7 +41,7 @@ with sync_playwright() as p:
   followup_calls=page.evaluate('window.calls');assert all(x['name'] in ['sgp_linea_plan_consultar','sgp_consultar_ensamble','sgp_lp_operacion_consultar'] for x in followup_calls)
   page.locator('#productionLocationsTab').click();assert page.locator('#assemblyLocationReportPanel').is_visible()
   page.locator('#productionPlannerTab').click();assert page.locator('#productionPlannerPanel').is_visible()
-  page.locator('#productionTrackingTab').click()
+  page.locator('#productionPackingTab' if page.locator('[data-op-stage]').input_value()=='EMPAQUE' else '#productionAssemblyTab').click()
   page.evaluate('window.failRead=true');page.locator('[data-refresh]').click();page.wait_for_function("document.querySelector('[data-status]').textContent.includes('QA no disponible')");assert page.locator('.lp-followup-order').count()==0
   calls=page.evaluate('window.calls');assert not any(any(word in x['name'] for word in ['guardar','registrar','programar','mover','arrastrar']) for x in calls)
   assert not errors,errors

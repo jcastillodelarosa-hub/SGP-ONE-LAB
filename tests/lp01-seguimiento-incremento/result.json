@@ -1,0 +1,16 @@
+{
+  "environment": "isolated PostgreSQL17.11 network none synthetic only",
+  "checks": [
+    "Both stages: coordinator validates; supervisor/leader/admin denied; operator reads and execution preserved; individual-close capability preserved",
+    "Global read: coordinator/admin, historic/unassigned, canonical identity, stage balances, unknown kept, homonyms separated, zero excluded only in matching stage; no source/assignment/operation/audit writes",
+    "Export zero with fully consumed assignments but outstanding local affectation remains pending reconciliation, never available",
+    "Concurrent committed role revocation: real reader waits on authority lock and rejects after revalidation",
+    "Private prototype no API grants; revoked user access rejected"
+  ],
+  "status": "PASS",
+  "limitations": [
+    "Local browser integration verified separately",
+    "No public RPC grant",
+    "No productive validation"
+  ]
+}

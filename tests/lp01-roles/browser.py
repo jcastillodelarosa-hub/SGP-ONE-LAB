@@ -27,6 +27,7 @@ try:
    db=Database()
    try:
     setup(db)
+    db.sql((ROOT/'docs/sql-proposals/lp01-seguimiento/INSTALL_REVIEW.sql').read_text())
     def intercept(route):
      try:answer=rpc(db,route.request.url.split('/rpc/')[-1],json.loads(route.request.post_data or '{}'));route.fulfill(status=200,content_type='application/json',body=json.dumps(answer))
      except Exception as e:route.fulfill(status=400,content_type='application/json',body=json.dumps({'code':'QA_SQL','message':str(e)}))

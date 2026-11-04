@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "checks": [
+    "Observed public default EXECUTE grants reproduced only in isolated fixture; old installer rejected atomically; corrected install denies anon/authenticated/service_role and preserves default ACL plus existing function metadata",
+    "Atomic installer rollback on forced failure; repeated install refuses existing objects; existing OID/owner/ACL/SECURITY/search_path preserved",
+    "Actual HTTP PostgREST: blocked before enable; anon-only facade allows coordinator/admin stages; invalid/forged roles/session/scope and private/table access denied; future columns/payload excluded",
+    "Live local HTTP calls reject revoked/expired session, inactive account and effective access",
+    "Remove requires containment; rollback removes only new reader/facade and preserves coordinator-only validation; reinstallation remains revoked",
+    "service_role with BYPASSRLS cannot execute the facade before/after API enable; containment/removal/reinstallation preserve project default ACLs and all preexisting function metadata"
+  ],
+  "postgrest_image": "postgrest/postgrest:v13.0.7@sha256:0a46780309a604cdc8b56c776c6e5e15788ce58174d709e40459ab5a2d44d228",
+  "isolation": "network none; local synthetic authenticator only",
+  "production_operations": 0,
+  "default_acl_fixture": "postgres/public EXECUTE: postgres, anon, authenticated, service_role; unchanged by candidate",
+  "package_sha256": {
+    "CONTAIN_REVIEW.sql": "a8d163eefd6f7cd584269aa78d5fbf6fbdaae4e4d0a6658d2403d841b57178c2",
+    "ENABLE_API_REVIEW.sql": "0a1d772065d463af5f3ae879906169c7b5dbbe5112457db399e0fb1444e591b7",
+    "INSTALL_REVIEW.sql": "edeb19dd6ca27eaacf654f8126246437723f3e978314465d608eae8e5955e183",
+    "PREFLIGHT_READ_ONLY.sql": "573c69a2c49ed63a8e9bb3b804747d654ae89e252655a0fee626d6f831699fe2",
+    "REMOVE_REVIEW.sql": "7e72e9c8a7c0b5f40b947863737ea36ece1a80a09ae47d03aa09a1e5654d20d6"
+  }
+}

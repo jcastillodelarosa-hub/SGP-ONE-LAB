@@ -28,7 +28,7 @@ try:
     page=browser.new_page(viewport={'width':width,'height':950 if width>400 else 844});errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
     page.route('**/*',lambda r:r.continue_() if r.request.url.startswith(origin) else r.abort());page.goto(origin+'/')
     page.evaluate('''()=>{document.querySelector('[data-view-panel="ensamble"]').hidden=false;window.SGPPlannerBridge.getToken=()=> 'COORDINADOR';window.SGPPlannerBridge.getClient=async()=>({rpc:async(name,args)=>(await fetch('/rpc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,args})})).json()});}''')
-    page.locator('#productionTrackingTab').click();page.wait_for_selector('[data-op-date]');page.locator('[data-op-date]').fill('2026-11-01');page.locator('[data-op-date]').dispatch_event('change')
+    page.locator('#productionPackingTab' if page.locator('[data-op-stage]').input_value()=='EMPAQUE' else '#productionAssemblyTab').click();page.wait_for_selector('[data-op-date]');page.locator('[data-op-date]').fill('2026-11-01');page.locator('[data-op-date]').dispatch_event('change')
     page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('NO_ABIERTO')")
     assert 'primer turno' in page.locator('[data-auto-opening]').inner_text()
     page.locator('[data-open]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Guardado confirmado')")
@@ -43,7 +43,7 @@ try:
     assert db.sql('SELECT count(*) FROM sgp_lp_operacion.turnos')=='1'
     page.locator('[data-op-shift]').select_option('1');page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Turno ABIERTO')")
     page.locator('[data-turn-operation]').click();page.locator('[data-empty-confirm]').check();page.locator('[data-close-note]').fill('QA responsable cierra el origen vacío');page.locator('[data-close-empty]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Guardado confirmado')")
-    page.locator('#productionTrackingTab').click();page.wait_for_selector('[data-next-turn]')
+    page.locator('#productionPackingTab' if page.locator('[data-op-stage]').input_value()=='EMPAQUE' else '#productionAssemblyTab').click();page.wait_for_selector('[data-next-turn]')
     assert 'pendiente de autorización técnica' in page.locator('[data-auto-opening]').inner_text()
     assert db.snapshot()['automaticOpening']['state']=='READY_PENDING_TECHNICAL_APPROVAL'
     audit=db.sql('SELECT count(*) FROM sgp_lp_operacion.auditoria')

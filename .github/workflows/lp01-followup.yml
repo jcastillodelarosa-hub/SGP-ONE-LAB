@@ -23,6 +23,10 @@ on:
       - 'tests/lp01-cierres-integrados/**'
       - 'tests/lp01-paneles2/**'
       - 'tests/lp01-roles/**'
+      - 'tests/lp01-seguimiento-incremento/**'
+      - 'tests/lp01-tracking-global.test.mjs'
+      - 'src/modules/lp01-tracking.js'
+      - 'docs/sql-proposals/lp01-seguimiento/**'
       - 'tests/lp01-ambitos-import/**'
       - 'tests/lp01-ambitos-import.test.mjs'
       - 'scripts/lp01-import-scopes.mjs'
@@ -76,6 +80,7 @@ jobs:
         run: |
           node tests/lp01-powerbi.test.mjs
           node tests/lp01-operation.test.mjs
+          node tests/lp01-tracking-global.test.mjs
           node tests/lp01-continuidad.test.mjs
           node tests/lp01-sin-actividad.test.mjs
           node tests/lp01-apertura.test.mjs
@@ -128,22 +133,69 @@ jobs:
         if: always()
         with:
           name: lp01-followup-synthetic-evidence
+          # Explicit synthetic results only; no historical metadata or receipts.
           path: |
-            tests/lp01-seguimiento/evidence
-            tests/lp01-operacion/evidence/
-            tests/lp01-powerbi/evidence/
-            tests/lp01-continuidad/evidence/
-            tests/lp01-sin-actividad/evidence/
-            tests/lp01-apertura/evidence/
-            tests/lp01-fuentes/evidence/
-            tests/lp01-liberaciones/evidence/
-            tests/lp01-origen/evidence/
-            tests/lp01-export-reader/evidence/
-            tests/lp01-ambitos/evidence/
-            tests/lp01-ambitos-temporales/evidence/
-            tests/lp01-ambitos-import/evidence/
-            tests/lp01-cierres-integrados/evidence/fixtures.json
-            tests/lp01-cierres-integrados/evidence/verification.json
-            tests/lp01-roles/evidence/
+            tests/lp01-seguimiento/evidence/browser-results.json
+            tests/lp01-operacion/evidence/browser.json
+            tests/lp01-operacion/evidence/postgres.json
+            tests/lp01-powerbi/evidence/browser.json
+            tests/lp01-powerbi/evidence/postgres.json
+            tests/lp01-continuidad/evidence/browser.json
+            tests/lp01-continuidad/evidence/postgres.json
+            tests/lp01-sin-actividad/evidence/browser.json
+            tests/lp01-sin-actividad/evidence/postgres.json
+            tests/lp01-apertura/evidence/browser.json
+            tests/lp01-apertura/evidence/postgres.json
+            tests/lp01-fuentes/evidence/browser.json
+            tests/lp01-fuentes/evidence/postgres.json
+            tests/lp01-roles/evidence/browser.json
+            tests/lp01-roles/evidence/postgres.json
+            tests/lp01-liberaciones/evidence/postgres.json
+            tests/lp01-origen/evidence/postgres.json
+            tests/lp01-export-reader/evidence/postgres.json
+            tests/lp01-ambitos/evidence/postgres.json
+            tests/lp01-ambitos-temporales/evidence/postgres.json
+            tests/lp01-ambitos-import/evidence/postgres.json
+            tests/lp01-roles/evidence/hardening.json
+            tests/lp01-roles/evidence/compatibility.json
+            tests/lp01-roles/evidence/activation.json
+            tests/lp01-roles/evidence/xlsx.json
             tests/lp01-cierres-integrados/evidence/browser-sql08.json
-            tests/lp01-cierres-integrados/evidence/sql08-*.png
+
+  tracking-global:
+    name: Global tracking install, API permissions and UI (isolated)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm install --no-package-lock --no-audit --no-fund
+      - run: npm run build:vendor
+      - run: docker pull postgres:17.11
+      - run: docker pull postgrest/postgrest:v13.0.7@sha256:0a46780309a604cdc8b56c776c6e5e15788ce58174d709e40459ab5a2d44d228
+      - name: Verify deterministic review package and minimal API permissions
+        run: |
+          python tests/lp01-seguimiento-incremento/build-package.py
+          git diff --exit-code -- docs/sql-proposals/lp01-seguimiento
+          python tests/lp01-seguimiento-incremento/check.py
+          python tests/lp01-seguimiento-incremento/api.py
+      - name: Global UI with the candidate API permissions
+        run: |
+          pip install playwright==1.62.0
+          python -m playwright install --with-deps chromium
+          python tests/lp01-seguimiento-incremento/browser.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lp01-global-tracking-synthetic-evidence
+          path: |
+            tests/lp01-seguimiento-incremento/result.json
+            tests/lp01-seguimiento-incremento/api-result.json
+            tests/lp01-seguimiento-incremento/browser-result.json

@@ -1,5 +1,18 @@
 # Línea de Producción — estado operativo actual
 
+## Candidato Seguimiento global — revisión en borrador
+
+Rama `feat/lp01-seguimiento-global-review`, base main `ab1d2d6`.
+B08–B11 reutilizado con consulta por línea/etapa de todas las semanas y producciones
+sin asignación. Export conserva prioridad; desconocido/cero con pendientes queda
+en conciliación. Seguimiento coordinador/administrador; VALIDAR solo coordinador.
+Implementado y verificado en aislamiento; sin instalación ni publicación.
+[Alcance y pruebas sintéticas](SEGUIMIENTO_INCREMENTO_AISLADO.md).
+Pruebas anteriores válidas reutilizadas; CI del nuevo SHA pendiente al preparar
+este commit. Próximo paso: revisar CI y el PR, manteniendo por separado las
+aprobaciones de instalación, EXECUTE anon, fusión y publicación.
+
+
 **Actualizado:** 2026-11-04, UTC/America/Bogota. PR183, rama existente.
 **Código de referencia verificado:**6edf892; main4ef528b (#190) incorporado
 conservando LP, ambos bloques styles.css, calendario Colombia y saldos futuros.

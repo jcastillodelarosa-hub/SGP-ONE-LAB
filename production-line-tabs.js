@@ -130,7 +130,8 @@
  quickStyle.textContent='.sgp-assembly-quickviews{padding:14px;margin:12px 0;border:1px solid #cbdcf0;border-radius:14px;background:#f8fbff;color:#103b73}.sgp-assembly-quicktabs{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.sgp-assembly-quicktabs button{min-height:44px;padding:9px 12px;border:1px solid #bad2ee;border-radius:10px;background:#eaf2ff;color:#124b8b;font-weight:650}.sgp-assembly-quickviews small{display:block;color:#526781}@media(max-width:680px){.sgp-assembly-quickviews{position:relative;margin:10px 0;padding:12px}.sgp-assembly-quicktabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.sgp-assembly-quicktabs button{font-size:12px;padding:8px 3px}.assembly-table-wrap tbody tr{padding:6px 10px}.assembly-table-wrap tbody td{padding:6px 2px!important;font-size:13px}.assembly-table-wrap tbody td:first-child{font-weight:700;color:#103b73}.production-table-sortbar{padding:9px;gap:7px}.production-table-sortbar label{min-width:0}}';
  document.head.append(quickStyle);
 
- let activeStage='ensamble',supervisorStage=null;
+ let activeStage='ensamble',supervisorStage=null,trackingAllowed=false;
+ extraPanels.seguimiento.button.hidden=true;
  const all=[['planificador',planner,plannerPanel],['ensamble',assembly,assemblyPanel],['empaque',packing,packingPanel],['ubicaciones',report,locations],...Object.entries(extraPanels).map(([key,{button,panel}])=>[key,button,panel])];
  all.forEach(([name,button,panel])=>{button.setAttribute('role','tab');button.setAttribute('aria-controls',panel.id);button.addEventListener('click',()=>select(name));});
  tabs.addEventListener('keydown',event=>{
@@ -143,6 +144,7 @@
   visible[next][1].focus();visible[next][1].click();
  });
  function select(name){
+  if(name==='seguimiento'&&!trackingAllowed)return;
   if(supervisorStage&&(![supervisorStage,'operacion','reportes'].includes(name)))return;
   if(['operacion','reportes'].includes(name))activeStage=extraPanels.seguimiento.panel.querySelector('[data-op-stage]')?.value==='EMPAQUE'?'empaque':'ensamble';
   if(name==='ensamble'||name==='empaque')activeStage=name;
@@ -163,8 +165,11 @@
   queueMicrotask(()=>{assemblyPanel.hidden=name!=='ubicaciones';packingPanel.hidden=true;sheet.hidden=true;locations.hidden=name!=='ubicaciones';});
  }
  document.addEventListener('sgp:lp-role',event=>{
+  trackingAllowed=['COORDINADOR','ADMINISTRADOR'].includes(event.detail);
   supervisorStage=event.detail==='SUPERVISOR ENSAMBLE'?'ensamble':event.detail==='SUPERVISOR EMPAQUE'?'empaque':null;
   for(const button of [planner,extraPanels.seguimiento.button,report])button.hidden=Boolean(supervisorStage);
+  extraPanels.seguimiento.button.hidden=!trackingAllowed;
+  if(!trackingAllowed&&extraPanels.seguimiento.button.getAttribute('aria-selected')==='true')select(supervisorStage||'ensamble');
   assembly.hidden=supervisorStage==='empaque';packing.hidden=supervisorStage==='ensamble';
   // Do not offer the opposite stage in the shared controller either.
   for(const option of extraPanels.seguimiento.panel.querySelectorAll('[data-op-stage] option')){
