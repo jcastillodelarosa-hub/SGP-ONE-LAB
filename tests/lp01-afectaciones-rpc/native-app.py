@@ -37,7 +37,7 @@ try:
      if page.locator('#mobileMenuToggle').is_visible():page.locator('#mobileMenuToggle').click()
      page.locator('.nav [data-view="ensamble"]').click()
      if user=='COORDINADOR':
-      page.locator('#productionTrackingTab').click();page.wait_for_selector('.lp-tracking-table');page.locator('.lp-tracking-table tbody summary').first.click();page.locator('[data-tracking-tab=Afectaciones]').click();page.wait_for_selector('.lp-picking-pending article');assert original in page.locator('.lp-picking-pending').inner_text()
+      page.locator('#productionTrackingTab').click();page.wait_for_selector('.lp-tracking-table');page.locator('.lp-tracking-table tbody summary').first.click();page.locator('[data-tracking-tab=Afectaciones]').click();page.wait_for_selector('.lp-pdt-compact');assert page.locator('.lp-aluminum-pending').evaluate('(el,id)=>el.textContent.includes(id)',original)
       assert page.locator('[data-order-affectations] form').is_hidden()
       value=page.locator('[data-tracking-context] option').nth(1).get_attribute('value');page.locator('[data-tracking-context]').select_option(value)
       page.locator('[data-tracking-content] [name=cause]').select_option('NOVEDAD');page.locator('[data-tracking-content] [name=observation]').fill('Borrador que debe conservarse')
@@ -46,11 +46,11 @@ try:
       page.wait_for_timeout(200);assert reads[0]>prior_reads,'Expected actual quiet RPC';assert page.evaluate("window.qaPanel===document.querySelector('[data-order-affectations] form')");assert page.locator('[data-tracking-content] [name=observation]').input_value()=='Borrador que debe conservarse'
       page.screenshot(path=str(HERE/f'evidence/app-tracking-{width}.png'),full_page=True)
       db.sql("UPDATE public.sgp_usuario_accesos SET permitido=false WHERE id_usuario=(SELECT id_usuario FROM public.sgp_usuarios WHERE usuario='COORDINADOR')")
-      page.clock.fast_forward(20000);page.wait_for_function("!document.querySelector('.lp-picking-pending')")
+      page.clock.fast_forward(20000);page.wait_for_function("!document.querySelector('.lp-aluminum-pending')")
      else:
       assert page.locator('#productionTrackingTab').is_hidden();page.locator('#productionAssemblyTab').click();page.locator('[data-op-date]').fill('2026-11-01');page.locator('[data-op-date]').dispatch_event('change');page.wait_for_selector('[data-order-part]:visible')
       page.locator('[data-live-orders] [data-live-operate]').first.click();page.wait_for_selector('[data-order-form]')
-      page.locator('[data-individual-affects] > summary').click();page.wait_for_selector('.lp-picking-pending article');assert original in page.locator('.lp-picking-pending').inner_text()
+      page.locator('[data-individual-affects] > summary').click();page.wait_for_selector('.lp-pdt-compact');assert page.locator('.lp-aluminum-pending').evaluate('(el,id)=>el.textContent.includes(id)',original)
       assert page.locator('[data-affect-save]').is_disabled()
       page.screenshot(path=str(HERE/f'evidence/app-operation-{width}.png'),full_page=True)
      assert not errors,errors;results.append({'width':width,'role':user,'originalPickingVisible':True,'existingController':True,'externalRequests':0});page.close()

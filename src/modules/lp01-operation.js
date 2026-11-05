@@ -1,3 +1,5 @@
+import {affectationSummary} from '../domain/lp01-affectation-summary.js';
+import {summaryMarkup} from './lp01-affectation-summary.js';
 import {mountTrackingAffectations} from './lp01-tracking-affectations.js';
 import {enrichOperationEvidence} from '../services/lp01-operation-evidence.js';
 import {mountProposal} from './lp01-proposal.js';
@@ -20,6 +22,7 @@ export function mountOperation({tracking,operation,bridge,legacyLoad}){
  let viewPanel='planificador',trackingViewState={},globalData=null,globalContext=null,globalSession=null,trackingRole=null,globalRequest=null,globalQueued=false;
  let operationRequest=null,enrichment=null;
  const trackingStates=new Map();
+ let summaryFlight=null,summaryScope=null;const summaries=new Map();
  document.addEventListener('sgp:lp-role',e=>{trackingRole=e.detail;if(globalSession!==bridge.getToken()||!['COORDINADOR','ADMINISTRADOR'].includes(trackingRole)){globalData=null;trackingStates.clear();if(viewPanel==='seguimiento'){++seq;loading=false;live.replaceChildren();message.textContent='Seguimiento no autorizado';}}});
  const today=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'America/Bogota',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
  tracking.querySelector('.lp-followup-filters').insertAdjacentHTML('afterend','<div class="lp-operational-context"><label>Etapa<select data-op-stage><option>ENSAMBLE</option><option>EMPAQUE</option></select></label><label>Fecha operativa<input type="date" data-op-date value="'+today()+'"></label><label>Turno<select data-op-shift><option value="1">Turno 1</option><option value="2">Turno 2</option></select></label><button type="button" data-op-load>Consultar turno</button><span data-op-status role="status"></span><button type="button" data-retry-pending hidden>Reintentar guardado sin respuesta</button></div><section data-live-orders></section>');
@@ -55,17 +58,34 @@ export function mountOperation({tracking,operation,bridge,legacyLoad}){
    if(token!==bridge.getToken())throw Error('La sesión cambió. Vuelve a consultar.');
    const normalized=globalTrackingData(next,ctx),changed=JSON.stringify(normalized)!==JSON.stringify(globalData);
    globalData=normalized;globalContext=ctx;globalSession=token;
+   if(summaryScope!==scope){summaryScope=scope;summaries.clear();}
    const key=JSON.stringify([ctx.line,ctx.stage]);if(!trackingStates.has(key))trackingStates.set(key,{});trackingViewState=trackingStates.get(key);
    message.textContent='';const editing=quiet&&sameScope&&trackingViewState.open&&['Afectaciones','Materiales'].includes(trackingViewState.tab)&&globalData.orders.some(r=>trackingIdentity(r)===trackingViewState.selected);if(!editing&&(changed||!quiet||!sameScope))renderGlobal();
+   refreshSummaries();
   }catch(e){if(request!==seq)return;globalData=null;live.replaceChildren();message.textContent='No se pudo consultar Seguimiento: '+e.message;}
   finally{if(globalRequest?.request===request)globalRequest=null;if(request===seq)loading=false;if(globalQueued){globalQueued=false;loading=false;if(viewPanel==='seguimiento')loadGlobal();}}
+ }
+ function summaryFor(row){const s=summaries.get(row.key);return s&&s.balance!==officialBalance(row,globalContext.stage)?{...s,total:null,available:null}:s;}
+ function refreshSummaries(){
+  if(summaryFlight||!globalData||viewPanel!=='seguimiento')return;
+  const token=globalSession,scope=summaryScope,ctx={...globalContext},keys=globalData.orders.map(r=>r.key);let cursor=0;
+  const alive=()=>token===bridge.getToken()&&scope===summaryScope&&viewPanel==='seguimiento'&&globalData;
+  summaryFlight=(async()=>{const client=await bridge.getClient();
+   await Promise.all(Array.from({length:Math.min(3,keys.length)},async()=>{while(cursor<keys.length&&alive()){
+    const key=keys[cursor++];let summary;
+    try{const transport=affectationsTransport({client,getToken:()=>alive()?bridge.getToken():null,contractVersion:2,context:{key,line:ctx.line,stage:ctx.stage}});summary=affectationSummary(await transport.read());}
+    catch(error){if(!alive())return;if(error.message==='NO_AUTORIZADO'){++seq;loading=false;globalData=null;summaries.clear();live.replaceChildren();message.textContent='Acceso revocado. Vuelve a consultar.';return;}summary={status:'UNAVAILABLE'};}
+    if(!alive())return;summaries.set(key,summary);
+    live.querySelectorAll('[data-order-summary]').forEach(button=>{if(button.dataset.orderSummary===key){const row=globalData.orders.find(r=>r.key===key);const html=summaryMarkup(row?summaryFor(row):null);if(button.innerHTML!==html)button.innerHTML=html;}});
+   }}));
+  })().catch(()=>{}).finally(()=>{summaryFlight=null;if(scope!==summaryScope&&globalData)refreshSummaries();});
  }
  function renderGlobal(){
   if(!globalData||globalSession!==bridge.getToken())return;
   for(const sel of ['[data-week]','[data-day]','[data-shift]','[data-progress]','[data-sort]'])tracking.querySelector(sel).closest('label').hidden=true;
   for(const sel of ['[data-status]','[data-list]','[data-summary]'])tracking.querySelector(sel).hidden=true;
   get('[data-tracking-stages]').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.trackingStage===globalContext.stage)));
-  renderTracking({host:live,data:globalData,context:globalContext,state:trackingViewState,search:'',canReviewSale:true,
+  renderTracking({host:live,data:{...globalData,orders:globalData.orders.map(r=>({...r,get affectationSummary(){return summaryFor(r);}}))},context:globalContext,state:trackingViewState,search:'',canReviewSale:true,
    onDetailClose:()=>renderGlobal(),
    onAffectations:async({host,row,target})=>{
     const token=bridge.getToken(),scope=globalContext;host.textContent='Consultando afectaciones…';

@@ -26,6 +26,7 @@ on:
       - 'tests/lp01-seguimiento-incremento/**'
       - 'tests/lp01-tracking-global.test.mjs'
       - 'tests/lp01-tracking-ui/**'
+      - 'tests/lp01-summary-ui/**'
       - 'tests/lp01-afectaciones-rpc/**'
       - 'tests/lp01-affectations*.test.mjs'
       - 'tests/lp01-b12-b13/**'
@@ -204,6 +205,7 @@ jobs:
           python -m playwright install --with-deps chromium
           python tests/lp01-seguimiento-incremento/browser.py
           python tests/lp01-tracking-ui/browser.py
+          python tests/lp01-summary-ui/browser.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -213,6 +215,8 @@ jobs:
             tests/lp01-seguimiento-incremento/api-result.json
             tests/lp01-seguimiento-incremento/browser-result.json
             tests/lp01-tracking-ui/evidence/
+            tests/lp01-summary-ui/result.json
+            tests/lp01-summary-ui/evidence/
 
   affectations:
     name: Affectations native PDT, revocation and UI (isolated)

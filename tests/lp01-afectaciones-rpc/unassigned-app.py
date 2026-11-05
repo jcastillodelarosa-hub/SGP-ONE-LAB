@@ -40,10 +40,10 @@ try:
      if page.locator('#mobileMenuToggle').is_visible():page.locator('#mobileMenuToggle').click()
      page.locator('.nav [data-view="ensamble"]').click()
      if user=='COORDINADOR':
-      page.locator('#productionTrackingTab').click();page.wait_for_selector('.lp-tracking-table');page.locator('.lp-tracking-table tbody summary').first.click();page.locator('[data-tracking-tab=Materiales]').click();page.wait_for_selector('.lp-picking-pending article');assert original in page.locator('.lp-picking-pending').inner_text()
+      page.locator('#productionTrackingTab').click();page.wait_for_selector('.lp-tracking-table');page.locator('.lp-tracking-table tbody summary').first.click();page.locator('[data-tracking-tab=Materiales]').click();page.wait_for_selector('.lp-pdt-compact');assert page.locator('.lp-aluminum-pending').evaluate('(el,id)=>el.textContent.includes(id)',original)
       assert page.locator('[data-order-affectations] form').is_hidden()
       assert page.locator('[data-tracking-context] option').count()==1
-      assert 'no permite guardar SALE sin asignación' in page.locator('[data-sale-context]').inner_text()
+      assert 'corregir esa dependencia está pendiente' in page.locator('[data-sale-context]').inner_text()
       form=page.locator('[data-affect-context]');form.locator('[name=date]').fill('2026-11-01');form.locator('[name=shift]').select_option('2');form.locator('button').click()
       page.wait_for_function("document.querySelector('[data-context-status]').textContent.includes('No hay un turno')")
       assert page.locator('[data-order-affectations] form').is_hidden()
@@ -69,11 +69,11 @@ try:
       assert db.sql('SELECT count(*) FROM sgp_lp_operacion.ordenes')=='0'
       assert db.sql('SELECT count(*) FROM public.sgp_linea_plan_asignaciones')=='0'
       db.sql("UPDATE public.sgp_usuario_accesos SET permitido=false WHERE id_usuario=(SELECT id_usuario FROM public.sgp_usuarios WHERE usuario='COORDINADOR')")
-      page.clock.fast_forward(20000);page.wait_for_function("!document.querySelector('.lp-picking-pending')")
+      page.clock.fast_forward(20000);page.wait_for_function("!document.querySelector('.lp-aluminum-pending')")
      else:
       assert page.locator('#productionTrackingTab').is_hidden();page.locator('#productionAssemblyTab').click();page.locator('[data-op-date]').fill('2026-11-01');page.locator('[data-op-date]').dispatch_event('change');page.wait_for_selector('[data-order-part]:visible')
       page.locator('[data-live-orders] [data-live-operate]').first.click();page.wait_for_selector('[data-order-form]')
-      page.locator('[data-individual-affects] > summary').click();page.wait_for_selector('.lp-picking-pending article');assert original in page.locator('.lp-picking-pending').inner_text()
+      page.locator('[data-individual-affects] > summary').click();page.wait_for_selector('.lp-pdt-compact');assert page.locator('.lp-aluminum-pending').evaluate('(el,id)=>el.textContent.includes(id)',original)
       assert page.locator('[data-affect-save]').is_disabled()
       page.screenshot(path=str(HERE/f'evidence/app-operation-{width}.png'),full_page=True)
      assert not errors,errors;results.append({'width':width,'role':user,'originalPickingVisible':True,'unassignedReportSaved':True,'atomicPdtWithoutNC':True,'retryNoDuplicate':True,'assignmentsCreated':0,'closedTurnDenied':True,'draft20sPreserved':True,'existingController':True,'externalRequests':0});page.close()

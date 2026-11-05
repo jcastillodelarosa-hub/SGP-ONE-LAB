@@ -29,3 +29,10 @@ test('all-origin metadata stays order-scoped and cannot become a Picking associa
  const data=await transport(response([row])).read();assert.equal(data.aluminumPending.rows[0].origin,'PRODUCCION');assert.deepEqual(data.pickingPending.rows,[]);
  for(const changed of [{key:'OTHER'},{readOnly:false},{id:null}])await assert.rejects(transport(response([{...row,...changed}])).read(),/ALUMINIO_AMBITO_INVALIDO/);
 });
+test('NC state accepts either real identifier, rejects mismatches and rechecks LP after NC-only denial',async()=>{
+ const make=(nc)=>affectationsTransport({context,getToken:()=> 'token',client:{rpc:async()=>({data:{ok:true,nc}})}});
+ assert.equal(await make({numero:'NC1',consecutivo:'100',estado:'FINALIZADA'}).lookupNc('100'),'FINALIZADA');
+ assert.equal(await make({numero:'OTHER',estado:'FINALIZADA'}).lookupNc('100'),null);
+ let calls=0;const t=affectationsTransport({context,getToken:()=> 'token',client:{rpc:async(name)=>{calls++;return name==='sgp_pdt_manual_nc_consultar_v1'?{error:{message:'NO_AUTORIZADO'}}:{data:base};}}});
+ assert.equal(await t.lookupNc('NC1'),null);assert.equal(calls,2);
+});
