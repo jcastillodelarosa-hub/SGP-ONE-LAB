@@ -1,0 +1,18 @@
+{
+  "scope": "policy-only preparation; coordinator-supplied current GET evidence",
+  "inspection_run": 41938425351,
+  "job": 126952882628,
+  "observed_at": "2026-11-05T00:03:53.052970+00:00",
+  "version": "sites/sgp-one-lab/versions/1d4abf7aa4a92f52",
+  "status": "FINALIZED",
+  "files": 94,
+  "inventory_sha256": "24b3ac6eb974307f57507eef0957d7fb6666cad6017647fe0ff4f6028b7ea371",
+  "config_sha256": "b1c8097ce32ce29d3d39d04e54f86699c1cd013dcbfc8a4f9b89f033cadc34fd",
+  "changed_hashes": {
+    "production-line-tabs.js": "7cb31492565f71b0b64d840012f58c572b7b7f93e4a5eb66277d7daf63ffbf84",
+    "src/modules/lp01-operation.js": "77ba6d9e8269a06a8aa19eaedc17b5b5cdca63d8a2b8f654c0da560a2f654b27"
+  },
+  "version_label": "LAB v381",
+  "gate_transition": "HOLD / POLICY_TRANSITION_REQUIRES_EXPLICIT_REVIEW",
+  "deployment": "not executed"
+}

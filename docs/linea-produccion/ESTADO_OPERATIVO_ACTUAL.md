@@ -1,5 +1,23 @@
 # Línea de Producción — estado operativo actual
 
+## PR193 · política preparada sobre vidrio publicado · 05/11/2026
+
+Inspección GET confirmada por el coordinador de publicación:
+[run41938425351](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/actions/runs/41938425351),
+job126952882628, observación `2026-11-05T00:03:53.052970+00:00`.
+Versión `sites/sgp-one-lab/versions/1d4abf7aa4a92f52`, FINALIZED, 94 archivos;
+inventario SHA256 `24b3ac6eb974307f57507eef0957d7fb6666cad6017647fe0ff4f6028b7ea371`,
+config SHA256 `b1c8097ce32ce29d3d39d04e54f86699c1cd013dcbfc8a4f9b89f033cadc34fd`.
+Coincide con #192; baseline/rollback fijados a esa versión para preservar vidrio.
+Política: integration_pr193 y solo huellas de production-line-tabs.js y
+src/modules/lp01-operation.js actualizadas; verificadores y restricciones intactos.
+LAB v381 sin cambios: misma entrega aún no publicada. Política/postcheck/release
+local PASS. La transición main→candidato mantiene HOLD; prepare solo construye.
+CI del SHA nuevo es obligatoria, no se acredita con resultados de 44ad1e7.
+Sin merge, dispatch, despliegue ni datos: los coordina únicamente el hilo principal.
+Siguiente: completar CI del nuevo SHA y entregar artefacto/pins al coordinador.
+
+
 ## Seguimiento · versión LAB v380 → LAB v381 · 04/11/2026
 
 Norma explícita de Johan: incrementar versión en cada entrega. Main `9e4a8ec`
