@@ -28,6 +28,12 @@ on:
       - 'tests/lp01-tracking-ui/**'
       - 'tests/lp01-afectaciones-rpc/**'
       - 'tests/lp01-affectations*.test.mjs'
+      - 'tests/lp01-b12-b13/**'
+      - 'tests/lp01-operation-orders.test.mjs'
+      - 'src/modules/lp01-operation-orders.js'
+      - 'src/modules/lp01-proposal.js'
+      - 'src/services/lp01-operation-evidence.js'
+      - 'docs/sql-proposals/lp01-propuestas/**'
       - 'docs/sql-proposals/lp01-afectaciones/**'
       - 'src/modules/lp01-affectations-panel.js'
       - 'src/services/lp01-affectations.js'
@@ -256,3 +262,45 @@ jobs:
           path: |
             tests/lp01-afectaciones-rpc/*result.json
             tests/lp01-afectaciones-rpc/evidence/
+
+  operation-b12-b13:
+    name: B12 B13 assignment capture and disabled proposal (isolated)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm install --no-package-lock --no-audit --no-fund
+      - run: npm run build:vendor
+      - run: docker pull postgres:17.11
+      - run: pip install playwright==1.62.0
+      - run: python -m playwright install --with-deps chromium
+      - name: Remove previous synthetic results
+        run: |
+          python - <<'PYTHON'
+          from pathlib import Path
+          root=Path('tests/lp01-b12-b13')
+          for path in root.glob('*result.json'):path.unlink()
+          for path in (root/'evidence').glob('*.png'):path.unlink()
+          PYTHON
+      - name: Contracts, real application and representative volume
+        run: |
+          node --test tests/lp01-operation-orders.test.mjs
+          python tests/lp01-b12-b13/proposal.py
+          python tests/lp01-b12-b13/browser.py
+          node tests/lp01-b12-b13/performance.mjs
+          python tests/lp01-b12-b13/dom-performance.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lp01-b12-b13-synthetic-evidence
+          path: |
+            tests/lp01-b12-b13/*result.json
+            tests/lp01-b12-b13/evidence/

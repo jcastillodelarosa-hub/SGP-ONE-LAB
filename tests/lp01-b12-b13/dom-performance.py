@@ -10,7 +10,7 @@ server=http.server.ThreadingHTTPServer(('127.0.0.1',0),Files);threading.Thread(t
 results=[]
 try:
  with sync_playwright() as p:
-  browser=p.chromium.launch(executable_path='/usr/bin/chromium',args=['--no-sandbox'])
+  browser=p.chromium.launch(executable_path='/usr/bin/chromium' if Path('/usr/bin/chromium').exists() else None,args=['--no-sandbox'])
   for width in [1440,390]:
    page=browser.new_page(viewport={'width':width,'height':950})
    page.route('**/*',lambda r:r.continue_() if r.request.url.startswith(origin) else r.abort())

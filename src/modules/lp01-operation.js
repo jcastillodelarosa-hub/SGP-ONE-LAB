@@ -29,7 +29,7 @@ export function mountOperation({tracking,operation,bridge,legacyLoad}){
  const coordinator=()=>['COORDINADOR','ADMINISTRADOR'].includes(data?.role);
  const writeCompatible=()=>data?.writeContract==='LP-OPERACION-CAS-2';
  const writable=()=>writeCompatible()&&data?.writes&&(!data.operations||data.operations.includes('EJECUTAR'))&&data?.role!=='CONSULTA'&&data?.turn.estado!=='CERRADO'&&(data?.turn.estado!=='EN_REVISION'||coordinator());
- async function rpc(name,args,{signal}={}){const token=bridge.getToken();if(!token)throw Error('Inicia sesión para consultar');const client=await bridge.getClient();let query=client.rpc(name,{p_token:token,...args});if(signal)query=query.abortSignal(signal);const r=await query;if(r.error)throw r.error;return r.data;}
+ async function rpc(name,args,{signal}={}){const token=bridge.getToken();if(!token)throw Error('Inicia sesión para consultar');const client=await bridge.getClient();let query=client.rpc(name,{p_token:token,...args});if(signal&&typeof query.abortSignal==='function')query=query.abortSignal(signal);const r=await query;if(r.error)throw r.error;return r.data;}
  function globalControls(global){
   // The shared controls remain available in Ensamble/Empaque, outside Seguimiento.
   tracking.querySelector('.lp-followup-heading').hidden=global;

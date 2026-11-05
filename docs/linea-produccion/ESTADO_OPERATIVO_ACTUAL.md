@@ -1,3 +1,14 @@
+## PR195 · compatibilidad de aceptación existente · 05/11/2026
+
+Adaptadas pruebas de Power BI, cierres integrados y fuentes al acceso directo B12,
+seleccionando explícitamente la misma asignación por identidad (sin cambiar aserciones
+cuantitativas/de permisos/cierre). Las tres baterías PC/móvil PostgreSQL aislado PASS.
+Añadido job CI aislado B12/B13 con contratos, aplicación, propuesta deshabilitada,
+rendimiento50/200/500 y artefactos sintéticos; contents:read, sin credenciales ni deploy.
+490 Node/release383 PASS. No cambios en workflows Hosting ni política ni producción.
+El SHA anterior tiene Tests/sintaxis verdes; aceptación completa debe corresponder
+al HEAD nuevo. Evidencia local: tests/lp01-b12-b13/regression-result.json.
+
 ## LAB v383 · revisión, rendimiento y preflight · 05/11/2026
 
 Revisión independiente cerró4 hallazgos: vínculos Picking de otra etapa no prueban

@@ -2,6 +2,8 @@
 from pathlib import Path
 import sys,json,http.server,threading,subprocess,base64,hashlib
 from playwright.sync_api import sync_playwright
+sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'lp01-b12-b13'))
+from navigation import open_assignment
 from isolated import ClosureDB,ROOT,lit
 HERE=Path(__file__).parent;OUT=HERE/'evidence';PBI=ROOT/'tests/lp01-powerbi'
 SOURCES={s:PBI/'fixtures'/f'{s.lower()}.xlsx' for s in ['ENSAMBLE','EMPAQUE']}
@@ -41,7 +43,7 @@ def run(page,db,stage,origin,endpoint,width):
   document.querySelector('[data-op-date]').value='2026-10-31';document.querySelector('[data-op-stage]').value=stage;
  }''',{'stage':stage,'endpoint':endpoint})
  page.locator('#productionPackingTab' if page.locator('[data-op-stage]').input_value()=='EMPAQUE' else '#productionAssemblyTab').click();page.wait_for_selector('[data-live-operate]',state='attached')
- page.locator(f'[data-order-part="{roots[0]}"] summary').click();page.locator(f'[data-live-operate="{roots[0]}"]').click()
+ open_assignment(page,roots[0])
  page.locator('[data-executed]').fill(str(total//2));page.locator('[data-operation-note]').fill('QA acumulado corregido')
  page.locator('[data-order-form] button[type=submit]').click();confirmed(page)
  assert sum(x['ejecutado'] for x in db.snapshot(stage,date=ctx['date'])['orders'] if x['key']==target)==total-1
@@ -70,7 +72,7 @@ def run(page,db,stage,origin,endpoint,width):
  page.screenshot(path=str(OUT/f'sql08-{stage.lower()}-{width}.png'))
  # Reopen from the actual coordinator UI and preserve the first immutable version.
  page.evaluate("window.qaRole='COORDINADOR'");page.locator('#productionPackingTab' if page.locator('[data-op-stage]').input_value()=='EMPAQUE' else '#productionAssemblyTab').click()
- page.wait_for_selector('[data-live-operate]',state='attached');page.locator(f'[data-order-part="{roots[0]}"] summary').click();page.locator(f'[data-live-operate="{roots[0]}"]').click()
+ page.wait_for_selector('[data-live-operate]',state='attached');open_assignment(page,roots[0])
  page.locator('[data-close-note]').fill('QA reapertura autorizada');page.locator('[data-reopen]').click();confirmed(page)
  assert len(db.snapshot(stage,date=ctx['date'])['reports'])==1
  # Previous XLSX remains immutable: reselect it; importing in review as coordinator reuses its content.
