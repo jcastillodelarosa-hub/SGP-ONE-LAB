@@ -1,0 +1,258 @@
+[
+  {
+    "schema": "public",
+    "proname": "sgp_pdt_registrar_v4",
+    "arguments": "p_token text, p_origen text, p_contexto jsonb, p_piezas jsonb, p_idempotency_key uuid",
+    "body_md5": "c161750f1cec8f48896b9b2462c86d53",
+    "definition_md5": "d7354f82a8975fd84eb312f760e957be",
+    "security_definer": true,
+    "volatility": "v",
+    "proconfig": [
+      "search_path=\"\""
+    ],
+    "owner": "postgres",
+    "anon_execute": true,
+    "authenticated_execute": true,
+    "public_execute": false
+  },
+  {
+    "schema": "public",
+    "proname": "sgp_pdt_registro_fuentes_v4",
+    "arguments": "p_token text, p_origen text, p_contexto jsonb",
+    "body_md5": "e19fb3c3380aa601a1d50dd1b0dc8d3e",
+    "definition_md5": "796475ed306c013d56555d34f901c7a5",
+    "security_definer": true,
+    "volatility": "v",
+    "proconfig": [
+      "search_path=\"\""
+    ],
+    "owner": "postgres",
+    "anon_execute": true,
+    "authenticated_execute": true,
+    "public_execute": false
+  },
+  {
+    "schema": "public",
+    "proname": "sgp_pdt_validar_rol_real",
+    "arguments": "p_token text, p_roles text[]",
+    "body_md5": "107715139254fc1afc7f6b886cc27f47",
+    "definition_md5": "30a705f967c3b726b5440e07753f32b1",
+    "security_definer": true,
+    "volatility": "v",
+    "proconfig": [
+      "search_path=\"\""
+    ],
+    "owner": "postgres",
+    "anon_execute": false,
+    "authenticated_execute": false,
+    "public_execute": false
+  },
+  {
+    "schema": "public",
+    "proname": "sgp_picking_piezas_panel",
+    "arguments": "p_token text, p_id_programacion uuid, p_produccion text",
+    "body_md5": "3d01198c65962e659b219e946b5440ac",
+    "definition_md5": "413270cea600f8092572376722c2a285",
+    "security_definer": true,
+    "volatility": "v",
+    "proconfig": [
+      "search_path=\"\""
+    ],
+    "owner": "postgres",
+    "anon_execute": true,
+    "authenticated_execute": true,
+    "public_execute": true
+  },
+  {
+    "schema": "public",
+    "proname": "sgp_sesion_actual",
+    "arguments": "p_token text",
+    "body_md5": "79efd30d18eac0950907b5248a2c79d5",
+    "definition_md5": "e964ea0d6f9af2c88010542cd3c84f9e",
+    "security_definer": true,
+    "volatility": "v",
+    "proconfig": [
+      "search_path=public"
+    ],
+    "owner": "postgres",
+    "anon_execute": true,
+    "authenticated_execute": true,
+    "public_execute": false
+  },
+  {
+    "schema": "sgp_lp_operacion",
+    "proname": "admitir",
+    "arguments": "",
+    "body_md5": "dba0559912a5d2351aa7028cbad9379e",
+    "definition_md5": "3794f2d755ceb0dab4e102dce18e838c",
+    "security_definer": false,
+    "volatility": "v",
+    "proconfig": [
+      "search_path=\"\""
+    ],
+    "owner": "postgres",
+    "anon_execute": false,
+    "authenticated_execute": false,
+    "public_execute": false
+  },
+  {
+    "schema": "sgp_lp_operacion",
+    "proname": "contener_ambitos",
+    "arguments": "",
+    "body_md5": "4bd286da759a7f14d9bb0b49dd9fff16",
+    "definition_md5": "bc0bd8286331402ac960a0ae1dd3a7b3",
+    "security_definer": false,
+    "volatility": "v",
+    "proconfig": [
+      "search_path=\"\""
+    ],
+    "owner": "postgres",
+    "anon_execute": false,
+    "authenticated_execute": false,
+    "public_execute": false
+  },
+  {
+    "schema": "sgp_lp_operacion",
+    "proname": "operaciones_rol",
+    "arguments": "r text, et text",
+    "body_md5": "69274f528a2fed8001da535856649036",
+    "definition_md5": "dd5e12ebe66a594ab8574c105a8e9a57",
+    "security_definer": false,
+    "volatility": "i",
+    "proconfig": [
+      "search_path=\"\""
+    ],
+    "owner": "postgres",
+    "anon_execute": false,
+    "authenticated_execute": false,
+    "public_execute": false
+  },
+  {
+    "schema": "sgp_lp_operacion",
+    "proname": "permisos_en_periodo",
+    "arguments": "d date, t integer",
+    "body_md5": "2bcf1551c9de003898e4bf663fe544b6",
+    "definition_md5": "44bd9e5b2e23440bc85350d6834dd4de",
+    "security_definer": false,
+    "volatility": "v",
+    "proconfig": [
+      "search_path=\"\""
+    ],
+    "owner": "postgres",
+    "anon_execute": false,
+    "authenticated_execute": false,
+    "public_execute": false
+  },
+  {
+    "schema": "sgp_lp_operacion",
+    "proname": "puede_operar",
+    "arguments": "u text, et text, op text",
+    "body_md5": "b0b7459a0be0a7ea5a4a392eecb2afde",
+    "definition_md5": "45288fff62b8afc504a5373f9c4d18f2",
+    "security_definer": false,
+    "volatility": "s",
+    "proconfig": [
+      "search_path=\"\""
+    ],
+    "owner": "postgres",
+    "anon_execute": false,
+    "authenticated_execute": false,
+    "public_execute": false
+  },
+  {
+    "schema": "sgp_lp_operacion",
+    "proname": "saldo",
+    "arguments": "k text, et text",
+    "body_md5": "78d6a385538d622eeb03c699f575eaeb",
+    "definition_md5": "0a6865e2b9d0b52496cca19428415888",
+    "security_definer": false,
+    "volatility": "v",
+    "proconfig": [
+      "search_path=\"\""
+    ],
+    "owner": "postgres",
+    "anon_execute": false,
+    "authenticated_execute": false,
+    "public_execute": false
+  },
+  {
+    "schema": "sgp_lp_operacion",
+    "proname": "sesion",
+    "arguments": "token text, et text, k text, line_id text",
+    "body_md5": "f06e86fb101d602de053faa50d6696b3",
+    "definition_md5": "89485fa3a179f0494e3fb5e335191502",
+    "security_definer": true,
+    "volatility": "v",
+    "proconfig": [
+      "search_path=\"\""
+    ],
+    "owner": "postgres",
+    "anon_execute": false,
+    "authenticated_execute": false,
+    "public_execute": false
+  },
+  {
+    "schema": "sgp_lp_operacion",
+    "proname": "verificar_temporal",
+    "arguments": "u text, et text, ln text, d date, t integer, k text, op text",
+    "body_md5": "c39ce5692affad2b1edc4a7dbf66faf2",
+    "definition_md5": "847fb9fa10ce716cf01d41487bbd9275",
+    "security_definer": false,
+    "volatility": "v",
+    "proconfig": [
+      "search_path=\"\""
+    ],
+    "owner": "postgres",
+    "anon_execute": false,
+    "authenticated_execute": false,
+    "public_execute": false
+  },
+  {
+    "schema": "sgp_pdt_multiorigen",
+    "proname": "actor",
+    "arguments": "p_token text, p_origen text",
+    "body_md5": "17dbf094c2e0c5fc86239e3fcec3a07c",
+    "definition_md5": "0135538938cabe8e2466df05e9499e30",
+    "security_definer": true,
+    "volatility": "v",
+    "proconfig": [
+      "search_path=\"\""
+    ],
+    "owner": "postgres",
+    "anon_execute": false,
+    "authenticated_execute": false,
+    "public_execute": false
+  },
+  {
+    "schema": "sgp_pdt_multiorigen",
+    "proname": "fuentes",
+    "arguments": "p_token text, p_origen text, p_contexto jsonb",
+    "body_md5": "7cca133124fdb1fc47360994dc102ad3",
+    "definition_md5": "0a993414a14276ef57245cbcbf96f89b",
+    "security_definer": true,
+    "volatility": "v",
+    "proconfig": [
+      "search_path=\"\""
+    ],
+    "owner": "postgres",
+    "anon_execute": false,
+    "authenticated_execute": false,
+    "public_execute": false
+  },
+  {
+    "schema": "sgp_pdt_multiorigen",
+    "proname": "registrar",
+    "arguments": "p_token text, p_origen text, p_contexto jsonb, p_piezas jsonb, p_evento uuid, p_entrega uuid",
+    "body_md5": "2c9da616eb830fd6db20973e9bec4155",
+    "definition_md5": "c3b6e78ead504f407d89c88f127c2899",
+    "security_definer": true,
+    "volatility": "v",
+    "proconfig": [
+      "search_path=\"\""
+    ],
+    "owner": "postgres",
+    "anon_execute": false,
+    "authenticated_execute": false,
+    "public_execute": false
+  }
+]

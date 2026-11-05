@@ -1,5 +1,18 @@
 # Línea de Producción — estado operativo actual
 
+## LAB v382 · contraste SQL productivo SOLO LECTURA · 05/11/2026
+
+Autorizadas y realizadas consultas BEGIN READ ONLY/ROLLBACK, sin filas individuales.
+13/16 cuerpos seleccionados coinciden con fixture; LP roles/locks/temporal coinciden.
+HOLD: wrapper PDT actual c161750f deriva a legacy8c501e2 y añade Picking parcial;
+fuentes/listado Picking difieren también. SQL03 actual falla cerrado; pins intactos.
+136 pendientes:77 LEGACY (16 sin key),59 V2 (41 con ledger nativo,13 manuales,5 otros).
+120 candidatos lectura por key. Join136→136 sin IDs duplicados; no prueba ausencia de
+duplicados semánticos. ACL privadas niegan acceso API; tablas públicas RLS sin políticas.
+No cambios productivos, grants ni publicación. Evidencia/plan exacto:
+docs/sql-proposals/lp01-afectaciones/CONTRASTE_PRODUCTIVO.md. Siguiente: probar cadena
+PDT vigente aislada, revisión/pins/manifest, luego coordinar instalación contenida.
+
 ## LAB v382 · revalidación concurrente corregida · 05/11/2026
 
 Prueba PostgreSQL aislada reproduce CADUCIDAD de permiso temporal mientras espera

@@ -1,5 +1,9 @@
 # LAB v382 — revisión y plan de activación, 05/11/2026
 
+Actualización posterior autorizada: [contraste SQL productivo de solo lectura](CONTRASTE_PRODUCTIVO.md).
+Sus hallazgos sustituyen las incógnitas de metadatos siguientes; el HOLD continúa por
+diferencias reales del contrato PDT, no por ausencia de autorización para leer.
+
 **HOLD para escrituras y publicación.** Candidato revisado:
 `ee2f8de4fbf8773939b56f18c589d77907715f3f`. La revisión inicial del mismo agente fue complementada por el agente independiente
 `review_reconciliation`; revisó el diff y las pruebas sin editar ni acceder a producción.
