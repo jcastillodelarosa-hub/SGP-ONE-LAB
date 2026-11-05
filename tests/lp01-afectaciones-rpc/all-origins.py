@@ -37,7 +37,7 @@ try:
  server=http.server.ThreadingHTTPServer(('127.0.0.1',0),Files);threading.Thread(target=server.serve_forever,daemon=True).start();origin=f'http://127.0.0.1:{server.server_port}'
  results=[]
  with sync_playwright() as pw:
-  browser=pw.chromium.launch(executable_path='/usr/bin/chromium',args=['--no-sandbox'])
+  browser=pw.chromium.launch(executable_path='/usr/bin/chromium' if Path('/usr/bin/chromium').exists() else None,args=['--no-sandbox'])
   for width in [1440,390]:
    page=browser.new_page(viewport={'width':width,'height':900});page.route('**/*',lambda r:r.continue_() if r.request.url.startswith(origin) else r.abort());page.route('**/qa.html',lambda r:r.fulfill(content_type='text/html',body='<html><meta name=viewport content="width=device-width, initial-scale=1"><link rel=stylesheet href=/styles.css><body></body></html>'));page.goto(origin+'/qa.html')
    page.evaluate("async snapshot=>{document.body.innerHTML='<main id=qa></main>';const {mountAffectationsPanel}=await import('/src/modules/lp01-affectations-panel.js');snapshot.capabilities=['READ'];await mountAffectationsPanel(document.querySelector('#qa'),{read:async()=>snapshot});}",snap)

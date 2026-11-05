@@ -81,3 +81,13 @@ Resultado reproducible: tests/lp01-afectaciones-rpc/all-origins-result.json y
 unassigned-app-result.json; capturas sintéticas en su carpeta evidence.
 Documentación Supabase consultada: https://supabase.com/docs/guides/database/functions
 (changelog.md no legible por herramienta web; no cambia firmas Supabase de cliente).
+
+## Preflight productivo de lectura · 05/11/2026
+
+Supabase BEGIN READ ONLY / ROLLBACK: lectorv2 conserva baselineMD5,
+ownerpostgres, SECURITY DEFINER, search_path vacío exacto y ACL postgres+anon
+sin grantoption. Las18 columnas requeridas están presentes con tipos compatibles.
+Dependencias actor/lectorv1/validadorrol inventariadas en production-preflight.json;
+sin nuevas concesiones, filas de negocio consultadas ni cambios productivos.
+Workflow de aceptación incorpora ambos ensayos nuevos en PostgreSQL aislado;
+Chromium usa binario local o el instalado por Playwright en CI.
