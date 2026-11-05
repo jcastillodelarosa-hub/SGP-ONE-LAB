@@ -37,7 +37,7 @@ try:
      except Exception as e:result={'data':None,'error':{'message':str(e)}}
      route.fulfill(status=200,content_type='application/json',body=json.dumps(result))
     page.route('**/rpc/*',rpc);page.goto(origin+'/tests/lp01-afectaciones-rpc/native-fixture.html')
-    page.wait_for_selector('.lp-pdt-compact');assert page.locator('.lp-aluminum-pending').evaluate('(el,id)=>el.textContent.includes(id)',original);assert page.locator('.lp-aluminum-pending').evaluate('(el)=>el.textContent.includes("E17")')
+    page.wait_for_selector('.lp-pdt-compact');assert any(r['id']==original for r in (x.read2().get('aluminumPending') or x.read2()['pickingPending'])['rows']);assert not page.locator('.lp-aluminum-pending').evaluate('(el,id)=>el.textContent.includes(id)',original);assert page.locator('.lp-aluminum-pending').evaluate('(el)=>el.textContent.includes("E17")')
     page.locator('[name=cause]').select_option('NC_AL');page.locator('[name=aluminumSource]').select_option('new');page.locator('[data-ref]').select_option('PANEL-REF')
     index=page.evaluate("[...document.querySelectorAll('[data-source-radio]')].findIndex(n=>{const a=JSON.parse(n.dataset.sourceRadio);return a[2]==='P1'&&a[1]==='R'})")
     assert index>=0;page.locator('[data-source-radio]').nth(index).check();page.locator('[data-qty]').fill('2');page.locator('[data-nc]').fill('' if width==1440 else 'QA-NC');assert not page.locator('[data-nc]').evaluate('(e)=>e.required')

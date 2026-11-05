@@ -1,0 +1,337 @@
+{
+  "date": "2026-11-05",
+  "project": "ocvxbwzqxbrfndkvjmfx",
+  "scope": "BEGIN TRANSACTION READ ONLY / ROLLBACK; catalog only, no business rows",
+  "data": [
+    {
+      "table_name": "sgp_accesorios",
+      "column_name": "id_accesorio",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_accesorios",
+      "column_name": "id_carga",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_accesorios",
+      "column_name": "fila_origen",
+      "data_type": "integer",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_accesorios",
+      "column_name": "id",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_accesorios",
+      "column_name": "key_produccion",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_accesorios",
+      "column_name": "estado_relacion_produccion",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_accesorios",
+      "column_name": "codigo_sap",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_accesorios",
+      "column_name": "descripcion",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_accesorios",
+      "column_name": "cantidad",
+      "data_type": "numeric",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_accesorios",
+      "column_name": "unidad",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_accesorios",
+      "column_name": "sistema",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_accesorios",
+      "column_name": "produccion",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_accesorios",
+      "column_name": "id_orden",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_accesorios",
+      "column_name": "orden_co",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_accesorios",
+      "column_name": "linea",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_accesorios",
+      "column_name": "semana",
+      "data_type": "integer",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_accesorios",
+      "column_name": "anio",
+      "data_type": "integer",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_accesorios",
+      "column_name": "fuente",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_accesorios",
+      "column_name": "fecha_carga",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_accesorios",
+      "column_name": "activo",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_nc_vidrio",
+      "column_name": "consecutivo",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_nc_vidrio",
+      "column_name": "semana_prod",
+      "data_type": "integer",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_nc_vidrio",
+      "column_name": "semana_maestro",
+      "data_type": "integer",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_nc_vidrio",
+      "column_name": "anio",
+      "data_type": "integer",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_nc_vidrio",
+      "column_name": "tipo_pvc",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_nc_vidrio",
+      "column_name": "fecha_repo",
+      "data_type": "date",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_nc_vidrio",
+      "column_name": "codigo_qr",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_nc_vidrio",
+      "column_name": "proyecto",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_nc_vidrio",
+      "column_name": "orden",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_nc_vidrio",
+      "column_name": "oves",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_nc_vidrio",
+      "column_name": "orden_sap",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_nc_vidrio",
+      "column_name": "oves_repo",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_nc_vidrio",
+      "column_name": "orden_repo",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_nc_vidrio",
+      "column_name": "item",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_nc_vidrio",
+      "column_name": "estado_nc",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_nc_vidrio",
+      "column_name": "cant_dia",
+      "data_type": "numeric",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_nc_vidrio",
+      "column_name": "cant_repo",
+      "data_type": "numeric",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_nc_vidrio",
+      "column_name": "cant_recibida",
+      "data_type": "numeric",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_nc_vidrio",
+      "column_name": "mt_nc",
+      "data_type": "numeric",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_nc_vidrio",
+      "column_name": "linea_responsable",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_nc_vidrio",
+      "column_name": "linea_afectada",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_nc_vidrio",
+      "column_name": "linea_despacho",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_nc_vidrio",
+      "column_name": "sistema",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_nc_vidrio",
+      "column_name": "motivo",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_nc_vidrio",
+      "column_name": "estado_auditado",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_nc_vidrio",
+      "column_name": "fecha_auditada",
+      "data_type": "date",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_nc_vidrio",
+      "column_name": "fecha_aprobacion_sap",
+      "data_type": "date",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_nc_vidrio",
+      "column_name": "fecha_aprobacion_repo",
+      "data_type": "date",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_nc_vidrio",
+      "column_name": "fecha_auditoria",
+      "data_type": "date",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_nc_vidrio",
+      "column_name": "fecha_generacion_nc",
+      "data_type": "date",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_nc_vidrio",
+      "column_name": "turno",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "sgp_nc_vidrio",
+      "column_name": "datos_origen",
+      "data_type": "jsonb",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_nc_vidrio",
+      "column_name": "activo",
+      "data_type": "boolean",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_nc_vidrio",
+      "column_name": "fecha_actualizacion",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "sgp_nc_vidrio",
+      "column_name": "id_lote",
+      "data_type": "uuid",
+      "is_nullable": "YES"
+    }
+  ]
+}

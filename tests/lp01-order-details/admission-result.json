@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "scope": "Directed isolated PostgreSQL17.11 synthetic admission tests only",
+  "checks": [
+    "Three disabled flag combinations suppress NOTE and reject write without persistence",
+    "Both flags true permits note",
+    "Actual note transaction holds global and local flag locks; concurrent shutdown waits",
+    "After shutdown, reads remain available and even previously successful UUID retries are denied"
+  ]
+}

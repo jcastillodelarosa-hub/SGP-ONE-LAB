@@ -1,3 +1,78 @@
+## PR203 · candidata v393 sellada · 05/11/2026
+
+Baseline/rollback: v392 sites/sgp-one-lab/versions/8e49cd70f0182107,
+publicación acreditada por coordinación en run 42101547385 sobre main 0529673.
+Versión393, integration_pr203, 16 pins intactos y transición HOLD verificada.
+Esperar CI exacta e integrar desde PR; preparar ZIP oficial y detener en HOLD
+para revisión independiente. Backend ya activo: no repetir SQL.
+
+## PR203 · rebase sobre Disponible v392 · 05/11/2026
+
+Base main 0529673; editor compacto y modal/refresco de Disponible preservados.
+Conflictos resueltos en tracking, pruebas y estado documental. Paquete SQL y
+readback de activación sin cambios; no repetir instalación. Copy Historial
+simplificado y textos nuevos usan Disponible. Versión candidata, baseline,
+rollback y policy pendientes de Hosting final v392 y coordinación; no publicar.
+
+## PR203 · backend autorizado activado; Historial por etapa · 05/11/2026
+
+Backend INSTALADO/HABILITADO en ocvxbwzqxbrfndkvjmfx tras autorización específica.
+Paquete SHA256 sin cambios, preflight PASS; 01 y 02 instalados, seis funciones
+coinciden con manifest/owner/search_path/ACL; 03 activa solo bandera local y
+EXECUTE a anon para cuatro RPC. Readback y banderas existentes sin cambios en
+production-activation-evidence.json. Sin notas/NC/reportes de prueba productivos.
+Frontend NO PUBLICADO: Historial muestra registros por fecha/turno de la etapa,
+sin saldo Export ni real conciliado inventado. Contexto para gestionar solo en
+Historial; fuera del detalle habitual. Esperar main de Disponible para rebase.
+
+## PR203 · pestañas y observación conectadas · 05/11/2026
+
+IMPLEMENTADO EN RAMA sobre v391; no fusionado, SQL no aplicado, no publicado.
+Seis pestañas B10, observación global con CAS, cálculo exacto Export, NC manual
+múltiple. Backend ausente bloquea guardado. Accesorios/vínculo NC verificado
+siguen pendientes de contrato. Contextos plegados por acción, sin asignación
+obligatoria para afectar. UUID/contrato retirados solo de la tarjeta pendiente.
+Coordinación inspeccionó originales y autorizó especificación textual; capturas
+propias en tests/lp01-order-details/evidence. Revisión contra originales: padre.
+Pruebas sintéticas PC/móvil y PostgreSQL dirigidas documentadas en README del
+contrato. Rounding sin decidir; no cuantificar ni sumar Tecno calculado.
+Pendiente rebase con Disponible y versión libre, revisión SQL/ACL/bandera nueva.
+Preservados editor SALE, pins y HOLD. Export previo archivado sin repetir consulta.
+
+## PR203 · revisión base de borrador preservada · 05/11/2026
+
+Corregido refresco que adoptaba revisión nueva mientras conservaba texto viejo.
+`draftRevision` permanece en r1 al leer r2; guardar devuelve conflicto CAS.
+Prueba puntual nueva PASS: A/B/refresco/rechazo y descarte explícito para retomar r2.
+No SQL ni UI modificados. Evidencia anterior reutilizada; CI del SHA final pendiente.
+
+## PR203 · contratos fuente y brechas · 05/11/2026
+
+Revisión dirigida de catálogo READ ONLY/ROLLBACK, sin datos de negocio:
+NC vidrio tiene consulta semanal y PK consecutivo, sin key producción/línea;
+no se encontró enlace LP verificado. Accesorios tiene materiales, no causa LP.
+Aluminio/PDT usa identidad original; no sumar las vistas separadas.
+Permisos y brechas en docs/sql-proposals/lp01-order-details/CONTRACT_GAPS.md.
+Library image_file devolvió OCR/punteros sin píxeles renderizados aquí; no nueva
+transferencia ni evasión. PR203 sigue parcial; UI y vínculo NC verificado pendientes.
+Pruebas previas válidas para código intacto; este incremento solo documenta evidencia.
+Siguiente: resolver inspección visual soportada y revisar adaptador NC canónico.
+
+## Observación por orden / Tecno / NC · contratos aislados · 05/11/2026
+
+Rama feat/seguimiento-order-details, base main90518a0 (PR202 preservado).
+Nota canónica producción/línea con CAS, UUID, auditoría y permisos NOTA existentes;
+lector independiente Export exacto; referencia NC_V manual atómica y no verificada.
+SQL REVIEW sin grants, flag false; ningún SQL/dato/permiso/flag productivo modificado.
+9 pruebas Node y PostgreSQL17.11 sintético PASS (nota y NC). Sin sesión productiva.
+Bocetos Library resueltos pero descarga helper falló, incluido único reintento de
+Tecno-observacion-1: píxeles no accesibles. UI/pestañas/PC-móvil/capturas pendientes;
+no se integra layout supuesto ni se promete guardado. Módulos nuevos aún no conectados.
+SALE, versión visible391, pins/HOLD intactos; versión funcional próxima por coordinar.
+Detalle y referencias: docs/sql-proposals/lp01-order-details/README.md.
+Siguiente: materializar e inspeccionar bocetos para integrar vistas y probarlas.
+IMPLEMENTADO EN RAMA parcialmente / SQL PROPUESTO; no fusionado/aplicado/publicado.
+
 ## Recepción A/C · candidata v388 en rama · 05/11/2026
 
 Base main `2ed9f8e9d485bde1c66b0a14632dc0c908b0d0fb` (B10 v387/PR198).

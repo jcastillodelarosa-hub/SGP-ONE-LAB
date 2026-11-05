@@ -1,0 +1,22 @@
+-- REVIEW ONLY: separate explicit approval required. Run only after both definition scripts.
+BEGIN;
+SET LOCAL search_path='';SET LOCAL lock_timeout='5s';SET LOCAL statement_timeout='30s';
+DO $$ BEGIN
+ IF current_user<>'postgres' THEN RAISE EXCEPTION 'OWNER_REQUIRED';END IF;
+ IF NOT EXISTS(SELECT 1 FROM pg_proc p WHERE p.oid=to_regprocedure('public.sgp_lp_glass_nc_read_v1(text,text,text)') AND md5(pg_get_functiondef(p.oid))='7e209230aa86eef8384a8dd61825c679' AND pg_get_userbyid(p.proowner)='postgres') THEN RAISE EXCEPTION 'DEFINITION_OR_OWNER_DRIFT: %','public.sgp_lp_glass_nc_read_v1(text,text,text)';END IF;
+ IF NOT EXISTS(SELECT 1 FROM pg_proc p WHERE p.oid=to_regprocedure('public.sgp_lp_glass_nc_report_v1(text,text,text,date,integer,jsonb,text)') AND md5(pg_get_functiondef(p.oid))='189939b87c16beded54ebd5d1add5da6' AND pg_get_userbyid(p.proowner)='postgres') THEN RAISE EXCEPTION 'DEFINITION_OR_OWNER_DRIFT: %','public.sgp_lp_glass_nc_report_v1(text,text,text,date,integer,jsonb,text)';END IF;
+ IF NOT EXISTS(SELECT 1 FROM pg_proc p WHERE p.oid=to_regprocedure('sgp_lp_order_details.authorize(text,text,text,text)') AND md5(pg_get_functiondef(p.oid))='53847dde3096fabda625887b526ab1ac' AND pg_get_userbyid(p.proowner)='postgres') THEN RAISE EXCEPTION 'DEFINITION_OR_OWNER_DRIFT: %','sgp_lp_order_details.authorize(text,text,text,text)';END IF;
+ IF NOT EXISTS(SELECT 1 FROM pg_proc p WHERE p.oid=to_regprocedure('sgp_lp_order_details.immutable()') AND md5(pg_get_functiondef(p.oid))='3174b4c1228b6ec6a2535b50fa5a0b54' AND pg_get_userbyid(p.proowner)='postgres') THEN RAISE EXCEPTION 'DEFINITION_OR_OWNER_DRIFT: %','sgp_lp_order_details.immutable()';END IF;
+ IF NOT EXISTS(SELECT 1 FROM pg_proc p WHERE p.oid=to_regprocedure('public.sgp_lp_order_details_read_v1(text,text,text)') AND md5(pg_get_functiondef(p.oid))='c87269c40a2fd92d9d5c0927aa52fb3a' AND pg_get_userbyid(p.proowner)='postgres') THEN RAISE EXCEPTION 'DEFINITION_OR_OWNER_DRIFT: %','public.sgp_lp_order_details_read_v1(text,text,text)';END IF;
+ IF NOT EXISTS(SELECT 1 FROM pg_proc p WHERE p.oid=to_regprocedure('public.sgp_lp_order_note_save_v1(text,text,text,jsonb)') AND md5(pg_get_functiondef(p.oid))='c4185628733dfd71f12795d6f1f1327b' AND pg_get_userbyid(p.proowner)='postgres') THEN RAISE EXCEPTION 'DEFINITION_OR_OWNER_DRIFT: %','public.sgp_lp_order_note_save_v1(text,text,text,jsonb)';END IF;
+ IF (SELECT writes FROM sgp_lp_order_details.config WHERE id) IS DISTINCT FROM false THEN RAISE EXCEPTION 'ACTIVATION_STATE_CONFLICT';END IF;
+ IF EXISTS(SELECT 1 FROM aclexplode((SELECT proacl FROM pg_proc WHERE oid=to_regprocedure('public.sgp_lp_order_details_read_v1(text,text,text)'))) a WHERE a.grantee<>(SELECT oid FROM pg_roles WHERE rolname='postgres')) THEN RAISE EXCEPTION 'UNEXPECTED_API_ACL';END IF;
+ IF EXISTS(SELECT 1 FROM aclexplode((SELECT proacl FROM pg_proc WHERE oid=to_regprocedure('public.sgp_lp_order_note_save_v1(text,text,text,jsonb)'))) a WHERE a.grantee<>(SELECT oid FROM pg_roles WHERE rolname='postgres')) THEN RAISE EXCEPTION 'UNEXPECTED_API_ACL';END IF;
+ IF EXISTS(SELECT 1 FROM aclexplode((SELECT proacl FROM pg_proc WHERE oid=to_regprocedure('public.sgp_lp_glass_nc_read_v1(text,text,text)'))) a WHERE a.grantee<>(SELECT oid FROM pg_roles WHERE rolname='postgres')) THEN RAISE EXCEPTION 'UNEXPECTED_API_ACL';END IF;
+ IF EXISTS(SELECT 1 FROM aclexplode((SELECT proacl FROM pg_proc WHERE oid=to_regprocedure('public.sgp_lp_glass_nc_report_v1(text,text,text,date,integer,jsonb,text)'))) a WHERE a.grantee<>(SELECT oid FROM pg_roles WHERE rolname='postgres')) THEN RAISE EXCEPTION 'UNEXPECTED_API_ACL';END IF;
+ IF EXISTS(SELECT 1 FROM aclexplode((SELECT proacl FROM pg_proc WHERE oid=to_regprocedure('sgp_lp_order_details.authorize(text,text,text,text)'))) a WHERE a.grantee<>(SELECT oid FROM pg_roles WHERE rolname='postgres')) THEN RAISE EXCEPTION 'UNEXPECTED_API_ACL';END IF;
+ IF EXISTS(SELECT 1 FROM aclexplode((SELECT proacl FROM pg_proc WHERE oid=to_regprocedure('sgp_lp_order_details.immutable()'))) a WHERE a.grantee<>(SELECT oid FROM pg_roles WHERE rolname='postgres')) THEN RAISE EXCEPTION 'UNEXPECTED_API_ACL';END IF;
+END $$;
+GRANT EXECUTE ON FUNCTION public.sgp_lp_order_details_read_v1(text,text,text),public.sgp_lp_order_note_save_v1(text,text,text,jsonb),public.sgp_lp_glass_nc_read_v1(text,text,text),public.sgp_lp_glass_nc_report_v1(text,text,text,date,integer,jsonb,text) TO anon;
+UPDATE sgp_lp_order_details.config SET writes=true WHERE id;
+COMMIT;

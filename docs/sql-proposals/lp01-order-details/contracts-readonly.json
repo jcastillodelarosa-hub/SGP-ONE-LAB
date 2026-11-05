@@ -1,0 +1,22 @@
+{
+  "date": "2026-11-05",
+  "project": "ocvxbwzqxbrfndkvjmfx",
+  "scope": "BEGIN TRANSACTION READ ONLY / ROLLBACK; catalog only, no business rows",
+  "data": [
+    {
+      "jsonb_build_object": {
+        "functions": [
+          {
+            "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+            "signature": "sgp_consultar_nc_vidrio(text,integer)",
+            "definition": "CREATE OR REPLACE FUNCTION public.sgp_consultar_nc_vidrio(p_token text, p_semana integer DEFAULT NULL::integer)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\ndeclare u text; begin u:=sgp_validar_sesion_rol(p_token,array['ADMINISTRADOR','COORDINADOR','LIDER','CONSULTA']);\nreturn jsonb_build_object(\n 'semanas_abiertas',(select coalesce(jsonb_agg(x.semana_maestro order by x.semana_maestro),'[]'::jsonb) from (select distinct semana_maestro from sgp_nc_vidrio where activo and upper(coalesce(estado_nc,''))='ABIERTA' and semana_maestro is not null)x),\n 'rows',(select coalesce(jsonb_agg(to_jsonb(q) order by q.semana_maestro,q.fecha_generacion_nc,q.consecutivo),'[]'::jsonb) from (\n select n.*,greatest(current_date-coalesce(n.fecha_generacion_nc,n.fecha_repo,current_date),0) dias_abierta\n from sgp_nc_vidrio n where n.activo and\n ((p_semana is null and n.semana_maestro in(select distinct semana_maestro from sgp_nc_vidrio where activo and upper(coalesce(estado_nc,''))='ABIERTA'))\n or n.semana_maestro=p_semana)\n )q)\n); end $function$\n"
+          }
+        ],
+        "ncConstraints": [
+          "PRIMARY KEY (consecutivo)"
+        ],
+        "relatedSignatures": null
+      }
+    }
+  ]
+}

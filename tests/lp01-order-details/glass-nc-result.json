@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "scope": "Synthetic isolated PostgreSQL17.11; no productive NC or session",
+  "checks": [
+    "No default grants; disabled before activation",
+    "Manual NC reference and reported windows commit atomically; reference is explicitly unverified",
+    "Same UUID idempotent; changed NC rejected; concurrent retry creates once",
+    "Invalid input, other causes and unauthorized actor denied",
+    "Late NC insert failure rolls back native report and event; no physical confirmation or automatic Tecno report"
+  ]
+}
