@@ -1,0 +1,31 @@
+[
+  {
+    "width": 1440,
+    "synthetic_transport": true,
+    "app_load_render_open_source": true,
+    "external_requests": 0,
+    "cards_scope_and_unknowns": true,
+    "combined_empty_cancel_reset_filters": true,
+    "sort_numeric_null_audit_identity": true,
+    "keyboard_escape_focus_scroll": true,
+    "refresh_and_week_race": true,
+    "tracking_failure_audit": true
+  },
+  {
+    "width": 390,
+    "synthetic_transport": true,
+    "app_load_render_open_source": true,
+    "external_requests": 0,
+    "cards_scope_and_unknowns": true,
+    "combined_empty_cancel_reset_filters": true,
+    "sort_numeric_null_audit_identity": true,
+    "keyboard_escape_focus_scroll": true,
+    "refresh_and_week_race": true,
+    "tracking_failure_audit": true
+  },
+  {
+    "whole_app_unauthenticated_boot": true,
+    "page_errors": [],
+    "production_calls_allowed": false
+  }
+]

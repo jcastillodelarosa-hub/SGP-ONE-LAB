@@ -1,6 +1,18 @@
 ## B10 corrección · rama aislada · 05/11/2026
 
-Base 2ed9f8e9/v387. Detalle de afectaciones ancho bajo listado y bajo orden en móvil; acceso por causa, vacíos explícitos y orígenes PDT conservados. v389 provisional; coordinar numeración al integrar. Pruebas y límites en [lp01-b10-correction/README.md](../../tests/lp01-b10-correction/README.md). Sin SQL, permisos ni datos. Política PR199: pin de operación fbf8d7de…; baseline/rollback v387 2eb92f1e5438ff75 acreditada por coordinador con run 42041671863 (104 bytes de aplicación y 2 rutas de plataforma). No es lectura nueva del canal. Gate de transición HOLD; CI del SHA final y contraste live requeridos antes de integrar/publicar.
+Base integrada e182f537/v388. Detalle de afectaciones ancho bajo listado y bajo orden en móvil; acceso por causa, vacíos explícitos y orígenes PDT conservados. v389 provisional; coordinar numeración al integrar. Pruebas y límites en [lp01-b10-correction/README.md](../../tests/lp01-b10-correction/README.md). Sin SQL, permisos ni datos. Política PR199: pin de operación fbf8d7de…; baseline/rollback v388 ee9bc38852832125 acreditada por coordinador con run 42052662472 (106 archivos). No es lectura nueva del canal. Gate de transición HOLD; CI del SHA final y contraste live requeridos antes de integrar/publicar.
+
+## Recepción PR200 · candidata v388 · preparación, no publicada
+
+Main observado 2ed9f8e/B10 v387. Recepción A/C aprobada visualmente por coordinación;
+no cambios en contratos, fuentes, permisos ni código SALE/Seguimiento. 506Node y
+PC1440/móvil390 sintéticos PASS reutilizados. Nueva etiqueta candidata v388 si es
+la siguiente publicación; confirmar orden con B10/SALE antes de integrar.
+Política200: baseline/rollback v387 2eb92f1e5438ff75 acreditada por run42041671863,
+104 archivos públicos idénticos y2plataforma intactos. 16pins sin cambios; transición
+HOLD conservada, verificadores/probe intactos. Ver docs/RECEPTION_CARDS_FILTERS_HANDOFF.md.
+Siguiente: CI del SHA final y coordinación previa a ready/merge; publicación requiere
+prepare del SHA integrado y revisión de pins/live vigente. Sin merge/deploy desde aquí.
 
 ## B10 visual v387 · preparación independiente
 
