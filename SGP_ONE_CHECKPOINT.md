@@ -1,3 +1,22 @@
+## Seguimiento · LAB v382 preparada en aislamiento · 05/11/2026
+
+Base main `5003c61` (LAB v381). Rama local `fix/seguimiento-v382-column-menus`.
+Se retiran título y textos repetidos de línea/todas las semanas; tabla y detalle
+muestran solo Saldo Ensamble o Saldo Empaque según etapa. Menú desde encabezado:
+Ordenar columna / Filtrar columna, búsqueda de valores, casillas, Aplicar/Cancelar;
+encabezados accesibles sobre tarjetas móviles, Escape y retorno/ciclo de foco.
+Referencia: instrucciones y descripción de capturas remitidas por el hilo principal,
+estilo SGP existente y guía Refero de foco/controles nativos. Las imágenes no estaban
+disponibles en las rutas locales indicadas; no se afirma haberlas inspeccionado.
+SALE, avance por turno, afectaciones y sus contratos/roles SIN CAMBIOS, a la espera
+de aclaración funcional coordinada por el hilo principal. No se suman turnos.
+469 JS PASS, release v382 PASS, navegador Chromium1440/390 PASS con transporte
+sintético: etapas, menú, aplicar/cancelar, búsqueda, teclado, refresco y permisos.
+No se ejecutó backend SQL ni se acredita aceptación en planta. Política intacta;
+el cambio de controlador queda fuera de sus huellas, manteniendo publicación HOLD.
+Sin push, PR, SQL, datos ni despliegue. Siguiente: revisión visual de esta propuesta
+y respuesta sobre afectaciones/avance; integrar solo cuando se coordine el alcance.
+
 ## PR193 · política preparada sobre vidrio publicado · 05/11/2026
 
 Inspección GET confirmada por el coordinador de publicación:

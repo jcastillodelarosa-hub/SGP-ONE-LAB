@@ -6,6 +6,8 @@
     "no_overlap": true,
     "scope_session_role_clear": true,
     "external_requests": 0,
+    "single_stage_balance": true,
+    "header_menu_search_apply_cancel_escape_focus": true,
     "approved_header_removed_in_tracking": true,
     "operation_and_closure_navigation_preserved": true
   },
@@ -16,6 +18,8 @@
     "no_overlap": true,
     "scope_session_role_clear": true,
     "external_requests": 0,
+    "single_stage_balance": true,
+    "header_menu_search_apply_cancel_escape_focus": true,
     "approved_header_removed_in_tracking": true,
     "operation_and_closure_navigation_preserved": true
   }

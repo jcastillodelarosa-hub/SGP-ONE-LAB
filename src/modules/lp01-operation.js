@@ -48,7 +48,7 @@ export function mountOperation({tracking,operation,bridge,legacyLoad}){
    const normalized=globalTrackingData(next,ctx),changed=JSON.stringify(normalized)!==JSON.stringify(globalData);
    globalData=normalized;globalContext=ctx;globalSession=token;
    const key=JSON.stringify([ctx.line,ctx.stage]);if(!trackingStates.has(key))trackingStates.set(key,{});trackingViewState=trackingStates.get(key);
-   message.textContent='Todas las semanas · '+ctx.line+' · '+ctx.stage;if(changed||!quiet||!sameScope)renderGlobal();
+   message.textContent='';if(changed||!quiet||!sameScope)renderGlobal();
   }catch(e){if(request!==seq)return;globalData=null;live.replaceChildren();message.textContent='No se pudo consultar Seguimiento: '+e.message;}
   finally{if(globalRequest?.request===request)globalRequest=null;if(request===seq)loading=false;if(globalQueued){globalQueued=false;loading=false;if(viewPanel==='seguimiento')loadGlobal();}}
  }
