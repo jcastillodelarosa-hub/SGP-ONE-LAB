@@ -92,5 +92,18 @@ No es validación de sesiones/roles reales, móvil físico ni funcionamiento pro
 No se ejecutó la RPC productiva (puede sincronizar INSERT/UPDATE para algunos roles).
 Los estilos y la lógica de Seguimiento/SALE no se modificaron.
 
-Siguiente paso: el padre compara las capturas con A/C y revisa el PR, coordina el
+Siguiente paso: el padre compara las capturas con A/C y revisa la rama, coordina el
 rebase/versión y cualquier integración/publicación mediante sus controles existentes.
+
+## Bloqueo de entrega externa
+
+Implementación subida a origin en commit `a382dbbea4e8d8822f5d13c05fdf66edbd850736`.
+La creación de PR borrador en `jcastillodelarosa-hub/SGP-ONE-LAB`, base `main`,
+head `feat/reception-cards-column-filters`, fue **DENEGADA** por auto-review:
+
+> Creating a draft PR is an external repository commitment, and the user authorized the feature work but did not explicitly authorize opening this PR.
+
+La lectura posterior del historial visible no aportó autorización explícita nueva.
+No se reintentó la operación ni se usó otra vía; el PR no fue creado. Se requiere
+que el padre obtenga o aporte evidencia nueva de autorización para abrir ese PR.
+La rama y las pruebas ya están disponibles; merge/publicación siguen excluidos.

@@ -14,8 +14,10 @@ Referencia implementada desde descripción precisa del padre tras fallo de Libra
 comparación final de capturas con bocetos a cargo del padre. v390 reservada solo
 provisionalmente (SALE388, B10 389); rebasar y confirmar antes de integrar.
 IMPLEMENTADO EN RAMA / VERIFICADO AISLADAMENTE; sin SQL, privilegios, merge ni deploy.
-No cambios de SALE, GOOGLE, LAC ni workflows. Siguiente: revisión visual/técnica del
-padre y coordinación de integración/publicación con los controles existentes.
+No cambios de SALE, GOOGLE, LAC ni workflows. Rama subida (funcional a382dbb).
+Crear PR borrador fue denegado por auto-review por falta de autorización explícita;
+sin reintento tras revisar historial. Siguiente: revisión visual/técnica del padre
+y autorización/evidencia nueva para abrir PR; sin merge/publicación.
 
 ## PR195 · compatibilidad de aceptación existente · 05/11/2026
 
