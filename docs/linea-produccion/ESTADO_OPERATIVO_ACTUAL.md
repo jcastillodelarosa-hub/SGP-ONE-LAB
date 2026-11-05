@@ -1,3 +1,17 @@
+## Seguimiento · Disponible compacto · 05/11/2026
+
+V391 fue publicada en main 90518a07f297c4079cdd97dc1c89ba83ffb94e90,
+Hosting sites/sgp-one-lab/versions/cf7a564682e0d50e (run 42085341702).
+V392 en rama aislada: la celda global muestra la definición guardada por orden
+como «Disponible» o «Por definir», con lápiz; Guardar/Cancelar, motivo e historial
+quedan en edición puntual. Lecturas de filas visibles con máximo cuatro concurrentes.
+No cambia RPC, permisos, datos, saldo Export ni SALE operativo de turnos. PR203
+trabaja detalle de afectaciones por separado: compartirán lp01-tracking.js, solo
+etiquetas y conexión de la celda se cambian aquí. Prueba sintética PC/móvil y
+release pendientes de asociar al SHA final. Las tres referencias Library están
+resueltas y su OCR leído; transferencia de píxeles bloqueada por política de red
+del ejecutor, así que no se acredita comparación visual directa con el boceto.
+
 ## Seguimiento · pendientes visibles y registro · 05/11/2026
 
 Candidata v391 sobre main a01ce776/v390: pendientes de aluminio no representados visibles sin inferir ventanas; acceso de registro por turno real abierto y capacidad servidor. Texto heredado corregido: la asignación es para avance; SALE se consulta por orden. Sin SQL, datos, flags ni cambios al contrato SALE. Ver [lp01-pending-ui/README.md](../../tests/lp01-pending-ui/README.md) para pruebas y brecha fuera de turno. Política PR202: baseline/rollback v390 fbd20418a9bf4438 acreditada por run 42079722091; pins SALE conservados y transición HOLD. CI e integración pendientes.
