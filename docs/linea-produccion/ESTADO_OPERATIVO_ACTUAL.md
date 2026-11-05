@@ -2,14 +2,16 @@
 
 V391 fue publicada en main 90518a07f297c4079cdd97dc1c89ba83ffb94e90,
 Hosting sites/sgp-one-lab/versions/cf7a564682e0d50e (run 42085341702).
-V392 en rama aislada: la celda global muestra la definición guardada por orden
+V392 en PR204 borrador: la celda global muestra la definición guardada por orden
 como «Disponible» o «Por definir», con lápiz; Guardar/Cancelar, motivo e historial
 quedan en edición puntual. Lecturas de filas visibles con máximo cuatro concurrentes.
 No cambia RPC, permisos, datos, saldo Export ni SALE operativo de turnos. PR203
 trabaja detalle de afectaciones por separado: compartirán lp01-tracking.js, solo
-etiquetas y conexión de la celda se cambian aquí. Prueba sintética PC/móvil y
-release pendientes de asociar al SHA final. Las tres referencias Library están
-resueltas y su OCR leído; transferencia de píxeles bloqueada por política de red
+etiquetas y conexión de la celda se cambian aquí. Política PR204:
+baseline/rollback cf7a564682e0d50e; HOLD, pins y verificadores intactos.
+Node 513/513, release PASS y Chromium sintético 1440/390 PASS. Las tres
+referencias Library están resueltas y su OCR leído; transferencia de píxeles
+bloqueada por política de red
 del ejecutor, así que no se acredita comparación visual directa con el boceto.
 
 ## Seguimiento · pendientes visibles y registro · 05/11/2026
