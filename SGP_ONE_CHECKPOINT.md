@@ -1,3 +1,15 @@
+## Aclaración de afectaciones individuales y PDT · 05/11/2026
+
+Reglas recuperadas: líder fuente principal, coordinador agrega/corrige; cada causa
+es un reporte individual por producción/etapa, con arrastre de la misma identidad.
+Confirmación física parcial con cantidad/observación en panel, distinta de solución
+en origen. Revisión de PDT confirma rutas multiorigen y manual, pero cantidades de
+piezas no acreditan ventanas disponibles; no hay emisor LP implementado. Primera
+actividad de Ensamble sí define apertura; Empaque continúa sin disparador acreditado.
+Se corrige propuesta documental agregada; no se cambian contratos, datos ni UI.
+LAB v382 sigue aislada y sin publicar. Pendiente coordinar implementación backend
+y panel completo; formulario agregado actual no satisface el alcance recuperado.
+
 ## LAB v382 · historial por día/turno y límites de contrato · 05/11/2026
 
 IMPLEMENTADO LOCAL: panel Historial muestra los últimos totales LP por asignación,

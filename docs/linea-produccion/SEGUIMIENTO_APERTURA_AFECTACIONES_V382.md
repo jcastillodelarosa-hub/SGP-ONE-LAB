@@ -27,6 +27,9 @@ estado anterior, completitud del historial ni evidencia de primer avance.
 La fecha de primera afectación tampoco sustituye primer avance; para una orden
 bloqueada sin avance hay estado de afectación, pero no fecha de inicio acreditada.
 
+El primer avance de ENSAMBLE está confirmado como disparador de apertura. El
+disparador de EMPAQUE no está acreditado: no extender esa regla automáticamente.
+
 Propuesta para revisión de contrato: devolver evidencia de inicio por producción,
 línea y etapa con fecha/turno operativos, timestamp, evento/origen y calidad
 (acreditado, primer registro LP con cobertura desconocida, sin evidencia).
@@ -51,13 +54,23 @@ tener valores distintos. Esas copias no son una autoridad global única por orde
 Elegir la copia más reciente entre partes, sumar causas o copiar un nuevo reporte
 a todos los turnos crearía pérdidas, doble conteo o reescritura histórica.
 
-Opción recomendada para diseño backend: una identidad canónica de afectación por
-producción y etapa con cantidades por causa, revisión, motivo, autor, fechas
-originales y eventos de modificación; arrastre referencia esa misma identidad.
-Un consolidado de ventanas distintas validado por coordinador debe respetar
-max(causas) ≤ consolidado ≤ suma(causas), además del saldo elegible. Administrador
-puede registrar según permisos vigentes; no ampliar VALIDAR fuera del coordinador.
-Sin consolidación acreditada, disponibles no se infieren restando suma de causas.
+Reglas adicionales recuperadas el 05/11: líder como fuente principal del reporte;
+coordinador también agrega/corrige y valida consolidado. Cada afectación es un
+registro individual por causa agrupado por producción, con etapa de origen e
+historial compartido. No equivale a una identidad por producción con cuatro
+cantidades. Esta precisión sustituye la propuesta agregada anterior de esta nota.
+No se requieren identificadores individuales de ventanas.
+
+Diseño pendiente de revisión: identidad estable de cada reporte, causa, producción,
+etapa, cantidad de ventanas, autor y fechas/turnos originales; eventos de corrección,
+solución parcial y confirmación física con cantidad y observación en panel lateral.
+El arrastre referencia el mismo reporte, sin crear otro por turno ni otra etapa.
+El Picking conserva su identidad y vínculo de origen; no reingresar su reporte
+como nuevo bloqueo al mostrarlo en Ensamble/Empaque. Solución en origen y recepción
+física son eventos distintos; ninguna suma automática determina disponibles.
+El coordinador valida el consolidado de ventanas distintas, con causas solapables.
+Conservar permisos vigentes hasta revisar el contrato; la fuente principal líder
+requiere acceso operativo por su etapa, no conceder Seguimiento global a todos.
 
 Compatibilidad obligatoria: lectura/autorización por sesión y ámbito, CAS e
 idempotencia, auditoría común con etapa identificada, integración con operación y
@@ -67,6 +80,33 @@ del coordinador; no migrarlas sumando ni sobrescribirlas automáticamente.
 Esta opción todavía no tiene SQL, migración ni formulario de escritura preparado.
 Mantener el formulario actual por turno es compatible temporalmente, pero NO
 presentarlo como solución al registro global por orden solicitado.
+
+## PDT aluminio: reutilización concreta y límites
+
+Inspección de código/propuestas versionadas, no certificación de cuerpos instalados:
+
+| Requisito | Contrato actual y diferencia |
+|---|---|
+| Reportar aluminio como Picking con origen de etapa | `src/domain/pdt-registration.js` admite PICKING/ENSAMBLE/EMPAQUE; `src/services/pdt-registration.js` llama `sgp_pdt_registro_fuentes_v4` y `sgp_pdt_registrar_v4`. Reutilizar identidad canónica y lote idempotente; fijar origen desde contexto autorizado, sin selector que permita falsear etapa. |
+| Registro individual e historial | V4 conserva UUID PDT, piezas verificadas, producción/reserva, origen/fecha/usuario mediante `sgp_pdt_registro_metadatos_v4`. Son piezas PANEL de aluminio, no ventanas LP. Su UUID puede vincularse al reporte, sin convertir cantidades de piezas en ventanas. |
+| Variantes de captura | `src/services/pdt-manual.js` usa catálogo/fuentes y `sgp_pdt_manual_registrar_v1`, devuelve `id_reporte`. Flujo manual distinto de V4; verificar capacidades de destino antes de escoger ruta. V4 exige NC en Ensamble/Empaque; `manualReportPayload` no la exige. No imponer ni eliminar esa diferencia sin comprobar contrato efectivo. |
+| Soluciones parciales y entrega | `pdt/manual/03_manual_operations_REVIEW.sql` define `sgp_aluminio_pendiente_registrar_avance_v1`; `pdt/multiorigin/02_canonical_lifecycle_REVIEW.sql` define `sgp_pdt_entrega_registrar_v2`, con detalle/entrega/cantidad/clave, validación de identidad y límite al procesado neto. Esto registra material, no confirma ventanas disponibles en una etapa LP. |
+| Confirmación física LP y liberación | `src/server/lp01-pdt-origin.js` devuelve `canEmitReceipt:false`, crédito cero: falta enlace autoritativo raíz/etapa, versiones y unión de ventanas antes/después. `lp01-operacion/07_pdt_asociacion_REVIEW.sql` es propuesta privada, sin endpoint navegador ni emisor de evidencias implementado. No es un formulario utilizable para cumplir la regla recuperada. |
+| Afectaciones de otras causas | AFECTAR LP sigue objeto agregado por parte/turno. Falta contrato individual común para vidrio/novedad y para vincular aluminio, con eventos físicos, correcciones, arrastre e historial compartido. |
+
+Los paths SQL de la tabla son relativos a `docs/sql-proposals/`. No habilitar
+escritura llamando helpers privados ni ampliar roles de PDT para simular recepción.
+La entrega PDT usa roles existentes de Picking/coordinación; eso no acredita quién
+puede confirmar físicamente ventanas en LP. Revisar esa autorización efectiva al
+preparar el contrato, conservando el coordinador como validador del consolidado.
+
+Paquete técnico por coordinar: lectura de reportes individuales e historia con
+vínculos PDT; comandos idempotentes por reporte con revisión para conflictos;
+confirmación física parcial auditada separada de solución; consolidación validada;
+proyección de apertura de Ensamble con procedencia/cobertura. Después, panel lateral
+para líder en su etapa y coordinador, pruebas de arrastre sin duplicación, causas
+solapadas, correcciones concurrentes, reintento, solución sin recepción y permisos.
+No reconciliar automáticamente copias históricas ni inventar reportes faltantes.
 
 ## Implementación local permitida
 
