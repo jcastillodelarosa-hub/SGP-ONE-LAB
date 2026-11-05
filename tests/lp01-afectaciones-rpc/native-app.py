@@ -37,7 +37,8 @@ try:
      if page.locator('#mobileMenuToggle').is_visible():page.locator('#mobileMenuToggle').click()
      page.locator('.nav [data-view="ensamble"]').click()
      if user=='COORDINADOR':
-      page.locator('#productionTrackingTab').click();page.wait_for_selector('.lp-tracking-table');page.locator('.lp-tracking-table tbody summary').first.click();page.locator('[data-tracking-tab=Afectaciones]').click();page.wait_for_selector('.lp-pdt-compact');assert any(r['id']==original for r in (x.read2(user).get('aluminumPending') or x.read2(user)['pickingPending'])['rows']);assert page.locator('.lp-aluminum-pending').is_visible()
+      page.locator('#productionTrackingTab').click();
+      page.wait_for_selector('.lp-tracking-table');page.locator('.lp-tracking-table tbody summary').first.click();page.locator('[data-tracking-tab=Afectaciones]').click();page.wait_for_selector('.lp-pdt-compact');assert any(r['id']==original for r in (x.read2(user).get('aluminumPending') or x.read2(user)['pickingPending'])['rows']);assert page.locator('.lp-aluminum-pending').is_visible()
       assert page.locator('[data-order-affectations] form').is_hidden()
       page.locator('[data-advance-context] summary').click();value=page.locator('[data-tracking-context] option').nth(1).get_attribute('value');page.locator('[data-tracking-context]').select_option(value);page.locator('[data-register-affectation] summary').click();page.locator('[data-affect-context] button').click();page.locator('[data-order-type=NOVEDAD]').click();page.wait_for_selector('[data-type-pane=NOVEDAD] form:visible')
       page.locator('[data-order-type=NOVEDAD]').click();page.locator('[data-type-pane=NOVEDAD] [name=observation]').fill('Borrador que debe conservarse')

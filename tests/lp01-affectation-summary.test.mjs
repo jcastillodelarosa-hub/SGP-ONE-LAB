@@ -17,8 +17,8 @@ test('unlinked LEGACY pieces cannot become windows or known availability',()=>{
 test('duplicate IDs, wrong stage and impossible physical totals are rejected',()=>{
  for(const reports of [[report('a','NC_AL',1),report('a','NC_V',1)],[{...report('a','NC_AL',1),originStage:'EMPAQUE'}],[report('a','NC_AL',1,2)]])assert.throws(()=>affectationSummary({...fixture(),reports}),/INVALIDO/);
 });
-test('compact PDT summary keeps UUID and long evidence inside expandable details',()=>{
- const html=pendingCompact([{id:'private-detail-id',reference:'REF',pieceQuantity:19,nc:'NC1',origin:'PRODUCCION',contract:'LEGACY'}]);const summary=html.match(/<summary>([\s\S]*?)<\/summary>/)[1];assert.match(summary,/REF/);assert.match(summary,/19 piezas/);assert.match(summary,/Estado NC/);assert.match(summary,/PRODUCCION/);assert.ok(!summary.includes('private-detail-id'));assert.ok(html.includes('private-detail-id'));
+test('compact PDT presentation omits technical identity and preserves operational details',()=>{
+ const html=pendingCompact([{id:'private-detail-id',reference:'REF',pieceQuantity:19,nc:'NC1',origin:'PRODUCCION',contract:'LEGACY'}]);const summary=html.match(/<summary>([\s\S]*?)<\/summary>/)[1];assert.match(summary,/REF/);assert.match(summary,/19 piezas/);assert.match(summary,/Estado NC/);assert.match(summary,/PRODUCCION/);assert.ok(!summary.includes('private-detail-id'));assert.ok(!html.includes('private-detail-id'));assert.ok(!html.includes('Contrato:'));assert.match(html,/Reserva:/);assert.match(html,/Estado PDT:/);
 });
 test('Picking-only reader cannot prove all-origin coverage or availability',()=>{
  const d=fixture();delete d.aluminumPending;d.pickingPending={status:'AVAILABLE',rows:[]};const s=affectationSummary(d);assert.equal(s.total,null);assert.equal(s.available,null);assert.equal(s.aluminumUnknown,true);
