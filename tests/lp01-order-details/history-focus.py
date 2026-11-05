@@ -22,7 +22,7 @@ try:
     assert [r.locator('td').nth(2).inner_text() for r in rows.all()]==quantities
     assert [r.locator('td').nth(1).inner_text() for r in rows.all()]==['1','2']
     assert all(r.locator('td').nth(0).inner_text()=='2026-11-02' for r in rows.all())
-    assert 'real conciliado' in timeline.inner_text();assert '20' not in [r.locator('td').nth(2).inner_text() for r in rows.all()]
+    assert 'Cantidades registradas en Operación' in timeline.inner_text() and 'no modifican el saldo oficial' in timeline.inner_text();assert '20' not in [r.locator('td').nth(2).inner_text() for r in rows.all()]
     assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
     for cell in rows.locator('td').all():
      cell.scroll_into_view_if_needed();rect=cell.bounding_box();assert rect['x']>=0 and rect['x']+rect['width']<=width

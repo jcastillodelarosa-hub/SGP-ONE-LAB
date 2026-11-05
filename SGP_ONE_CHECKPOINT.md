@@ -1,3 +1,11 @@
+## PR203 · rebase sobre Disponible v392 · 05/11/2026
+
+Base main 0529673; editor compacto y modal/refresco de Disponible preservados.
+Conflictos resueltos en tracking, pruebas y estado documental. Paquete SQL y
+readback de activación sin cambios; no repetir instalación. Copy Historial
+simplificado y textos nuevos usan Disponible. Versión candidata, baseline,
+rollback y policy pendientes de Hosting final v392 y coordinación; no publicar.
+
 ## PR203 · backend autorizado activado; Historial por etapa · 05/11/2026
 
 Backend INSTALADO/HABILITADO en ocvxbwzqxbrfndkvjmfx tras autorización específica.
