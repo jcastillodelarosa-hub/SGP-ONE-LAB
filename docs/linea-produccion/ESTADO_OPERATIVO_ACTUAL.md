@@ -12,7 +12,7 @@ writer d7aa1edaea6a22004226e4a73a6fb61f. Token inválido denegado en ambas;
 cero datos de prueba productivos. ACL históricas intactas. No repetir SQL.
 
 Frontend SALE v390 en rama sobre main 13f50e95 (B10 v389 publicada): integración
-real en fila, PC1440/móvil390 y PostgreSQL sintético PASS. Recepción y B10 ya están integradas; preparar un solo PR borrador v390. Uso de la definición entre turnos sigue sin regla; `operational:false`.
+real en fila, PC1440/móvil390 y PostgreSQL sintético PASS. Recepción y B10 ya están integradas; PR201 borrador v390; pins de publicación y baseline v389 preparados. CI del SHA final pendiente. Uso de la definición entre turnos sigue sin regla; `operational:false`.
 Detalle: [SALE por orden](../sql-proposals/lp01-order-sale/README.md).
 
 ## B10 v389 y Recepción v388 publicados
