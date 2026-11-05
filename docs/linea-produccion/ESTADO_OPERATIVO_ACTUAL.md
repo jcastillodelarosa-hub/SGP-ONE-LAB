@@ -14,7 +14,8 @@ en segundo plano; no equivale a rendimiento productivo.
 Preflight Supabase READ ONLY/ROLLBACK:3 RPC públicas coinciden con huellas previas,
 ACL conservadas y propuesta ausente;9 firmas inventariadas, sin datos individuales.
 Gate local real HOLD/LP_ASSETS_NOT_APPROVED; política194 intacta. No SQL aplicado,
-acceso ampliado, merge, dispatch ni publicación. Preparar PR Draft/CI del SHA final.
+acceso ampliado, merge, dispatch ni publicación. PR195 Draft abierto sobre main6467290;
+commit funcional401e635. Confirmar CI propia del SHA final antes de integrar.
 Evidencia: docs/sql-proposals/lp01-propuestas y tests/lp01-b12-b13.
 
 ## LAB v383 · B12/B13 preparados en aislamiento · 05/11/2026

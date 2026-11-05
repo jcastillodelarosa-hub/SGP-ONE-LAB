@@ -50,3 +50,5 @@ La lectura principal ahora es singleflight. El enriquecimiento de afectaciones c
 DOM real Chromium1440/390: 50/200/500 órdenes, dos asignaciones cada una, sin desborde. Máximo observado500:121ms PC y127.5ms móvil. Generación de HTML p95:11.21/12.62/31.61ms. Transporte simulado100ms/RPC:1.77/7.11/16.80s en segundo plano, máximo3 simultáneas. Son datos sintéticos locales, no capacidad certificada de Supabase en producción; revisar latencia real antes de publicación.
 
 Preflight del proyecto SGP-ONE-LAB: SELECT de catálogo dentro de READ ONLY/ROLLBACK. Las tres RPC públicas utilizadas coinciden con evidencia previa (MD5); conserva ACL existentes. La nueva propuesta no existe. No se consultaron órdenes individuales ni secretos ni se modificaron datos/permisos. La política vigente permanece194 y su gate real produce HOLD/LP_ASSETS_NOT_APPROVED para este cambio; no se actualizaron pins para eludirlo.
+
+PR preparado: https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/pull/195 (Draft). Commit funcional401e635; verificar CI del HEAD final, incluidos commits documentales. Sin aprobación formal, fusión ni publicación.
