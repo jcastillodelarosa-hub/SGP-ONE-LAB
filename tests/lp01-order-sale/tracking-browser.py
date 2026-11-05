@@ -39,6 +39,42 @@ try:
    assert not errors,errors
    results.append({'width':width,'header':'Disponible','rows':['40','Por definir'],'rowHeightBefore':before,'rowHeightAfterQuiet':after,'editorModalAfterQuiet':True,'focusPreserved':True,'filterAndCancel':True})
    page.close()
+   # Full mountOperation path: a synthetic persisted order definition survives reload,
+   # a quiet global refresh preserves focus/selection, and a lost reply retries the
+   # same command after filtering the row out and back in.
+   app=browser.new_page(viewport={'width':width,'height':850});app_errors=[];app.on('pageerror',lambda e:app_errors.append(str(e)))
+   app.goto(f'http://127.0.0.1:{server.server_port}/tests/lp01-pending-ui/fixture.html')
+   cell=app.locator('[data-sale-order-key="QA1|PANELES_2"] .lp-sale-row')
+   cell.scroll_into_view_if_needed();cell.locator('[data-sale-edit]').wait_for(state='visible')
+   cell.locator('[data-sale-edit]').click()
+   cell.locator('.lp-sale-dialog:modal [name=quantity]').fill('8')
+   note=cell.locator('.lp-sale-dialog:modal [name=observation]');note.fill('Definición QA');note.focus()
+   app.evaluate("document.querySelector('[data-sale-order-key=\"QA1|PANELES_2\"] [name=observation]').setSelectionRange(4,9)")
+   app.evaluate('window.version++;void controller.load({quiet:true})')
+   app.wait_for_function("document.querySelector('[data-sale-order-key=\"QA1|PANELES_2\"] .lp-sale-dialog:modal')!==null")
+   assert note.input_value()=='Definición QA'
+   assert app.evaluate("document.activeElement===document.querySelector('[data-sale-order-key=\"QA1|PANELES_2\"] [name=observation]') && document.activeElement.selectionStart===4 && document.activeElement.selectionEnd===9")
+   cell.locator('.lp-sale-dialog:modal [data-sale-save]').click()
+   app.wait_for_function("document.querySelector('[data-sale-order-key=\"QA1|PANELES_2\"] [data-sale-edit]')?.textContent.includes('8')")
+   app.reload();cell.scroll_into_view_if_needed();cell.locator('[data-sale-edit]').wait_for(state='visible')
+   assert '8' in cell.locator('[data-sale-edit]').inner_text()
+   cell.locator('[data-sale-edit]').click()
+   cell.locator('.lp-sale-dialog:modal [name=quantity]').fill('10')
+   cell.locator('.lp-sale-dialog:modal [name=observation]').fill('Segundo valor')
+   app.evaluate('qaSale.lost=true')
+   cell.locator('.lp-sale-dialog:modal [data-sale-save]').click()
+   app.wait_for_function("document.querySelector('[data-sale-order-key=\"QA1|PANELES_2\"] [data-sale-status]')?.textContent.includes('Resultado sin confirmar')")
+   cell.locator('[data-sale-cancel]').click()
+   app.locator('[data-tracking-status]').select_option('PENDIENTE_CONCILIACION')
+   assert app.locator('[data-sale-order-key="QA1|PANELES_2"]').count()==0
+   app.locator('[data-tracking-status]').select_option('')
+   cell.scroll_into_view_if_needed();cell.locator('[data-sale-edit]').click()
+   cell.locator('.lp-sale-dialog:modal [data-sale-retry]').click()
+   app.wait_for_function("document.querySelector('[data-sale-order-key=\"QA1|PANELES_2\"] [data-sale-edit]')?.textContent.includes('10')")
+   assert app.evaluate("qaSale.ids.at(-1)===qaSale.ids.at(-2) && qaSale.records['QA1|PANELES_2'].history.length===2")
+   assert not app_errors,app_errors
+   results[-1].update({'controllerQuietFocusAndSelection':True,'reloadPersistence':True,'uncertainRetryAcrossFilterSameId':True})
+   app.close()
   browser.close()
  (Path(__file__).parent/'tracking-result.json').write_text(json.dumps(results,indent=2)+'\n')
  print(json.dumps(results))

@@ -10,7 +10,10 @@
     "rowHeightAfterQuiet": 82,
     "editorModalAfterQuiet": true,
     "focusPreserved": true,
-    "filterAndCancel": true
+    "filterAndCancel": true,
+    "controllerQuietFocusAndSelection": true,
+    "reloadPersistence": true,
+    "uncertainRetryAcrossFilterSameId": true
   },
   {
     "width": 390,
@@ -23,6 +26,9 @@
     "rowHeightAfterQuiet": 250,
     "editorModalAfterQuiet": true,
     "focusPreserved": true,
-    "filterAndCancel": true
+    "filterAndCancel": true,
+    "controllerQuietFocusAndSelection": true,
+    "reloadPersistence": true,
+    "uncertainRetryAcrossFilterSameId": true
   }
 ]

@@ -12,7 +12,10 @@ revocación y permanencia del diálogo modal tras repintar.
 `python3 tests/lp01-order-sale/tracking-browser.py` prueba
 `renderTracking` real con dos órdenes sintéticas: encabezado Disponible,
 40 / Por definir, edición visible y enfocada tras refresco silencioso, Cancelar
-y altura de fila sin cambio (PC 82→82 px, móvil 250→250 px).
+y altura de fila sin cambio (PC 82→82 px, móvil 250→250 px). En el mismo
+recorrido, `mountOperation` conserva foco y selección tras carga silenciosa,
+la definición sintética persiste tras recarga y un guardado incierto reintenta
+el mismo ID después de filtrar y restaurar la fila.
 `python3 tests/lp01-order-sale/browser.py` verifica con PostgreSQL aislado
 guardar, recargar, historial, reintento del mismo ID, roles y sesión.
 `python3 tests/lp01-pending-ui/browser.py` conserva causas contraídas y registro.
