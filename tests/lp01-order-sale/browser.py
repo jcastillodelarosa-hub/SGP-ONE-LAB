@@ -35,27 +35,27 @@ try:
      except Exception as e:response={'data':None,'error':{'code':'P0001','message':str(e)}}
      if 'p_cmd' in a and lost[0]:lost[0]=False;route.abort();return
      route.fulfill(status=200,content_type='application/json',body=json.dumps(response))
-    page.route('**/rpc/*',rpc);page.goto(origin+'/tests/lp01-order-sale/fixture.html');page.wait_for_selector('[name=quantity]')
+    page.route('**/rpc/*',rpc);page.goto(origin+'/tests/lp01-order-sale/fixture.html');page.wait_for_selector('[data-sale-edit]')
     def save(n,reason):
-     page.locator('[name=quantity]').fill(str(n));page.locator('[name=observation]').fill(reason);page.get_by_role('button',name='Guardar definición',exact=True).click()
-    save(8,'Ocho definidas');page.wait_for_function("document.querySelector('[data-sale-message]').textContent.includes('Definición guardada.')")
-    page.reload();page.wait_for_selector('[name=quantity]');assert page.locator('[name=quantity]').input_value()=='8'
+     if not page.locator('.lp-sale-dialog:modal').count():page.locator('[data-sale-edit]').click()
+     page.locator('.lp-sale-dialog:modal [name=quantity]').fill(str(n));page.locator('.lp-sale-dialog:modal [name=observation]').fill(reason);page.locator('.lp-sale-dialog:modal [data-sale-save]').click()
+    save(8,'Ocho definidas');page.wait_for_function("document.querySelector('[data-sale-edit]')?.textContent.includes('8')")
+    page.reload();page.wait_for_selector('[data-sale-edit]');assert '8' in page.locator('[data-sale-edit]').inner_text()
     # Hold an actual read response: refresh must prevent overlapping writes.
     page.evaluate("const originalFetch=window.fetch;window.fetch=(...args)=>{window.fetch=originalFetch;return originalFetch(...args).then(r=>new Promise(resolve=>{window.qaRelease=()=>resolve(r)}))};void 0")
-    page.get_by_role('button',name='Actualizar',exact=True).click();page.wait_for_function('typeof qaRelease==="function"')
-    assert page.locator('[name=quantity]').is_disabled();count=len(ids)
-    page.evaluate("document.querySelector('form').dispatchEvent(new Event('submit',{cancelable:true}));qaRelease()")
-    page.wait_for_function("!document.querySelector('[name=quantity]').disabled");assert len(ids)==count
+    page.locator('[data-sale-edit]').click();page.locator('.lp-sale-dialog:modal [data-sale-refresh]').click();page.wait_for_function('typeof qaRelease==="function"')
+    count=len(ids);page.evaluate("document.querySelector('form').dispatchEvent(new Event('submit',{cancelable:true}));qaRelease()")
+    page.wait_for_selector('[data-sale-edit]');assert len(ids)==count
     # Superseded controller cannot erase a newer mount in the same host.
-    page.evaluate('window.oldDispose=window.dispose;mount()');page.wait_for_selector('[name=quantity]');page.evaluate('oldDispose()');assert page.locator('[name=quantity]').count()==1
-    lost[0]=True;save(10,'Diez definidas');page.wait_for_function("document.querySelector('[data-sale-message]').textContent.includes('Resultado sin confirmar')")
-    assert page.locator('[name=quantity]').is_disabled();page.get_by_role('button',name='Reintentar mismo guardado').click();page.wait_for_function("document.querySelector('[data-sale-message]').textContent.includes('Definición guardada.')")
+    page.evaluate('window.oldDispose=window.dispose;mount()');page.wait_for_selector('[data-sale-edit]');page.evaluate('oldDispose()');assert page.locator('[data-sale-edit]').count()==1
+    lost[0]=True;save(10,'Diez definidas');page.wait_for_function("document.querySelector('[data-sale-status]')?.textContent.includes('Resultado sin confirmar')")
+    assert page.locator('.lp-sale-dialog:modal [name=quantity]').is_disabled();page.locator('.lp-sale-dialog:modal [data-sale-retry]').click();page.wait_for_function("document.querySelector('[data-sale-edit]')?.textContent.includes('10')")
     assert ids[-1]==ids[-2] and db.sql('SELECT count(*) FROM sgp_lp_sale_orden.eventos')=='2'
-    page.get_by_text('Historial · 2',exact=True).click();assert 'Ocho definidas' in page.locator('details').inner_text() and 'Diez definidas' in page.locator('details').inner_text()
+    page.locator('[data-sale-edit]').click();page.get_by_text('Historial · 2',exact=True).click();assert 'Ocho definidas' in page.locator('details').inner_text() and 'Diez definidas' in page.locator('details').inner_text();page.locator('[data-sale-cancel]').click()
     assert legacy_snapshot()==before,'Existing turn SALE / audit changed'
     assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
     (HERE/'evidence').mkdir(exist_ok=True);page.screenshot(path=str(HERE/f'evidence/cell-{width}.png'),full_page=True)
-    page.evaluate("qaToken='se';mount()");page.wait_for_function("document.querySelector('[name=quantity]')?.readOnly");assert page.get_by_role('button',name='Guardar definición',exact=True).is_hidden()
+    page.evaluate("qaToken='se';mount()");page.wait_for_function("document.querySelector('#cell .lp-sale-value')?.textContent.includes('10')");assert page.locator('[data-sale-edit]').count()==0
     page.evaluate("qaToken='invalid'");page.wait_for_function("document.querySelector('#cell').textContent===''")
     assert not errors,errors
     results.append({'width':width,'status':'PASS','nativePostgres':True,'saveReloadHistory':True,'lostResponseSameIdRetry':True,'existingTurnSaleAndAuditUnchanged':True,'roleAndSessionCleanup':True,'refreshSerializesWrites':True,'oldDisposeCannotClearNewMount':True,'isolatedCellOnly':True});page.close()

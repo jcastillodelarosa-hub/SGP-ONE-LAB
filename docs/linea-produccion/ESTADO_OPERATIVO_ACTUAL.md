@@ -15,6 +15,10 @@ editable tras refresco silencioso; la altura de fila no cambia. Las tres
 referencias Library están resueltas y su OCR leído; transferencia de píxeles
 bloqueada por política de red
 del ejecutor, así que no se acredita comparación visual directa con el boceto.
+CI anterior detectó selector heredado «Consultar o definir» en la prueba de
+afectaciones contraídas; se actualizó a «Por definir» con lápiz y se conservaron
+los casos de registro, revocación y origen de aluminio. Browser nativo del editor
+y `renderTracking` sintético PC/móvil PASS; CI debe verificarse sobre SHA final.
 
 ## Seguimiento · pendientes visibles y registro · 05/11/2026
 
