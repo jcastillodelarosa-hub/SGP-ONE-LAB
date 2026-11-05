@@ -43,7 +43,7 @@ try:
       page.locator('#productionTrackingTab').click();page.wait_for_selector('.lp-tracking-table');page.locator('.lp-tracking-table tbody summary').first.click();assert page.locator('[data-tracking-tab=Afectaciones]').get_attribute('aria-pressed')=='true';page.wait_for_selector('.lp-pdt-compact');assert page.locator('.lp-aluminum-pending').evaluate('(el,id)=>el.textContent.includes(id)',original)
       assert page.locator('[data-order-affectations] form').is_hidden()
       assert page.locator('[data-tracking-context] option').count()==1
-      assert 'corregir esa dependencia está pendiente' in page.locator('[data-sale-context]').inner_text()
+      assert 'Para consultar el avance del turno, selecciona una asignación.' in page.locator('[data-sale-context]').inner_text();assert 'edición actual aún exige seleccionar' not in page.locator('[data-sale-context]').inner_text()
       page.locator('[data-register-affectation] summary').click();form=page.locator('[data-affect-context]');form.locator('[name=date]').fill('2026-11-01');form.locator('[name=shift]').select_option('2');form.locator('button').click()
       page.wait_for_function("document.querySelector('[data-context-status]').textContent.includes('No hay un turno')")
       assert page.locator('[data-order-affectations] form').is_hidden()
