@@ -21,5 +21,6 @@
       "noFalsePicking": true,
       "readOnly": true
     }
-  ]
+  ],
+  "guardedRecoveryPreservesAcl": true
 }

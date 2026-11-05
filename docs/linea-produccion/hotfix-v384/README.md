@@ -91,3 +91,23 @@ Dependencias actor/lectorv1/validadorrol inventariadas en production-preflight.j
 sin nuevas concesiones, filas de negocio consultadas ni cambios productivos.
 Workflow de aceptación incorpora ambos ensayos nuevos en PostgreSQL aislado;
 Chromium usa binario local o el instalado por Playwright en CI.
+
+## Controles finales PR196
+
+integration_pr196; baseline y rollback v383
+sites/sgp-one-lab/versions/7f429af5f0b5c5f7, confirmada por coordinador.
+Única huella protegida cambiada: src/modules/lp01-operation.js
+9a19735343293c352a9da8a60e3ec1711369767c9c5c55e5cb16c4186fb01184.
+Gate push HOLD/POLICY_TRANSITION_REQUIRES_EXPLICIT_REVIEW; prepare solo construye.
+Backend probe, inventario, bytes, validadores y restricciones conservados.
+Política, backend-readiness4, postcheck7, artefactoZIP/runtime y release384 PASS.
+Sin nueva versión ni cambio funcional. Pendiente CI propia del SHA de controles.
+
+Recuperación exacta guardada en13_restore_reader_REVIEW.sql, SHA256 cdfb00b7bf8606f25d106ca29229f66b0164cf8d66a4410854b6b9b8d98eb1c5.
+Exige nuevoMD5 a74f14fefe3a3d91201423fdc3111d7a y owner/ACL/config exactos;
+restaura baselineMD5 31a9538446f1cb9b59c46161a60d6861 sin tocar registros.
+No restablecer03 completo ni borrar tablas. La coordinación ejecutará la migración;
+ninguna aplicación SQL, fusión o publicación se realiza desde este hilo.
+
+Pendientes de UI compacta, resumen por causa y SALE/abiertas del líder siguen
+separados. No se incorporan propuesta12 ni ramas B14–B27 ni expansión de permisos.

@@ -48,5 +48,11 @@ try:
   browser.close()
  server.shutdown()
  (HERE/'all-origins-result.json').write_text(json.dumps({'sql':'PASS','functionBodyMd5':db.sql('SELECT md5(prosrc) FROM pg_proc WHERE oid='+signature),'aclPreserved':True,'rollbackAndBaselineGuard':True,'invalidSessionAndStageDenied':True,'restrictedRoleUnauthorized':True,'noAssociationsCreated':True,'ui':results},indent=2)+'\n')
- print('PASS all origins SQL + PC/mobile')
+ original_acl=db.sql('SELECT proacl::text FROM pg_proc WHERE oid='+signature)
+ db.sql((ROOT/'docs/sql-proposals/lp01-afectaciones/13_restore_reader_REVIEW.sql').read_text())
+ assert db.sql('SELECT md5(prosrc) FROM pg_proc WHERE oid='+signature)=='31a9538446f1cb9b59c46161a60d6861'
+ assert db.sql('SELECT proacl::text FROM pg_proc WHERE oid='+signature)==original_acl
+ assert db.run((ROOT/'docs/sql-proposals/lp01-afectaciones/13_restore_reader_REVIEW.sql').read_text()).returncode
+ result_path=HERE/'all-origins-result.json';result=json.loads(result_path.read_text());result['guardedRecoveryPreservesAcl']=True;result_path.write_text(json.dumps(result,indent=2)+'\n')
+ print('PASS all origins SQL + PC/mobile + guarded recovery')
 finally:x.close()

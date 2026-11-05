@@ -1,14 +1,14 @@
 {
   "contract": "LP-HOSTING-POLICY/1",
   "mode": "runtime",
-  "integration_pr": 195,
+  "integration_pr": 196,
   "hosting_certified": true,
   "project": "sgp-one-lab",
   "site": "sgp-one-lab",
   "approved_lp_files": {
     "production-line-tabs.js": "7cb31492565f71b0b64d840012f58c572b7b7f93e4a5eb66277d7daf63ffbf84",
     "src/modules/lp01-followup.js": "6887ae936c6e3695f003a1aed7286147ba723c37cf6473b2d4a8f33f217bbef5",
-    "src/modules/lp01-operation.js": "5f0c2847bf6aec5f84a59376dea442e6f73cf4880d4b6ab18396a6419d7e6ae4",
+    "src/modules/lp01-operation.js": "9a19735343293c352a9da8a60e3ec1711369767c9c5c55e5cb16c4186fb01184",
     "src/domain/lp01-visual-bridge.js": "6d4694f08e2724a34cd23a10f15ac5dd13b5936ad161fd73f322526dc84917aa",
     "scripts/prepare-lp-main-visual.py": "942601e7986e36cff74f2475c9f8a9c638993c15e4b7b91e5ffde6cbd62da5c5",
     "tests/lp01-integration/fixtures/lp-synthetic.json": "ed5812201e96feff0ab8b7bf5b4bcb06567978a4ab52207ac91056a22251d81b",
@@ -25,8 +25,8 @@
   },
   "legacy_navigation_sha256": "4f0992b1c98f4933fe5a0daa98d95fd85b35fceaffbbbd904fef7d422f21f0af",
   "certification_reference": "docs/linea-produccion/PUBLICACION_CONTROLADA_2026_11_03.md",
-  "baseline_version": "sites/sgp-one-lab/versions/07abe57ef1374fde",
-  "rollback_version": "sites/sgp-one-lab/versions/07abe57ef1374fde",
+  "baseline_version": "sites/sgp-one-lab/versions/7f429af5f0b5c5f7",
+  "rollback_version": "sites/sgp-one-lab/versions/7f429af5f0b5c5f7",
   "artifact_kind": "runtime",
   "backend_contracts_verified": true,
   "backend_probe_required": true
