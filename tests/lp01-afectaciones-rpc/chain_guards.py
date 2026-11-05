@@ -6,6 +6,7 @@ HERE=Path(__file__).parent;ROOT=HERE.parents[1]
 x=Fixture.__new__(Fixture)
 try:
  x.__init__(install_affectations=False);db=x.db
+ assert db.sql("SELECT count(*) FROM pg_default_acl WHERE defaclnamespace='public'::regnamespace AND defaclobjtype='f'")=='1'
  sql=(ROOT/'docs/sql-proposals/lp01-afectaciones/03_pdt_atomico_REVIEW.sql').read_text()
  pins=json.loads((HERE/'production-readonly/required-chain.json').read_text());checks=[]
  for pin in pins:
@@ -28,6 +29,8 @@ try:
  db.sql(sql)
  assert db.sql('SELECT NOT writes AND NOT atomic_pdt AND NOT pdt_links AND NOT physical FROM sgp_lp_afectaciones.config')=='t'
  assert db.sql("SELECT NOT has_function_privilege('anon','public.sgp_lp_afectaciones_aluminio_v1(text,text,text,date,int,jsonb,jsonb)','EXECUTE')")=='t'
+ for role in ['anon','authenticated','service_role']:
+  assert db.sql("SELECT NOT has_function_privilege("+lit(role)+",'public.sgp_lp_afectaciones_aluminio_v1(text,text,text,date,int,jsonb,jsonb)','EXECUTE')")=='t'
  out={'status':'PASS','environment':'PostgreSQL17.11 network none synthetic full catalog','sql03_sha256':hashlib.sha256(sql.encode()).hexdigest(),'functions':checks,'reserve_view_drift_rejected':True,'install_rollback':True,'default_disabled_no_api_grants':True}
  (HERE/'chain-guards-result.json').write_text(json.dumps(out,indent=2)+'\n');print(json.dumps(out))
 finally:

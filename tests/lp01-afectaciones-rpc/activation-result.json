@@ -1,0 +1,35 @@
+{
+  "status": "PASS",
+  "environment": "isolated PostgreSQL synthetic only",
+  "checks": [
+    {
+      "file": "07_api_read_ACTIVATE.sql",
+      "sha256": "1f64b8a4c6446b954a521fbd2740669fa41200bc2d5822daf04725f8648d7bed",
+      "anon_api_count": 2
+    },
+    {
+      "file": "08_api_write_ACTIVATE.sql",
+      "sha256": "04ee6c359919e5d4d21db7a78f520fd1fb6d843d8fa5d225a705da4cc867805d",
+      "anon_api_count": 6
+    },
+    {
+      "file": "09_enable_writes_ACTIVATE.sql",
+      "sha256": "7b112ec13b5e26cb592cb21d7eadee2df36f232698272e68db868333d548f45c",
+      "anon_api_count": 6
+    },
+    {
+      "file": "10_enable_aluminum_ACTIVATE.sql",
+      "sha256": "18c7d1b5a36a04aa46c186b095e498ee65858957ee3cbd9082952ab50ce55af4",
+      "anon_api_count": 6
+    },
+    {
+      "file": "11_enable_physical_ACTIVATE.sql",
+      "sha256": "41182a27d83cfd96af640b05699e1639b97262a092b2d50a11959c555fc0c900",
+      "anon_api_count": 6
+    }
+  ],
+  "v1_internal": true,
+  "private_schema_denied": true,
+  "other_roles_denied": true,
+  "invalid_session_denied": true
+}

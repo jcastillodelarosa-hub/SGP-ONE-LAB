@@ -10,10 +10,11 @@ class Fixture(a.ContractMethods):
   subprocess.run(db.docker+['exec',db.container,'createdb','-U','postgres','current_chain'],env=db.env,check=True,capture_output=True)
   db.sql('CREATE ROLE service_role')
   db.run=lambda q:subprocess.run(db.docker+['exec','-i',db.container,'psql','-d','current_chain','-X','-qAt','-U','postgres','-v','ON_ERROR_STOP=1'],env=db.env,input=q,text=True,capture_output=True)
+  db.sql('ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT EXECUTE ON FUNCTIONS TO anon,authenticated,service_role')
   db.sql(subprocess.check_output(['python',str(ROOT/'tests/mecanizado-parcial/setup.py')],text=True))
   db.sql(next((ROOT/'supabase/migrations').glob('*_mecanizado_programacion_parcial.sql')).read_text())
   # Current captured definitions, no stub or contract relaxation.
-  for name in ['legacy','wrappers','sources','helpers','nc-link']:
+  for name in ['legacy','wrappers','sources','helpers','nc-link','activation-configs']:
    for row in json.loads((HERE/'production-readonly'/f'{name}.json').read_text()):db.sql(row['definition'])
   db.sql("CREATE TABLE public.sgp_linea_plan_asignaciones(id uuid PRIMARY KEY,key_produccion text REFERENCES public.sgp_producciones,fecha date,turno int,cantidad int,prioridad int,estado text,origen_id uuid);CREATE TABLE public.sgp_configuracion_general(clave text PRIMARY KEY,valor jsonb);INSERT INTO public.sgp_configuracion_general VALUES('HORARIOS_TURNOS','{\"lunes_sabado\":{\"turno1\":{\"inicio\":\"07:00\",\"fin\":\"19:00\"},\"turno2\":{\"inicio\":\"19:00\",\"fin\":\"07:00\"}},\"domingo\":{\"turno1\":{\"inicio\":\"07:00\",\"fin\":\"18:00\"},\"turno2\":{\"inicio\":\"18:00\",\"fin\":\"05:00\"}}}');")
   db.sql((ROOT/'docs/sql-proposals/lp01-operacion/01_operacion_REVIEW.sql').read_text())

@@ -11,7 +11,8 @@
     "signature": "public.sgp_pdt_registro_fuentes_v4(text,text,jsonb)",
     "body_md5": "e19fb3c3380aa601a1d50dd1b0dc8d3e",
     "proconfig": [
-      "search_path=\"\""
+      "search_path=\"\"",
+      "statement_timeout=45s"
     ],
     "security_definer": true
   },
@@ -51,7 +52,8 @@
     "signature": "sgp_pdt_multiorigen.fuentes(text,text,jsonb)",
     "body_md5": "7cca133124fdb1fc47360994dc102ad3",
     "proconfig": [
-      "search_path=\"\""
+      "search_path=\"\"",
+      "statement_timeout=45s"
     ],
     "security_definer": true
   },

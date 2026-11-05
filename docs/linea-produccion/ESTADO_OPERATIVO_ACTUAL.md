@@ -1,3 +1,15 @@
+## LAB v382 · activación gradual autorizada · 05/11/2026
+
+Johan autorizó explícitamente cambio compartido PDT, seis RPC para anon y activación
+gradual. Preflight actual:15 cuerpos y vista coinciden; dos lectores incluyen timeout45s.
+Pins/fixture ahora reproducen esa configuración exacta sin modificar dependencias.
+Default ACL public concede service_role:01–05 revocan también ese rol solo en objetos
+nuevos. Fixture aplica defaults en la BD correcta; revisión independiente lo comprobó.
+Scripts07–11 separan lectura, escrituras API y flags; pins7RPC/ACL/RLS fallan cerrado.
+Sin grants privados/v1 ni otros roles. Snapshot recovery del registrador, manifiesto y
+pruebas en docs/sql-proposals/lp01-afectaciones y tests/lp01-afectaciones-rpc.
+Estado al preparar: todavía sin mutaciones productivas; publicación coordinada por padre.
+
 # Línea de Producción — estado operativo actual
 
 ## LAB v382 · NC opcional preparada, contrato compartido · 05/11/2026

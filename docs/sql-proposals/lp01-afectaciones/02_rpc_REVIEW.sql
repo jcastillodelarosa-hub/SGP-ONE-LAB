@@ -153,7 +153,7 @@ DECLARE s jsonb;ln text;uid text;op text:=p_cmd->>'action';rid uuid:=(p_cmd->>'i
  IF op='VALIDATE' THEN INSERT INTO sgp_lp_afectaciones.consolidados VALUES(p_key,p_stage,rev+1,q,bal,rid);END IF;
  RETURN result;
 END $$;
-REVOKE ALL ON ALL TABLES IN SCHEMA sgp_lp_afectaciones FROM PUBLIC,anon,authenticated;
-REVOKE ALL ON ALL FUNCTIONS IN SCHEMA sgp_lp_afectaciones FROM PUBLIC,anon,authenticated;
-REVOKE ALL ON FUNCTION public.sgp_lp_afectaciones_consultar_v1(text,text,text),public.sgp_lp_afectaciones_comando_v1(text,text,text,date,int,jsonb) FROM PUBLIC,anon,authenticated;
+REVOKE ALL ON ALL TABLES IN SCHEMA sgp_lp_afectaciones FROM PUBLIC,anon,authenticated,service_role;
+REVOKE ALL ON ALL FUNCTIONS IN SCHEMA sgp_lp_afectaciones FROM PUBLIC,anon,authenticated,service_role;
+REVOKE ALL ON FUNCTION public.sgp_lp_afectaciones_consultar_v1(text,text,text),public.sgp_lp_afectaciones_comando_v1(text,text,text,date,int,jsonb) FROM PUBLIC,anon,authenticated,service_role;
 COMMIT;

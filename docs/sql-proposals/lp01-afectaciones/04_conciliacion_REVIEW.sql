@@ -81,7 +81,7 @@ DO $patch$ DECLARE def text;BEGIN
  EXECUTE replace(def,$n$IF op='CONFIRM' AND cfg.physical IS DISTINCT FROM true THEN$n$,$r$IF op='CONFIRM' AND s->>'rol' NOT IN('LIDER LINEA','COORDINADOR') THEN RAISE EXCEPTION 'CONFIRMACION_ROL_NO_ACREDITADO';END IF;
  IF op='CONFIRM' AND cfg.physical IS DISTINCT FROM true THEN$r$);
 END $patch$;
-REVOKE ALL ON ALL TABLES IN SCHEMA sgp_lp_afectaciones FROM PUBLIC,anon,authenticated;
-REVOKE ALL ON ALL FUNCTIONS IN SCHEMA sgp_lp_afectaciones FROM PUBLIC,anon,authenticated;
-REVOKE ALL ON FUNCTION public.sgp_lp_afectaciones_legado_v1(text,text,text),public.sgp_lp_afectaciones_conciliar_v1(text,text,text,uuid,text,bigint,jsonb,text) FROM PUBLIC,anon,authenticated;
+REVOKE ALL ON ALL TABLES IN SCHEMA sgp_lp_afectaciones FROM PUBLIC,anon,authenticated,service_role;
+REVOKE ALL ON ALL FUNCTIONS IN SCHEMA sgp_lp_afectaciones FROM PUBLIC,anon,authenticated,service_role;
+REVOKE ALL ON FUNCTION public.sgp_lp_afectaciones_legado_v1(text,text,text),public.sgp_lp_afectaciones_conciliar_v1(text,text,text,uuid,text,bigint,jsonb,text) FROM PUBLIC,anon,authenticated,service_role;
 COMMIT;

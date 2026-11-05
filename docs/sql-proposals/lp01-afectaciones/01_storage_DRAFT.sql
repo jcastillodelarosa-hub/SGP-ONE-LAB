@@ -2,7 +2,7 @@
 -- No historical migration, cloning from turn snapshots, PDT writes or SALE changes.
 BEGIN;
 CREATE SCHEMA sgp_lp_afectaciones;
-REVOKE ALL ON SCHEMA sgp_lp_afectaciones FROM PUBLIC,anon,authenticated;
+REVOKE ALL ON SCHEMA sgp_lp_afectaciones FROM PUBLIC,anon,authenticated,service_role;
 CREATE TABLE sgp_lp_afectaciones.ambitos (
  key text NOT NULL REFERENCES public.sgp_producciones(key_produccion),
  etapa text NOT NULL CHECK(etapa IN ('ENSAMBLE','EMPAQUE')),
@@ -53,12 +53,12 @@ CREATE TABLE sgp_lp_afectaciones.consolidados (
 );
 CREATE FUNCTION sgp_lp_afectaciones.inmutable() RETURNS trigger LANGUAGE plpgsql SET search_path='' AS $$
 BEGIN RAISE EXCEPTION 'HISTORIAL_INMUTABLE';END $$;
-REVOKE ALL ON FUNCTION sgp_lp_afectaciones.inmutable() FROM PUBLIC,anon,authenticated;
+REVOKE ALL ON FUNCTION sgp_lp_afectaciones.inmutable() FROM PUBLIC,anon,authenticated,service_role;
 CREATE TRIGGER eventos_inmutables BEFORE UPDATE OR DELETE ON sgp_lp_afectaciones.eventos FOR EACH ROW EXECUTE FUNCTION sgp_lp_afectaciones.inmutable();
 ALTER TABLE sgp_lp_afectaciones.ambitos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE sgp_lp_afectaciones.reportes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE sgp_lp_afectaciones.fuentes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE sgp_lp_afectaciones.eventos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE sgp_lp_afectaciones.consolidados ENABLE ROW LEVEL SECURITY;
-REVOKE ALL ON ALL TABLES IN SCHEMA sgp_lp_afectaciones FROM PUBLIC,anon,authenticated;
+REVOKE ALL ON ALL TABLES IN SCHEMA sgp_lp_afectaciones FROM PUBLIC,anon,authenticated,service_role;
 COMMIT;

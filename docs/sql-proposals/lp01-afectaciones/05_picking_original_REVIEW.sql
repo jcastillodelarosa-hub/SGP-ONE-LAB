@@ -30,5 +30,5 @@ DO $patch$ DECLARE def text;needle text:='z.firma_legado=sgp_lp_afectaciones.fir
  EXECUTE replace(def,$n$ELSIF op='VALIDATE' THEN$n$,$r$ELSIF op='VALIDATE' THEN
   IF NOT sgp_lp_afectaciones.picking_cubierto(p_key,p_stage) THEN RAISE EXCEPTION 'PICKING_SIN_CONCILIAR';END IF;$r$);
 END $patch$;
-REVOKE ALL ON FUNCTION sgp_lp_afectaciones.picking_cubierto(text,text),public.sgp_lp_afectaciones_desde_picking_v1(text,text,text,date,integer,jsonb,uuid) FROM PUBLIC,anon,authenticated;
+REVOKE ALL ON FUNCTION sgp_lp_afectaciones.picking_cubierto(text,text),public.sgp_lp_afectaciones_desde_picking_v1(text,text,text,date,integer,jsonb,uuid) FROM PUBLIC,anon,authenticated,service_role;
 COMMIT;

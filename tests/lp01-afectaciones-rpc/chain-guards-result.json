@@ -1,7 +1,7 @@
 {
   "status": "PASS",
   "environment": "PostgreSQL17.11 network none synthetic full catalog",
-  "sql03_sha256": "cc8ebb1744e79933fa41bb5ce0a70ca366b142e7f34cdb8a256fe04ecb4c41dd",
+  "sql03_sha256": "b944329ac0037906ab8e9d9c3b8bf0b1f6ee3c5c3f31fa59c9dcdcf4e372165f",
   "functions": [
     {
       "signature": "public.sgp_pdt_registrar_v4(text,text,jsonb,jsonb,uuid)",

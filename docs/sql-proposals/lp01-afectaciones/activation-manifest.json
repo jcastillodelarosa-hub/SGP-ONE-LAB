@@ -1,27 +1,27 @@
 {
   "candidate": "Containing Git commit; exact SQL bytes below",
   "version": "LAB v382",
-  "status": "ISOLATED_OPTIONAL_NC_PREPARED_SHARED_CONTRACT_APPROVAL_PENDING",
+  "status": "AUTHORIZED_GRADUAL_ACTIVATION_PREFLIGHT",
   "ordered_files": [
     {
       "path": "docs/sql-proposals/lp01-afectaciones/01_storage_DRAFT.sql",
-      "sha256": "e2b9b5c7a822b9b680c98e16486cc2ba36d5b352fdf62b525fb92f3ff0e86d91"
+      "sha256": "a1c818f56b73278aeda5e94d47b0b106c76be8dc1c9fdc0c7d9f0f0b20e1cddd"
     },
     {
       "path": "docs/sql-proposals/lp01-afectaciones/02_rpc_REVIEW.sql",
-      "sha256": "55f1e1d0966e86d583d47f61a3e372bfbf92de83b030d5d7164745306c7c6b6a"
+      "sha256": "4e08ecaf76bd95c5bf92f8dbe3f72b59de7bfdad2072b9774c663578de115fd1"
     },
     {
       "path": "docs/sql-proposals/lp01-afectaciones/03_pdt_atomico_REVIEW.sql",
-      "sha256": "cc8ebb1744e79933fa41bb5ce0a70ca366b142e7f34cdb8a256fe04ecb4c41dd"
+      "sha256": "b944329ac0037906ab8e9d9c3b8bf0b1f6ee3c5c3f31fa59c9dcdcf4e372165f"
     },
     {
       "path": "docs/sql-proposals/lp01-afectaciones/04_conciliacion_REVIEW.sql",
-      "sha256": "2d1fb5ef53c835d04a01a0602bcacd1cc66bd9a825b3504d07afea1a9eab65bd"
+      "sha256": "e1c31874505dd465ba690959dc0384f2dd924223157a0449c857744448195c2e"
     },
     {
       "path": "docs/sql-proposals/lp01-afectaciones/05_picking_original_REVIEW.sql",
-      "sha256": "4e74ca817f7177e2c2cb89c4cccc0d4a236e5aed977b563bf158f7d7ed984609"
+      "sha256": "26281ca32bec9ccfc6b03606b823c34dc5ee193f2ebf02f5658fb90046ba9cdd"
     },
     {
       "path": "docs/sql-proposals/lp01-afectaciones/06_nc_opcional_REVIEW.sql",
@@ -36,5 +36,27 @@
     "before_md5": "2c9da616eb830fd6db20973e9bec4155",
     "after_md5": "d1195cca8c35315007969da936979546",
     "effect": "Native PDT optional NC immediately on applying 06, independent of LP flags; unchanged grants"
-  }
+  },
+  "activation_files": [
+    {
+      "path": "docs/sql-proposals/lp01-afectaciones/07_api_read_ACTIVATE.sql",
+      "sha256": "1f64b8a4c6446b954a521fbd2740669fa41200bc2d5822daf04725f8648d7bed"
+    },
+    {
+      "path": "docs/sql-proposals/lp01-afectaciones/08_api_write_ACTIVATE.sql",
+      "sha256": "04ee6c359919e5d4d21db7a78f520fd1fb6d843d8fa5d225a705da4cc867805d"
+    },
+    {
+      "path": "docs/sql-proposals/lp01-afectaciones/09_enable_writes_ACTIVATE.sql",
+      "sha256": "7b112ec13b5e26cb592cb21d7eadee2df36f232698272e68db868333d548f45c"
+    },
+    {
+      "path": "docs/sql-proposals/lp01-afectaciones/10_enable_aluminum_ACTIVATE.sql",
+      "sha256": "18c7d1b5a36a04aa46c186b095e498ee65858957ee3cbd9082952ab50ce55af4"
+    },
+    {
+      "path": "docs/sql-proposals/lp01-afectaciones/11_enable_physical_ACTIVATE.sql",
+      "sha256": "41182a27d83cfd96af640b05699e1639b97262a092b2d50a11959c555fc0c900"
+    }
+  ]
 }
