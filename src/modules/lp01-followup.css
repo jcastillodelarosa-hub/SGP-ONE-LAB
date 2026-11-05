@@ -137,3 +137,5 @@
 .lp-affect-cause-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}
 .lp-affect-cause-tabs button[aria-pressed=true]{background:#eaf2fb;border-color:#1264c8;color:#103b73}
 .lp-tracking .lp-tracking-detail-cell[hidden],.lp-tracking [hidden]{display:none}
+
+.lp-tracking [data-report-context] details{border:1px solid #b7cbe2;border-radius:8px;padding:10px 12px;margin:0 0 14px;background:#f5f9ff}.lp-tracking [data-report-context] summary{color:#103b73;font-weight:700;cursor:pointer;min-height:44px;padding:10px 0;box-sizing:border-box}.lp-tracking [data-report-context] form{max-width:650px}.lp-tracking [data-report-context] [role=status]{color:#25496f}

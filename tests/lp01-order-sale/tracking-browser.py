@@ -48,7 +48,7 @@ try:
      if page.locator('#mobileMenuToggle').is_visible():page.locator('#mobileMenuToggle').click()
      page.locator('.nav [data-view="ensamble"]').click();page.locator('#productionTrackingTab').click();page.wait_for_selector('.lp-tracking-table')
      page.get_by_role('button',name='Consultar o definir SALE por orden').first.click();page.wait_for_selector('.lp-sale-row [name=quantity]')
-    open_tracking();cell=page.locator('.lp-sale-row').first
+    open_tracking();page.locator('.lp-tracking-table tbody summary').first.click();assert 'SALE se consulta por orden' in page.locator('[data-sale-context]').inner_text();assert 'edición actual aún exige' not in page.locator('#lp-tracking-drawer').inner_text();assert page.locator('[data-live-operate]').inner_text()=='Avance · requiere asignación';page.locator('[data-tracking-close]').click();cell=page.locator('.lp-sale-row').first
     cell.locator('[name=quantity]').fill('8');cell.locator('[name=observation]').fill('Definición conservada');cell.locator('[name=observation]').focus()
     page.evaluate("window.qaInput=document.querySelector('.lp-sale-row [name=observation]');qaInput.setSelectionRange(4,9)")
     for balance in [287,288]:
