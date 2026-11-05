@@ -1,28 +1,34 @@
 [
   {
     "width": 1440,
-    "status": "PASS",
-    "fullApplication": true,
-    "nativeSql": true,
-    "unassigned": false,
-    "quietRefreshFocusAndSelection": true,
-    "filterAndDrawerPreserveDraft": true,
+    "header": "Disponible",
+    "rows": [
+      "40",
+      "Por definir"
+    ],
+    "rowHeightBefore": 82,
+    "rowHeightAfterQuiet": 82,
+    "editorModalAfterQuiet": true,
+    "focusPreserved": true,
+    "filterAndCancel": true,
+    "controllerQuietFocusAndSelection": true,
     "reloadPersistence": true,
-    "uncertainRetryAcrossFilterSameId": true,
-    "originalOperationUnchanged": true,
-    "revocationClears": true
+    "uncertainRetryAcrossFilterSameId": true
   },
   {
     "width": 390,
-    "status": "PASS",
-    "fullApplication": true,
-    "nativeSql": true,
-    "unassigned": true,
-    "quietRefreshFocusAndSelection": true,
-    "filterAndDrawerPreserveDraft": true,
+    "header": "Disponible",
+    "rows": [
+      "40",
+      "Por definir"
+    ],
+    "rowHeightBefore": 250,
+    "rowHeightAfterQuiet": 250,
+    "editorModalAfterQuiet": true,
+    "focusPreserved": true,
+    "filterAndCancel": true,
+    "controllerQuietFocusAndSelection": true,
     "reloadPersistence": true,
-    "uncertainRetryAcrossFilterSameId": true,
-    "originalOperationUnchanged": true,
-    "revocationClears": true
+    "uncertainRetryAcrossFilterSameId": true
   }
 ]
