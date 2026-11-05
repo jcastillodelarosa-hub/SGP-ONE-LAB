@@ -1,10 +1,10 @@
 <!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/src/modules/lp01-followup.css"><body><p>QA · DATOS SINTÉTICOS</p><section class="lp-followup"><div id="qa"></div></section><script type="module">
 import {renderTracking} from '/src/modules/lp01-tracking.js';
 import {globalTrackingData} from '/src/domain/lp01-tracking-global.js';
-window.qa={calls:0,current:true,quantity:40};const context={line:'PANELES_2',stage:'ENSAMBLE'};
+window.qa={calls:0,current:true,quantity:40,failOnce:new URLSearchParams(location.search).has('fail')};const context={line:'PANELES_2',stage:'ENSAMBLE'};
 const make=(n,b)=>({key:'QA'+n+'|PANELES_2',line:'PANELES_2',stage:'ENSAMBLE',classification:'ABIERTA',assignments:[],operations:[],oficial:{key_produccion:'QA'+n+'|PANELES_2',id_linea:'PANELES_2',produccion:'ORDEN DEMO 0'+n,sistema:'ES-EL400',reserva_al:'R'+n,saldos_inicializados:true,presente_ultimo_export:true,saldo_ensamble:b,saldo_empaque:10,semana_base:45,anio:2026}});
 const source={productions:[make(1,60),make(2,32)],contract:'LP-SEGUIMIENTO-1',role:'COORDINADOR',line:'PANELES_2',stage:'ENSAMBLE'};
-const provider=key=>({isCurrent:()=>qa.current,read:async()=>{qa.calls++;const quantity=key.startsWith('QA1')?qa.quantity:null;return {quantity,history:quantity===null?[]:[{at:'05 nov',user:'QA',before:{cantidad:32},quantity,observation:'QA'}],revision:quantity===null?0:1,capabilities:['READ','DEFINE'],source:{available:60,fingerprint:'QA'}};},save:async()=>{}});
+const provider=key=>({isCurrent:()=>qa.current,read:async()=>{qa.calls++;if(key.startsWith('QA1')&&qa.failOnce){qa.failOnce=false;throw Error('STATEMENT_TIMEOUT');}const quantity=key.startsWith('QA1')?qa.quantity:null;return {quantity,history:quantity===null?[]:[{at:'05 nov',user:'QA',before:{cantidad:32},quantity,observation:'QA'}],revision:quantity===null?0:1,capabilities:['READ','DEFINE'],source:{available:60,fingerprint:'QA'}};},save:async()=>{}});
 const state={sort:'age',direction:'asc',columnFilters:{}};
 window.qaRender=()=>renderTracking({host:document.querySelector('#qa'),data:globalTrackingData(source,context),context,state,orderSaleProvider:provider});
 window.qaChange=()=>{source.productions[0].oficial.saldo_ensamble--;qaRender()};qaRender();

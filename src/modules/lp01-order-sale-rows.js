@@ -15,7 +15,7 @@ export function retainOrderSaleRows(host,provider,authorizedKeys){
   while(entry.active<MAX_READS&&entry.queue.length){
    const c=entry.queue.shift();if(!c||c.status!=='queued'||!c.node.isConnected||owners.get(host)!==entry)continue;
    c.status='loading';entry.active++;
-   Promise.resolve().then(()=>provider(c.key)).then(t=>mountOrderSaleCell(c.node,t)).then(dispose=>{if(owners.get(host)===entry&&entry.cells.get(c.key)===c){c.dispose=dispose;c.status='mounted';}else dispose?.();}).catch(()=>{if(c.node.isConnected&&owners.get(host)===entry){c.node.innerHTML='<button type="button" data-sale-try>Disponible no disponible · Actualizar</button>';c.node.querySelector('[data-sale-try]').onclick=()=>{c.status='idle';queue(c);};}}).finally(()=>{entry.active--;pump();});
+   Promise.resolve().then(()=>provider(c.key)).then(t=>mountOrderSaleCell(c.node,t)).then(dispose=>{if(owners.get(host)===entry&&entry.cells.get(c.key)===c){c.dispose=dispose;c.status='mounted';}else dispose?.();}).catch(()=>{if(c.node.isConnected&&owners.get(host)===entry){c.node.innerHTML='<button type="button" data-sale-try aria-label="No se pudo consultar Disponible. Reintentar" title="No se pudo consultar Disponible. Reintentar">Error · ↻</button>';c.node.querySelector('[data-sale-try]').onclick=()=>{c.status='idle';queue(c);};}}).finally(()=>{entry.active--;pump();});
   }
  };
  const queue=c=>{if(c.status!=='idle')return;c.status='queued';entry.queue.push(c);pump();};

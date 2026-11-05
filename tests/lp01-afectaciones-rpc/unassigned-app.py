@@ -41,26 +41,26 @@ try:
      page.locator('.nav [data-view="ensamble"]').click()
      if user=='COORDINADOR':
       page.locator('#productionTrackingTab').click();page.wait_for_selector('.lp-tracking-table');page.locator('.lp-tracking-table tbody summary').first.click();assert page.locator('[data-tracking-tab=Afectaciones]').get_attribute('aria-pressed')=='true';page.wait_for_selector('.lp-pdt-compact');assert any(r['id']==original for r in (x.read2(user).get('aluminumPending') or x.read2(user)['pickingPending'])['rows']);assert page.locator('.lp-aluminum-pending').is_visible()
-      assert page.locator('[data-order-affectations] form').is_hidden()
+      assert page.locator('[data-affect-content=NC_AL] form').is_hidden()
       assert page.locator('[data-tracking-context] option').count()==1
       assert page.locator('[data-tracking-context]').is_hidden();assert page.locator('[data-sale-context]').count()==0
       page.locator('[data-order-type=NC_AL]').click();page.locator('[data-register-affectation] summary').click();form=page.locator('[data-affect-context]');form.locator('[name=date]').fill('2026-11-01');form.locator('[name=shift]').select_option('2');form.locator('button').click()
-      page.wait_for_function("document.querySelector('[data-context-status]').textContent.includes('No hay un turno')")
-      assert page.locator('[data-order-affectations] form').is_hidden()
+      page.wait_for_function("document.querySelector('[data-context-status]')?.textContent.includes('No hay un turno')")
+      assert page.locator('[data-affect-content=NC_AL] form').is_hidden()
       form.locator('[name=shift]').select_option('1');form.locator('button').click()
-      page.locator('[data-order-type=NOVEDAD]').click();report=page.locator('[data-type-pane=NOVEDAD] form');report.wait_for(state='visible')
-      page.locator('[data-order-type=NOVEDAD]').click();report=page.locator('[data-type-pane=NOVEDAD] form');report.locator('[name=quantity]').fill('3');report.locator('[name=observation]').fill('QA sin asignación');report.locator('button[type=submit]').click()
+      page.locator('[data-order-type=NOVEDAD]').click();report=page.locator('[data-affect-content=NOVEDAD] form');report.wait_for(state='visible')
+      page.locator('[data-order-type=NOVEDAD]').click();report=page.locator('[data-affect-content=NOVEDAD] form');report.locator('[name=quantity]').fill('3');report.locator('[name=observation]').fill('QA sin asignación');report.locator('button[type=submit]').click()
       page.wait_for_function("document.querySelector('[data-type-pane=NOVEDAD] [data-result]').textContent==='Guardado'")
       assert x.read2('COORDINADOR')['reports'][0]['quantity']==3
       assert db.sql('SELECT count(*) FROM sgp_lp_operacion.ordenes')=='0'
       assert db.sql('SELECT count(*) FROM public.sgp_linea_plan_asignaciones')=='0'
-      page.locator('[data-order-type=NC_AL]').click();report=page.locator('[data-type-pane=NC_AL] form');report.locator('[name=aluminumSource]').select_option('new')
+      page.locator('[data-order-type=NC_AL]').click();report=page.locator('[data-affect-content=NC_AL] form');report.locator('[name=aluminumSource]').select_option('new')
       page.wait_for_selector('[data-pdt-draft] table')
       assert 'fabricación' in page.locator('[data-pdt-draft]').inner_text().lower()
-      page.locator('[data-order-type=NOVEDAD]').click();report=page.locator('[data-type-pane=NOVEDAD] form');report.locator('[name=observation]').fill('Borrador que debe conservarse')
-      page.evaluate("window.qaPanel=document.querySelector('[data-type-pane=NOVEDAD] form')");prior_reads=reads[0]
+      page.locator('[data-order-type=NOVEDAD]').click();report=page.locator('[data-affect-content=NOVEDAD] form');report.locator('[name=observation]').fill('Borrador que debe conservarse')
+      page.evaluate("window.qaPanel=document.querySelector('[data-affect-content=NOVEDAD] form')");prior_reads=reads[0]
       db.sql("UPDATE public.sgp_producciones SET saldo_ensamble=287 WHERE key_produccion="+f.lit(x.key));page.clock.fast_forward(20000)
-      page.wait_for_timeout(200);assert reads[0]>prior_reads,'Expected actual quiet RPC';assert page.evaluate("window.qaPanel===document.querySelector('[data-type-pane=NOVEDAD] form')");assert page.locator('[data-type-pane=NOVEDAD] [name=observation]').input_value()=='Borrador que debe conservarse'
+      page.wait_for_timeout(200);assert reads[0]>prior_reads,'Expected actual quiet RPC';assert page.evaluate("window.qaPanel===document.querySelector('[data-affect-content=NOVEDAD] form')");assert page.locator('[data-type-pane=NOVEDAD] [name=observation]').input_value()=='Borrador que debe conservarse'
       page.screenshot(path=str(HERE/f'evidence/unassigned-{width}.png'),full_page=True)
       before=int(db.sql('SELECT count(*) FROM public.sgp_aluminio_pendientes'))
       command=x.command('CREATE',2,user='COORDINADOR',cause='NC_AL');pieces=[{**p,'nc':''} for p in x.pieces('COORDINADOR')]

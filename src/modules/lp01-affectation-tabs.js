@@ -1,9 +1,9 @@
 import {mountAffectationsPanel} from './lp01-affectations-panel.js';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const types=[['ALUMINIO','Aluminio'],['NC_AL','PDT Aluminio'],['NC_V','NC Vidrio'],['TECNO','Vidrio Tecno'],['NOVEDAD','Novedades'],['ACCESORIOS','Accesorios']];
+const types=[['NC_AL','PDT Aluminio'],['NC_V','NC Vidrio'],['TECNO','Vidrio Tecno'],['NOVEDAD','Novedades'],['ACCESORIOS','Accesorios']];
 /** Panes stay mounted while changing tabs so their forms keep independent drafts. */
 export function mountAffectationTabs(host,{transport,cause,onSelect=()=>{},details=()=>null}){
- let selected=types.some(([k])=>k===cause)?cause:'ALUMINIO',disposed=false;const cleanups=[],mounted=new Set();
+ let selected=types.some(([k])=>k===cause)?cause:'NC_AL',disposed=false;const cleanups=[],mounted=new Set();
  host.innerHTML='<nav class="lp-affect-cause-tabs lp-order-type-tabs" aria-label="Tipos de afectación">'+types.map(([key,label])=>'<button type="button" data-order-type="'+key+'" aria-pressed="false">'+label+'</button>').join('')+'</nav>'+types.map(([key,label])=>'<section data-type-pane="'+key+'" aria-label="'+label+'" hidden></section>').join('');
  const alive=()=>!disposed&&host.isConnected;
  function glass(){const box=host.querySelector('[data-type-pane=TECNO]');if(!box||!mounted.has('TECNO'))return;const d=details(),g=d?.glass;
@@ -15,7 +15,8 @@ export function mountAffectationTabs(host,{transport,cause,onSelect=()=>{},detai
   if(key==='ACCESORIOS'){box.innerHTML='<h4>Accesorios</h4><p>Las piezas importadas no acreditan ventanas afectadas. El registro de esta causa aún requiere habilitación y contrato propio.</p><fieldset disabled><label>Accesorio / faltante<input></label><label>Ventanas afectadas · indicadas por líder o coordinador<input type=number min=0 step=1></label><label>Observación de esta afectación<textarea rows=2></textarea></label><button type=button>Guardar afectación</button></fieldset><p>No se guardarán datos en este formulario.</p>';return;}
   let ncReferences=null;if(key==='NC_V'){box.textContent='Consultando referencias NC…';try{ncReferences=await transport.readGlassNc();}catch(e){if(e.message==='NO_AUTORIZADO'){box.textContent='Acceso revocado.';return;}ncReferences={available:false,canReport:false,references:[]};}}
   if(!alive())return;
-  const cleanup=await mountAffectationsPanel(box,transport,{fixedCause:key==='ALUMINIO'?'NC_AL':key,pendingOnly:key==='ALUMINIO',cause:key==='ALUMINIO'?'ALUMINIO':key,ncReferences});if(!alive())cleanup();else cleanups.push(cleanup);
+  const content=document.createElement('div');content.dataset.affectContent=key;box.append(content);
+  const cleanup=await mountAffectationsPanel(content,transport,{fixedCause:key,cause:key,ncReferences});if(!alive())cleanup();else cleanups.push(cleanup);
  }
  host.querySelectorAll('[data-order-type]').forEach(b=>{b.onclick=()=>void select(b.dataset.orderType);b.onkeydown=e=>{if(!['ArrowRight','ArrowLeft','Home','End'].includes(e.key))return;e.preventDefault();const i=types.findIndex(([k])=>k===selected),next=e.key==='Home'?0:e.key==='End'?types.length-1:(i+(e.key==='ArrowRight'?1:types.length-1))%types.length;const button=host.querySelector('[data-order-type="'+types[next][0]+'"]');button.focus();void select(types[next][0]);};});
  void select(selected);return {refreshGlass:glass,dispose(){disposed=true;cleanups.forEach(f=>f());}};

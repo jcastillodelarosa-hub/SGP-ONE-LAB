@@ -50,7 +50,7 @@ export async function mountOrderSaleCell(host,transport){
  async function refresh(){
   if(busy||pending||!alive())return;busy=true;
   try{const next=await transport.read();if(alive()){state=next;message='';show();}}
-  catch(e){if(!denied(e)&&alive()){host.innerHTML='<button type="button" class="lp-sale-value" data-sale-load>Disponible no disponible · Actualizar</button>';host.querySelector('[data-sale-load]').onclick=()=>void refresh();}}
+  catch(e){if(!denied(e)&&alive()){host.innerHTML='<button type="button" class="lp-sale-value" data-sale-load aria-label="No se pudo consultar Disponible. Reintentar" title="No se pudo consultar Disponible. Reintentar">Error · ↻</button>';host.querySelector('[data-sale-load]').onclick=()=>void refresh();}}
   finally{busy=false;}
  }
  host.textContent='Consultando disponible…';await refresh();return dispose;

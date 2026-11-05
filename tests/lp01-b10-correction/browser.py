@@ -15,21 +15,26 @@ with sync_playwright() as p:
   row=page.locator('tr').filter(has=page.locator('[data-order-summary="QA1|PANELES_2"]'))
   row.locator('summary').click();page.wait_for_selector('.lp-affect-cause-tabs')
   assert page.locator('[data-tracking-tab="Afectaciones"]').get_attribute('aria-pressed')=='true'
-  assert page.locator('.lp-affect-reports article:visible').count()==4
+  assert page.locator('.lp-affect-reports article:visible').count()==1
   assert page.locator('#lp-tracking-drawer').evaluate('(e)=>getComputedStyle(e).position')!='fixed'
   if width<700: assert row.locator('#lp-tracking-drawer').count()==1
   else: assert page.locator('#lp-tracking-drawer').evaluate('(e)=>e.getBoundingClientRect().width')>900
-  for cause in ['NC_AL','NC_V','TECNO','NOVEDAD']:
-   row.locator('[data-summary-cause="'+cause+'"]').click();page.wait_for_selector('[data-cause-filter="'+cause+'"][aria-pressed="true"]')
+  nav=page.locator('.lp-order-type-tabs');top=nav.evaluate('(e)=>e.offsetTop')
+  assert page.locator('[data-order-type]').count()==5 and page.locator('[data-order-type=ALUMINIO]').count()==0
+  for cause in ['NC_AL','NC_V','NOVEDAD']:
+   row.locator('[data-summary-cause="'+cause+'"]').click();page.wait_for_selector('[data-order-type="'+cause+'"][aria-pressed="true"]')
    assert page.locator('.lp-affect-reports article:visible').count()==1
    assert page.locator('.lp-affect-reports article:visible').get_attribute('data-report-cause')==cause
-  page.locator('[data-cause-filter="NC_AL"]').click();assert all(x in page.locator('.lp-aluminum-pending').inner_text() for x in ['PICKING','PRODUCCION','LEGACY','ENSAMBLE','EMPAQUE'])
-  page.locator('[data-cause-filter=""]').click();assert page.locator('.lp-affect-reports article:visible').count()==4
+   assert page.locator('[data-type-pane="'+cause+'"] > [data-report-context]').count()==1
+   assert abs(nav.evaluate('(e)=>e.offsetTop')-top)<2
+  page.locator('[data-order-type=NC_AL]').click();assert all(x in page.locator('.lp-aluminum-pending:visible').inner_text() for x in ['PICKING','PRODUCCION','LEGACY','ENSAMBLE','EMPAQUE'])
+  row.locator('[data-summary-cause=TECNO]').click();page.wait_for_selector('[data-order-type=TECNO][aria-pressed=true]');assert page.locator('.lp-glass-estimate').is_visible()
+  assert page.locator('[data-report-context]').is_hidden()
   page.locator('[data-tracking-close]').click();assert page.locator('#lp-tracking-drawer').is_hidden()
-  page.locator('tr').filter(has=page.locator('[data-order-summary="QA2|PANELES_2"]')).locator('summary').click();page.wait_for_selector('[data-reports-empty]:visible');assert 'No se devolvieron reportes' in page.locator('[data-reports-empty]').inner_text();assert 'Sin pendientes devueltos' in page.locator('.lp-aluminum-pending').inner_text()
+  page.locator('tr').filter(has=page.locator('[data-order-summary="QA2|PANELES_2"]')).locator('summary').click();page.wait_for_selector('[data-reports-empty]:visible');assert 'No se devolvieron reportes' in page.locator('[data-reports-empty]').inner_text();assert 'Sin pendientes devueltos' in page.locator('.lp-aluminum-pending:visible').inner_text()
   page.locator('[data-tracking-close]').click();row.locator('summary').click();page.wait_for_selector('.lp-affect-cause-tabs');page.locator('[data-register-affectation] summary').click();page.locator('[data-affect-context] [name=date]').fill('2026-11-02');page.locator('[data-affect-context] [name=shift]').select_option('1');page.evaluate('controller.load({quiet:true})');page.wait_for_timeout(300);assert page.locator('[data-affect-context] [name=date]').input_value()=='2026-11-02';assert page.locator('[data-affect-context] [name=shift]').input_value()=='1'
   page.locator('[data-tracking-close]').click();row.locator('summary').focus();page.keyboard.press('Enter');page.wait_for_selector('.lp-affect-cause-tabs');page.locator('[data-tracking-close]').focus();page.keyboard.press('Escape');assert page.locator('#lp-tracking-drawer').is_hidden();assert page.evaluate("document.activeElement.matches('details[data-order-part] > summary')")
-  row.locator('[data-summary-cause="NOVEDAD"]').click();page.wait_for_selector('[data-cause-filter="NOVEDAD"][aria-pressed="true"]');page.locator('#lp-tracking-drawer').screenshot(path=f'/tmp/b10-detail-{width}.png');page.screenshot(path=f'/tmp/b10-page-{width}.png',full_page=True)
+  row.locator('[data-summary-cause="NOVEDAD"]').click();page.wait_for_selector('[data-order-type="NOVEDAD"][aria-pressed="true"]');page.locator('#lp-tracking-drawer').screenshot(path=f'/tmp/b10-detail-{width}.png');page.screenshot(path=f'/tmp/b10-page-{width}.png',full_page=True)
   page.evaluate('window.delayAffect=true');page.locator('tr').filter(has=page.locator('[data-order-summary="QA2|PANELES_2"]')).locator('summary').click();page.wait_for_function('!!window.releaseAffect');page.locator('[data-tracking-close]').click();page.evaluate('window.delayAffect=false;window.releaseAffect()');page.wait_for_timeout(100);assert page.locator('#lp-tracking-drawer').is_hidden()
   assert page.evaluate('document.documentElement.scrollWidth<=innerWidth');assert not errors,errors
   print('PASS',width,'order, four causes, empty, keyboard, close, layout');page.close()
