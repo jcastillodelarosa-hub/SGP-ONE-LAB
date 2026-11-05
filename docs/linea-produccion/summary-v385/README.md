@@ -1,7 +1,8 @@
 # LAB v385 · presentación compacta PDT y resumen por causa
 
-IMPLEMENTADO EN RAMA fix/seguimiento-summary-v385, dependiente de PR196/bc6970a.
-No publicado, sin push/PR, SQL, nuevos roles/EXECUTE ni cambios de datos.
+IMPLEMENTADO EN RAMA fix/seguimiento-summary-v385, PR197 borrador sobre main
+f644231da30db15357fc4170cfbdb3ce2f47f1dc (v384 publicada/verificada por coordinador).
+No publicado, sin SQL, nuevos roles/EXECUTE ni cambios de datos.
 No mezcla SALE/abiertas del líder ni la cadena vieja B14–B27. Versión384→385 de
 esta entrega candidata; renumerar las ramas viejas aisladas al integrarlas.
 
@@ -57,6 +58,18 @@ recuperación guardada PASS. Evidencia sintética, no verificación de Hosting.
 Revisión independiente cerró tres hallazgos de revocación/cobertura/caché; sin
 bloqueantes restantes en delta. Workflow preparado para ejecutar nueva UI en CI.
 
-Siguiente: revisión conjunta de presentación/limitaciones, CI propia de SHA nuevo,
-rebase solo tras integrar PR196 y política/pins de nueva entrega. No reutilizar
-política196 como aprobación de385; HOLD se conserva hasta actualización coordinada.
+## Controles de PR197
+
+Rebase limpio: el árbol main f644231 es idéntico a bc6970a; no conflictos ni
+cambios funcionales nuevos de hotfix. Reejecutados 498 Node, release385, resumen y
+tracking PC/móvil, unassigned-app y all-origins PostgreSQL aislado: PASS.
+Política integration_pr197 y pin real lp01-operation.js actualizados; restantes
+pins/verificadores/HOLD intactos. Sin nueva migración ni despliegue.
+
+BLOQUEO de publicación: baseline/rollback aún referencian v383. No sustituyen la
+versión v384 actual. Hace falta identidad exacta acreditada de Hosting v384 antes
+de integrar/publicar. La descarga del artefacto hosting-identity-42022900174 por
+gh run download devolvió HTTP403; no reintentada ni sustituida con un ID supuesto.
+Run reporta SUCCESS sobre f644231, pero eso no acredita por sí solo el ID Hosting.
+Siguiente: coordinador aporta identidad, actualizar baseline/rollback, CI del SHA
+final y revisión de artefacto. No reutilizar CI de un SHA previo.
