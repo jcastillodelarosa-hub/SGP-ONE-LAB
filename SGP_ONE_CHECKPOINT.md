@@ -1,3 +1,25 @@
+## Recepción A/C · candidata v388 en rama · 05/11/2026
+
+Base main `2ed9f8e9d485bde1c66b0a14632dc0c908b0d0fb` (B10 v387/PR198).
+Rama `feat/reception-cards-column-filters`: tarjetas por estado con reservas y
+ventanas según listado, conserva cinco indicadores; filtros/orden por encabezado
+en pendientes y recibidas, sin acoplamiento de datos LP. Regla principal/fallback
+preservada; cantidades duplicadas no se suman, conflictos quedan por confirmar.
+Estado aluminio desconocido/mixto neutral. Filtros afectan resumen visible;
+refresco conserva, cambio de semana limpia, recLoadSequence preservado.
+506 pruebas Node y verify:release PASS; Chromium PC1440/móvil390 con transporte
+sintético, sin llamadas productivas. Capturas y alcance en
+`docs/RECEPTION_CARDS_FILTERS_HANDOFF.md` y `tests/reception-ui/evidence/`.
+Referencia implementada desde descripción precisa del padre tras fallo de Library;
+comparación final de capturas con bocetos a cargo del padre. Reserva inicial v390 sustituida por candidata v388 para siguiente publicación;
+confirmar orden con B10/SALE antes de integrar. Política200 baseline/rollback v387
+2eb92f1e5438ff75 acreditada por run42041671863; hashes/HOLD intactos.
+IMPLEMENTADO EN RAMA / VERIFICADO AISLADAMENTE; sin SQL, privilegios, merge ni deploy.
+No cambios de SALE, GOOGLE, LAC ni workflows. Rama subida (funcional a382dbb).
+PR borrador #200 abierto tras autorización explícita nueva de Johan y un único
+reintento del rechazo inicial. Siguiente: comunicar SHA/checks al padre y coordinar
+revisión e integración con B10/SALE; no se ejecutó merge/publicación.
+
 ## PR195 · compatibilidad de aceptación existente · 05/11/2026
 
 Adaptadas pruebas de Power BI, cierres integrados y fuentes al acceso directo B12,

@@ -1,3 +1,5 @@
+import {filterReceptionRows as filterReceptionTableRows,receptionAluminumSummary} from './src/domain/reception-table.js';
+import {createReceptionColumns} from './src/modules/reception-columns.js';
 import {openPartialProgramming} from './src/modules/mecanizado-partes.js';
 import {coverageAmount,partDeliveryStatus} from './src/domain/mecanizado-partes.js';
 import {mountPdtRegistration,openPdtRegistration} from './src/modules/pdt-registration-form.js';
@@ -1926,11 +1928,15 @@ function showOpsChangeDetail(rows,title){rows=rows||[];document.querySelector('#
 
 // Persistent getAppToken already defined above.
 function getAppUser(){try{const t=getAppToken();return t?{username:(currentAuth?.usuario||document.querySelector("#authUser")?.value||"")} : null}catch{return null}}
-let recRows=[],recCurrent=null,recMissingDraft=[],recAluminumStateIndex=new Map(),recLoadSequence=0;
+let recRows=[],recCurrent=null,recMissingDraft=[],recAluminumStateIndex=new Map(),recLoadSequence=0,recLoadedWeek=null,recRequestedWeek=null,recHasLoaded=false;
+const recColumns=createReceptionColumns({root:document.querySelector('[data-mach-panel="recepcion"]'),onChange:renderReception});
 async function loadReception(){
  const token=getAppToken();if(!token)return;
  const sequence=++recLoadSequence;
- const client=await getSupabaseClient(),week=Number(document.querySelector('#recWeek')?.value)||null;
+ const week=Number(document.querySelector('#recWeek')?.value)||null;
+ recColumns.close(false);
+ if(week!==recRequestedWeek){recColumns.reset();recRequestedWeek=week;}
+ const client=await getSupabaseClient();
  // El tablero y Recepción consultan la misma fuente, con la misma semana.
  // Un fallo de Seguimiento no debe impedir auditar una recepción.
  const [reception,tracking]=await Promise.all([
@@ -1940,6 +1946,7 @@ async function loadReception(){
  if(sequence!==recLoadSequence)return;
  if(reception.error)throw reception.error;
  recRows=Array.isArray(reception.data)?reception.data:[];
+ recLoadedWeek=week;recHasLoaded=true;
  const trackingOk=!tracking.error&&Array.isArray(tracking.data?.rows);
  recAluminumStateIndex=indexReceptionAluminumStates(trackingOk?tracking.data.rows:[]);
  // Tipo de reserva: usar la misma fuente autorizada de Seguimiento de Aluminio.
@@ -1976,9 +1983,21 @@ function receptionTypeBadge(r){
 }
 function renderReception(){
  const q=(document.querySelector('#recSearch')?.value||'').toLowerCase(),
- rows=recRows.filter(r=>!q||String(r.reserva).toLowerCase().includes(q)),
+ searched=recRows.filter(r=>!q||String(r.reserva).toLowerCase().includes(q)),
+ tableRows={pending:searched.filter(r=>r.estado!=='RECIBIDA'),received:searched.filter(r=>r.estado==='RECIBIDA')},
+ rows=[...filterReceptionTableRows(tableRows.pending,recColumns.states.pending,recAluminumStateIndex),...filterReceptionTableRows(tableRows.received,recColumns.states.received,recAluminumStateIndex)],
  pending=rows.filter(r=>r.estado!=='RECIBIDA'),
  received=rows.filter(r=>r.estado==='RECIBIDA');
+ recColumns.update(tableRows,recAluminumStateIndex);
+ const summary=receptionAluminumSummary(rows,recAluminumStateIndex),format=value=>new Intl.NumberFormat('es-CO').format(value);
+ document.querySelector('#recAluminumCards').innerHTML=[['PENDIENTE_BODEGA','Pend. bodega','warehouse'],['PENDIENTE_ABASTECIMIENTO','Pend. abastecimiento','supply'],['ALUMINIO_ENTREGADO','Aluminio entregado','delivered']].map(([key,label,color])=>{
+  const card=summary.cards[key];
+  return '<article class="rec-aluminum-card rec-card-'+color+'" data-rec-state="'+key+'"><h4><span aria-hidden="true"></span>'+label+'</h4><div class="rec-card-counts"><div><strong data-rec-reservations>'+format(card.reservations)+'</strong><span>reservas</span></div><div><strong data-rec-windows'+(card.windows===null?' class="rec-count-unknown"':'')+'>'+(card.windows===null?'Por confirmar':format(card.windows))+'</strong><span>ventanas según listado</span></div></div></article>';
+ }).join('');
+ document.querySelector('#recSummaryScope').textContent=(recHasLoaded?(recLoadedWeek?'Semana '+recLoadedWeek:'Todas las semanas cargadas'):'Sin consulta')+' · '+(q||recColumns.active()?'Resultados filtrados':'Listado completo')+' · '+summary.reservations+' reservas';
+ const unknown=document.querySelector('#recSummaryUnknown'),unknownQuantities=Object.values(summary.cards).reduce((sum,c)=>sum+c.unknownQuantities,0);
+ unknown.hidden=!summary.unclassified&&!summary.unidentified&&!unknownQuantities;
+ unknown.textContent=[summary.unclassified?summary.unclassified+' reservas sin estado de aluminio inequívoco (sin dato o mixto); no incluidas en las tres tarjetas.':'',unknownQuantities?unknownQuantities+' reservas con cantidad por confirmar.':'',summary.unidentified?summary.unidentified+' filas sin identidad de reserva; no incluidas en las tarjetas.':''].filter(Boolean).join(' ');
  document.querySelector('#recPending').textContent=pending.length;
  document.querySelector('#recReceived').textContent=received.length;
  document.querySelector('#recIncomplete').textContent=received.filter(r=>r.completa===false).length;
@@ -2455,7 +2474,7 @@ document.querySelector('#progRefresh')?.addEventListener('click',()=>{deferredPr
 
 document.querySelectorAll('[data-mach-tab]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-mach-tab]').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('[data-mach-panel]').forEach(x=>x.hidden=x.dataset.machPanel!==b.dataset.machTab);if(b.dataset.machTab==='recepcion')loadReception();if(b.dataset.machTab==='faltantes')loadMissing();if(b.dataset.machTab==='programacion')loadProgramming();if(b.dataset.machTab==='produccion')loadProductionBoard();if(b.dataset.machTab==='novedades')loadNovelties()});
 document.querySelectorAll('input[name="recCompleteChoice"]').forEach(x=>x.addEventListener('change',()=>{const incomplete=x.checked&&x.value==='NO';document.querySelector('#recMissingSection').hidden=!incomplete;if(incomplete&&recMissingDraft.length===0){recMissingDraft.push({perfil:'',cantidad:1,longitud:'',observacion:''});renderMissingEditor()}if(!incomplete){recMissingDraft=[];renderMissingEditor()}}));
-document.querySelector('#recRefresh')?.addEventListener('click',loadReception);document.querySelector('#recSearch')?.addEventListener('input',renderReception);document.querySelector('#addMissing')?.addEventListener('click',()=>{recMissingDraft.push({perfil:'',cantidad:1,longitud:'',observacion:''});const no=document.querySelector('input[name="recCompleteChoice"][value="NO"]');if(no)no.checked=true;document.querySelector('#recMissingSection').hidden=false;renderMissingEditor()});document.querySelector('#recClose')?.addEventListener('click',()=>document.querySelector('#recModal').hidden=true);document.querySelector('#recCancel')?.addEventListener('click',()=>document.querySelector('#recModal').hidden=true);document.querySelector('#recSave')?.addEventListener('click',saveReception);
+document.querySelector('#recRefresh')?.addEventListener('click',loadReception);document.querySelector('#recWeek')?.addEventListener('change',loadReception);document.querySelector('#recSearch')?.addEventListener('input',renderReception);document.querySelector('#addMissing')?.addEventListener('click',()=>{recMissingDraft.push({perfil:'',cantidad:1,longitud:'',observacion:''});const no=document.querySelector('input[name="recCompleteChoice"][value="NO"]');if(no)no.checked=true;document.querySelector('#recMissingSection').hidden=false;renderMissingEditor()});document.querySelector('#recClose')?.addEventListener('click',()=>document.querySelector('#recModal').hidden=true);document.querySelector('#recCancel')?.addEventListener('click',()=>document.querySelector('#recModal').hidden=true);document.querySelector('#recSave')?.addEventListener('click',saveReception);
 
 document.querySelector('#saveShiftConfig')?.addEventListener('click',async()=>{const v={lunes_sabado:{turno1:{inicio:document.querySelector('#cfgWeekT1Start').value,fin:document.querySelector('#cfgWeekT1End').value},turno2:{inicio:document.querySelector('#cfgWeekT2Start').value,fin:document.querySelector('#cfgWeekT2End').value}},domingo:{turno1:{inicio:document.querySelector('#cfgSunT1Start').value,fin:document.querySelector('#cfgSunT1End').value},turno2:{inicio:document.querySelector('#cfgSunT2Start').value,fin:document.querySelector('#cfgSunT2End').value}}};try{const c=await getSupabaseClient(),{error}=await c.rpc('sgp_configuracion_general_guardar',{p_token:getAppToken(),p_clave:'HORARIOS_TURNOS',p_valor:v});if(error)throw error;sgpGeneralConfig.HORARIOS_TURNOS=v;alert('Horarios guardados correctamente')}catch(e){alert('No fue posible guardar los horarios: '+(e?.message||e))}});
 
