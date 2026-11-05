@@ -1,3 +1,13 @@
+## LAB v382 · política de publicación PR194 preparada · 05/11/2026
+
+integration_pr194; única huella protegida cambiada lp01-operation.js=c59d53eb… .
+Baseline/rollback246cf9687407ab1a, v381/SHA5003c612: evidencia92/92 bytes aportada
+por el coordinador, quien contrasta metadata actual. No inspección Hosting nueva aquí.
+Policy/readiness offline, artefacto runtime e inventario/bytes y release382 PASS.
+Gate con política real: transición push=HOLD; prepare sin despliegue; drift rechazado.
+Sin cambiar verificadores, backend, permisos ni funciones. Padre conserva integración,
+dispatch/publicación y GET final. CI debe corresponder al nuevo SHA de política.
+
 ## LAB v382 · backend instalado y activado · 05/11/2026 03:16 UTC
 
 01–11 aplicadas en SGP-ONE-LAB tras autorización específica y confirmaciones nativas.
