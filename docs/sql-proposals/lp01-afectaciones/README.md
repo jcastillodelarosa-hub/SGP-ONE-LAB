@@ -1,5 +1,8 @@
 # LAB v382 · afectaciones por orden y PDT
 
+Preparación posterior: [NC opcional en ambas etapas](NC_OPCIONAL.md), transición
+compartida explícita06 pendiente de coordinación; no aplicada.
+
 Actualización: [cadena vigente probada y alcance de pins](CADENA_PDT_VALIDADA.md).
 La diferencia de wrapper/fuentes quedó resuelta en aislamiento; activación pendiente.
 

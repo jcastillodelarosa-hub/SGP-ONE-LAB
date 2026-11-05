@@ -1,5 +1,18 @@
 # Línea de Producción — estado operativo actual
 
+## LAB v382 · NC opcional preparada, contrato compartido · 05/11/2026
+
+Nueva instrucción permite preparar NC opcional en Ensamble/Empaque como Picking.
+Contradicción documental previa reportada antes de cambiar. SQL06 remueve solo guard
+NC obligatoria, conserva roles/identidad/auditoría/ACL y fija transición2c9da→d1195.
+Frontend opcional; NC omitida queda pendiente sin disponibilidad física. Pruebas
+PostgreSQL de ambos orígenes, vínculo posterior mismo ID, permisos y rollback PASS.
+Manifest01–06 actualizado.06 cambia contrato PDT activo aunque LP esté apagado: requiere
+coordinación explícita antes de aplicación, no es instalación pasiva. No producción.
+Detalle y evidencia: docs/sql-proposals/lp01-afectaciones/NC_OPCIONAL.md. Siguiente:
+482JS/release382 y UI PC/móvil PASS; revisión independiente final sin nuevos riesgos.
+Coordinar contrato compartido, CI/instalación/activación.
+
 ## LAB v382 · cadena PDT vigente reproducida · 05/11/2026
 
 Wrapper público actual, fuentes/Picking reales y vista multireserva reproducidos en

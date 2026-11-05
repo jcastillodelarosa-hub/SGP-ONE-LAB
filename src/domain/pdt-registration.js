@@ -19,7 +19,6 @@ export function registrationPieces(origin,sources,entries){
 
   if(!p.id_pieza||!p.key_produccion||!p.reserva||!p.reserva_principal||!text(p.acabado)||p.tipo_pieza!=='PANEL'||p.id_linea!=='PANELES_2')throw new Error('Identidad PANEL incompleta');
   if(!Number.isSafeInteger(quantity)||quantity<=0||p.cantidad_referencia==null||quantity>Number(p.cantidad_referencia))throw new Error('Cantidad fuera de la referencia de la pieza');
-  if(origin!=='PICKING'&&!nc)throw new Error('La NC es obligatoria en '+origin);
   if(nc.length>120||/[\x00-\x1f\x7f]/.test(nc))throw new Error('NC inválida');
   return {id_pieza:p.id_pieza,key_produccion:p.key_produccion,produccion:p.produccion,reserva:p.reserva,reserva_principal:p.reserva_principal,perfil:p.codigo_sap,fabricacion:p.fabricacion,longitud:p.longitud,acabado:p.acabado,cantidad:quantity,nc,...(origin==='PICKING'&&ncs.length>1?{ncs}:{}),observacion:text(entry.observacion)};
  });

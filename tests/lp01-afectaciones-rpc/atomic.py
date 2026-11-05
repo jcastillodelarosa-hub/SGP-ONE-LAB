@@ -35,7 +35,7 @@ def tests(x):
  assert db.sql('SELECT count(*) FROM sgp_aluminio_pendientes')=='1'
  assert db.sql('SELECT cantidad FROM sgp_aluminio_pendientes')=='2' and x.read2()['reports'][0]['quantity']==5
  assert db.run(x.atomic_query(c,[{**pieces[0],'cantidad':3}])).returncode
- for bad in [{'longitud':101},{'fabricacion':'OTHER'},{'key_produccion':'QA|FRAMES_2'},{'nc':''}]:
+ for bad in [{'longitud':101},{'fabricacion':'OTHER'},{'key_produccion':'QA|FRAMES_2'},{'nc':'BAD\nNC'}]:
   badcmd=x.command('CREATE',1,user='ll',cause='NC_AL');assert db.run(x.atomic_query(badcmd,[{**pieces[0],**bad}])).returncode
  assert db.sql('SELECT count(*) FROM sgp_aluminio_pendientes')=='1'
  checks.append('Native V4 source/identity/NC guards; same transaction PDT2 pieces + LP5 windows; replay one record; supervisor denied; malformed source rolls back')

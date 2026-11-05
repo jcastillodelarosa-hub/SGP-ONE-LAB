@@ -40,7 +40,7 @@ try:
     page.wait_for_selector('.lp-picking-pending article');assert original in page.locator('.lp-picking-pending').inner_text();assert 'E17' in page.locator('.lp-picking-pending').inner_text()
     page.locator('[name=cause]').select_option('NC_AL');page.locator('[name=aluminumSource]').select_option('new');page.locator('[data-ref]').select_option('PANEL-REF')
     index=page.evaluate("[...document.querySelectorAll('[data-source-radio]')].findIndex(n=>{const a=JSON.parse(n.dataset.sourceRadio);return a[2]==='P1'&&a[1]==='R'})")
-    assert index>=0;page.locator('[data-source-radio]').nth(index).check();page.locator('[data-qty]').fill('2');page.locator('[data-nc]').fill('QA-NC')
+    assert index>=0;page.locator('[data-source-radio]').nth(index).check();page.locator('[data-qty]').fill('2');page.locator('[data-nc]').fill('' if width==1440 else 'QA-NC');assert not page.locator('[data-nc]').evaluate('(e)=>e.required')
     def save(n,obs):
      page.locator('[name=quantity]').fill(str(n));page.locator('[name=observation]').first.fill(obs);page.get_by_role('button',name='Guardar',exact=True).click();page.wait_for_function("document.querySelector('[data-result]').textContent && document.querySelector('[data-result]').textContent!=='Guardando…'");assert page.locator('[data-result]').inner_text()=='Guardado',page.locator('#panel').inner_text()
     save(5,'NC aluminio nueva: cinco ventanas');assert db.sql('SELECT count(*) FROM sgp_aluminio_pendientes')=='2'

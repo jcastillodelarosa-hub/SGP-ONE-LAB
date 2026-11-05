@@ -1,5 +1,8 @@
 # Cadena PDT vigente validada en aislamiento — LAB v382
 
+Preparación posterior: [NC opcional en ambas etapas](NC_OPCIONAL.md), transición
+compartida explícita06 pendiente de coordinación; no aplicada.
+
 **Implementado localmente; no instalado ni activado en producción.** Se resolvió
 la incompatibilidad de SQL03 mediante reproducción y pruebas de los contratos
 observados, conservando el wrapper público. No se restauró la versión anterior ni

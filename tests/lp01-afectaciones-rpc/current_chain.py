@@ -13,7 +13,7 @@ class Fixture(a.ContractMethods):
   db.sql(subprocess.check_output(['python',str(ROOT/'tests/mecanizado-parcial/setup.py')],text=True))
   db.sql(next((ROOT/'supabase/migrations').glob('*_mecanizado_programacion_parcial.sql')).read_text())
   # Current captured definitions, no stub or contract relaxation.
-  for name in ['legacy','wrappers','sources','helpers']:
+  for name in ['legacy','wrappers','sources','helpers','nc-link']:
    for row in json.loads((HERE/'production-readonly'/f'{name}.json').read_text()):db.sql(row['definition'])
   db.sql("CREATE TABLE public.sgp_linea_plan_asignaciones(id uuid PRIMARY KEY,key_produccion text REFERENCES public.sgp_producciones,fecha date,turno int,cantidad int,prioridad int,estado text,origen_id uuid);CREATE TABLE public.sgp_configuracion_general(clave text PRIMARY KEY,valor jsonb);INSERT INTO public.sgp_configuracion_general VALUES('HORARIOS_TURNOS','{\"lunes_sabado\":{\"turno1\":{\"inicio\":\"07:00\",\"fin\":\"19:00\"},\"turno2\":{\"inicio\":\"19:00\",\"fin\":\"07:00\"}},\"domingo\":{\"turno1\":{\"inicio\":\"07:00\",\"fin\":\"18:00\"},\"turno2\":{\"inicio\":\"18:00\",\"fin\":\"05:00\"}}}');")
   db.sql((ROOT/'docs/sql-proposals/lp01-operacion/01_operacion_REVIEW.sql').read_text())
@@ -36,7 +36,7 @@ class Fixture(a.ContractMethods):
   db.sql('GRANT EXECUTE ON FUNCTION public.sgp_lp_afectaciones_consultar_v1(text,text,text),public.sgp_lp_afectaciones_comando_v1(text,text,text,date,int,jsonb) TO anon')
   for stage in ['ENSAMBLE','EMPAQUE']:db.execute(db.cmd('ABRIR',stage=stage))
   if install_affectations:
-   for file in ['03_pdt_atomico_REVIEW.sql','04_conciliacion_REVIEW.sql','05_picking_original_REVIEW.sql']:db.sql(reconciliation_sql if file=='04_conciliacion_REVIEW.sql' and reconciliation_sql is not None else (ROOT/'docs/sql-proposals/lp01-afectaciones'/file).read_text())
+   for file in ['03_pdt_atomico_REVIEW.sql','04_conciliacion_REVIEW.sql','05_picking_original_REVIEW.sql','06_nc_opcional_REVIEW.sql']:db.sql(reconciliation_sql if file=='04_conciliacion_REVIEW.sql' and reconciliation_sql is not None else (ROOT/'docs/sql-proposals/lp01-afectaciones'/file).read_text())
    db.sql('GRANT EXECUTE ON FUNCTION public.sgp_lp_afectaciones_aluminio_v1(text,text,text,date,int,jsonb,jsonb),public.sgp_lp_afectaciones_consultar_v2(text,text,text),public.sgp_lp_afectaciones_legado_v1(text,text,text),public.sgp_lp_afectaciones_conciliar_v1(text,text,text,uuid,text,bigint,jsonb,text),public.sgp_lp_afectaciones_desde_picking_v1(text,text,text,date,int,jsonb,uuid) TO anon')
 if __name__=='__main__':
  x=Fixture.__new__(Fixture)

@@ -239,6 +239,7 @@ jobs:
         run: |
           python tests/lp01-afectaciones-rpc/current_chain.py
           python tests/lp01-afectaciones-rpc/chain_guards.py
+          python tests/lp01-afectaciones-rpc/optional_nc.py
           python tests/lp01-afectaciones-rpc/atomic.py
           python tests/lp01-afectaciones-rpc/revocation.py
       - name: Synthetic native panel and existing app controllers

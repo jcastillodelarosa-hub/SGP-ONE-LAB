@@ -1,7 +1,7 @@
 {
   "candidate": "Containing Git commit; exact SQL bytes below",
   "version": "LAB v382",
-  "status": "ISOLATED_CURRENT_CHAIN_VALIDATED_ACTIVATION_PENDING",
+  "status": "ISOLATED_OPTIONAL_NC_PREPARED_SHARED_CONTRACT_APPROVAL_PENDING",
   "ordered_files": [
     {
       "path": "docs/sql-proposals/lp01-afectaciones/01_storage_DRAFT.sql",
@@ -22,8 +22,19 @@
     {
       "path": "docs/sql-proposals/lp01-afectaciones/05_picking_original_REVIEW.sql",
       "sha256": "4e74ca817f7177e2c2cb89c4cccc0d4a236e5aed977b563bf158f7d7ed984609"
+    },
+    {
+      "path": "docs/sql-proposals/lp01-afectaciones/06_nc_opcional_REVIEW.sql",
+      "sha256": "49cc61735d83e871303c2af245405acb1bb4495007a2a3af9accdb30d6a7f083"
     }
   ],
   "implementation_base": "ee2f8de4fbf8773939b56f18c589d77907715f3f",
-  "dependency_pins": "tests/lp01-afectaciones-rpc/production-readonly/required-chain.json"
+  "dependency_pins": "tests/lp01-afectaciones-rpc/production-readonly/required-chain.json",
+  "shared_contract_transition": {
+    "file": "06_nc_opcional_REVIEW.sql",
+    "function": "sgp_pdt_multiorigen.registrar(text,text,jsonb,jsonb,uuid,uuid)",
+    "before_md5": "2c9da616eb830fd6db20973e9bec4155",
+    "after_md5": "d1195cca8c35315007969da936979546",
+    "effect": "Native PDT optional NC immediately on applying 06, independent of LP flags; unchanged grants"
+  }
 }

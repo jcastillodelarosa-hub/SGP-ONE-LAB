@@ -1,0 +1,1 @@
+BEGIN READ ONLY; SET LOCAL statement_timeout='15s'; SELECT p.oid::regprocedure::text AS signature,md5(prosrc) AS body_md5,pg_get_functiondef(p.oid) AS definition FROM pg_proc p WHERE p.oid='public.sgp_aluminio_pendiente_nc_vincular_v1(text,uuid,text[])'::regprocedure; ROLLBACK;
