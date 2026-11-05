@@ -23,9 +23,13 @@ try:
     db.execute(db.cmd('SALE',key=x.key,part=x.parts[0],quantity=10,observation='QA validado'))
     for user in ['ll']:
      page=browser.new_page(viewport={'width':width,'height':950});page.clock.install();reads=[0];errors=[];page.on('pageerror',lambda e:errors.append(str(e)));page.add_init_script("sessionStorage.setItem('sgp_one_session',"+json.dumps(user)+")")
+     held=[];holding=[True];operation_reads=[0];proposal_reads=[0]
      page.route('**/*',lambda r:r.continue_() if r.request.url.startswith(origin) else r.abort())
      def rpc(route):
       name=route.request.url.split('/rpc/')[-1];a=route.request.post_data_json
+      if name=='sgp_lp_afectaciones_consultar_v2' and holding[0]:held.append(route);return
+      if name=='sgp_lp_operacion_consultar':operation_reads[0]+=1
+      if name=='sgp_lp_propuesta_v1':proposal_reads[0]+=1
       try:
        if name=='sgp_sesion_actual':data=json.loads(db.sql('SELECT public.sgp_sesion_actual('+f.lit(a['p_token'])+')'))
        elif name=='sgp_mis_accesos':data=json.loads(db.sql("SELECT coalesce(jsonb_agg(to_jsonb(x)),'[]') FROM public.sgp_mis_accesos("+f.lit(a['p_token'])+') x'))
@@ -64,10 +68,15 @@ try:
        page.wait_for_function('(n)=>document.querySelector("[data-order-total]")?.textContent.includes(": "+n)',arg=n)
       assert db.sql("SELECT ejecutado FROM sgp_lp_operacion.ordenes WHERE etapa='ENSAMBLE' AND parte="+f.lit(x.parts[0]))=='8'
       assert page.locator('[data-assignment-select]').count()==1
-      page.locator('[data-executed]').fill('9');page.clock.fast_forward(20000);page.wait_for_timeout(200);assert page.locator('[data-executed]').input_value()=='9'
-      page.locator('summary').filter(has_text='Propuesta de disponibilidad').click();page.wait_for_selector('[data-proposal-save]')
-      assert page.locator('[data-proposal-save]').is_disabled() # Picking original has no accredited physical union.
-      assert 'Por validar' in page.locator('[data-proposal-panel]').inner_text()
+      page.locator('[data-executed]').fill('9');page.clock.fast_forward(40000);page.wait_for_timeout(200);assert page.locator('[data-executed]').input_value()=='9'
+      assert len(held)==1,'Background evidence reads must not overlap across 20s refresh cycles'
+      assert operation_reads[0]>=3,'Native reads/writes must remain available while evidence waits'
+      holding[0]=False
+      for route in held:rpc(route)
+      page.wait_for_timeout(100)
+      page.locator('summary').filter(has_text='Propuesta de disponibilidad').click()
+      page.wait_for_function("document.querySelector('[data-proposal-panel]')?.textContent.includes('pendiente de habilitación autorizada')")
+      assert page.locator('[data-proposal-save]').count()==0 and proposal_reads[0]==0
       page.locator('[data-individual-affects] > summary').click();page.wait_for_selector('.lp-picking-pending article');assert original in page.locator('.lp-picking-pending').inner_text()
       assert page.locator('[data-affect-save]').is_disabled()
       assert page.evaluate('document.documentElement.scrollWidth<=window.innerWidth+1')
@@ -75,6 +84,9 @@ try:
        nav=page.locator('.lp-operation-order-nav').bounding_box();pane=page.locator('.lp-operation-form-pane').bounding_box();assert nav['x']<pane['x'] and abs(nav['y']-pane['y'])<25
       page.locator('[data-back]').scroll_into_view_if_needed()
       page.screenshot(path=str(OUT/f'evidence/detail-{width}.png'))
+     # Client-only fault injection: no SQL or network writes in this check.
+     page.evaluate("""async()=>{const {mountProposal}=await import('/src/modules/lp01-proposal.js');const h=document.createElement('div');h.id='qa-proposal-fault';document.body.append(h);let reads=0;const scope={key:'QA',line:'L',date:'2026-11-05',shift:1};await mountProposal(h,{scope,enabled:true,isCurrent:()=>true,rpc:async(_,a)=>{if(a.p_cmd)return {contract:'LP-PROPOSAL-1',...scope,revision:1,id:a.p_cmd.id};if(reads++)throw Error('QA refresh failed');return {contract:'LP-PROPOSAL-1',...scope,revision:0,target:{date:'2026-11-05',shift:2},available:10,canWrite:true,history:[]};}});h.querySelector('input').value='5';h.querySelector('textarea').value='QA';h.querySelector('button').click();}""")
+     page.wait_for_function("document.querySelector('#qa-proposal-fault').textContent.includes('Propuesta guardada. No se pudo actualizar')")
      assert not errors,errors;results.append({'width':width,'role':user,'originalPickingVisible':True,'existingController':True,'externalRequests':0});page.close()
    finally:x.close()
   browser.close()

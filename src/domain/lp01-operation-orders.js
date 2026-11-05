@@ -19,7 +19,7 @@ export function operationOrders(data,filters={}){
   const started=g.rows.some(r=>Number(r.ejecutado)>0||Number(r.total_etapa_parte)>0);
   const uncertain=g.rows.some(r=>r.individualEvidence?.status==='UNAVAILABLE');
   const state=hasAffectation?'ABIERTAS':finished?(uncertain?'POR_REVISAR':'COMPLETADAS'):g.rows.some(r=>r.abierta)||started?'ABIERTAS':uncertain?'POR_REVISAR':'PROGRAMADAS';
-  const origins=g.rows.flatMap(r=>r.antiguedad_fecha||r.origen_fecha?[{date:r.antiguedad_fecha||r.origen_fecha,shift:r.antiguedad_turno??r.origen_turno??null}]:[]).sort((a,b)=>a.date.localeCompare(b.date)||(a.shift??3)-(b.shift??3));
+  const origins=g.rows.flatMap(r=>r.individualEvidence?.opening?[r.individualEvidence.opening]:[]).filter(o=>o.eventId&&/^\d{4}-\d{2}-\d{2}$/.test(o.date)&&[1,2].includes(o.shift)).sort((a,b)=>a.date.localeCompare(b.date)||a.shift-b.shift);
   return {...g,first,state,week:originalWeek(first),sale:total(g.rows,'sale'),executed:total(g.rows,'ejecutado'),origin:origins[0]??null,hasAffectation};
  }).sort((a,b)=>['ABIERTAS','PROGRAMADAS','POR_REVISAR','COMPLETADAS'].indexOf(a.state)-['ABIERTAS','PROGRAMADAS','POR_REVISAR','COMPLETADAS'].indexOf(b.state)||(a.state==='ABIERTAS'?String(a.origin?.date??'9999').localeCompare(String(b.origin?.date??'9999'))||(a.origin?.shift??3)-(b.origin?.shift??3):0)||priority(a)-priority(b)||a.key.localeCompare(b.key));
 }

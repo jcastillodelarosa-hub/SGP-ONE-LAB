@@ -1,3 +1,22 @@
+## LAB v383 · revisión, rendimiento y preflight · 05/11/2026
+
+Revisión independiente cerró4 hallazgos: vínculos Picking de otra etapa no prueban
+confirmación Ensamble; antigüedad usa primer movimiento acreditado; historial
+identifica asignación; fallo de relectura conserva guardado confirmado.
+Propuesta deshabilitada explícitamente en frontend: cero RPC; SQL REVIEW intacto,
+flag false y sin grants por defecto. RPC nueva ausente en producción.
+Native load singleflight; evidencia en segundo plano, máximo3 simultáneas,
+cancelación por ámbito/sesión; consultas retenidas40s no bloquean avance6→8 ni
+multiplican lecturas en ciclos20s (Chromium/PG sintético PC1440/móvil390 PASS).
+490 Node +release383 PASS. DOM real50/200/500 órdenes (100/400/1000 partes),
+500 tarjetas hasta127.5ms sin desborde. Latencia simulada100ms/RPC:1.77/7.11/16.80s
+en segundo plano; no equivale a rendimiento productivo.
+Preflight Supabase READ ONLY/ROLLBACK:3 RPC públicas coinciden con huellas previas,
+ACL conservadas y propuesta ausente;9 firmas inventariadas, sin datos individuales.
+Gate local real HOLD/LP_ASSETS_NOT_APPROVED; política194 intacta. No SQL aplicado,
+acceso ampliado, merge, dispatch ni publicación. Preparar PR Draft/CI del SHA final.
+Evidencia: docs/sql-proposals/lp01-propuestas y tests/lp01-b12-b13.
+
 ## LAB v383 · B12/B13 preparados en aislamiento · 05/11/2026
 
 Base main646729005295c79d73bed7d6730aa10d042768b8; coordinador confirmó

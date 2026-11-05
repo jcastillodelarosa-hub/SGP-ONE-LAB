@@ -1,0 +1,15 @@
+{
+  "policyUnchanged": true,
+  "integrationPrStill": 194,
+  "gate": {
+    "route": "hold",
+    "reason": "LP_ASSETS_NOT_APPROVED"
+  },
+  "newProposalAbsent": true,
+  "existingPublicBodiesMatchPriorEvidence": {
+    "sgp_lp_afectaciones_consultar_v2(text,text,text)": true,
+    "sgp_lp_operacion_comando(text,jsonb)": true,
+    "sgp_lp_operacion_consultar(text,text,text,date,integer)": true
+  },
+  "mode": "read-only metadata + local gate; no activation"
+}

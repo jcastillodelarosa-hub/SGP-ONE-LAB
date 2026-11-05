@@ -1,0 +1,107 @@
+{
+  "observedAt": "2026-11-05 04:11:01 UTC",
+  "project": "ocvxbwzqxbrfndkvjmfx",
+  "mode": "BEGIN READ ONLY / ROLLBACK; metadata only",
+  "proposalPresent": false,
+  "functions": [
+    {
+      "signature": "sgp_lp_afectaciones_consultar_v2(text,text,text)",
+      "body_md5": "31a9538446f1cb9b59c46161a60d6861",
+      "owner": "postgres",
+      "security_definer": true,
+      "config": [
+        "search_path=\"\""
+      ],
+      "anon_execute": true,
+      "authenticated_execute": false
+    },
+    {
+      "signature": "sgp_lp_operacion_comando(text,jsonb)",
+      "body_md5": "5d962fc5b2595e0420124b340f9bbe3a",
+      "owner": "postgres",
+      "security_definer": true,
+      "config": [
+        "search_path=\"\""
+      ],
+      "anon_execute": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "sgp_lp_operacion_consultar(text,text,text,date,integer)",
+      "body_md5": "9f9f3ef8861c4fb410a4132f74204930",
+      "owner": "postgres",
+      "security_definer": true,
+      "config": [
+        "search_path=\"\""
+      ],
+      "anon_execute": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "sgp_lp_operacion.admitir()",
+      "body_md5": "dba0559912a5d2351aa7028cbad9379e",
+      "owner": "postgres",
+      "security_definer": false,
+      "config": [
+        "search_path=\"\""
+      ],
+      "anon_execute": false,
+      "authenticated_execute": false
+    },
+    {
+      "signature": "sgp_lp_operacion.inmutable()",
+      "body_md5": "e125d74e6977f74eb22047e487cdb14c",
+      "owner": "postgres",
+      "security_definer": false,
+      "config": [
+        "search_path=\"\""
+      ],
+      "anon_execute": false,
+      "authenticated_execute": false
+    },
+    {
+      "signature": "sgp_lp_operacion.puede_operar(text,text,text)",
+      "body_md5": "b0b7459a0be0a7ea5a4a392eecb2afde",
+      "owner": "postgres",
+      "security_definer": false,
+      "config": [
+        "search_path=\"\""
+      ],
+      "anon_execute": false,
+      "authenticated_execute": false
+    },
+    {
+      "signature": "sgp_lp_operacion.sesion(text,text,text,text)",
+      "body_md5": "f06e86fb101d602de053faa50d6696b3",
+      "owner": "postgres",
+      "security_definer": true,
+      "config": [
+        "search_path=\"\""
+      ],
+      "anon_execute": false,
+      "authenticated_execute": false
+    },
+    {
+      "signature": "sgp_lp_operacion.siguiente(date,integer)",
+      "body_md5": "a9aa777f841d44dddfc1fceda162be35",
+      "owner": "postgres",
+      "security_definer": false,
+      "config": [
+        "search_path=\"\""
+      ],
+      "anon_execute": false,
+      "authenticated_execute": false
+    },
+    {
+      "signature": "sgp_lp_operacion.verificar_temporal(text,text,text,date,integer,text,text)",
+      "body_md5": "c39ce5692affad2b1edc4a7dbf66faf2",
+      "owner": "postgres",
+      "security_definer": false,
+      "config": [
+        "search_path=\"\""
+      ],
+      "anon_execute": false,
+      "authenticated_execute": false
+    }
+  ]
+}

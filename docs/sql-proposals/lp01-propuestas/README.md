@@ -1,10 +1,10 @@
 # B12/B13 · LAB v383 · implementación aislada
 
-Base publicada comunicada por coordinador: main `646729005295c79d73bed7d6730aa10d042768b8`, Hosting `07abe57ef1374fde` (v382). No inspección productiva nueva en este trabajo.
+Base publicada comunicada por coordinador: main `646729005295c79d73bed7d6730aa10d042768b8`, Hosting `07abe57ef1374fde` (v382). Preflight posterior: lectura de metadatos únicamente, documentada en production-readonly.json; no inspección Hosting nueva.
 
 ## Resultado en rama
 
-B13 Ensamble agrupa una producción una sola vez por línea/etapa/fecha/turno. Abiertas primero por antigüedad original acreditada; programadas sin iniciar por prioridad. Las completadas siguen accesibles en un bloque separado para no presentarlas como pendientes ni ocultar historial. Semana/año original Export y sistema visibles en PC/móvil; datos ausentes explícitos. La búsqueda se aplica después de agrupar para no truncar totales. Empaque conserva su lista anterior.
+B13 Ensamble agrupa una producción una sola vez por línea/etapa/fecha/turno. Abiertas primero por primer movimiento acreditado (no fecha de arrastre); programadas sin iniciar por prioridad. Las completadas siguen accesibles en un bloque separado para no presentarlas como pendientes ni ocultar historial. Semana/año original Export y sistema visibles en PC/móvil; datos ausentes explícitos. La búsqueda se aplica después de agrupar para no truncar totales. Empaque conserva su lista anterior.
 
 B12 reutiliza `sgp_lp_operacion_comando`: el valor 8 reemplaza 6, mantiene auditoría/CAS/idempotencia existentes. PC muestra lista y detalle; móvil abre detalle directamente. Captura exige motivo si queda por debajo de SALE. SALE desconocido no se trata como cero. Se conservan acceso a vidrio, afectaciones individuales/Picking y cierre.
 
@@ -22,7 +22,7 @@ Parámetros: token, producción, línea, fecha/turno de origen, comando opcional
 
 Solo ENSAMBLE. Reutiliza sesión, ámbito temporal y capacidad existente LEER/NOTA; revalida tras esperar bloqueos. Admisión nativa, flag propio, turno abierto, idempotencia por UUID, revisión propia y bloqueo nativo por línea. Rechaza cantidades sin disponibilidad acreditada por el lector vigente de afectaciones o por encima de ella. No suma causas ni convierte piezas a ventanas. La propuesta conserva evidencia de disponibilidad de ese instante; correcciones posteriores requieren nueva consulta/validación y nunca actualizan SALE automáticamente.
 
-La instalación deja `enabled=false` y revoca EXECUTE de PUBLIC/anon/authenticated/service_role, incluso si los defaults lo conceden. La interfaz informa contrato ausente; no simula guardados. Ningún SQL de este directorio se aplicó a Supabase.
+La instalación deja `enabled=false` y revoca EXECUTE de PUBLIC/anon/authenticated/service_role, incluso si los defaults lo conceden. La interfaz mantiene la propuesta explícitamente deshabilitada: no invoca la RPC ni simula guardados. El componente permite habilitación solamente en pruebas aisladas; habilitarlo en aplicación requiere cambio revisado y autorización. Ningún SQL de este directorio se aplicó a Supabase.
 
 ## Activación pendiente, no ejecutada
 
@@ -40,3 +40,13 @@ Recuperación no destructiva: apagar `sgp_lp_propuestas.config.enabled` y revoca
 - `tests/lp01-b12-b13/proposal.py`: PostgreSQL con cadena nativa capturada y datos sintéticos; grants por defecto, gate, autoridad, CAS/carreras, historial 6→8, idempotencia, rollback, saldo/SALE intactos.
 - `tests/lp01-b12-b13/browser.py`: aplicación real Chromium PC/móvil contra PostgreSQL aislado; sin solicitudes externas; capturas en `evidence/`. No es validación en planta.
 - Resultados JSON acompañan cada prueba completada; no confundir el preparado REVIEW con instalación o publicación.
+
+## Revisión y rendimiento posteriores
+
+Revisión independiente en dos pasadas cerró cuatro hallazgos: vinculación Picking por etapa, apertura acreditada, identidad de asignación en historial y confirmación tras guardado/relectura fallida. No fue aprobación formal de PR.
+
+La lectura principal ahora es singleflight. El enriquecimiento de afectaciones corre en segundo plano, máximo3 solicitudes, sin impedir captura; se cancela al cambiar ámbito y no se solapa con otro enriquecimiento. Mientras falta evidencia, la clasificación permanece por revisar. La prueba real de aplicación con consultas retenidas durante40s mantiene avance6→8 y no multiplica lecturas al refrescar cada20s.
+
+DOM real Chromium1440/390: 50/200/500 órdenes, dos asignaciones cada una, sin desborde. Máximo observado500:121ms PC y127.5ms móvil. Generación de HTML p95:11.21/12.62/31.61ms. Transporte simulado100ms/RPC:1.77/7.11/16.80s en segundo plano, máximo3 simultáneas. Son datos sintéticos locales, no capacidad certificada de Supabase en producción; revisar latencia real antes de publicación.
+
+Preflight del proyecto SGP-ONE-LAB: SELECT de catálogo dentro de READ ONLY/ROLLBACK. Las tres RPC públicas utilizadas coinciden con evidencia previa (MD5); conserva ACL existentes. La nueva propuesta no existe. No se consultaron órdenes individuales ni secretos ni se modificaron datos/permisos. La política vigente permanece194 y su gate real produce HOLD/LP_ASSETS_NOT_APPROVED para este cambio; no se actualizaron pins para eludirlo.

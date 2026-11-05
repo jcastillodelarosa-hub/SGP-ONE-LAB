@@ -1,7 +1,8 @@
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const integer=v=>Number.isSafeInteger(v)&&v>=0;
 /** Optional B12 contract; missing installation is visible, never saved locally as a proposal. */
-export async function mountProposal(host,{rpc,scope,isCurrent,onDirty=()=>{}}){
+export async function mountProposal(host,{rpc,scope,isCurrent,onDirty=()=>{},enabled=false,confirmed=false}){
+ if(!enabled){host.textContent='Propuesta del siguiente turno pendiente de habilitación autorizada. SALE y Export conservan su validación actual.';return;}
  let data,pending,busy=false;
  const valid=r=>r?.contract==='LP-PROPOSAL-1'&&r.key===scope.key&&r.line===scope.line&&r.date===scope.date&&r.shift===scope.shift&&integer(r.revision);
  const call=cmd=>rpc('sgp_lp_propuesta_v1',{p_key:scope.key,p_linea:scope.line,p_fecha:scope.date,p_turno:scope.shift,p_cmd:cmd});
@@ -25,10 +26,10 @@ export async function mountProposal(host,{rpc,scope,isCurrent,onDirty=()=>{}}){
     busy=true;save.disabled=true;host.querySelectorAll('input,textarea').forEach(e=>e.disabled=true);
     const result=await call(pending);if(!current())return;
     if(!valid(result)||result.id!==pending.id)throw Error('RESPUESTA_NO_CONFIRMADA');
-    pending=null;await mountProposal(host,{rpc,scope,isCurrent,onDirty});
-    if(current())host.querySelector('[data-proposal-status]').textContent='Propuesta guardada; SALE no ha cambiado.';
-   }catch(error){if(current()){if(error.code==='P0001'){pending=null;await mountProposal(host,{rpc,scope,isCurrent,onDirty});if(current())host.querySelector('[data-proposal-status]')?.append(document.createTextNode(error.message));return;}status.textContent=error.message;save.textContent=pending?'Reintentar la misma propuesta':'Guardar propuesta';save.disabled=false;}}
+    pending=null;await mountProposal(host,{rpc,scope,isCurrent,onDirty,enabled,confirmed:true});
+    if(current()&&host.querySelector('[data-proposal-status]'))host.querySelector('[data-proposal-status]').textContent='Propuesta guardada; SALE no ha cambiado.';
+   }catch(error){if(current()){if(error.code==='P0001'){pending=null;await mountProposal(host,{rpc,scope,isCurrent,onDirty,enabled});if(current())host.querySelector('[data-proposal-status]')?.append(document.createTextNode(error.message));return;}status.textContent=error.message;save.textContent=pending?'Reintentar la misma propuesta':'Guardar propuesta';save.disabled=false;}}
    finally{busy=false;}
   };
- }catch(error){if(current())host.textContent='Propuesta del siguiente turno no disponible: '+error.message+'. No se ha registrado ninguna propuesta.';}
+ }catch(error){if(current())host.textContent=(confirmed?'Propuesta guardada. No se pudo actualizar la consulta: ':'Propuesta del siguiente turno no disponible: ')+error.message;}
 }

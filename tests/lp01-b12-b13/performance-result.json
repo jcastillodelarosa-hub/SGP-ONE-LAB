@@ -1,0 +1,41 @@
+{
+  "environment": "Node local synthetic data; 100ms simulated transport, NOT production RPC latency",
+  "scenarios": [
+    {
+      "orders": 50,
+      "assignments": 100,
+      "renderP50Ms": 0.57,
+      "renderP95Ms": 11.21,
+      "htmlBytes": 26969,
+      "backgroundReads": 50,
+      "maxConcurrent": 3,
+      "simulatedRpcLatencyMs": 100,
+      "backgroundElapsedMs": 1771.04,
+      "firstListNotAwaitingEvidenceMs": 0.4
+    },
+    {
+      "orders": 200,
+      "assignments": 400,
+      "renderP50Ms": 1.67,
+      "renderP95Ms": 12.62,
+      "htmlBytes": 108020,
+      "backgroundReads": 200,
+      "maxConcurrent": 3,
+      "simulatedRpcLatencyMs": 100,
+      "backgroundElapsedMs": 7112.68,
+      "firstListNotAwaitingEvidenceMs": 0.21
+    },
+    {
+      "orders": 500,
+      "assignments": 1000,
+      "renderP50Ms": 3.62,
+      "renderP95Ms": 31.61,
+      "htmlBytes": 270320,
+      "backgroundReads": 500,
+      "maxConcurrent": 3,
+      "simulatedRpcLatencyMs": 100,
+      "backgroundElapsedMs": 16804.26,
+      "firstListNotAwaitingEvidenceMs": 0.18
+    }
+  ]
+}
