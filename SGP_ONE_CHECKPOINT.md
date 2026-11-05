@@ -1,3 +1,11 @@
+## PR203 · candidata v393 sellada · 05/11/2026
+
+Baseline/rollback: v392 sites/sgp-one-lab/versions/8e49cd70f0182107,
+publicación acreditada por coordinación en run 42101547385 sobre main 0529673.
+Versión393, integration_pr203, 16 pins intactos y transición HOLD verificada.
+Esperar CI exacta e integrar desde PR; preparar ZIP oficial y detener en HOLD
+para revisión independiente. Backend ya activo: no repetir SQL.
+
 ## PR203 · rebase sobre Disponible v392 · 05/11/2026
 
 Base main 0529673; editor compacto y modal/refresco de Disponible preservados.
