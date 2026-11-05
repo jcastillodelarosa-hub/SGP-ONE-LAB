@@ -1,5 +1,19 @@
 # Línea de Producción — estado operativo actual
 
+## LAB v382 · contrato y panel aislado de afectaciones · 05/11/2026
+
+Preparados modelo backend ejecutable (sin persistencia), panel por etapa y DRAFT
+de almacenamiento privado; no endpoints ni SQL aplicados. Reportes individuales,
+corrección, solución y recepción física separadas, consolidado coordinador, revisión
+e idempotencia. 477 JS PASS; Chromium1440/390 PASS; release v382 PASS.
+Johan confirmó apertura de Empaque desde primer movimiento acreditado, igual que
+Ensamble. Proyector exige cobertura desde origen; sin evidencia devuelve no disponible.
+Pendientes técnicos: RPC transaccional con sesión/permisos reales, proyección de
+auditoría, historial compartido autorizado, vínculo PDT y reconciliación histórica.
+El panel es demostración aislada, no cumplimiento productivo completo. SQL DRAFT
+sin prueba PostgreSQL (binarios ausentes). No push, despliegue ni cambios de datos.
+Detalle: docs/sql-proposals/lp01-afectaciones/README.md.
+
 ## Aclaración de afectaciones individuales y PDT · 05/11/2026
 
 Reglas recuperadas: líder fuente principal, coordinador agrega/corrige; cada causa

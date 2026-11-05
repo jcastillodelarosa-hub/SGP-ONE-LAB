@@ -27,8 +27,9 @@ estado anterior, completitud del historial ni evidencia de primer avance.
 La fecha de primera afectación tampoco sustituye primer avance; para una orden
 bloqueada sin avance hay estado de afectación, pero no fecha de inicio acreditada.
 
-El primer avance de ENSAMBLE está confirmado como disparador de apertura. El
-disparador de EMPAQUE no está acreditado: no extender esa regla automáticamente.
+Actualización 05/11: Johan confirmó también EMPAQUE: primer movimiento acreditado
+de su proceso. Ambas etapas conservan su fecha al cambiar turno. Sin evidencia
+del primer avance, fecha no disponible; no reconstruirla con programación.
 
 Propuesta para revisión de contrato: devolver evidencia de inicio por producción,
 línea y etapa con fecha/turno operativos, timestamp, evento/origen y calidad
@@ -120,3 +121,10 @@ Pruebas locales: 472 JS PASS; navegador 1440/390 PASS con transporte sintético,
 filas de historial visibles; release LAB v382 PASS. Sin certificación productiva.
 Siguiente: revisar propuesta del contrato con el hilo principal antes de preparar
 RPC/migración de lectura/escritura o cambiar clasificación/fecha de apertura.
+
+## Incremento aislado posterior · 05/11
+
+Contrato ejecutable, panel de una etapa y propuesta de almacenamiento preparados:
+[alcance exacto y pendientes](../sql-proposals/lp01-afectaciones/README.md).
+477 JS PASS y panel PC/móvil PASS con datos sintéticos. No hay RPC instalada ni
+integración productiva. Se mantiene LAB v382 como misma entrega aún sin publicar.
