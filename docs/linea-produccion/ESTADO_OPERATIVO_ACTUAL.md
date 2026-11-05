@@ -15,21 +15,14 @@ Frontend SALE v390 en rama sobre main 13f50e95 (B10 v389 publicada): integració
 real en fila, PC1440/móvil390 y PostgreSQL sintético PASS. Recepción y B10 ya están integradas; preparar un solo PR borrador v390. Uso de la definición entre turnos sigue sin regla; `operational:false`.
 Detalle: [SALE por orden](../sql-proposals/lp01-order-sale/README.md).
 
-## B10 corrección · publicada v389 · 05/11/2026
+## B10 v389 y Recepción v388 publicados
 
-Base integrada e182f537/v388. Detalle de afectaciones ancho bajo listado y bajo orden en móvil; acceso por causa, vacíos explícitos y orígenes PDT conservados. v389 provisional; coordinar numeración al integrar. Pruebas y límites en [lp01-b10-correction/README.md](../../tests/lp01-b10-correction/README.md). Sin SQL, permisos ni datos. Política PR199: pin de operación fbf8d7de…; baseline/rollback v388 ee9bc38852832125 acreditada por coordinador con run 42052662472 (106 archivos). No es lectura nueva del canal. Gate de transición HOLD; CI del SHA final y contraste live requeridos antes de integrar/publicar.
-
-## Recepción PR200 · candidata v388 · preparación, no publicada
-
-Main observado 2ed9f8e/B10 v387. Recepción A/C aprobada visualmente por coordinación;
-no cambios en contratos, fuentes, permisos ni código SALE/Seguimiento. 506Node y
-PC1440/móvil390 sintéticos PASS reutilizados. Nueva etiqueta candidata v388 si es
-la siguiente publicación; confirmar orden con B10/SALE antes de integrar.
-Política200: baseline/rollback v387 2eb92f1e5438ff75 acreditada por run42041671863,
-104 archivos públicos idénticos y2plataforma intactos. 16pins sin cambios; transición
-HOLD conservada, verificadores/probe intactos. Ver docs/RECEPTION_CARDS_FILTERS_HANDOFF.md.
-Siguiente: CI del SHA final y coordinación previa a ready/merge; publicación requiere
-prepare del SHA integrado y revisión de pins/live vigente. Sin merge/deploy desde aquí.
+B10 integrado main 13f50e95e97fe23707ec1a18deec9398c2883e87, Hosting
+sites/sgp-one-lab/versions/93bde8b172480952, run 42073197726 SUCCESS,
+106 archivos verificados por coordinación. Preservar panel inferior ancho,
+chips por causa, rótulo Afectaciones y Picking como origen de aluminio.
+Recepción integrado antes en main e182f5379b74a5b77a325838bda5208f3a53fc7f,
+LAB v388, Hosting sites/sgp-one-lab/versions/ee9bc38852832125.
 
 ## B10 visual v387 · preparación independiente
 
