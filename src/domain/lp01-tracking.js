@@ -48,3 +48,6 @@ export function trackingRows(data,context,{search='',week='',status='',sort='age
   return order*(direction==='desc'?-1:1)||compareAge(a,b);
  });
 }
+
+/** Decorative week identity, stable across sort/filter; text remains authoritative. */
+export function weekColor(row){const value=originalWeek(row);return value?'week-'+((value.year*53+value.week)%8):'week-unknown';}

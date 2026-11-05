@@ -1,5 +1,5 @@
 import {affectationSummary} from '../domain/lp01-affectation-summary.js';
-import {summaryMarkup} from './lp01-affectation-summary.js';
+import {compactSummaryMarkup as summaryMarkup} from './lp01-affectation-summary.js';
 import {mountTrackingAffectations} from './lp01-tracking-affectations.js';
 import {enrichOperationEvidence} from '../services/lp01-operation-evidence.js';
 import {mountProposal} from './lp01-proposal.js';

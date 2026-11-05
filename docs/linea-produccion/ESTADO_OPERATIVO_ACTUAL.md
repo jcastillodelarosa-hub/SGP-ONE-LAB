@@ -1,3 +1,13 @@
+## B10 visual v387 · preparación independiente
+
+Sobre main3280223/v385; chips aplicables y semanas coloreadas con número/año,
+filtros y detalle intactos. Excluye editor/borrador SALE, lector de abiertas y SQL.
+500Node/release387 y PC/móvil/refresco/permisos PASS. SALE por orden sigue pendiente.
+Baseline/rollback v385 ba7ae3754b4d5a76 acreditada por coordinador. HOLD intacto.
+Renumerar entregas aisladas abiertas/SALE a >=388 antes de publicarlas.
+Ver [b10-visual-v387/README.md](b10-visual-v387/README.md). Falta PR/CI exacta y
+coordinación para integración/publicación; sin datos ni permisos modificados.
+
 ## LAB v385 · PDT compacto y resumen por causa · aislado
 
 PR197 borrador, rama fix/seguimiento-summary-v385 sobre main f644231 (v384
