@@ -18,13 +18,16 @@ try:
     assert cells.nth(0).inner_text()=='No informado';assert cells.nth(1).inner_text()=='Sin número informado'
     print('PASS: missing NC number does not claim an informed reference');page.close();continue
    assert page.locator('[data-report-context]').is_visible()
+   nav=page.locator('.lp-order-type-tabs');top=nav.evaluate('(e)=>e.offsetTop')
    page.locator('[data-order-type=TECNO]').click();page.wait_for_selector('.lp-glass-estimate');assert page.locator('[data-report-context]').is_hidden()
    page.locator('[data-order-note-refresh]').click();page.wait_for_timeout(200);assert page.locator('[data-report-context]').is_hidden();assert page.locator('[data-order-note-refresh]').inner_text()=='Actualizar datos'
    page.locator('#lp-tracking-drawer').screenshot(path=str(HERE/f'evidence/tecno-context-hidden-{width}.png'))
-   for kind in ['ALUMINIO','ACCESORIOS']:
+   for kind in ['ACCESORIOS']:
     page.locator('[data-order-type='+kind+']').click();assert page.locator('[data-report-context]').is_hidden()
    for kind in ['NC_AL','NOVEDAD','NC_V']:
     page.locator('[data-order-type='+kind+']').click();assert page.locator('[data-report-context]').is_visible()
+    assert page.locator('[data-type-pane='+kind+'] > [data-report-context]').count()==1
+    assert abs(nav.evaluate('(e)=>e.offsetTop')-top)<2
    cells=page.locator('[data-nc-references] tbody tr').first.locator('td');assert cells.count()==4
    assert cells.nth(1).inner_text()=='Sin número informado';assert cells.nth(2).inner_text()=='Sin dato confirmado';assert cells.nth(3).inner_text()=='8'
    if width==390:

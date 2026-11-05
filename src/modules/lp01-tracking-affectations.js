@@ -4,11 +4,11 @@ import {orderDetailsTransport} from '../services/lp01-order-details.js';
 import {mountOrderNote} from './lp01-order-note.js';
 /** Order-scoped reports need a real open process turn, never an assignment. */
 export async function mountTrackingAffectations({host,row,target,cause,scope,client,getToken,isCurrent}){
- const token=getToken();let generation=0,dispose,canReport=false,selectedCause=cause==='REGISTER'?'NC_AL':cause,orderDetails=null,tabs;
+ const token=getToken();let generation=0,dispose,canReport=false,selectedCause=cause==='REGISTER'||cause==='ALUMINIO'?'NC_AL':cause,orderDetails=null,tabs;
  const alive=()=>host.isConnected&&getToken()===token&&isCurrent();
- host.innerHTML='<section data-report-context></section><section data-order-affectations></section><section class=lp-order-note data-order-note-section></section>';
+ host.innerHTML='<section data-order-affectations></section><section data-report-context hidden></section><section class=lp-order-note data-order-note-section></section>';
  const controls=host.querySelector('[data-report-context]'),panel=host.querySelector('[data-order-affectations]');
- const syncContext=()=>{controls.hidden=!['NC_AL','NC_V','NOVEDAD'].includes(selectedCause);};
+ const syncContext=()=>{const enabled=alive()&&['NC_AL','NC_V','NOVEDAD'].includes(selectedCause);controls.hidden=!enabled;if(enabled){const pane=panel.querySelector('[data-type-pane="'+selectedCause+'"]');if(pane)pane.prepend(controls);}};
  async function mount(period){
   const version=++generation;dispose?.();panel.replaceChildren();
   const transport=affectationsTransport({client,getToken:()=>alive()?getToken():null,contractVersion:2,context:{key:row.key,line:scope.line,stage:scope.stage,date:period?.date,shift:period?.shift,production:row.produccion}});

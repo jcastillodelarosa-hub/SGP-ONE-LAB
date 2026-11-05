@@ -6,6 +6,11 @@ En la tabla global se retira Avance por turno, se acorta el resumen contraído
 de afectaciones y el error de lectura de Disponible queda como `Error · ↻`,
 distinto de `Por definir`, con reintento accesible. Detalle, chips, registro,
 pestañas y operación por turno permanecen. Sin datos ni permisos cambiados.
+En el mismo PR205 se retira la pestaña duplicada «Aluminio»: NC AL conserva
+pendientes PDT y reportes, y el chip Aluminio abre esa pestaña. El selector
+«Registrar afectación» vive dentro del panel activo NC AL, NC V o Novedades;
+la barra de cinco pestañas queda estable. Tecno y Accesorios siguen sin ese
+formulario. Materiales no se modifica.
 El registro PostgreSQL de 20:40–20:55 UTC muestra 12 `statement_timeout`
 (57014) de `sgp_lp_sale_orden_consultar_v1`: el lector de afectaciones llega a
 `sgp_lp_operacion.sesion`, que materializa permisos para toda la línea. La
@@ -13,8 +18,11 @@ limpieza visual no resuelve ese timeout. Una optimización y recuperación de es
 función compartida están preparadas y probadas solo en rama aislada
 `fix/seguimiento-sesion-acotada-proposal`; requieren revisión/activación aparte.
 Pruebas visuales PC/móvil, afectaciones y refresco PASS; Node 523/523 y
-`verify:release` PASS con vendor generado localmente. PR205 borrador; falta CI del SHA final,
-validación de la política y aceptación con sesión real. La referencia Library
+`verify:release` PASS con vendor generado localmente sobre el delta completo.
+La integración adicional de pestañas/registro pasó Chromium sintético PC/móvil,
+incluida prueba nativa de nota/NC, turno cerrado, borrador y revocación; la
+La CI debe corresponder al SHA actualizado. PR205 está en borrador; falta
+aceptación con sesión real. La referencia Library
 no se pudo materializar por restricción de red del ejecutor; coordinación sí
 inspeccionó los píxeles. Siguiente: validar CI de PR205 y decidir activación SQL separada.
 
