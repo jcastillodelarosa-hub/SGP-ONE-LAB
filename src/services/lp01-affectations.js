@@ -17,6 +17,7 @@ export function affectationsTransport({client,getToken,context,contractVersion=1
    if(data?.contract!=='LP-AFFECTATIONS-'+contractVersion||data.key!==scope.key||data.line!==scope.line||data.stage!==scope.stage||!integer(data.revision)||!Array.isArray(data.reports)||!Array.isArray(data.events)||!Array.isArray(data.capabilities))throw Error('CONTRATO_AFECTACIONES_INVALIDO');
    for(const r of data.reports)if(!r.id||r.originStage!==scope.stage||![r.quantity,r.solved,r.confirmed].every(integer)||r.confirmed>r.solved||r.solved>r.quantity)throw Error('CONTRATO_AFECTACIONES_INVALIDO');
    if(data.pickingPending&&(!Array.isArray(data.pickingPending.rows)||data.pickingPending.rows.some(p=>p.key!==scope.key||p.origin!=='PICKING')))throw Error('PICKING_AMBITO_INVALIDO');
+   if(data.aluminumPending&&(!['AVAILABLE','UNAUTHORIZED'].includes(data.aluminumPending.status)||!Array.isArray(data.aluminumPending.rows)||data.aluminumPending.rows.some(p=>p.key!==scope.key||!p.id||p.readOnly!==true)))throw Error('ALUMINIO_AMBITO_INVALIDO');
    if(data.available!==null&&!integer(data.available))throw Error('CONTRATO_AFECTACIONES_INVALIDO');
    for(const [stage,p] of Object.entries(data.progress||{})){
     const evidence=progressEvidence({key:scope.key,line:scope.line,stage,events:p.events,coverage:p.coverage});

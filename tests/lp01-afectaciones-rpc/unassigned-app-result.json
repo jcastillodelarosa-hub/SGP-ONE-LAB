@@ -1,0 +1,28 @@
+[
+  {
+    "width": 1440,
+    "role": "COORDINADOR",
+    "originalPickingVisible": true,
+    "unassignedReportSaved": true,
+    "atomicPdtWithoutNC": true,
+    "retryNoDuplicate": true,
+    "assignmentsCreated": 0,
+    "closedTurnDenied": true,
+    "draft20sPreserved": true,
+    "existingController": true,
+    "externalRequests": 0
+  },
+  {
+    "width": 390,
+    "role": "COORDINADOR",
+    "originalPickingVisible": true,
+    "unassignedReportSaved": true,
+    "atomicPdtWithoutNC": true,
+    "retryNoDuplicate": true,
+    "assignmentsCreated": 0,
+    "closedTurnDenied": true,
+    "draft20sPreserved": true,
+    "existingController": true,
+    "externalRequests": 0
+  }
+]

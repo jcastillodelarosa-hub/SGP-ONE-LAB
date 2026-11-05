@@ -1,3 +1,4 @@
+import {mountTrackingAffectations} from './lp01-tracking-affectations.js';
 import {enrichOperationEvidence} from '../services/lp01-operation-evidence.js';
 import {mountProposal} from './lp01-proposal.js';
 import {operationOrders,validateTurnEntry} from '../domain/lp01-operation-orders.js';
@@ -55,7 +56,7 @@ export function mountOperation({tracking,operation,bridge,legacyLoad}){
    const normalized=globalTrackingData(next,ctx),changed=JSON.stringify(normalized)!==JSON.stringify(globalData);
    globalData=normalized;globalContext=ctx;globalSession=token;
    const key=JSON.stringify([ctx.line,ctx.stage]);if(!trackingStates.has(key))trackingStates.set(key,{});trackingViewState=trackingStates.get(key);
-   message.textContent='';const editing=quiet&&sameScope&&trackingViewState.open&&trackingViewState.tab==='Afectaciones'&&globalData.orders.some(r=>trackingIdentity(r)===trackingViewState.selected);if(!editing&&(changed||!quiet||!sameScope))renderGlobal();
+   message.textContent='';const editing=quiet&&sameScope&&trackingViewState.open&&['Afectaciones','Materiales'].includes(trackingViewState.tab)&&globalData.orders.some(r=>trackingIdentity(r)===trackingViewState.selected);if(!editing&&(changed||!quiet||!sameScope))renderGlobal();
   }catch(e){if(request!==seq)return;globalData=null;live.replaceChildren();message.textContent='No se pudo consultar Seguimiento: '+e.message;}
   finally{if(globalRequest?.request===request)globalRequest=null;if(request===seq)loading=false;if(globalQueued){globalQueued=false;loading=false;if(viewPanel==='seguimiento')loadGlobal();}}
  }
@@ -69,10 +70,7 @@ export function mountOperation({tracking,operation,bridge,legacyLoad}){
    onAffectations:async({host,row,target})=>{
     const token=bridge.getToken(),scope=globalContext;host.textContent='Consultando afectaciones…';
     try{const client=await bridge.getClient();if(!host.isConnected||token!==bridge.getToken()||(scope.line!==globalContext?.line||scope.stage!==globalContext?.stage))return;
-     const transport=affectationsTransport({client,getToken:()=>bridge.getToken(),contractVersion:2,context:{key:row.key,line:scope.line,stage:scope.stage,date:target?.fecha,shift:target?Number(target.turno):null,production:row.produccion}});
-     const read=transport.read;transport.read=async()=>{const value=await read();if(!target)value.capabilities=['READ'];return value;};
-     if(!target)host.insertAdjacentHTML('afterend','<p>Selecciona un contexto operativo para registrar cambios. La consulta conserva los pendientes originales.</p>');
-     await mountAffectationsPanel(host,transport);
+     await mountTrackingAffectations({host,row,target,scope,client,getToken:()=>bridge.getToken(),isCurrent:()=>scope.line===globalContext?.line&&scope.stage===globalContext?.stage});
     }catch(error){if(host.isConnected)host.textContent='Afectaciones no disponibles: '+error.message;}
    },
    onOperate:async(id,focusSale,target)=>{
