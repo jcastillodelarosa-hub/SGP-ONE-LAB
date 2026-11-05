@@ -1,3 +1,14 @@
+## LAB v382 · instalación parcial contenida; 04 cancelada · 05/11/2026 03:09 UTC
+
+01–03 aplicadas y verificadas en SGP-ONE-LAB; cuatro flags false, cero API expuestas,
+reportes/eventos nuevos cero, registrador PDT conserva cuerpo2c9da… (06 no aplicada).
+04 no aplicada: confirmación del conector expiró y el intento renovado fue cancelado
+por el padre; conector confirmó Nothing was run y catálogo confirma tabla/RPC ausentes.
+No reintentar automáticamente.05–11 no intentadas; no merge ni publicación.
+CI completa PASS del78b547b/PR194; evidencia y huellas exactas en
+`docs/sql-proposals/lp01-afectaciones/production-activation-evidence.json`.
+Siguiente: padre revisa el efecto exacto de04 y coordina una nueva solicitud explícita.
+
 ## LAB v382 · activación gradual autorizada · 05/11/2026
 
 Johan autorizó explícitamente cambio compartido PDT, seis RPC para anon y activación

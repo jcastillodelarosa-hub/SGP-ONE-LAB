@@ -1,7 +1,7 @@
 {
   "candidate": "Containing Git commit; exact SQL bytes below",
   "version": "LAB v382",
-  "status": "AUTHORIZED_GRADUAL_ACTIVATION_PREFLIGHT",
+  "status": "PRODUCTION_01_03_INSTALLED_CONTAINED_04_CANCELLED_BY_PARENT",
   "ordered_files": [
     {
       "path": "docs/sql-proposals/lp01-afectaciones/01_storage_DRAFT.sql",
