@@ -35,6 +35,14 @@ export function affectationsTransport({client,getToken,context,contractVersion=1
    if(data?.contract!=='LP-AFFECTATIONS-COMMAND-1'||data.id!==command.id||!integer(data.revision))throw Error('RESPUESTA_NO_CONFIRMADA');
    return data;
   },
+  async lookupNc(reference){
+   let data;
+   try{data=await rpc('sgp_pdt_manual_nc_consultar_v1',{p_referencia:reference});}
+   catch(error){if(error.message!=='NO_AUTORIZADO')throw error;await this.read();return null;}
+   const nc=data?.nc,normalize=v=>String(v??'').trim().toUpperCase();
+   if(data?.ok!==true||!nc||![nc.numero,nc.consecutivo].some(v=>v!=null&&normalize(v)===normalize(reference)))return null;
+   return typeof nc.estado==='string'&&nc.estado.trim()?nc.estado:null;
+  },
   async legacy(){
    const data=await rpc('sgp_lp_afectaciones_legado_v1',{p_key:scope.key,p_stage:scope.stage});
    if(data?.contract!=='LP-AFFECTATIONS-LEGACY-1'||data.key!==scope.key||data.stage!==scope.stage||!Array.isArray(data.sources))throw Error('CONTRATO_LEGADO_INVALIDO');return data;

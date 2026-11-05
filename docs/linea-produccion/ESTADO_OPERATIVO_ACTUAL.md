@@ -1,3 +1,17 @@
+## LAB v385 · PDT compacto y resumen por causa · aislado
+
+PR197 borrador, rama fix/seguimiento-summary-v385 sobre main f644231 (v384
+publicada/verificada por coordinador). Sin publicación385 ni SQL.
+PDT contraído referencia/piezas/NC/estadoNC/origen, detalle expandible; resumen
+por orden/etapa, categorías reportadas y unión/disponibilidad solo acreditadas.
+No convertir piezas ni liberar por soluciónNC. Accesorios sin contrato: no disponible.
+498Node/release385, PC/móvil/SQL sintético y revisión independiente cerrada.
+Ver [summary-v385/README.md](summary-v385/README.md). SALE y abiertas líder separados;
+Pins197 y baseline/rollback v384 6d4540070fcda22e preparados con inspección oficial
+42024136075 acreditada por coordinador; descarga403 no reintentada. HOLD intacto.
+Esperar CI del nuevo SHA y coordinación para integrar/publicar. No incorporar
+cadena B14–B27 ni propuesta12.
+
 ## PR196 · controles finales LAB v384 · 05/11/2026
 
 Política196, baseline/rollback v383 7f429af5f0b5c5f7 acreditada por coordinador.
