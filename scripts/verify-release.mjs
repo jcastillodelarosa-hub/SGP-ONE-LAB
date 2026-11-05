@@ -1,3 +1,4 @@
+import {releaseLabel} from './build-release-info.mjs';
 import { access, readFile } from "node:fs/promises";
 
 const required=["index.html","app.js","config.js","styles.css","src/services/supabase-client.js","vendor/supabase.js","vendor/html2canvas.min.js","vendor/jspdf.umd.min.js"];
@@ -13,6 +14,7 @@ const fail=(message)=>{throw new Error("Release bloqueado: "+message)};
 const release=index.match(/LAB v(\d+)/);
 if(!release)fail("index.html no identifica una versión LAB");
 const version=release[1];
+if(releaseLabel!==`LAB v${version}`)fail("el sello de compilación no coincide con la versión visible");
 const appVersion=index.match(/app\.js\?v=(\d+)/)?.[1];
 const cssVersion=index.match(/styles\.css\?v=(\d+)/)?.[1];
 if(appVersion!==version)fail(`app.js cache-bust v${appVersion||"?"} no coincide con LAB v${version}`);

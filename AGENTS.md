@@ -67,3 +67,14 @@ Entregar estados separados: PROPUESTO / IMPLEMENTADO EN RAMA / FUSIONADO /
 APLICADO EN SUPABASE / PUBLICADO / VERIFICADO. Guardar un checkpoint útil por entrega,
 no un informe por corrección menor. Esta metodología orienta tareas futuras de
 GOOGLE y LAC sin modificar sus repositorios ni ampliar autorizaciones.
+
+## Versión visible por entrega (norma confirmada por Johan)
+Cada nueva entrega con cambios funcionales o visuales, incluidos hotfixes, debe
+incrementar la versión LAB respecto de main; no reutilizar la versión anterior.
+Antes de publicar, sincronizar `index.html` (indicador `releaseVersion` y cache-bust
+app/CSS) con `releaseLabel` en `scripts/build-release-info.mjs`. Conservar el sello
+de SHA/fecha del mecanismo existente y ejecutar `npm run verify:release`.
+Después de publicar, comprobar en el artefacto exacto y en Hosting el texto visible
+y `data-release-commit`; registrar versión anterior/nueva junto al SHA publicado.
+Una versión incrementada en rama o CI no acredita publicación. Esta norma no
+habilita despliegues ni sustituye los controles de artefacto, pins y recuperación.

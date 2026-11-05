@@ -1,0 +1,22 @@
+[
+  {
+    "width": 1440,
+    "unchanged_20s_cycles": 3,
+    "filters_sort_focus_panel": true,
+    "no_overlap": true,
+    "scope_session_role_clear": true,
+    "external_requests": 0,
+    "approved_header_removed_in_tracking": true,
+    "operation_and_closure_navigation_preserved": true
+  },
+  {
+    "width": 390,
+    "unchanged_20s_cycles": 3,
+    "filters_sort_focus_panel": true,
+    "no_overlap": true,
+    "scope_session_role_clear": true,
+    "external_requests": 0,
+    "approved_header_removed_in_tracking": true,
+    "operation_and_closure_navigation_preserved": true
+  }
+]

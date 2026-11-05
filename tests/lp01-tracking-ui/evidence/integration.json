@@ -1,0 +1,41 @@
+{
+  "base": "9e4a8ecb90664d7296d1e77e241c4a9204d7ff50",
+  "original_change": "1ff8cfc",
+  "scope": "local merge only; no production access",
+  "tests": {
+    "js": {
+      "pass": 469,
+      "fail": 0
+    },
+    "release": "PASS",
+    "chromium_viewports": [
+      1440,
+      390
+    ],
+    "policy_offline": "PASS",
+    "postcheck_offline": 7
+  },
+  "preserved_identical_to_main": [
+    "app.js",
+    "deployment/",
+    "scripts/",
+    "tests/glass-week-partial-mapping.test.mjs",
+    "tests/lp01-publish/",
+    ".github/"
+  ],
+  "gate_simulation": {
+    "route": "hold",
+    "reason": "LP_ASSETS_NOT_APPROVED",
+    "paths": [
+      "production-line-tabs.js",
+      "src/modules/lp01-operation.js"
+    ]
+  },
+  "pending": [
+    "review final local package",
+    "PR/CI preparation when authorized",
+    "publication pins and exact artifact review outside current scope"
+  ],
+  "upper_blocks": "Both removed from Seguimiento only; explicit user clarification",
+  "navigation": "Real production-line-tabs.js, synthetic transport, PC/mobile PASS"
+}

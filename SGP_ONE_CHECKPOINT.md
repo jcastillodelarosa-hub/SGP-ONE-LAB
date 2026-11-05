@@ -1,3 +1,86 @@
+## PR193 · política preparada sobre vidrio publicado · 05/11/2026
+
+Inspección GET confirmada por el coordinador de publicación:
+[run41938425351](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/actions/runs/41938425351),
+job126952882628, observación `2026-11-05T00:03:53.052970+00:00`.
+Versión `sites/sgp-one-lab/versions/1d4abf7aa4a92f52`, FINALIZED, 94 archivos;
+inventario SHA256 `24b3ac6eb974307f57507eef0957d7fb6666cad6017647fe0ff4f6028b7ea371`,
+config SHA256 `b1c8097ce32ce29d3d39d04e54f86699c1cd013dcbfc8a4f9b89f033cadc34fd`.
+Coincide con #192; baseline/rollback fijados a esa versión para preservar vidrio.
+Política: integration_pr193 y solo huellas de production-line-tabs.js y
+src/modules/lp01-operation.js actualizadas; verificadores y restricciones intactos.
+LAB v381 sin cambios: misma entrega aún no publicada. Política/postcheck/release
+local PASS. La transición main→candidato mantiene HOLD; prepare solo construye.
+CI del SHA nuevo es obligatoria, no se acredita con resultados de 44ad1e7.
+Sin merge, dispatch, despliegue ni datos: los coordina únicamente el hilo principal.
+Siguiente: completar CI del nuevo SHA y entregar artefacto/pins al coordinador.
+
+## Seguimiento · versión LAB v380 → LAB v381 · 04/11/2026
+
+Norma explícita de Johan: incrementar versión en cada entrega. Main `9e4a8ec`
+conserva LAB v380; este PR prepara LAB v381. Sincronizados badge/título y cache-bust
+app/CSS de `index.html` con `releaseLabel`; verify:release ahora también compara
+el sello con la versión visible. Norma permanente en AGENTS.md; no habilita deploy.
+469 pruebas PASS y release v381 PASS. Sello reproducible probado con SHA completo;
+badge real local verificado visible en PC/móvil. Evidencia `version.json` y capturas
+en `tests/lp01-tracking-ui/evidence/`. NO PUBLICADO: comprobar v381 y el SHA exacto
+en el artefacto y Hosting después del despliegue coordinado. CI del nuevo SHA debe
+completarse; no reutilizar como aprobación la CI del candidato anterior.
+
+## Seguimiento · integración/publicación autorizada, PR en preparación · 04/11/2026
+
+Autorización explícita de Johan para integrar/publicar el ajuste concreto de
+Seguimiento. Revisión visual PC/móvil completada; main sigue `9e4a8ec` y no existe
+PR duplicado. Se añade la regresión de refresco/filtros/navegación al job aislado
+existente, sin permisos, secretos ni cambios en el workflow de publicación.
+469 pruebas locales y release PASS; gate permanece HOLD por las dos huellas LP.
+No se aprueba formalmente ningún PR ni se fusiona/publica desde este paso.
+Siguiente: crear PR borrador, verificar CI del SHA exacto y coordinar con el hilo
+principal los pins/artefacto/baseline antes de integración y publicación controladas.
+
+## Seguimiento · ambos bloques retirados según confirmación · 04/11/2026
+
+Johan confirmó «Los 2»: retirar de Seguimiento el bloque «Seguimiento de órdenes»
+con Línea/Buscar/Actualizar y los accesos «Operación del turno»/«Cierres del turno».
+IMPLEMENTADO EN RAMA LOCAL, sobre main `9e4a8ec`; no se eliminan datos ni funciones.
+Se ocultan únicamente en Seguimiento: los controles compartidos reaparecen en
+Ensamble/Empaque y sus accesos a operación/cierres siguen funcionando. Seguimiento
+conserva etapas, filtros de tabla, detalle y actualización silenciosa. No hereda
+una búsqueda invisible escrita en Operación. La línea continúa siendo la del
+contexto seleccionado en Ensamble/Empaque, visible en el encabezado de la tabla.
+469 pruebas PASS, release PASS, Chromium 1440/390 PASS con navegación real y
+transporte sintético local (no aceptación productiva). Capturas actualizadas en
+`tests/lp01-tracking-ui/evidence/`. Aclaración del bloque superior RESUELTA.
+Gate local HOLD / LP_ASSETS_NOT_APPROVED para `production-line-tabs.js` y
+`src/modules/lp01-operation.js`. Sin cambios de política/workflows, push, PR,
+fusión a main, SQL ni despliegue. Siguiente: aprobar visualmente el paquete local;
+luego revisión de CI/artefacto/pins/baseline vigentes antes de autorizar publicación.
+
+## Seguimiento · compatible con main #192 · 04/11/2026
+
+Integración LOCAL de main `9e4a8ecb90664d7296d1e77e241c4a9204d7ff50` en
+`fix/seguimiento-silent-filters`. Cambio original `1ff8cfc` conservado; main no
+contiene una implementación duplicada. Solo conflictos documentales, resueltos
+conservando ambos historiales. Vidrio `app.js`, su prueba, política, workflows y
+postcheck quedan idénticos a main. Ningún bloque superior ni control eliminado.
+469 pruebas JS PASS, verify:release PASS, Chromium 1440/390 PASS (transporte
+sintético), política offline PASS y 7 pruebas postcheck PASS. Simulación pura de
+gate: HOLD / LP_ASSETS_NOT_APPROVED por `src/modules/lp01-operation.js`; no se
+actualizan pins ni se habilita publicación. Publicación de vidrio en versión
+`1d4abf7aa4a92f52` informada por el hilo principal, no reinspeccionada aquí.
+SIN PUSH/PR/FUSIÓN A MAIN/SQL/DESPLIEGUE. Siguiente: revisar la integración local y
+aclarar el bloque superior; publicación requiere evaluación de artefacto y pins
+vigentes bajo los controles existentes. Evidencia: `tests/lp01-tracking-ui/`.
+
+## Seguimiento · ajuste local aislado · 04/11/2026
+
+Base main `fe82ffab`; rama `fix/seguimiento-silent-filters`.
+IMPLEMENTADO y VERIFICADO EN AISLAMIENTO: refresco silencioso, Semana Export antes
+de Producción, orden/filtros combinables PC y móvil; 462 JS y release PASS.
+Sin SQL, datos productivos, push, PR, fusión ni publicación; no toca vidrio #192.
+Pendiente aclarar bloque superior a retirar. Siguiente: revisión del cambio local.
+[Detalle y evidencia](tests/lp01-tracking-ui/README.md).
+
 ## PR192 · vidrio preparado sobre Seguimiento publicado · 04/11/2026
 
 PR191 fusionado en fe82ffab y publicado en Hosting5f20f122c0f91fb9.

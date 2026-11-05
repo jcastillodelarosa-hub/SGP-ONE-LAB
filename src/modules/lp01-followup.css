@@ -68,3 +68,21 @@
 [data-tracking-stages][hidden]{display:none}
 [data-tracking-stages] button[aria-pressed=true]{color:#1264c8;border-bottom-color:#1264c8;background:#f1f7ff}
 .lp-tracking-drawer [data-tracking-context]{width:100%;min-width:0;max-width:100%}
+/* Seguimiento uses the existing SGP blue controls on both table and cards. */
+.lp-tracking-table th button{font:inherit;color:inherit;background:transparent;border:0;min-height:40px;padding:3px;text-align:inherit;white-space:nowrap}
+.lp-column-controls,.lp-column-panel>div{display:flex;align-items:end;gap:8px;flex-wrap:wrap;margin:10px 0}
+.lp-column-controls label{display:grid;gap:4px}
+.lp-column-panel{border:1px solid #cbdcf0;border-radius:9px;background:#f3f8fe;padding:12px;margin:10px 0}
+.lp-column-panel header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.lp-column-panel fieldset{max-height:210px;overflow:auto;overscroll-behavior:contain;display:flex;flex-wrap:wrap;gap:6px 16px;border:0;padding:0}
+.lp-column-panel label{display:flex;align-items:center;gap:8px;min-height:44px;overflow-wrap:anywhere}
+.lp-column-panel input[type=checkbox]{width:18px;height:18px;flex:none}
+.lp-column-panel button,.lp-column-controls button,.lp-column-controls select{min-height:44px}
+.lp-tracking-mobile-week{display:none}
+.lp-tracking button:focus-visible,.lp-tracking select:focus-visible,.lp-tracking input:focus-visible{outline:2px solid #1264c8;outline-offset:2px}
+@media(max-width:700px){
+ .lp-tracking-mobile-week{display:block;font-size:12px;color:#25496f;margin-bottom:5px}
+ .lp-column-controls label,.lp-column-controls select{width:100%;min-width:0}
+ .lp-column-panel fieldset{display:grid;grid-template-columns:minmax(0,1fr)}
+ .lp-tracking-table thead{display:none}
+}

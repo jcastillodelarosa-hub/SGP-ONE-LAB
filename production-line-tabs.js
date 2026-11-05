@@ -150,7 +150,7 @@
   if(name==='ensamble'||name==='empaque')activeStage=name;
   const logical=['operacion','reportes'].includes(name)?activeStage:name;
   for(const [key,button] of all){const active=key===logical;button.classList.toggle('active',active);button.setAttribute('aria-selected',String(active));button.tabIndex=active?0:-1;}
-  stageActions.hidden=['planificador','ubicaciones'].includes(name);
+  stageActions.hidden=['planificador','ubicaciones','seguimiento'].includes(name);
   plannerPanel.hidden=name!=='planificador';
   for(const [key,{panel}] of Object.entries(extraPanels))panel.hidden=key!==name;
   if(name==='ensamble'||name==='empaque'){
