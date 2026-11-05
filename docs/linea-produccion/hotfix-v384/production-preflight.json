@@ -1,0 +1,92 @@
+{
+  "observedOn": "2026-11-05",
+  "project": "SGP-ONE-LAB",
+  "method": "Supabase execute_sql BEGIN READ ONLY / ROLLBACK; metadata only; no business rows",
+  "functions": [
+    {
+      "signature": "sgp_pdt_validar_rol_real(text,text[])",
+      "body_md5": "107715139254fc1afc7f6b886cc27f47",
+      "owner": "postgres",
+      "prosecdef": true,
+      "proconfig": [
+        "search_path=\"\""
+      ],
+      "proacl": "{postgres=X/postgres,service_role=X/postgres}",
+      "anon_execute": false,
+      "acl": [
+        {
+          "role": "postgres",
+          "grantable": false,
+          "privilege": "EXECUTE"
+        },
+        {
+          "role": "service_role",
+          "grantable": false,
+          "privilege": "EXECUTE"
+        }
+      ]
+    },
+    {
+      "signature": "sgp_lp_afectaciones.actor(text,text,text,text,date,integer)",
+      "body_md5": "ad60fdc6dd01904c366010467f96e6ca",
+      "owner": "postgres",
+      "prosecdef": false,
+      "proconfig": [
+        "search_path=\"\""
+      ],
+      "proacl": "{postgres=X/postgres}",
+      "anon_execute": false,
+      "acl": [
+        {
+          "role": "postgres",
+          "grantable": false,
+          "privilege": "EXECUTE"
+        }
+      ]
+    },
+    {
+      "signature": "sgp_lp_afectaciones_consultar_v1(text,text,text)",
+      "body_md5": "22276d883423e5f3dcc32d335f61ee5f",
+      "owner": "postgres",
+      "prosecdef": true,
+      "proconfig": [
+        "search_path=\"\""
+      ],
+      "proacl": "{postgres=X/postgres}",
+      "anon_execute": false,
+      "acl": [
+        {
+          "role": "postgres",
+          "grantable": false,
+          "privilege": "EXECUTE"
+        }
+      ]
+    },
+    {
+      "signature": "sgp_lp_afectaciones_consultar_v2(text,text,text)",
+      "body_md5": "31a9538446f1cb9b59c46161a60d6861",
+      "owner": "postgres",
+      "prosecdef": true,
+      "proconfig": [
+        "search_path=\"\""
+      ],
+      "proacl": "{postgres=X/postgres,anon=X/postgres}",
+      "anon_execute": true,
+      "acl": [
+        {
+          "role": "postgres",
+          "grantable": false,
+          "privilege": "EXECUTE"
+        },
+        {
+          "role": "anon",
+          "grantable": false,
+          "privilege": "EXECUTE"
+        }
+      ]
+    }
+  ],
+  "requiredColumns": 18,
+  "missingColumns": 0,
+  "migrationApplied": false
+}

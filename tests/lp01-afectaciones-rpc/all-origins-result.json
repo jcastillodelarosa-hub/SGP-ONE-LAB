@@ -1,0 +1,26 @@
+{
+  "sql": "PASS",
+  "functionBodyMd5": "a74f14fefe3a3d91201423fdc3111d7a",
+  "aclPreserved": true,
+  "rollbackAndBaselineGuard": true,
+  "invalidSessionAndStageDenied": true,
+  "restrictedRoleUnauthorized": true,
+  "noAssociationsCreated": true,
+  "ui": [
+    {
+      "width": 1440,
+      "legacyProduction19PiecesVisible": true,
+      "windowsUnknown": true,
+      "noFalsePicking": true,
+      "readOnly": true
+    },
+    {
+      "width": 390,
+      "legacyProduction19PiecesVisible": true,
+      "windowsUnknown": true,
+      "noFalsePicking": true,
+      "readOnly": true
+    }
+  ],
+  "guardedRecoveryPreservesAcl": true
+}

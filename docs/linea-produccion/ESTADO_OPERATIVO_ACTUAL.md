@@ -1,3 +1,23 @@
+## PR196 · controles finales LAB v384 · 05/11/2026
+
+Política196, baseline/rollback v383 7f429af5f0b5c5f7 acreditada por coordinador.
+Único pin cambiado: lp01-operation.js 9a197353…; HOLD por transición conservado.
+Verificadores/backend probe/inventario/bytes intactos. Recuperación lector13
+con guard de nuevoMD5 guardada; ninguna instalación productiva desde este hilo.
+Pruebas y evidencia: [hotfix-v384/README.md](hotfix-v384/README.md).
+CI final debe corresponder al nuevo SHA; no reutilizar CI444c751 como cobertura.
+SALE, presentación compacta y bocetos posteriores quedan separados.
+
+## Hotfix LAB v384 · Seguimiento por orden · 05/11/2026
+
+Implementado aislado sobre main17b0115 (PR195 fusionado); no publicado.
+Acceso visible a pendientes/PDT; registro sin asignación con turno real abierto,
+validación servidor y cero turnos/asignaciones ficticios. SALE sin asignación sigue
+sin contrato y se explica. Propuesta13 lector: todos los orígenes de aluminio por
+key exacta, identidad real, LEGACY solo consulta, sin grants ni cambios de datos.
+Pruebas/requisitos y activación pendiente: [hotfix-v384/README.md](hotfix-v384/README.md).
+No interferir con publicación383; reconciliar numeración futura B14–B27.
+
 ## LAB v383 · controles de publicación PR195 · 05/11/2026
 
 Política preparada sobre121e1805ad0445a4c91f03d5ba812f0004dd09ad (CI3/3 PASS).

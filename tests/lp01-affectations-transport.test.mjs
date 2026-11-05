@@ -22,3 +22,10 @@ test('Picking source scope is checked and original association never calls PDT r
  assert.equal(name,'sgp_lp_afectaciones_desde_picking_v1');assert.equal(args.p_source,'source');assert.equal(args.p_cmd.quantity,5);assert.ok(!('sourcePicking' in args.p_cmd));
  await assert.rejects(transport.command({id:'request',sourcePicking:'source',pieces:[]}),/AMBIGUO/);
 });
+test('all-origin metadata stays order-scoped and cannot become a Picking association',async()=>{
+ const row={id:'legacy',key:context.key,origin:'PRODUCCION',contract:'LEGACY',pieceQuantity:19,affectedWindows:null,readOnly:true};
+ const response=rows=>({...base,aluminumPending:{status:'AVAILABLE',rows},pickingPending:{rows:[]}});
+ const transport=data=>affectationsTransport({context,getToken:()=> 'token',client:{rpc:async()=>({data})}});
+ const data=await transport(response([row])).read();assert.equal(data.aluminumPending.rows[0].origin,'PRODUCCION');assert.deepEqual(data.pickingPending.rows,[]);
+ for(const changed of [{key:'OTHER'},{readOnly:false},{id:null}])await assert.rejects(transport(response([{...row,...changed}])).read(),/ALUMINIO_AMBITO_INVALIDO/);
+});
