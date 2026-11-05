@@ -1,0 +1,1176 @@
+{
+  "chain": [
+    {
+      "observed_at": "2026-11-05 03:17:50.518469+00",
+      "chain_matches_authorized_post06": true,
+      "view_md5": "f0edf5a04ac0d41b841412c0d0c58fbb",
+      "reports": 0,
+      "events": 0,
+      "receipts": 0
+    }
+  ],
+  "migrations": {
+    "migrations": [
+      {
+        "version": "20261008000222",
+        "name": "core_schema"
+      },
+      {
+        "version": "20261008000240",
+        "name": "master_lines_processes"
+      },
+      {
+        "version": "20261008000720",
+        "name": "master_sublineas"
+      },
+      {
+        "version": "20261008001202",
+        "name": "scope_maestro_piezas_paneles2_frames2"
+      },
+      {
+        "version": "20261008001447",
+        "name": "master_piezas_228"
+      },
+      {
+        "version": "20261008012215",
+        "name": "rpc_clasificar_piezas_aluminio"
+      },
+      {
+        "version": "20261008180257",
+        "name": "add_weekly_accessories_glass_detail"
+      },
+      {
+        "version": "20261008180525",
+        "name": "add_weekly_load_dry_run"
+      },
+      {
+        "version": "20261008181509",
+        "name": "add_server_weekly_package_validation"
+      },
+      {
+        "version": "20261008181747",
+        "name": "add_locked_atomic_weekly_load"
+      },
+      {
+        "version": "20261008182004",
+        "name": "temporary_weekly_rollback_test"
+      },
+      {
+        "version": "20261008182011",
+        "name": "remove_temporary_weekly_rollback_test"
+      },
+      {
+        "version": "20261008183213",
+        "name": "app_credentials_auth"
+      },
+      {
+        "version": "20261008183516",
+        "name": "one_time_initial_admin_activation"
+      },
+      {
+        "version": "20261008183857",
+        "name": "fix_pgcrypto_schema_auth_functions"
+      },
+      {
+        "version": "20261008184139",
+        "name": "close_bootstrap_and_secure_weekly_authorization"
+      },
+      {
+        "version": "20261008184318",
+        "name": "replace_weekly_load_with_app_session_wrapper"
+      },
+      {
+        "version": "20261008184509",
+        "name": "temporary_v2_weekly_transaction_test"
+      },
+      {
+        "version": "20261008184515",
+        "name": "remove_temporary_v2_weekly_transaction_test"
+      },
+      {
+        "version": "20261008184610",
+        "name": "enable_guarded_weekly_load_rpc"
+      },
+      {
+        "version": "20261008185423",
+        "name": "add_weekly_load_preflight"
+      },
+      {
+        "version": "20261008190223",
+        "name": "add_secure_weekly_programming_query"
+      },
+      {
+        "version": "20261008190721",
+        "name": "extend_weekly_programming_query_finish_muntin"
+      },
+      {
+        "version": "20261008190845",
+        "name": "order_weekly_programming_by_reservation"
+      },
+      {
+        "version": "20261008192547",
+        "name": "include_type_in_weekly_programming_query"
+      },
+      {
+        "version": "20261008193925",
+        "name": "secure_weekly_piece_summary"
+      },
+      {
+        "version": "20261008194542",
+        "name": "piece_drilldown_with_marks"
+      },
+      {
+        "version": "20261008200617",
+        "name": "filter_piece_drilldown_by_master_piece_type"
+      },
+      {
+        "version": "20261008201403",
+        "name": "piece_drilldown_add_length"
+      },
+      {
+        "version": "20261009005113",
+        "name": "daily_load_foundation"
+      },
+      {
+        "version": "20261009005331",
+        "name": "daily_export_rpc"
+      },
+      {
+        "version": "20261009010042",
+        "name": "daily_export_week_scope_guard"
+      },
+      {
+        "version": "20261009030955",
+        "name": "glass_location_daily_import"
+      },
+      {
+        "version": "20261009031059",
+        "name": "glass_location_panels_only"
+      },
+      {
+        "version": "20261009032150",
+        "name": "glass_location_defer_balance_filter"
+      },
+      {
+        "version": "20261009032530",
+        "name": "initialize_daily_balances_safely"
+      },
+      {
+        "version": "20261009032922",
+        "name": "glass_balance_filter_per_production"
+      },
+      {
+        "version": "20261009033455",
+        "name": "assembly_board_read_rpc"
+      },
+      {
+        "version": "20261009033900",
+        "name": "assembly_add_glass_fields"
+      },
+      {
+        "version": "20261009160656",
+        "name": "assembly_glass_detail_and_location_report"
+      },
+      {
+        "version": "20261009163514",
+        "name": "glass_location_position_identity_v2"
+      },
+      {
+        "version": "20261009163704",
+        "name": "glass_location_excel_serial_date_fix"
+      },
+      {
+        "version": "20261009163718",
+        "name": "glass_location_safe_excel_values"
+      },
+      {
+        "version": "20261009164709",
+        "name": "location_report_transfer_t_or_l"
+      },
+      {
+        "version": "20261009165708",
+        "name": "glass_detail_production_header"
+      },
+      {
+        "version": "20261009170131",
+        "name": "location_report_rack_classification_v2"
+      },
+      {
+        "version": "20261009194943",
+        "name": "nc_aluminum_master_week_model"
+      },
+      {
+        "version": "20261009195001",
+        "name": "nc_aluminum_preview_apply_rpc"
+      },
+      {
+        "version": "20261009195942",
+        "name": "nc_aluminum_preview_week_breakdown"
+      },
+      {
+        "version": "20261009201418",
+        "name": "nc_aluminum_operational_view_rpc"
+      },
+      {
+        "version": "20261009202458",
+        "name": "nc_aluminum_operational_v2"
+      },
+      {
+        "version": "20261009202949",
+        "name": "nc_aluminum_line_summary_v3"
+      },
+      {
+        "version": "20261009204032",
+        "name": "nc_supplier_alutions_v4"
+      },
+      {
+        "version": "20261009204043",
+        "name": "nc_supplier_alutions_metrics_v4"
+      },
+      {
+        "version": "20261009205855",
+        "name": "nc_aluminum_apply_return_new_rows_v5"
+      },
+      {
+        "version": "20261009205906",
+        "name": "nc_aluminum_preview_new_rows_v6"
+      },
+      {
+        "version": "20261009211317",
+        "name": "nc_glass_base_v1"
+      },
+      {
+        "version": "20261009212107",
+        "name": "nc_glass_operational_v2"
+      },
+      {
+        "version": "20261009222315",
+        "name": "aluminum_tracking_base_v2"
+      },
+      {
+        "version": "20261009222337",
+        "name": "aluminum_tracking_daily_v3"
+      },
+      {
+        "version": "20261009222731",
+        "name": "aluminum_tracking_reservation_production_v5"
+      },
+      {
+        "version": "20261009223537",
+        "name": "fix_aluminum_tracking_identity_order_v6"
+      },
+      {
+        "version": "20261009224203",
+        "name": "aluminum_tracking_operational_v7"
+      },
+      {
+        "version": "20261010021039",
+        "name": "priority_assignment_v1"
+      },
+      {
+        "version": "20261010021828",
+        "name": "priority_glass_type_v2"
+      },
+      {
+        "version": "20261010023256",
+        "name": "priority_reservation_membership_v3"
+      },
+      {
+        "version": "20261010125227",
+        "name": "priority_auto_generate_v4"
+      },
+      {
+        "version": "20261010125710",
+        "name": "priority_assignment_owner_v5"
+      },
+      {
+        "version": "20261010125818",
+        "name": "priority_primary_reservation_v6"
+      },
+      {
+        "version": "20261010141931",
+        "name": "priorities_in_programming_and_assembly_v7"
+      },
+      {
+        "version": "20261010142449",
+        "name": "nc_aluminum_update_changes_summary_v1"
+      },
+      {
+        "version": "20261010142505",
+        "name": "nc_aluminum_apply_change_tracking_v2"
+      },
+      {
+        "version": "20261010143352",
+        "name": "nc_aluminum_open_weeks_operational_v3"
+      },
+      {
+        "version": "20261010143406",
+        "name": "daily_source_change_events_v1"
+      },
+      {
+        "version": "20261010151032",
+        "name": "export_and_aluminum_tracking_change_events_v2"
+      },
+      {
+        "version": "20261010160527",
+        "name": "export_completed_orders_event_v3"
+      },
+      {
+        "version": "20261011155455",
+        "name": "machining_reception_module_v1"
+      },
+      {
+        "version": "20261011161006",
+        "name": "machining_reception_context_fields_v2"
+      },
+      {
+        "version": "20261011161715",
+        "name": "machining_reception_date_shift_v3"
+      },
+      {
+        "version": "20261011164319",
+        "name": "faltantes_recepcion_fecha_turno_v123"
+      },
+      {
+        "version": "20261011170759",
+        "name": "faltantes_auto_reporte_y_sla_recepcion_v125"
+      },
+      {
+        "version": "20261011172021",
+        "name": "recepcion_no_inferir_cantidad_reserva_v126"
+      },
+      {
+        "version": "20261011180902",
+        "name": "recepcion_primera_asignacion_reserva_v127"
+      },
+      {
+        "version": "20261011190812",
+        "name": "recepcion_cantidad_acabado_principal_v128"
+      },
+      {
+        "version": "20261011200254",
+        "name": "mecanizado_programacion_base_v132"
+      },
+      {
+        "version": "20261011201053",
+        "name": "fix_programacion_clasificacion_semana_v134"
+      },
+      {
+        "version": "20261011221039",
+        "name": "programacion_saldos_prioridad_decimal_v136"
+      },
+      {
+        "version": "20261011221656",
+        "name": "mecanizado_exponer_prioridad_semanal_v137"
+      },
+      {
+        "version": "20261011222900",
+        "name": "mecanizado_partes_y_cantidad_principal_v140"
+      },
+      {
+        "version": "20261011223614",
+        "name": "mecanizado_cantidad_siempre_programacion_semanal_v141"
+      },
+      {
+        "version": "20261011224100",
+        "name": "mecanizado_programacion_semanal_fuente_base_v142"
+      },
+      {
+        "version": "20261011224641",
+        "name": "restore_mecanizado_function_name_v143"
+      },
+      {
+        "version": "20261011224702",
+        "name": "fix_mecanizado_rpc_column_conflict_v143"
+      },
+      {
+        "version": "20261011224814",
+        "name": "prioritize_received_unlegalized_for_programming_v143"
+      },
+      {
+        "version": "20261011224820",
+        "name": "programming_received_unlegalized_precedence_v144"
+      },
+      {
+        "version": "20261011225308",
+        "name": "canonical_aluminum_operational_status_v144"
+      },
+      {
+        "version": "20261011225503",
+        "name": "wire_canonical_operational_status_v145"
+      },
+      {
+        "version": "20261011225826",
+        "name": "remove_ambiguous_mecanizado_programar_overload_v146"
+      },
+      {
+        "version": "20261011230449",
+        "name": "separate_weekly_part_from_machining_priority_v147"
+      },
+      {
+        "version": "20261011230655",
+        "name": "backward_compatible_mecanizado_programar_v148"
+      },
+      {
+        "version": "20261011231024",
+        "name": "fix_mecanizado_programar_glass_snapshot_v149"
+      },
+      {
+        "version": "20261011232515",
+        "name": "backfill_single_weekly_part_programming_v152"
+      },
+      {
+        "version": "20261012171048",
+        "name": "machining_reorder_priorities_v155"
+      },
+      {
+        "version": "20261012171547",
+        "name": "user_access_management_v156"
+      },
+      {
+        "version": "20261012172121",
+        "name": "user_roles_v157"
+      },
+      {
+        "version": "20261012174419",
+        "name": "role_access_and_password_reset_v162"
+      },
+      {
+        "version": "20261012175819",
+        "name": "fix_role_access_session_table_v165"
+      },
+      {
+        "version": "20261012180056",
+        "name": "fix_role_access_token_hash_v166"
+      },
+      {
+        "version": "20261012180954",
+        "name": "fix_role_access_list_session_v168"
+      },
+      {
+        "version": "20261012181231",
+        "name": "fix_extension_resolution_admin_users_v169"
+      },
+      {
+        "version": "20261012181236",
+        "name": "fix_extension_resolution_password_reset_v169"
+      },
+      {
+        "version": "20261012181442",
+        "name": "expand_sgp_user_roles_v170"
+      },
+      {
+        "version": "20261012181901",
+        "name": "fix_password_reset_session_v171"
+      },
+      {
+        "version": "20261012182115",
+        "name": "fix_user_access_session_v172"
+      },
+      {
+        "version": "20261012182330",
+        "name": "allow_recepcion_role_operational_rpcs_v173"
+      },
+      {
+        "version": "20261012185617",
+        "name": "latest_glass_source_v170"
+      },
+      {
+        "version": "20261012185634",
+        "name": "mecanizado_use_latest_glass_v170"
+      },
+      {
+        "version": "20261012185655",
+        "name": "mecanizado_latest_glass_in_disponibles_v170"
+      },
+      {
+        "version": "20261012192032",
+        "name": "add_glass_type_to_mecanizado_available_v177"
+      },
+      {
+        "version": "20261012193354",
+        "name": "production_capacity_model_v179"
+      },
+      {
+        "version": "20261012195341",
+        "name": "general_shift_schedule_config_v182"
+      },
+      {
+        "version": "20261012203322",
+        "name": "mecanizado_produccion_base_v185"
+      },
+      {
+        "version": "20261012234945",
+        "name": "mecanizado_produccion_detalle_v187"
+      },
+      {
+        "version": "20261012235122",
+        "name": "mecanizado_production_detail_helpers_v187"
+      },
+      {
+        "version": "20261013000334",
+        "name": "production_orders_glass_and_profile_search_v188"
+      },
+      {
+        "version": "20261013001104",
+        "name": "fix_production_detail_use_weekly_priority_v189"
+      },
+      {
+        "version": "20261013150832",
+        "name": "make_reception_save_idempotent"
+      },
+      {
+        "version": "20261013163106",
+        "name": "add_picking_mecanizado_states"
+      },
+      {
+        "version": "20261013164141",
+        "name": "mecanizado_v190_pendientes_turno"
+      },
+      {
+        "version": "20261013164827",
+        "name": "mecanizado_v191_historico_cumplimiento"
+      },
+      {
+        "version": "20261013171028",
+        "name": "mecanizado_v195_arrastre_con_estado_reserva"
+      },
+      {
+        "version": "20261013171925",
+        "name": "mecanizado_v196_arrastre_directo_por_orden"
+      },
+      {
+        "version": "20261013191709",
+        "name": "mecanizado_v197_arrastre_solo_turno_cerrado"
+      },
+      {
+        "version": "20261013200406",
+        "name": "mecanizado_v202_pendientes_aluminio"
+      },
+      {
+        "version": "20261013200439",
+        "name": "mecanizado_v202_nombres_usuarios_faltantes"
+      },
+      {
+        "version": "20261013203450",
+        "name": "mecanizado_v203_vista_novedades"
+      },
+      {
+        "version": "20261013211256",
+        "name": "picking_v208_base"
+      },
+      {
+        "version": "20261013211631",
+        "name": "picking_v209_fix_queue_execution"
+      },
+      {
+        "version": "20261013212206",
+        "name": "picking_v210_fix_pieces"
+      },
+      {
+        "version": "20261013213028",
+        "name": "picking_v211_pieces_by_reservation"
+      },
+      {
+        "version": "20261013213945",
+        "name": "mecanizado_v212_arrastre_historico_y_masivo"
+      },
+      {
+        "version": "20261014000656",
+        "name": "picking_v214_orders_and_exact_part_pieces"
+      },
+      {
+        "version": "20261014003525",
+        "name": "picking_v215_panel_pieces_only"
+      },
+      {
+        "version": "20261014005525",
+        "name": "picking_v217_order_details_delivery"
+      },
+      {
+        "version": "20261014010424",
+        "name": "picking_v219_delivery_flow"
+      },
+      {
+        "version": "20261014011418",
+        "name": "picking_v220_nc_faltante"
+      },
+      {
+        "version": "20261014022924",
+        "name": "picking_v223_repo_tracking"
+      },
+      {
+        "version": "20261014023719",
+        "name": "picking_v224_fix_piece_id_text"
+      },
+      {
+        "version": "20261014024504",
+        "name": "picking_v225_order_states"
+      },
+      {
+        "version": "20261014025435",
+        "name": "picking_v226_assembly_pending_projection"
+      },
+      {
+        "version": "20261014030223",
+        "name": "picking_v227_fix_assembly_timestamp"
+      },
+      {
+        "version": "20261014030234",
+        "name": "picking_v227_nc_link_status"
+      },
+      {
+        "version": "20261014201305",
+        "name": "mecanizado_reprogramacion_individual"
+      },
+      {
+        "version": "20261014201317",
+        "name": "mecanizado_arrastre_historico"
+      },
+      {
+        "version": "20261014201322",
+        "name": "mecanizado_ordenes_programacion_reprogramadas"
+      },
+      {
+        "version": "20261014201329",
+        "name": "mecanizado_reprogramar_reserva_completa"
+      },
+      {
+        "version": "20261014201428",
+        "name": "mecanizado_arrastre_estado_reservas_sin_parte"
+      },
+      {
+        "version": "20261014220925",
+        "name": "picking_v234_order_association"
+      },
+      {
+        "version": "20261014234611",
+        "name": "grant_anon_execute_mecanizado_reprogramar_reserva"
+      },
+      {
+        "version": "20261014234800",
+        "name": "allow_zero_qty_for_cancelled_mecanizado_programacion"
+      },
+      {
+        "version": "20261015000119",
+        "name": "picking_delivery_pending_validation_state"
+      },
+      {
+        "version": "20261015000438",
+        "name": "picking_delivery_date_shift_metadata"
+      },
+      {
+        "version": "20261015015714",
+        "name": "picking_reception_audit_v1"
+      },
+      {
+        "version": "20261015022827",
+        "name": "fix_aluminum_operational_state_priority"
+      },
+      {
+        "version": "20261015023440",
+        "name": "tracking_expose_operational_aluminum_state"
+      },
+      {
+        "version": "20261015024543",
+        "name": "tracking_add_machining_state"
+      },
+      {
+        "version": "20261015143644",
+        "name": "add_nc_aluminum_report_rpc"
+      },
+      {
+        "version": "20261015145723",
+        "name": "nc_origin_rule_supplier_priority"
+      },
+      {
+        "version": "20261015145733",
+        "name": "nc_report_base_with_origin"
+      },
+      {
+        "version": "20261015145746",
+        "name": "extend_nc_report_metrics_v2"
+      },
+      {
+        "version": "20261015192854",
+        "name": "fix_picking_pieces_fallback_by_production"
+      },
+      {
+        "version": "20261016020525",
+        "name": "optimize_weekly_load_aluminum_indexes"
+      },
+      {
+        "version": "20261016021458",
+        "name": "fix_anon_execute_mecanizado_ordenes_programacion"
+      },
+      {
+        "version": "20261016021543",
+        "name": "fix_picking_pieces_any_piece_type"
+      },
+      {
+        "version": "20261016023056",
+        "name": "picking_panel_only_wrapper"
+      },
+      {
+        "version": "20261016032048",
+        "name": "picking_panel_filter_from_master"
+      },
+      {
+        "version": "20261016033803",
+        "name": "picking_disambiguate_same_production_by_system"
+      },
+      {
+        "version": "20261016213633",
+        "name": "add_home_production_balances_rpc"
+      },
+      {
+        "version": "20261016221646",
+        "name": "fix_picking_priority_source_of_truth"
+      },
+      {
+        "version": "20261016223743",
+        "name": "add_finish_to_aluminum_pending_list"
+      },
+      {
+        "version": "20261016224050",
+        "name": "separate_resolved_aluminum_pending"
+      },
+      {
+        "version": "20261017144933",
+        "name": "preservar_ubicacion_vidrio_ove_ausente"
+      },
+      {
+        "version": "20261017152058",
+        "name": "agregar_semana_a_pendientes_aluminio"
+      },
+      {
+        "version": "20261017200145",
+        "name": "mecanizado_reporte_turno_comentario"
+      },
+      {
+        "version": "20261018032323",
+        "name": "mecanizado_arrastre_cinco_minutos"
+      },
+      {
+        "version": "20261018134634",
+        "name": "grant_anon_mecanizado_pendientes_turno"
+      },
+      {
+        "version": "20261018171016",
+        "name": "fix_carry_only_unfinished_orders_v269"
+      },
+      {
+        "version": "20261018172627",
+        "name": "production_week_and_priority_source_v272"
+      },
+      {
+        "version": "20261018181537",
+        "name": "pending_aluminum_include_resolved_v275"
+      },
+      {
+        "version": "20261018182015",
+        "name": "pending_aluminum_week_multireserve_v276"
+      },
+      {
+        "version": "20261018182028",
+        "name": "pending_aluminum_week_multireserve_v276"
+      },
+      {
+        "version": "20261018185812",
+        "name": "shared_reservation_foundation_v276"
+      },
+      {
+        "version": "20261018185902",
+        "name": "shared_reservation_read_flows_v276"
+      },
+      {
+        "version": "20261018185944",
+        "name": "shared_reservation_pending_write_v276"
+      },
+      {
+        "version": "20261018190012",
+        "name": "shared_reservation_picking_and_pending_read_v276"
+      },
+      {
+        "version": "20261018190355",
+        "name": "picking_panel_shared_finish_v276"
+      },
+      {
+        "version": "20261018190503",
+        "name": "shared_reservation_carry_v276"
+      },
+      {
+        "version": "20261018193703",
+        "name": "lab_v277_reserva_compartida_semantica_y_multireserva"
+      },
+      {
+        "version": "20261019004801",
+        "name": "lab_v282_fix_execute_arrastre_anon"
+      },
+      {
+        "version": "20261019171803",
+        "name": "lab_v283_cantidad_canonica_programacion"
+      },
+      {
+        "version": "20261019171924",
+        "name": "lab_v283_programacion_composicion_consumidores"
+      },
+      {
+        "version": "20261019174949",
+        "name": "lab_v284_cobertura_ordenes_base"
+      },
+      {
+        "version": "20261019175000",
+        "name": "lab_v284_reconciliar_programacion_legacy"
+      },
+      {
+        "version": "20261019175011",
+        "name": "lab_v284_backfill_evidencia_ejecucion"
+      },
+      {
+        "version": "20261019175345",
+        "name": "lab_v284_revoke_public_cobertura"
+      },
+      {
+        "version": "20261019183535",
+        "name": "fix_programacion_scope_cte_insert_v287"
+      },
+      {
+        "version": "20261019185409",
+        "name": "lab_v287_conciliacion_operativa_base"
+      },
+      {
+        "version": "20261019185416",
+        "name": "lab_v287_conciliaciones_listar"
+      },
+      {
+        "version": "20261019193601",
+        "name": "lab_v288_prevenir_prioridad_nula"
+      },
+      {
+        "version": "20261019193818",
+        "name": "lab_v288_guardia_duplicados_ordenes"
+      },
+      {
+        "version": "20261019194203",
+        "name": "lab_v288_programar_cobertura_global"
+      },
+      {
+        "version": "20261019205223",
+        "name": "lab_v290_resumen_vidrio"
+      },
+      {
+        "version": "20261019205231",
+        "name": "lab_v290_ordenes_resumen_vidrio"
+      },
+      {
+        "version": "20261019205651",
+        "name": "lab_v291_semana_por_programacion"
+      },
+      {
+        "version": "20261019211947",
+        "name": "lab_v293_saldos_portada_lineas"
+      },
+      {
+        "version": "20261019212318",
+        "name": "lab_v294_dispersion_vidrio"
+      },
+      {
+        "version": "20261019212856",
+        "name": "lab_v295_dispersion_reserva_partes"
+      },
+      {
+        "version": "20261019223535",
+        "name": "lab_v298_dispersion_ventanas"
+      },
+      {
+        "version": "20261019223603",
+        "name": "lab_v298_restore_canonical_priority"
+      },
+      {
+        "version": "20261020204906",
+        "name": "lab_v310_prioridad_tercer_nivel"
+      },
+      {
+        "version": "20261020210649",
+        "name": "lab_v310_generar_prioridades_tercer_nivel"
+      },
+      {
+        "version": "20261021120913",
+        "name": "lab_v316_reprogramacion_detalle_canonico"
+      },
+      {
+        "version": "20261022124920",
+        "name": "sgp_maestro_piezas_admin_auditoria_20261022"
+      },
+      {
+        "version": "20261022124953",
+        "name": "sgp_maestro_piezas_admin_listar_20261022"
+      },
+      {
+        "version": "20261022140726",
+        "name": "sgp_carga_semanal_concurrency_lock_20261022"
+      },
+      {
+        "version": "20261022162241",
+        "name": "linea_plan_v1_safe_schema"
+      },
+      {
+        "version": "20261022162255",
+        "name": "linea_plan_execution_v1"
+      },
+      {
+        "version": "20261022162400",
+        "name": "linea_plan_columns_v2"
+      },
+      {
+        "version": "20261022162406",
+        "name": "linea_plan_consultar_v1"
+      },
+      {
+        "version": "20261022162415",
+        "name": "linea_plan_programar_v1"
+      },
+      {
+        "version": "20261022162423",
+        "name": "linea_plan_registrar_v1"
+      },
+      {
+        "version": "20261022162439",
+        "name": "linea_plan_mover_v1"
+      },
+      {
+        "version": "20261022162449",
+        "name": "linea_plan_arrastrar_v1"
+      },
+      {
+        "version": "20261022162458",
+        "name": "linea_plan_arrastrar_hotfix_v2"
+      },
+      {
+        "version": "20261022162540",
+        "name": "linea_plan_disable_carryover_pending_qa"
+      },
+      {
+        "version": "20261022181435",
+        "name": "linea_plan_explorador_v327"
+      },
+      {
+        "version": "20261023103357",
+        "name": "recepcion_faltantes_roles_cierre_20261023"
+      },
+      {
+        "version": "20261023105038",
+        "name": "recepcion_lectura_roles_20261023"
+      },
+      {
+        "version": "20261023111137",
+        "name": "recepcion_auditoria_roles_20261023"
+      },
+      {
+        "version": "20261023123223",
+        "name": "picking_reporte_cantidad_programada_20261023"
+      },
+      {
+        "version": "20261023202236",
+        "name": "sgp_picking_respaldo_duplicados_20261023"
+      },
+      {
+        "version": "20261023202435",
+        "name": "picking_reporte_nombre_responsable_20261023"
+      },
+      {
+        "version": "20261023202440",
+        "name": "picking_no_duplicar_entrega_completa_20261023"
+      },
+      {
+        "version": "20261024034031",
+        "name": "arrastre_prospectivo_por_orden_20261024"
+      },
+      {
+        "version": "20261024154023",
+        "name": "lab_v348_programada_independiente"
+      },
+      {
+        "version": "20261026160651",
+        "name": "pdt_v2_historial_estado_nuevo_fix_20261026"
+      },
+      {
+        "version": "20261026215744",
+        "name": "allow_lider_mecanizado_programacion_listar_20261026"
+      },
+      {
+        "version": "20261027020106",
+        "name": "sgp_mecanizado_recepcion_resumen_readonly_v1"
+      },
+      {
+        "version": "20261027101959",
+        "name": "pdt_multiorigen_v4_pr116"
+      },
+      {
+        "version": "20261027111219",
+        "name": "grant_anon_execute_mecanizado_reprogramar_orden"
+      },
+      {
+        "version": "20261027111901",
+        "name": "fix_mecanizado_reprogramar_orden_atomic_detail_transfer"
+      },
+      {
+        "version": "20261027141125",
+        "name": "picking_fecha_turno_guard_123"
+      },
+      {
+        "version": "20261028131730",
+        "name": "weekly_load_rpc_timeout_55s_20261028"
+      },
+      {
+        "version": "20261029194106",
+        "name": "pdt_unified_grouped_source_20261029"
+      },
+      {
+        "version": "20261029194115",
+        "name": "pdt_unified_manual_01_20261029"
+      },
+      {
+        "version": "20261029194118",
+        "name": "pdt_unified_manual_02_20261029"
+      },
+      {
+        "version": "20261029194121",
+        "name": "pdt_unified_manual_03_20261029"
+      },
+      {
+        "version": "20261029194125",
+        "name": "pdt_unified_manual_04_20261029"
+      },
+      {
+        "version": "20261029194127",
+        "name": "pdt_unified_manual_05_20261029"
+      },
+      {
+        "version": "20261029194133",
+        "name": "pdt_unified_cutover_contract_20261029"
+      },
+      {
+        "version": "20261029214944",
+        "name": "pdt_manual_multiple_ncs_20261029"
+      },
+      {
+        "version": "20261030023006",
+        "name": "picking_multi_nc_v4_20261030"
+      },
+      {
+        "version": "20261030030556",
+        "name": "pdt_deferred_multi_nc_fix_20261030"
+      },
+      {
+        "version": "20261030032105",
+        "name": "pdt_add_nc_deferred_fix_20261029"
+      },
+      {
+        "version": "20261030162950",
+        "name": "pdt_v2_close_history_state_20261030"
+      },
+      {
+        "version": "20261031033429",
+        "name": "mecanizado_programacion_parcial"
+      },
+      {
+        "version": "20261102184626",
+        "name": "mecanizado_reserva_compartida_canonica_pr185"
+      },
+      {
+        "version": "20261103145315",
+        "name": "sgp_archivar_pruebas_2026_s41_s44"
+      },
+      {
+        "version": "20261103153934",
+        "name": "sgp_picking_recepcion_ocultar_producciones_archivadas_s41_s44"
+      },
+      {
+        "version": "20261103164154",
+        "name": "sgp_recepcion_cantidades_fuente_programacion_20261103"
+      },
+      {
+        "version": "20261103172613",
+        "name": "sgp_recepcion_reserva_principal_cantidad_ocultar_complementarias_v2"
+      },
+      {
+        "version": "20261104025405",
+        "name": "lp183_harden_native_access_catalogs"
+      },
+      {
+        "version": "20261104025604",
+        "name": "lp183_operacion_01_contained"
+      },
+      {
+        "version": "20261104025619",
+        "name": "lp183_powerbi_06_contained"
+      },
+      {
+        "version": "20261104025624",
+        "name": "lp183_temporal_08_contained"
+      },
+      {
+        "version": "20261104033408",
+        "name": "lp183_native_roles_10_contained"
+      },
+      {
+        "version": "20261104211406",
+        "name": "lp191_seguimiento_global_install"
+      },
+      {
+        "version": "20261104211455",
+        "name": "lp191_seguimiento_global_enable_anon"
+      },
+      {
+        "version": "20261105020934",
+        "name": "sgp_pdt_fuentes_timeout_temporal_45s_20261104"
+      },
+      {
+        "version": "20261105025610",
+        "name": "lp382_01_storage_draft"
+      },
+      {
+        "version": "20261105030345",
+        "name": "lp382_02_rpc_review"
+      },
+      {
+        "version": "20261105030401",
+        "name": "lp382_03_pdt_atomico_review"
+      },
+      {
+        "version": "20261105031220",
+        "name": "lp382_04_conciliacion_review"
+      },
+      {
+        "version": "20261105031235",
+        "name": "lp382_05_picking_original_review"
+      },
+      {
+        "version": "20261105031309",
+        "name": "lp382_06_nc_opcional_review"
+      },
+      {
+        "version": "20261105031332",
+        "name": "lp382_07_api_read_activate"
+      },
+      {
+        "version": "20261105031431",
+        "name": "lp382_08_api_write_activate"
+      },
+      {
+        "version": "20261105031445",
+        "name": "lp382_09_enable_writes_activate"
+      },
+      {
+        "version": "20261105031534",
+        "name": "lp382_10_enable_aluminum_activate"
+      },
+      {
+        "version": "20261105031549",
+        "name": "lp382_11_enable_physical_activate"
+      }
+    ]
+  }
+}

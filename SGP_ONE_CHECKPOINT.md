@@ -1,3 +1,17 @@
+## LAB v382 · backend instalado y activado · 05/11/2026 03:16 UTC
+
+01–11 aplicadas en SGP-ONE-LAB tras autorización específica y confirmaciones nativas.
+04 cancelada previamente no se ejecutó; nuevo intento autorizado aplicado una sola vez.
+Seis RPC EXECUTE solo anon, v1 interno; sin acceso privado ni grants a otros roles.
+Cuatro flags activos; registrador PDT opcionalNC d1195… con owner/ACL/config conservados.
+Siete huellas API y once tablas RLS verificadas; cero reportes/eventos/recibos de prueba.
+Sesión inválida rechazada por las seis RPC en READ ONLY/ROLLBACK, sin órdenes reales.
+Advisor: sin nuevos ERROR; +6 avisos RPC anon y +11 tablas RLS sin policy, esperados.
+Detalle: docs/sql-proposals/lp01-afectaciones/production-activation-evidence.json.
+NO merge ni frontend publicado por este agente. Padre coordina gates/backend-readiness,
+Hosting baseline/inventario/bytes, merge/despliegue y comprobación visible v382.
+CI PASS78b547b; los commits de evidencia tienen su propia CI, no heredan ese resultado.
+
 ## LAB v382 · instalación parcial contenida; 04 cancelada · 05/11/2026 03:09 UTC
 
 01–03 aplicadas y verificadas en SGP-ONE-LAB; cuatro flags false, cero API expuestas,
