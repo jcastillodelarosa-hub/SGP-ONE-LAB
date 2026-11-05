@@ -33,3 +33,16 @@ test('server-side read revocation clears an already loaded private draft',async(
  let denied=false;const editor=orderNoteEditor({isCurrent:()=>true,read:async()=>{if(denied)throw Error('NO_AUTORIZADO');return data();}});
  await editor.load();editor.edit('private');denied=true;await assert.rejects(editor.load(),/NO_AUTORIZADO/);assert.equal(editor.state.snapshot,null);assert.equal(editor.state.draft,'');
 });
+test('dirty draft retains r1 after B saves r2 and refresh; explicit discard adopts r2',async()=>{
+ let stored={revision:1,observation:'Initial'},sent;
+ const editor=orderNoteEditor({isCurrent:()=>true,read:async()=>({...data(),note:{...stored}}),save:async cmd=>{
+  sent=cmd;if(cmd.revision!==stored.revision){const e=Error('ORDER_NOTE_REVISION_STALE');e.confirmedRejected=true;throw e;}
+  stored={revision:stored.revision+1,observation:cmd.observation};return stored;
+ }},{uuid:()=> 'race'});
+ await editor.load();editor.edit('Draft A');stored={revision:2,observation:'Saved by B'};await editor.load();
+ assert.equal(editor.state.snapshot.note.revision,2);assert.equal(editor.state.draft,'Draft A');assert.equal(editor.state.draftRevision,1);
+ await assert.rejects(editor.save(),/REVISION_STALE/);assert.equal(sent.revision,1);assert.equal(stored.observation,'Saved by B');
+ await editor.load();assert.equal(editor.state.draftRevision,1);assert.equal(editor.state.draft,'Draft A');
+ editor.discardDraft();assert.equal(editor.state.draft,'Saved by B');assert.equal(editor.state.draftRevision,2);
+ editor.edit('A after reviewing B');await editor.save();assert.equal(stored.revision,3);
+});

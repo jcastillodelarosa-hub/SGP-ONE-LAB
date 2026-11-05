@@ -1,3 +1,10 @@
+## PR203 · revisión base de borrador preservada · 05/11/2026
+
+Corregido refresco que adoptaba revisión nueva mientras conservaba texto viejo.
+`draftRevision` permanece en r1 al leer r2; guardar devuelve conflicto CAS.
+Prueba puntual nueva PASS: A/B/refresco/rechazo y descarte explícito para retomar r2.
+No SQL ni UI modificados. Evidencia anterior reutilizada; CI del SHA final pendiente.
+
 ## PR203 · contratos fuente y brechas · 05/11/2026
 
 Revisión dirigida de catálogo READ ONLY/ROLLBACK, sin datos de negocio:

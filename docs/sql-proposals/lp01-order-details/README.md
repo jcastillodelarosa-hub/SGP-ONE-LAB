@@ -105,3 +105,10 @@ revisión SQL y activación con el padre. Este PR debe permanecer draft hasta en
 
 Ampliación dirigida: [contratos y brechas NC/Accesorios/Aluminio/PDT](CONTRACT_GAPS.md),
 con evidencia de catálogo solo lectura. El soporte NC manual no completa el boceto.
+
+Revisión puntual del editor: un refresco con borrador dirty conserva ahora su
+`draftRevision`; no adopta silenciosamente la revisión de otra persona. La nueva
+prueba A:r1 → B:r2 → refrescar A → guardar A comprueba rechazo CAS, conservación
+del texto de B y descarte explícito del borrador antes de editar sobre r2.
+Ejecutada solo esa prueba nueva (PASS); 9 pruebas anteriores y PostgreSQL se
+conservan como evidencia previa, sin afirmar que fueron ejecutadas otra vez.
