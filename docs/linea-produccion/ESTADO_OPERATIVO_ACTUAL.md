@@ -1,3 +1,27 @@
+## LAB v383 · B12/B13 preparados en aislamiento · 05/11/2026
+
+Base main646729005295c79d73bed7d6730aa10d042768b8; coordinador confirmó
+v382 publicado/Hosting07abe57ef1374fde. Rama fix/operacion-b12-b13-v383.
+Ensamble: una entrada por producción/turno, abiertas por antigüedad nativa,
+programadas sin iniciar por prioridad; semana/sistema, detalle directo PC/móvil.
+Motor existente reemplaza6→8, conserva historial, SALE desconocido y partes.
+Varias asignaciones requieren selección explícita: pendiente regla de total único
+por orden sin inventar reparto. Clasificación combina el motor operativo con afectaciones individuales y Picking
+pendiente no vinculado, mediante el lector existente (máximo3 consultas simultáneas).
+Lectura faltante: clasificación por revisar; revocación: limpiar vista. Sin sumar causas.
+Propuesta siguiente turno: contrato nuevo aislado, una RPC sin EXECUTE por defecto,
+flag false, eventos privados/inmutables, no cambia SALE/Export ni concede roles.
+Activación productiva requiere manifiesto/pins y autorización de esa nueva firma.
+490 pruebas Node y release383 PASS. Chromium PC1440/móvil390 contra PostgreSQL
+sintético: reemplazo6→8, borrador conservado20s, Picking visible, propuesta bloqueada
+sin disponibilidad acreditada; geometría escritorio y sin desborde móvil PASS.
+PostgreSQL: CAS/idempotencia/carreras, rollback, permisos privados, revocación
+serializada y rechazo posterior, saldo/SALE intactos PASS.
+Detalle y límites: docs/sql-proposals/lp01-propuestas/README.md; evidencia tests/lp01-b12-b13.
+IMPLEMENTADO EN RAMA, no push/PR/CI nuevo, no SQL productivo, merge ni despliegue.
+Siguiente: coordinador revisa la captura con varias asignaciones y contrato de propuesta.
+Preparar preflight/política solo tras coordinación; pendiente autorización nueva RPC/flag.
+
 ## LAB v382 · política de publicación PR194 preparada · 05/11/2026
 
 integration_pr194; única huella protegida cambiada lp01-operation.js=c59d53eb… .
