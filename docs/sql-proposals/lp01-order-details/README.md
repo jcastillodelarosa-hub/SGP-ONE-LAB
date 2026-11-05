@@ -50,7 +50,7 @@ Datos ausentes, fuera de rango o Export no vigente dan no disponible, nunca cero
 Porcentaje decimal hasta 12 cifras y cantidad entera de hasta 15 dígitos; fuera
 de ese contrato se rechaza sin truncamiento. Evidencia productiva previa del padre:
 porcentajes enteros 0–100; 32 PANELES_2 y 51 FRAMES_2 arrojan fracciones.
-No se volvió a consultar producción.
+No se volvieron a consultar datos del Export.
 
 Decisión requerida **solo antes de convertir en ventanas enteras**: elegir si una
 fracción cuenta como ventana afectada (techo), se consideran únicamente completas
@@ -102,3 +102,6 @@ ni baterías visuales de vistas sin cambios.
 Siguiente acción: recuperar los bocetos en este executor e inspeccionarlos; después
 integrar los controles al diseño aprobado, probar PC/móvil y coordinar versión,
 revisión SQL y activación con el padre. Este PR debe permanecer draft hasta entonces.
+
+Ampliación dirigida: [contratos y brechas NC/Accesorios/Aluminio/PDT](CONTRACT_GAPS.md),
+con evidencia de catálogo solo lectura. El soporte NC manual no completa el boceto.

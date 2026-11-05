@@ -1,3 +1,15 @@
+## PR203 · contratos fuente y brechas · 05/11/2026
+
+Revisión dirigida de catálogo READ ONLY/ROLLBACK, sin datos de negocio:
+NC vidrio tiene consulta semanal y PK consecutivo, sin key producción/línea;
+no se encontró enlace LP verificado. Accesorios tiene materiales, no causa LP.
+Aluminio/PDT usa identidad original; no sumar las vistas separadas.
+Permisos y brechas en docs/sql-proposals/lp01-order-details/CONTRACT_GAPS.md.
+Library image_file devolvió OCR/punteros sin píxeles renderizados aquí; no nueva
+transferencia ni evasión. PR203 sigue parcial; UI y vínculo NC verificado pendientes.
+Pruebas previas válidas para código intacto; este incremento solo documenta evidencia.
+Siguiente: resolver inspección visual soportada y revisar adaptador NC canónico.
+
 ## Observación por orden / Tecno / NC · contratos aislados · 05/11/2026
 
 Rama feat/seguimiento-order-details, base main90518a0 (PR202 preservado).
