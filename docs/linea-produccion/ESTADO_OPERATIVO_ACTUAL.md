@@ -5,7 +5,7 @@ filtros y detalle intactos. Excluye editor/borrador SALE, lector de abiertas y S
 500Node/release387 y PC/móvil/refresco/permisos PASS. SALE por orden sigue pendiente.
 Baseline/rollback v385 ba7ae3754b4d5a76 acreditada por coordinador. HOLD intacto.
 Renumerar entregas aisladas abiertas/SALE a >=388 antes de publicarlas.
-Ver [b10-visual-v387/README.md](b10-visual-v387/README.md). Falta PR/CI exacta y
+Ver [b10-visual-v387/README.md](b10-visual-v387/README.md). PR198 borrador, política198/pins preparados; falta CI exacta y
 coordinación para integración/publicación; sin datos ni permisos modificados.
 
 ## LAB v385 · PDT compacto y resumen por causa · aislado

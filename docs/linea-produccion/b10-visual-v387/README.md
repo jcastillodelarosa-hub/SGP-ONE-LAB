@@ -34,5 +34,7 @@ Inventory SHA256 c6f2371c388c87a5e454acaebd9323ea377e13d00a008140930b92d347cb756
 config SHA256 b1c8097ce32ce29d3d39d04e54f86699c1cd013dcbfc8a4f9b89f033cadc34fd.
 No nueva inspección productiva desde este hilo ni reintento de descarga403.
 
-Siguiente: PR borrador y CI de su SHA final, pins y artefacto revisado. Integración y
+PR198 borrador creado. Política198, baseline/rollback v385 acreditada y único
+pin protegido modificado lp01-operation.js actualizados. HOLD/verificadores intactos.
+Siguiente: CI de su SHA final y artefacto revisado. Integración y
 publicación solo por coordinador. Sin aprobación formal ni despliegue desde este hilo.
