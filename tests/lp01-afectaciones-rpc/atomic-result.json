@@ -1,0 +1,17 @@
+{
+  "status": "PASS",
+  "environment": "PostgreSQL17.11 --network none",
+  "checks": [
+    "Native V4 source/identity/NC guards; same transaction PDT2 pieces + LP5 windows; replay one record; supervisor denied; malformed source rolls back",
+    "Late LP/receipt failures roll back native PDT too; concurrent exact retry creates one PDT event and one LP report",
+    "Native Picking pending visible by exact production with original ID/reference/fabrication/length/state; supervisor read unavailable; original optional NC stays blank on adoption; no duplicate/no availability credit",
+    "Coordinator explicit legacy-to-report evidence; missing/stale/other-role reconciliation denied; no backfill; changed report quantity invalidates mapping; physical only leader/coordinator, not supervisor/admin",
+    "Current public wrapper preserves Empaque origin/replay; LEGACY and V2 without ledger visible only by exact key, adoption rejected without replacement or availability credit; new null-key historical-style insert rejected by native identity guard"
+  ],
+  "limits": [
+    "Synthetic rows only",
+    "Full captured native Picking/source/reserve view and partial wrapper; synthetic rows only",
+    "No production capability activation",
+    "Legacy mapping needs explicit evidence, never inferred"
+  ]
+}

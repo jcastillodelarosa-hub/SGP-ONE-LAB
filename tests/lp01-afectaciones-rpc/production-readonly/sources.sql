@@ -1,0 +1,1 @@
+BEGIN READ ONLY; SET LOCAL statement_timeout='15s'; SELECT p.oid::regprocedure::text AS signature,pg_get_functiondef(p.oid) AS definition FROM pg_proc p WHERE p.oid IN('sgp_pdt_multiorigen.fuentes(text,text,jsonb)'::regprocedure,'public.sgp_picking_piezas_panel(text,uuid,text)'::regprocedure); ROLLBACK;

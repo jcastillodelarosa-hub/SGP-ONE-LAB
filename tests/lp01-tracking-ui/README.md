@@ -1,5 +1,21 @@
 # Seguimiento: actualización silenciosa y columnas
 
+## Entrega local LAB v382 (vigente)
+
+Base 5003c61. Rama fix/seguimiento-v382-column-menus, sin push/publicación.
+Se quitan títulos redundantes, se muestra solo el saldo de la etapa y se reemplaza
+el panel de columna por menú accesible desde encabezados PC/móvil con ordenar,
+búsqueda, casillas, Aplicar/Cancelar y Escape. Se conserva el comportamiento de
+SALE/avances/afectaciones hasta aclaración funcional.
+469 JS PASS, release v382 PASS, Chromium 1440/390 PASS. Capturas actuales:
+`evidence/menu-1440.png`, `menu-390.png`, `tracking-1440.png`, `tracking-390.png`.
+`browser.json` acredita el nuevo recorrido con transporte sintético, sin SQL ni
+producción. Los documentos/evidencias de integración/política/versionado v381 que
+siguen son antecedentes de la entrega previa, no certificación de v382.
+
+## Antecedentes v381
+
+
 Base `fe82ffab` (main #191). Rama local `fix/seguimiento-silent-filters`.
 No push, PR, SQL, datos productivos, fusión ni despliegue. Vidrio #192 intacto.
 

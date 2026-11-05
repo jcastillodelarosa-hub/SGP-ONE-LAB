@@ -39,9 +39,9 @@ test('entrega completa omite PDT; incompleta envía una llamada V4',async()=>{
  assert.equal(calls[1].args.p_piezas.length,1);
  assert.equal(calls[1].args.p_piezas[0].ncs.length,2);
 });
-test('Ensamble y Empaque conservan NC obligatoria y no envían arreglo adicional',()=>{
+test('Ensamble y Empaque admiten NC pendiente y no envían arreglo adicional',()=>{
  for(const origin of ['ENSAMBLE','EMPAQUE']){
-  assert.throws(()=>registrationPieces(origin,[source],[entry(source)]),/obligatoria/);
+  assert.equal(registrationPieces(origin,[source],[entry(source)])[0].nc,'');
   const [row]=registrationPieces(origin,[source],[entry(source,['NC-1'])]);
   assert.equal(row.nc,'NC-1');assert.equal('ncs' in row,false);
   assert.throws(()=>registrationPieces(origin,[source],[entry(source,['NC-1','NC-2'])]),/una NC/);

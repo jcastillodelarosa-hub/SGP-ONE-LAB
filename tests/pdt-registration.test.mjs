@@ -4,7 +4,7 @@ import {registrationSources,saveRegistration,registrationMetadata} from '../src/
 const source={id_pieza:'QA1',key_produccion:'QA|PANELES_2',produccion:'QA ORDER',codigo_sap:'E17',tipo_pieza:'PANEL',id_linea:'PANELES_2',reserva:'R',reserva_principal:'PRIMARY',acabado:'DS',fabricacion:'E17-A',longitud:100,cantidad_referencia:9};
 const entry=(s=source,extra={})=>({source:sourceKey(s),cantidad:2,nc:'',observacion:'QA',...extra});
 test('Picking without NC preserves exact source identity, reserve and principal',()=>{const p=registrationPieces('PICKING',[source],[entry()])[0];assert.equal(p.nc,'');assert.equal(p.id_pieza,'QA1');assert.equal(p.key_produccion,source.key_produccion);assert.equal(p.reserva_principal,'PRIMARY');});
-test('Ensamble/Empaque require nonblank NC and retain it',()=>{for(const o of ['ENSAMBLE','EMPAQUE']){for(const nc of ['', '  '])assert.throws(()=>registrationPieces(o,[source],[entry(source,{nc})]),/obligatoria/);assert.equal(registrationPieces(o,[source],[entry(source,{nc:' NC-1 '})])[0].nc,'NC-1');}});
+test('Ensamble/Empaque allow pending NC and retain an informed reference',()=>{for(const o of ['ENSAMBLE','EMPAQUE']){for(const nc of ['', '  '])assert.equal(registrationPieces(o,[source],[entry(source,{nc})])[0].nc,'');assert.equal(registrationPieces(o,[source],[entry(source,{nc:' NC-1 '})])[0].nc,'NC-1');}});
 test('same reference and fabrication across productions never chooses by text',()=>{const other={...source,id_pieza:'QA2',key_produccion:'OTHER|PANELES_2'};const p=registrationPieces('PICKING',[source,other],[entry(other)])[0];assert.equal(p.id_pieza,'QA2');assert.equal(p.key_produccion,other.key_produccion);assert.throws(()=>registrationPieces('PICKING',[source,source],[entry()]),/identidad/);});
 test('shared reserve selection remains explicit, many independent pieces supported',()=>{const other={...source,reserva:'SHARED'};const rows=registrationPieces('PICKING',[source,other],[entry(),entry(other)]);assert.deepEqual(rows.map(p=>p.reserva),['R','SHARED']);});
 test('invalid quantities, empty sources, missing classifications never save',()=>{for(const q of [0,-1,1.1,10,'bad'])assert.throws(()=>registrationPieces('PICKING',[source],[entry(source,{cantidad:q})]));assert.throws(()=>registrationPieces('PICKING',[],[entry()]));for(const s of [{...source,tipo_pieza:'FRAME'},{...source,key_produccion:null},{...source,reserva_principal:null}])assert.throws(()=>registrationPieces('PICKING',[s],[entry(s)]));});
@@ -29,4 +29,10 @@ test('new V4 validator preserves direct identity checks and required audit state
  assert.match(validator,/FROM public.sgp_aluminio a/);assert.match(validator,/JOIN public.sgp_producciones/);assert.match(validator,/public.sgp_produccion_reservas_v/);assert.doesNotMatch(validator,/sgp_pdt_origenes_internal_v3/);
  assert.equal((validator.match(/estado_anterior,estado_nuevo,tipo_evento/g)||[]).length,2);assert.equal((validator.match(/p_observacion,v_p.estado_repo,v_p.estado_repo,/g)||[]).length,2);
  assert.match(sql,/es_registro_v4\(p_id\)/);assert.match(sql,/original_sgp_aluminio_pendiente_validar_detalles_v1/);
+});
+
+test('missing selection is distinct from stale or duplicate source identity',()=>{
+ assert.throws(()=>registrationPieces('PICKING',[source],[entry(source,{source:''})]),/Selecciona una pieza PANEL/);
+ assert.throws(()=>registrationPieces('PICKING',[],[entry()]),/identidad verificable/);
+ assert.throws(()=>registrationPieces('PICKING',[source,source],[entry()]),/identidad verificable/);
 });

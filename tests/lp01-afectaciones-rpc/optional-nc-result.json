@@ -1,0 +1,19 @@
+{
+  "status": "PASS",
+  "environment": "PostgreSQL17.11 network none synthetic only",
+  "before_md5": "2c9da616eb830fd6db20973e9bec4155",
+  "after_md5": "d1195cca8c35315007969da936979546",
+  "migration_sha256": "49cc61735d83e871303c2af245405acb1bb4495007a2a3af9accdb30d6a7f083",
+  "both_stages": [
+    "blank",
+    "null",
+    "omitted",
+    "informed"
+  ],
+  "identity_and_nc_validation_preserved": true,
+  "idempotency_and_unique_link": true,
+  "acl_and_existing_data_unchanged": true,
+  "migration_and_event_rollback": true,
+  "later_link_same_pending_and_role_enforced": true,
+  "later_link_not_physical_availability": true
+}

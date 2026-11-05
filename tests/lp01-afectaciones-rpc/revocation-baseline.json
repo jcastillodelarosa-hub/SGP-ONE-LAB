@@ -1,0 +1,26 @@
+{
+  "status": "BASELINE_REPRODUCED",
+  "environment": "PostgreSQL17.11 network none synthetic only",
+  "baselineCommit": "77f3f8c",
+  "sqlSha256": "90f16d240c85cc3e5cf414102e0924ffc96539f329128d09c356021193891b79",
+  "checks": [
+    {
+      "wait": "stage",
+      "expiredPermission": true,
+      "outcome": "baseline accepted expired scope"
+    },
+    {
+      "wait": "receipt",
+      "expiredPermission": true,
+      "outcome": "baseline accepted expired scope"
+    },
+    {
+      "wait": "reader",
+      "expiredPermission": true,
+      "outcome": "baseline accepted expired scope"
+    },
+    {
+      "revocation": "serialized during wait; committed afterward; retry denied"
+    }
+  ]
+}

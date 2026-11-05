@@ -1,0 +1,31 @@
+[
+  {
+    "section": "lineage",
+    "value": {
+      "joined_rows": 136,
+      "pending_rows": 136,
+      "new_schema_present": false,
+      "duplicate_event_ids": 0,
+      "duplicate_detail_ids": 0
+    }
+  },
+  {
+    "section": "api_roles",
+    "value": [
+      {
+        "role": "authenticated",
+        "bypassrls": false,
+        "superuser": false
+      },
+      {
+        "role": "anon",
+        "bypassrls": false,
+        "superuser": false
+      }
+    ]
+  },
+  {
+    "section": "public_table_policies",
+    "value": []
+  }
+]

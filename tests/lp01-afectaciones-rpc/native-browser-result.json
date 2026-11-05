@@ -1,0 +1,22 @@
+[
+  {
+    "width": 1440,
+    "status": "PASS",
+    "nativePdt": true,
+    "originalPickingPreserved": true,
+    "pieceQuantity": 2,
+    "windowQuantity": 5,
+    "combinedPendingUnion": 6,
+    "supervisorPdtAndPhysicalDenied": true
+  },
+  {
+    "width": 390,
+    "status": "PASS",
+    "nativePdt": true,
+    "originalPickingPreserved": true,
+    "pieceQuantity": 2,
+    "windowQuantity": 5,
+    "combinedPendingUnion": 6,
+    "supervisorPdtAndPhysicalDenied": true
+  }
+]

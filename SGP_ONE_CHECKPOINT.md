@@ -1,3 +1,210 @@
+## LAB v382 · backend instalado y activado · 05/11/2026 03:16 UTC
+
+01–11 aplicadas en SGP-ONE-LAB tras autorización específica y confirmaciones nativas.
+04 cancelada previamente no se ejecutó; nuevo intento autorizado aplicado una sola vez.
+Seis RPC EXECUTE solo anon, v1 interno; sin acceso privado ni grants a otros roles.
+Cuatro flags activos; registrador PDT opcionalNC d1195… con owner/ACL/config conservados.
+Siete huellas API y once tablas RLS verificadas; cero reportes/eventos/recibos de prueba.
+Sesión inválida rechazada por las seis RPC en READ ONLY/ROLLBACK, sin órdenes reales.
+Advisor: sin nuevos ERROR; +6 avisos RPC anon y +11 tablas RLS sin policy, esperados.
+Detalle: docs/sql-proposals/lp01-afectaciones/production-activation-evidence.json.
+NO merge ni frontend publicado por este agente. Padre coordina gates/backend-readiness,
+Hosting baseline/inventario/bytes, merge/despliegue y comprobación visible v382.
+CI PASS78b547b; los commits de evidencia tienen su propia CI, no heredan ese resultado.
+
+## LAB v382 · instalación parcial contenida; 04 cancelada · 05/11/2026 03:09 UTC
+
+01–03 aplicadas y verificadas en SGP-ONE-LAB; cuatro flags false, cero API expuestas,
+reportes/eventos nuevos cero, registrador PDT conserva cuerpo2c9da… (06 no aplicada).
+04 no aplicada: confirmación del conector expiró y el intento renovado fue cancelado
+por el padre; conector confirmó Nothing was run y catálogo confirma tabla/RPC ausentes.
+No reintentar automáticamente.05–11 no intentadas; no merge ni publicación.
+CI completa PASS del78b547b/PR194; evidencia y huellas exactas en
+`docs/sql-proposals/lp01-afectaciones/production-activation-evidence.json`.
+Siguiente: padre revisa el efecto exacto de04 y coordina una nueva solicitud explícita.
+
+## LAB v382 · activación gradual autorizada · 05/11/2026
+
+Johan autorizó explícitamente cambio compartido PDT, seis RPC para anon y activación
+gradual. Preflight actual:15 cuerpos y vista coinciden; dos lectores incluyen timeout45s.
+Pins/fixture ahora reproducen esa configuración exacta sin modificar dependencias.
+Default ACL public concede service_role:01–05 revocan también ese rol solo en objetos
+nuevos. Fixture aplica defaults en la BD correcta; revisión independiente lo comprobó.
+Scripts07–11 separan lectura, escrituras API y flags; pins7RPC/ACL/RLS fallan cerrado.
+Sin grants privados/v1 ni otros roles. Snapshot recovery del registrador, manifiesto y
+pruebas en docs/sql-proposals/lp01-afectaciones y tests/lp01-afectaciones-rpc.
+Estado al preparar: todavía sin mutaciones productivas; publicación coordinada por padre.
+
+## LAB v382 · NC opcional preparada, contrato compartido · 05/11/2026
+
+Nueva instrucción permite preparar NC opcional en Ensamble/Empaque como Picking.
+Contradicción documental previa reportada antes de cambiar. SQL06 remueve solo guard
+NC obligatoria, conserva roles/identidad/auditoría/ACL y fija transición2c9da→d1195.
+Frontend opcional; NC omitida queda pendiente sin disponibilidad física. Pruebas
+PostgreSQL de ambos orígenes, vínculo posterior mismo ID, permisos y rollback PASS.
+Manifest01–06 actualizado.06 cambia contrato PDT activo aunque LP esté apagado: requiere
+coordinación explícita antes de aplicación, no es instalación pasiva. No producción.
+Detalle y evidencia: docs/sql-proposals/lp01-afectaciones/NC_OPCIONAL.md. Siguiente:
+482JS/release382 y UI PC/móvil PASS; revisión independiente final sin nuevos riesgos.
+Coordinar contrato compartido, CI/instalación/activación.
+
+## LAB v382 · cadena PDT vigente reproducida · 05/11/2026
+
+Wrapper público actual, fuentes/Picking reales y vista multireserva reproducidos en
+PostgreSQL17.11 sin red con catálogo completo y filas sintéticas. Wrapper ambas etapas
+PASS;63/63 mecanizado/Picking PASS; LP atómico/legacy/Empaque y expiración PASS.
+SQL03 fija15 cuerpos/owner/definer/search_path y vista, drift rechazado individualmente;
+rollback y defaults sin grants PASS. No bypass al legacy ni cambios productivos.
+Manifiesto actualizado. Revisión independiente acota transitividad a NC LP/asociación;
+no afirmar hashes de todas las ramas históricas de Picking. Límites LEGACY/sin key,
+aplicación entre etapas y now() nativo continúan. CI ampliada, ejecución remota pendiente.
+Detalle: docs/sql-proposals/lp01-afectaciones/CADENA_PDT_VALIDADA.md. UI y aplicación PC/móvil PASS;482JS y release382 PASS. Captura Picking: selección
+vacía ahora tiene mensaje propio; identidad ambigua sigue bloqueada. NC Picking
+opcional conservada; nuevos Ensamble/Empaque requieren NC nativa, coordinar si se
+solicita hacerla opcional también. Siguiente: entregar SHA/manifiesto al coordinador
+y revisar instalación contenida.
+
+## LAB v382 · contraste SQL productivo SOLO LECTURA · 05/11/2026
+
+Autorizadas y realizadas consultas BEGIN READ ONLY/ROLLBACK, sin filas individuales.
+13/16 cuerpos seleccionados coinciden con fixture; LP roles/locks/temporal coinciden.
+HOLD: wrapper PDT actual c161750f deriva a legacy8c501e2 y añade Picking parcial;
+fuentes/listado Picking difieren también. SQL03 actual falla cerrado; pins intactos.
+136 pendientes:77 LEGACY (16 sin key),59 V2 (41 con ledger nativo,13 manuales,5 otros).
+120 candidatos lectura por key. Join136→136 sin IDs duplicados; no prueba ausencia de
+duplicados semánticos. ACL privadas niegan acceso API; tablas públicas RLS sin políticas.
+No cambios productivos, grants ni publicación. Evidencia/plan exacto:
+docs/sql-proposals/lp01-afectaciones/CONTRASTE_PRODUCTIVO.md. Siguiente: probar cadena
+PDT vigente aislada, revisión/pins/manifest, luego coordinar instalación contenida.
+
+## LAB v382 · revalidación concurrente corregida · 05/11/2026
+
+Prueba PostgreSQL aislada reproduce CADUCIDAD de permiso temporal mientras espera
+lock: escritura, recibo y lectura legado. Las tres rutas corregidas deniegan sin
+escritura/divulgación. Revocación UPDATE directa ya se serializaba por locks nativos;
+se corrige hipótesis anterior. Revisor independiente review_reconciliation comprobó
+diff/prueba; no detectó nuevos bloqueos en esa corrección. Regresión atómica PASS.
+Job CI aislado incorporado, pendiente ejecución remota del SHA final. Manifest
+regenerado; versión382 conservada. No SQL productivo ni publicación. Pendientes:
+contratos/ACL actuales, integridad real agregada, LEGACY/alcance entre etapas y
+semántica nativa de caducidad de sesión now(). Evidencia y siguiente paso de activación
+en docs/sql-proposals/lp01-afectaciones/ACTIVACION_REVISION.md.
+
+## LAB v382 · contraste de metadatos y plan de activación · 05/11/2026
+
+Main remoto confirmado5003c61; Supabase17.11 y columnas/FK PDT/Picking compatibles
+por metadatos. Paquete nuevo no observado instalado. Sin SQL ejecutado ni filas
+productivas consultadas, conforme al encargo; hashes vigentes/ACL y pendientes reales
+no certificados. Revisión separada del mismo agente detecta falta de revalidación de
+permisos tras locks en conciliación: bloquea esa activación hasta corrección y prueba.
+Tablas privadas PDT sin RLS requieren comprobar ACL/exposición; no se concluye acceso
+público por ese dato. Se preservan restricciones LEGACY y entre etapas.
+Plan exacto01–05, manifest SHA256, precondiciones, pruebas y recuperación en
+`docs/sql-proposals/lp01-afectaciones/ACTIVACION_REVISION.md` y
+`activation-manifest.json`. Sin grants, SQL, push ni publicación; v382 sin incremento
+adicional por ser la misma entrega pendiente. Siguiente: corregir revalidación en
+entorno aislado y obtener autorización de consultas de solo lectura necesarias para
+certificar contratos/ACL/integridad agregada, antes de preparar activación final.
+
+## LAB v382 · integración nativa PDT/Picking y panel · 05/11/2026
+
+Resultado local que sustituye las limitaciones técnicas de los hitos anteriores:
+escritor atómico PDT+LP, asociación del pendiente original de Picking sin crear otro
+PDT, conciliación explícita del legado y confirmación física con permisos acotados.
+Panel integrado en Seguimiento y Operación; conserva borradores durante refrescos
+y limpia al revocar acceso. Fabricación/longitud usan selección nativa de Picking;
+piezas y ventanas se registran por separado. Historia/apertura exige evidencia real.
+
+Validación: 481/481 JS, release v382, PostgreSQL17.11 aislado con datos sintéticos,
+rollback/carreras/idempotencia, Chromium1440/390 con escritor nativo y controladores
+existentes, refresco20s y revocación. Evidencia en
+`tests/lp01-afectaciones-rpc/{atomic-result,native-browser-result,native-app-result}.json`.
+Alcance/SQL revisable: `docs/sql-proposals/lp01-afectaciones/README.md`, propuestas03–05.
+
+No publicado ni aplicado a producción. Sin push, grants API ni activación por defecto.
+Conserva HOLD de publicación y verificadores. v381 publicada → candidata v382; estos
+commits pertenecen a la misma entrega pendiente. Próximo paso: revisión del paquete,
+contraste de dependencias y plan de activación/recuperación por el coordinador del hilo.
+Límites: LEGACY/manual sin identidad acreditada, aplicación del mismo pendiente entre
+etapas y relaciones históricas parciales requieren evidencia/contrato; no se duplican
+registros ni se concede disponibilidad. No se amplían permisos PDT de supervisores.
+
+## LAB v382 · RPC y panel contra PostgreSQL aislado · 05/11/2026
+
+Implementados almacenamiento y RPC transaccionales nuevas, sesión/roles/etapa reales,
+CAS e idempotencia concurrente, auditoría inmutable, reversión atómica y lectura de
+historial compartido solo por etapas autorizadas. Avances proyectados de EJECUTAR
+con cantidades/antes; apertura de ambas etapas solo con cobertura acreditada.
+PostgreSQL17.11 Docker --network none y datos sintéticos; no Supabase productivo.
+480 JS PASS, matriz SQL PASS, panel+RPC Chromium1440/390 PASS y release v382 PASS.
+Panel conectado al transporte validado en demo PC/móvil; selector PDT reutiliza tabla
+Picking manteniendo origen y NC de Ensamble/Empaque. No convierte piezas a ventanas.
+NC_AL exige vínculo PDT único; Guardar aluminio sigue bloqueado: falta adaptador
+atómico nativo, sin dos escrituras frontend separadas. Confirmación física y escritura
+siguen deshabilitadas al instalar; sin grants API. Disponible requiere conciliación
+acreditada del legado actual, que no se migra ni se suma. Pendiente procedimiento de
+conciliación/cobertura y certificación de permisos físicos antes de integración.
+Detalle y evidencia: docs/sql-proposals/lp01-afectaciones/README.md y
+ tests/lp01-afectaciones-rpc/{result.json,browser-result.json}.
+Sigue v382, misma entrega no publicada; sin push, PR, cambios productivos ni despliegue.
+
+## LAB v382 · contrato y panel aislado de afectaciones · 05/11/2026
+
+Preparados modelo backend ejecutable (sin persistencia), panel por etapa y DRAFT
+de almacenamiento privado; no endpoints ni SQL aplicados. Reportes individuales,
+corrección, solución y recepción física separadas, consolidado coordinador, revisión
+e idempotencia. 477 JS PASS; Chromium1440/390 PASS; release v382 PASS.
+Johan confirmó apertura de Empaque desde primer movimiento acreditado, igual que
+Ensamble. Proyector exige cobertura desde origen; sin evidencia devuelve no disponible.
+Pendientes técnicos: RPC transaccional con sesión/permisos reales, proyección de
+auditoría, historial compartido autorizado, vínculo PDT y reconciliación histórica.
+El panel es demostración aislada, no cumplimiento productivo completo. SQL DRAFT
+sin prueba PostgreSQL (binarios ausentes). No push, despliegue ni cambios de datos.
+Detalle: docs/sql-proposals/lp01-afectaciones/README.md.
+
+## Aclaración de afectaciones individuales y PDT · 05/11/2026
+
+Reglas recuperadas: líder fuente principal, coordinador agrega/corrige; cada causa
+es un reporte individual por producción/etapa, con arrastre de la misma identidad.
+Confirmación física parcial con cantidad/observación en panel, distinta de solución
+en origen. Revisión de PDT confirma rutas multiorigen y manual, pero cantidades de
+piezas no acreditan ventanas disponibles; no hay emisor LP implementado. Primera
+actividad de Ensamble sí define apertura; Empaque continúa sin disparador acreditado.
+Se corrige propuesta documental agregada; no se cambian contratos, datos ni UI.
+LAB v382 sigue aislada y sin publicar. Pendiente coordinar implementación backend
+y panel completo; formulario agregado actual no satisface el alcance recuperado.
+
+## LAB v382 · historial por día/turno y límites de contrato · 05/11/2026
+
+IMPLEMENTADO LOCAL: panel Historial muestra los últimos totales LP por asignación,
+fecha y turno, sin sumarlos ni acreditar cierre/Export. 472 JS PASS, Chromium
+1440/390 PASS, release PASS; transporte sintético. Sigue LAB v382, misma entrega
+sin publicar. Apertura y afectaciones globales NO IMPLEMENTADAS: RPC omite
+cantidades de auditoría y clasifica abierta por saldo; afectaciones existentes
+son copias por parte/turno. Se recuperaron reglas funcionales sin reconstruir datos.
+[Fuentes, opciones y propuesta](docs/linea-produccion/SEGUIMIENTO_APERTURA_AFECTACIONES_V382.md).
+Sin push, PR, SQL ni publicación. Siguiente: coordinación de contrato antes de
+preparar cambios de apertura/clasificación y registro canónico por orden/etapa.
+
+## Seguimiento · LAB v382 preparada en aislamiento · 05/11/2026
+
+Base main `5003c61` (LAB v381). Rama local `fix/seguimiento-v382-column-menus`.
+Se retiran título y textos repetidos de línea/todas las semanas; tabla y detalle
+muestran solo Saldo Ensamble o Saldo Empaque según etapa. Menú desde encabezado:
+Ordenar columna / Filtrar columna, búsqueda de valores, casillas, Aplicar/Cancelar;
+encabezados accesibles sobre tarjetas móviles, Escape y retorno/ciclo de foco.
+Referencia: instrucciones y descripción de capturas remitidas por el hilo principal,
+estilo SGP existente y guía Refero de foco/controles nativos. Las imágenes no estaban
+disponibles en las rutas locales indicadas; no se afirma haberlas inspeccionado.
+SALE, avance por turno, afectaciones y sus contratos/roles SIN CAMBIOS, a la espera
+de aclaración funcional coordinada por el hilo principal. No se suman turnos.
+469 JS PASS, release v382 PASS, navegador Chromium1440/390 PASS con transporte
+sintético: etapas, menú, aplicar/cancelar, búsqueda, teclado, refresco y permisos.
+No se ejecutó backend SQL ni se acredita aceptación en planta. Política intacta;
+el cambio de controlador queda fuera de sus huellas, manteniendo publicación HOLD.
+Sin push, PR, SQL, datos ni despliegue. Siguiente: revisión visual de esta propuesta
+y respuesta sobre afectaciones/avance; integrar solo cuando se coordine el alcance.
+
 ## PR193 · política preparada sobre vidrio publicado · 05/11/2026
 
 Inspección GET confirmada por el coordinador de publicación:

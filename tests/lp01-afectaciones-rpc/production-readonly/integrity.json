@@ -1,0 +1,28 @@
+[
+  {
+    "contract": "LEGACY",
+    "pending_count": 77,
+    "missing_key": 16,
+    "orphan_key": 0,
+    "without_native_detail": 77,
+    "native_lineage_eligible": 0,
+    "origin_mismatch": 0,
+    "missing_fabrication": 0,
+    "missing_or_invalid_length": 0,
+    "missing_or_invalid_piece_quantity": 0,
+    "manual_detail": 0
+  },
+  {
+    "contract": "V2",
+    "pending_count": 59,
+    "missing_key": 0,
+    "orphan_key": 0,
+    "without_native_detail": 18,
+    "native_lineage_eligible": 41,
+    "origin_mismatch": 0,
+    "missing_fabrication": 0,
+    "missing_or_invalid_length": 0,
+    "missing_or_invalid_piece_quantity": 0,
+    "manual_detail": 13
+  }
+]

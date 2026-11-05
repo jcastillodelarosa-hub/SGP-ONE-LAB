@@ -21,31 +21,48 @@ with sync_playwright() as p:
   assert page.locator('[data-stage-reports]').is_hidden()
   page.evaluate("document.querySelector('[data-search]').value='unmatched old operation search'")
   page.evaluate('controller.load()');assert page.locator('tbody tr').count()==30
+  def column(key,section='filter'):
+   page.locator('[data-column-origin="'+('mobile' if width<700 else 'table')+'"][data-column-menu="'+key+'"]').click()
+   page.locator('[data-menu-section="'+section+'"] > summary').click()
   assert page.locator('thead th').all_text_contents()[:2]==['Semana ▾','Producción / asignación ▾']
   if width<700:assert page.locator('.lp-tracking-mobile-week').first.is_visible()
   page.evaluate("window.node=document.querySelector('.lp-tracking-table');window.observer=new MutationObserver(()=>window.mutations++);window.mutations=0;observer.observe(document.querySelector('[data-live-orders]'),{childList:true,subtree:true})")
   for _ in range(3):page.clock.fast_forward(20000);page.wait_for_function('window.inflight===0')
   assert page.evaluate("window.node===document.querySelector('.lp-tracking-table') && window.mutations===0")
-  page.locator('[data-column-select]').select_option('system');page.locator('[data-column-none]').click();page.locator('[data-column-value]').filter().nth(0).check();assert page.locator('tbody tr').count()==15
-  page.locator('[data-column-select]').select_option('week');page.locator('[data-column-order="desc"]').click()
+  column('system');page.locator('[data-column-none]').click();page.locator('[data-column-value]').nth(0).check();assert page.locator('tbody tr').count()==30;page.locator('[data-column-apply]').click();assert page.locator('tbody tr').count()==15
+  column('week','sort');page.locator('[data-column-order="desc"]').click();column('week')
   page.locator('[data-column-value]').first.focus();page.evaluate("window.version++;window.beforeFocus=document.activeElement.dataset.columnValue")
   page.clock.fast_forward(20000);page.wait_for_function('window.inflight===0')
   assert page.locator('tbody tr').count()==15
-  assert page.evaluate('document.activeElement.dataset.columnValue===window.beforeFocus')
+  assert page.evaluate('document.activeElement.dataset.columnValue===window.beforeFocus'),page.evaluate('({active:document.activeElement.outerHTML,expected:window.beforeFocus,details:[...document.querySelectorAll("[data-menu-section]")].map(x=>[x.dataset.menuSection,x.open])})')
   page.locator('[data-column-close]').click();page.locator('tbody summary').first.click();page.locator('[data-tracking-tab="Historial"]').click()
   page.evaluate("window.version++;document.querySelector('.lp-tracking-table-wrap').scrollTop=100")
   page.clock.fast_forward(20000);page.wait_for_function('window.inflight===0')
   assert page.locator('[data-tracking-tab="Historial"]').get_attribute('aria-pressed')=='true'
   assert page.locator('#lp-tracking-drawer').is_visible()
+  assert page.locator('.lp-tracking-timeline tbody tr').count()==2
+  assert page.locator('.lp-tracking-timeline tbody tr').first.inner_text().endswith('2')
+  page.locator('#lp-tracking-drawer').screenshot(path=str(OUT/f'timeline-{width}.png'))
   page.locator('[data-tracking-close]').click();page.locator('[data-columns-reset]').click();assert page.locator('tbody tr').count()==30
-  page.locator('[data-column-select]').select_option('assembly');page.locator('[data-column-order="desc"]').click();assert page.locator('tbody tr').last.locator('[data-label="Saldo Ens."]').inner_text()=='Por confirmar'
+  column('assembly','sort');page.locator('[data-column-order="desc"]').click();assert page.locator('tbody tr').last.locator('[data-label="Saldo Ensamble"]').inner_text()=='Por confirmar'
+  assert 'Saldo Empaque' not in page.locator('#tracking').inner_text()
+  assert page.locator('.lp-tracking-heading').count()==0
+  column('system');page.locator('[data-column-none]').click();page.locator('[data-column-search]').fill('B');assert page.locator('[data-value-label]:visible').count()==1
+  page.screenshot(path=str(OUT/f'menu-{width}.png'),full_page=True)
+  for _ in range(12):
+   page.keyboard.press('Tab');assert page.evaluate("document.querySelector('.lp-column-menu').contains(document.activeElement)")
+  page.locator('[data-column-cancel]').click();assert page.locator('tbody tr').count()==30
+  column('week');page.keyboard.press('Escape');assert page.locator('.lp-column-menu').count()==0
+  assert page.evaluate("document.activeElement.dataset.columnMenu==='week'")
   page.screenshot(path=str(OUT/f'tracking-{width}.png'),full_page=True)
   assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
   page.evaluate('window.delay=true;void controller.load({quiet:true})');page.wait_for_function('window.inflight===1')
   page.clock.fast_forward(40000);assert page.evaluate('window.inflight')==1
   page.locator('[data-tracking-stage="EMPAQUE"]').click();assert page.locator('tbody tr').count()==0
-  page.evaluate('window.delay=false;window.release()');page.wait_for_function("window.inflight===0 && document.querySelector('[data-op-status]').textContent.includes('EMPAQUE')")
+  page.evaluate('window.delay=false;window.release()');page.wait_for_function("window.inflight===0 && document.querySelector('[data-tracking-stage=EMPAQUE]').getAttribute('aria-pressed')==='true'")
   assert page.evaluate('window.maxInflight')==1
+  assert 'Saldo Ensamble' not in page.locator('#tracking').inner_text()
+  assert 'Saldo Empaque' in page.locator('#tracking').inner_text()
   page.evaluate("window.token='new';document.dispatchEvent(new CustomEvent('sgp:lp-role',{detail:'COORDINADOR'}))")
   assert page.locator('tbody tr').count()==0
   page.evaluate('controller.load()');page.wait_for_selector('tbody tr')
@@ -72,6 +89,6 @@ with sync_playwright() as p:
   assert page.locator('[data-stage-reports]').is_hidden()
   assert page.locator('[data-turn-operation]').is_hidden()
   assert not errors,errors
-  results.append({'width':width,'unchanged_20s_cycles':3,'filters_sort_focus_panel':True,'no_overlap':True,'scope_session_role_clear':True,'external_requests':0,'approved_header_removed_in_tracking':True,'operation_and_closure_navigation_preserved':True});page.close()
+  results.append({'width':width,'unchanged_20s_cycles':3,'filters_sort_focus_panel':True,'no_overlap':True,'scope_session_role_clear':True,'external_requests':0,'single_stage_balance':True,'header_menu_search_apply_cancel_escape_focus':True,'approved_header_removed_in_tracking':True,'operation_and_closure_navigation_preserved':True});page.close()
  browser.close()
 server.shutdown();(OUT/'browser.json').write_text(json.dumps(results,indent=2)+'\n');print(json.dumps(results))

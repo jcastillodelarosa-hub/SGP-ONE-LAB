@@ -1,0 +1,114 @@
+[
+  {
+    "schema": "public",
+    "function": "sgp_pdt_registrar_v4",
+    "production_md5": "c161750f1cec8f48896b9b2462c86d53",
+    "fixture_md5": "8c501e21c8a6986f584ec96a3da955e6",
+    "same_body": false
+  },
+  {
+    "schema": "public",
+    "function": "sgp_pdt_registro_fuentes_v4",
+    "production_md5": "e19fb3c3380aa601a1d50dd1b0dc8d3e",
+    "fixture_md5": "e19fb3c3380aa601a1d50dd1b0dc8d3e",
+    "same_body": true
+  },
+  {
+    "schema": "public",
+    "function": "sgp_pdt_validar_rol_real",
+    "production_md5": "107715139254fc1afc7f6b886cc27f47",
+    "fixture_md5": "107715139254fc1afc7f6b886cc27f47",
+    "same_body": true
+  },
+  {
+    "schema": "public",
+    "function": "sgp_picking_piezas_panel",
+    "production_md5": "3d01198c65962e659b219e946b5440ac",
+    "fixture_md5": "1e43b4c96a216fa8edfde0ab46961b3b",
+    "same_body": false
+  },
+  {
+    "schema": "public",
+    "function": "sgp_sesion_actual",
+    "production_md5": "79efd30d18eac0950907b5248a2c79d5",
+    "fixture_md5": "79efd30d18eac0950907b5248a2c79d5",
+    "same_body": true
+  },
+  {
+    "schema": "sgp_lp_operacion",
+    "function": "admitir",
+    "production_md5": "dba0559912a5d2351aa7028cbad9379e",
+    "fixture_md5": "dba0559912a5d2351aa7028cbad9379e",
+    "same_body": true
+  },
+  {
+    "schema": "sgp_lp_operacion",
+    "function": "contener_ambitos",
+    "production_md5": "4bd286da759a7f14d9bb0b49dd9fff16",
+    "fixture_md5": "4bd286da759a7f14d9bb0b49dd9fff16",
+    "same_body": true
+  },
+  {
+    "schema": "sgp_lp_operacion",
+    "function": "operaciones_rol",
+    "production_md5": "69274f528a2fed8001da535856649036",
+    "fixture_md5": "69274f528a2fed8001da535856649036",
+    "same_body": true
+  },
+  {
+    "schema": "sgp_lp_operacion",
+    "function": "permisos_en_periodo",
+    "production_md5": "2bcf1551c9de003898e4bf663fe544b6",
+    "fixture_md5": "2bcf1551c9de003898e4bf663fe544b6",
+    "same_body": true
+  },
+  {
+    "schema": "sgp_lp_operacion",
+    "function": "puede_operar",
+    "production_md5": "b0b7459a0be0a7ea5a4a392eecb2afde",
+    "fixture_md5": "b0b7459a0be0a7ea5a4a392eecb2afde",
+    "same_body": true
+  },
+  {
+    "schema": "sgp_lp_operacion",
+    "function": "saldo",
+    "production_md5": "78d6a385538d622eeb03c699f575eaeb",
+    "fixture_md5": "78d6a385538d622eeb03c699f575eaeb",
+    "same_body": true
+  },
+  {
+    "schema": "sgp_lp_operacion",
+    "function": "sesion",
+    "production_md5": "f06e86fb101d602de053faa50d6696b3",
+    "fixture_md5": "f06e86fb101d602de053faa50d6696b3",
+    "same_body": true
+  },
+  {
+    "schema": "sgp_lp_operacion",
+    "function": "verificar_temporal",
+    "production_md5": "c39ce5692affad2b1edc4a7dbf66faf2",
+    "fixture_md5": "c39ce5692affad2b1edc4a7dbf66faf2",
+    "same_body": true
+  },
+  {
+    "schema": "sgp_pdt_multiorigen",
+    "function": "actor",
+    "production_md5": "17dbf094c2e0c5fc86239e3fcec3a07c",
+    "fixture_md5": "17dbf094c2e0c5fc86239e3fcec3a07c",
+    "same_body": true
+  },
+  {
+    "schema": "sgp_pdt_multiorigen",
+    "function": "fuentes",
+    "production_md5": "7cca133124fdb1fc47360994dc102ad3",
+    "fixture_md5": "db84ac4f4baa2694028d84f93b4136ef",
+    "same_body": false
+  },
+  {
+    "schema": "sgp_pdt_multiorigen",
+    "function": "registrar",
+    "production_md5": "2c9da616eb830fd6db20973e9bec4155",
+    "fixture_md5": "2c9da616eb830fd6db20973e9bec4155",
+    "same_body": true
+  }
+]

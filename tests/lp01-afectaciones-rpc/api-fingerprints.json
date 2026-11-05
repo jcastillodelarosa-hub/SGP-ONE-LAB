@@ -1,0 +1,30 @@
+[
+  {
+    "md5": "eb76d71efb658c4c9d67dda2c2b62a4a",
+    "signature": "sgp_lp_afectaciones_aluminio_v1(text,text,text,date,integer,jsonb,jsonb)"
+  },
+  {
+    "md5": "a5fdfb67d341a2d8f788b8e0ad34bfbd",
+    "signature": "sgp_lp_afectaciones_comando_v1(text,text,text,date,integer,jsonb)"
+  },
+  {
+    "md5": "16e1eb3578e56d5d8067ac0d3ca37efb",
+    "signature": "sgp_lp_afectaciones_conciliar_v1(text,text,text,uuid,text,bigint,jsonb,text)"
+  },
+  {
+    "md5": "22276d883423e5f3dcc32d335f61ee5f",
+    "signature": "sgp_lp_afectaciones_consultar_v1(text,text,text)"
+  },
+  {
+    "md5": "31a9538446f1cb9b59c46161a60d6861",
+    "signature": "sgp_lp_afectaciones_consultar_v2(text,text,text)"
+  },
+  {
+    "md5": "5c28c17decfa750376fa32c4fa94ab25",
+    "signature": "sgp_lp_afectaciones_desde_picking_v1(text,text,text,date,integer,jsonb,uuid)"
+  },
+  {
+    "md5": "ed4534939f9f0a867ad8a6549ab614ec",
+    "signature": "sgp_lp_afectaciones_legado_v1(text,text,text)"
+  }
+]

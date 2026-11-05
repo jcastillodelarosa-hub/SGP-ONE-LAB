@@ -1,0 +1,1 @@
+BEGIN READ ONLY; SET LOCAL statement_timeout='15s'; SELECT 'public.sgp_produccion_reservas_v' AS name,pg_get_viewdef('public.sgp_produccion_reservas_v'::regclass,true) AS definition,md5(pg_get_viewdef('public.sgp_produccion_reservas_v'::regclass,true)) AS definition_md5; ROLLBACK;

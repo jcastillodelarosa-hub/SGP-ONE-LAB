@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "environment": "17.11 (Debian 17.11-1.pgdg13+2)",
+  "network": "none",
+  "checks": [
+    "Atomic failed installation; default writes/physical/PDT disabled; no public grants",
+    "Leader records own stage; cross-stage, invalid session, admin validation and direct private access denied; idempotency/CAS",
+    "Partial source solution does not release; physical gate/bounds; overlapping union requires coordinator; Export change/correction invalidates union; immutable history",
+    "Concurrent stale writes serialize: one success and one conflict; identical concurrent retries create one report",
+    "Audit failure rolls back report, revision and consolidated state atomically",
+    "Shared history restricted by stage; next shift preserves report ID and original date/shift without copying",
+    "Real LP audit quantities/before and corrections projected; both stage openings unknown without privileged origin coverage; preserved after correction",
+    "PDT disabled by default; fabricated source rejected; synthetic attested Picking ID linked once, duplicate rolls back; no piece/window conversion",
+    "Session revocation rejects retry before returning stored receipt"
+  ],
+  "limitations": [
+    "Synthetic data only",
+    "No native PDT source emitter",
+    "Physical permission gate remains off in installation",
+    "RPC grants not enabled by installation"
+  ]
+}

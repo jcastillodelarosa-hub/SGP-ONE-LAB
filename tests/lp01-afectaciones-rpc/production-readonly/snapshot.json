@@ -1,0 +1,14 @@
+[
+  {
+    "observed_at": "2026-11-05 02:01:22.534773+00",
+    "read_only": "on",
+    "new_schema_absent": true,
+    "lp_flags": {
+      "writes": true,
+      "bi_format_approved": true
+    },
+    "native_role_profile": true,
+    "overlapping_native_manual_sources": 0,
+    "exact_key_readable_candidates": 120
+  }
+]

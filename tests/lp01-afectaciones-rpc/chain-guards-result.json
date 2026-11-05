@@ -1,0 +1,85 @@
+{
+  "status": "PASS",
+  "environment": "PostgreSQL17.11 network none synthetic full catalog",
+  "sql03_sha256": "b944329ac0037906ab8e9d9c3b8bf0b1f6ee3c5c3f31fa59c9dcdcf4e372165f",
+  "functions": [
+    {
+      "signature": "public.sgp_pdt_registrar_v4(text,text,jsonb,jsonb,uuid)",
+      "body_md5": "c161750f1cec8f48896b9b2462c86d53",
+      "drift_rejected": true
+    },
+    {
+      "signature": "public.sgp_pdt_registro_fuentes_v4(text,text,jsonb)",
+      "body_md5": "e19fb3c3380aa601a1d50dd1b0dc8d3e",
+      "drift_rejected": true
+    },
+    {
+      "signature": "public.sgp_pdt_validar_rol_real(text,text[])",
+      "body_md5": "107715139254fc1afc7f6b886cc27f47",
+      "drift_rejected": true
+    },
+    {
+      "signature": "public.sgp_picking_piezas_panel(text,uuid,text)",
+      "body_md5": "3d01198c65962e659b219e946b5440ac",
+      "drift_rejected": true
+    },
+    {
+      "signature": "public.sgp_sesion_actual(text)",
+      "body_md5": "79efd30d18eac0950907b5248a2c79d5",
+      "drift_rejected": true
+    },
+    {
+      "signature": "sgp_pdt_multiorigen.actor(text,text)",
+      "body_md5": "17dbf094c2e0c5fc86239e3fcec3a07c",
+      "drift_rejected": true
+    },
+    {
+      "signature": "sgp_pdt_multiorigen.fuentes(text,text,jsonb)",
+      "body_md5": "7cca133124fdb1fc47360994dc102ad3",
+      "drift_rejected": true
+    },
+    {
+      "signature": "sgp_pdt_multiorigen.registrar(text,text,jsonb,jsonb,uuid,uuid)",
+      "body_md5": "2c9da616eb830fd6db20973e9bec4155",
+      "drift_rejected": true
+    },
+    {
+      "signature": "public.sgp_mecanizado_es_parte(uuid)",
+      "body_md5": "305fdfa8f147fda0e1c69079bc737732",
+      "drift_rejected": true
+    },
+    {
+      "signature": "public.sgp_pdt_contexto_internal_v3(text,text,text,text,text,text,text,numeric)",
+      "body_md5": "9fa3879614d2243d37dd7f7b7e735c11",
+      "drift_rejected": true
+    },
+    {
+      "signature": "public.sgp_pdt_crear_internal_v3(text,text,text,text,numeric,numeric,text,text,text,text,text,text,text)",
+      "body_md5": "92c7f5b8a7983f74249cfd4acc35b921",
+      "drift_rejected": true
+    },
+    {
+      "signature": "public.sgp_pdt_linea_maestro_v3(text)",
+      "body_md5": "afce3596b9151846db0d21d26b6d7d0e",
+      "drift_rejected": true
+    },
+    {
+      "signature": "public.sgp_pdt_origenes_internal_v3(text,text,text,text,text)",
+      "body_md5": "9e2f8cdbff11ad3aa7a6857c804a1985",
+      "drift_rejected": true
+    },
+    {
+      "signature": "public.sgp_validar_sesion_rol(text,text[])",
+      "body_md5": "c11c53edf00a3c90b9b124451e7cef92",
+      "drift_rejected": true
+    },
+    {
+      "signature": "sgp_mecanizado_parcial.registro_legacy(text,text,jsonb,jsonb,uuid)",
+      "body_md5": "8c501e21c8a6986f584ec96a3da955e6",
+      "drift_rejected": true
+    }
+  ],
+  "reserve_view_drift_rejected": true,
+  "install_rollback": true,
+  "default_disabled_no_api_grants": true
+}

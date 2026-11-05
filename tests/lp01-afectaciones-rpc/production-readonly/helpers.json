@@ -1,0 +1,62 @@
+[
+  {
+    "signature": "sgp_mecanizado_es_parte(uuid)",
+    "body_md5": "305fdfa8f147fda0e1c69079bc737732",
+    "security_definer": true,
+    "proconfig": [
+      "search_path=\"\""
+    ],
+    "owner": "postgres",
+    "definition": "CREATE OR REPLACE FUNCTION public.sgp_mecanizado_es_parte(p_id uuid)\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO ''\nAS $function$\n select exists(select 1 from sgp_mecanizado_parcial.partes where id_programacion=p_id)\n$function$\n"
+  },
+  {
+    "signature": "sgp_pdt_contexto_internal_v3(text,text,text,text,text,text,text,numeric)",
+    "body_md5": "9fa3879614d2243d37dd7f7b7e735c11",
+    "security_definer": true,
+    "proconfig": [
+      "search_path=\"\""
+    ],
+    "owner": "postgres",
+    "definition": "CREATE OR REPLACE FUNCTION public.sgp_pdt_contexto_internal_v3(p_reserva text, p_perfil text, p_produccion text, p_acabado text, p_id_pieza text, p_expected_key text, p_principal text, p_longitud numeric)\n RETURNS jsonb\n LANGUAGE plpgsql\n STABLE SECURITY DEFINER\n SET search_path TO ''\nAS $function$\nDECLARE line text; sources jsonb; ctx jsonb; keys_count integer;\nBEGIN\n line:=public.sgp_pdt_linea_maestro_v3(p_perfil);\n SELECT jsonb_agg(DISTINCT x),count(DISTINCT x->>'key_produccion') INTO sources,keys_count\n FROM public.sgp_pdt_origenes_internal_v3(p_reserva,p_perfil,p_produccion,p_acabado,p_id_pieza) x\n WHERE x->>'codigo_sap'=btrim(p_perfil) AND x->>'id_linea'=line\n AND (p_longitud IS NULL OR (x->>'longitud')::numeric=p_longitud);\n IF keys_count IS DISTINCT FROM 1 THEN RAISE EXCEPTION 'PDT_ASOCIACION_INEXISTENTE_O_AMBIGUA'; END IF;\n -- Principal and finish must also be unambiguous; caller inputs are assertions only.\n IF (SELECT count(DISTINCT coalesce(x->>'reserva_principal',x->>'reserva')) FROM jsonb_array_elements(sources) x)<>1\n OR (SELECT count(DISTINCT x->>'acabado') FROM jsonb_array_elements(sources) x)<>1\n THEN RAISE EXCEPTION 'PDT_RESERVA_ACABADO_AMBIGUOS'; END IF;\n ctx:=sources->0;\n IF nullif(btrim(p_expected_key),'') IS NOT NULL AND p_expected_key<>ctx->>'key_produccion'\n THEN RAISE EXCEPTION 'PDT_CLAVE_NO_CORRESPONDE_A_MAESTRO'; END IF;\n IF nullif(btrim(p_principal),'') IS NOT NULL AND p_principal<>coalesce(ctx->>'reserva_principal',ctx->>'reserva')\n THEN RAISE EXCEPTION 'PDT_PRINCIPAL_INCONSISTENTE'; END IF;\n RETURN ctx;\nEND $function$\n"
+  },
+  {
+    "signature": "sgp_pdt_crear_internal_v3(text,text,text,text,numeric,numeric,text,text,text,text,text,text,text)",
+    "body_md5": "92c7f5b8a7983f74249cfd4acc35b921",
+    "security_definer": true,
+    "proconfig": [
+      "search_path=\"\""
+    ],
+    "owner": "postgres",
+    "definition": "CREATE OR REPLACE FUNCTION public.sgp_pdt_crear_internal_v3(p_token text, p_reserva text, p_produccion text, p_perfil text, p_cantidad numeric, p_longitud numeric, p_origen text, p_causa text, p_observacion text, p_key_produccion text, p_reserva_principal text, p_acabado_pendiente text, p_id_pieza text)\n RETURNS uuid\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\nDECLARE actor text; ctx jsonb; id uuid;\nBEGIN\n actor:=public.sgp_validar_sesion_rol(p_token,ARRAY['ADMINISTRADOR','COORDINADOR','LIDER MECANIZADO','LIDER','LIDER LINEA']);\n IF p_cantidad IS NULL OR p_cantidad<=0 OR p_cantidad<>trunc(p_cantidad) OR p_cantidad>2147483647 THEN RAISE EXCEPTION 'PDT_CANTIDAD_INVALIDA'; END IF;\n ctx:=public.sgp_pdt_contexto_internal_v3(p_reserva,p_perfil,p_produccion,p_acabado_pendiente,p_id_pieza,p_key_produccion,p_reserva_principal,p_longitud);\n INSERT INTO public.sgp_aluminio_pendientes(reserva,reserva_principal,key_produccion,es_reserva_compartida,acabado_pendiente,produccion,perfil,cantidad,longitud,origen,causa,observacion,usuario_reporte,id_pieza,marca,fabricacion)\n VALUES(ctx->>'reserva',coalesce(ctx->>'reserva_principal',ctx->>'reserva'),ctx->>'key_produccion',coalesce((ctx->>'es_reserva_compartida')::boolean,false),ctx->>'acabado',ctx->>'produccion',btrim(p_perfil),p_cantidad,CASE WHEN p_id_pieza IS NOT NULL THEN coalesce(p_longitud,(ctx->>'longitud')::numeric) ELSE p_longitud END,upper(coalesce(p_origen,'PRODUCCION')),p_causa,p_observacion,actor,\n  p_id_pieza,CASE WHEN p_id_pieza IS NOT NULL THEN ctx->>'marca' END,CASE WHEN p_id_pieza IS NOT NULL THEN ctx->>'fabricacion' END)\n RETURNING id_pendiente INTO id;\n RETURN id;\nEND $function$\n"
+  },
+  {
+    "signature": "sgp_pdt_linea_maestro_v3(text)",
+    "body_md5": "afce3596b9151846db0d21d26b6d7d0e",
+    "security_definer": true,
+    "proconfig": [
+      "search_path=\"\""
+    ],
+    "owner": "postgres",
+    "definition": "CREATE OR REPLACE FUNCTION public.sgp_pdt_linea_maestro_v3(p_perfil text)\n RETURNS text\n LANGUAGE plpgsql\n STABLE SECURITY DEFINER\n SET search_path TO ''\nAS $function$\nDECLARE m public.sgp_maestro_piezas%rowtype;\nBEGIN\n SELECT * INTO STRICT m FROM public.sgp_maestro_piezas WHERE codigo_sap=btrim(p_perfil);\n IF m.activo IS DISTINCT FROM 'SI' OR m.tipo_pieza IS NULL OR m.destino_productivo IS NULL OR m.destino_productivo NOT IN ('PANEL','FRAME')\n OR m.tipo_pieza NOT IN ('PANEL','FRAME','COVER','REFUERZO','MUNTIN')\n OR (m.tipo_pieza IN ('PANEL','FRAME') AND m.tipo_pieza<>m.destino_productivo)\n THEN RAISE EXCEPTION 'PDT_MAESTRO_NO_VERIFICABLE'; END IF;\n RETURN CASE m.destino_productivo WHEN 'PANEL' THEN 'PANELES_2' ELSE 'FRAMES_2' END;\nEXCEPTION WHEN NO_DATA_FOUND OR TOO_MANY_ROWS THEN RAISE EXCEPTION 'PDT_MAESTRO_NO_VERIFICABLE';\nEND $function$\n"
+  },
+  {
+    "signature": "sgp_pdt_origenes_internal_v3(text,text,text,text,text)",
+    "body_md5": "9e2f8cdbff11ad3aa7a6857c804a1985",
+    "security_definer": true,
+    "proconfig": [
+      "search_path=\"\""
+    ],
+    "owner": "postgres",
+    "definition": "CREATE OR REPLACE FUNCTION public.sgp_pdt_origenes_internal_v3(p_reserva text, p_buscar text, p_produccion text DEFAULT NULL::text, p_acabado text DEFAULT NULL::text, p_id_pieza text DEFAULT NULL::text)\n RETURNS SETOF jsonb\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO ''\nAS $function$\n SELECT jsonb_build_object('id_pieza',a.id_pieza,'codigo_sap',m.codigo_sap,'tipo_pieza',m.tipo_pieza,\n  'destino_productivo',m.destino_productivo,'activo',m.activo,'id_linea',target.id_linea,\n  'key_produccion',target.key_produccion,'produccion',target.produccion,'sistema',target.sistema,\n  'reserva',r.reserva,'reserva_principal',coalesce(nullif(btrim(r.reserva_principal),''),r.reserva),'es_reserva_compartida',r.es_reserva_compartida,\n  'acabado',a.acabado,'marca',a.marca,'fabricacion',a.fabricacion,'longitud',a.longitud,'cantidad_referencia',a.cantidad,\n  'reservas',(SELECT jsonb_agg(DISTINCT jsonb_build_object('reserva',rs.reserva,'acabado',coalesce(rs.acabado_reserva,a.acabado),\n    'tipo',CASE WHEN rs.reserva=rs.reserva_principal THEN 'PRINCIPAL' ELSE 'ASOCIADA' END,\n    'es_principal_compartida',coalesce((to_jsonb(rs)->>'es_principal_compartida')::boolean,false)))\n    FROM public.sgp_produccion_reservas_v rs WHERE rs.key_produccion=target.key_produccion))\n FROM public.sgp_aluminio a\n JOIN public.sgp_maestro_piezas m ON m.codigo_sap=a.codigo_sap AND m.activo='SI'\n JOIN public.sgp_producciones origin ON origin.key_produccion=a.key_produccion\n JOIN public.sgp_producciones target ON target.id=origin.id AND nullif(btrim(origin.id),'') IS NOT NULL\n JOIN public.sgp_produccion_reservas_v r ON r.key_produccion=target.key_produccion\n WHERE origin.id_linea IN ('PANELES_2','FRAMES_2') AND a.activo='SI' AND m.tipo_pieza IN ('PANEL','FRAME','COVER','REFUERZO','MUNTIN')\n  AND m.destino_productivo IN ('PANEL','FRAME')\n  AND (m.tipo_pieza NOT IN ('PANEL','FRAME') OR m.tipo_pieza=m.destino_productivo)\n  AND a.tipo_pieza=m.tipo_pieza\n  AND target.id_linea=CASE m.destino_productivo WHEN 'PANEL' THEN 'PANELES_2' ELSE 'FRAMES_2' END\n  AND btrim(a.produccion)=btrim(target.produccion) AND btrim(origin.produccion)=btrim(target.produccion)\n  AND upper(btrim(a.sistema))=upper(btrim(target.sistema)) AND upper(btrim(origin.sistema))=upper(btrim(target.sistema))\n  AND r.reserva=btrim(p_reserva)\n  AND (NOT coalesce(r.es_reserva_compartida,false) OR nullif(btrim(r.reserva_principal),'') IS NOT NULL)\n  AND (r.acabado_reserva IS NULL OR upper(btrim(r.acabado_reserva))=upper(btrim(a.acabado)))\n  AND (nullif(btrim(p_acabado),'') IS NULL OR upper(btrim(a.acabado))=upper(btrim(p_acabado)))\n  AND (nullif(btrim(p_produccion),'') IS NULL OR target.produccion=p_produccion)\n  AND (p_id_pieza IS NULL OR a.id_pieza=p_id_pieza)\n  AND (nullif(btrim(p_buscar),'') IS NULL OR a.codigo_sap ILIKE '%'||btrim(p_buscar)||'%')\n ORDER BY target.key_produccion,a.codigo_sap,a.fabricacion,a.longitud,a.id_pieza;\n$function$\n"
+  },
+  {
+    "signature": "sgp_validar_sesion_rol(text,text[])",
+    "body_md5": "c11c53edf00a3c90b9b124451e7cef92",
+    "security_definer": true,
+    "proconfig": [
+      "search_path=public, extensions"
+    ],
+    "owner": "postgres",
+    "definition": "CREATE OR REPLACE FUNCTION public.sgp_validar_sesion_rol(p_token text, p_roles text[])\n RETURNS text\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public', 'extensions'\nAS $function$ declare v_usuario text; v_rol text; begin select u.usuario,u.rol into v_usuario,v_rol from public.sgp_sesiones_app s join public.sgp_usuarios u on u.id_usuario=s.id_usuario where s.token_hash=encode(extensions.digest(coalesce(p_token,''),'sha256'),'hex') and s.revocado_en is null and s.expira_en>now() and u.activo=true; if v_usuario is null then raise exception 'PERMISO_DENEGADO'; end if; if v_rol=any(p_roles) then return v_usuario; end if; if v_rol='RECEPCION' and 'LIDER'=any(p_roles) then return v_usuario; end if; raise exception 'PERMISO_DENEGADO'; end $function$\n"
+  }
+]
