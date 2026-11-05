@@ -19,7 +19,7 @@ try:
    assert 'No disponible por orden' in page.locator('tbody tr').first.inner_text()
    assert 'week-' in page.locator('.lp-tracking-week-cell .lp-week-label').first.get_attribute('class')
    page.screenshot(path=str(OUT/f'summary-list-{width}.png'))
-   legacy=page.locator('[data-order-summary="QA1|PANELES_2"]');assert 'Pendiente de validar' in legacy.inner_text();legacy.click()
+   legacy=page.locator('[data-order-summary="QA1|PANELES_2"]');assert 'Pendiente de validar' in legacy.inner_text();legacy.locator('[data-summary-cause=NC_AL]').click()
    card=page.locator('.lp-pdt-compact');card.wait_for();page.wait_for_function("document.querySelector('[data-pdt-nc]').textContent==='SOLUCIONADA'")
    summary=card.locator('summary');text=summary.inner_text();assert all(s in text for s in ['ES-EL400-004','19 piezas','NC1','SOLUCIONADA','PRODUCCION']);assert 'synthetic-legacy-id' not in text
    assert 'Ventanas distintas afectadas: Pendiente de validar' in page.locator('[data-order-affectations]').inner_text();assert not card.get_attribute('open');summary.focus();page.keyboard.press('Enter');assert card.get_attribute('open') is not None;assert 'synthetic-legacy-id' in card.inner_text();page.keyboard.press('Enter')

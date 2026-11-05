@@ -22,7 +22,7 @@ export async function mountAffectationsPanel(host,transport,{cause:initialCause=
   host.querySelectorAll('[data-cause-filter]').forEach(b=>b.onclick=()=>{selectedCause=b.dataset.causeFilter||null;applyCause();});
   const form=host.querySelector('form'),status=host.querySelector('[data-result]');
   {const section=document.createElement('section');section.className='lp-aluminum-pending';const pending=snapshot.aluminumPending??snapshot.pickingPending;
-   section.innerHTML='<h4>Pendientes de aluminio</h4>'+(!snapshot.aluminumPending?'<p>El lector aún no incluye todos los orígenes; se muestran los Picking disponibles.</p>':'')+(!pending||pending.status!=='AVAILABLE'?'<p>No disponible para esta sesión.</p>':pendingCompact(pending.rows));host.querySelector('form').before(section);
+   section.innerHTML='<h4>Pendientes de aluminio</h4>'+(!snapshot.aluminumPending?'<p>El lector aún no incluye todos los orígenes; se muestran los Picking disponibles.</p>':'')+(!pending||pending.status!=='AVAILABLE'?'<p>Consulta no disponible para esta sesión.</p>':pendingCompact(pending.rows));host.querySelector('form').before(section);
    const entries=[...section.querySelectorAll('[data-pdt-nc]')],cache=new Map();let cursor=0;
    void Promise.all(Array.from({length:Math.min(3,entries.length)},async()=>{while(cursor<entries.length&&alive()&&section.isConnected){const entry=entries[cursor++],ref=entry.dataset.pdtNc;
     if(!cache.has(ref))cache.set(ref,transport.lookupNc?transport.lookupNc(ref):Promise.resolve(null));
