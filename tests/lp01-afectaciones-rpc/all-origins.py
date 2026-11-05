@@ -41,7 +41,9 @@ try:
   for width in [1440,390]:
    page=browser.new_page(viewport={'width':width,'height':900});page.route('**/*',lambda r:r.continue_() if r.request.url.startswith(origin) else r.abort());page.route('**/qa.html',lambda r:r.fulfill(content_type='text/html',body='<html><meta name=viewport content="width=device-width, initial-scale=1"><link rel=stylesheet href=/styles.css><body></body></html>'));page.goto(origin+'/qa.html')
    page.evaluate("async snapshot=>{document.body.innerHTML='<main id=qa></main>';const {mountAffectationsPanel}=await import('/src/modules/lp01-affectations-panel.js');snapshot.capabilities=['READ'];await mountAffectationsPanel(document.querySelector('#qa'),{read:async()=>snapshot});}",snap)
-   page.locator('.lp-pdt-compact summary').click();text=page.locator('.lp-aluminum-pending').inner_text();assert all(v in text for v in ['ES-EL400-004','PRODUCCION','LEGACY','19 piezas','8713011','BODEGA','Ventanas afectadas: No acreditadas','Consulta del registro original'])
+   page.locator('.lp-pdt-compact summary').click();text=page.locator('.lp-aluminum-pending').inner_text();assert all(v in text for v in ['ES-EL400-004','PRODUCCION','19 piezas','8713011','BODEGA','Ventanas afectadas: No acreditadas'])
+   assert row['id']==pid and row['contract']=='LEGACY' and row['origin']=='PRODUCCION'
+   assert pid not in text and 'Contrato:' not in text and 'Consulta del registro original' not in text
    assert page.locator('#qa form').is_hidden();assert page.locator('.lp-picking-pending article').count()==0
    page.locator('.lp-aluminum-pending').screenshot(path=str(HERE/f'evidence/all-origins-{width}.png'))
    results.append({'width':width,'legacyProduction19PiecesVisible':True,'windowsUnknown':True,'noFalsePicking':True,'readOnly':True});page.close()
