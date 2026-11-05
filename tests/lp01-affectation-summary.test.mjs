@@ -23,3 +23,11 @@ test('compact PDT summary keeps UUID and long evidence inside expandable details
 test('Picking-only reader cannot prove all-origin coverage or availability',()=>{
  const d=fixture();delete d.aluminumPending;d.pickingPending={status:'AVAILABLE',rows:[]};const s=affectationSummary(d);assert.equal(s.total,null);assert.equal(s.available,null);assert.equal(s.aluminumUnknown,true);
 });
+
+test('unlinked pending is presence only; linked source is not duplicated and incomplete coverage stays unknown',()=>{
+ const empty={...fixture(),reports:[],aluminumPending:{status:'AVAILABLE',rows:[{id:'p',state:'PENDIENTE',pieceQuantity:19,affectedWindows:7}]}};
+ const present=affectationSummary(empty);assert.equal(present.aluminumUnlinked,true);assert.equal(present.hasReports,false);assert.equal(present.categories.NC_AL,null);assert.equal(present.total,null);
+ const linked=affectationSummary({...empty,reports:[{...report('r','NC_AL',3),sources:[{id:'p'}]}]});assert.equal(linked.aluminumUnlinked,false);assert.equal(linked.aluminumNeedsIndicator,false);assert.equal(linked.categories.NC_AL,3);
+ const received=affectationSummary({...empty,reports:[{...report('r','NC_AL',3,3),sources:[{id:'p'}]}]});assert.equal(received.aluminumNeedsIndicator,true);assert.equal(received.categories.NC_AL,0);
+ const unknown=affectationSummary({...empty,aluminumPending:{status:'UNAUTHORIZED',rows:[]}});assert.equal(unknown.aluminumUnlinked,false);assert.equal(unknown.aluminumCoverage,'UNAVAILABLE');
+});

@@ -1,3 +1,7 @@
+## Seguimiento · pendientes visibles y registro · 05/11/2026
+
+Candidata v391 sobre main a01ce776/v390: pendientes de aluminio no representados visibles sin inferir ventanas; acceso de registro por turno real abierto y capacidad servidor. Sin SQL, datos, flags ni cambios SALE. Ver [lp01-pending-ui/README.md](../../tests/lp01-pending-ui/README.md) para pruebas y brecha fuera de turno. CI e integración pendientes.
+
 ## SALE por orden · backend activo, frontend local en espera
 
 Backend coordinado en Supabase: instalación `lp_sale_orden_definition_reviewed`

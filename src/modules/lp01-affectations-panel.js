@@ -4,7 +4,7 @@ import {pendingCompact} from './lp01-pending-compact.js';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const mounts=new WeakMap();
 const actions={CREATE:['REPORT','Registrar afectación'],CORRECT:['REPORT','Corregir cantidad total'],SOLVE:['SOLVE','Registrar solución parcial'],CONFIRM:['CONFIRM','Confirmar recepción física'],VALIDATE:['VALIDATE','Validar consolidado']};
-export async function mountAffectationsPanel(host,transport,{cause:initialCause=null}={}){
+export async function mountAffectationsPanel(host,transport,{cause:initialCause=null,registrationFirst=false}={}){
  let disposed=false,busy=false,snapshot,retry,selectedCause=initialCause;
  const token={};mounts.set(host,token);const alive=()=>!disposed&&mounts.get(host)===token;
  const denied=error=>{if(error.message==='NO_AUTORIZADO'&&alive()){disposed=true;host.textContent='Acceso revocado. Vuelve a ingresar con una sesión autorizada.';return true;}return false;};
@@ -13,12 +13,13 @@ export async function mountAffectationsPanel(host,transport,{cause:initialCause=
   if(!alive())return;
   const summary=affectationSummary(snapshot);
   host.innerHTML='<h3>Afectaciones por orden</h3><p>'+esc(snapshot.key)+' · '+esc(snapshot.stage)+'</p><p>Ventanas distintas afectadas: <b>'+esc(summary.total??'Pendiente de validar')+'</b> · Disponibles: <b>'+esc(summary.available??'Pendiente de validar')+'</b></p><p>Las causas pueden coincidir. Solución en origen y recepción física se registran por separado.</p><div class="lp-affect-reports">'+snapshot.reports.map(r=>'<article data-report-cause="'+esc(r.cause)+'"><h4>'+esc(r.cause)+'</h4><p>'+r.quantity+' afectadas · '+r.solved+' solucionadas · '+r.confirmed+' confirmadas físicamente</p><small>'+esc(r.originStage)+' · '+esc(r.originDate)+' / T'+r.originShift+' · '+esc(r.createdBy)+'</small></article>').join('')+'</div><form><label>Acción<select name="action">'+Object.entries(actions).filter(([,v])=>snapshot.capabilities.includes(v[0])).map(([k,v])=>'<option value="'+k+'">'+v[1]+'</option>').join('')+'</select></label><label data-report>Reporte<select name="reportId">'+snapshot.reports.map(r=>'<option value="'+esc(r.id)+'">'+esc(r.cause)+' · '+esc(r.originDate)+' · '+esc(r.id)+'</option>').join('')+'</select></label><label data-cause>Causa<select name="cause"><option value="">Selecciona una causa</option><option>NC_AL</option><option>NC_V</option><option>TECNO</option><option>NOVEDAD</option></select></label><fieldset data-aluminum hidden disabled></fieldset><label>Cantidad de ventanas<input name="quantity" type="number" min="0" step="1" required></label><label>Observación<textarea name="observation" maxlength="2000" required></textarea></label><button type="submit">Guardar</button></form><p role="status" data-result></p><button type="button" data-reload>Actualizar datos</button><details data-affect-history><summary>Historial autorizado de la producción · contexto '+esc(snapshot.stage)+'</summary>'+snapshot.events.map(e=>'<article><b>'+esc(actions[e.action]?.[1]??e.action)+' · '+e.quantity+'</b><p>'+esc(e.date)+' / T'+e.shift+' · '+esc(e.user)+' · '+esc(e.stage)+'</p><p>'+esc(e.observation)+'</p></article>').join('')+'</details>';
-  const causeLabels={NC_AL:'NC AL',NC_V:'NC V',TECNO:'Tecno',NOVEDAD:'Novedad'};
-  const applicable=Object.keys(causeLabels).filter(key=>snapshot.reports.some(r=>r.cause===key)||Number.isSafeInteger(summary.categories[key])&&summary.categories[key]>0);
+  const causeLabels={ALUMINIO:'Aluminio',NC_AL:'NC AL',NC_V:'NC V',TECNO:'Tecno',NOVEDAD:'Novedad'};
+  const applicable=Object.keys(causeLabels).filter(key=>key!=='ALUMINIO'&&(snapshot.reports.some(r=>r.cause===key)||Number.isSafeInteger(summary.categories[key])&&summary.categories[key]>0));
+  if(summary.aluminumNeedsIndicator)applicable.unshift('ALUMINIO');
   if(selectedCause&&!applicable.includes(selectedCause))selectedCause=null;
   const reports=host.querySelector('.lp-affect-reports');
   reports.insertAdjacentHTML('beforebegin','<nav class="lp-affect-cause-tabs" aria-label="Causas de afectación"><button type="button" data-cause-filter="">Todas</button>'+applicable.map(key=>'<button type="button" data-cause-filter="'+key+'">'+causeLabels[key]+'</button>').join('')+'</nav><p data-reports-empty hidden></p>');
-  const applyCause=()=>{host.querySelectorAll('[data-cause-filter]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.causeFilter===(selectedCause||''))));let visible=0;reports.querySelectorAll('[data-report-cause]').forEach(item=>{item.hidden=Boolean(selectedCause&&item.dataset.reportCause!==selectedCause);if(!item.hidden)visible++;});const empty=host.querySelector('[data-reports-empty]');empty.hidden=visible>0;empty.textContent=selectedCause?'No se devolvieron reportes para esta causa.':'No se devolvieron reportes de afectaciones para esta orden.';const pending=host.querySelector('.lp-aluminum-pending');if(pending)pending.hidden=Boolean(selectedCause&&selectedCause!=='NC_AL');};
+  const applyCause=()=>{host.querySelectorAll('[data-cause-filter]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.causeFilter===(selectedCause||''))));let visible=0;reports.querySelectorAll('[data-report-cause]').forEach(item=>{item.hidden=Boolean(selectedCause&&item.dataset.reportCause!==selectedCause);if(!item.hidden)visible++;});const empty=host.querySelector('[data-reports-empty]');empty.hidden=visible>0;empty.textContent=selectedCause?'No se devolvieron reportes para esta causa.':'No se devolvieron reportes de afectaciones para esta orden.';const pending=host.querySelector('.lp-aluminum-pending');if(pending)pending.hidden=Boolean(selectedCause&&!['NC_AL','ALUMINIO'].includes(selectedCause));};
   host.querySelectorAll('[data-cause-filter]').forEach(b=>b.onclick=()=>{selectedCause=b.dataset.causeFilter||null;applyCause();});
   const form=host.querySelector('form'),status=host.querySelector('[data-result]');
   {const section=document.createElement('section');section.className='lp-aluminum-pending';const pending=snapshot.aluminumPending??snapshot.pickingPending;
@@ -31,6 +32,7 @@ export async function mountAffectationsPanel(host,transport,{cause:initialCause=
    }}));
   }
   applyCause();
+  if(registrationFirst){const tabs=host.querySelector('.lp-affect-cause-tabs');tabs.before(form,status);}
   if(snapshot.capabilities.includes('RECONCILE')&&transport.legacy&&transport.reconcile){
    const section=document.createElement('section');section.innerHTML='<button type="button" data-legacy-load>Conciliar historial anterior</button><div data-legacy-content></div>';host.querySelector('[data-affect-history]').before(section);
    section.querySelector('button').onclick=async()=>{
