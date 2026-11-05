@@ -1,8 +1,9 @@
 # Observación por orden, Vidrio Tecno y referencia NC
 
 Estado: **IMPLEMENTADO EN RAMA E INTEGRADO EN VISTAS**.
-SQL **PROPUESTO / NO APLICADO**. Sin publicación, cambios de permisos, datos o flags
-productivos. Base inicial a01ce776/v390; actualizado a main 90518a0 (PR202).
+SQL **INSTALADO Y HABILITADO** el 05/11/2026 con autorización específica.
+Cuatro RPC habilitadas a anon y bandera local encendida; evidencia técnica en
+`production-activation-evidence.json`. Sin datos de negocio de prueba ni publicación frontend. Base inicial a01ce776/v390; actualizado a main 90518a0 (PR202).
 La versión permanece pendiente de coordinación antes de integrar/publicar; no
 reutilizar v391 para la siguiente entrega funcional. SALE, los 16 pins y HOLD siguen intactos.
 
@@ -120,7 +121,7 @@ La nota pasa por `sgp_lp_operacion.admitir()` y conserva su bloqueo compartido
 hasta commit. NOTE solo se anuncia si la bandera global `escrituras` y la local
 `writes` son true. NC ya hereda la admisión global del escritor nativo.
 
-Scripts propuestos, **sin aplicar**:
+Scripts instalados y verificados (bytes del paquete sin cambios):
 
 1. `01_definition_REVIEW.sql`: esquema privado, nota/auditoría, lector y escritor.
 2. `02_glass_nc_REVIEW.sql`: referencia manual NC_V y entrada atómica; incompleto
@@ -134,8 +135,8 @@ search_path y ACL, antes de autorizar EXECUTE **solo para anon** como transporte
 - `public.sgp_lp_glass_nc_read_v1(text,text,text)`
 - `public.sgp_lp_glass_nc_report_v1(text,text,text,date,integer,jsonb,text)`
 
-Hoy los scripts revocan EXECUTE de PUBLIC, anon, authenticated y service_role.
-No autorizar USAGE/DML privados ni EXECUTE de helpers. No otorgar roles funcionales
+Los scripts de definición revocan EXECUTE de PUBLIC, anon, authenticated y service_role.
+No se concedió USAGE/DML privado ni EXECUTE de helpers. No otorgar roles funcionales
 nuevos. NOTA/AFECTAR conservan la intersección de rol, etapa y ámbito existentes;
 CONFIRM solo coordinador/líder de línea y consolidación solo coordinador.
 
@@ -146,11 +147,11 @@ parte de esta entrega**. Los reportes NC requieren además
 `sgp_lp_afectaciones.config.writes` y turno abierto, por su escritor nativo;
 confirmación física requiere `physical`. No modificar esas banderas existentes.
 
-El paquete 00–04 y activation-manifest.json está preparado para revisión, sin
-aprobación de instalación ni activación runtime. Las vistas están conectadas con degradación explícita. Antes de activar cada capacidad:
+El paquete 00–03 fue ejecutado con autorización específica y readback verificado.
+04 permanece disponible como contención no destructiva, no ejecutada. Las vistas están conectadas con degradación explícita. Antes de activar cada capacidad:
 revisar SQL exacto y huellas/owner/ACL, acordar las cuatro firmas y bandera local,
 preparar contención sin borrar historial, coordinar versión/pins/HOLD y validar
-artefacto. Ninguna de esas acciones productivas se ejecutó aquí.
+artefacto. Instalación y activación acreditadas en production-activation-evidence.json; integración frontend y publicación siguen pendientes.
 
 ## Incremento de interfaz y verificación dirigida
 

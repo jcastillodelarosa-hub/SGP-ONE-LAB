@@ -51,7 +51,7 @@ export async function mountAffectationsPanel(host,transport,{cause:initialCause=
     }catch(error){if(!denied(error)&&alive())box.textContent=error.message;}finally{busy=false;}
    };
   }
-  if(snapshot.progress){const section=document.createElement('section');section.className='lp-affect-progress';section.innerHTML='<h4>Avances por proceso</h4>'+Object.entries(snapshot.progress).map(([stage,p])=>'<h5>'+esc(stage)+'</h5><p>Abierta desde: '+esc(p.opening?p.opening.date+' / T'+p.opening.shift:'No disponible')+'</p>'+p.events.map(e=>'<p>'+esc(e.date)+' / T'+e.shift+' · '+esc(e.assignment)+' · '+e.quantity+' unidades registradas · '+esc(e.observation)+'</p>').join('')).join('');host.querySelector('[data-affect-history]').before(section);}
+  if(snapshot.progress&&!fixedCause&&!pendingOnly){const section=document.createElement('section');section.className='lp-affect-progress';section.innerHTML='<h4>Avances por proceso</h4>'+Object.entries(snapshot.progress).map(([stage,p])=>'<h5>'+esc(stage)+'</h5><p>Abierta desde: '+esc(p.opening?p.opening.date+' / T'+p.opening.shift:'No disponible')+'</p>'+p.events.map(e=>'<p>'+esc(e.date)+' / T'+e.shift+' · '+esc(e.assignment)+' · '+e.quantity+' unidades registradas · '+esc(e.observation)+'</p>').join('')).join('');host.querySelector('[data-affect-history]').before(section);}
 
   form.hidden=!snapshot.capabilities.some(c=>Object.values(actions).some(a=>a[0]===c));
   if(fixedCause){form.elements.cause.value=fixedCause;form.elements.cause.closest('label').hidden=true;}

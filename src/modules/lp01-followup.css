@@ -161,3 +161,11 @@
  .lp-tracking [data-nc-references] td{white-space:normal;overflow:visible;text-overflow:clip;padding:6px;overflow-wrap:anywhere}
  [data-nc-references] td::before{content:attr(data-label);display:block;font-size:11px;font-weight:700;color:#30445e}
 }
+
+@media(max-width:700px){
+ .lp-tracking [data-turn-history],.lp-tracking [data-turn-history] tbody,.lp-tracking [data-turn-history] tr,.lp-tracking [data-turn-history] td{display:block;width:100%;min-width:0;max-width:100%;box-sizing:border-box}
+ [data-turn-history] thead{display:none}
+ [data-turn-history] tr{border:1px solid #cbdcf0;border-radius:8px;margin:8px 0;padding:8px}
+ .lp-tracking [data-turn-history] td{white-space:normal;overflow:visible;text-overflow:clip;padding:6px;overflow-wrap:anywhere}
+ [data-turn-history] td::before{content:attr(data-label);display:block;font-size:11px;font-weight:700;color:#30445e}
+}

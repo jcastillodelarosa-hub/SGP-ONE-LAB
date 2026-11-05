@@ -1,0 +1,182 @@
+{
+  "project": "ocvxbwzqxbrfndkvjmfx",
+  "verifiedAt": "2026-11-05 19:36:30 UTC",
+  "scope": "Production installation and activation of authorized order-details package only; no business records created",
+  "packageHashesVerified": true,
+  "preflight": "PASS",
+  "install01": "SUCCESS",
+  "install02": "SUCCESS",
+  "before": {
+    "physical": true,
+    "new_schema": null,
+    "global_writes": true,
+    "affectation_writes": true,
+    "existing_new_rpc_count": 0
+  },
+  "installed": {
+    "tables": [
+      {
+        "acl": "{postgres=arwdDxtm/postgres}",
+        "rls": true,
+        "name": "config",
+        "owner": "postgres"
+      },
+      {
+        "acl": "{postgres=arwdDxtm/postgres}",
+        "rls": true,
+        "name": "events",
+        "owner": "postgres"
+      },
+      {
+        "acl": "{postgres=arwdDxtm/postgres}",
+        "rls": true,
+        "name": "glass_nc",
+        "owner": "postgres"
+      },
+      {
+        "acl": "{postgres=arwdDxtm/postgres}",
+        "rls": true,
+        "name": "notes",
+        "owner": "postgres"
+      }
+    ],
+    "functions": [
+      {
+        "acl": "{postgres=X/postgres}",
+        "owner": "postgres",
+        "config": [
+          "search_path=\"\""
+        ],
+        "body_md5": "36cfbdcc72721d072034350274db100a",
+        "signature": "public.sgp_lp_glass_nc_read_v1(text,text,text)",
+        "definition_md5": "7e209230aa86eef8384a8dd61825c679",
+        "security_definer": true
+      },
+      {
+        "acl": "{postgres=X/postgres}",
+        "owner": "postgres",
+        "config": [
+          "search_path=\"\""
+        ],
+        "body_md5": "564b9e46cc28ca2e612187f6394ebe28",
+        "signature": "public.sgp_lp_glass_nc_report_v1(text,text,text,date,integer,jsonb,text)",
+        "definition_md5": "189939b87c16beded54ebd5d1add5da6",
+        "security_definer": true
+      },
+      {
+        "acl": "{postgres=X/postgres}",
+        "owner": "postgres",
+        "config": [
+          "search_path=\"\""
+        ],
+        "body_md5": "814562e915d6b54fd1ba5991c8b1a73c",
+        "signature": "public.sgp_lp_order_details_read_v1(text,text,text)",
+        "definition_md5": "c87269c40a2fd92d9d5c0927aa52fb3a",
+        "security_definer": true
+      },
+      {
+        "acl": "{postgres=X/postgres}",
+        "owner": "postgres",
+        "config": [
+          "search_path=\"\""
+        ],
+        "body_md5": "07e2ba07fc34abf0e7fe764c39f608ed",
+        "signature": "public.sgp_lp_order_note_save_v1(text,text,text,jsonb)",
+        "definition_md5": "c4185628733dfd71f12795d6f1f1327b",
+        "security_definer": true
+      },
+      {
+        "acl": "{postgres=X/postgres}",
+        "owner": "postgres",
+        "config": [
+          "search_path=\"\""
+        ],
+        "body_md5": "834eb09f5d18b0a00d9509f880794b0b",
+        "signature": "sgp_lp_order_details.authorize(text,text,text,text)",
+        "definition_md5": "53847dde3096fabda625887b526ab1ac",
+        "security_definer": false
+      },
+      {
+        "acl": "{postgres=X/postgres}",
+        "owner": "postgres",
+        "config": [
+          "search_path=\"\""
+        ],
+        "body_md5": "da69f69f9a3ae903fc189d2e26496faf",
+        "signature": "sgp_lp_order_details.immutable()",
+        "definition_md5": "3174b4c1228b6ec6a2535b50fa5a0b54",
+        "security_definer": false
+      }
+    ],
+    "local_writes": false,
+    "private_schema_acl": "{postgres=UC/postgres}"
+  },
+  "readback": {
+    "physical": true,
+    "functions": [
+      {
+        "acl": "{postgres=X/postgres,anon=X/postgres}",
+        "owner": "postgres",
+        "config": [
+          "search_path=\"\""
+        ],
+        "signature": "public.sgp_lp_glass_nc_read_v1(text,text,text)",
+        "definition_md5": "7e209230aa86eef8384a8dd61825c679",
+        "security_definer": true
+      },
+      {
+        "acl": "{postgres=X/postgres,anon=X/postgres}",
+        "owner": "postgres",
+        "config": [
+          "search_path=\"\""
+        ],
+        "signature": "public.sgp_lp_glass_nc_report_v1(text,text,text,date,integer,jsonb,text)",
+        "definition_md5": "189939b87c16beded54ebd5d1add5da6",
+        "security_definer": true
+      },
+      {
+        "acl": "{postgres=X/postgres,anon=X/postgres}",
+        "owner": "postgres",
+        "config": [
+          "search_path=\"\""
+        ],
+        "signature": "public.sgp_lp_order_details_read_v1(text,text,text)",
+        "definition_md5": "c87269c40a2fd92d9d5c0927aa52fb3a",
+        "security_definer": true
+      },
+      {
+        "acl": "{postgres=X/postgres,anon=X/postgres}",
+        "owner": "postgres",
+        "config": [
+          "search_path=\"\""
+        ],
+        "signature": "public.sgp_lp_order_note_save_v1(text,text,text,jsonb)",
+        "definition_md5": "c4185628733dfd71f12795d6f1f1327b",
+        "security_definer": true
+      },
+      {
+        "acl": "{postgres=X/postgres}",
+        "owner": "postgres",
+        "config": [
+          "search_path=\"\""
+        ],
+        "signature": "sgp_lp_order_details.authorize(text,text,text,text)",
+        "definition_md5": "53847dde3096fabda625887b526ab1ac",
+        "security_definer": false
+      },
+      {
+        "acl": "{postgres=X/postgres}",
+        "owner": "postgres",
+        "config": [
+          "search_path=\"\""
+        ],
+        "signature": "sgp_lp_order_details.immutable()",
+        "definition_md5": "3174b4c1228b6ec6a2535b50fa5a0b54",
+        "security_definer": false
+      }
+    ],
+    "local_writes": true,
+    "global_writes": true,
+    "affectation_writes": true
+  }
+}

@@ -1,3 +1,14 @@
+## PR203 · backend autorizado activado; Historial por etapa · 05/11/2026
+
+Backend INSTALADO/HABILITADO en ocvxbwzqxbrfndkvjmfx tras autorización específica.
+Paquete SHA256 sin cambios, preflight PASS; 01 y 02 instalados, seis funciones
+coinciden con manifest/owner/search_path/ACL; 03 activa solo bandera local y
+EXECUTE a anon para cuatro RPC. Readback y banderas existentes sin cambios en
+production-activation-evidence.json. Sin notas/NC/reportes de prueba productivos.
+Frontend NO PUBLICADO: Historial muestra registros por fecha/turno de la etapa,
+sin saldo Export ni real conciliado inventado. Contexto para gestionar solo en
+Historial; fuera del detalle habitual. Esperar main de Disponible para rebase.
+
 ## PR203 · pestañas y observación conectadas · 05/11/2026
 
 IMPLEMENTADO EN RAMA sobre v391; no fusionado, SQL no aplicado, no publicado.

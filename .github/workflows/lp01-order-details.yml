@@ -37,6 +37,7 @@ jobs:
       - run: python -m playwright install --with-deps chromium
       - run: python tests/lp01-order-details/browser.py
       - run: python tests/lp01-order-details/visual-focus.py
+      - run: python tests/lp01-order-details/history-focus.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:

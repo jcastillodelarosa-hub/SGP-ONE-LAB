@@ -48,9 +48,9 @@ try:
       rows=page.locator('.lp-tracking-table tbody tr');assert rows.count()==5,rows.all_inner_texts()
       zero=rows.filter(has_text='ZERO-PENDING');assert 'Pendiente de conciliación' in zero.inner_text();assert zero.locator('td').nth(3).inner_text()=='0'
       unknown=rows.filter(has_text='UNKNOWN');assert 'Pendiente de conciliación' in unknown.inner_text() and unknown.locator('td').nth(3).inner_text()=='Por confirmar'
-      unassigned=rows.filter(has_text='UNASSIGNED');assert 'Sin asignación' in unassigned.inner_text();unassigned.locator('summary').click();drawer=page.locator('#lp-tracking-drawer');assert drawer.locator('[data-live-operate]').is_disabled();drawer.press('Escape')
+      unassigned=rows.filter(has_text='UNASSIGNED');assert 'Sin asignación' in unassigned.inner_text();unassigned.locator('summary').click();drawer=page.locator('#lp-tracking-drawer');assert drawer.locator('[data-live-operate]').is_hidden();drawer.press('Escape')
       page.locator('[data-column-menu=week]:visible').click();page.locator('[data-menu-section=filter] > summary').click();page.locator('[data-column-none]').click();page.locator('[data-column-value]').first.check();page.locator('[data-column-apply]').click();assert rows.count()==1;page.locator('[data-columns-reset]').click()
-      qa=rows.filter(has_text='QA|PANELES_2');qa.locator('summary').click();drawer=page.locator('#lp-tracking-drawer');assert drawer.locator('[data-tracking-context]').is_hidden();drawer.locator('[data-live-operate]').click()
+      qa=rows.filter(has_text='QA|PANELES_2');qa.locator('summary').click();drawer=page.locator('#lp-tracking-drawer');assert drawer.locator('[data-tracking-context]').is_hidden();drawer.locator('[data-tracking-tab=Historial]').click();drawer.locator('[data-live-operate]').click()
       options=drawer.locator('[data-tracking-context] option');value=options.nth(1).get_attribute('value');drawer.locator('[data-tracking-context]').select_option(value)
       assert drawer.locator('[data-live-operate]').is_enabled();
       if width<700:
