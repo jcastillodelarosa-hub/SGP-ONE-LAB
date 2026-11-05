@@ -43,7 +43,7 @@ DECLARE s jsonb;n jsonb;p jsonb;h jsonb;enabled boolean; BEGIN
  SELECT to_jsonb(x) INTO p FROM public.sgp_producciones x WHERE key_produccion=p_key;
  SELECT to_jsonb(x) INTO n FROM sgp_lp_order_details.notes x WHERE key=p_key;
  SELECT coalesce(jsonb_agg(jsonb_build_object('id',id,'revision',revision,'stage',stage,'actor',actor,'at',at,'observation',observation) ORDER BY revision),'[]') INTO h FROM sgp_lp_order_details.events WHERE key=p_key;
- SELECT writes INTO enabled FROM sgp_lp_order_details.config WHERE id;
+ SELECT writes AND (SELECT escrituras FROM sgp_lp_operacion.config WHERE id) INTO enabled FROM sgp_lp_order_details.config WHERE id;
  RETURN jsonb_build_object('contract','LP-ORDER-DETAILS-1','key',p_key,'line',p->>'id_linea','stage',p_stage,
  'note',jsonb_build_object('observation',coalesce(n->>'observation',''),'revision',coalesce((n->>'revision')::bigint,0),'actor',n->'actor','at',n->'at'),
  'history',h,'capabilities',CASE WHEN enabled AND sgp_lp_operacion.puede_operar(s->>'usuario',p_stage,'NOTA') THEN '["READ","NOTE"]'::jsonb ELSE '["READ"]'::jsonb END,
@@ -58,6 +58,7 @@ DECLARE s jsonb;rid uuid;rv bigint;n sgp_lp_order_details.notes%rowtype;e sgp_lp
  rid:=(p_cmd->>'id')::uuid;rv:=(p_cmd->>'revision')::bigint;
  IF rid IS NULL THEN RAISE EXCEPTION 'ORDER_NOTE_ID_REQUIRED';END IF;
  s:=sgp_lp_order_details.authorize(p_token,p_key,p_stage,'NOTA');
+ PERFORM sgp_lp_operacion.admitir();
  SELECT writes INTO enabled FROM sgp_lp_order_details.config WHERE id FOR SHARE;
  IF enabled IS DISTINCT FROM true THEN RAISE EXCEPTION 'ORDER_NOTE_DISABLED';END IF;
  PERFORM pg_advisory_xact_lock(hashtextextended(rid::text,392));

@@ -29,11 +29,16 @@ export function affectationsTransport({client,getToken,context,contractVersion=1
    return data;
   },
   async command(command){
-   const {pieces,sourcePicking,...cmd}=command;
+   const {pieces,sourcePicking,ncReference,...cmd}=command;
    if(pieces&&sourcePicking)throw Error('ORIGEN_ALUMINIO_AMBIGUO');
-   const data=await rpc(sourcePicking?'sgp_lp_afectaciones_desde_picking_v1':pieces?'sgp_lp_afectaciones_aluminio_v1':'sgp_lp_afectaciones_comando_v1',{p_key:scope.key,p_stage:scope.stage,p_date:scope.date,p_shift:scope.shift,p_cmd:cmd,...(pieces?{p_pieces:pieces}:{}),...(sourcePicking?{p_source:sourcePicking}:{})});
+   const data=await rpc(ncReference!==undefined?'sgp_lp_glass_nc_report_v1':sourcePicking?'sgp_lp_afectaciones_desde_picking_v1':pieces?'sgp_lp_afectaciones_aluminio_v1':'sgp_lp_afectaciones_comando_v1',{p_key:scope.key,p_stage:scope.stage,p_date:scope.date,p_shift:scope.shift,p_cmd:cmd,...(ncReference!==undefined?{p_nc:ncReference}:{}),...(pieces?{p_pieces:pieces}:{}),...(sourcePicking?{p_source:sourcePicking}:{})});
    if(data?.contract!=='LP-AFFECTATIONS-COMMAND-1'||data.id!==command.id||!integer(data.revision))throw Error('RESPUESTA_NO_CONFIRMADA');
    return data;
+  },
+  async readGlassNc(){
+   const d=await rpc('sgp_lp_glass_nc_read_v1',{p_key:scope.key,p_stage:scope.stage});
+   if(d?.contract!=='LP-GLASS-NC-1'||d.key!==scope.key||d.stage!==scope.stage||!Array.isArray(d.references)||typeof d.canReport!=='boolean'||d.references.some(r=>!r.reportId||typeof r.reference!=='string'||r.verified!==false))throw Error('CONTRATO_NC_V_INVALIDO');
+   return {...d,available:true};
   },
   async lookupNc(reference){
    let data;

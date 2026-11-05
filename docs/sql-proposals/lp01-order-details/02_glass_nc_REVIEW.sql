@@ -26,11 +26,11 @@ DECLARE result jsonb;prior text;enabled boolean; BEGIN
  RETURN result||jsonb_build_object('ncReference',btrim(p_nc),'ncVerified',false);
 END $$;
 CREATE FUNCTION public.sgp_lp_glass_nc_read_v1(p_token text,p_key text,p_stage text) RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
-DECLARE result jsonb; BEGIN
- PERFORM sgp_lp_order_details.authorize(p_token,p_key,p_stage,'LEER');
+DECLARE result jsonb;s jsonb; BEGIN
+ s:=sgp_lp_order_details.authorize(p_token,p_key,p_stage,'LEER');
  SELECT coalesce(jsonb_agg(jsonb_build_object('reportId',r.id,'reference',n.reference,'verified',false) ORDER BY r.id),'[]') INTO result
  FROM sgp_lp_order_details.glass_nc n JOIN sgp_lp_afectaciones.reportes r ON r.id=n.report_id WHERE r.key=p_key AND r.etapa=p_stage;
- RETURN jsonb_build_object('contract','LP-GLASS-NC-1','key',p_key,'stage',p_stage,'references',result);
+ RETURN jsonb_build_object('contract','LP-GLASS-NC-1','key',p_key,'stage',p_stage,'references',result,'canReport',(SELECT writes FROM sgp_lp_order_details.config WHERE id) AND (SELECT escrituras FROM sgp_lp_operacion.config WHERE id) AND (SELECT writes FROM sgp_lp_afectaciones.config WHERE id) AND sgp_lp_operacion.puede_operar(s->>'usuario',p_stage,'AFECTAR'));
 END $$;
 REVOKE ALL ON sgp_lp_order_details.glass_nc FROM PUBLIC,anon,authenticated,service_role;
 REVOKE ALL ON FUNCTION public.sgp_lp_glass_nc_report_v1(text,text,text,date,integer,jsonb,text),public.sgp_lp_glass_nc_read_v1(text,text,text) FROM PUBLIC,anon,authenticated,service_role;

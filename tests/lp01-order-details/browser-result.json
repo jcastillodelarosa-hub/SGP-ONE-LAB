@@ -1,0 +1,32 @@
+[
+  {
+    "width": 1440,
+    "status": "PASS",
+    "nativeSQL": true,
+    "missingBackendHonest": true,
+    "sixTabs": true,
+    "exactFraction": true,
+    "draftSurvivesTabs": true,
+    "conflictNotOverwritten": true,
+    "uncertainRetrySameUUID": true,
+    "notePersistence": true,
+    "manualNCAtomic": true,
+    "unsupportedActionsDisabled": true,
+    "B10GeometryAndNoOverflow": true
+  },
+  {
+    "width": 390,
+    "status": "PASS",
+    "nativeSQL": true,
+    "missingBackendHonest": true,
+    "sixTabs": true,
+    "exactFraction": true,
+    "draftSurvivesTabs": true,
+    "conflictNotOverwritten": true,
+    "uncertainRetrySameUUID": true,
+    "notePersistence": true,
+    "manualNCAtomic": true,
+    "unsupportedActionsDisabled": true,
+    "B10GeometryAndNoOverflow": true
+  }
+]

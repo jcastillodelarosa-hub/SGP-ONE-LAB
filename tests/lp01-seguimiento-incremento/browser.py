@@ -50,11 +50,11 @@ try:
       unknown=rows.filter(has_text='UNKNOWN');assert 'Pendiente de conciliación' in unknown.inner_text() and unknown.locator('td').nth(3).inner_text()=='Por confirmar'
       unassigned=rows.filter(has_text='UNASSIGNED');assert 'Sin asignación' in unassigned.inner_text();unassigned.locator('summary').click();drawer=page.locator('#lp-tracking-drawer');assert drawer.locator('[data-live-operate]').is_disabled();drawer.press('Escape')
       page.locator('[data-column-menu=week]:visible').click();page.locator('[data-menu-section=filter] > summary').click();page.locator('[data-column-none]').click();page.locator('[data-column-value]').first.check();page.locator('[data-column-apply]').click();assert rows.count()==1;page.locator('[data-columns-reset]').click()
-      qa=rows.filter(has_text='QA|PANELES_2');qa.locator('summary').click();drawer=page.locator('#lp-tracking-drawer');assert drawer.locator('[data-live-operate]').is_disabled()
+      qa=rows.filter(has_text='QA|PANELES_2');qa.locator('summary').click();drawer=page.locator('#lp-tracking-drawer');assert drawer.locator('[data-tracking-context]').is_hidden();drawer.locator('[data-live-operate]').click()
       options=drawer.locator('[data-tracking-context] option');value=options.nth(1).get_attribute('value');drawer.locator('[data-tracking-context]').select_option(value)
       assert drawer.locator('[data-live-operate]').is_enabled();
       if width<700:
-       rect=drawer.locator('[data-tracking-context]').bounding_box();assert rect['x']+rect['width']<=width
+       drawer.locator('[data-advance-context] summary').click();rect=drawer.locator('[data-tracking-context]').bounding_box();assert rect['x']+rect['width']<=width
       if token=='COORDINADOR':page.screenshot(path='/tmp/sgp-global-'+str(width)+'-'+stage+'.png')
       drawer.locator('[data-live-operate]').click();page.wait_for_selector('[data-order-form]');assert page.locator('[data-op-date]').input_value()=='2026-11-01'
       assert page.locator('[data-validate-save]').count()==(1 if token=='COORDINADOR' else 0)

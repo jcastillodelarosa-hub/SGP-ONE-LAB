@@ -1,3 +1,17 @@
+## PR203 · pestañas y observación conectadas · 05/11/2026
+
+IMPLEMENTADO EN RAMA sobre v391; no fusionado, SQL no aplicado, no publicado.
+Seis pestañas B10, observación global con CAS, cálculo exacto Export, NC manual
+múltiple. Backend ausente bloquea guardado. Accesorios/vínculo NC verificado
+siguen pendientes de contrato. Contextos plegados por acción, sin asignación
+obligatoria para afectar. UUID/contrato retirados solo de la tarjeta pendiente.
+Coordinación inspeccionó originales y autorizó especificación textual; capturas
+propias en tests/lp01-order-details/evidence. Revisión contra originales: padre.
+Pruebas sintéticas PC/móvil y PostgreSQL dirigidas documentadas en README del
+contrato. Rounding sin decidir; no cuantificar ni sumar Tecno calculado.
+Pendiente rebase con Disponible y versión libre, revisión SQL/ACL/bandera nueva.
+Preservados editor SALE, pins y HOLD. Export previo archivado sin repetir consulta.
+
 ## PR203 · revisión base de borrador preservada · 05/11/2026
 
 Corregido refresco que adoptaba revisión nueva mientras conservaba texto viejo.

@@ -4,13 +4,21 @@
     "role": "ll",
     "originalPickingVisible": true,
     "existingController": true,
-    "externalRequests": 0
+    "externalRequests": 0,
+    "proposalRpcCalls": 0,
+    "replacementTotal": 8,
+    "delayedEvidenceMs": 40000,
+    "staleResponseAfterRevocationRejected": true
   },
   {
     "width": 390,
     "role": "ll",
     "originalPickingVisible": true,
     "existingController": true,
-    "externalRequests": 0
+    "externalRequests": 0,
+    "proposalRpcCalls": 0,
+    "replacementTotal": 8,
+    "delayedEvidenceMs": 40000,
+    "staleResponseAfterRevocationRejected": false
   }
 ]

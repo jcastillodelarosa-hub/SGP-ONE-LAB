@@ -1,0 +1,19 @@
+{
+  "provenance": "Coordinator delegation in source thread 01a1a79f-59a2-70f3-948e-60f4b86ea0f1, 2026-11-05; original READ ONLY / ROLLBACK aggregates, not rerun by PR203",
+  "project": "ocvxbwzqxbrfndkvjmfx",
+  "call_completion_times_utc_approximate": ["2026-11-05T18:18:31Z", "2026-11-05T18:18:56Z", "2026-11-05T18:19:12Z"],
+  "time_limit": "Call completion times, not PostgreSQL timestamps",
+  "current": [
+    {"line":"PANELES_2","orders":596,"partial_percentage":56,"fractional_windows":32},
+    {"line":"FRAMES_2","orders":567,"partial_percentage":56,"fractional_windows":51}
+  ],
+  "history_present": [{"line":"PANELES_2","rows":13940},{"line":"FRAMES_2","rows":12283}],
+  "both_sets": {"nulls":0,"minimum_percentage":0,"maximum_percentage":100,"negative":0,"above_100":0,"between_0_and_1":0,"exactly_1":0,"fractional_percentage":0},
+  "last_cut_quantity":{"matched":1163,"differs_from_current":0,"fractional_quantity":0},
+  "fingerprints": [
+    {"function":"public.sgp_aplicar_export_diario","definition_md5":"e1c87927361b9f183be6681b2cc97233","body_md5":"e46ffa9c133596f5cb9945599a40f085"},
+    {"function":"sgp_pdt_manual.original_aplicar_export_diario","definition_md5":"36c6bf327313f83d0b4adb7b7f7eb49d","body_md5":"efc52bdbd29ed89efa87a71fa74a2852"}
+  ],
+  "matching_repository_evidence":"tests/lp01-export-reader/catalog-readonly.json at a01ce77665f48913f8442c92a88ddd53277fa6d7",
+  "limits":["Observed dataset only; future imports must be validated","Fraction count was calculated as cantidad*porc_vidrio/100; with integral cantidad its fractional property is identical for missing fraction","Available-versus-missing semantics comes from explicit user confirmation, not distribution","No rounding policy approved"]
+}

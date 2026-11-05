@@ -36,7 +36,7 @@ verificado y corregir referencias ya registradas requieren contrato adicional.
 de guardado incompletas. `orderNoteEditor` conserva borrador tras conflicto,
 exige relectura, retiene el mismo UUID en resultado incierto y borra estado ante
 revocación. No almacena notas/tokens en localStorage ni promete guardado sin backend.
-Todavía no está conectado al formulario visual.
+Conectado al formulario de Seguimiento, deshabilitado si falta el contrato o permiso.
 
 ## Fórmula exacta y decisión mínima pendiente
 
@@ -48,16 +48,18 @@ enteras pendiente». No escribirlo como reporte cuantificado, sumarlo a TECNO
 reportado, incorporarlo a consolidación/SALE ni confundirlo con recepción física.
 Datos ausentes, fuera de rango o Export no vigente dan no disponible, nunca cero.
 Porcentaje decimal hasta 12 cifras y cantidad entera de hasta 15 dígitos; fuera
-de ese contrato se rechaza sin truncamiento. Evidencia productiva previa del padre:
-porcentajes enteros 0–100; 32 PANELES_2 y 51 FRAMES_2 arrojan fracciones.
-No se volvieron a consultar datos del Export.
+de ese contrato se rechaza sin truncamiento. Los ejemplos anteriores son
+sintéticos y reproducibles en `tests/lp01-export-glass.test.mjs`. La evidencia del Export reutilizada está en `export-evidence-reused.json`, con
+procedencia, horas aproximadas y huellas; la consulta exacta entregada está en
+`export-evidence-query_READONLY.sql`. No se ejecutó otra vez. La semántica procede
+de la confirmación del usuario; los agregados no autorizan redondeo.
 
 Decisión requerida **solo antes de convertir en ventanas enteras**: elegir si una
 fracción cuenta como ventana afectada (techo), se consideran únicamente completas
 (piso), o una regla distinta expresamente aprobada. Mientras tanto el valor exacto
 puede mostrarse como estimación independiente. No se eligió regla por el usuario.
 
-## Referencias visuales y bloqueo
+## Referencias visuales y coordinación
 
 Se resolvieron los nombres autorizados usando Library. Cada transferencia devolvió
 URL firmada, `workspace_path: null`; el helper oficial falló con `download failed`.
@@ -77,11 +79,11 @@ es un fallo de transferencia sin causa más específica disponible.
 | libfile_e02ee39fed408191834dad22ebb0b646 | Detalle-pestanas-2.png | No materializado |
 | libfile_1f26a6214e50819196a3fe871b9a489b | Tecno-observacion-1.png | No materializado |
 
-No se implementó el layout que depende de esos bocetos. Sigue pendiente: pestañas
-por tipo, campo NC en vista, nota general y presentación Tecno en B10. Mantener
-vista contraída y panel inferior ancho; la actualización Tecno-observacion-1
-prevalece. No se ejecutaron PC/móvil ni se generaron capturas nuevas: no hay UI
-nueva comprobable. No afirmar finalización de la implementación visual.
+Coordinación inspeccionó los siete originales y autorizó ejecutar su especificación
+textual detallada. Se implementaron seis pestañas, nota general, cálculo exacto y
+NC manual en el panel inferior B10. Capturas propias PC/móvil en
+`tests/lp01-order-details/evidence/`; no se afirma inspección de los originales en
+este executor. La comparación final con originales la realiza coordinación.
 
 ## Pruebas ejecutadas
 
@@ -99,9 +101,9 @@ sin credenciales/despliegue; resultado exacto del SHA se consulta después del p
 Se reutiliza evidencia previa de PR202 para código intacto; no se repiten auditorías
 ni baterías visuales de vistas sin cambios.
 
-Siguiente acción: recuperar los bocetos en este executor e inspeccionarlos; después
-integrar los controles al diseño aprobado, probar PC/móvil y coordinar versión,
-revisión SQL y activación con el padre. Este PR debe permanecer draft hasta entonces.
+Siguiente acción: revisión visual de coordinación, rebase sobre el cambio Disponible,
+versión libre y revisión SQL específica antes de cualquier activación. Draft, sin
+publicación. Vinculación NC verificada y Accesorios siguen pendientes de contrato.
 
 Ampliación dirigida: [contratos y brechas NC/Accesorios/Aluminio/PDT](CONTRACT_GAPS.md),
 con evidencia de catálogo solo lectura. El soporte NC manual no completa el boceto.
@@ -112,3 +114,56 @@ prueba A:r1 → B:r2 → refrescar A → guardar A comprueba rechazo CAS, conser
 del texto de B y descarte explícito del borrador antes de editar sobre r2.
 Ejecutada solo esa prueba nueva (PASS); 9 pruebas anteriores y PostgreSQL se
 conservan como evidencia previa, sin afirmar que fueron ejecutadas otra vez.
+
+## Admisión y aprobación previa a cualquier activación
+
+La nota pasa por `sgp_lp_operacion.admitir()` y conserva su bloqueo compartido
+hasta commit. NOTE solo se anuncia si la bandera global `escrituras` y la local
+`writes` son true. NC ya hereda la admisión global del escritor nativo.
+
+Scripts propuestos, **sin aplicar**:
+
+1. `01_definition_REVIEW.sql`: esquema privado, nota/auditoría, lector y escritor.
+2. `02_glass_nc_REVIEW.sql`: referencia manual NC_V y entrada atómica; incompleto
+   para vínculo verificado. No activar como implementación del boceto completo.
+
+Firmas públicas nuevas que requerirán revisión individual de definición, owner,
+search_path y ACL, antes de autorizar EXECUTE **solo para anon** como transporte:
+
+- `public.sgp_lp_order_details_read_v1(text,text,text)`
+- `public.sgp_lp_order_note_save_v1(text,text,text,jsonb)`
+- `public.sgp_lp_glass_nc_read_v1(text,text,text)`
+- `public.sgp_lp_glass_nc_report_v1(text,text,text,date,integer,jsonb,text)`
+
+Hoy los scripts revocan EXECUTE de PUBLIC, anon, authenticated y service_role.
+No autorizar USAGE/DML privados ni EXECUTE de helpers. No otorgar roles funcionales
+nuevos. NOTA/AFECTAR conservan la intersección de rol, etapa y ámbito existentes;
+CONFIRM solo coordinador/líder de línea y consolidación solo coordinador.
+
+Bandera nueva: `sgp_lp_order_details.config.writes`, false por instalación y
+necesaria para nota/NC manual. Su activación requiere aprobación independiente.
+Contención existente: `sgp_lp_operacion.config.escrituras`; **no encenderla como
+parte de esta entrega**. Los reportes NC requieren además
+`sgp_lp_afectaciones.config.writes` y turno abierto, por su escritor nativo;
+confirmación física requiere `physical`. No modificar esas banderas existentes.
+
+No existe todavía script de activación aprobado, manifiesto de huellas nuevo ni
+activación runtime. Las vistas están conectadas con degradación explícita. Antes de activar cada capacidad:
+revisar SQL exacto y huellas/owner/ACL, acordar las cuatro firmas y bandera local,
+preparar contención sin borrar historial, coordinar versión/pins/HOLD y validar
+artefacto. Ninguna de esas acciones productivas se ejecutó aquí.
+
+## Incremento de interfaz y verificación dirigida
+
+Implementado: seis pestañas persistentes al navegar, nota con CAS y recuperación
+explícita, tres tarjetas Tecno exactas, NC manual múltiple, contexto de registro
+plegado tras validar turno, selector de avance bajo acción discreta. Identidad y
+contrato técnico retirados solo de la tarjeta pendiente. No se modificó el editor
+SALE, ni pins/HOLD. Accesorios y vínculo NC verificado muestran su indisponibilidad.
+
+Pruebas nuevas: `admission.py` verifica intersección de banderas y bloqueo frente a
+revocación; `browser.py` integra controlador real/RPC SQL en PostgreSQL sintético,
+PC 1440 y móvil 390, nota persistida/conflicto/reintento, decimal 1.5, NC manual y
+backend ausente. Resultados y capturas se guardan junto al script. Ninguna sesión
+productiva se utilizó para estas pruebas. La evidencia Export anterior se conserva
+en `export-evidence-reused.json` y `export-evidence-query_READONLY.sql`.

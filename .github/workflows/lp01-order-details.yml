@@ -6,7 +6,9 @@ on:
       - 'tests/lp01-order-details/**'
       - 'tests/lp01-order-details.test.mjs'
       - 'tests/lp01-export-glass.test.mjs'
-      - 'src/services/lp01-order-details.js'
+      - 'src/modules/lp01-*.js'
+      - 'src/modules/lp01-followup.css'
+      - 'src/services/lp01-*.js'
       - 'src/domain/lp01-export-glass.js'
       - 'src/domain/lp01-order-note-editor.js'
       - '.github/workflows/lp01-order-details.yml'
@@ -29,9 +31,15 @@ jobs:
       - run: node --test tests/lp01-order-details.test.mjs tests/lp01-export-glass.test.mjs
       - run: docker pull postgres:17.11
       - run: python tests/lp01-order-details/postgres.py
+      - run: python tests/lp01-order-details/admission.py
       - run: python tests/lp01-order-details/glass-nc.py
+      - run: pip install playwright==1.55.0
+      - run: python -m playwright install --with-deps chromium
+      - run: python tests/lp01-order-details/browser.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: order-details-synthetic-contracts
-          path: tests/lp01-order-details/*result.json
+          path: |
+            tests/lp01-order-details/*result.json
+            tests/lp01-order-details/evidence/
