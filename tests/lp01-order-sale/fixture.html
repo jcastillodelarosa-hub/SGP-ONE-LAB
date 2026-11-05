@@ -1,0 +1,5 @@
+<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/styles.css"><title>QA aislada: definición SALE</title><main style="max-width:700px;padding:16px"><h1>QA · SALE por orden</h1><p>Ensayo aislado. La definición no se aplica a turnos.</p><div id="cell"></div></main><script type="module">
+import {mountOrderSaleCell} from '/src/modules/lp01-order-sale-cell.js';
+import {orderSaleTransport} from '/src/services/lp01-order-sale.js';
+window.qaToken='COORDINADOR';window.mount=async()=>{window.dispose?.();window.dispose=await mountOrderSaleCell(document.querySelector('#cell'),orderSaleTransport({key:'QA|PANELES_2',stage:'ENSAMBLE',getToken:()=>qaToken,client:{rpc:async(name,args)=>{const r=await fetch('/rpc/'+name,{method:'POST',body:JSON.stringify(args)});return r.json();}}}));};await mount();
+</script></html>

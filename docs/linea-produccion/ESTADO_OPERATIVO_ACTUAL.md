@@ -1,4 +1,21 @@
-## B10 corrección · rama aislada · 05/11/2026
+## SALE por orden · backend activo, frontend local en espera
+
+Backend coordinado en Supabase: instalación `lp_sale_orden_definition_reviewed`
+versión 20261105145602, SHA256 4e7a70c5b495a52b2c88f4a418fdecf7eed7f1a26af004fc19608c35059573b1;
+habilitación `lp_sale_orden_enable_reviewed` versión 20261105150053,
+SHA256 0531259c946b507ac8f2e1be0a91d272371c53ff273a48ae1187485c8b859ff4.
+Habilitador anterior f42f6d62 falló antes de GRANT; estado apagado y sin filas
+verificado antes del reintento corregido. Postcheck 15:02 UTC: flag encendido;
+las dos RPC EXECUTE solo postgres/anon; tablas privadas RLS/ACL solo postgres,
+anon sin USAGE ni DML; reader MD5 6ca3e65a9248a55f973d26836744f757,
+writer d7aa1edaea6a22004226e4a73a6fb61f. Token inválido denegado en ambas;
+cero datos de prueba productivos. ACL históricas intactas. No repetir SQL.
+
+Frontend SALE v390 en rama sobre main 13f50e95 (B10 v389 publicada): integración
+real en fila, PC1440/móvil390 y PostgreSQL sintético PASS. Recepción y B10 ya están integradas; preparar un solo PR borrador v390. Uso de la definición entre turnos sigue sin regla; `operational:false`.
+Detalle: [SALE por orden](../sql-proposals/lp01-order-sale/README.md).
+
+## B10 corrección · publicada v389 · 05/11/2026
 
 Base integrada e182f537/v388. Detalle de afectaciones ancho bajo listado y bajo orden en móvil; acceso por causa, vacíos explícitos y orígenes PDT conservados. v389 provisional; coordinar numeración al integrar. Pruebas y límites en [lp01-b10-correction/README.md](../../tests/lp01-b10-correction/README.md). Sin SQL, permisos ni datos. Política PR199: pin de operación fbf8d7de…; baseline/rollback v388 ee9bc38852832125 acreditada por coordinador con run 42052662472 (106 archivos). No es lectura nueva del canal. Gate de transición HOLD; CI del SHA final y contraste live requeridos antes de integrar/publicar.
 

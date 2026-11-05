@@ -34,7 +34,7 @@ export function mountFollowup({tracking,operation,bridge}){
  }
  get('[data-refresh]').onclick=()=>operational.load();get('[data-week]').onchange=()=>operational.load();
  for(const selector of ['[data-search]','[data-day]','[data-shift]','[data-progress]','[data-sort]'])get(selector).addEventListener(selector==='[data-search]'?'input':'change',render);
- const operational=mountOperation({tracking,operation,bridge,legacyLoad:()=>{get('[data-list]').hidden=false;get('[data-summary]').hidden=false;return load();}});
+ const operational=mountOperation({tracking,operation,bridge,orderSaleEnabled:true,legacyLoad:()=>{get('[data-list]').hidden=false;get('[data-summary]').hidden=false;return load();}});
 
  return {load:operational.load};
 }

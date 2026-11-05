@@ -1,0 +1,26 @@
+[
+  {
+    "width": 1440,
+    "status": "PASS",
+    "nativePostgres": true,
+    "saveReloadHistory": true,
+    "lostResponseSameIdRetry": true,
+    "existingTurnSaleAndAuditUnchanged": true,
+    "roleAndSessionCleanup": true,
+    "refreshSerializesWrites": true,
+    "oldDisposeCannotClearNewMount": true,
+    "isolatedCellOnly": true
+  },
+  {
+    "width": 390,
+    "status": "PASS",
+    "nativePostgres": true,
+    "saveReloadHistory": true,
+    "lostResponseSameIdRetry": true,
+    "existingTurnSaleAndAuditUnchanged": true,
+    "roleAndSessionCleanup": true,
+    "refreshSerializesWrites": true,
+    "oldDisposeCannotClearNewMount": true,
+    "isolatedCellOnly": true
+  }
+]
