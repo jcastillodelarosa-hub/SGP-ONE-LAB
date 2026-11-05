@@ -1,0 +1,12 @@
+{
+  "status": "PASS",
+  "scope": "PostgreSQL 17.11 network none; actual captured SGP auth and synthetic rows; no productive session",
+  "checks": [
+    "Transactional install rollback; reinstallation rejected; no default API/private grants; explicit disabled capability",
+    "One canonical production note shared across stages; leader/coordinator existing NOTA permissions; wrong scope/role/inputs rejected; deliberate clear audited; original per-turn notes preserved",
+    "Concurrent CAS: exactly one editor wins; same UUID replay commits once; immutable audit; late failure rolls back note; independent connection reread persists",
+    "Export read preserves exact numeric text including null/invalid inputs for explicit client rejection; no percentage heuristic or production writes",
+    "Actual note transaction serializes with concurrent account/session revocation through existing catalog/session locks",
+    "Revoked access denies new read and retry of an already committed request"
+  ]
+}

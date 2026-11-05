@@ -1,3 +1,18 @@
+## Observación por orden / Tecno / NC · contratos aislados · 05/11/2026
+
+Rama feat/seguimiento-order-details, base main90518a0 (PR202 preservado).
+Nota canónica producción/línea con CAS, UUID, auditoría y permisos NOTA existentes;
+lector independiente Export exacto; referencia NC_V manual atómica y no verificada.
+SQL REVIEW sin grants, flag false; ningún SQL/dato/permiso/flag productivo modificado.
+9 pruebas Node y PostgreSQL17.11 sintético PASS (nota y NC). Sin sesión productiva.
+Bocetos Library resueltos pero descarga helper falló, incluido único reintento de
+Tecno-observacion-1: píxeles no accesibles. UI/pestañas/PC-móvil/capturas pendientes;
+no se integra layout supuesto ni se promete guardado. Módulos nuevos aún no conectados.
+SALE, versión visible391, pins/HOLD intactos; versión funcional próxima por coordinar.
+Detalle y referencias: docs/sql-proposals/lp01-order-details/README.md.
+Siguiente: materializar e inspeccionar bocetos para integrar vistas y probarlas.
+IMPLEMENTADO EN RAMA parcialmente / SQL PROPUESTO; no fusionado/aplicado/publicado.
+
 ## Seguimiento · Disponible compacto · 05/11/2026
 
 V391 fue publicada en main 90518a07f297c4079cdd97dc1c89ba83ffb94e90,
