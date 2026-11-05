@@ -18,6 +18,12 @@
       "result": "PASS",
       "scenarios": 4,
       "environment": "Actual UI/local PostgreSQL synthetic; unchanged quantity, permissions and closure assertions"
+    },
+    {
+      "source": "tests/lp01-seguimiento-incremento/browser-result.json",
+      "result": "PASS",
+      "scenarios": 10,
+      "environment": "PC/mobile real isolated SQL; coordinator/admin global access and supervisors/leader denied global access; own operation return preserved"
     }
   ]
 }

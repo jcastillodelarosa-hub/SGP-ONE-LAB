@@ -2,6 +2,9 @@
 from pathlib import Path
 import importlib.util,json,http.server,threading,os
 from playwright.sync_api import sync_playwright
+import sys
+sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'lp01-b12-b13'))
+from navigation import open_assignment
 ROOT=Path(__file__).resolve().parents[2];HERE=Path(__file__).parent
 spec=importlib.util.spec_from_file_location('roles_fixture',ROOT/'tests/lp01-roles/postgres.py');f=importlib.util.module_from_spec(spec);spec.loader.exec_module(f)
 class Files(http.server.SimpleHTTPRequestHandler):
@@ -63,7 +66,7 @@ try:
      page.evaluate("document.querySelector('#productionTrackingTab').click()")
      assert page.locator('#productionTrackingTab').get_attribute('aria-selected')!='true'
      page.locator('#productionPackingTab' if token=='sp' else '#productionAssemblyTab').click();page.locator('[data-op-date]').fill('2026-11-01');page.locator('[data-op-date]').dispatch_event('change');page.wait_for_selector('[data-order-part]:visible')
-     page.locator('[data-order-part]').first.locator('summary').click();page.locator('[data-live-operate]').first.click();page.wait_for_selector('[data-order-form]');assert not page.locator('[data-validate-save]').count();page.locator('[data-back]').click();page.wait_for_selector('[data-order-part]:visible')
+     open_assignment(page,page.locator('[data-live-orders] [data-order-part]').first.get_attribute('data-order-part'));page.wait_for_selector('[data-order-form]');assert not page.locator('[data-validate-save]').count();page.locator('[data-back]').click();page.wait_for_selector('[data-order-part]:visible')
      results.append({'width':width,'role':token,'tracking_denied':True,'operation_return_preserved':True})
     assert not errors,errors
     page.close()
