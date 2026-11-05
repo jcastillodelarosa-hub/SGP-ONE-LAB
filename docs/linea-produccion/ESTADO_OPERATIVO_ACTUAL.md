@@ -1,3 +1,23 @@
+## Seguimiento · corrección visual v394 propuesta · 05/11/2026
+
+Base publicada LAB v393: main `2dedc5e055a2472d034d20d23463e66310fdc64f`,
+Hosting `sites/sgp-one-lab/versions/c68abd3d0ba7d720` (run 42110454030).
+En la tabla global se retira Avance por turno, se acorta el resumen contraído
+de afectaciones y el error de lectura de Disponible queda como `Error · ↻`,
+distinto de `Por definir`, con reintento accesible. Detalle, chips, registro,
+pestañas y operación por turno permanecen. Sin datos ni permisos cambiados.
+El registro PostgreSQL de 20:40–20:55 UTC muestra 12 `statement_timeout`
+(57014) de `sgp_lp_sale_orden_consultar_v1`: el lector de afectaciones llega a
+`sgp_lp_operacion.sesion`, que materializa permisos para toda la línea. La
+limpieza visual no resuelve ese timeout. Una optimización y recuperación de esa
+función compartida están preparadas y probadas solo en rama aislada
+`fix/seguimiento-sesion-acotada-proposal`; requieren revisión/activación aparte.
+Pruebas visuales PC/móvil, afectaciones y refresco PASS; Node 523/523 y
+`verify:release` PASS con vendor generado localmente. Falta PR/CI del SHA final,
+validación de la política y aceptación con sesión real. La referencia Library
+no se pudo materializar por restricción de red del ejecutor; coordinación sí
+inspeccionó los píxeles. Siguiente: PR borrador visual, luego decisión sobre SQL.
+
 ## PR203 · revisión base de borrador preservada · 05/11/2026
 
 Corregido refresco que adoptaba revisión nueva mientras conservaba texto viejo.

@@ -15,8 +15,8 @@ try:
    for key,label in [('QA3|PANELES_2','aluminio'),('QA1|PANELES_2','reportadas')]:
     row=page.locator('tr').filter(has=page.locator('[data-order-summary="'+key+'"]'));assert row.locator('details[data-order-part]').get_attribute('open') is None;row.scroll_into_view_if_needed();row.locator('[data-sale-edit]').wait_for(state='visible');assert 'Por definir' in row.locator('.lp-sale-row').inner_text();row.screenshot(path=f'/tmp/afectaciones-contraida-{label}-{width}.png')
    pending=page.locator('[data-order-summary="QA3|PANELES_2"]');assert 'Aluminio · ventanas por definir' in pending.inner_text();assert '19 ×' not in pending.inner_text()
-   assert 'Sin reportes ni pendientes de aluminio devueltos' in page.locator('[data-order-summary="QA2|PANELES_2"]').inner_text()
-   assert 'pendientes de aluminio no disponibles' in page.locator('[data-order-summary="QA4|PANELES_2"]').inner_text()
+   assert page.locator('[data-order-summary="QA2|PANELES_2"] [aria-label="Sin reportes ni pendientes de aluminio devueltos"]').count()==1
+   assert page.locator('[data-order-summary="QA4|PANELES_2"] [aria-label="Pendientes de aluminio no disponibles"]').count()==1
    assert '2 × NC AL' in page.locator('[data-order-summary="QA5|PANELES_2"]').inner_text();assert page.locator('[data-order-summary="QA5|PANELES_2"] [data-summary-cause=ALUMINIO]').count()==0
    pending.locator('[data-summary-cause=ALUMINIO]').click();page.wait_for_selector('[data-order-type=ALUMINIO][aria-pressed=true]');assert all(x in page.locator('.lp-aluminum-pending').inner_text() for x in ['PRODUCCION','LEGACY','PICKING'])
    assert 'edición actual aún exige' not in page.locator('#lp-tracking-drawer').inner_text();assert page.locator('[data-tracking-context]').is_hidden();assert page.locator('[data-live-operate]').is_hidden()
