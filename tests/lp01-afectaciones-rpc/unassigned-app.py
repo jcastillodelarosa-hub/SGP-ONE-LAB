@@ -44,7 +44,7 @@ try:
       assert page.locator('[data-order-affectations] form').is_hidden()
       assert page.locator('[data-tracking-context] option').count()==1
       assert page.locator('[data-tracking-context]').is_hidden();assert page.locator('[data-sale-context]').count()==0
-      page.locator('[data-register-affectation] summary').click();form=page.locator('[data-affect-context]');form.locator('[name=date]').fill('2026-11-01');form.locator('[name=shift]').select_option('2');form.locator('button').click()
+      page.locator('[data-order-type=NC_AL]').click();page.locator('[data-register-affectation] summary').click();form=page.locator('[data-affect-context]');form.locator('[name=date]').fill('2026-11-01');form.locator('[name=shift]').select_option('2');form.locator('button').click()
       page.wait_for_function("document.querySelector('[data-context-status]').textContent.includes('No hay un turno')")
       assert page.locator('[data-order-affectations] form').is_hidden()
       form.locator('[name=shift]').select_option('1');form.locator('button').click()

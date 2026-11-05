@@ -1,11 +1,10 @@
 # Observación por orden, Vidrio Tecno y referencia NC
 
-Estado: **IMPLEMENTADO EN RAMA (contratos y lógica), NO INTEGRADO EN VISTAS**.
+Estado: **IMPLEMENTADO EN RAMA E INTEGRADO EN VISTAS**.
 SQL **PROPUESTO / NO APLICADO**. Sin publicación, cambios de permisos, datos o flags
 productivos. Base inicial a01ce776/v390; actualizado a main 90518a0 (PR202).
-Esta entrega no cambia la versión visible: ningún nuevo módulo está conectado a
-la aplicación. Coordinar la siguiente versión funcional después de v391; no
-reutilizar v391 al integrar las vistas. SALE, los 16 pins y HOLD siguen intactos.
+La versión permanece pendiente de coordinación antes de integrar/publicar; no
+reutilizar v391 para la siguiente entrega funcional. SALE, los 16 pins y HOLD siguen intactos.
 
 ## Contrato mínimo
 
@@ -147,8 +146,8 @@ parte de esta entrega**. Los reportes NC requieren además
 `sgp_lp_afectaciones.config.writes` y turno abierto, por su escritor nativo;
 confirmación física requiere `physical`. No modificar esas banderas existentes.
 
-No existe todavía script de activación aprobado, manifiesto de huellas nuevo ni
-activación runtime. Las vistas están conectadas con degradación explícita. Antes de activar cada capacidad:
+El paquete 00–04 y activation-manifest.json está preparado para revisión, sin
+aprobación de instalación ni activación runtime. Las vistas están conectadas con degradación explícita. Antes de activar cada capacidad:
 revisar SQL exacto y huellas/owner/ACL, acordar las cuatro firmas y bandera local,
 preparar contención sin borrar historial, coordinar versión/pins/HOLD y validar
 artefacto. Ninguna de esas acciones productivas se ejecutó aquí.
@@ -167,3 +166,15 @@ PC 1440 y móvil 390, nota persistida/conflicto/reintento, decimal 1.5, NC manua
 backend ausente. Resultados y capturas se guardan junto al script. Ninguna sesión
 productiva se utilizó para estas pruebas. La evidencia Export anterior se conserva
 en `export-evidence-reused.json` y `export-evidence-query_READONLY.sql`.
+
+Paquete acotado: `00_preflight_READONLY.sql` compara cuatro dependencias y la
+columna Export; ante diferencia, detener y revisar, no actualizar huellas a ciegas.
+Instalar 01 y 02 como postgres, luego 03 solo con aprobación explícita. Las seis
+funciones nuevas pertenecen a postgres y fijan search_path vacío; únicamente las
+cuatro públicas son SECURITY DEFINER y recibirían EXECUTE a anon. Helpers, tablas
+y esquema privados no reciben permisos. `activation-manifest.json` contiene MD5
+de definición/cuerpo y ACL inicial; `package-sha256.json` fija bytes de scripts.
+04 desactiva solo writes local y revoca las cuatro entradas de anon, sin borrar
+notas/historial/referencias ni cambiar banderas existentes. Timeout implica
+rollback: comprobar resultado antes de cualquier reintento. Prueba sintética del
+paquete: PASS, concesiones exactas, activación local y contención sin DDL destructivo.
