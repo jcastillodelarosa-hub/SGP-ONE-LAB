@@ -1,0 +1,28 @@
+[
+  {
+    "width": 1440,
+    "status": "PASS",
+    "fullApplication": true,
+    "nativeSql": true,
+    "unassigned": false,
+    "quietRefreshFocusAndSelection": true,
+    "filterAndDrawerPreserveDraft": true,
+    "reloadPersistence": true,
+    "uncertainRetryAcrossFilterSameId": true,
+    "originalOperationUnchanged": true,
+    "revocationClears": true
+  },
+  {
+    "width": 390,
+    "status": "PASS",
+    "fullApplication": true,
+    "nativeSql": true,
+    "unassigned": true,
+    "quietRefreshFocusAndSelection": true,
+    "filterAndDrawerPreserveDraft": true,
+    "reloadPersistence": true,
+    "uncertainRetryAcrossFilterSameId": true,
+    "originalOperationUnchanged": true,
+    "revocationClears": true
+  }
+]

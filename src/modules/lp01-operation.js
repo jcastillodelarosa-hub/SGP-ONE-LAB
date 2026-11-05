@@ -1,3 +1,4 @@
+import {orderSaleTransport} from '../services/lp01-order-sale.js';
 import {affectationSummary} from '../domain/lp01-affectation-summary.js';
 import {compactSummaryMarkup as summaryMarkup} from './lp01-affectation-summary.js';
 import {mountTrackingAffectations} from './lp01-tracking-affectations.js';
@@ -17,10 +18,11 @@ const esc=v=>String(v??'—').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>'
 const progress=r=>r.total_etapa_parte>=r.programada?'Parte ejecutada':r.sale===null?'SALE por validar':r.ejecutado>=r.sale&&r.sale>0?'SALE cubierto':r.ejecutado>0?'En proceso':'Pendiente';
 const n=v=>v===null||v===undefined?'Por validar':String(v);
 /** Real RPC controller. Missing installation is explicit, never replaced with a write stub. */
-export function mountOperation({tracking,operation,bridge,legacyLoad}){
+export function mountOperation({tracking,operation,bridge,legacyLoad,orderSaleEnabled=false}){
  let data=null,context=null,selected=null,seq=0,pending=null,busy=false,bi=null,fileId=null,session=null,loading=false,missing=false,dirty=false,fileSequence=0;
  let viewPanel='planificador',trackingViewState={},globalData=null,globalContext=null,globalSession=null,trackingRole=null,globalRequest=null,globalQueued=false;
  let operationRequest=null,enrichment=null;
+ let orderSaleScope=null,orderSaleProvider=null;
  const trackingStates=new Map();
  let summaryFlight=null,summaryScope=null;const summaries=new Map();
  document.addEventListener('sgp:lp-role',e=>{trackingRole=e.detail;if(globalSession!==bridge.getToken()||!['COORDINADOR','ADMINISTRADOR'].includes(trackingRole)){globalData=null;trackingStates.clear();if(viewPanel==='seguimiento'){++seq;loading=false;live.replaceChildren();message.textContent='Seguimiento no autorizado';}}});
@@ -85,7 +87,13 @@ export function mountOperation({tracking,operation,bridge,legacyLoad}){
   for(const sel of ['[data-week]','[data-day]','[data-shift]','[data-progress]','[data-sort]'])tracking.querySelector(sel).closest('label').hidden=true;
   for(const sel of ['[data-status]','[data-list]','[data-summary]'])tracking.querySelector(sel).hidden=true;
   get('[data-tracking-stages]').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.trackingStage===globalContext.stage)));
-  renderTracking({host:live,data:{...globalData,orders:globalData.orders.map(r=>({...r,get affectationSummary(){return summaryFor(r);}}))},context:globalContext,state:trackingViewState,search:'',canReviewSale:true,
+  const saleScope=JSON.stringify([globalSession,globalContext.line,globalContext.stage,globalData.role]);
+  if(orderSaleEnabled&&saleScope!==orderSaleScope){
+   orderSaleScope=saleScope;const token=globalSession,ctx={...globalContext};
+   orderSaleProvider=key=>orderSaleTransport({key,stage:ctx.stage,getToken:()=>viewPanel==='seguimiento'&&bridge.getToken()===token&&globalContext?.line===ctx.line&&globalContext?.stage===ctx.stage&&globalData?.orders.some(r=>r.key===key)?token:null,
+    client:{rpc:async(name,args)=>(await bridge.getClient()).rpc(name,args)}});
+  }
+  renderTracking({host:live,orderSaleProvider:orderSaleEnabled?orderSaleProvider:null,data:{...globalData,orders:globalData.orders.map(r=>({...r,get affectationSummary(){return summaryFor(r);}}))},context:globalContext,state:trackingViewState,search:'',canReviewSale:true,
    onDetailClose:()=>renderGlobal(),
    onAffectations:async({host,row,target,cause})=>{
     const token=bridge.getToken(),scope=globalContext;host.textContent='Consultando afectaciones…';
@@ -260,7 +268,7 @@ export function mountOperation({tracking,operation,bridge,legacyLoad}){
  get('[data-retry-pending]').onclick=()=>attempt(()=>transmit());
  get('[data-op-load]').onclick=()=>load();for(const sel of ['[data-op-stage]','[data-op-date]','[data-op-shift]'])get(sel).onchange=()=>load();
  tracking.querySelector('[data-search]')?.addEventListener('input',()=>{if(viewPanel==='seguimiento')renderGlobal();else if(data)render();});tracking.querySelector('[data-line]')?.addEventListener('change',()=>load());
- document.addEventListener('sgp:production-panel',e=>{if(viewPanel!==e.detail){++seq;loading=false;}viewPanel=e.detail;});
+ document.addEventListener('sgp:production-panel',e=>{if(viewPanel!==e.detail){++seq;loading=false;orderSaleScope=null;orderSaleProvider=null;}viewPanel=e.detail;});
  document.addEventListener('sgp:production-panel',e=>{if(e.detail==='seguimiento')tracking.querySelector('.lp-followup-heading h3').textContent='Seguimiento de órdenes';});
  document.addEventListener('sgp:production-stage',e=>{if(!['ENSAMBLE','EMPAQUE'].includes(e.detail))return;get('[data-op-stage]').value=e.detail;tracking.querySelector('.lp-followup-heading h3').textContent='Operación · '+(e.detail==='ENSAMBLE'?'Ensamble':'Empaque');});
  document.addEventListener('sgp:production-panel',e=>{if(['operacion','dashboard','reportes'].includes(e.detail)&&(missing||(data&&session===bridge.getToken()))){renderReports();return;}if(['seguimiento','operacion','dashboard','reportes','ensamble','empaque'].includes(e.detail))load();});

@@ -1,18 +1,28 @@
-## B10 corrección · rama aislada · 05/11/2026
+## SALE por orden · backend activo, frontend local en espera
 
-Base integrada e182f537/v388. Detalle de afectaciones ancho bajo listado y bajo orden en móvil; acceso por causa, vacíos explícitos y orígenes PDT conservados. v389 provisional; coordinar numeración al integrar. Pruebas y límites en [lp01-b10-correction/README.md](../../tests/lp01-b10-correction/README.md). Sin SQL, permisos ni datos. Política PR199: pin de operación fbf8d7de…; baseline/rollback v388 ee9bc38852832125 acreditada por coordinador con run 42052662472 (106 archivos). No es lectura nueva del canal. Gate de transición HOLD; CI del SHA final y contraste live requeridos antes de integrar/publicar.
+Backend coordinado en Supabase: instalación `lp_sale_orden_definition_reviewed`
+versión 20261105145602, SHA256 4e7a70c5b495a52b2c88f4a418fdecf7eed7f1a26af004fc19608c35059573b1;
+habilitación `lp_sale_orden_enable_reviewed` versión 20261105150053,
+SHA256 0531259c946b507ac8f2e1be0a91d272371c53ff273a48ae1187485c8b859ff4.
+Habilitador anterior f42f6d62 falló antes de GRANT; estado apagado y sin filas
+verificado antes del reintento corregido. Postcheck 15:02 UTC: flag encendido;
+las dos RPC EXECUTE solo postgres/anon; tablas privadas RLS/ACL solo postgres,
+anon sin USAGE ni DML; reader MD5 6ca3e65a9248a55f973d26836744f757,
+writer d7aa1edaea6a22004226e4a73a6fb61f. Token inválido denegado en ambas;
+cero datos de prueba productivos. ACL históricas intactas. No repetir SQL.
 
-## Recepción PR200 · candidata v388 · preparación, no publicada
+Frontend SALE v390 en rama sobre main 13f50e95 (B10 v389 publicada): integración
+real en fila, PC1440/móvil390 y PostgreSQL sintético PASS. Recepción y B10 ya están integradas; PR201 borrador v390; pins de publicación y baseline v389 preparados. CI del SHA final pendiente. Uso de la definición entre turnos sigue sin regla; `operational:false`.
+Detalle: [SALE por orden](../sql-proposals/lp01-order-sale/README.md).
 
-Main observado 2ed9f8e/B10 v387. Recepción A/C aprobada visualmente por coordinación;
-no cambios en contratos, fuentes, permisos ni código SALE/Seguimiento. 506Node y
-PC1440/móvil390 sintéticos PASS reutilizados. Nueva etiqueta candidata v388 si es
-la siguiente publicación; confirmar orden con B10/SALE antes de integrar.
-Política200: baseline/rollback v387 2eb92f1e5438ff75 acreditada por run42041671863,
-104 archivos públicos idénticos y2plataforma intactos. 16pins sin cambios; transición
-HOLD conservada, verificadores/probe intactos. Ver docs/RECEPTION_CARDS_FILTERS_HANDOFF.md.
-Siguiente: CI del SHA final y coordinación previa a ready/merge; publicación requiere
-prepare del SHA integrado y revisión de pins/live vigente. Sin merge/deploy desde aquí.
+## B10 v389 y Recepción v388 publicados
+
+B10 integrado main 13f50e95e97fe23707ec1a18deec9398c2883e87, Hosting
+sites/sgp-one-lab/versions/93bde8b172480952, run 42073197726 SUCCESS,
+106 archivos verificados por coordinación. Preservar panel inferior ancho,
+chips por causa, rótulo Afectaciones y Picking como origen de aluminio.
+Recepción integrado antes en main e182f5379b74a5b77a325838bda5208f3a53fc7f,
+LAB v388, Hosting sites/sgp-one-lab/versions/ee9bc38852832125.
 
 ## B10 visual v387 · preparación independiente
 
