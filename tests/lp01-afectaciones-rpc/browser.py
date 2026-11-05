@@ -30,7 +30,7 @@ try:
      except Exception as e:result={'data':None,'error':{'message':str(e)}}
      route.fulfill(status=200,content_type='application/json',body=json.dumps(result))
     page.route('**/rpc/*',rpc);page.goto(origin+'/tests/lp01-afectaciones-rpc/fixture.html')
-    page.locator('[name=cause]').select_option('NC_AL');page.wait_for_selector('[data-ref]');page.locator('[data-ref]').select_option('AL-1');page.locator('[data-source-radio]').check()
+    page.locator('[name=cause]').select_option('NC_AL');page.locator('[name=aluminumSource]').select_option('new');page.wait_for_selector('[data-ref]');page.locator('[data-ref]').select_option('AL-1');page.locator('[data-source-radio]').check()
     assert 'FAB-70' in page.locator('[data-preview]').inner_text() and '70 in' in page.locator('[data-preview]').inner_text()
     assert page.get_by_role('button',name='Guardar',exact=True).is_disabled();assert len(x.read()['reports'])==0
     page.locator('[name=cause]').select_option('NOVEDAD')

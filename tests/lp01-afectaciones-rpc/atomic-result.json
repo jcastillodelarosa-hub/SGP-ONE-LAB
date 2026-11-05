@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "environment": "PostgreSQL17.11 --network none",
+  "checks": [
+    "Native V4 source/identity/NC guards; same transaction PDT2 pieces + LP5 windows; replay one record; supervisor denied; malformed source rolls back",
+    "Late LP/receipt failures roll back native PDT too; concurrent exact retry creates one PDT event and one LP report",
+    "Native Picking pending visible by exact production with original ID/reference/fabrication/length/state; supervisor read unavailable; no duplicate/no availability credit",
+    "Coordinator explicit legacy-to-report evidence; missing/stale/other-role reconciliation denied; no backfill; changed report quantity invalidates mapping; physical only leader/coordinator, not supervisor/admin"
+  ],
+  "limits": [
+    "Synthetic rows only",
+    "Existing Picking list dependency uses documented fixture",
+    "No production capability activation",
+    "Legacy mapping needs explicit evidence, never inferred"
+  ]
+}

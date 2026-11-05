@@ -14,3 +14,11 @@ test('transport does not accept an invented opening without complete evidence',a
 test('unconfirmed command result must not be treated as saved',async()=>{
  await assert.rejects(affectationsTransport({context,getToken:()=> 'token',client:{rpc:async()=>({data:{contract:'LP-AFFECTATIONS-COMMAND-1',id:'wrong',revision:1}})}}).command({id:'expected'}),/RESPUESTA_NO_CONFIRMADA/);
 });
+test('Picking source scope is checked and original association never calls PDT register',async()=>{
+ const bad={...base,contract:'LP-AFFECTATIONS-2',pickingPending:{rows:[{key:'OTHER',origin:'PICKING'}]}};
+ await assert.rejects(affectationsTransport({context,contractVersion:2,getToken:()=> 'token',client:{rpc:async()=>({data:bad})}}).read(),/PICKING_AMBITO/);
+ let name,args;const transport=affectationsTransport({context,getToken:()=> 'token',client:{rpc:async(n,a)=>{name=n;args=a;return {data:{contract:'LP-AFFECTATIONS-COMMAND-1',id:'request',revision:1}};}}});
+ await transport.command({id:'request',action:'CREATE',cause:'NC_AL',quantity:5,sourcePicking:'source'});
+ assert.equal(name,'sgp_lp_afectaciones_desde_picking_v1');assert.equal(args.p_source,'source');assert.equal(args.p_cmd.quantity,5);assert.ok(!('sourcePicking' in args.p_cmd));
+ await assert.rejects(transport.command({id:'request',sourcePicking:'source',pieces:[]}),/AMBIGUO/);
+});

@@ -1,5 +1,28 @@
 # Línea de Producción — estado operativo actual
 
+## LAB v382 · integración nativa PDT/Picking y panel · 05/11/2026
+
+Resultado local que sustituye las limitaciones técnicas de los hitos anteriores:
+escritor atómico PDT+LP, asociación del pendiente original de Picking sin crear otro
+PDT, conciliación explícita del legado y confirmación física con permisos acotados.
+Panel integrado en Seguimiento y Operación; conserva borradores durante refrescos
+y limpia al revocar acceso. Fabricación/longitud usan selección nativa de Picking;
+piezas y ventanas se registran por separado. Historia/apertura exige evidencia real.
+
+Validación: 481/481 JS, release v382, PostgreSQL17.11 aislado con datos sintéticos,
+rollback/carreras/idempotencia, Chromium1440/390 con escritor nativo y controladores
+existentes, refresco20s y revocación. Evidencia en
+`tests/lp01-afectaciones-rpc/{atomic-result,native-browser-result,native-app-result}.json`.
+Alcance/SQL revisable: `docs/sql-proposals/lp01-afectaciones/README.md`, propuestas03–05.
+
+No publicado ni aplicado a producción. Sin push, grants API ni activación por defecto.
+Conserva HOLD de publicación y verificadores. v381 publicada → candidata v382; estos
+commits pertenecen a la misma entrega pendiente. Próximo paso: revisión del paquete,
+contraste de dependencias y plan de activación/recuperación por el coordinador del hilo.
+Límites: LEGACY/manual sin identidad acreditada, aplicación del mismo pendiente entre
+etapas y relaciones históricas parciales requieren evidencia/contrato; no se duplican
+registros ni se concede disponibilidad. No se amplían permisos PDT de supervisores.
+
 ## LAB v382 · RPC y panel contra PostgreSQL aislado · 05/11/2026
 
 Implementados almacenamiento y RPC transaccionales nuevas, sesión/roles/etapa reales,

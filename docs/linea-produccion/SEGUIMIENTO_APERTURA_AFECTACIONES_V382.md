@@ -1,7 +1,10 @@
 # Seguimiento: apertura, historial y afectaciones por orden
 
-Estado: revisión de contratos en código y preparación local de LAB v382.
-No SQL aplicado, consulta de filas productivas, nueva RPC ni permisos modificados.
+Estado: implementación local LAB v382 validada con PostgreSQL aislado y navegadores.
+RPC nuevas y panel preparados; no SQL aplicado a producción, consulta de filas productivas
+ni permisos productivos modificados. El análisis original siguiente se conserva como
+antecedente. Estado vigente y límites en `ESTADO_OPERATIVO_ACTUAL.md` y
+`../sql-proposals/lp01-afectaciones/README.md`.
 
 ## Reglas recuperadas (evidencia del hilo principal)
 

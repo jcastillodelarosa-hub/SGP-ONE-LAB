@@ -1,153 +1,141 @@
-# Afectaciones individuales · contrato en preparación LAB v382
+# LAB v382 · afectaciones por orden y PDT
 
-**IMPLEMENTADO Y VERIFICADO EN AISLAMIENTO:** almacenamiento, RPC transaccionales,
-transporte y panel, PostgreSQL17.11 con datos sintéticos y pruebas PC/móvil.
-**NO PUBLICADO / SIN ACTIVACIÓN:** faltan adaptadores PDT, certificación física y
-procedimiento de conciliación/cobertura. Las nuevas RPC no tienen grants públicos.
-No cambiar producción ni instalar 01_storage_DRAFT.sql aisladamente.
+**IMPLEMENTADO EN RAMA / VERIFICADO EN POSTGRESQL AISLADO Y NAVEGADOR.**
+No aplicado en Supabase, no publicado ni certificado con datos de planta.
+Misma entrega v382 aún sin publicar, frente a main v381.
 
-## Contrato verificable
+## Resultado
 
-`src/server/lp01-affectations-contract.js` implementa CREATE, CORRECT (total), SOLVE
-(incremento), CONFIRM (incremento) y VALIDATE (unión de ventanas distintas).
-Cada comando lleva UUID estable, revisión esperada y observación. Reintentar el
-mismo UUID devuelve sin otro evento; distinto actor/contenido se rechaza.
-La autorización se comprueba antes incluso de un reintento. La autoridad de sesión,
-producción, línea, etapa, saldo Export y fecha/turno provienen del servidor.
-La función pura no autentica tokens ni persiste: NO es un backend de producción.
-El fixture importa el modelo para demostrarlo en memoria, nunca como autorización.
+Registro individual por causa y producción, con etapa, autor y fecha/turno originales.
+Correcciones y soluciones parciales conservan auditoría; la confirmación física de
+ventanas es distinta de solución en origen. No se suma automáticamente el solapamiento.
+El coordinador valida las ventanas distintas afectadas; un cambio invalida el
+consolidado. Arrastrar al siguiente turno no inserta otra afectación.
 
-Reporte conserva identidad, autor/fecha/turno/etapa originales; no hay comando de
-arrastre porque leerlo en otro turno no crea otra fila. Eventos retienen autor,
-contexto y cantidad. Corrección no borra eventos ni reduce bajo cantidades ya
-solucionadas/confirmadas. Solución no equivale a recepción física. Consolidado
-coordinador entre mayor pendiente individual y suma de pendientes es un chequeo
-de consistencia; jamás una estimación automática. Se invalida con cada cambio o
-cambio de saldo. No actualiza SALE ni crea liberaciones de SQL07.
+El panel se integra en **Seguimiento → detalle → Afectaciones** y en
+**Operación → Afectaciones individuales y pendientes de Picking**. Reutiliza el
+selector real de Picking para referencia, fabricación, longitud, acabado y reserva,
+pero mantiene origen ENSAMBLE/EMPAQUE y reglas NC de V4. Cantidad de piezas y cantidad
+de ventanas son entradas independientes. Los controles anteriores por turno se
+conservan para compatibilidad y se deshabilitan en la vista cuando la nueva consulta
+acredita escritura individual. Un cambio legacy por otro cliente invalida conciliación.
 
-## Adaptación requerida antes de RPC
+Pendientes originales de Picking se consultan por **key exacta**, con ID, contrato,
+origen, referencia, fabricación, longitud, estado, reserva, cantidad de piezas y
+fecha originales. Verlos no inserta nada ni concede disponibilidad. El usuario puede
+seleccionar un pendiente original acreditado: crea su relación LP sin otro PDT.
+Los ya asociados se muestran, pero no pueden registrarse de nuevo.
 
-- Usar `sgp_lp_operacion.sesion` y accesos vigentes, revalidar dentro del bloqueo por
-  producción/etapa; derivar línea desde producción. No confiar rol/capacidad del cliente.
-- Líder y coordinador registran/corrigen según etapa autorizada; consolidado solo
-  coordinador. Mapear SOLVE/CONFIRM a permisos reales antes de exponerlos. En demo
-  se conceden explícitamente, sin ampliar la matriz productiva.
-- Transacción única: sesión, lock, recibo idempotente, CAS, cambio, evento inmutable,
-  invalidación consolidado y respuesta; fallo revierte todo. No emular CAS con dos RPC.
-- Crear lector compartido por producción, conservando etapa y ámbitos autorizados;
-  panel actual demuestra una etapa. No duplicar filas para compartir el historial.
-- Picking/PDT: fuentes verificadas por `registrationSources`/`manualSources`, registro
-  con sus servicios existentes; origen fijado por etapa. Vincular ID real mediante
-  adaptador servidor. Tabla fuentes evita duplicar identidad. No usar cantidad de
-  piezas como ventanas ni llamar nuevamente registrar PDT al arrastrar.
-- Conciliar snapshots antiguos únicamente con evidencia/decisión auditada. No
-  sembrar reportes sumando causas, partes o turnos. Sin backfill de fechas.
-- RPC lectura/escritura futuras con EXECUTE mínimo, sin acceso directo a tablas;
-  no instalar almacenamiento sin todas las pruebas y recuperación.
+## Contratos y transacciones
 
-## Apertura e historial
+Orden de propuestas, NO autorización de instalación:
 
-Johan confirmó primer movimiento de cada proceso, incluido Empaque (05/11). El
-proyector `src/domain/lp01-progress-evidence.js` conserva eventos de avance y sus
-correcciones, día/turno/etapa/parte. Primer avance positivo solo acredita apertura
-si servidor acredita cobertura desde origen y no existe avance anterior en el
-primer estado disponible de una parte. Si no, apertura null / No disponible.
-Cambio de turno no reinicia fecha. No sumar snapshots ni tratar cero como inicio.
-El contrato global actual omite cantidades/antes de auditoría y cobertura; hay que
-ampliar su proyección antes de conectar este cálculo. No marcar FROM_ORIGIN por
-mera ausencia de eventos más antiguos: requiere fuente de cobertura acreditada.
+1. `01_storage_DRAFT.sql`: almacenamiento privado con RLS, cantidades e identidades.
+2. `02_rpc_REVIEW.sql`: lectura y comandos individuales, guardas LP existentes.
+3. `03_pdt_atomico_REVIEW.sql`: escritor PDT+LP y consulta enriquecida v2.
+4. `04_conciliacion_REVIEW.sql`: conciliación explícita y permisos físicos restringidos.
+5. `05_picking_original_REVIEW.sql`: asociación del Picking original sin duplicarlo.
 
-## Evidencia y siguiente incremento
+La escritura atómica llama a `public.sgp_pdt_registrar_v4` dentro de la misma
+transacción, con su actor, fuentes, NC, guards de identidad y ledger originales.
+Verifica los IDs devueltos y su producción/origen/evento, crea el reporte LP y
+vínculos únicos. Un fallo de LP o del recibo final revierte también PDT. Nunca se
+encadenan dos escrituras frontend. Se fijan hashes de las funciones nativas revisadas;
+un cuerpo incompatible detiene la instalación. No se reescriben funciones PDT.
 
-`node --test tests/lp01-affectations-contract.test.mjs` cubre conflictos, reintentos,
-revocación, ámbito, causas solapadas, corrección, recepción parcial y apertura.
-`python tests/lp01-affectations-ui/browser.py` demuestra PC/móvil con datos sintéticos.
-La UI conserva borrador ante error y UUID al reintentar; no hay polling que lo borre.
+UUID estable más contenido/actor/ámbito exactos impide reutilización ambigua.
+Bloqueos de recibo (incluido el nativo), etapa y producción, CAS y revalidación de
+sesión serializan carreras. La misma solicitud concurrente crea una sola operación;
+dos revisiones iguales distintas dejan una ganadora y la otra revierte íntegra.
+Fuente única `(contrato,id)` evita duplicar el bloqueo al volver a asociar un PDT.
+La relación no convierte piezas en ventanas ni cambia movimientos/estados físicos PDT.
 
-SQL y panel ya probados en PostgreSQL aislado, como se detalla abajo. Falta completar
-adaptadores y conectar panel operativo+Seguimiento sin eliminar el formulario
-vigente hasta certificar compatibilidad. Recuperación previa
-a escrituras: retirar nuevos endpoints/DDL vacíos bajo control. Después de eventos:
-contener escrituras y corregir hacia delante; jamás DROP ni restaurar datos antiguos.
-Documentación de funciones consultada: https://supabase.com/docs/guides/database/functions .
-Índice changelog no accesible (web content-type; GET entorno403); no se cambian SDK
-ni funciones Supabase nuevas en este incremento.
+## Permisos y controles conservados
 
-## Incremento RPC comprobado · 05/11/2026 (prevalece sobre estado inicial)
+Sesión, accesos individuales, etapa, guard temporal y admisión LP existentes siguen
+siendo autoridad. Sin service-role frontend, nuevas equivalencias ni cambios a roles.
+RLS y revocaciones en tablas/helpers; las RPC nuevas quedan **sin EXECUTE público**.
+`writes=false`, `physical=false`, `pdt_links=false`, `atomic_pdt=false` al instalar.
+No se proporciona activación productiva automática. Turno abierto requerido al escribir.
 
-La falta de binarios locales se resolvió usando el motor Docker disponible:
-PostgreSQL17.11 (`postgres:17.11`, digest
-`sha256:3b0cda93be7c8dba2ed484d19393d93845dc3dafb88973e248ba8e6d99d784e1`),
-contenedores efímeros con `--network none`. Solo esquemas y datos sintéticos.
-01_storage_DRAFT + 02_rpc_REVIEW fueron ejecutados en ese entorno; nunca en Supabase.
+| Acción | Alcance preparado |
+|---|---|
+| Reporte genérico/corrección | Roles autorizados por AFECTAR en su etapa vigente |
+| Nuevo aluminio / original Picking | Intersección AFECTAR LP y actor nativo PDT; LIDER LINEA, COORDINADOR y ADMINISTRADOR cuando ambos contratos autorizan |
+| Consulta Picking | Roles nativos de lectura PDT y acceso LP a producción/etapa; Seguimiento sigue coordinador/administrador |
+| Confirmación física | LIDER LINEA o COORDINADOR, con AFECTAR vigente y gate físico habilitado; supervisor y administrador no reciben esta acción |
+| Consolidado/conciliación | Solo COORDINADOR con VALIDAR vigente |
 
-RPC nuevas `sgp_lp_afectaciones_consultar_v1` y `sgp_lp_afectaciones_comando_v1`:
-reutilizan sesión, permisos por etapa y guard temporal LP actuales; comando exige
-turno abierto, congela autoridad/configuración, serializa UUID y etapa, bloquea
-producción, revalida sesión y aplica CAS. Reporte, auditoría inmutable, consolidado
-y respuesta idempotente se confirman juntos. No asignaciones ni aperturas implícitas.
-No se alteran RPC vigentes. Instalación comprueba owner y huella de matriz de roles;
-RLS y revocaciones en todo almacenamiento privado; EXECUTE público revocado.
+SUPERVISOR ENSAMBLE/EMPAQUE no figura en el actor PDT V4 ni en la lectura nativa de
+metadatos: interfaz muestra consulta no autorizada y bloquea aluminio; no suplanta
+al líder ni usa token del coordinador. Puede continuar acciones genéricas autorizadas.
+Ampliar ese acceso sería una decisión funcional y de permisos aparte, no un requisito
+para que líder/coordinador operen con sus permisos existentes.
 
-Historial compartido combina eventos de la misma producción solo de etapas con
-acceso vigente. Un supervisor no recibe la otra etapa; líder autorizado a ambas sí.
-`progress` proyecta EJECUTAR real con cantidad, antes, parte, fecha, turno, usuario
-y observación. Ambas aperturas permanecen null sin acreditación privada de cobertura
-completa desde origen. Se conserva primer avance positivo aunque luego se corrija.
-No hay RPC de navegador para falsificar cobertura ni reconstrucción histórica.
+## Conciliación histórica y apertura
 
-Disponible requiere consolidado de coordinador vigente y conciliación acreditada
-con las copias legacy actuales. La firma de snapshots y saldo se comprueba al leer;
-si cambia cualquiera, no se muestra disponible. No se migra ni suma legacy. La
-conciliación está sin habilitar al usuario hasta preparar su procedimiento auditado.
+El coordinador recibe los snapshots legacy actuales (último por parte), fingerprint
+y revisión; relaciona explícitamente cada ocurrencia con reportes existentes de
+misma producción/etapa/causa y registra evidencia. La unión legacy también requiere
+cobertura. Se validan cardinalidad, referencias, cantidades y totalidad de fuentes.
+No se crean reportes desde los números legacy, no se suman turnos/partes ni se
+reescriben fechas o snapshots. El cotejo y sus fuentes quedan inmutables, con
+idempotencia; cambio de cantidad/identidad del reporte o de fuente invalida el cotejo.
+Sin relación demostrable, se mantiene bloqueada la consolidación, no se inventa.
 
-Controles de instalación: `writes=false`, `physical=false`, `pdt_links=false`.
-Permisos efectivos de confirmación física siguen pendientes de certificación: la
-prueba habilita el gate solo en QA; no constituye autorización de planta. No hay
-script de activación productiva. `admitir()` LP también debe permitir escrituras.
+El historial compartido solo incluye etapas actualmente autorizadas. La proyección
+de EJECUTAR conserva cantidad, estado anterior, parte, día, turno, autor y correcciones.
+Ensamble y Empaque abren desde su primer avance positivo **acreditado**. Sin cobertura
+histórica completa desde origen, fecha no disponible; ninguna programación, carga
+Export o arrastre sustituye esa evidencia. No hay RPC de navegador para inventar
+cobertura histórica. Corrección posterior o cambio de turno no reinicia la fecha.
 
-### Compatibilidad PDT comprobada en código
+Disponible no modifica SALE. Requiere consolidado vigente, saldo vigente, cotejo
+legacy válido y pendientes originales Picking cubiertos en el ámbito. No se deduce
+una liberación por cerrar un PDT, por su cantidad de piezas o por solo consultarlo.
 
-El selector compartido `mountPdtRegistration` ahora acepta `selectionStyle:'table'`:
-reutiliza la tabla de Picking (fabricación, marca, longitud, acabado, reserva,
-referencia) manteniendo origen ENSAMBLE/EMPAQUE y NC obligatoria de V4. Los callers
-vigentes mantienen sus defaults. La demo consulta una respuesta sintética de fuentes;
-no acredita instalación ni lectura real PDT. Se usa líder de línea, compatible con
-roles V4; supervisores LP no figuran en el actor V4 vigente, por lo que NO se les
-extiende permiso ni se promete ese registro. Manual tiene contrato distinto.
+## Evidencia reproducible
 
-NC_AL no admite reporte de ventanas suelto: SQL exige fuente PDT acreditada y vínculo
-único; el panel bloquea guardar aluminio y permite revisar fabricación/longitud.
-El vínculo probado usa una fuente privada sintética de Picking; no existe aún un
-emisor nativo acreditado. Ninguna cantidad de pieza se copia a ventanas. La tabla
-fuentes impide reutilizar ese PDT para generar otro bloqueo en otra etapa/turno.
+PostgreSQL17.11 Docker efímero, `--network none`, datos exclusivamente sintéticos.
+Imagen `postgres:17.11`, digest
+`sha256:3b0cda93be7c8dba2ed484d19393d93845dc3dafb88973e248ba8e6d99d784e1`.
+La fixture combina la sesión/matriz LP capturada con cuerpos PDT nativos revisados,
+sin alterar sus guards. La dependencia histórica `sgp_picking_piezas_panel` usa la
+fixture documentada del repositorio; no se afirma certificación de su cuerpo en planta.
 
-Brecha exacta para escritura completa NC_AL: preparar transacción coordinada que
-reutilice `sgp_pdt_registrar_v4` y su ledger, valide IDs devueltos/clave/origen, cree
-reporte LP y vínculos en la MISMA transacción, con reintento de todo el contenido;
-o vincular un PDT existente con evidencia autoritativa de su origen e identidad.
-Dos llamadas frontend consecutivas pueden dejar un PDT huérfano si falla LP: no se
-implementó ese atajo. Fabricación/longitud no son una identidad global. Arrastrar
-un reporte nunca debe volver a llamar registrar PDT. Quedan fuera liberaciones
-SALE y deducción automática de ventanas por solución de material.
+- `postgres.py` / `result.json`: almacenamiento/RPC, fallos atómicos, roles, revocación,
+  carreras, snapshots, historial y cobertura de apertura, fuentes no acreditadas.
+- `atomic.py` / `atomic-result.json`: fuentes y escritor V4 nativos, NC/fabricación/
+  longitud incorrectas, PDT2 piezas frente a LP5 ventanas, reintentos y carreras,
+  rollback final completo, Picking original visible/asociado sin duplicación,
+  conciliación, restricciones físicas y cantidades modificadas.
+- `native-browser.py` / `native-browser-result.json`: panel y fuente/escritor nativos
+  en PC1440/móvil390; nuevo PDT, original Picking, solución, físico, cotejo y unión.
+- `native-app.py` / `native-app-result.json`: **pantallas/controladores existentes**,
+  coordinador en Seguimiento y líder en Operación, PC/móvil, fuente original visible,
+  borrador conservado durante polling y limpieza por revocación.
+- `tests/lp01-tracking-ui/browser.py`: regresión de menús, Semana/saldo, tres ciclos20s,
+  filtros/foco/scroll/panel y ámbito/sesión/rol.
+- `npm test`: 481/481 PASS. `npm run verify:release`: versión v382 PASS.
 
-### Evidencia reproducible
+No se utilizan destinos productivos ni se consulta una sesión real de planta.
 
-- `python tests/lp01-afectaciones-rpc/postgres.py`: roles reales capturados,
-  atomicidad, fallos de auditoría, conflictos y reintentos concurrentes, permisos,
-  revocación, arrastre sin clon, historial compartido, proyección de avances y
-  apertura con/sin cobertura, vínculo único PDT, sin modificación productiva.
-- `python tests/lp01-afectaciones-rpc/browser.py`: panel + transporte validado + RPC
-  PostgreSQL reales por túnel local de pruebas; PC/móvil. El único reader PDT es
-  sintético y no se llama a ningún escritor PDT. Evidencia en su directorio.
-- `src/services/lp01-affectations.js` rechaza respuesta de otro ámbito, cambio de
-  sesión en vuelo, apertura inventada y confirmación de comando ajeno. No está
-  conectado al controlador productivo, cuyo contrato sigue sin estas RPC.
+## Límites pendientes antes de una publicación segura
 
-Pendiente antes de publicar: adaptador atómico PDT, certificación de confirmación
-física, procedimiento de conciliación y cobertura histórica, integración controlada
-y revisión/activación de permisos y política. Se entrega código comprobado en
-PostgreSQL aislado, no sistema completo habilitado ni certificación productiva.
+- Contrastar dependencias instaladas con los hashes y preparar revisión/activación,
+  inventario, respaldo/recuperación y gates existentes; sin cambiar pins por conveniencia.
+- Pendientes LEGACY/manuales sin identidad nativa V4: visibles si autorizados, pero su
+  adopción automática falla cerrada. Requieren evidencia/adaptador propio, sin inferir.
+- Un mismo PDT no puede generar reportes duplicados por etapas. Si ya está vinculado
+  a otra etapa y falta evidencia de disponibilidad en la actual, esta entrega no
+  concede crédito ni permite duplicarlo. Hace falta un contrato explícito de alcance
+  entre etapas para resolver ese caso; el historial de la producción permanece visible.
+- El cotejo exige una relación completa demostrable. No resuelve automáticamente
+  relaciones parciales ambiguas ni cantidades históricas contradictorias.
+- Seguimiento permite consulta sin asignación; para escribir, la interfaz actual usa
+  un contexto operativo existente seleccionado. No crea asignaciones ni abre turnos.
+- Sin evidencia acreditada de inicio anterior, apertura sigue no disponible.
 
-Resultado final de este incremento: 480 JS PASS; matriz PostgreSQL PASS; navegador
-RPC PC1440/móvil390 PASS; verify:release LAB v382 PASS. Sin publicación.
+Recuperación: antes de nuevos eventos, contener/deshabilitar el paquete y retirar
+solo objetos nuevos vacíos bajo procedimiento revisado. Después de eventos, contener
+escrituras y corregir hacia delante; no DROP ni restauración destructiva de datos.
