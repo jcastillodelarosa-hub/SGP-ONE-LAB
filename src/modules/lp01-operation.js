@@ -87,10 +87,10 @@ export function mountOperation({tracking,operation,bridge,legacyLoad}){
   get('[data-tracking-stages]').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.trackingStage===globalContext.stage)));
   renderTracking({host:live,data:{...globalData,orders:globalData.orders.map(r=>({...r,get affectationSummary(){return summaryFor(r);}}))},context:globalContext,state:trackingViewState,search:'',canReviewSale:true,
    onDetailClose:()=>renderGlobal(),
-   onAffectations:async({host,row,target})=>{
+   onAffectations:async({host,row,target,cause})=>{
     const token=bridge.getToken(),scope=globalContext;host.textContent='Consultando afectaciones…';
     try{const client=await bridge.getClient();if(!host.isConnected||token!==bridge.getToken()||(scope.line!==globalContext?.line||scope.stage!==globalContext?.stage))return;
-     await mountTrackingAffectations({host,row,target,scope,client,getToken:()=>bridge.getToken(),isCurrent:()=>scope.line===globalContext?.line&&scope.stage===globalContext?.stage});
+     await mountTrackingAffectations({host,row,target,cause,scope,client,getToken:()=>bridge.getToken(),isCurrent:()=>scope.line===globalContext?.line&&scope.stage===globalContext?.stage});
     }catch(error){if(host.isConnected)host.textContent='Afectaciones no disponibles: '+error.message;}
    },
    onOperate:async(id,focusSale,target)=>{

@@ -4,7 +4,7 @@ import {mountAffectationsPanel} from '../../src/modules/lp01-affectations-panel.
 import {progressEvidence} from '../../src/domain/lp01-progress-evidence.js';
 let state=emptyAffectations('DEMO|PANELES_2','PANELES_2','ENSAMBLE'),dispose;
 const authority=()=>({active:!window.revoked,user:role.value,role:role.value,key:state.key,line:state.line,stages:['ENSAMBLE'],capabilities:['READ','REPORT','SOLVE','CONFIRM',...(role.value==='COORDINADOR'?['VALIDATE']:[])],balance:20,date:'2026-11-05',shift:2,now:new Date().toISOString()});
-window.transport={read:async()=>readAffectations(state,authority()),command:async c=>{state=affectationCommand(state,c,authority());}};
+window.transport={read:async()=>({...readAffectations(state,authority()),aluminumPending:{status:"AVAILABLE",rows:[]}}),command:async c=>{state=affectationCommand(state,c,authority());}};
 const mount=async()=>{dispose?.();dispose=await mountAffectationsPanel(panel,transport);};role.onchange=mount;await mount();
 const result=progressEvidence({key:state.key,line:state.line,stage:state.stage,coverage:'FROM_ORIGIN',events:[{id:'event-1',key:state.key,line:state.line,stage:state.stage,assignment:'parte-1',date:'2026-11-03',shift:1,quantity:2,before:0,at:'2026-11-03T12:00:00Z'}]});
 progress.textContent='Abierta desde '+result.opening.date+' / T'+result.opening.shift+' · Ensamble: '+result.events[0].quantity+' unidades registradas. Evidencia sintética.';

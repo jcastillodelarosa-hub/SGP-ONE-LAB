@@ -22,11 +22,11 @@
 .lp-tracking-list{min-width:0}.lp-tracking-list>h4{font-size:14px;margin:4px 0 10px}
 .lp-tracking-table-wrap{max-height:60vh;overflow:auto;overscroll-behavior:contain;border:1px solid #cbdcf0;border-radius:9px;scrollbar-gutter:stable}
 .lp-tracking-table{width:100%;min-width:960px;border-collapse:separate;border-spacing:0;font-size:13px;table-layout:auto}
-.lp-tracking-table th,.lp-tracking-table td{padding:9px 10px;border-bottom:1px solid #dce6f1;text-align:left;vertical-align:top}
-.lp-tracking-table th{position:sticky;top:0;z-index:1;background:#eef5fd;color:#25496f;font-size:11px;white-space:nowrap}
-.lp-tracking-table th:nth-child(n+4):nth-child(-n+6),.lp-tracking-table td:nth-child(n+4):nth-child(-n+6){text-align:right;font-variant-numeric:tabular-nums}
-.lp-tracking-table td:nth-child(n+4):nth-child(-n+6){min-width:70px;font-weight:700}
-.lp-tracking-table tr.selected>td{background:#e5f2ff}.lp-tracking-table tbody tr:hover>td{background:#f3f8fe}
+.lp-tracking-table>thead>tr>th,.lp-tracking-table>tbody>tr>td{padding:9px 10px;border-bottom:1px solid #dce6f1;text-align:left;vertical-align:top}
+.lp-tracking-table>thead>tr>th{position:sticky;top:0;z-index:1;background:#eef5fd;color:#25496f;font-size:11px;white-space:nowrap}
+.lp-tracking-table>thead>tr>th:nth-child(n+4):nth-child(-n+6),.lp-tracking-table>tbody>tr>td:nth-child(n+4):nth-child(-n+6){text-align:right;font-variant-numeric:tabular-nums}
+.lp-tracking-table>tbody>tr>td:nth-child(n+4):nth-child(-n+6){min-width:70px;font-weight:700}
+.lp-tracking-table>tbody>tr.selected>td{background:#e5f2ff}.lp-tracking-table>tbody>tr:hover>td{background:#f3f8fe}
 .lp-tracking-identity{min-width:210px;max-width:270px;overflow-wrap:anywhere}.lp-tracking-identity>small{font-size:10px}
 .lp-tracking-disclosure>summary{cursor:pointer;min-height:44px;list-style-position:inside}.lp-tracking-disclosure>summary b{font-size:13px}.lp-tracking-disclosure>summary small{font-size:11px}
 .lp-tracking-badge{display:inline-block;border-radius:20px;background:#e5f2ff;color:#174d83;font-size:10px;padding:3px 6px;margin-left:5px;white-space:nowrap}
@@ -51,10 +51,10 @@
  .lp-tracking.has-detail .lp-tracking-layout{grid-template-columns:minmax(0,1fr)}
  .lp-tracking-list{padding-left:16px;box-sizing:border-box}
  .lp-tracking-table-wrap{max-height:65vh;border:0;border-radius:0;scrollbar-gutter:auto}
- .lp-tracking-table{min-width:0;display:block}.lp-tracking-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
- .lp-tracking-table tbody{display:grid;gap:10px}.lp-tracking-table tr{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid #cbdcf0;border-radius:9px;overflow:hidden;background:#fff}
- .lp-tracking-table td{display:block;border:0;padding:8px 5px;min-width:0!important;max-width:none;text-align:left!important;overflow-wrap:anywhere}
- .lp-tracking-table td::before{content:attr(data-label);display:block;font-size:10px;font-weight:400;color:#526782;margin-bottom:6px}
+ .lp-tracking-table{min-width:0;display:block}.lp-tracking-table>thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+ .lp-tracking-table>tbody{display:grid;gap:10px}.lp-tracking-table>tbody>tr{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid #cbdcf0;border-radius:9px;overflow:hidden;background:#fff}
+ .lp-tracking-table>tbody>tr>td{display:block;border:0;padding:8px 5px;min-width:0!important;max-width:none;text-align:left!important;overflow-wrap:anywhere}
+ .lp-tracking-table>tbody>tr>td::before{content:attr(data-label);display:block;font-size:10px;font-weight:400;color:#526782;margin-bottom:6px}
  .lp-tracking-table .lp-tracking-identity{grid-column:1/-1;padding:10px}.lp-tracking-identity::before{display:none!important}
  .lp-tracking-table .lp-tracking-week-cell,.lp-tracking-table .lp-tracking-system-cell{display:none}
  .lp-tracking-table .lp-tracking-affects,.lp-tracking-table .lp-tracking-assembly-state{grid-column:1/-1;padding:8px 10px}
@@ -69,7 +69,7 @@
 [data-tracking-stages] button[aria-pressed=true]{color:#1264c8;border-bottom-color:#1264c8;background:#f1f7ff}
 .lp-tracking-drawer [data-tracking-context]{width:100%;min-width:0;max-width:100%}
 /* Seguimiento uses the existing SGP blue controls on both table and cards. */
-.lp-tracking-table th button{font:inherit;color:inherit;background:transparent;border:0;min-height:40px;padding:3px;text-align:inherit;white-space:nowrap}
+.lp-tracking-table>thead>tr>th button{font:inherit;color:inherit;background:transparent;border:0;min-height:40px;padding:3px;text-align:inherit;white-space:nowrap}
 .lp-column-controls,.lp-column-panel>div{display:flex;align-items:end;gap:8px;flex-wrap:wrap;margin:10px 0}
 .lp-column-controls label{display:grid;gap:4px}
 .lp-column-panel{border:1px solid #cbdcf0;border-radius:9px;background:#f3f8fe;padding:12px;margin:10px 0}
@@ -84,7 +84,7 @@
  .lp-tracking-mobile-week{display:block;font-size:12px;color:#25496f;margin-bottom:5px}
  .lp-column-controls label,.lp-column-controls select{width:100%;min-width:0}
  .lp-column-panel fieldset{display:grid;grid-template-columns:minmax(0,1fr)}
- .lp-tracking-table thead{display:none}
+ .lp-tracking-table>thead{display:none}
 }
 /* v382: column menus share one accessible dialog for desktop and mobile headers. */
 .lp-tracking-toolbar{display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin:8px 0}
@@ -109,7 +109,7 @@
  .lp-mobile-columns{display:flex;gap:6px;overflow-x:auto;padding:6px 0;max-width:100%}
  .lp-mobile-columns button{min-height:44px;white-space:nowrap;flex:none}
  .lp-column-menu{margin:auto 12px 12px;width:calc(100vw - 24px);max-height:85dvh}
- .lp-tracking-table tr{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .lp-tracking-table>tbody>tr{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
 .lp-timeline-scroll{overflow:auto;max-width:100%;overscroll-behavior:contain}
 .lp-tracking-timeline table{width:100%;border-collapse:collapse;font-size:12px}
@@ -120,3 +120,20 @@
 .lp-order-group{border:1px solid #cbd9ea;border-radius:10px;margin:16px 0;overflow:hidden}.lp-order-group>h4{margin:0;padding:12px 14px 4px;background:#eaf2fb}.lp-order-group>p{margin:0;padding:0 14px 12px;background:#eaf2fb;font-size:13px}.lp-order-group-open>h4,.lp-order-group-open>p{background:#fff8e7}.lp-order-group article{padding:8px;border-top:1px solid #dce6f1;border-left:4px solid #1264c8}.lp-order-group-open article{border-left-color:#bb7b10}.lp-followup .lp-order-entry{width:100%;border:0;border-radius:0;display:grid;grid-template-columns:minmax(180px,2fr) repeat(3,minmax(70px,1fr)) minmax(100px,1fr) 20px;gap:12px;text-align:left;align-items:center}.lp-order-entry span>b{display:block}.lp-operation-detail-layout{display:grid;grid-template-columns:minmax(260px,.85fr) minmax(0,1.6fr);gap:20px;align-items:start}.lp-operation-form-pane{min-width:0}.lp-operation-order-nav .lp-order-entry{grid-template-columns:repeat(3,minmax(0,1fr))}.lp-operation-order-nav .lp-order-identity,.lp-operation-order-nav .lp-order-affects{grid-column:1/-1}.lp-operation-order-nav .lp-order-entry>span:last-child{display:none}
 @media(max-width:850px){.lp-operation-detail-layout{display:block}.lp-operation-order-nav{display:none}.lp-followup .lp-order-entry{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.lp-order-entry .lp-order-identity,.lp-order-entry .lp-order-affects{grid-column:1/-1}.lp-order-entry>span:last-child{display:none}}
 .lp-operation-detail-layout>[data-live-notice]{grid-column:1/-1;margin:0}.lp-operation-detail-layout>[data-live-notice]:empty{display:none}
+
+/* B10: the selected order's detail uses the width of the list. */
+.lp-tracking.has-detail .lp-tracking-layout{grid-template-columns:minmax(0,1fr)}
+.lp-tracking-drawer{max-height:none;overflow:visible}
+.lp-tracking-drawer>header{position:static}
+.lp-tracking-detail-actions{display:flex;flex-wrap:wrap}
+.lp-affect-summary-compact{display:block}
+@media(max-width:700px){
+ .lp-tracking .lp-tracking-list{padding-left:0}
+ .lp-tracking .lp-tracking-table-wrap{max-height:none;overflow:visible}
+ .lp-tracking .lp-tracking-detail-cell{grid-column:1/-1;padding:0!important}
+ .lp-tracking .lp-tracking-detail-cell::before{display:none}
+ .lp-tracking .lp-tracking-drawer{position:static;inset:auto;max-height:none;width:100%;border-radius:0;padding:14px;box-shadow:none}
+}
+.lp-affect-cause-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}
+.lp-affect-cause-tabs button[aria-pressed=true]{background:#eaf2fb;border-color:#1264c8;color:#103b73}
+.lp-tracking .lp-tracking-detail-cell[hidden],.lp-tracking [hidden]{display:none}

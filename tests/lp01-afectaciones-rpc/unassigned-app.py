@@ -40,7 +40,7 @@ try:
      if page.locator('#mobileMenuToggle').is_visible():page.locator('#mobileMenuToggle').click()
      page.locator('.nav [data-view="ensamble"]').click()
      if user=='COORDINADOR':
-      page.locator('#productionTrackingTab').click();page.wait_for_selector('.lp-tracking-table');page.locator('.lp-tracking-table tbody summary').first.click();page.locator('[data-tracking-tab=Materiales]').click();page.wait_for_selector('.lp-pdt-compact');assert page.locator('.lp-aluminum-pending').evaluate('(el,id)=>el.textContent.includes(id)',original)
+      page.locator('#productionTrackingTab').click();page.wait_for_selector('.lp-tracking-table');page.locator('.lp-tracking-table tbody summary').first.click();assert page.locator('[data-tracking-tab=Afectaciones]').get_attribute('aria-pressed')=='true';page.wait_for_selector('.lp-pdt-compact');assert page.locator('.lp-aluminum-pending').evaluate('(el,id)=>el.textContent.includes(id)',original)
       assert page.locator('[data-order-affectations] form').is_hidden()
       assert page.locator('[data-tracking-context] option').count()==1
       assert 'corregir esa dependencia está pendiente' in page.locator('[data-sale-context]').inner_text()

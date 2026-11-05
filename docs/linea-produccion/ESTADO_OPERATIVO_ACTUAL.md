@@ -1,3 +1,7 @@
+## B10 corrección · rama aislada · 05/11/2026
+
+Base integrada e182f537/v388. Detalle de afectaciones ancho bajo listado y bajo orden en móvil; acceso por causa, vacíos explícitos y orígenes PDT conservados. v389 provisional; coordinar numeración al integrar. Pruebas y límites en [lp01-b10-correction/README.md](../../tests/lp01-b10-correction/README.md). Sin SQL, permisos ni datos. Política PR199: pin de operación fbf8d7de…; baseline/rollback v388 ee9bc38852832125 acreditada por coordinador con run 42052662472 (106 archivos). No es lectura nueva del canal. Gate de transición HOLD; CI del SHA final y contraste live requeridos antes de integrar/publicar.
+
 ## Recepción PR200 · candidata v388 · preparación, no publicada
 
 Main observado 2ed9f8e/B10 v387. Recepción A/C aprobada visualmente por coordinación;
