@@ -26,6 +26,11 @@ on:
       - 'tests/lp01-seguimiento-incremento/**'
       - 'tests/lp01-tracking-global.test.mjs'
       - 'tests/lp01-tracking-ui/**'
+      - 'tests/lp01-afectaciones-rpc/**'
+      - 'tests/lp01-affectations*.test.mjs'
+      - 'docs/sql-proposals/lp01-afectaciones/**'
+      - 'src/modules/lp01-affectations-panel.js'
+      - 'src/services/lp01-affectations.js'
       - 'src/modules/lp01-tracking.js'
       - 'docs/sql-proposals/lp01-seguimiento/**'
       - 'tests/lp01-ambitos-import/**'
@@ -202,3 +207,48 @@ jobs:
             tests/lp01-seguimiento-incremento/api-result.json
             tests/lp01-seguimiento-incremento/browser-result.json
             tests/lp01-tracking-ui/evidence/
+
+  affectations:
+    name: Affectations native PDT, revocation and UI (isolated)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm install --no-package-lock --no-audit --no-fund
+      - run: npm run build:vendor
+      - run: docker pull postgres:17.11
+      - name: Remove prior synthetic evidence before this run
+        run: |
+          python - <<'PYTHON'
+          from pathlib import Path
+          root = Path('tests/lp01-afectaciones-rpc')
+          for path in root.glob('*result.json'):
+              path.unlink()
+          for path in (root / 'evidence').glob('*.png'):
+              path.unlink()
+          PYTHON
+      - name: Native contracts and temporal authorization after waits
+        run: |
+          python tests/lp01-afectaciones-rpc/atomic.py
+          python tests/lp01-afectaciones-rpc/revocation.py
+      - name: Synthetic native panel and existing app controllers
+        run: |
+          pip install playwright==1.62.0
+          python -m playwright install --with-deps chromium
+          python tests/lp01-afectaciones-rpc/native-browser.py
+          python tests/lp01-afectaciones-rpc/native-app.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lp01-affectations-synthetic-evidence
+          path: |
+            tests/lp01-afectaciones-rpc/*result.json
+            tests/lp01-afectaciones-rpc/evidence/

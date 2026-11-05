@@ -1,0 +1,26 @@
+{
+  "status": "PASS",
+  "environment": "PostgreSQL17.11 network none synthetic only",
+  "baselineCommit": null,
+  "sqlSha256": "2d1fb5ef53c835d04a01a0602bcacd1cc66bd9a825b3504d07afea1a9eab65bd",
+  "checks": [
+    {
+      "wait": "stage",
+      "expiredPermission": true,
+      "outcome": "denied with no audit write or receipt disclosure"
+    },
+    {
+      "wait": "receipt",
+      "expiredPermission": true,
+      "outcome": "denied with no audit write or receipt disclosure"
+    },
+    {
+      "wait": "reader",
+      "expiredPermission": true,
+      "outcome": "denied with no audit write or receipt disclosure"
+    },
+    {
+      "revocation": "serialized during wait; committed afterward; retry denied"
+    }
+  ]
+}

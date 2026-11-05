@@ -1,7 +1,7 @@
 {
-  "candidate": "ee2f8de4fbf8773939b56f18c589d77907715f3f",
+  "candidate": "Containing Git commit; exact SQL bytes below",
   "version": "LAB v382",
-  "status": "REVIEW_ONLY_NOT_ACTIVATABLE",
+  "status": "REVIEW_ONLY_PRODUCTION_CONTRACTS_PENDING",
   "ordered_files": [
     {
       "path": "docs/sql-proposals/lp01-afectaciones/01_storage_DRAFT.sql",
@@ -17,11 +17,12 @@
     },
     {
       "path": "docs/sql-proposals/lp01-afectaciones/04_conciliacion_REVIEW.sql",
-      "sha256": "90f16d240c85cc3e5cf414102e0924ffc96539f329128d09c356021193891b79"
+      "sha256": "2d1fb5ef53c835d04a01a0602bcacd1cc66bd9a825b3504d07afea1a9eab65bd"
     },
     {
       "path": "docs/sql-proposals/lp01-afectaciones/05_picking_original_REVIEW.sql",
       "sha256": "4e74ca817f7177e2c2cb89c4cccc0d4a236e5aed977b563bf158f7d7ed984609"
     }
-  ]
+  ],
+  "implementation_base": "ee2f8de4fbf8773939b56f18c589d77907715f3f"
 }

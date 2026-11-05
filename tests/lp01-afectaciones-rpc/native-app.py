@@ -11,7 +11,7 @@ server=http.server.ThreadingHTTPServer(('127.0.0.1',0),Files);threading.Thread(t
 results=[]
 try:
  with sync_playwright() as pw:
-  browser=pw.chromium.launch(executable_path='/usr/bin/chromium',args=['--no-sandbox'])
+  browser=pw.chromium.launch(executable_path='/usr/bin/chromium' if Path('/usr/bin/chromium').exists() else None,args=['--no-sandbox'])
   for width in [1440,390]:
    x=f.Fixture()
    try:

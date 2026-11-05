@@ -1,9 +1,10 @@
 # LAB v382 — revisión y plan de activación, 05/11/2026
 
 **HOLD para escrituras y publicación.** Candidato revisado:
-`ee2f8de4fbf8773939b56f18c589d77907715f3f`. Esta pasada es una revisión separada
-sobre el resultado implementado, realizada por el mismo agente; no sustituye una
-revisión independiente por otra persona ni una aprobación formal de PR.
+`ee2f8de4fbf8773939b56f18c589d77907715f3f`. La revisión inicial del mismo agente fue complementada por el agente independiente
+`review_reconciliation`; revisó el diff y las pruebas sin editar ni acceder a producción.
+No constituye aprobación formal de PR. La corrección posterior está identificada por
+las huellas del manifest y `revocation-result.json`.
 
 ## Evidencia actual, sin datos de órdenes
 
@@ -32,12 +33,12 @@ Los conteos de catálogo no se emplean como prueba de integridad ni de no duplic
 
 | Hallazgo | Evidencia y efecto | Condición para levantar bloqueo |
 |---|---|---|
-| Permiso de conciliación no se revalida después de esperas | `04_conciliacion_REVIEW.sql`, RPC conciliar: actor se consulta antes de locks; tras esperar se comprueban huellas, pero no sesión/permisos. Una revocación durante la espera podría dejar operar con autorización anterior. Hallazgo estático, no reproducción productiva. | Revalidar actor/coordinador después de locks y prueba concurrente de revocación en PostgreSQL aislado. Bloquea activar esa escritura. |
+| RESUELTO EN AISLAMIENTO: permiso de conciliación vencido tras esperas | `04_conciliacion_REVIEW.sql`, RPC conciliar: actor se consulta antes de locks; tras esperar se comprueban huellas, pero no sesión/permisos. La prueba reprodujo caducidad temporal durante espera, NO revocación directa: esta última ya se serializaba por locks de sesión nativos. Corregidas escritura, recibo y lectura legado. | PASS baseline/fixed con contratos reales y datos sintéticos; actor/rol/usuario/línea revalidados tras esperas. Queda verificar contratos instalados antes de activar. |
 | Cobertura Picking exige todos los originales, incluso resueltos/heredados | `05`, `picking_cubierto`: no filtra estado ni evidencia física. Conservador: bloquea consolidado aunque algunos pendientes ya no sean aplicables. | Regla explícita y evidencia de disponibilidad por etapa; no filtrar estados para conceder crédito automáticamente. |
 | Fuente única no equivale a alcance entre etapas | PK `(contrato,fuente_id)` evita volver a crear el mismo vínculo; si está asociado en Ensamble, no puede duplicarse en Empaque. | Definir aplicación compartida con confirmación física por etapa. Mientras tanto, lectura/historial y consolidación desconocida. |
 | LEGACY/manual sin ledger V4 | Consulta por key puede mostrarlos; adopción exige contrato V2 más ledger V4 e id_entrega. | Adaptador con evidencia propia; nunca crear un nuevo PDT para eludirlo. |
 | Fuentes sin key exacta no se recuperan por nombre | Lector filtra key; metadatos permiten nulos históricos. | Medir únicamente agregados de integridad y reconciliar identidad acreditada; no unir por producción ambigua. |
-| CI nueva aún no incorpora estas suites SQL/navegador | No hay referencias a atomic/native-app/afectaciones en workflows actuales. | Integrarlas en CI aislada y comprobar SHA final antes de publicar. Pruebas locales previas no equivalen a CI. |
+| CI nueva aún no incorpora estas suites SQL/navegador | Job affectations añadido localmente al workflow LP; permisos contents:read, sin secretos; PostgreSQL network none. | Ejecutar CI sobre SHA final cuando se publique la rama autorizada. Pruebas locales previas no equivalen a CI. |
 
 Controles positivos revisados: funciones nuevas con search_path vacío y REVOKE;
 esquema privado sin USAGE API, tablas nuevas con RLS; sesión y autorización servidor;
@@ -48,8 +49,9 @@ instalados y permisos efectivos de dependencias siguen pendientes de contraste.
 
 ## Plan exacto, no ejecutado
 
-1. Resolver hallazgo de revalidación, incorporar prueba de revocación tras espera,
-   CI y revisión por otra persona. Mantener versión382: misma entrega sin publicar.
+1. Corrección y revisión independiente completadas localmente. Prueba reproducible
+   carga SQL04 de git77f3f8c y registra SHA256; fixed PASS en tres rutas. CI incorporada,
+   pendiente de ejecución remota. Mantener versión382: misma entrega sin publicar.
 2. Obtener evidencia de solo lectura expresamente permitida sobre producción:
    hashes/cuerpo/owner/search_path/SECURITY DEFINER de sesion, verificar_temporal,
    operaciones_rol, admitir, saldo, puede_operar, permisos_en_periodo, actor PDT,
@@ -107,3 +109,21 @@ manifest y esta evaluación. Lectura productiva del nuevo panel requiere instala
 ACL revisadas y verificación pendiente. Escrituras NO listas para activación por los
 bloqueos anteriores. No hay denegación ni resultado de ejecución incierto: las consultas
 SQL de validación no se intentaron por restricción explícita del encargo.
+
+## Alcance de la corrección posterior
+
+`revocation-baseline.json` demuestra escritura/recibo/lector con permiso temporal
+vencido; `revocation-result.json` demuestra denegación AMBITO_DENEGADO sin escritura
+ni divulgación tras espera. La revocación explícita UPDATE no atraviesa el SHARE
+nativo: se serializa y el siguiente reintento es rechazado. Se corrige la hipótesis
+inicial que la describía como carrera reproducida. No se modificaron dependencias.
+
+Limitación distinta conservada: `sgp_sesion_actual` usa now() transaccional para
+caducidad de sesión. Revalidar actor no cambia ese contrato a reloj real; no se afirma
+resolver expiración de sesión dentro de una transacción. Requiere revisión específica
+del contrato compartido si se exige dicha semántica. No ampliar permisos para eludirlo.
+
+La autorización de continuar implementación no se usó para aplicar SQL productivo:
+el manifiesto actualizado y las precondiciones se entregan al coordinador antes de
+cualquier mutación. Sin vía permitida de consulta SQL productiva, hashes/ACL/integridad
+de filas reales siguen sin certificar; los metadatos ya obtenidos no los sustituyen.

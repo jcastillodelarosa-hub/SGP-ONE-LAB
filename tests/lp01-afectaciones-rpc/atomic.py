@@ -6,10 +6,10 @@ spec=importlib.util.spec_from_file_location('lp_fixture_atomic',HERE/'postgres.p
 spec=importlib.util.spec_from_file_location('pdt_fixture_atomic',HERE/'native_pdt.py');pdt=importlib.util.module_from_spec(spec);spec.loader.exec_module(pdt)
 lit=lp.lit
 class Fixture(lp.Fixture):
- def __init__(self):
+ def __init__(self,reconciliation_sql=None):
   super().__init__();pdt.prepare(self.db)
   for name in ['03_pdt_atomico_REVIEW.sql','04_conciliacion_REVIEW.sql','05_picking_original_REVIEW.sql']:
-   sql=(ROOT/'docs/sql-proposals/lp01-afectaciones'/name).read_text();failed=self.db.run(sql.replace('COMMIT;','SELECT 1/0;COMMIT;'));assert failed.returncode;self.db.sql(sql)
+   sql=reconciliation_sql if name=='04_conciliacion_REVIEW.sql' and reconciliation_sql is not None else (ROOT/'docs/sql-proposals/lp01-afectaciones'/name).read_text();failed=self.db.run(sql.replace('COMMIT;','SELECT 1/0;COMMIT;'));assert failed.returncode;self.db.sql(sql)
   self.db.sql('GRANT EXECUTE ON FUNCTION public.sgp_lp_afectaciones_aluminio_v1(text,text,text,date,int,jsonb,jsonb),public.sgp_lp_afectaciones_consultar_v2(text,text,text),public.sgp_lp_afectaciones_legado_v1(text,text,text),public.sgp_lp_afectaciones_conciliar_v1(text,text,text,uuid,text,bigint,jsonb,text),public.sgp_lp_afectaciones_desde_picking_v1(text,text,text,date,int,jsonb,uuid) TO anon')
  def read2(self,user='ll',stage='ENSAMBLE'):
   return json.loads(self.db.sql('SET ROLE anon;SELECT public.sgp_lp_afectaciones_consultar_v2('+','.join(map(lit,[user,self.key,stage]))+')'))

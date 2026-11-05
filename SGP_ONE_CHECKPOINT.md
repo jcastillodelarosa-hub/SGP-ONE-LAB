@@ -1,3 +1,16 @@
+## LAB v382 · revalidación concurrente corregida · 05/11/2026
+
+Prueba PostgreSQL aislada reproduce CADUCIDAD de permiso temporal mientras espera
+lock: escritura, recibo y lectura legado. Las tres rutas corregidas deniegan sin
+escritura/divulgación. Revocación UPDATE directa ya se serializaba por locks nativos;
+se corrige hipótesis anterior. Revisor independiente review_reconciliation comprobó
+diff/prueba; no detectó nuevos bloqueos en esa corrección. Regresión atómica PASS.
+Job CI aislado incorporado, pendiente ejecución remota del SHA final. Manifest
+regenerado; versión382 conservada. No SQL productivo ni publicación. Pendientes:
+contratos/ACL actuales, integridad real agregada, LEGACY/alcance entre etapas y
+semántica nativa de caducidad de sesión now(). Evidencia y siguiente paso de activación
+en docs/sql-proposals/lp01-afectaciones/ACTIVACION_REVISION.md.
+
 ## LAB v382 · contraste de metadatos y plan de activación · 05/11/2026
 
 Main remoto confirmado5003c61; Supabase17.11 y columnas/FK PDT/Picking compatibles

@@ -19,10 +19,12 @@ CREATE FUNCTION sgp_lp_afectaciones.legado(k text,et text) RETURNS jsonb LANGUAG
  ) SELECT coalesce(jsonb_agg(jsonb_build_object('id',parte::text||'|'||causa,'assignment',parte,'date',fecha,'shift',turno,'cause',causa,'quantity',cantidad) ORDER BY parte,causa),'[]') FROM items;
 $$;
 CREATE FUNCTION public.sgp_lp_afectaciones_legado_v1(p_token text,p_key text,p_stage text) RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
-DECLARE s jsonb;BEGIN
+DECLARE s jsonb;checked jsonb;BEGIN
  s:=sgp_lp_afectaciones.actor(p_token,p_key,p_stage,'VALIDAR');
  IF s->>'rol' IS DISTINCT FROM 'COORDINADOR' THEN RAISE EXCEPTION 'SOLO_COORDINADOR';END IF;
  PERFORM 1 FROM public.sgp_producciones WHERE key_produccion=p_key FOR SHARE;
+ checked:=sgp_lp_afectaciones.actor(p_token,p_key,p_stage,'VALIDAR');
+ IF checked->>'rol' IS DISTINCT FROM 'COORDINADOR' OR checked->>'usuario' IS DISTINCT FROM s->>'usuario' OR checked->>'line' IS DISTINCT FROM s->>'line' THEN RAISE EXCEPTION 'AUTORIZACION_CONCILIACION_CAMBIO';END IF;
  RETURN jsonb_build_object('contract','LP-AFFECTATIONS-LEGACY-1','key',p_key,'stage',p_stage,'fingerprint',sgp_lp_afectaciones.firma_legado(p_key,p_stage),'revision',coalesce((SELECT revision FROM sgp_lp_afectaciones.ambitos WHERE key=p_key AND etapa=p_stage),0),'sources',sgp_lp_afectaciones.legado(p_key,p_stage));
 END $$;
 CREATE FUNCTION public.sgp_lp_afectaciones_conciliar_v1(p_token text,p_key text,p_stage text,p_id uuid,p_fingerprint text,p_revision bigint,p_mappings jsonb,p_observation text)
@@ -34,12 +36,18 @@ DECLARE s jsonb;u text;ln text;cfg sgp_lp_afectaciones.config%rowtype;req jsonb;
  IF cfg.writes IS DISTINCT FROM true THEN RAISE EXCEPTION 'ESCRITURA_NO_HABILITADA';END IF;
  IF p_id IS NULL OR length(btrim(coalesce(p_observation,''))) NOT BETWEEN 1 AND 2000 OR jsonb_typeof(p_mappings) IS DISTINCT FROM 'array' THEN RAISE EXCEPTION 'EVIDENCIA_REQUERIDA';END IF;
  PERFORM pg_advisory_xact_lock(hashtextextended(p_id::text,383));
+ -- Recheck time-sensitive scope after waiting; never reuse authority across locks.
+ s:=sgp_lp_afectaciones.actor(p_token,p_key,p_stage,'VALIDAR');
+ IF s->>'rol' IS DISTINCT FROM 'COORDINADOR' OR s->>'usuario' IS DISTINCT FROM u OR s->>'line' IS DISTINCT FROM ln THEN RAISE EXCEPTION 'AUTORIZACION_CONCILIACION_CAMBIO';END IF;
  req:=jsonb_build_object('key',p_key,'stage',p_stage,'fingerprint',p_fingerprint,'revision',p_revision,'mappings',p_mappings,'observation',p_observation);
  SELECT * INTO prior FROM sgp_lp_afectaciones.conciliaciones_audit WHERE id=p_id;
  IF FOUND THEN IF prior.usuario<>u OR prior.solicitud<>req THEN RAISE EXCEPTION 'IDEMPOTENCIA_REUTILIZADA';END IF;RETURN prior.respuesta||jsonb_build_object('duplicate',true);END IF;
  PERFORM pg_advisory_xact_lock(hashtextextended(p_stage||'|'||ln,184));
  PERFORM 1 FROM public.sgp_producciones WHERE key_produccion=p_key FOR UPDATE;
  PERFORM 1 FROM sgp_lp_operacion.ordenes WHERE key=p_key AND etapa=p_stage FOR SHARE;
+ -- Recheck time-sensitive scope after waiting; never reuse authority across locks.
+ s:=sgp_lp_afectaciones.actor(p_token,p_key,p_stage,'VALIDAR');
+ IF s->>'rol' IS DISTINCT FROM 'COORDINADOR' OR s->>'usuario' IS DISTINCT FROM u OR s->>'line' IS DISTINCT FROM ln THEN RAISE EXCEPTION 'AUTORIZACION_CONCILIACION_CAMBIO';END IF;
  IF p_fingerprint IS DISTINCT FROM sgp_lp_afectaciones.firma_legado(p_key,p_stage) OR p_revision IS DISTINCT FROM coalesce((SELECT revision FROM sgp_lp_afectaciones.ambitos WHERE key=p_key AND etapa=p_stage),0) THEN RAISE EXCEPTION 'EVIDENCIA_DESACTUALIZADA';END IF;
  src:=sgp_lp_afectaciones.legado(p_key,p_stage);
  IF jsonb_array_length(src)<>jsonb_array_length(p_mappings) OR (SELECT count(DISTINCT v->>'sourceId') FROM jsonb_array_elements(p_mappings) v)<>jsonb_array_length(src) THEN RAISE EXCEPTION 'COBERTURA_LEGADO_INCOMPLETA';END IF;
