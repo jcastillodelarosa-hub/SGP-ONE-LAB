@@ -1,5 +1,18 @@
 # Línea de Producción — estado operativo actual
 
+## LAB v382 · historial por día/turno y límites de contrato · 05/11/2026
+
+IMPLEMENTADO LOCAL: panel Historial muestra los últimos totales LP por asignación,
+fecha y turno, sin sumarlos ni acreditar cierre/Export. 472 JS PASS, Chromium
+1440/390 PASS, release PASS; transporte sintético. Sigue LAB v382, misma entrega
+sin publicar. Apertura y afectaciones globales NO IMPLEMENTADAS: RPC omite
+cantidades de auditoría y clasifica abierta por saldo; afectaciones existentes
+son copias por parte/turno. Se recuperaron reglas funcionales sin reconstruir datos.
+[Fuentes, opciones y propuesta](SEGUIMIENTO_APERTURA_AFECTACIONES_V382.md).
+Sin push, PR, SQL ni publicación. Siguiente: coordinación de contrato antes de
+preparar cambios de apertura/clasificación y registro canónico por orden/etapa.
+
+
 ## Seguimiento · LAB v382 preparada en aislamiento · 05/11/2026
 
 Base main `5003c61` (LAB v381). Rama local `fix/seguimiento-v382-column-menus`.

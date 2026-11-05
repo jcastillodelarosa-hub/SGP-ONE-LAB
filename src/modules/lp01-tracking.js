@@ -1,3 +1,4 @@
+import {trackingTimeline} from '../domain/lp01-tracking-timeline.js';
 import {trackingIdentity as identity} from '../domain/lp01-tracking-global.js';
 import {trackingRows,trackingColumnValue,trackingValueKey,originalWeek,trackingState,affectationChips,AFFECTATION_LABELS} from '../domain/lp01-tracking.js';
 import {officialBalance,salePendingReason} from '../domain/lp01-operation.js';
@@ -79,6 +80,10 @@ export function renderTracking({host,data,context,state,search='',onOperate,onGl
   if(tab==='Historial'){
    const history=(data.history||[]).filter(h=>h.key===r.key&&(!global||(target? h.parte===target.parte&&h.fecha===target.fecha&&Number(h.turno)===Number(target.turno):true))&&(global||h.parte===r.parte));
    box.innerHTML='<p>Movimientos autorizados del contexto seleccionado; sin selección, historial de la producción.</p>'+history.map(h=>'<article><b>'+esc(h.operacion)+'</b><p>'+esc(h.creado_en)+' · '+esc(h.usuario)+'</p><p>'+esc(h.payload?.observation||'Sin observación')+'</p></article>').join('')+(history.length?'':'<p>Sin movimientos devueltos para esta asignación.</p>');
+  }
+  if(tab==='Historial'&&global){
+   const timeline=trackingTimeline(base).filter(x=>!target||(x.assignment===target.parte&&x.date===target.fecha&&x.shift===Number(target.turno)));
+   box.insertAdjacentHTML('afterbegin','<section class="lp-tracking-timeline"><h5>'+ (packing?'Empacado':'Ensamblado')+' registrado por día y turno</h5><p>Último total LP de cada asignación. No es saldo Export ni acredita cierre conciliado. Cero no demuestra actividad.</p>'+(timeline.length?'<div class="lp-timeline-scroll"><table><thead><tr><th>Fecha operativa</th><th>Turno</th><th>Asignación</th><th>Unidades registradas</th></tr></thead><tbody>'+timeline.map(x=>'<tr><td>'+esc(x.date)+'</td><td>'+x.shift+'</td><td>'+esc(x.assignment)+'</td><td>'+esc(x.quantity??'Sin dato')+'</td></tr>').join('')+'</tbody></table></div>':'<p>Sin registros LP devueltos para este contexto. No permite inferir cuándo comenzó la orden.</p>')+'</section>');
   }
   drawer.querySelector('[data-tracking-close]').onclick=close;
   drawer.querySelectorAll('[data-tracking-tab]').forEach(b=>b.onclick=()=>open(part,b.dataset.trackingTab,false));

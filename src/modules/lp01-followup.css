@@ -111,3 +111,7 @@
  .lp-column-menu{margin:auto 12px 12px;width:calc(100vw - 24px);max-height:85dvh}
  .lp-tracking-table tr{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
+.lp-timeline-scroll{overflow:auto;max-width:100%;overscroll-behavior:contain}
+.lp-tracking-timeline table{width:100%;border-collapse:collapse;font-size:12px}
+.lp-tracking-timeline th,.lp-tracking-timeline td{padding:8px;text-align:left;border-bottom:1px solid #dce6f1;overflow-wrap:anywhere}
+.lp-tracking-timeline th{color:#25496f;background:#eef5fd}

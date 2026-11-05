@@ -40,6 +40,9 @@ with sync_playwright() as p:
   page.clock.fast_forward(20000);page.wait_for_function('window.inflight===0')
   assert page.locator('[data-tracking-tab="Historial"]').get_attribute('aria-pressed')=='true'
   assert page.locator('#lp-tracking-drawer').is_visible()
+  assert page.locator('.lp-tracking-timeline tbody tr').count()==2
+  assert page.locator('.lp-tracking-timeline tbody tr').first.inner_text().endswith('2')
+  page.locator('#lp-tracking-drawer').screenshot(path=str(OUT/f'timeline-{width}.png'))
   page.locator('[data-tracking-close]').click();page.locator('[data-columns-reset]').click();assert page.locator('tbody tr').count()==30
   column('assembly','sort');page.locator('[data-column-order="desc"]').click();assert page.locator('tbody tr').last.locator('[data-label="Saldo Ensamble"]').inner_text()=='Por confirmar'
   assert 'Saldo Empaque' not in page.locator('#tracking').inner_text()
