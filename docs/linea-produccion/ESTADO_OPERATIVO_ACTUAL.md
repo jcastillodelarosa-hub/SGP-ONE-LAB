@@ -1,6 +1,6 @@
 ## Seguimiento · pendientes visibles y registro · 05/11/2026
 
-Candidata v391 sobre main a01ce776/v390: pendientes de aluminio no representados visibles sin inferir ventanas; acceso de registro por turno real abierto y capacidad servidor. Sin SQL, datos, flags ni cambios SALE. Ver [lp01-pending-ui/README.md](../../tests/lp01-pending-ui/README.md) para pruebas y brecha fuera de turno. CI e integración pendientes.
+Candidata v391 sobre main a01ce776/v390: pendientes de aluminio no representados visibles sin inferir ventanas; acceso de registro por turno real abierto y capacidad servidor. Sin SQL, datos, flags ni cambios SALE. Ver [lp01-pending-ui/README.md](../../tests/lp01-pending-ui/README.md) para pruebas y brecha fuera de turno. Política PR202: baseline/rollback v390 fbd20418a9bf4438 acreditada por run 42079722091; pins SALE conservados y transición HOLD. CI e integración pendientes.
 
 ## SALE por orden · backend activo, frontend local en espera
 
