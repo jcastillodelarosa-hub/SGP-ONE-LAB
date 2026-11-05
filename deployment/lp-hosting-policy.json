@@ -1,7 +1,7 @@
 {
   "contract": "LP-HOSTING-POLICY/1",
   "mode": "runtime",
-  "integration_pr": 203,
+  "integration_pr": 205,
   "hosting_certified": true,
   "project": "sgp-one-lab",
   "site": "sgp-one-lab",

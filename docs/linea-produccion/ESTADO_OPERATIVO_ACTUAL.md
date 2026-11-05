@@ -13,10 +13,10 @@ limpieza visual no resuelve ese timeout. Una optimización y recuperación de es
 función compartida están preparadas y probadas solo en rama aislada
 `fix/seguimiento-sesion-acotada-proposal`; requieren revisión/activación aparte.
 Pruebas visuales PC/móvil, afectaciones y refresco PASS; Node 523/523 y
-`verify:release` PASS con vendor generado localmente. Falta PR/CI del SHA final,
+`verify:release` PASS con vendor generado localmente. PR205 borrador; falta CI del SHA final,
 validación de la política y aceptación con sesión real. La referencia Library
 no se pudo materializar por restricción de red del ejecutor; coordinación sí
-inspeccionó los píxeles. Siguiente: PR borrador visual, luego decisión sobre SQL.
+inspeccionó los píxeles. Siguiente: validar CI de PR205 y decidir activación SQL separada.
 
 ## PR203 · revisión base de borrador preservada · 05/11/2026
 
