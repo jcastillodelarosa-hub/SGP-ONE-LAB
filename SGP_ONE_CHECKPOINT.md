@@ -15,9 +15,9 @@ comparación final de capturas con bocetos a cargo del padre. v390 reservada sol
 provisionalmente (SALE388, B10 389); rebasar y confirmar antes de integrar.
 IMPLEMENTADO EN RAMA / VERIFICADO AISLADAMENTE; sin SQL, privilegios, merge ni deploy.
 No cambios de SALE, GOOGLE, LAC ni workflows. Rama subida (funcional a382dbb).
-Crear PR borrador fue denegado por auto-review por falta de autorización explícita;
-sin reintento tras revisar historial. Siguiente: revisión visual/técnica del padre
-y autorización/evidencia nueva para abrir PR; sin merge/publicación.
+PR borrador #200 abierto tras autorización explícita nueva de Johan y un único
+reintento del rechazo inicial. Siguiente: comunicar SHA/checks al padre y coordinar
+revisión e integración con B10/SALE; no se ejecutó merge/publicación.
 
 ## PR195 · compatibilidad de aceptación existente · 05/11/2026
 

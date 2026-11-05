@@ -95,7 +95,7 @@ Los estilos y la lógica de Seguimiento/SALE no se modificaron.
 Siguiente paso: el padre compara las capturas con A/C y revisa la rama, coordina el
 rebase/versión y cualquier integración/publicación mediante sus controles existentes.
 
-## Bloqueo de entrega externa
+## Apertura del PR: bloqueo resuelto
 
 Implementación subida a origin en commit `a382dbbea4e8d8822f5d13c05fdf66edbd850736`.
 La creación de PR borrador en `jcastillodelarosa-hub/SGP-ONE-LAB`, base `main`,
@@ -104,6 +104,8 @@ head `feat/reception-cards-column-filters`, fue **DENEGADA** por auto-review:
 > Creating a draft PR is an external repository commitment, and the user authorized the feature work but did not explicitly authorize opening this PR.
 
 La lectura posterior del historial visible no aportó autorización explícita nueva.
-No se reintentó la operación ni se usó otra vía; el PR no fue creado. Se requiere
-que el padre obtenga o aporte evidencia nueva de autorización para abrir ese PR.
-La rama y las pruebas ya están disponibles; merge/publicación siguen excluidos.
+No se usó otra vía. Después el padre aportó autorización explícita nueva de Johan
+para abrir/revisar/fusionar/publicar tras controles. El único reintento autorizado
+creó el PR borrador #200: https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/pull/200
+No persiste el bloqueo de autorización. Antes de integrar, comunicar SHA/checks al
+padre para coordinar B10/SALE y versión. No se ejecutó merge ni publicación.
