@@ -1,3 +1,22 @@
+## Recepción A/C · v390 provisional en rama · 05/11/2026
+
+Base main `2ed9f8e9d485bde1c66b0a14632dc0c908b0d0fb` (B10 v387/PR198).
+Rama `feat/reception-cards-column-filters`: tarjetas por estado con reservas y
+ventanas según listado, conserva cinco indicadores; filtros/orden por encabezado
+en pendientes y recibidas, sin acoplamiento de datos LP. Regla principal/fallback
+preservada; cantidades duplicadas no se suman, conflictos quedan por confirmar.
+Estado aluminio desconocido/mixto neutral. Filtros afectan resumen visible;
+refresco conserva, cambio de semana limpia, recLoadSequence preservado.
+506 pruebas Node y verify:release PASS; Chromium PC1440/móvil390 con transporte
+sintético, sin llamadas productivas. Capturas y alcance en
+`docs/RECEPTION_CARDS_FILTERS_HANDOFF.md` y `tests/reception-ui/evidence/`.
+Referencia implementada desde descripción precisa del padre tras fallo de Library;
+comparación final de capturas con bocetos a cargo del padre. v390 reservada solo
+provisionalmente (SALE388, B10 389); rebasar y confirmar antes de integrar.
+IMPLEMENTADO EN RAMA / VERIFICADO AISLADAMENTE; sin SQL, privilegios, merge ni deploy.
+No cambios de SALE, GOOGLE, LAC ni workflows. Siguiente: revisión visual/técnica del
+padre y coordinación de integración/publicación con los controles existentes.
+
 ## PR195 · compatibilidad de aceptación existente · 05/11/2026
 
 Adaptadas pruebas de Power BI, cierres integrados y fuentes al acceso directo B12,
