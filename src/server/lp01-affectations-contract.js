@@ -39,6 +39,7 @@ export function affectationCommand(state,command,authority){
  if(!/^\d{4}-\d{2}-\d{2}$/.test(authority.date)||new Date(authority.date+'T00:00:00Z').toISOString().slice(0,10)!==authority.date||![1,2].includes(authority.shift)||!Number.isFinite(Date.parse(authority.now)))fail('CONTEXTO_NO_ACREDITADO');
  const next=clone(state),report=next.reports.find(r=>r.id===command.reportId);
  if(command.action==='CREATE'){
+  if(command.cause==='NC_AL')fail('NC_AL_REQUIERE_PDT');
   if(!causes.includes(command.cause)||command.quantity===0||command.quantity>authority.balance)fail('REPORTE_INVALIDO');
   next.reports.push({id:command.id,cause:command.cause,quantity:command.quantity,solved:0,confirmed:0,originStage:state.stage,originDate:authority.date,originShift:authority.shift,createdAt:authority.now,createdBy:authority.user});
  }else if(command.action==='VALIDATE'){

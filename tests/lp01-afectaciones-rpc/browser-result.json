@@ -1,0 +1,14 @@
+[
+  {
+    "width": 1440,
+    "status": "PASS",
+    "flow": "real SQL read/create/solve/confirm/validate/history/revoke",
+    "PDT": "shared Picking editor, synthetic source-reader response, origin ENSAMBLE; save blocked; no PDT write"
+  },
+  {
+    "width": 390,
+    "status": "PASS",
+    "flow": "real SQL read/create/solve/confirm/validate/history/revoke",
+    "PDT": "shared Picking editor, synthetic source-reader response, origin ENSAMBLE; save blocked; no PDT write"
+  }
+]

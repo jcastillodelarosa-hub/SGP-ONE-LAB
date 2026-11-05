@@ -4,7 +4,7 @@ import {progressEvidence} from '../src/domain/lp01-progress-evidence.js';
 const a={active:true,user:'leader',role:'LIDER',key:'P|PANELES_2',line:'PANELES_2',stages:['ENSAMBLE'],capabilities:['READ','REPORT','SOLVE','CONFIRM'],balance:20,date:'2026-11-05',shift:1,now:'2026-11-05T12:00:00Z'};
 const empty=()=>emptyAffectations(a.key,a.line,'ENSAMBLE');
 const cmd=(s,id,action,quantity,extra={})=>({id,action,quantity,revision:s.revision,observation:'motivo',...extra});
-const create=s=>run(s,cmd(s,'r1','CREATE',5,{cause:'NC_AL'}),a);
+const create=s=>run(s,cmd(s,'r1','CREATE',5,{cause:'NOVEDAD'}),a);
 test('individual identity survives turn change; solution alone never credits physical availability',()=>{
  let s=create(empty());const original=structuredClone(s);
  s=run(s,cmd(s,'s1','SOLVE',3,{reportId:'r1'}),{...a,date:'2026-11-06',shift:2});
@@ -23,7 +23,7 @@ test('overlap requires coordinator union and never sums reports automatically',(
  s=run(s,cmd(s,'v','VALIDATE',6),co);assert.equal(read(s,a).available,14);
 });
 test('idempotency, CAS, session revocation, scope and role are checked before retries',()=>{
- const s=empty(),c=cmd(s,'r1','CREATE',5,{cause:'NC_AL'}),next=run(s,c,a);
+ const s=empty(),c=cmd(s,'r1','CREATE',5,{cause:'NOVEDAD'}),next=run(s,c,a);
  assert.deepEqual(run(next,c,a),next);assert.throws(()=>run(next,{...c,quantity:4},a),/IDEMPOTENCIA/);
  assert.throws(()=>run(next,c,{...a,active:false}),/NO_AUTORIZADO/);
  assert.throws(()=>run(next,c,{...a,stages:['EMPAQUE']}),/NO_AUTORIZADO/);

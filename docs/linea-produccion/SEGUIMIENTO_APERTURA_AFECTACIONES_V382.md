@@ -128,3 +128,14 @@ Contrato ejecutable, panel de una etapa y propuesta de almacenamiento preparados
 [alcance exacto y pendientes](../sql-proposals/lp01-afectaciones/README.md).
 477 JS PASS y panel PC/móvil PASS con datos sintéticos. No hay RPC instalada ni
 integración productiva. Se mantiene LAB v382 como misma entrega aún sin publicar.
+
+## RPC preparadas y probadas en PostgreSQL aislado · 05/11
+
+La barrera de entorno se resolvió con Docker PostgreSQL17.11 sin red. RPC nuevas,
+transporte y panel se prueban con sesión/matriz reales capturadas y datos sintéticos.
+Lectura compartida filtrada por permisos; movimientos proyectados de auditoría;
+apertura de ambas etapas exige evidencia privada desde origen. NC_AL exige vínculo
+PDT único: selector de fabricación/longitud compartido con Picking, guardado bloqueado
+hasta adaptador atómico; no ampliar roles PDT (supervisores LP aún no figuran en V4).
+Sin grants API ni gates habilitados por instalación. Conciliación de legacy y permiso
+físico por certificar. Estado técnico actualizado en el README del paquete SQL.

@@ -1,3 +1,22 @@
+## LAB v382 · RPC y panel contra PostgreSQL aislado · 05/11/2026
+
+Implementados almacenamiento y RPC transaccionales nuevas, sesión/roles/etapa reales,
+CAS e idempotencia concurrente, auditoría inmutable, reversión atómica y lectura de
+historial compartido solo por etapas autorizadas. Avances proyectados de EJECUTAR
+con cantidades/antes; apertura de ambas etapas solo con cobertura acreditada.
+PostgreSQL17.11 Docker --network none y datos sintéticos; no Supabase productivo.
+480 JS PASS, matriz SQL PASS, panel+RPC Chromium1440/390 PASS y release v382 PASS.
+Panel conectado al transporte validado en demo PC/móvil; selector PDT reutiliza tabla
+Picking manteniendo origen y NC de Ensamble/Empaque. No convierte piezas a ventanas.
+NC_AL exige vínculo PDT único; Guardar aluminio sigue bloqueado: falta adaptador
+atómico nativo, sin dos escrituras frontend separadas. Confirmación física y escritura
+siguen deshabilitadas al instalar; sin grants API. Disponible requiere conciliación
+acreditada del legado actual, que no se migra ni se suma. Pendiente procedimiento de
+conciliación/cobertura y certificación de permisos físicos antes de integración.
+Detalle y evidencia: docs/sql-proposals/lp01-afectaciones/README.md y
+ tests/lp01-afectaciones-rpc/{result.json,browser-result.json}.
+Sigue v382, misma entrega no publicada; sin push, PR, cambios productivos ni despliegue.
+
 ## LAB v382 · contrato y panel aislado de afectaciones · 05/11/2026
 
 Preparados modelo backend ejecutable (sin persistencia), panel por etapa y DRAFT

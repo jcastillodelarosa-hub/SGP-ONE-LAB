@@ -1,0 +1,8 @@
+<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>LAB v382 · RPC aislada</title><link rel="stylesheet" href="../../styles.css"><style>body{padding:16px}main{max-width:1100px;margin:auto;display:grid;grid-template-columns:1fr minmax(300px,540px);gap:24px}aside{min-width:0;border:1px solid #cbd5e1;padding:16px;border-radius:12px;background:white}aside label{display:grid;gap:6px;margin:14px 0}aside input,aside select,aside textarea,aside button{min-height:44px;max-width:100%;min-width:0}aside article{border-bottom:1px solid #cbd5e1;padding:10px 0}aside p,aside small{overflow-wrap:anywhere}.table-wrap{overflow:auto} [hidden]{display:none!important}@media(max-width:700px){main{display:block}aside{padding:12px}}</style><main><section><h1>LAB v382 · Orden QA</h1><p>PostgreSQL aislado, sin datos productivos.</p></section><aside id="panel"></aside></main><script type="module">
+import {mountAffectationsPanel} from '../../src/modules/lp01-affectations-panel.js';
+import {affectationsTransport} from '../../src/services/lp01-affectations.js';
+window.qaToken='ll';
+const client={rpc:async(name,args)=>await(await fetch('/rpc/'+name,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(args)})).json()};
+const transport=affectationsTransport({client,getToken:()=>window.qaToken,context:{key:'QA|PANELES_2',line:'PANELES_2',stage:'ENSAMBLE',date:'2026-11-01',shift:1,production:'TORRE NORTE',reserve:'R1'}});
+window.mount=()=>mountAffectationsPanel(panel,transport);await mount();
+</script></html>
