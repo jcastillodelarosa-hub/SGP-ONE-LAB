@@ -4,8 +4,9 @@ Estado: IMPLEMENTADO EN RAMA / VERIFICADO EN AISLAMIENTO. No publicado.
 
 - Base: `2ed9f8e9d485bde1c66b0a14632dc0c908b0d0fb`, merge PR198/B10 v387.
 - Rama: `feat/reception-cards-column-filters`; worktree `/workspace/sgp-reception`.
-- Versión **provisional v390**, coordinada por el padre: SALE v388, B10 v389.
-  Rebasar y confirmar siguiente número libre antes de integrar.
+- Versión candidata **v388** para la siguiente publicación desde main v387, según
+  coordinación posterior del padre. La reserva inicial v390 quedó sustituida.
+  Confirmar nuevamente main y versión libre antes de integrar con B10/SALE.
 - Sin cambios en SALE, GOOGLE, LAC, permisos, SQL, workflows o producción.
 
 ## Referencia y decisiones visuales
@@ -109,3 +110,33 @@ para abrir/revisar/fusionar/publicar tras controles. El único reintento autoriz
 creó el PR borrador #200: https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/pull/200
 No persiste el bloqueo de autorización. Antes de integrar, comunicar SHA/checks al
 padre para coordinar B10/SALE y versión. No se ejecutó merge ni publicación.
+
+## Preparación controlada de integración/publicación
+
+Revisión visual A/C PC/móvil favorable comunicada por coordinación. Main observado
+sigue en 2ed9f8e/B10 v387. Se propone v388 por ser la siguiente versión libre,
+pendiente confirmación final de orden de integración por el padre.
+
+Baseline/rollback acreditada: `sites/sgp-one-lab/versions/2eb92f1e5438ff75`.
+Evidencia: run42041671863, job127294013772, publicación de main2ed9f8e SUCCESS;
+observada 2026-11-05T14:06:54.262506+00:00, 106 archivos (104 aplicación idénticos
+al artefacto, 2 plataforma conservados), versión anterior retenida intacta.
+Inventory SHA256 `b72e0322a2476e60c65b922db0409e5d87e72809d6a9041f52bdad3a70d53519`;
+config SHA256 `b1c8097ce32ce29d3d39d04e54f86699c1cd013dcbfc8a4f9b89f033cadc34fd`.
+Son observaciones acreditadas de esa publicación, no una consulta Firebase nueva.
+
+Política cambia solo integration_pr=200 y baseline/rollback. Los 16 hashes
+protegidos coinciden y permanecen intactos. Transición debe emitir HOLD;
+no se debilita gate, backend probe, inventario, verificador de ZIP o controles.
+Tras coordinación/merge: revisar prepare del SHA integrado, sus pins source/run/ZIP
+externamente, confirmar live esperado y recuperar desde v387 si fuera necesario.
+No reutilizar ZIP local/PR como artefacto del SHA merge. No publicar desde este hilo
+antes de que el padre coordine la integración. Reutilizar las pruebas funcionales
+válidas; solo nueva validación de release/política/artefacto por estos cambios.
+
+Validación dirigida de esta preparación: verify:release v388 PASS; policy.py y
+artifact.py PASS; diff --check PASS. Comparación de los 16 hashes protegidos con main
+idéntica. Gate real de transición: HOLD / POLICY_TRANSITION_REQUIRES_EXPLICIT_REVIEW.
+No se repitió npm test ni UI local: las únicas diferencias posteriores son etiqueta,
+cache-bust, metadatos de política y documentación; se reutiliza evidencia funcional.
+CI debe acreditarse nuevamente sobre el SHA final del PR por sus workflows existentes.
