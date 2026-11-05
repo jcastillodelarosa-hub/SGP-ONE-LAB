@@ -93,7 +93,7 @@ export function mountOperation({tracking,operation,bridge,legacyLoad}){
    const byKey=new Map(enriched.orders.map(r=>[r.key,r.individualEvidence]));
    data={...data,orders:data.orders.map(r=>({...r,individualEvidence:byKey.get(r.key)||{status:'UNAVAILABLE',active:false}}))};
    render(); // Never replace an operation form or its draft after background reads.
-  }).catch(error=>{if(enrichment===job&&!controller.signal.aborted&&token===bridge.getToken()&&scope===JSON.stringify(context)){clear();message.textContent='No se pudo verificar el acceso: '+error.message;}}).finally(()=>{if(enrichment===job)enrichment=null;});
+  }).catch(error=>{if(enrichment===job&&!controller.signal.aborted&&token===bridge.getToken()&&scope===JSON.stringify(context)){++seq;loading=false;clear();message.textContent='No se pudo verificar el acceso: '+error.message;}}).finally(()=>{if(enrichment===job)enrichment=null;});
  }
  async function load({quiet=false}={}){
   if(viewPanel==='seguimiento'){stopEnrichment();return loadGlobal({quiet});}
