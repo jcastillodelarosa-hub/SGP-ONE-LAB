@@ -1,3 +1,20 @@
+## LAB v383 · controles de publicación PR195 · 05/11/2026
+
+Política preparada sobre121e1805ad0445a4c91f03d5ba812f0004dd09ad (CI3/3 PASS).
+integration_pr195; única huella protegida modificada: src/modules/lp01-operation.js
+SHA256 5f0c2847bf6aec5f84a59376dea442e6f73cf4880d4b6ab18396a6419d7e6ae4.
+Baseline y rollback: sites/sgp-one-lab/versions/07abe57ef1374fde (LAB v382,
+main646729005295c79d73bed7d6730aa10d042768b8). Evidencia aportada por coordinador:
+run41962991598 SUCCESS,96/96 archivos públicos exactos y2 rutas de plataforma
+intactas; metadata actual se contrasta en el hilo coordinador, no nueva inspección aquí.
+Policy, backend-readiness offline4, postcheck offline7, artefacto runtime y release383
+PASS. Política real: push=HOLD/POLICY_TRANSITION_REQUIRES_EXPLICIT_REVIEW;
+prepare solo construye; drift sigue rechazado. Verificadores, backend probe, inventario,
+bytes, recuperación y workflows intactos. Propuesta deshabilitada, sin EXECUTE nuevo.
+No backend, merge, ready-for-review, dispatch ni publicación desde este hilo.
+Siguiente: CI propia del nuevo SHA de política y coordinación del padre para revisión,
+artefacto exacto, controles e integración/publicación; no reutilizar CI121e180 como nueva.
+
 ## PR195 · compatibilidad de aceptación existente · 05/11/2026
 
 Adaptadas pruebas de Power BI, cierres integrados y fuentes al acceso directo B12,
