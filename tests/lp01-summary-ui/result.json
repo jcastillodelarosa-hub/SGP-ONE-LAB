@@ -9,7 +9,10 @@
     "scopeRevocationClears": true,
     "staleGlobalAfterRevocationRejected": true,
     "maxSummaryConcurrency": 3,
-    "drawerSummaryCurrent": true
+    "drawerSummaryCurrent": true,
+    "compactChips": true,
+    "weekColorAndText": true,
+    "noSaleDraftEditor": true
   },
   {
     "width": 390,
@@ -21,6 +24,9 @@
     "scopeRevocationClears": true,
     "staleGlobalAfterRevocationRejected": true,
     "maxSummaryConcurrency": 3,
-    "drawerSummaryCurrent": true
+    "drawerSummaryCurrent": true,
+    "compactChips": true,
+    "weekColorAndText": true,
+    "noSaleDraftEditor": true
   }
 ]
