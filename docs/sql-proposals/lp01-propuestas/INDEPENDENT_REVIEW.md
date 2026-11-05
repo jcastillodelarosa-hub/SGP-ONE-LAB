@@ -10,3 +10,5 @@ Revisor: agente review_b12_b13, dos pasadas de solo lectura, 05/11/2026. Sin apr
 Segunda pasada: cuatro hallazgos cerrados,8 pruebas focalizadas PASS; reproducción independiente confirmó cero RPC con enabled omitido y conservación de éxito tras relectura fallida. Singleflight/AbortController/background revisados sin nuevo bloqueante concreto. Observación menor resuelta: detalle dice Origen del arrastre para distinguirlo de apertura.
 
 SQL REVIEW mantiene flag false, RLS y revocación de EXECUTE; no se instala en este PR.
+
+Comprobación adicional del autor: si falla la autorización en el enriquecimiento, se invalida también la secuencia de una lectura nativa pendiente. La prueba PC retiene una respuesta leída antes de revocar permisos, libera el rechazo real de PostgreSQL y luego la respuesta antigua: no reaparecen tarjetas ni formulario. Cero llamadas a la RPC de propuesta en la aplicación; fallo de relectura tras guardado probado por inyección de cliente separada y explícita.
