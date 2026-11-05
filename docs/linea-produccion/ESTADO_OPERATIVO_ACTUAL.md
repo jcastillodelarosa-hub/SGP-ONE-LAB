@@ -9,7 +9,9 @@ No cambia RPC, permisos, datos, saldo Export ni SALE operativo de turnos. PR203
 trabaja detalle de afectaciones por separado: compartirán lp01-tracking.js, solo
 etiquetas y conexión de la celda se cambian aquí. Política PR204:
 baseline/rollback cf7a564682e0d50e; HOLD, pins y verificadores intactos.
-Node 513/513, release PASS y Chromium sintético 1440/390 PASS. Las tres
+Node 513/513, release PASS y Chromium sintético 1440/390 PASS. Un smoke con
+`renderTracking` real confirmó que el editor permanece modal, enfocado y
+editable tras refresco silencioso; la altura de fila no cambia. Las tres
 referencias Library están resueltas y su OCR leído; transferencia de píxeles
 bloqueada por política de red
 del ejecutor, así que no se acredita comparación visual directa con el boceto.

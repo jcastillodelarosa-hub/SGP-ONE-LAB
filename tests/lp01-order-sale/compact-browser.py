@@ -31,6 +31,7 @@ try:
    cell.locator('[data-sale-edit]').click()
    cell.locator('[name=quantity]').fill('8');cell.locator('[name=observation]').fill('Motivo de prueba')
    page.evaluate('qaRender()')
+   assert cell.locator('.lp-sale-dialog:modal').count()==1
    assert cell.locator('[name=observation]').input_value()=='Motivo de prueba'
    cell.locator('[data-sale-cancel]').click()
    assert cell.locator('.lp-sale-dialog').is_hidden()

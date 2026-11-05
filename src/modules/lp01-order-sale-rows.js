@@ -7,6 +7,9 @@ export function retainOrderSaleRows(host,provider,authorizedKeys){
  const allowed=new Set(authorizedKeys);
  for(const [key,c] of entry.cells){if(!allowed.has(key)||!provider){entry.observer?.unobserve(c.node);c.dispose?.();c.node.remove();entry.cells.delete(key);}}
  const focused=document.activeElement,savedFocus=[...entry.cells.values()].some(c=>c.node.contains(focused))?focused:null;
+ // Moving a modal dialog through a detached fragment removes it from the top layer.
+ // Reopen the same node after reattachment so a quiet render preserves the editor and focus.
+ const modalDialogs=[...entry.cells.values()].map(c=>c.node.querySelector('dialog:modal')).filter(Boolean);
  const fragment=document.createDocumentFragment();entry.cells.forEach(c=>fragment.append(c.node));
  const pump=()=>{
   while(entry.active<MAX_READS&&entry.queue.length){
@@ -28,6 +31,7 @@ export function retainOrderSaleRows(host,provider,authorizedKeys){
    slot.append(c.node);if(entry.observer)entry.observer.observe(c.node);else queue(c);
   });
   entry.cells.forEach(c=>{if(!host.contains(c.node))parked.append(c.node);});
+  modalDialogs.forEach(dialog=>{if(dialog.isConnected&&!parked.contains(dialog)){dialog.close();dialog.showModal();}});
   if(savedFocus?.isConnected&&!parked.contains(savedFocus))savedFocus.focus({preventScroll:true});
  };
 }

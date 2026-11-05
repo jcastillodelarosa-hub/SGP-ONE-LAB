@@ -8,7 +8,11 @@ Verificación local: `python3 tests/lp01-order-sale/compact-browser.py` en
 Chromium 1440 y 390 px comprueba lectura automática acotada, valor / Por definir,
 formulario cerrado en reposo, Guardar/Cancelar, reintento del mismo comando tras
 respuesta incierta, conservación durante render silencioso y limpieza por
-revocación. `npm test` y `npm run verify:release` comprueban el paquete.
+revocación y permanencia del diálogo modal tras repintar. Un smoke dirigido de
+`renderTracking` real con dos órdenes sintéticas comprobó encabezado Disponible,
+40 / Por definir, edición visible y enfocada tras refresco silencioso, Cancelar
+y altura de fila sin cambio (PC 82→82 px, móvil 250→250 px).
+`npm test` y `npm run verify:release` comprueban el paquete.
 Son datos sintéticos: no acreditan aceptación de una sesión real.
 
 Las imágenes Library referenciadas fueron resueltas y su OCR consultado, pero
