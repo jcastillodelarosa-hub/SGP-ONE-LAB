@@ -66,10 +66,24 @@ tracking PC/móvil, unassigned-app y all-origins PostgreSQL aislado: PASS.
 Política integration_pr197 y pin real lp01-operation.js actualizados; restantes
 pins/verificadores/HOLD intactos. Sin nueva migración ni despliegue.
 
-BLOQUEO de publicación: baseline/rollback aún referencian v383. No sustituyen la
-versión v384 actual. Hace falta identidad exacta acreditada de Hosting v384 antes
-de integrar/publicar. La descarga del artefacto hosting-identity-42022900174 por
-gh run download devolvió HTTP403; no reintentada ni sustituida con un ID supuesto.
-Run reporta SUCCESS sobre f644231, pero eso no acredita por sí solo el ID Hosting.
-Siguiente: coordinador aporta identidad, actualizar baseline/rollback, CI del SHA
-final y revisión de artefacto. No reutilizar CI de un SHA previo.
+Baseline y rollback actualizados a v384:
+`sites/sgp-one-lab/versions/6d4540070fcda22e`, FINALIZED.
+Evidencia comunicada por coordinador: inspección oficial GET-only SUCCESS
+https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/actions/runs/42024136075,
+job127234200324, observado2026-11-05T12:05:39.272505+00:00.
+Proyecto/site sgp-one-lab; canal sites/sgp-one-lab/channels/live;
+release sites/sgp-one-lab/channels/live/releases/1793879818928000.
+103 archivos; inventory SHA256
+350ed450439cbf8d8a25f53766d42c9694261e34f0736328246fdebd0e237077;
+config SHA256 b1c8097ce32ce29d3d39d04e54f86699c1cd013dcbfc8a4f9b89f033cadc34fd.
+Coincide con publicación v384/main f644231da30db15357fc4170cfbdb3ce2f47f1dc,
+101 archivos de aplicación idénticos y2 de plataforma intactos, verificados por
+coordinador. No inspección productiva adicional desde este hilo.
+La descarga anterior HTTP403 no fue reintentada.
+
+Este incremento solo cambia dos referencias de política y documentación; HOLD,
+validadores, pins, roles, backend y datos permanecen intactos. Pruebas locales de
+política, backend-readiness offline, postcheck, artefacto y release385 PASS.
+Siguiente: CI del nuevo SHA y revisión de artefacto coordinada antes de integrar o
+publicar; PR continúa borrador, sin aprobación formal ni despliegue desde este hilo.
+No reutilizar CI de un SHA previo.
