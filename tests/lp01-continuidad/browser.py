@@ -47,7 +47,7 @@ try:
     page.locator('[data-next-turn]').click();page.wait_for_function("document.querySelector('[data-op-shift]').value==='2' && document.querySelector('[data-op-status]').textContent.includes('NO_ABIERTO')")
     page.locator('[data-turn-capacity]').fill('20');page.locator('[data-open]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Guardado confirmado')")
     row=next(r for r in db.snapshot('EMPAQUE',shift=2)['orders'] if r['parte']==part);assert row['sale']==12 and row['ejecutado']==0 and row['contexto_origen']['ejecutado']==8
-    page.locator('[data-order-part="'+part+'"] > summary').click();page.locator('[data-live-operate="'+part+'"]').click();assert 'Antigüedad original 2026-11-01 / T1' in page.locator('[data-operation-detail]').inner_text()
+    page.locator('[data-order-part="'+part+'"] > summary').click();page.locator('[data-live-operate="'+part+'"]').click();assert 'Origen del arrastre 2026-11-01 / T1' in page.locator('[data-operation-detail]').inner_text()
     page.locator('[data-operation-detail]').screenshot(path=str(OUT/f'packing-continuity-{width}.png'))
     # Commit succeeds, writes become contained, response is lost: read receipt confirms it once.
     lost={'done':False,'id':None}

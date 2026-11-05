@@ -1,3 +1,75 @@
+## LAB v383 · controles de publicación PR195 · 05/11/2026
+
+Política preparada sobre121e1805ad0445a4c91f03d5ba812f0004dd09ad (CI3/3 PASS).
+integration_pr195; única huella protegida modificada: src/modules/lp01-operation.js
+SHA256 5f0c2847bf6aec5f84a59376dea442e6f73cf4880d4b6ab18396a6419d7e6ae4.
+Baseline y rollback: sites/sgp-one-lab/versions/07abe57ef1374fde (LAB v382,
+main646729005295c79d73bed7d6730aa10d042768b8). Evidencia aportada por coordinador:
+run41962991598 SUCCESS,96/96 archivos públicos exactos y2 rutas de plataforma
+intactas; metadata actual se contrasta en el hilo coordinador, no nueva inspección aquí.
+Policy, backend-readiness offline4, postcheck offline7, artefacto runtime y release383
+PASS. Política real: push=HOLD/POLICY_TRANSITION_REQUIRES_EXPLICIT_REVIEW;
+prepare solo construye; drift sigue rechazado. Verificadores, backend probe, inventario,
+bytes, recuperación y workflows intactos. Propuesta deshabilitada, sin EXECUTE nuevo.
+No backend, merge, ready-for-review, dispatch ni publicación desde este hilo.
+Siguiente: CI propia del nuevo SHA de política y coordinación del padre para revisión,
+artefacto exacto, controles e integración/publicación; no reutilizar CI121e180 como nueva.
+
+## PR195 · compatibilidad de aceptación existente · 05/11/2026
+
+Adaptadas pruebas de Power BI, cierres integrados y fuentes al acceso directo B12,
+seleccionando explícitamente la misma asignación por identidad (sin cambiar aserciones
+cuantitativas/de permisos/cierre). Las tres baterías PC/móvil PostgreSQL aislado PASS.
+Añadido job CI aislado B12/B13 con contratos, aplicación, propuesta deshabilitada,
+rendimiento50/200/500 y artefactos sintéticos; contents:read, sin credenciales ni deploy.
+490 Node/release383 PASS. No cambios en workflows Hosting ni política ni producción.
+El SHA anterior tiene Tests/sintaxis verdes; aceptación completa debe corresponder
+al HEAD nuevo. Evidencia local: tests/lp01-b12-b13/regression-result.json.
+
+## LAB v383 · revisión, rendimiento y preflight · 05/11/2026
+
+Revisión independiente cerró4 hallazgos: vínculos Picking de otra etapa no prueban
+confirmación Ensamble; antigüedad usa primer movimiento acreditado; historial
+identifica asignación; fallo de relectura conserva guardado confirmado.
+Propuesta deshabilitada explícitamente en frontend: cero RPC; SQL REVIEW intacto,
+flag false y sin grants por defecto. RPC nueva ausente en producción.
+Native load singleflight; evidencia en segundo plano, máximo3 simultáneas,
+cancelación por ámbito/sesión; consultas retenidas40s no bloquean avance6→8 ni
+multiplican lecturas en ciclos20s (Chromium/PG sintético PC1440/móvil390 PASS).
+490 Node +release383 PASS. DOM real50/200/500 órdenes (100/400/1000 partes),
+500 tarjetas hasta127.5ms sin desborde. Latencia simulada100ms/RPC:1.77/7.11/16.80s
+en segundo plano; no equivale a rendimiento productivo.
+Preflight Supabase READ ONLY/ROLLBACK:3 RPC públicas coinciden con huellas previas,
+ACL conservadas y propuesta ausente;9 firmas inventariadas, sin datos individuales.
+Gate local real HOLD/LP_ASSETS_NOT_APPROVED; política194 intacta. No SQL aplicado,
+acceso ampliado, merge, dispatch ni publicación. PR195 Draft abierto sobre main6467290;
+commit funcional401e635. Confirmar CI propia del SHA final antes de integrar.
+Evidencia: docs/sql-proposals/lp01-propuestas y tests/lp01-b12-b13.
+
+## LAB v383 · B12/B13 preparados en aislamiento · 05/11/2026
+
+Base main646729005295c79d73bed7d6730aa10d042768b8; coordinador confirmó
+v382 publicado/Hosting07abe57ef1374fde. Rama fix/operacion-b12-b13-v383.
+Ensamble: una entrada por producción/turno, abiertas por antigüedad nativa,
+programadas sin iniciar por prioridad; semana/sistema, detalle directo PC/móvil.
+Motor existente reemplaza6→8, conserva historial, SALE desconocido y partes.
+Varias asignaciones requieren selección explícita: pendiente regla de total único
+por orden sin inventar reparto. Clasificación combina el motor operativo con afectaciones individuales y Picking
+pendiente no vinculado, mediante el lector existente (máximo3 consultas simultáneas).
+Lectura faltante: clasificación por revisar; revocación: limpiar vista. Sin sumar causas.
+Propuesta siguiente turno: contrato nuevo aislado, una RPC sin EXECUTE por defecto,
+flag false, eventos privados/inmutables, no cambia SALE/Export ni concede roles.
+Activación productiva requiere manifiesto/pins y autorización de esa nueva firma.
+490 pruebas Node y release383 PASS. Chromium PC1440/móvil390 contra PostgreSQL
+sintético: reemplazo6→8, borrador conservado20s, Picking visible, propuesta bloqueada
+sin disponibilidad acreditada; geometría escritorio y sin desborde móvil PASS.
+PostgreSQL: CAS/idempotencia/carreras, rollback, permisos privados, revocación
+serializada y rechazo posterior, saldo/SALE intactos PASS.
+Detalle y límites: docs/sql-proposals/lp01-propuestas/README.md; evidencia tests/lp01-b12-b13.
+IMPLEMENTADO EN RAMA, no push/PR/CI nuevo, no SQL productivo, merge ni despliegue.
+Siguiente: coordinador revisa la captura con varias asignaciones y contrato de propuesta.
+Preparar preflight/política solo tras coordinación; pendiente autorización nueva RPC/flag.
+
 ## LAB v382 · política de publicación PR194 preparada · 05/11/2026
 
 integration_pr194; única huella protegida cambiada lp01-operation.js=c59d53eb… .

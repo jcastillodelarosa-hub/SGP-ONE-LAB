@@ -1,0 +1,29 @@
+{
+  "observedAt": "2026-11-05T04:22:12.678430+00:00",
+  "checks": [
+    {
+      "source": "tests/lp01-powerbi/evidence/browser.json",
+      "result": "PASS",
+      "scenarios": 2,
+      "environment": "Actual UI/local PostgreSQL synthetic; unchanged quantity, permissions and closure assertions"
+    },
+    {
+      "source": "tests/lp01-fuentes/evidence/browser.json",
+      "result": "PASS",
+      "scenarios": 2,
+      "environment": "Actual UI/local PostgreSQL synthetic; unchanged quantity, permissions and closure assertions"
+    },
+    {
+      "source": "tests/lp01-cierres-integrados/evidence/browser-sql08.json",
+      "result": "PASS",
+      "scenarios": 4,
+      "environment": "Actual UI/local PostgreSQL synthetic; unchanged quantity, permissions and closure assertions"
+    },
+    {
+      "source": "tests/lp01-seguimiento-incremento/browser-result.json",
+      "result": "PASS",
+      "scenarios": 10,
+      "environment": "PC/mobile real isolated SQL; coordinator/admin global access and supervisors/leader denied global access; own operation return preserved"
+    }
+  ]
+}

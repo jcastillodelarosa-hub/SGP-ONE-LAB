@@ -1,0 +1,89 @@
+{
+  "environment": "Local Chromium actual DOM/layout, synthetic 50/200/500 orders, no backend/network latency",
+  "scenarios": [
+    {
+      "width": 1440,
+      "orders": 50,
+      "assignments": 100,
+      "samplesMs": [
+        75.2,
+        10.8,
+        12.4,
+        15.1,
+        14.1
+      ],
+      "cards": 50,
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "orders": 200,
+      "assignments": 400,
+      "samplesMs": [
+        45.8,
+        37.1,
+        37.2,
+        35.2,
+        36.2
+      ],
+      "cards": 200,
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "orders": 500,
+      "assignments": 1000,
+      "samplesMs": [
+        101.8,
+        81.1,
+        79.2,
+        121,
+        81.8
+      ],
+      "cards": 500,
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "orders": 50,
+      "assignments": 100,
+      "samplesMs": [
+        70.6,
+        12.9,
+        14.4,
+        17.3,
+        19.6
+      ],
+      "cards": 50,
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "orders": 200,
+      "assignments": 400,
+      "samplesMs": [
+        47,
+        48.3,
+        42.6,
+        39.1,
+        36.4
+      ],
+      "cards": 200,
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "orders": 500,
+      "assignments": 1000,
+      "samplesMs": [
+        90.7,
+        87.2,
+        82.2,
+        127.5,
+        98
+      ],
+      "cards": 500,
+      "overflow": false
+    }
+  ]
+}

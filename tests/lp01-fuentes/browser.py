@@ -3,6 +3,9 @@ from database import SourcesDatabase,HERE,ROOT,lit
 from pathlib import Path
 import json,http.server,threading,os
 from playwright.sync_api import sync_playwright
+import sys
+sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'lp01-b12-b13'))
+from navigation import open_assignment
 OUT=HERE/'evidence';os.chdir(ROOT)
 class Handler(http.server.SimpleHTTPRequestHandler):
  db=None
@@ -32,8 +35,8 @@ try:
     for stage in ['ENSAMBLE','EMPAQUE']:
      page.locator('#productionPackingTab' if page.locator('[data-op-stage]').input_value()=='EMPAQUE' else '#productionAssemblyTab').click();page.locator('[data-op-stage]').select_option(stage)
      page.wait_for_function("s=>document.querySelector('[data-op-status]').textContent.includes('ABIERTO') && document.querySelector('[data-live-orders]').textContent.includes(s)",arg=stage)
-     details=page.locator('[data-order-part="'+part+'"]');details.locator('summary').click();details.locator('[data-live-operate]').click()
-     page.wait_for_function("s=>document.querySelector('[data-operation-detail] h4').textContent.includes(s)",arg=stage)
+     open_assignment(page,part)
+     page.wait_for_function("s=>document.querySelector('.lp-operation-form-pane h4, [data-operation-detail]>.lp-turn-header h4').textContent.includes(s)",arg=stage)
      # Only a genuine zero could mean assembly complete. NULL must remain unknown.
      if stage=='EMPAQUE':assert 'completo según Export' not in page.locator('[data-live-orders]').inner_text()
      page.locator('[data-material-load]').click();page.wait_for_function("document.querySelector('[data-material-summary]').textContent.includes('por nombre')")
@@ -44,8 +47,7 @@ try:
     # Actual SQL authentication failure, no synthetic denial response.
     page.locator('#productionPackingTab' if page.locator('[data-op-stage]').input_value()=='EMPAQUE' else '#productionAssemblyTab').click()
     detail=page.locator('[data-order-part="'+part+'"]');detail.wait_for()
-    if detail.get_attribute('open') is None:detail.locator('summary').click()
-    detail.locator('[data-live-operate]').click()
+    open_assignment(page,part)
     db.sql("UPDATE public.sgp_sesiones_app SET expira_en=now()-interval '1 minute' WHERE token_hash=encode(extensions.digest('COORDINADOR','sha256'),'hex')")
     page.locator('[data-material-load]').click();page.wait_for_function("document.querySelector('[data-material-summary]').textContent.includes('SESION_NO_AUTORIZADA')")
     db.sql("UPDATE public.sgp_sesiones_app SET expira_en=now()+interval '1 day' WHERE token_hash=encode(extensions.digest('COORDINADOR','sha256'),'hex')")
@@ -53,8 +55,7 @@ try:
     db.sql("INSERT INTO public.sgp_prioridades(anio,semana,id_linea,key_produccion,prioridad) VALUES(2026,44,'PANELES_2','QA|PANELES_2',1),(2026,44,'PANELES_2','QA|PANELES_2',2)")
     page.locator('#productionPackingTab' if page.locator('[data-op-stage]').input_value()=='EMPAQUE' else '#productionAssemblyTab').click()
     detail=page.locator('[data-order-part="'+part+'"]');detail.wait_for()
-    if detail.get_attribute('open') is None:detail.locator('summary').click()
-    detail.locator('[data-live-operate]').click();page.locator('[data-material-load]').click()
+    open_assignment(page,part);page.locator('[data-material-load]').click()
     page.wait_for_function("document.querySelector('[data-material-summary]').textContent.includes('ambigua')")
     assert before==db.unchanged() and not errors,errors
     assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')

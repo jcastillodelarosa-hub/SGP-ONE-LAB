@@ -1,0 +1,12 @@
+{
+  "status": "PASS",
+  "environment": "PostgreSQL isolated native chain, synthetic only",
+  "checks": [
+    "No default EXECUTE/table grants; disabled admission",
+    "Unvalidated availability stays unknown and rejects proposal",
+    "Native next-turn calendar; order-level proposal with immutable 6\u21928 history",
+    "Idempotency, stale CAS, concurrent writer, invalid session and wrong stage rejected",
+    "SALE/Export unchanged; transactional rollback; stale consolidation denied",
+    "Native permission revocation serialized during lock wait; subsequent access rejected; no new event"
+  ]
+}
