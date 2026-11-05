@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "publicWrapperOrigins": [
+    "ENSAMBLE",
+    "EMPAQUE"
+  ],
+  "environment": "Full captured catalog, PostgreSQL17.11 network none synthetic only"
+}

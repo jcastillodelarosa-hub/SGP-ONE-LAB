@@ -11,7 +11,7 @@ def wait_for(db,query,timeout=10):
   time.sleep(.04)
  raise AssertionError('Expected database condition not observed')
 def holder(db,lock):
- p=subprocess.Popen(db.docker+['exec','-i',db.container,'psql','-X','-qAt','-U','postgres','-v','ON_ERROR_STOP=1'],env=db.env,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,bufsize=1)
+ p=subprocess.Popen(db.docker+['exec','-i',db.container,'psql','-d',getattr(db,'database','postgres'),'-X','-qAt','-U','postgres','-v','ON_ERROR_STOP=1'],env=db.env,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,bufsize=1)
  p.stdin.write('BEGIN;'+lock+";SELECT 'HELD';\n");p.stdin.flush()
  while p.stdout.readline().strip()!='HELD':
   if p.poll() is not None:raise AssertionError(p.stderr.read())

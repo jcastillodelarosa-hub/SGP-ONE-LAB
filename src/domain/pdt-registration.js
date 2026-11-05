@@ -8,6 +8,7 @@ export function registrationPieces(origin,sources,entries){
  if(!Array.isArray(entries)||!entries.length||entries.length>100)throw new Error('Agrega entre 1 y 100 piezas');
  if(new Set(entries.map(e=>e.source)).size!==entries.length)throw new Error('La misma pieza está repetida en esta operación');
  return entries.map(entry=>{
+  if(!entry.source)throw new Error('Selecciona una pieza PANEL de las fuentes verificadas.');
   const matches=sources.filter(s=>sourceKey(s)===entry.source);
   if(matches.length!==1)throw new Error('La pieza no tiene una identidad verificable. Actualiza las fuentes.');
   const p=matches[0],quantity=Number(entry.cantidad),rawNcs=entry.ncs??[entry.nc??''];

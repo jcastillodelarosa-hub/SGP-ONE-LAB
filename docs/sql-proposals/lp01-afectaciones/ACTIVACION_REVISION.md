@@ -1,5 +1,8 @@
 # LAB v382 — revisión y plan de activación, 05/11/2026
 
+Actualización: [cadena vigente probada y alcance de pins](CADENA_PDT_VALIDADA.md).
+La diferencia de wrapper/fuentes quedó resuelta en aislamiento; activación pendiente.
+
 Actualización posterior autorizada: [contraste SQL productivo de solo lectura](CONTRASTE_PRODUCTIVO.md).
 Sus hallazgos sustituyen las incógnitas de metadatos siguientes; el HOLD continúa por
 diferencias reales del contrato PDT, no por ausencia de autorización para leer.

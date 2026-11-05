@@ -3,14 +3,8 @@ import importlib.util,json,uuid
 from concurrent.futures import ThreadPoolExecutor
 ROOT=Path(__file__).resolve().parents[2];HERE=Path(__file__).parent
 spec=importlib.util.spec_from_file_location('lp_fixture_atomic',HERE/'postgres.py');lp=importlib.util.module_from_spec(spec);spec.loader.exec_module(lp)
-spec=importlib.util.spec_from_file_location('pdt_fixture_atomic',HERE/'native_pdt.py');pdt=importlib.util.module_from_spec(spec);spec.loader.exec_module(pdt)
 lit=lp.lit
-class Fixture(lp.Fixture):
- def __init__(self,reconciliation_sql=None):
-  super().__init__();pdt.prepare(self.db)
-  for name in ['03_pdt_atomico_REVIEW.sql','04_conciliacion_REVIEW.sql','05_picking_original_REVIEW.sql']:
-   sql=reconciliation_sql if name=='04_conciliacion_REVIEW.sql' and reconciliation_sql is not None else (ROOT/'docs/sql-proposals/lp01-afectaciones'/name).read_text();failed=self.db.run(sql.replace('COMMIT;','SELECT 1/0;COMMIT;'));assert failed.returncode;self.db.sql(sql)
-  self.db.sql('GRANT EXECUTE ON FUNCTION public.sgp_lp_afectaciones_aluminio_v1(text,text,text,date,int,jsonb,jsonb),public.sgp_lp_afectaciones_consultar_v2(text,text,text),public.sgp_lp_afectaciones_legado_v1(text,text,text),public.sgp_lp_afectaciones_conciliar_v1(text,text,text,uuid,text,bigint,jsonb,text),public.sgp_lp_afectaciones_desde_picking_v1(text,text,text,date,int,jsonb,uuid) TO anon')
+class ContractMethods(lp.Fixture):
  def read2(self,user='ll',stage='ENSAMBLE'):
   return json.loads(self.db.sql('SET ROLE anon;SELECT public.sgp_lp_afectaciones_consultar_v2('+','.join(map(lit,[user,self.key,stage]))+')'))
  def pieces(self,user='ll',stage='ENSAMBLE'):
@@ -23,6 +17,14 @@ class Fixture(lp.Fixture):
  def legacy(self):return json.loads(self.db.sql('SET ROLE anon;SELECT public.sgp_lp_afectaciones_legado_v1(\'COORDINADOR\','+lit(self.key)+",'ENSAMBLE')"))
  def reconcile_query(self,snapshot,maps,uid=None,user='COORDINADOR'):
   return 'SET ROLE anon;SELECT public.sgp_lp_afectaciones_conciliar_v1('+','.join([lit(user),lit(self.key),"'ENSAMBLE'",lit(uid or str(uuid.uuid4())),lit(snapshot['fingerprint']),str(snapshot['revision']),lit(json.dumps(maps))+'::jsonb',lit('QA cotejo documentado')])+')'
+def Fixture(reconciliation_sql=None):
+ import current_chain
+ x=current_chain.Fixture.__new__(current_chain.Fixture)
+ try:
+  x.__init__(reconciliation_sql=reconciliation_sql);return x
+ except BaseException:
+  if hasattr(x,'db'):x.close()
+  raise
 def tests(x):
  db=x.db;checks=[];pieces=x.pieces();c=x.command('CREATE',5,user='ll',cause='NC_AL')
  assert db.run(x.atomic_query(c,pieces)).returncode
@@ -54,8 +56,9 @@ def tests(x):
  checks.append('Late LP/receipt failures roll back native PDT too; concurrent exact retry creates one PDT event and one LP report')
  # Actual original Picking writer and row, no fabricated source registry.
  native_context={'id_programacion':'00000000-0000-0000-0000-000000000001','produccion':'QA ORDER','completa':False,'fecha_entrega':'2026-11-01','turno':'TURNO 1'}
- picking=json.loads(db.sql('SET ROLE anon;SELECT public.sgp_pdt_registrar_v4('+','.join([lit('COORDINADOR'),lit('PICKING'),lit(json.dumps(native_context))+'::jsonb',lit(json.dumps(pieces))+'::jsonb',lit(str(uuid.uuid4()))])+')'))
+ picking=json.loads(db.sql('SET ROLE anon;SELECT public.sgp_pdt_registrar_v4('+','.join([lit('COORDINADOR'),lit('PICKING'),lit(json.dumps(native_context))+'::jsonb',lit(json.dumps([{**p,'nc':''} for p in pieces]))+'::jsonb',lit(str(uuid.uuid4()))])+')'))
  before=db.sql('SELECT count(*) FROM sgp_aluminio_pendientes');rows=x.read2()['pickingPending']['rows']
+ assert rows[0]['nc'] in (None,'')
  assert len(rows)==1 and rows[0]['id']==picking['ids_pendientes'][0] and rows[0]['fabrication']=='E17' and rows[0]['length']==100 and rows[0]['origin']=='PICKING'
  assert x.read2('se')['pickingPending']=={'status':'UNAUTHORIZED','rows':[]}
  assert db.sql('SELECT count(*) FROM sgp_aluminio_pendientes')==before
@@ -64,7 +67,7 @@ def tests(x):
  adopt='SET ROLE anon;SELECT public.sgp_lp_afectaciones_desde_picking_v1('+','.join([lit('ll'),lit(x.key),lit('ENSAMBLE'),lit('2026-11-01'),'1',lit(json.dumps(pending_cmd))+'::jsonb',lit(picking['ids_pendientes'][0])])+')'
  adopted=json.loads(db.sql(adopt));assert json.loads(db.sql(adopt))['duplicate']
  assert db.sql('SELECT count(*) FROM sgp_aluminio_pendientes')==before
- checks.append('Native Picking pending visible by exact production with original ID/reference/fabrication/length/state; supervisor read unavailable; no duplicate/no availability credit')
+ checks.append('Native Picking pending visible by exact production with original ID/reference/fabrication/length/state; supervisor read unavailable; original optional NC stays blank on adoption; no duplicate/no availability credit')
  # Reconcile a current legacy occurrence against the same existing report, never clone.
  db.execute(db.cmd('AFECTAR',key=x.key,part=x.parts[0],affectations={'NC_AL':5},observation='QA legacy'), 'se')
  snapshot=x.legacy();assert len(snapshot['sources'])==1
@@ -82,9 +85,28 @@ def tests(x):
  x.run(x.command('CORRECT',6,user='ll',reportId=rid),user='ll');assert 'VALIDATE' not in x.read2('COORDINADOR')['capabilities']
  assert db.run(x.reconcile_query(snapshot,mappings)).returncode
  checks.append('Coordinator explicit legacy-to-report evidence; missing/stale/other-role reconciliation denied; no backfill; changed report quantity invalidates mapping; physical only leader/coordinator, not supervisor/admin')
+ # Both process origins use the current PUBLIC wrapper, never the legacy function directly.
+ emp=x.command('CREATE',3,user='ll',stage='EMPAQUE',cause='NC_AL')
+ em=x.atomic(emp,x.pieces(stage='EMPAQUE'),stage='EMPAQUE')
+ assert x.atomic(emp,x.pieces(stage='EMPAQUE'),stage='EMPAQUE')['duplicate']
+ assert db.sql('SELECT origen FROM public.sgp_aluminio_pendientes WHERE id_pendiente='+lit(em['pdtIds'][0]))=='EMPAQUE'
+ # Explicit historical cases preserve identity; absence of ledger never creates a replacement PDT.
+ for contract,key in [('LEGACY',x.key),('V2',x.key),('LEGACY',None)]:
+  source=str(uuid.uuid4());seed_sql='INSERT INTO public.sgp_aluminio_pendientes(id_pendiente,reserva,produccion,perfil,cantidad,longitud,origen,estado,id_pieza,fabricacion,key_produccion,contrato_pdt,usuario_reporte) SELECT '+lit(source)+',reserva,produccion,perfil,cantidad,longitud,origen,estado,id_pieza,fabricacion,'+('NULL' if key is None else lit(key))+','+lit(contract)+",usuario_reporte FROM public.sgp_aluminio_pendientes WHERE origen='PICKING' LIMIT 1"
+  if key is None:
+   invalid=db.run(seed_sql);assert invalid.returncode and 'PDT_CLAVE_NO_VERIFICADA' in invalid.stderr;continue
+  db.sql(seed_sql)
+  visible=any(r['id']==source for r in x.read2()['pickingPending']['rows']);assert visible==(key is not None)
+  before=db.sql('SELECT count(*) FROM public.sgp_aluminio_pendientes')
+  c=x.command('CREATE',1,user='ll',cause='NC_AL')
+  denied=db.run('SET ROLE anon;SELECT public.sgp_lp_afectaciones_desde_picking_v1('+','.join([lit('ll'),lit(x.key),lit('ENSAMBLE'),lit('2026-11-01'),'1',lit(json.dumps(c))+'::jsonb',lit(source)])+')')
+  assert denied.returncode and 'ORIGEN_PICKING_NO_ACREDITADO' in denied.stderr
+  assert db.sql('SELECT count(*) FROM public.sgp_aluminio_pendientes')==before
+ assert x.read2()['available'] is None
+ checks.append('Current public wrapper preserves Empaque origin/replay; LEGACY and V2 without ledger visible only by exact key, adoption rejected without replacement or availability credit; new null-key historical-style insert rejected by native identity guard')
  return checks
 if __name__=='__main__':
  x=Fixture()
  try:
-  checks=tests(x);out={'status':'PASS','environment':'PostgreSQL17.11 --network none','checks':checks,'limits':['Synthetic rows only','Existing Picking list dependency uses documented fixture','No production capability activation','Legacy mapping needs explicit evidence, never inferred']};(HERE/'atomic-result.json').write_text(json.dumps(out,indent=2)+'\n');print(json.dumps(out,indent=2))
+  checks=tests(x);out={'status':'PASS','environment':'PostgreSQL17.11 --network none','checks':checks,'limits':['Synthetic rows only','Full captured native Picking/source/reserve view and partial wrapper; synthetic rows only','No production capability activation','Legacy mapping needs explicit evidence, never inferred']};(HERE/'atomic-result.json').write_text(json.dumps(out,indent=2)+'\n');print(json.dumps(out,indent=2))
  finally:x.close()

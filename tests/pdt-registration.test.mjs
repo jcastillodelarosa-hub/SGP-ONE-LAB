@@ -30,3 +30,9 @@ test('new V4 validator preserves direct identity checks and required audit state
  assert.equal((validator.match(/estado_anterior,estado_nuevo,tipo_evento/g)||[]).length,2);assert.equal((validator.match(/p_observacion,v_p.estado_repo,v_p.estado_repo,/g)||[]).length,2);
  assert.match(sql,/es_registro_v4\(p_id\)/);assert.match(sql,/original_sgp_aluminio_pendiente_validar_detalles_v1/);
 });
+
+test('missing selection is distinct from stale or duplicate source identity',()=>{
+ assert.throws(()=>registrationPieces('PICKING',[source],[entry(source,{source:''})]),/Selecciona una pieza PANEL/);
+ assert.throws(()=>registrationPieces('PICKING',[],[entry()]),/identidad verificable/);
+ assert.throws(()=>registrationPieces('PICKING',[source,source],[entry()]),/identidad verificable/);
+});

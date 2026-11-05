@@ -1,7 +1,7 @@
 {
   "candidate": "Containing Git commit; exact SQL bytes below",
   "version": "LAB v382",
-  "status": "REVIEW_ONLY_PRODUCTION_CONTRACTS_PENDING",
+  "status": "ISOLATED_CURRENT_CHAIN_VALIDATED_ACTIVATION_PENDING",
   "ordered_files": [
     {
       "path": "docs/sql-proposals/lp01-afectaciones/01_storage_DRAFT.sql",
@@ -13,7 +13,7 @@
     },
     {
       "path": "docs/sql-proposals/lp01-afectaciones/03_pdt_atomico_REVIEW.sql",
-      "sha256": "569625c1e562f733a815e105f2d1df245d886ad20b8a31db0eba6053815e6033"
+      "sha256": "cc8ebb1744e79933fa41bb5ce0a70ca366b142e7f34cdb8a256fe04ecb4c41dd"
     },
     {
       "path": "docs/sql-proposals/lp01-afectaciones/04_conciliacion_REVIEW.sql",
@@ -24,5 +24,6 @@
       "sha256": "4e74ca817f7177e2c2cb89c4cccc0d4a236e5aed977b563bf158f7d7ed984609"
     }
   ],
-  "implementation_base": "ee2f8de4fbf8773939b56f18c589d77907715f3f"
+  "implementation_base": "ee2f8de4fbf8773939b56f18c589d77907715f3f",
+  "dependency_pins": "tests/lp01-afectaciones-rpc/production-readonly/required-chain.json"
 }

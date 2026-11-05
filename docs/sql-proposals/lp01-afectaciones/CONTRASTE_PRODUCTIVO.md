@@ -1,5 +1,8 @@
 # Contraste productivo de solo lectura — 05/11/2026
 
+Actualización: [cadena vigente probada y alcance de pins](CADENA_PDT_VALIDADA.md).
+La diferencia de wrapper/fuentes quedó resuelta en aislamiento; activación pendiente.
+
 Resultado: **HOLD de instalación/activación**. La base y los permisos nativos LP
 coinciden con las pruebas, pero el adaptador PDT debe actualizar su entorno de
 pruebas y precondiciones para la envoltura vigente de Mecanizado parcial. No se

@@ -1,3 +1,19 @@
+## LAB v382 · cadena PDT vigente reproducida · 05/11/2026
+
+Wrapper público actual, fuentes/Picking reales y vista multireserva reproducidos en
+PostgreSQL17.11 sin red con catálogo completo y filas sintéticas. Wrapper ambas etapas
+PASS;63/63 mecanizado/Picking PASS; LP atómico/legacy/Empaque y expiración PASS.
+SQL03 fija15 cuerpos/owner/definer/search_path y vista, drift rechazado individualmente;
+rollback y defaults sin grants PASS. No bypass al legacy ni cambios productivos.
+Manifiesto actualizado. Revisión independiente acota transitividad a NC LP/asociación;
+no afirmar hashes de todas las ramas históricas de Picking. Límites LEGACY/sin key,
+aplicación entre etapas y now() nativo continúan. CI ampliada, ejecución remota pendiente.
+Detalle: docs/sql-proposals/lp01-afectaciones/CADENA_PDT_VALIDADA.md. UI y aplicación PC/móvil PASS;482JS y release382 PASS. Captura Picking: selección
+vacía ahora tiene mensaje propio; identidad ambigua sigue bloqueada. NC Picking
+opcional conservada; nuevos Ensamble/Empaque requieren NC nativa, coordinar si se
+solicita hacerla opcional también. Siguiente: entregar SHA/manifiesto al coordinador
+y revisar instalación contenida.
+
 ## LAB v382 · contraste SQL productivo SOLO LECTURA · 05/11/2026
 
 Autorizadas y realizadas consultas BEGIN READ ONLY/ROLLBACK, sin filas individuales.

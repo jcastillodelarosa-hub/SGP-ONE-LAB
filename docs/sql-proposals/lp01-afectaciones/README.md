@@ -1,5 +1,8 @@
 # LAB v382 · afectaciones por orden y PDT
 
+Actualización: [cadena vigente probada y alcance de pins](CADENA_PDT_VALIDADA.md).
+La diferencia de wrapper/fuentes quedó resuelta en aislamiento; activación pendiente.
+
 **IMPLEMENTADO EN RAMA / VERIFICADO EN POSTGRESQL AISLADO Y NAVEGADOR.**
 No aplicado en Supabase, no publicado ni certificado con datos de planta.
 Misma entrega v382 aún sin publicar, frente a main v381.
