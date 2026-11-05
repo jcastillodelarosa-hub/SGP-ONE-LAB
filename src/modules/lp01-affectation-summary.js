@@ -10,7 +10,7 @@ export function compactSummaryMarkup(summary){
  if(!summary)return '<span class="lp-summary-pending">Consultando…</span>';
  if(summary.status==='UNAVAILABLE')return '<span class="lp-summary-pending">Datos pendientes</span>';
  const labels={NC_AL:'NC AL',NC_V:'NC V',TECNO:'Tecno',NOVEDAD:'Novedad'};
- const chips=Object.entries(labels).filter(([key])=>Number.isSafeInteger(summary.categories[key])&&summary.categories[key]>0).map(([key,label])=>'<span class="lp-tracking-chip chip-'+key+'">'+summary.categories[key]+' × '+label+'</span>').join('');
+ const chips=Object.entries(labels).filter(([key])=>Number.isSafeInteger(summary.categories[key])&&summary.categories[key]>0).map(([key,label])=>'<button type="button" data-summary-cause="'+key+'" class="lp-tracking-chip chip-'+key+'" aria-label="'+summary.categories[key]+' ventanas · '+label+'">'+summary.categories[key]+' × '+label+'</button>').join('');
  const total=summary.total===null||summary.total===undefined?'<span class="lp-summary-pending" title="Total de ventanas distintas pendiente de validación; las causas pueden coincidir">Pendiente de validar</span>':'<small>Total distinto: '+summary.total+' · Disponibles: '+summary.available+'</small>';
  return '<span class="lp-summary-chips">'+chips+'</span>'+total;
 }

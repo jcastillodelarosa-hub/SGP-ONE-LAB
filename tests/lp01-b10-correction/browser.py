@@ -1,0 +1,37 @@
+from pathlib import Path
+import http.server, threading
+from playwright.sync_api import sync_playwright
+ROOT=Path(__file__).resolve().parents[2]
+class Files(http.server.SimpleHTTPRequestHandler):
+ def __init__(self,*a,**kw): super().__init__(*a,directory=str(ROOT),**kw)
+ def log_message(self,*a): pass
+server=http.server.ThreadingHTTPServer(('127.0.0.1',0),Files); threading.Thread(target=server.serve_forever,daemon=True).start(); origin=f'http://127.0.0.1:{server.server_port}'
+with sync_playwright() as p:
+ browser=p.chromium.launch(executable_path='/usr/bin/chromium',args=['--no-sandbox'])
+ for width in (1440,390):
+  page=browser.new_page(viewport={'width':width,'height':900}); errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
+  page.route('**/*',lambda r:r.continue_() if r.request.url.startswith(origin) else r.abort())
+  page.goto(origin+'/tests/lp01-b10-correction/fixture.html');page.wait_for_selector('[data-order-summary="QA1|PANELES_2"] [data-summary-cause]')
+  row=page.locator('tr').filter(has=page.locator('[data-order-summary="QA1|PANELES_2"]'))
+  row.locator('summary').click();page.wait_for_selector('.lp-affect-cause-tabs')
+  assert page.locator('[data-tracking-tab="Afectaciones"]').get_attribute('aria-pressed')=='true'
+  assert page.locator('.lp-affect-reports article:visible').count()==4
+  assert page.locator('#lp-tracking-drawer').evaluate('(e)=>getComputedStyle(e).position')!='fixed'
+  if width<700: assert row.locator('#lp-tracking-drawer').count()==1
+  else: assert page.locator('#lp-tracking-drawer').evaluate('(e)=>e.getBoundingClientRect().width')>900
+  for cause in ['NC_AL','NC_V','TECNO','NOVEDAD']:
+   row.locator('[data-summary-cause="'+cause+'"]').click();page.wait_for_selector('[data-cause-filter="'+cause+'"][aria-pressed="true"]')
+   assert page.locator('.lp-affect-reports article:visible').count()==1
+   assert page.locator('.lp-affect-reports article:visible').get_attribute('data-report-cause')==cause
+  page.locator('[data-cause-filter="NC_AL"]').click();assert all(x in page.locator('.lp-aluminum-pending').inner_text() for x in ['PICKING','PRODUCCION','LEGACY','ENSAMBLE','EMPAQUE'])
+  page.locator('[data-cause-filter=""]').click();assert page.locator('.lp-affect-reports article:visible').count()==4
+  page.locator('[data-tracking-close]').click();assert page.locator('#lp-tracking-drawer').is_hidden()
+  page.locator('tr').filter(has=page.locator('[data-order-summary="QA2|PANELES_2"]')).locator('summary').click();page.wait_for_selector('[data-reports-empty]:visible');assert 'No se devolvieron reportes' in page.locator('[data-reports-empty]').inner_text();assert 'Sin pendientes devueltos' in page.locator('.lp-aluminum-pending').inner_text()
+  page.locator('[data-tracking-close]').click();row.locator('summary').click();page.wait_for_selector('.lp-affect-cause-tabs');page.locator('[data-affect-context] [name=date]').fill('2026-11-02');page.locator('[data-affect-context] [name=shift]').select_option('1');page.evaluate('controller.load({quiet:true})');page.wait_for_timeout(300);assert page.locator('[data-affect-context] [name=date]').input_value()=='2026-11-02';assert page.locator('[data-affect-context] [name=shift]').input_value()=='1'
+  page.locator('[data-tracking-close]').click();row.locator('summary').focus();page.keyboard.press('Enter');page.wait_for_selector('.lp-affect-cause-tabs');page.locator('[data-tracking-close]').focus();page.keyboard.press('Escape');assert page.locator('#lp-tracking-drawer').is_hidden();assert page.evaluate("document.activeElement.matches('details[data-order-part] > summary')")
+  row.locator('[data-summary-cause="NOVEDAD"]').click();page.wait_for_selector('[data-cause-filter="NOVEDAD"][aria-pressed="true"]');page.locator('#lp-tracking-drawer').screenshot(path=f'/tmp/b10-detail-{width}.png');page.screenshot(path=f'/tmp/b10-page-{width}.png',full_page=True)
+  page.evaluate('window.delayAffect=true');page.locator('tr').filter(has=page.locator('[data-order-summary="QA2|PANELES_2"]')).locator('summary').click();page.wait_for_function('!!window.releaseAffect');page.locator('[data-tracking-close]').click();page.evaluate('window.delayAffect=false;window.releaseAffect()');page.wait_for_timeout(100);assert page.locator('#lp-tracking-drawer').is_hidden()
+  assert page.evaluate('document.documentElement.scrollWidth<=innerWidth');assert not errors,errors
+  print('PASS',width,'order, four causes, empty, keyboard, close, layout');page.close()
+ browser.close()
+server.shutdown()

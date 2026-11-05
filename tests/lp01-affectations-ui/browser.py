@@ -14,7 +14,7 @@ with sync_playwright() as p:
   page.locator('[name=cause]').select_option('NOVEDAD')
   submit('CREATE',5,'Novedad de orden');assert page.locator('.lp-affect-reports article').count()==1
   submit('SOLVE',3,'Origen reporta solución parcial');assert '0 confirmadas' in page.locator('.lp-affect-reports').inner_text()
-  assert 'No disponible' in page.locator('#panel').inner_text()
+  assert 'Pendiente de validar' in page.locator('#panel').inner_text()
   submit('CONFIRM',2,'Recibidas físicamente dos ventanas');assert '2 confirmadas' in page.locator('.lp-affect-reports').inner_text()
   assert page.locator('[name=action] option[value=VALIDATE]').count()==0
   page.locator('#role').select_option('COORDINADOR');page.wait_for_selector('[name=action] option[value=VALIDATE]',state='attached')

@@ -1,3 +1,7 @@
+## B10 corrección · rama aislada · 05/11/2026
+
+Base 2ed9f8e9/v387. Detalle de afectaciones ancho bajo listado y bajo orden en móvil; acceso por causa, vacíos explícitos y orígenes PDT conservados. v389 provisional; coordinar numeración al integrar. Pruebas y límites en [lp01-b10-correction/README.md](../../tests/lp01-b10-correction/README.md). Sin SQL, permisos ni datos. HOLD conservado; requiere revisión de pin de operación, CI del SHA exacto y coordinación antes de integrar/publicar.
+
 ## B10 visual v387 · preparación independiente
 
 Sobre main3280223/v385; chips aplicables y semanas coloreadas con número/año,
