@@ -1,0 +1,27 @@
+{
+  "candidate": "ee2f8de4fbf8773939b56f18c589d77907715f3f",
+  "version": "LAB v382",
+  "status": "REVIEW_ONLY_NOT_ACTIVATABLE",
+  "ordered_files": [
+    {
+      "path": "docs/sql-proposals/lp01-afectaciones/01_storage_DRAFT.sql",
+      "sha256": "e2b9b5c7a822b9b680c98e16486cc2ba36d5b352fdf62b525fb92f3ff0e86d91"
+    },
+    {
+      "path": "docs/sql-proposals/lp01-afectaciones/02_rpc_REVIEW.sql",
+      "sha256": "55f1e1d0966e86d583d47f61a3e372bfbf92de83b030d5d7164745306c7c6b6a"
+    },
+    {
+      "path": "docs/sql-proposals/lp01-afectaciones/03_pdt_atomico_REVIEW.sql",
+      "sha256": "569625c1e562f733a815e105f2d1df245d886ad20b8a31db0eba6053815e6033"
+    },
+    {
+      "path": "docs/sql-proposals/lp01-afectaciones/04_conciliacion_REVIEW.sql",
+      "sha256": "90f16d240c85cc3e5cf414102e0924ffc96539f329128d09c356021193891b79"
+    },
+    {
+      "path": "docs/sql-proposals/lp01-afectaciones/05_picking_original_REVIEW.sql",
+      "sha256": "4e74ca817f7177e2c2cb89c4cccc0d4a236e5aed977b563bf158f7d7ed984609"
+    }
+  ]
+}

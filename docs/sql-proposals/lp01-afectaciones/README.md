@@ -139,3 +139,5 @@ No se utilizan destinos productivos ni se consulta una sesión real de planta.
 Recuperación: antes de nuevos eventos, contener/deshabilitar el paquete y retirar
 solo objetos nuevos vacíos bajo procedimiento revisado. Después de eventos, contener
 escrituras y corregir hacia delante; no DROP ni restauración destructiva de datos.
+
+Revisión posterior y bloqueos de activación: [plan y evidencia actual](ACTIVACION_REVISION.md).

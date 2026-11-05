@@ -1,3 +1,19 @@
+## LAB v382 · contraste de metadatos y plan de activación · 05/11/2026
+
+Main remoto confirmado5003c61; Supabase17.11 y columnas/FK PDT/Picking compatibles
+por metadatos. Paquete nuevo no observado instalado. Sin SQL ejecutado ni filas
+productivas consultadas, conforme al encargo; hashes vigentes/ACL y pendientes reales
+no certificados. Revisión separada del mismo agente detecta falta de revalidación de
+permisos tras locks en conciliación: bloquea esa activación hasta corrección y prueba.
+Tablas privadas PDT sin RLS requieren comprobar ACL/exposición; no se concluye acceso
+público por ese dato. Se preservan restricciones LEGACY y entre etapas.
+Plan exacto01–05, manifest SHA256, precondiciones, pruebas y recuperación en
+`docs/sql-proposals/lp01-afectaciones/ACTIVACION_REVISION.md` y
+`activation-manifest.json`. Sin grants, SQL, push ni publicación; v382 sin incremento
+adicional por ser la misma entrega pendiente. Siguiente: corregir revalidación en
+entorno aislado y obtener autorización de consultas de solo lectura necesarias para
+certificar contratos/ACL/integridad agregada, antes de preparar activación final.
+
 ## LAB v382 · integración nativa PDT/Picking y panel · 05/11/2026
 
 Resultado local que sustituye las limitaciones técnicas de los hitos anteriores:
