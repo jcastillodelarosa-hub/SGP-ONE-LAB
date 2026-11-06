@@ -1,3 +1,13 @@
+## Resumen único NC AL · candidata v400 · 06/11/2026
+
+Base main v399 e0624964. Un único distintivo de aluminio en la fila contraída:
+cantidad definida prioritaria o propuesta única marcada Estimado. Varias cantidades
+potencialmente solapadas quedan por validar, sin sumarlas ni elegir arbitrariamente.
+Detalle expandido, otras categorías, SQL, permisos y pins de publicación intactos.
+Ocho pruebas Node dirigidas y sintaxis PASS; no sesión productiva ni QA visual real.
+Preparado para revisión. Sin fusión, despliegue ni cambio backend. Siguiente:
+validar integración/versión y controles existentes antes de publicación autorizada.
+
 ## PR203 · candidata v393 sellada · 05/11/2026
 
 Baseline/rollback: v392 sites/sgp-one-lab/versions/8e49cd70f0182107,

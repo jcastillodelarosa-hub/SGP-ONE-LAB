@@ -1,3 +1,13 @@
+## Resumen único NC AL · candidata v400 · 06/11/2026
+
+Base main v399 e0624964. Un único distintivo de aluminio en la fila contraída:
+cantidad definida prioritaria o propuesta única marcada Estimado. Varias cantidades
+potencialmente solapadas quedan por validar, sin sumarlas ni elegir arbitrariamente.
+Detalle expandido, otras categorías, SQL, permisos y pins de publicación intactos.
+Ocho pruebas Node dirigidas y sintaxis PASS; no sesión productiva ni QA visual real.
+Preparado para revisión. Sin fusión, despliegue ni cambio backend. Siguiente:
+validar integración/versión y controles existentes antes de publicación autorizada.
+
 ## Disponible manual integrado en candidata v399 · 06/11/2026
 
 Frontend exacto de 82c46056c981644402d95585e4a81b737203fe0a: definición manual
