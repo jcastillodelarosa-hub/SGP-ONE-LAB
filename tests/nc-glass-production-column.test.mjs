@@ -13,6 +13,7 @@ function fixture({order=null,hidden=[]}={}){
  for(const id of ['#ncGlassHead','#ncGlassBody','#ncGlassColumnPicker'])elements[id]={innerHTML:'',closest:()=>({}),querySelectorAll:()=>[]};
  const ctx=vm.createContext({
   document:{querySelector:s=>elements[s]},
+  ncGlassCanTrack:()=>false,getAppToken:()=>null,
   localStorage:{getItem:k=>k==='sgp_ncg_col_order'?JSON.stringify(order):JSON.stringify(hidden),setItem:()=>{}},
   escapeHtml:v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),
   bindSheetFilters:(_table,_rows,cols)=>{elements.filterColumns=cols;},
@@ -22,11 +23,11 @@ function fixture({order=null,hidden=[]}={}){
  return {api:ctx.api,elements};
 }
 
-test('NC Vidrio muestra Producción (orden) junto a NC por defecto',()=>{
+test('NC Vidrio muestra Producción junto a NC por defecto',()=>{
  const {api,elements}=fixture();
  const keys=Array.from(api.keys());assert.equal(keys[keys.indexOf('consecutivo')+1],'orden');
  assert.ok(api.visible().includes('orden'));api.picker();
- assert.match(elements['#ncGlassColumnPicker'].innerHTML,/data-ncgvis="orden" checked> Producción \(orden\)/);
+ assert.match(elements['#ncGlassColumnPicker'].innerHTML,/data-ncgvis="orden" checked> Producción/);
 });
 test('preferencia anterior incorpora orden junto a NC sin reiniciar columnas',()=>{
  const old=['sistema','consecutivo','proyecto','semana_maestro','estado_nc'];
@@ -41,15 +42,16 @@ test('respeta ubicación y ocultación de Producción elegidas después',()=>{
 });
 test('muestra nombre de fuente escapado, no reemplaza orden por Orden SAP',()=>{
  const {api,elements}=fixture();api.rows([{consecutivo:'12615136',orden:'982383 - Murray <script>',orden_sap:'4501691027'}]);api.render();
- assert.match(elements['#ncGlassHead'].innerHTML,/Producción \(orden\)/);
- assert.match(elements['#ncGlassBody'].innerHTML,/<td>982383 - Murray &lt;script&gt;<\/td>/);
+ assert.match(elements['#ncGlassHead'].innerHTML,/Producción/);
+ assert.match(elements['#ncGlassBody'].innerHTML,/<td>982383 - Murray &lt;script&gt;<br>/);
  assert.ok(!elements['#ncGlassBody'].innerHTML.includes('<script>'));
  api.rows([{consecutivo:'12615203',orden:null,orden_sap:'4501695600'}]);api.render();
- assert.match(elements['#ncGlassBody'].innerHTML,/<td>12615203<\/td><td><\/td>/);
+ assert.match(elements['#ncGlassBody'].innerHTML,/<td>12615203<\/td><td><br>/);
 });
 test('el campo nuevo participa en filtro y ordenación existentes',()=>{
  const {api,elements}=fixture();api.rows([{consecutivo:'2',orden:'B'},{consecutivo:'1',orden:'A'}]);api.sort();api.render();
- assert.ok(elements['#ncGlassBody'].innerHTML.indexOf('<td>A</td>')<elements['#ncGlassBody'].innerHTML.indexOf('<td>B</td>'));
+ assert.ok(elements['#ncGlassBody'].innerHTML.indexOf('<td>A<br>')<elements['#ncGlassBody'].innerHTML.indexOf('<td>B<br>'));
  assert.ok(elements.filterColumns.some(c=>c.key==='orden'));api.filter(['B']);api.render();
- assert.ok(!elements['#ncGlassBody'].innerHTML.includes('<td>A</td>'));assert.ok(elements['#ncGlassBody'].innerHTML.includes('<td>B</td>'));
+ assert.ok(!elements['#ncGlassBody'].innerHTML.includes('<td>A<br>'));assert.ok(elements['#ncGlassBody'].innerHTML.includes('<td>B<br>'));
 });
+

@@ -36,7 +36,7 @@ export function mountFollowup({tracking,operation,bridge}){
  for(const selector of ['[data-search]','[data-day]','[data-shift]','[data-progress]','[data-sort]'])get(selector).addEventListener(selector==='[data-search]'?'input':'change',render);
  const operational=mountOperation({tracking,operation,bridge,orderSaleEnabled:true,legacyLoad:()=>{get('[data-list]').hidden=false;get('[data-summary]').hidden=false;return load();}});
 
- return {load:operational.load};
+ return {load:operational.load,openOrder:operational.openOrder};
 }
-function boot(){mountFollowup({tracking:document.getElementById('productionTrackingPanel'),operation:document.getElementById('productionOperationPanel'),bridge:{getToken:()=>window.SGPPlannerBridge?.getToken?.(),getClient:()=>window.SGPPlannerBridge.getClient(),openGlass:(...args)=>window.SGPPlannerBridge.openGlass(...args)}});}
+function boot(){window.SGPTrackingBridge=mountFollowup({tracking:document.getElementById('productionTrackingPanel'),operation:document.getElementById('productionOperationPanel'),bridge:{getToken:()=>window.SGPPlannerBridge?.getToken?.(),getClient:()=>window.SGPPlannerBridge.getClient(),openGlass:(...args)=>window.SGPPlannerBridge.openGlass(...args)}});}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();

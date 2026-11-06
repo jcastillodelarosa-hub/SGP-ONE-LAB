@@ -1,3 +1,7 @@
+import {ncGlassOrderHints,isActiveGlassNc} from '../services/nc-glass-order-hints.js';
+import {withExportGlassSummary} from '../domain/lp01-export-glass-summary.js';
+import {orderDetailsTransport} from '../services/lp01-order-details.js';
+import {requireNcTrackingTarget,NC_TRACKING_LINES,NC_TRACKING_STAGES} from '../services/nc-glass-tracking.js';
 import {orderSaleTransport} from '../services/lp01-order-sale.js';
 import {affectationSummary} from '../domain/lp01-affectation-summary.js';
 import {sharedOrderSummary} from '../domain/lp01-shared-order-summary.js';
@@ -23,16 +27,16 @@ const n=v=>v===null||v===undefined?'Por validar':String(v);
 export function mountOperation({tracking,operation,bridge,legacyLoad,orderSaleEnabled=false}){
  let data=null,context=null,selected=null,seq=0,pending=null,busy=false,bi=null,fileId=null,session=null,loading=false,missing=false,dirty=false,fileSequence=0;
  let viewPanel='planificador',trackingViewState={},globalData=null,globalContext=null,globalSession=null,trackingRole=null,globalRequest=null,globalQueued=false;
- let operationRequest=null,enrichment=null;
+ let operationRequest=null,enrichment=null,navigationGeneration=0,navigating=false,navigationFlight=null,revealing=false,temporaryTrackingState=null;
  let orderSaleScope=null,orderSaleProvider=null;
  const trackingStates=new Map();
- let summaryFlight=null,summaryScope=null;const summaries=new Map();
- document.addEventListener('sgp:lp-role',e=>{trackingRole=e.detail;if(globalSession!==bridge.getToken()||!['COORDINADOR','ADMINISTRADOR'].includes(trackingRole)){globalData=null;trackingStates.clear();if(viewPanel==='seguimiento'){++seq;loading=false;live.replaceChildren();message.textContent='Seguimiento no autorizado';}}});
+ let summaryFlight=null,summaryScope=null,ncHints=null,ncHintsScope=null,ncHintsReadAt=0;const summaries=new Map(),summaryTimes=new Map(),orderDetails=new Map(),detailsAt=new Map(),detailsGenerations=new Map();
+ document.addEventListener('sgp:lp-role',e=>{cancelNavigation();++navigationGeneration;trackingRole=e.detail;if(globalSession!==bridge.getToken()||!['COORDINADOR','ADMINISTRADOR'].includes(trackingRole)){globalData=null;trackingStates.clear();trackingViewState={};temporaryTrackingState=null;if(viewPanel==='seguimiento'){++seq;loading=false;live.replaceChildren();message.textContent='Seguimiento no autorizado';}}});
  const today=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'America/Bogota',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
  tracking.querySelector('.lp-followup-filters').insertAdjacentHTML('afterend','<div class="lp-operational-context"><label>Etapa<select data-op-stage><option>ENSAMBLE</option><option>EMPAQUE</option></select></label><label>Fecha operativa<input type="date" data-op-date value="'+today()+'"></label><label>Turno<select data-op-shift><option value="1">Turno 1</option><option value="2">Turno 2</option></select></label><button type="button" data-op-load>Consultar turno</button><span data-op-status role="status"></span><button type="button" data-retry-pending hidden>Reintentar guardado sin respuesta</button></div><section data-live-orders></section>');
  const get=s=>tracking.querySelector(s),live=get('[data-live-orders]'),message=get('[data-op-status]');
  // Sorting/filtering replaces the table directly; repaint only after that replacement.
- new MutationObserver(()=>paintSummaries()).observe(live,{childList:true});
+ new MutationObserver(()=>{paintSummaries();refreshSummaries();}).observe(live,{childList:true});
  get('[data-live-orders]').insertAdjacentHTML('beforebegin','<nav data-tracking-stages hidden aria-label="Etapa de Seguimiento"><button type="button" data-tracking-stage="ENSAMBLE">Ensamble</button><button type="button" data-tracking-stage="EMPAQUE">Empaque</button></nav>');
  get('[data-tracking-stages]').querySelectorAll('button').forEach(b=>b.onclick=()=>{get('[data-op-stage]').value=b.dataset.trackingStage;load();});
  const capture=()=>({line:tracking.querySelector('[data-line]').value,stage:get('[data-op-stage]').value,date:get('[data-op-date]').value,shift:Number(get('[data-op-shift]').value)});
@@ -50,9 +54,10 @@ export function mountOperation({tracking,operation,bridge,legacyLoad,orderSaleEn
   get('[data-tracking-stages]').hidden=!global;
  }
  async function loadGlobal({quiet=false}={}){
+  if(navigating)return;
   const token=bridge.getToken(),ctx=capture(),scope=JSON.stringify([token,ctx.line,ctx.stage]);
   const sameScope=token===globalSession&&ctx.line===globalContext?.line&&ctx.stage===globalContext?.stage;
-  if(!sameScope){globalData=null;live.replaceChildren();if(token!==globalSession)trackingStates.clear();}
+  if(!sameScope){if(temporaryTrackingState?.scope!==scope)temporaryTrackingState=null;globalData=null;live.replaceChildren();if(token!==globalSession)trackingStates.clear();}
   if(busy)return;
   if(globalRequest){if(globalRequest.scope!==scope||globalRequest.request!==seq){++seq;globalQueued=true;}return;}
   const request=++seq;globalRequest={scope,request};loading=true;globalControls(true);
@@ -64,17 +69,31 @@ export function mountOperation({tracking,operation,bridge,legacyLoad,orderSaleEn
    if(token!==bridge.getToken())throw Error('La sesión cambió. Vuelve a consultar.');
    const normalized=globalTrackingData(next,ctx),changed=JSON.stringify(normalized)!==JSON.stringify(globalData);
    globalData=normalized;globalContext=ctx;globalSession=token;
-   if(summaryScope!==scope){summaryScope=scope;summaries.clear();}
-   const key=JSON.stringify([ctx.line,ctx.stage]);if(!trackingStates.has(key))trackingStates.set(key,{});trackingViewState=trackingStates.get(key);
+   if(summaryScope!==scope){summaryScope=scope;summaries.clear();summaryTimes.clear();orderDetails.clear();detailsAt.clear();detailsGenerations.clear();}
+   const key=JSON.stringify([ctx.line,ctx.stage]);if(!trackingStates.has(key))trackingStates.set(key,{});trackingViewState=temporaryTrackingState?.scope===scope?temporaryTrackingState.state:trackingStates.get(key);
    message.textContent='';const editing=quiet&&sameScope&&trackingViewState.open&&['Afectaciones','Materiales'].includes(trackingViewState.tab)&&globalData.orders.some(r=>trackingIdentity(r)===trackingViewState.selected);if(!editing&&(changed||!quiet||!sameScope))renderGlobal();
-   refreshSummaries();
+   if(!quiet)summaryTimes.clear();refreshNcHints({force:!quiet});refreshSummaries();
   }catch(e){if(request!==seq)return;globalData=null;live.replaceChildren();message.textContent='No se pudo consultar Seguimiento: '+e.message;}
   finally{if(globalRequest?.request===request)globalRequest=null;if(request===seq)loading=false;if(globalQueued){globalQueued=false;loading=false;if(viewPanel==='seguimiento')loadGlobal();}}
  }
+ function rememberDetails(key,details){
+  const previous=orderDetails.get(key),before=detailsAt.get(key)??Date.parse(previous?.export?.at),after=Date.parse(details?.export?.at);
+  if(Number.isFinite(before)&&Number.isFinite(after)&&after<before)return previous??null;
+  if(Number.isFinite(after))detailsAt.set(key,Math.max(Number.isFinite(before)?before:after,after));
+  orderDetails.set(key,details);return details;
+ }
  function summaryFor(row){const s=summaries.get(row.key);return s&&s.balance!==officialBalance(row,globalContext.stage)?{...s,total:null,available:null}:s;}
+ function refreshNcHints({force=false}={}){
+  if(!globalData||viewPanel!=='seguimiento')return;
+  const token=globalSession,ctx={...globalContext},role=trackingRole,scope=JSON.stringify([token,ctx.line,ctx.stage,role]);
+  if(ncHintsScope!==scope){ncHints?.dispose();ncHintsScope=scope;ncHintsReadAt=0;ncHints=ncGlassOrderHints({getToken:()=>bridge.getToken(),getRole:()=>trackingRole,getClient:()=>bridge.getClient(),selectSource:isActiveGlassNc,isCurrent:()=>viewPanel==='seguimiento'&&globalSession===token&&globalContext?.line===ctx.line&&globalContext?.stage===ctx.stage});}
+  const current=ncHints,refresh=force||Date.now()-ncHintsReadAt>=20000;void current.read({force:refresh}).then(()=>{if(current===ncHints){if(refresh)ncHintsReadAt=Date.now();paintSummaries();}});
+ }
+ function ncHintsFor(row){const summary=summaries.get(row.key);return Array.isArray(summary?.ncRecordedReferences)&&ncHints?ncHints.candidatesFor(row,summary.ncRecordedReferences):{status:'UNAVAILABLE',count:null,candidates:[]};}
+ function ncAlert(row,compact=false){const hints=ncHintsFor(row);return hints.count>0?'<button type="button" class="lp-nc-alert'+(compact?' lp-nc-alert-name':'')+'" data-nc-review-order="'+esc(row.key)+'" aria-label="NC vidrio por revisar para '+esc(row.produccion)+'">'+(compact?'⚠':'⚠ NC vidrio por revisar')+'</button>'+(!compact?'<small class="lp-nc-alert-note">Posible relación · Sin registrar</small>':''):'';}
  function refreshSummaries(){
   if(summaryFlight||!globalData||viewPanel!=='seguimiento')return;
-  const token=globalSession,scope=summaryScope,ctx={...globalContext},keys=globalData.orders.map(r=>r.key);let cursor=0;
+  const token=globalSession,scope=summaryScope,ctx={...globalContext},keys=[...new Set([...live.querySelectorAll('[data-order-summary]')].map(h=>h.dataset.orderSummary))].filter(key=>Date.now()-(summaryTimes.get(key)||0)>20000);if(!keys.length)return;let cursor=0;
   const alive=()=>token===bridge.getToken()&&scope===summaryScope&&viewPanel==='seguimiento'&&globalData;
   summaryFlight=(async()=>{const client=await bridge.getClient();
    await Promise.all(Array.from({length:Math.min(3,keys.length)},async()=>{while(cursor<keys.length&&alive()){
@@ -86,10 +105,13 @@ export function mountOperation({tracking,operation,bridge,legacyLoad,orderSaleEn
      catch(error){if(error.message!=='SHARED_ORDER_UNAVAILABLE')throw error;summary={...affectationSummary(nativeSnapshot),sharedUnavailable:true,total:null,available:null};}
     }
     catch(error){if(!alive())return;if(error.message==='NO_AUTORIZADO'){++seq;loading=false;globalData=null;summaries.clear();live.replaceChildren();message.textContent='Acceso revocado. Vuelve a consultar.';return;}summary={status:'UNAVAILABLE'};}
-    if(!alive())return;if(Number.isSafeInteger(summary.sharedRevision)&&(summaries.get(key)?.sharedRevision??-1)>summary.sharedRevision)continue;summaries.set(key,summary);
+    if(!alive())return;
+    try{const details=await orderDetailsTransport({client,getToken:()=>alive()?bridge.getToken():null,key,line:ctx.line,stage:ctx.stage}).read();if(!alive())return;const latest=rememberDetails(key,details);summary=withExportGlassSummary(summary,latest,{key,line:ctx.line,stage:ctx.stage});}
+    catch(error){if(!alive())return;if(error.message==='NO_AUTORIZADO'){++seq;globalData=null;summaries.clear();live.replaceChildren();message.textContent='Acceso revocado. Vuelve a consultar.';return;}detailsGenerations.set(key,(detailsGenerations.get(key)||0)+1);orderDetails.set(key,null);summary=withExportGlassSummary(summary,null,{key,line:ctx.line,stage:ctx.stage});}
+    if(!alive())return;summaryTimes.set(key,Date.now());if(Number.isSafeInteger(summary.sharedRevision)&&(summaries.get(key)?.sharedRevision??-1)>summary.sharedRevision)continue;summaries.set(key,summary);summaryTimes.set(key,Date.now());
     paintSummaries(key);
    }}));
-  })().catch(()=>{}).finally(()=>{summaryFlight=null;if(scope!==summaryScope&&globalData)refreshSummaries();});
+  })().catch(()=>{}).finally(()=>{summaryFlight=null;if(globalData&&viewPanel==='seguimiento'&&(scope!==summaryScope||[...live.querySelectorAll('[data-order-summary]')].some(h=>!keys.includes(h.dataset.orderSummary)&&!summaryTimes.has(h.dataset.orderSummary))))refreshSummaries();});
  }
  function paintSummaries(key){
   if(!globalData||globalSession!==bridge.getToken()||viewPanel!=='seguimiento')return;
@@ -98,11 +120,13 @@ export function mountOperation({tracking,operation,bridge,legacyLoad,orderSaleEn
    const row=globalData.orders.find(r=>r.key===host.dataset.orderSummary),summary=row?summaryFor(row):null;
    const legacy=summary?.sharedUnavailable?'<small>Compartido no disponible · lectura heredada</small>':'';
    const accessories=Number.isSafeInteger(summary?.accessories)&&summary.accessories>0?'<button type="button" data-summary-cause="ACCESORIOS" class="lp-tracking-chip">'+summary.accessories+' × Accesorios</button>':'';
-   const html=legacy+summaryMarkup(summary)+accessories;if(host.innerHTML!==html)host.innerHTML=html;
+   const html=legacy+summaryMarkup(summary)+accessories+(row?ncAlert(row):'');if(host.innerHTML!==html)host.innerHTML=html;
   });
+  live.querySelectorAll('[data-nc-order-name]').forEach(host=>{const row=globalData.orders.find(r=>r.key===host.dataset.ncOrderName),html=row?ncAlert(row,true):'';if(host.innerHTML!==html)host.innerHTML=html;});
  }
  function renderGlobal(){
   if(!globalData||globalSession!==bridge.getToken())return;
+  refreshNcHints();
   for(const sel of ['[data-week]','[data-day]','[data-shift]','[data-progress]','[data-sort]'])tracking.querySelector(sel).closest('label').hidden=true;
   for(const sel of ['[data-status]','[data-list]','[data-summary]'])tracking.querySelector(sel).hidden=true;
   get('[data-tracking-stages]').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.trackingStage===globalContext.stage)));
@@ -113,11 +137,12 @@ export function mountOperation({tracking,operation,bridge,legacyLoad,orderSaleEn
     client:{rpc:async(name,args)=>(await bridge.getClient()).rpc(name,args)}});
   }
   renderTracking({host:live,orderSaleProvider:orderSaleEnabled?orderSaleProvider:null,data:{...globalData,orders:globalData.orders.map(r=>({...r,get affectationSummary(){return summaryFor(r);}}))},context:globalContext,state:trackingViewState,search:'',canReviewSale:true,
-   onDetailClose:()=>renderGlobal(),
+   onDetailClose:()=>{if(temporaryTrackingState){temporaryTrackingState=null;trackingViewState=trackingStates.get(JSON.stringify([globalContext.line,globalContext.stage]))||{};trackingViewState.open=false;}renderGlobal();},
    onAffectations:async({host,row,target,cause})=>{
-    const token=bridge.getToken(),scope=globalContext;host.textContent='Consultando afectaciones…';
+    const token=bridge.getToken(),scope=globalContext,candidateOrigin=temporaryTrackingState?.origin,origin=candidateOrigin?.key===row.key&&candidateOrigin.line===scope.line&&candidateOrigin.stage===scope.stage?candidateOrigin:null;host.textContent='Consultando afectaciones…';
     try{const client=await bridge.getClient();if(!host.isConnected||token!==bridge.getToken()||(scope.line!==globalContext?.line||scope.stage!==globalContext?.stage))return;
-     await mountTrackingAffectations({host,row,target,cause,scope,client,onSummary:summary=>{if(token!==bridge.getToken()||scope.line!==globalContext?.line||scope.stage!==globalContext?.stage||viewPanel!=='seguimiento')return;if((summaries.get(row.key)?.sharedRevision??-1)>(summary.sharedRevision??-1))return;summaries.set(row.key,summary);paintSummaries(row.key);},getToken:()=>bridge.getToken(),isCurrent:()=>scope.line===globalContext?.line&&scope.stage===globalContext?.stage});
+     await mountTrackingAffectations({host,row,target,cause,scope,client,ncHints,initialDetails:orderDetails.get(row.key),getLatestDetails:()=>orderDetails.get(row.key),getDetailsGeneration:()=>detailsGenerations.get(row.key)||0,onDetails:details=>rememberDetails(row.key,details),onSummary:summary=>{if(token!==bridge.getToken()||scope.line!==globalContext?.line||scope.stage!==globalContext?.stage||viewPanel!=='seguimiento')return;if((summaries.get(row.key)?.sharedRevision??-1)>(summary.sharedRevision??-1))return;summaries.set(row.key,summary);summaryTimes.set(row.key,Date.now());paintSummaries(row.key);},getToken:()=>bridge.getToken(),isCurrent:()=>scope.line===globalContext?.line&&scope.stage===globalContext?.stage});
+     if(origin&&host.isConnected&&token===bridge.getToken()&&temporaryTrackingState?.origin===origin){const notice=document.createElement('p');notice.className='nc-tracking-origin';notice.textContent='NC de origen '+origin.reference+' · Referencia sin guardar; no vinculada a esta orden.';host.prepend(notice);}
     }catch(error){if(host.isConnected)host.textContent='Afectaciones no disponibles: '+error.message;}
    },
    onOperate:async(id,focusSale,target)=>{
@@ -142,12 +167,15 @@ export function mountOperation({tracking,operation,bridge,legacyLoad,orderSaleEn
   }).catch(error=>{if(enrichment===job&&!controller.signal.aborted&&token===bridge.getToken()&&scope===JSON.stringify(context)){++seq;loading=false;clear();message.textContent='No se pudo verificar el acceso: '+error.message;}}).finally(()=>{if(enrichment===job)enrichment=null;});
  }
  async function load({quiet=false}={}){
+  if(navigating)return;
   if(viewPanel==='seguimiento'){stopEnrichment();return loadGlobal({quiet});}
   const scope=JSON.stringify([bridge.getToken(),capture()]);
   if(operationRequest){
    if(operationRequest.scope===scope)return operationRequest.promise;
    ++seq;clear();stopEnrichment();
-   await operationRequest.promise;return load({quiet});
+   const intention=navigationGeneration,panel=viewPanel;await operationRequest.promise;
+   if(intention!==navigationGeneration||panel!==viewPanel||scope!==JSON.stringify([bridge.getToken(),capture()]))return;
+   return load({quiet});
   }
   if(session!==bridge.getToken()||(context&&JSON.stringify(capture())!==JSON.stringify(context))){clear();stopEnrichment();}
   const promise=performLoad({quiet});operationRequest={scope,promise};
@@ -288,12 +316,44 @@ export function mountOperation({tracking,operation,bridge,legacyLoad,orderSaleEn
  get('[data-retry-pending]').onclick=()=>attempt(()=>transmit());
  get('[data-op-load]').onclick=()=>load();for(const sel of ['[data-op-stage]','[data-op-date]','[data-op-shift]'])get(sel).onchange=()=>load();
  tracking.querySelector('[data-search]')?.addEventListener('input',()=>{if(viewPanel==='seguimiento')renderGlobal();else if(data)render();});tracking.querySelector('[data-line]')?.addEventListener('change',()=>load());
- document.addEventListener('sgp:production-panel',e=>{if(viewPanel!==e.detail){++seq;loading=false;orderSaleScope=null;orderSaleProvider=null;}viewPanel=e.detail;});
+ document.addEventListener('sgp:production-panel',e=>{if(!revealing){cancelNavigation();++navigationGeneration;}if(viewPanel!==e.detail){++seq;loading=false;orderSaleScope=null;orderSaleProvider=null;}viewPanel=e.detail;});
  document.addEventListener('sgp:production-panel',e=>{if(e.detail==='seguimiento')tracking.querySelector('.lp-followup-heading h3').textContent='Seguimiento de órdenes';});
- document.addEventListener('sgp:production-stage',e=>{if(!['ENSAMBLE','EMPAQUE'].includes(e.detail))return;get('[data-op-stage]').value=e.detail;tracking.querySelector('.lp-followup-heading h3').textContent='Operación · '+(e.detail==='ENSAMBLE'?'Ensamble':'Empaque');});
- document.addEventListener('sgp:production-panel',e=>{if(['operacion','dashboard','reportes'].includes(e.detail)&&(missing||(data&&session===bridge.getToken()))){renderReports();return;}if(['seguimiento','operacion','dashboard','reportes','ensamble','empaque'].includes(e.detail))load();});
+ document.addEventListener('sgp:production-stage',e=>{if(!revealing){cancelNavigation();++navigationGeneration;}if(!['ENSAMBLE','EMPAQUE'].includes(e.detail))return;get('[data-op-stage]').value=e.detail;tracking.querySelector('.lp-followup-heading h3').textContent='Operación · '+(e.detail==='ENSAMBLE'?'Ensamble':'Empaque');});
+ document.addEventListener('sgp:production-panel',e=>{if(revealing)return;if(['operacion','dashboard','reportes'].includes(e.detail)&&(missing||(data&&session===bridge.getToken()))){renderReports();return;}if(['seguimiento','operacion','dashboard','reportes','ensamble','empaque'].includes(e.detail))load();});
  document.addEventListener('sgp:line-plan-updated',()=>{if(!tracking.hidden||!operation.hidden)load();});
  const timer=setInterval(()=>{if((data||globalData)&&(!tracking.hidden||!operation.hidden)&&document.visibilityState==='visible')load({quiet:true});},20000);
  window.addEventListener('pagehide',()=>clearInterval(timer),{once:true});
- return {load};
+ function cancelNavigation(){navigationFlight?.cancel();}
+ async function openOrder(target){
+  const session=bridge.getToken();
+  if(navigating)throw Error('Espera a que termine la apertura anterior y vuelve a buscar.');
+  if(!session||session!==target.session||!target.isCurrent?.()||!['COORDINADOR','ADMINISTRADOR'].includes(trackingRole))throw Error('Seguimiento no autorizado o sesión cambiada.');
+  if(!NC_TRACKING_LINES.includes(target.line)||!NC_TRACKING_STAGES.includes(target.stage)||typeof target.key!=='string'||!target.key.endsWith('|'+target.line))throw Error('Identidad de destino incompatible.');
+  // The shared editor has its own draft/revision. Never use the Operation dirty flag as its proxy.
+  if(trackingViewState.open||document.querySelector('.lp-sale-dialog[open]'))throw Error('Cierra primero el detalle o editor abierto en Seguimiento para conservar su trabajo. Después vuelve a buscar.');
+  if(busy||pending||dirty)throw Error('Resuelve el borrador o guardado pendiente de Operación antes de navegar.');
+  const version=++navigationGeneration;const current=()=>version===navigationGeneration&&session===bridge.getToken()&&target.isCurrent()&&['COORDINADOR','ADMINISTRADOR'].includes(trackingRole);
+  const flight={controller:new AbortController(),cancel(){this.controller.abort();if(navigationFlight===this){navigationFlight=null;navigating=false;loading=false;++navigationGeneration;}}};
+  navigationFlight=flight;navigating=true;++seq;globalQueued=false;stopEnrichment();
+  const cancel=()=>flight.cancel();target.signal?.addEventListener('abort',cancel,{once:true});
+  try{
+   const payload=await rpc('sgp_lp_seguimiento_consultar',{p_linea:target.line,p_etapa:target.stage},{signal:flight.controller.signal});
+   if(!current())throw Error('La navegación o sesión cambió. Vuelve a buscar.');
+   const ctx={...capture(),line:target.line,stage:target.stage},normalized=globalTrackingData(payload,ctx),row=requireNcTrackingTarget(normalized,target);
+   if(trackingViewState.open||busy||pending||dirty)throw Error('Hay un detalle o borrador abierto. Ciérralo explícitamente antes de navegar.');
+   revealing=true;try{target.reveal();}finally{revealing=false;}
+   if(viewPanel!=='seguimiento')throw Error('No se pudo abrir la vista Seguimiento.');
+   get('[data-line]').value=target.line;get('[data-op-stage]').value=target.stage;
+   globalData=normalized;globalContext=ctx;globalSession=session;globalControls(true);
+   const scope=JSON.stringify([session,target.line,target.stage]),key=JSON.stringify([target.line,target.stage]);
+   if(!trackingStates.has(key))trackingStates.set(key,{});
+   // A temporary unfiltered view reveals the selected row without rewriting saved filter choices.
+   trackingViewState={selected:trackingIdentity(row),open:true,tab:'Afectaciones',cause:'NC_V'};temporaryTrackingState={scope,state:trackingViewState,origin:Object.freeze({key:row.key,line:ctx.line,stage:ctx.stage,reference:target.ncReference})};
+   if(summaryScope!==scope){summaryScope=scope;summaries.clear();summaryTimes.clear();orderDetails.clear();detailsAt.clear();detailsGenerations.clear();}
+   message.textContent='';renderGlobal();refreshSummaries();
+   live.querySelector('#lp-tracking-drawer')?.focus({preventScroll:true});live.querySelector('#lp-tracking-drawer')?.scrollIntoView({block:'nearest'});
+   return {key:row.key,line:ctx.line,stage:ctx.stage};
+  }finally{target.signal?.removeEventListener('abort',cancel);if(navigationFlight===flight){navigationFlight=null;navigating=false;loading=false;}}
+ }
+ return {load,openOrder};
 }
