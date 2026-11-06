@@ -1,3 +1,18 @@
+## Hojas / cierre oficial · entrega parcial aislada · 06/11/2026
+
+Base main d45c5ed/v394; rama feat/lp01-operation-official-close, candidata v396
+(PR206/v395 ajeno). Clasificación de Ensamble por saldo Export y semana original;
+contrato puro de cierre PDA parcial/idempotente, identidad triple, historial y
+base de Disponible. Misma infraestructura de parser XLSX, extensión V2 opt-in;
+handler/SQL06 activos continúan V1. Cant. Procesada = ventanas también para PIEZA
+DE ALUMINIO CUERPOS, por confirmación explícita posterior de Johan.
+**NO bloque completo**: faltan persistencia RPC V2, tabla B13/B14, integración
+Empaque/Otras y retirada del campo manual. Apertura automática sigue contenida.
+Materialización de guía y XLSX nuevos falló con único reintento; sin píxeles ni
+prueba de los archivos 03/11. 535 Node PASS, release PASS, DOM1440/390 PASS;
+CI remota pendiente del SHA. Sin SQL productivo, ACL, flags, sesión, merge o
+publicación. [Alcance y próximo paso](OPERACION_CIERRE_OFICIAL_PENDIENTES.md).
+
 ## Seguimiento · corrección visual v394 propuesta · 05/11/2026
 
 Base publicada LAB v393: main `2dedc5e055a2472d034d20d23463e66310fdc64f`,

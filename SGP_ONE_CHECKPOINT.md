@@ -1,3 +1,14 @@
+## Hojas / cierre PDA · parcial para coordinación · 06/11/2026
+
+Base d45c5ed (main v394), rama feat/lp01-operation-official-close, candidata v396.
+Clasificador Export y contratos V2 de importación/conciliación/cierre implementados;
+V2 todavía sin RPC/persistencia productiva. 535 Node, release y DOMPC/móvil PASS.
+Guía original/XLSX nuevos no descargables tras reintento soportado: no rediseño
+ni comparación visual acreditada. PR206 intacto; no SQL/grants/flags/publicación.
+No dar el bloque por terminado. Próximo: resolver bytes originales y adaptar el
+cierre transaccional existente antes de retirar campo manual. Estado y brechas:
+[operación](docs/linea-produccion/OPERACION_CIERRE_OFICIAL_PENDIENTES.md).
+
 ## PR203 · candidata v393 sellada · 05/11/2026
 
 Baseline/rollback: v392 sites/sgp-one-lab/versions/8e49cd70f0182107,

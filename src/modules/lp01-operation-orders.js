@@ -1,7 +1,7 @@
 import {officialBalance,AFFECTATIONS} from '../domain/lp01-operation.js';
 const esc=v=>String(v??'—').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const value=v=>v===null||v===undefined?'Por validar':esc(v);
-const labels={ABIERTAS:['Órdenes abiertas','Primero las más antiguas · incluye arrastres'],PROGRAMADAS:['Programadas sin iniciar','En el orden de prioridad del turno'],POR_REVISAR:['Clasificación por revisar','No se pudo acreditar la lectura de afectaciones individuales'],COMPLETADAS:['Completadas en la asignación','Conservan su registro e historial']};
+const labels={ABIERTAS:['Órdenes abiertas','Por semana original del Export'],PROGRAMADAS:['Programadas sin iniciar','En el orden de prioridad del turno'],POR_REVISAR:['Clasificación por revisar','Datos Export ausentes o incompatibles'],COMPLETADAS:['Completadas en este proceso','Conservan su registro e historial']};
 export function operationOrderList(groups,stage,{compact=false}={}){
  if(!groups.length)return '<p>No hay órdenes incorporadas en este turno.</p>';
  return Object.entries(labels).map(([state,[title,subtitle]])=>{const items=groups.filter(g=>g.state===state);if(!items.length)return '';
