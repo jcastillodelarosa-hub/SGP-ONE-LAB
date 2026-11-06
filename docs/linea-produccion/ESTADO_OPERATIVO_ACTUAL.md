@@ -1,3 +1,19 @@
+## Disponible manual · regla aclarada y corrección preparada · 06/11/2026
+
+Coordinación confirma regla aprobada: editable por orden, sin asignación ni
+conciliación, con límite en saldo real de etapa. Se corrige la condición antigua,
+no se inventa disponibilidad conciliada. SQL07 cambia solo guardas de fuente/límite
+por exportBalance; mantiene autorización, CAS/UUID/fingerprint/locks/auditoría.
+UI cell usa mismo límite y explica saldo ausente/excedido. SQL08 recupera el
+cuerpo previo sin borrar datos. Sin cambios en permisos/RLS/versionado.
+
+SQL07/08 PREPARADOS, NO APLICADOS: este encargo exige reportar antes de backend.
+6 Node, PostgreSQL aislado y Chromium PC/móvil dirigidos PASS. Ver
+../sql-proposals/lp01-order-sale/MANUAL_BALANCE_REVIEW.md y resultados de pruebas.
+Siguiente: coordinación revisa e integra UI/SQL con Seguimiento, aplica07 bajo
+su autorización y publica versión conjunta; luego guardado real de Johan.
+No publicación ni datos productivos de prueba desde este hilo.
+
 ## Disponible persiste · causa funcional y segundo coste · 06/11/2026
 
 Johan confirmó fallo tras primer ajuste. Nuevo contraste: definiciones0,
