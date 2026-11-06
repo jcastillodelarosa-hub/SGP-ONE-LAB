@@ -20,5 +20,5 @@ export function sharedOrderSummary(nativeSnapshot,sharedSnapshot){
  const unlinked=active.filter(p=>!linked.has(p.id));
  const estimates=unlinked.map(p=>({reference:p.reference,quantity:p.pieceQuantity??p.pieces??p.quantity})).filter(p=>Number.isSafeInteger(p.quantity)&&p.quantity>0);
  const ncReferences=new Set([...sharedSnapshot.reports.filter(r=>r.cause==='NC_V'&&r.quantity>r.confirmed).map(r=>r.nc_reference),...sharedSnapshot.legacyReports.filter(r=>r.causa==='NC_V'&&r.ventanas>r.confirmadas).map(r=>r.ncReference)].filter(Boolean));
- return {...original,sharedRevision:sharedSnapshot.revision,reportedQuantities,estimates,ncEstimate:ncReferences.size||null,aluminumNeedsIndicator:unlinked.length>0,aluminumReported:reportedQuantities.NC_AL.length>0,categories,accessories,hasReports:sharedSnapshot.reports.length>0||sharedSnapshot.legacyReports.length>0,total:null,available:null};
+ return {...original,stageBalance:sharedSnapshot.stageBalance??null,sharedRevision:sharedSnapshot.revision,reportedQuantities,estimates,ncEstimate:ncReferences.size||null,aluminumNeedsIndicator:unlinked.length>0,aluminumReported:reportedQuantities.NC_AL.length>0,categories,accessories,hasReports:sharedSnapshot.reports.length>0||sharedSnapshot.legacyReports.length>0,total:null,available:null};
 }
