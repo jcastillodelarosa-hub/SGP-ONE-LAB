@@ -38,6 +38,12 @@ BEGIN
  SELECT state INTO st FROM sgp_lp_official.ledger WHERE stage=et AND line=lin;
  st:=coalesce(st,'{"contract":"LP-OFFICIAL-CLOSE-1","revision":0,"entries":[],"pending":[],"history":[],"closures":[],"receipts":[]}'::jsonb);
  -- No partial-scope reader may receive another order's stored history.
+ FOR r IN SELECT value FROM jsonb_array_elements(coalesce(st->'definitions','[]')) LOOP
+  PERFORM sgp_lp_operacion.sesion(p_token,et,r->>'key',lin);
+ END LOOP;
+ FOR r IN SELECT value FROM jsonb_array_elements(coalesce(st->'inclusions','[]')) LOOP
+  PERFORM sgp_lp_operacion.sesion(p_token,et,r->>'key',lin);
+ END LOOP;
  FOR r IN SELECT value FROM jsonb_array_elements(st->'entries') LOOP
   PERFORM sgp_lp_operacion.sesion(p_token,et,r->>'key',lin);
  END LOOP;
@@ -65,15 +71,51 @@ BEGIN
  FOR r IN SELECT value FROM jsonb_array_elements(plan_rows) LOOP PERFORM sgp_lp_operacion.sesion(p_token,et,r->>'key',lin);END LOOP;
  plan:=p_context||jsonb_build_object('revision',md5(plan_rows::text),'rows',plan_rows);
  fingerprint:=md5(jsonb_build_object('catalog',catalog,'plan',plan,'schedule',period,'turn',native_turn)::text);
- RETURN jsonb_build_object('contract','LP-OFFICIAL-CONTEXT-1','actor',s->>'usuario','observedAt',clock_timestamp(),'state',st,'catalog',catalog,'plan',plan,'schedule',period,'fingerprint',fingerprint);
+ RETURN jsonb_build_object('contract','LP-OFFICIAL-CONTEXT-1','actor',s->>'usuario','role',s->>'rol','observedAt',clock_timestamp(),'state',st,'catalog',catalog,'plan',plan,'schedule',period,'fingerprint',fingerprint);
 END $$;
 REVOKE ALL ON FUNCTION public.sgp_lp_official_context_v1(text,jsonb,uuid,text) FROM PUBLIC,anon,authenticated;
+
+CREATE FUNCTION public.sgp_lp_official_read_v1(p_token text,p_context jsonb)
+RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
+DECLARE et text:=p_context->>'stage';lin text:=p_context->>'line';d date:=(p_context->>'date')::date;t int:=(p_context->>'shift')::int;
+ s jsonb;st jsonb;catalog jsonb;plan_rows jsonb;plan jsonb;period jsonb;native_turn jsonb;fingerprint text;event sgp_lp_official.events%rowtype;r jsonb;enabled boolean;
+BEGIN
+ s:=sgp_lp_operacion.sesion(p_token,et,NULL,lin);
+ IF et NOT IN('ENSAMBLE','EMPAQUE') OR lin NOT IN('PANELES_2','FRAMES_2') OR d IS NULL OR t IS NULL OR t NOT IN(1,2) OR EXISTS(SELECT 1 FROM jsonb_object_keys(p_context) k WHERE k NOT IN('stage','line','date','shift')) THEN RAISE EXCEPTION 'OFFICIAL_CONTEXT_INVALID'; END IF;
+ SELECT state INTO st FROM sgp_lp_official.ledger WHERE stage=et AND line=lin;
+ st:=coalesce(st,'{"contract":"LP-OFFICIAL-CLOSE-1","revision":0,"entries":[],"pending":[],"history":[],"closures":[],"receipts":[]}'::jsonb);
+ -- No partial-scope reader may receive another order's stored history.
+ FOR r IN SELECT value FROM jsonb_array_elements(coalesce(st->'definitions','[]')) LOOP
+  PERFORM sgp_lp_operacion.sesion(p_token,et,r->>'key',lin);
+ END LOOP;
+ FOR r IN SELECT value FROM jsonb_array_elements(coalesce(st->'inclusions','[]')) LOOP
+  PERFORM sgp_lp_operacion.sesion(p_token,et,r->>'key',lin);
+ END LOOP;
+ FOR r IN SELECT value FROM jsonb_array_elements(st->'entries') LOOP
+  PERFORM sgp_lp_operacion.sesion(p_token,et,r->>'key',lin);
+ END LOOP;
+ period:=sgp_lp_operacion.periodo(d,t)||jsonb_build_object('timezone','America/Bogota');
+ -- Canonical source rows, not identity or authorization evidence supplied by a client.
+ SELECT coalesce(jsonb_agg(to_jsonb(p) ORDER BY p.key_produccion),'[]') INTO catalog
+ FROM public.sgp_producciones p WHERE p.id_linea=lin AND EXISTS(SELECT 1 FROM sgp_lp_operacion.permisos a WHERE a.usuario=s->>'usuario' AND a.etapa=et AND a.key=p.key_produccion);
+ SELECT coalesce(jsonb_agg(to_jsonb(x) ORDER BY x.key),'[]') INTO plan_rows FROM (
+  SELECT a.key_produccion key,sum(a.cantidad)::bigint quantity,jsonb_agg(to_jsonb(a) ORDER BY a.id) assignments
+  FROM public.sgp_linea_plan_asignaciones a JOIN public.sgp_producciones p USING(key_produccion)
+  WHERE p.id_linea=lin AND a.fecha=d AND a.turno=t AND a.estado IS DISTINCT FROM 'CANCELADA'
+  GROUP BY a.key_produccion)x;
+ FOR r IN SELECT value FROM jsonb_array_elements(plan_rows) LOOP PERFORM sgp_lp_operacion.sesion(p_token,et,r->>'key',lin);END LOOP;
+ plan:=p_context||jsonb_build_object('revision',md5(plan_rows::text),'rows',plan_rows);
+ fingerprint:=md5(jsonb_build_object('catalog',catalog,'plan',plan,'schedule',period,'turn',native_turn)::text);
+ RETURN jsonb_build_object('contract','LP-OFFICIAL-CONTEXT-1','actor',s->>'usuario','role',s->>'rol','observedAt',clock_timestamp(),'state',st,'catalog',catalog,'plan',plan,'schedule',period,'fingerprint',fingerprint);
+END $$;
+REVOKE ALL ON FUNCTION public.sgp_lp_official_read_v1(text,jsonb) FROM PUBLIC,anon,authenticated;
 
 CREATE FUNCTION public.sgp_lp_official_commit_v1(p_token text,p_context jsonb,p_id uuid,p_request_hash text,p_source_fingerprint text,p_expected_revision bigint,p_state jsonb,p_result jsonb,p_file jsonb)
 RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
 DECLARE et text:=p_context->>'stage';lin text:=p_context->>'line';ctx jsonb;old jsonb;r jsonb;rev bigint;raw bytea;result jsonb;s jsonb;
 BEGIN
  s:=sgp_lp_operacion.sesion(p_token,et,NULL,lin);
+ PERFORM pg_advisory_xact_lock(hashtextextended(et||'|'||lin,184));
  PERFORM pg_advisory_xact_lock(hashtextextended(et||'/'||lin,61106));
  -- Brief source lock only for commit: a changed plan/catalog/schedule rejects the CAS.
  -- Same order for every writer; source writers cannot slip between fingerprint and COMMIT.
@@ -87,6 +129,13 @@ BEGIN
  IF EXISTS(SELECT 1 FROM jsonb_array_elements(old->'history') WITH ORDINALITY h(v,n) WHERE p_state->'history'->(h.n::int-1) IS DISTINCT FROM h.v)
  OR EXISTS(SELECT 1 FROM jsonb_array_elements(old->'closures') WITH ORDINALITY h(v,n) WHERE p_state->'closures'->(h.n::int-1) IS DISTINCT FROM h.v)
  OR EXISTS(SELECT 1 FROM jsonb_array_elements(old->'receipts') WITH ORDINALITY h(v,n) WHERE p_state->'receipts'->(h.n::int-1) IS DISTINCT FROM h.v) THEN RAISE EXCEPTION 'HISTORIAL_INMUTABLE'; END IF;
+ IF EXISTS(SELECT 1 FROM jsonb_array_elements(coalesce(old->'definitions','[]')) WITH ORDINALITY h(v,n) WHERE p_state->'definitions'->(h.n::int-1) IS DISTINCT FROM h.v)
+ OR EXISTS(SELECT 1 FROM jsonb_array_elements(coalesce(old->'inclusions','[]')) WITH ORDINALITY h(v,n) WHERE p_state->'inclusions'->(h.n::int-1) IS DISTINCT FROM h.v) THEN RAISE EXCEPTION 'HISTORIAL_WORKFLOW_INMUTABLE'; END IF;
+ IF jsonb_array_length(coalesce(p_state->'definitions','[]'))>jsonb_array_length(coalesce(old->'definitions','[]')) AND ctx->>'role' NOT IN('COORDINADOR','ADMINISTRADOR') THEN RAISE EXCEPTION 'DEFINICION_REQUIERE_COORDINADOR'; END IF;
+ FOR r IN SELECT value FROM jsonb_array_elements(coalesce(p_state->'definitions','[]')||coalesce(p_state->'inclusions','[]')) LOOP
+  IF r->>'stage' IS DISTINCT FROM et OR r->>'line' IS DISTINCT FROM lin OR coalesce(r->>'quantity','') !~ '^[0-9]+$' OR nullif(btrim(r->>'observation'),'') IS NULL THEN RAISE EXCEPTION 'WORKFLOW_INVALIDO'; END IF;
+  PERFORM sgp_lp_operacion.sesion(p_token,et,r->>'key',lin);
+ END LOOP;
  FOR r IN SELECT value FROM jsonb_array_elements(p_state->'entries') LOOP
   IF r->>'stage' IS DISTINCT FROM et OR r->>'line' IS DISTINCT FROM lin OR coalesce(r->>'quantity','') !~ '^[0-9]+$' THEN RAISE EXCEPTION 'OFFICIAL_ENTRY_INVALID'; END IF;
   PERFORM sgp_lp_operacion.sesion(p_token,et,r->>'key',lin);
@@ -100,7 +149,7 @@ BEGIN
  END IF;
  result:=jsonb_build_object('contract','LP-OFFICIAL-COMMITTED-1','id',p_id,'revision',rev+1,'result',p_result);
  INSERT INTO sgp_lp_official.ledger VALUES(et,lin,rev+1,p_state) ON CONFLICT(stage,line) DO UPDATE SET revision=excluded.revision,state=excluded.state;
- INSERT INTO sgp_lp_official.events(id,stage,line,actor,request_hash,source_fingerprint,revision,result) VALUES(p_id,et,lin,ctx->>'actor',p_request_hash,p_source_fingerprint,rev+1,result);
+ INSERT INTO sgp_lp_official.events(id,stage,line,actor,request_hash,source_fingerprint,revision,result) VALUES(p_id,et,lin,ctx->>'actor',p_request_hash,p_source_fingerprint,rev+1,result) RETURNING events.result INTO result;
  IF p_file IS NOT NULL THEN INSERT INTO sgp_lp_official.files VALUES(p_id,p_file->>'name',p_file->>'sha256',raw);END IF;
  -- End-of-transaction authorization is rechecked after potentially blocking locks.
  PERFORM sgp_lp_operacion.sesion(p_token,et,NULL,lin);
@@ -111,7 +160,7 @@ REVOKE ALL ON FUNCTION public.sgp_lp_official_commit_v1(text,jsonb,uuid,text,tex
 -- Do not change global/default ACL or create a technical principal to pass this guard.
 DO $$ BEGIN
  IF EXISTS(SELECT 1 FROM pg_proc p CROSS JOIN LATERAL aclexplode(coalesce(p.proacl,acldefault('f',p.proowner))) a
-   WHERE p.oid IN('public.sgp_lp_official_context_v1(text,jsonb,uuid,text)'::regprocedure,'public.sgp_lp_official_commit_v1(text,jsonb,uuid,text,text,bigint,jsonb,jsonb,jsonb)'::regprocedure) AND a.grantee<>p.proowner)
+   WHERE p.oid IN('public.sgp_lp_official_read_v1(text,jsonb)'::regprocedure,'public.sgp_lp_official_context_v1(text,jsonb,uuid,text)'::regprocedure,'public.sgp_lp_official_commit_v1(text,jsonb,uuid,text,text,bigint,jsonb,jsonb,jsonb)'::regprocedure) AND a.grantee<>p.proowner)
  OR EXISTS(SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace CROSS JOIN LATERAL aclexplode(coalesce(c.relacl,acldefault('r',c.relowner))) a WHERE n.nspname='sgp_lp_official' AND c.relkind='r' AND a.grantee<>c.relowner)
  THEN RAISE EXCEPTION 'OFFICIAL_NEW_OBJECT_ACL_REQUIRES_REVIEW'; END IF;
 END $$;

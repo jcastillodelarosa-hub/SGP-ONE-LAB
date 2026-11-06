@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "checks": [
+    "Coordinator definition and leader incorporation persist with original empty plan and reason; planner untouched",
+    "Duplicate incorporation and stale revision reject",
+    "Historical read survives native closed turn and disabled writes; mutations stay blocked",
+    "Revoked key blocks reading persisted definition and incorporation"
+  ],
+  "scope": "Ephemeral PostgreSQL; no production activation"
+}

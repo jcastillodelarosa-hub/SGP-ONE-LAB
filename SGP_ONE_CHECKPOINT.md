@@ -1799,3 +1799,8 @@ EN SUPABASE, NO FUSIONADO, NO PUBLICADO. Pendiente revisar/aplicar RPC con autor
 separada y verificar permisos/payload reales antes de cualquier publicación355.
 Siguiente paso único: revisión ChatGPT del mismo PR98 y del SQL. No crear otro PR,
 no tocar producción, main, Firebase, GOOGLE ni LAC. Conservar commits y cambios locales.
+
+## LP local — Disponible / Otras / cierre / apertura (2026-11-06)
+Rama aislada `feat/lp01-operation-official-close`, base main `a068e14083bb92db6e72c71934d8cf240ef345ff` v396. Incremento local con definiciones y bases persistentes de Disponible, incorporaciones con motivo/plan inicial, lectura histórica separada, enlace transaccional con cierre nativo y ejecutor de apertura por horario configurado. Tablas y panel conectados; cinco pruebas de dominio, dos del runner, PostgreSQL aislado workflow/puente y recorrido UI PC/móvil correctos. Detalle y controles de activación en `docs/sql-proposals/lp01-official-close/README.md`.
+
+No activado ni publicado. Pendientes de coordinación: integrar componentes de Seguimiento del propietario, CI conjunta, revisión/instalación SQL y autorización específica para identidad servidor/job/ACL. No PR: la instrucción posterior anuló el reintento autorizado inicialmente; no se intentó. Referencias visuales originales y nuevos XLSX sin evidencia materializada adicional. No se consultaron skills propias SGP.

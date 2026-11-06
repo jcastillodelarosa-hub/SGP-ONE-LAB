@@ -3,12 +3,12 @@
   "results": [
     {
       "width": 1440,
-      "upload_close_reload": true,
+      "define_incorporate_upload_close_reload": true,
       "pageErrors": []
     },
     {
       "width": 390,
-      "upload_close_reload": true,
+      "define_incorporate_upload_close_reload": true,
       "pageErrors": []
     }
   ]

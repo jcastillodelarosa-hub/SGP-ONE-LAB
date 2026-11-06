@@ -5,7 +5,7 @@ import {DOMParser} from '@xmldom/xmldom';
 import {officialCloseService} from '../../src/server/lp-official-close-service.js';
 const input=JSON.parse(readFileSync(0,'utf8'));
 const lit=value=>value===null?'NULL':"'"+String(typeof value==='object'?JSON.stringify(value):value).replaceAll("'","''")+"'";
-const parameters={sgp_lp_official_context_v1:['p_token','p_context','p_id','p_request_hash'],sgp_lp_official_commit_v1:['p_token','p_context','p_id','p_request_hash','p_source_fingerprint','p_expected_revision','p_state','p_result','p_file']};
+const parameters={sgp_lp_official_read_v1:['p_token','p_context'],sgp_lp_official_context_v1:['p_token','p_context','p_id','p_request_hash'],sgp_lp_official_commit_v1:['p_token','p_context','p_id','p_request_hash','p_source_fingerprint','p_expected_revision','p_state','p_result','p_file']};
 const env={...process.env};for(const k of ['DOCKER_HOST','DOCKER_CONTEXT','DOCKER_TLS','DOCKER_TLS_VERIFY','DOCKER_CERT_PATH'])delete env[k];
 const service=officialCloseService({DOMParser,rpc:async(name,args)=>{
  if(!parameters[name])throw Error('Unexpected RPC');

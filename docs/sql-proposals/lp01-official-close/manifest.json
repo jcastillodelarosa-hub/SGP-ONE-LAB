@@ -1,8 +1,9 @@
 {
   "status": "PROPOSED_NOT_APPLIED",
   "files": {
-    "01_storage_REVIEW.sql": "45b8a7d8dbd6d73109855b6876b999a5556e38068c85045f252b241c4e6545f3",
-    "02_contain_REVIEW.sql": "89c364437403021d4845da6aff0a926c9025acdb0df965c3fbc79a463ebce965"
+    "01_storage_REVIEW.sql": "bab7cc0ab85665439d8cda70b76615f4db8d1c31a96db97384bea4336b2b54c0",
+    "02_contain_REVIEW.sql": "ab572df63af9fc9ffcaace46d9467c748517419656c455a8a27a9cf3fb5683a2",
+    "03_native_bridge_REVIEW.sql": "8bb86abed2ad4c70b75b23882ee7971a63d0fb806899ab228752b09a859dbea7"
   },
   "definitionDefault": "disabled, no API EXECUTE grants",
   "recovery": "contain own writer and RPC only; preserve data"

@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "checks": [
+    "Official close and native close commit atomically; retry matches receipt; history reads closed turn; manual totals untouched",
+    "Automatic current period uses configured schedule/timezone, requires flag and server role, and opens once without browser button",
+    "Automatic opening never skips missing intermediate turns"
+  ],
+  "scope": "Ephemeral PostgreSQL and synthetic schedules only; no credentials, jobs or grants installed"
+}

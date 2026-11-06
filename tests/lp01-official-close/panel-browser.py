@@ -23,16 +23,22 @@ try:
     const {emptyOfficialClose}=await import('/src/domain/lp01-official-close.js');
     const context={stage:'EMPAQUE',line:'PANELES_2',date:'2026-11-03',shift:1};
     const state=emptyOfficialClose();window.calls=[];
-    await mountOfficialClosePanel({host:document.querySelector('#panel'),context,isCurrent:()=>true,controller:{pending:()=>false,read:async()=>({state,revision:state.revision}),save:async(c,revision,input)=>{window.calls.push(input);state.revision++;if(input.action==='IMPORT')state.entries=[{...context,key:'QA|PANELES_2',quantity:7}];else state.closures.push({context,version:1,recordedAt:'2026-11-03T19:00:00-05:00',observation:input.observation,rows:[{key:'QA|PANELES_2',planned:10,realized:7,difference:-3}]});}}});
+    await mountOfficialClosePanel({host:document.querySelector('#panel'),context,isCurrent:()=>true,controller:{pending:()=>false,read:async()=>({state,revision:state.revision,role:'COORDINADOR',catalog:[{key_produccion:'OTHER|PANELES_2',produccion:'QA otra',sistema:'QA',saldos_inicializados:true,presente_ultimo_export:true,saldo_empaque:20}],plan:{rows:[]},availability:[]}),save:async(c,revision,input)=>{window.calls.push(input);state.revision++;if(input.action==='IMPORT')state.entries=[{...context,key:'QA|PANELES_2',quantity:7}];else if(input.action==='CLOSE')state.closures.push({context,version:1,recordedAt:'2026-11-03T19:00:00-05:00',observation:input.observation,rows:[{key:'QA|PANELES_2',planned:10,realized:7,difference:-3}]});}}});
    }''')
-   page.locator('[data-file]').set_input_files({'name':'qa.xlsx','mimeType':'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','buffer':b'fixture'})
-   page.locator('[data-import]').click();page.wait_for_function('window.calls.length===1')
-   page.locator('[data-note]').fill('QA cierre');page.locator('[data-close]').click()
+   page.locator('summary').filter(has_text='Definir Disponible').click()
+   page.locator('[data-available-quantity]').fill('12');page.locator('[data-available-reason]').fill('QA base disponible');page.locator('[data-define]').click()
+   page.wait_for_function('window.calls.length===1')
+   page.locator('summary').filter(has_text='Otras órdenes').click()
+   page.locator('[data-other-quantity]').fill('5');page.locator('[data-other-priority]').fill('2');page.locator('[data-other-reason]').fill('QA incorporación');page.locator('[data-incorporate]').click()
    page.wait_for_function('window.calls.length===2')
-   assert page.locator('summary').inner_text().startswith('Cierre 1')
+   page.locator('[data-file]').set_input_files({'name':'qa.xlsx','mimeType':'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','buffer':b'fixture'})
+   page.locator('[data-import]').click();page.wait_for_function('window.calls.length===3')
+   page.locator('[data-note]').fill('QA cierre');page.locator('[data-close]').click()
+   page.wait_for_function('window.calls.length===4')
+   assert page.locator('summary').filter(has_text='Cierre 1').count()==1
    assert 'definición y base acreditada pendientes' in page.locator('[data-history]').inner_text()
    assert not errors,errors
-   results.append({'width':width,'upload_close_reload':True,'pageErrors':errors})
+   results.append({'width':width,'define_incorporate_upload_close_reload':True,'pageErrors':errors})
    page.close()
   browser.close()
  Path(__file__).with_name('panel-browser-result.json').write_text(json.dumps({'scope':'Local UI fixture; no production/backend save certification','results':results},indent=2)+'\n')

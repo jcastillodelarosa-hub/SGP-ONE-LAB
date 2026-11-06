@@ -1,74 +1,38 @@
-# Cierre oficial · persistencia aislada en revisión
+# Cierre oficial y flujo operativo — paquete local, no aplicado
 
-Sin instalación/activación productiva, grants ni credenciales nuevos. No fusionar
-ni publicar todavía. Continúa `26fc8fdd` y no depende del worktree de afectaciones.
+Estado: propuesta revisable. Ninguno de estos scripts se ejecutó en producción. Main base v396 conserva Picking. Los archivos exactos de resumen compartido pertenecen a Seguimiento y no se modificaron.
 
-## Recorrido implementado
+## Dependencias e instalación propuesta
 
-`lp-powerbi-handler.js` acepta el opt-in `LP-PBI-XLSX-2` **solo si** el servidor
-recibe `officialService`; por defecto null, devuelve bloqueo. La ruta V1 conserva
-su implementación. No hay otro lector XLSX: V2 llama al mismo `parsePowerBI`.
-No se cambia la configuración de la Edge Function ni se conecta el servicio
-en producción. `lp-official-close-service.js` recibe únicamente archivo/comando;
-catálogo, actor, hora, plan, estado y horario se obtienen de RPC autenticada.
+1. `01_storage_REVIEW.sql`: requiere `sgp_lp_operacion.sesion`, `admitir`, `periodo`, tablas nativas y planificador existentes. Crea cuatro tablas privadas con RLS; funciones de contexto, lectura y commit para el servicio servidor. `enabled=false` inicialmente.
+2. `03_native_bridge_REVIEW.sql`: requiere 01 y estructura nativa revisada. Añade dos indicadores falsos (`native_close`, `automatic_open`), admite el adaptador ya existente `LP-PBI-XLSX-2` en archivos nativos y añade enlace transaccional de cierre y función de apertura por horario. No programa jobs.
+3. `02_contain_REVIEW.sql`: contención no destructiva; deshabilita el escritor y revoca únicamente RPC del bloque, incluido el lector y apertura si existen. Conserva archivos, cierres y recibos.
 
-Propuesta `01_storage_REVIEW.sql`: cuatro tablas privadas/RLS, configuración
-apagada, dos RPC sin EXECUTE para roles API. Contexto lee estado durable y
-fuentes, commit compara revisión y fingerprint, bloquea fuentes durante commit,
-persiste transición, recibo y XLSX original. UUID reintentado recupera recibo
-previo después de volver a comprobar sesión/ámbito. Error sin respuesta después
-del commit devuelve HTTP503; debe conservarse el UUID, nunca fingir rechazo.
-Historial/archivos son inmutables y el plan se congela al cerrar. Las entradas
-ausentes no se borran. Ninguna escritura en acumulados Export o ejecución manual.
+El script 03 exige el constraint nativo `archivos_adaptador_check`; si difiere del estado revisado, resolver esa dependencia antes de instalación. No aplicar automáticamente sobre una definición distinta. Manifest contiene huellas de los tres scripts.
 
-La función de horario reutilizada es `sgp_lp_operacion.periodo(date,integer)`:
-lee `HORARIOS_TURNOS`; se conserva su zona America/Bogota. Sin horario real o
-turno nativo existente devuelve bloqueo. No crea turnos ni horarios de relleno.
+## ACL antes / después
 
-## Dependencias y permisos antes/después
+Antes: no existen los objetos de `sgp_lp_official` ni sus RPC. Después de definición: funciones nuevas y tablas accesibles solo por propietario, RLS habilitado, ningún EXECUTE a PUBLIC/anon/authenticated. Los scripts rechazan default ACL que expongan los objetos nuevos. No cambian default ACL, roles, sesiones ni grants existentes.
 
-| Objeto | Antes | Después de definición, aún deshabilitada |
-|---|---|---|
-| sgp_lp_official | Ausente | Esquema privado, owner postgres |
-| config/ledger/events/files | Ausentes | Owner solamente; RLS; cero grants API |
-| sgp_lp_official_context_v1 | Ausente | SECURITY DEFINER/search_path vacío; owner solamente |
-| sgp_lp_official_commit_v1 | Ausente | SECURITY DEFINER/search_path vacío; owner solamente |
-| Roles/ACL/sesión existentes | Vigentes | Sin cambios |
+La activación necesita aprobación específica de: instalación, servidor que usa el mismo endpoint Power BI, principal servidor restringido para RPC, y ejecución periódica de `openDueOfficialTurns` con identidad SGP autorizada. No se ha creado ni aceptado esa identidad, credencial, job o permiso. La función de apertura requiere coordinador/administrador y las autorizaciones existentes por orden; no elude `sesion` ni `admitir`. Se debe acordar el alcance exacto del ejecutor antes de activarlo.
 
-Dependencias: `sgp_lp_operacion.sesion`, `admitir`, `periodo`, `inmutable`, permisos,
-turnos, producciones y asignaciones existentes. No se reemplazan. Si default ACL
-asigna un privilegio adicional a los objetos nuevos, la definición aborta de
-forma atómica; no cambia default ACL como atajo. Solo se admite ejecución del
-instalador como postgres, owner revisado. Nuevas RPC **no deben concederse a anon
-o authenticated**: el commit recibe transición calculada por servidor de confianza.
+## Comportamiento local implementado
 
-Activación futura requeriría revisión específica del acceso del servidor ya
-existente, wiring del handler y configuración nueva. No se prepara una credencial,
-rol ni habilitación automática. Este paquete no solicita activación mientras
-subsistan las integraciones pendientes abajo. Huellas en `manifest.json`.
-
-`02_contain_REVIEW.sql` es recuperación no destructiva: apaga exclusivamente
-este escritor y revoca únicamente sus dos RPC de roles API (incluido service_role
-si existe); conserva datos, originales y recibos. No DROP ni borrado de historial.
-Ningún archivo del paquete fue aplicado en Supabase.
+- El único parser existente procesa el XLSX oficial, incluso PIEZA DE ALUMINIO CUERPOS en ventanas. Identidad por producción/proyecto/sistema y referencias canónicas; ambigüedades pendientes.
+- El ledger guarda importaciones parciales, reemplazos, deltas, evidencia y cierres. Nunca suma una recarga ni pone a cero ausentes. No modifica Export semanal.
+- Disponible: definición por coordinador, con autor/motivo y bases de avance oficiales persistidas. Se proyecta sobre avance nuevo; una corrección hacia abajo revierte consumo. Sin base intraturno acreditada devuelve PENDING_BASE, no cero.
+- Otras: líder incorpora con cantidad/prioridad/motivo; persiste plan inicial e incorporación inmutable. Es una adición operativa explícita, no una modificación silenciosa del calendario. El plan vigente de cierre combina programación actual y adiciones sin duplicar la orden si el planificador la incorporó después.
+- Las hojas añaden incorporaciones y órdenes abiertas del catálogo autorizado, muestran Disponible oficial y conservan detalle compartido. Otras queda separada según saldo; sin fuentes compatibles queda Por revisar.
+- READ usa una RPC específica: puede consultar turnos nativos cerrados o escrituras contenidas. Mantiene autorización por todas las órdenes almacenadas y no devuelve firmas privadas de recibos.
+- CLOSE con `native_close=true`: exige cobertura completa antes de cerrar nativamente, guarda archivo/evidencia y snapshot nativo, actualiza estado/revisión en la misma transacción. La cobertura parcial sigue guardable como importación, pero bloquea cierre nativo. Devuelve el mismo recibo en reintentos.
+- Apertura: `sgp_lp_official_open_due_v1` determina período actual con HORARIOS_TURNOS y la zona existente America/Bogota, valida predecesor/cierre, bloquea huecos y abre una vez. Arrastre usa saldo Export acreditado, nunca ejecución manual. Registro de auditoría incluido. No hay botón Iniciar turno. `src/server/lp-official-turn-runner.js` es el consumidor servidor sin despliegue ni job.
 
 ## Evidencia y límites
 
-`tests/lp01-official-close/postgres.py` ejecuta el servicio Node real, parser
-existente y RPC reales en PostgreSQL17.11 aislado sin red. Identidades, sesiones,
-planes y archivos son sintéticos/anonimizados; auth capturada reutilizada del
-harness existente. El test crea únicamente su contenedor efímero y lo elimina.
-Resultados: `postgres-result.json`. No prueba de los XLSX originales nuevos ni
-sesión productiva. Pruebas HTTP dirigidas adicionales verifican opt-in apagado,
-rechazo de autoridad del cliente y respuesta incierta. No CI completa repetida.
+Pruebas nuevas: `workflow-postgres-result.json` (Disponible/Otras/lectura histórica/autorización), `native-bridge-postgres-result.json` (cierre nativo/reintento/apertura por horario), `panel-browser-result.json` (recorrido UI sintético PC/móvil), pruebas de dominio workflow, proyección y runner. PostgreSQL efímero, sin datos productivos. Se conservan evidencias anteriores de parser y persistencia; no se reauditaron fuentes intactas.
 
-**Pendiente:** este journal aún no cambia `sgp_lp_operacion.turnos` a CERRADO
-ni adapta su predecesor/arrastre. Tampoco escribe las definiciones de Disponible
-activas: falta persistir/conciliar su base intraturno. La UI aún no consume V2 ni
-retira el campo manual. El estado de cierre oficial almacenado no acredita un
-turno operativo cerrado. Falta completar esos enlaces y contrastar los originales
-antes de congelar candidato e iniciar la única CI completa coordinada.
+Los originales XLSX de noviembre y los píxeles originales B12/B13/B14 siguen sin materialización utilizable; no se certifica comparación visual exacta ni parser contra esos dos archivos. Se siguió la estructura aprobada, sin propuestas visuales alternativas. Falta integrar el bloque de componentes de Seguimiento, congelar el candidato conjunto y ejecutar una CI completa. PR continúa bloqueado; no se reintentó.
 
-Resumen compartido: esperando ruta/API exacta de `sharedOrderSummary` del hilo
-dueño. No se copia ni recrea esa función. `mountTrackingAffectations` ya se
-consume con target null/scope.stage en las hojas, desde el incremento26fc8fdd.
+## Reversión no destructiva
+
+Contener con 02 y detener el job aprobado si llegara a existir. Deshabilitar `native_close`/`automatic_open` cuando 03 esté instalado. No borrar ni reabrir turnos automáticamente, no convertir archivos V2 a V1, no retirar el formato V2 mientras existan evidencias de ese tipo. La reversión de pantallas debe mantener accesible el historial oficial preservado.

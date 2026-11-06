@@ -23,11 +23,11 @@ export function operationOrders(data,filters={}){
  return [...grouped.values()].filter(g=>!q||g.rows.some(r=>[r.produccion,r.key,r.parte,r.observacion,r.oficial?.sistema,r.oficial?.reserva_al].some(v=>String(v??'').toLocaleLowerCase('es').includes(q)))).map(g=>{
   g.rows.sort((a,b)=>(Number(a.prioridad)||0)-(Number(b.prioridad)||0)||a.parte.localeCompare(b.parte));
   const first=g.rows[0],hasAffectation=g.rows.some(r=>affected(r)||r.individualEvidence?.active);
-  const states=g.rows.map(r=>operationProcessState(r));
+  const states=g.rows.map(r=>operationProcessState(r,{scheduled:r.officialUnscheduled!==true}));
   const snapshots=new Set(g.rows.map(r=>JSON.stringify([officialBalance(r,r.etapa),r.oficial?.cantidad,originalWeek(r)?.key])));
   const state=new Set(states).size===1&&snapshots.size===1?states[0]:'POR_REVISAR';
   const origins=g.rows.flatMap(r=>r.individualEvidence?.opening?[r.individualEvidence.opening]:[]).filter(o=>o.eventId&&/^\d{4}-\d{2}-\d{2}$/.test(o.date)&&[1,2].includes(o.shift)).sort((a,b)=>a.date.localeCompare(b.date)||a.shift-b.shift);
-  return {...g,first,state,week:originalWeek(first),sale:total(g.rows,'sale'),executed:total(g.rows,'ejecutado'),origin:origins[0]??null,hasAffectation};
+  return {...g,first,state,officialAvailable:first.officialAvailable??null,officialRealized:first.officialRealized??null,week:originalWeek(first),sale:total(g.rows,'sale'),executed:total(g.rows,'ejecutado'),origin:origins[0]??null,hasAffectation};
  }).sort((a,b)=>['ABIERTAS','PROGRAMADAS','OTRAS','POR_REVISAR','COMPLETADAS'].indexOf(a.state)-['ABIERTAS','PROGRAMADAS','OTRAS','POR_REVISAR','COMPLETADAS'].indexOf(b.state)||(a.state==='ABIERTAS'?String(a.week?.key??'9999').localeCompare(String(b.week?.key??'9999')):0)||priority(a)-priority(b)||a.key.localeCompare(b.key));
 }
 export function validateTurnEntry(row,value,observation){

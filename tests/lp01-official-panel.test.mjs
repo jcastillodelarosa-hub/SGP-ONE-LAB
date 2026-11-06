@@ -17,7 +17,7 @@ test('confirmed rejection releases pending command for corrected input',async()=
 });
 test('official read uses authenticated existing context without commit or client-supplied data',async()=>{
  let calls=[];const state=emptyOfficialClose();state.receipts=[{signature:'server-only'}];
- const service=officialCloseService({rpc:async(name,args)=>{calls.push(name);return {data:{contract:'LP-OFFICIAL-CONTEXT-1',state,plan:{rows:[]},schedule:{timezone:'America/Bogota'}}};}});
+ const service=officialCloseService({rpc:async(name,args)=>{calls.push(name);return {data:{contract:'LP-OFFICIAL-CONTEXT-1',state,plan:{revision:'QA',rows:[]},schedule:{timezone:'America/Bogota'}}};}});
  const result=await service.run({token:'QA',command:{...context,id:'00000000-0000-4000-8000-000000000001',action:'READ',revision:0}});
- assert.deepEqual(calls,['sgp_lp_official_context_v1']);assert.equal(result.contract,'LP-OFFICIAL-VIEW-1');assert.deepEqual(result.state.receipts,[]);assert.equal(state.receipts.length,1);
+ assert.deepEqual(calls,['sgp_lp_official_read_v1']);assert.equal(result.contract,'LP-OFFICIAL-VIEW-1');assert.deepEqual(result.state.receipts,[]);assert.equal(state.receipts.length,1);
 });

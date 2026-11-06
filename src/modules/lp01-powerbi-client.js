@@ -26,7 +26,7 @@ export function importPowerBI({token,command,filename,base64}){
 /** Same gateway and parser; callers retain the UUID and exact payload on an
  * uncertain response. This does not enable the server contract or native close. */
 export async function submitOfficialClose({token,command,filename,base64,observation}){
- if(!command||!['IMPORT','CLOSE'].includes(command.action))throw Error('OFFICIAL_COMMAND_INVALID');
+ if(!command||!['IMPORT','CLOSE','DEFINE_AVAILABLE','INCORPORATE'].includes(command.action))throw Error('OFFICIAL_COMMAND_INVALID');
  const data=await requestPowerBI({adapter:OFFICIAL_POWERBI_VERSION,p_token:token,command,filename,base64,observation},{official:true});
  if(data?.ok!==true||data.contract!=='LP-OFFICIAL-COMMITTED-1'||data.id!==command.id||data.revision!==command.revision+1){
   throw Object.assign(Error('No se confirmó el cierre oficial; reintenta la misma solicitud'),{code:'OFFICIAL_COMMIT_UNCERTAIN'});
