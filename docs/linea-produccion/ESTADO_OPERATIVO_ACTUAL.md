@@ -1,3 +1,25 @@
+## Disponible / sesión acotada · APLICADO EN SUPABASE · 06/11/2026
+
+Autorización delegada por coordinación con instrucciones de Johan para corregir
+e implementar. Aplicado únicamente 03_session_scoped_REVIEW.sql como migración
+lp_session_scoped_v397 en SGP-ONE-LAB ocvxbwzqxbrfndkvjmfx; success=true.
+Readback 11:12:30 UTC confirma cuerpo 3416a2f6e5640577a4a07c554e26c55e,
+postgres/DEFINER/search_path vacío/ACL privada. Cinco dependencias contrastadas
+antes/después sin cambios. operaciones_rol 69274f528 conserva VALIDAR exclusivo
+del coordinador; coincide con INSTALL_REVIEW de Seguimiento y fixture vigente.
+Perfil_roles ya true antes de aplicar; no se cambió. RPC Disponible conservan
+cuerpos y EXECUTE anon existentes. Sin RLS/roles/flags/datos operativos alterados.
+
+Lectura y guardado sin sesión rechazados con SESION_NO_AUTORIZADA en la sesión
+optimizada antes de mutar. No se crearon datos de prueba. Se reutilizan 90 casos
+previos aislados. NO VERIFICADO aún el éxito lectura/guardado ni latencia real:
+no hay sesión funcional autorizada disponible en este hilo. No confundir rechazo
+seguro ni readback con resolución del síntoma de usuario. Siguiente: usuario o
+coordinación comprueba Disponible real y guardado operativo, observa 57014/latencia.
+Recuperación04 preparada, no ejecutada. Evidencia completa sin credenciales en
+`../sql-proposals/lp01-order-sale/session-scoped-production-evidence.json`.
+Sin frontend, versión, push, merge o publicación por este hilo.
+
 ## Disponible / lentitud · propuesta recuperada sobre v397 · 06/11/2026
 
 IMPLEMENTADO EN RAMA / SQL NO APLICADO. Base a45ddd8; rama aislada

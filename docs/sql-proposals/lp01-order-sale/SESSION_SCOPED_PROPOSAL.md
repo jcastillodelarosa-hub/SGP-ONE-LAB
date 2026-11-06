@@ -1,3 +1,9 @@
+> Actualización 06/11/2026: **APLICADO EN SUPABASE** bajo autorización delegada.
+> Migración `lp_session_scoped_v397`; postcheck 11:12:30 UTC confirma huella y ACL.
+> Evidencia: `session-scoped-production-evidence.json`. Lectura/guardado sin sesión
+> rechazados; éxito y latencia con sesión real pendientes. Las notas de propuesta
+> siguientes conservan el estado histórico anterior a esta aplicación.
+
 # Propuesta de sesión acotada para Línea de Producción
 
 Estado: **solo preparada y probada en PostgreSQL aislado**. No instalada ni
