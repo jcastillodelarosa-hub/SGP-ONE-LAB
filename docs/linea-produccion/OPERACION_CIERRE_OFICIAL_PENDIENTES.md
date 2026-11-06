@@ -121,3 +121,17 @@ para abrir PR/compartir contenido. Se consultó historial; sin evidencia nueva
 suficiente, no se reintentó ni se cambió de herramienta. PR del otro bloque
 igualmente fuera de alcance. Este incremento se conserva **solo local** para
 coordinación; ninguna publicación. CI del candidato completo sigue pendiente.
+
+## Persistencia añadida en aislamiento, posterior a26fc8fdd
+
+La brecha de almacenamiento del apartado2 ya tiene servicio y RPC propuestos,
+probados en PostgreSQL17.11 aislado. Ver
+[paquete de persistencia](../sql-proposals/lp01-official-close/README.md).
+El mismo handler Power BI tiene opt-in V2 deshabilitado por defecto. Se guardan
+originales y recibos, se recarga estado, se reemplazan correcciones parciales y
+se conservan cierres anteriores. Concurrencia real a una revisión: solo uno
+confirma. No se conectó el cambio de estado del turno nativo ni Disponible activo,
+ni se retiró el campo manual de UI. Sigue siendo una entrega parcial sin
+activación, producción, push nuevo o PR. 7 escenarios PG nuevos y5 HTTP PASS;
+se reutiliza evidencia previa intacta, CI completa única pendiente de congelación.
+sharedOrderSummary pendiente de ruta/contrato exactos del dueño; sin duplicación.

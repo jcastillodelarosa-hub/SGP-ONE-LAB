@@ -1,0 +1,9 @@
+{
+  "status": "PROPOSED_NOT_APPLIED",
+  "files": {
+    "01_storage_REVIEW.sql": "45b8a7d8dbd6d73109855b6876b999a5556e38068c85045f252b241c4e6545f3",
+    "02_contain_REVIEW.sql": "89c364437403021d4845da6aff0a926c9025acdb0df965c3fbc79a463ebce965"
+  },
+  "definitionDefault": "disabled, no API EXECUTE grants",
+  "recovery": "contain own writer and RPC only; preserve data"
+}

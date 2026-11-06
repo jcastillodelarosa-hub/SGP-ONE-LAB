@@ -1,3 +1,16 @@
+## Cierre oficial · persistencia real aislada · 06/11/2026
+
+Incremento local posterior a26fc8fdd: servicio servidor sobre parser existente,
+ruta V2 opt-in en mismo handler (apagada por defecto), propuesta privada/RLS
+sin grants para guardar estado, originales, recibos y cierres versionados.
+7 escenarios PostgreSQL17.11 PASS: recarga/corrección/parcial, cierre contra plan
+vigente, concurrencia CAS real y revocación, sin modificar Export/ejecución nativa.
+5 pruebas HTTP dirigidas PASS; no CI completa repetida. SQL no aplicado en Supabase.
+[Paquete, ACL antes/después, hashes y contención](../sql-proposals/lp01-official-close/README.md).
+Pendientes: conectar turno nativo/Disponible/UI V2, bocetos sin píxeles y contrato
+exacto de sharedOrderSummary (no recreado). PR denegado sigue sin reintento;
+solo commits locales, sin push ni publicación. No declarar bloque terminado.
+
 ## Integración compartida en hojas · incremento local · 06/11/2026
 
 Ensamble/Empaque consumen mountTrackingAffectations desde su panel existente,

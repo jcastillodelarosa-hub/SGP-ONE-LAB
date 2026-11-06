@@ -1,3 +1,13 @@
+## Cierre oficial · almacenamiento aislado · 06/11/2026
+
+Después de26fc8fdd: servicio/parser real y dos RPC privadas propuestos, definición
+apagada/sin grants, mismo endpoint con opt-in V2 no conectado en despliegue.
+7 escenarios PostgreSQL aislado PASS y5 HTTP dirigidas PASS; fuentes y backend
+intactos no reauditados. Falta turno nativo/Disponible/UI y resumen compartido
+(ruta exacta pendiente del hilo dueño). PR denegado no reintentado; solo local.
+Paquete: docs/sql-proposals/lp01-official-close/README.md. No SQL productivo ni
+publicación; CI única del candidato completo pendiente.
+
 ## Hojas / cierre PDA · parcial para coordinación · 06/11/2026
 
 Base d45c5ed (main v394), rama feat/lp01-operation-official-close, candidata v396.

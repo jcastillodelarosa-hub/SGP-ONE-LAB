@@ -1,0 +1,15 @@
+{
+  "status": "PASS",
+  "postgres": "17.11 (Debian 17.11-1.pgdg13+2)",
+  "sql_sha256": "45b8a7d8dbd6d73109855b6876b999a5556e38068c85045f252b241c4e6545f3",
+  "checks": [
+    "Definition is disabled; no API grants; all four private tables have RLS",
+    "Actual server parser \u2192 native RPC \u2192 committed ledger; exact retry returns original receipt",
+    "New upload same quantities has delta zero; durable closure snapshots current plan and preserves original XLSX",
+    "Partial correction persists replacement delta, preserves absent orders/closed snapshots, and identical partial reload is zero",
+    "Two real concurrent server imports at one revision commit once; loser must re-read",
+    "Stale revision, read-only role, invalid session and revoked scope (including retry) rejected",
+    "Weekly Export and manual execution untouched; native turn state not promoted by this storage proposal"
+  ],
+  "limits": "Isolated storage/service only; not production installation, shared UI, native automatic turn closure or new source files"
+}
