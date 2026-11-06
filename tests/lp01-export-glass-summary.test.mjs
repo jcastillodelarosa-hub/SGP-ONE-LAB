@@ -64,6 +64,32 @@ test('foreign key, line, stage or contract cannot enrich another production',()=
  for(const s of [{...scope,key:'OTHER'}, {...scope,line:null}, {...scope,stage:'OTHER'},{}])assert.throws(()=>withExportGlassSummary(summary(),details(),s),/SCOPE_INVALID/);
 });
 
+test('aluminum source absence remains explicit beside available or unknown Export glass',()=>{
+ for(const status of ['UNAVAILABLE','UNAUTHORIZED'])for(const source of [null,details('3','50'),details('3','100')]){
+  const native={...scope,reports:[],aluminumPending:{status,rows:[]}};
+  const shared={...scope,revision:0,reports:[],legacyReports:[]};
+  const result=withExportGlassSummary(sharedOrderSummary(native,shared),source,scope),html=compactSummaryMarkup(result);
+  assert.equal(result.aluminumCoverage,'UNAVAILABLE');assert.equal(result.aluminumUnknown,true);
+  assert.equal(result.categories.NC_AL,null);assert.equal(result.categories.TECNO,null);
+  assert.equal(result.total,null);assert.equal(result.available,null);
+  assert.match(html,/aria-label="Pendientes de aluminio no disponibles"/);
+  assert.doesNotMatch(html,/0 ×|Total 0|Sin reportes ni pendientes de aluminio devueltos/);
+  if(source===null)assert.match(html,/>Tecno · sin dato<\/button>/);
+  else if(source.export.percentage==='50')assert.match(html,/>2 × Tecno · Export<\/button>/);
+  else assert.doesNotMatch(html,/data-summary-source="EXPORT"/);
+ }
+});
+
+test('empty available aluminum and unavailable Export remain independent, without invented zero',()=>{
+ const native={...scope,reports:[],aluminumPending:{status:'AVAILABLE',rows:[]}};
+ const shared={...scope,revision:0,reports:[],legacyReports:[]};
+ const result=withExportGlassSummary(sharedOrderSummary(native,shared),null,scope),html=compactSummaryMarkup(result);
+ assert.equal(result.aluminumCoverage,'COMPLETE');assert.equal(result.aluminumUnknown,false);
+ assert.equal(result.categories.NC_AL,null);assert.equal(result.total,null);
+ assert.match(html,/>Tecno · sin dato<\/button>/);
+ assert.doesNotMatch(html,/Pendientes de aluminio no disponibles|data-summary-cause="NC_AL"|0 ×|Total 0/);
+});
+
 test('a supplied computed count cannot override the scoped Export source',()=>{
  const d=details('3','50');d.glass={status:'AVAILABLE',rounded:'999',percentage:'0'};
  const result=withExportGlassSummary(summary(),d,scope);

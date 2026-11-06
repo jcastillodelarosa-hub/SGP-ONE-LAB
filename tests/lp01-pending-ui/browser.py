@@ -15,7 +15,9 @@ try:
    for key,label in [('QA3|PANELES_2','aluminio'),('QA1|PANELES_2','reportadas')]:
     row=page.locator('tr').filter(has=page.locator('[data-order-summary="'+key+'"]'));assert row.locator('details[data-order-part]').get_attribute('open') is None;row.scroll_into_view_if_needed();row.locator('[data-sale-edit]').wait_for(state='visible');assert 'Por definir' in row.locator('.lp-sale-row').inner_text();row.screenshot(path=f'/tmp/afectaciones-contraida-{label}-{width}.png')
    pending=page.locator('[data-order-summary="QA3|PANELES_2"]');assert '15 × NC AL · Estimado ⚠' in pending.inner_text();assert pending.locator('[data-summary-cause=NC_AL]').count()==1;assert '19 ×' not in pending.inner_text()
-   assert page.locator('[data-order-summary="QA2|PANELES_2"] [aria-label="Sin reportes ni pendientes de aluminio devueltos"]').count()==1
+   empty=page.locator('[data-order-summary="QA2|PANELES_2"]');assert empty.locator('[data-summary-cause]:not([data-summary-source="EXPORT"])').count()==0
+   assert empty.locator('[data-summary-source="EXPORT"][aria-label="Vidrio Tecno: datos de Export no disponibles"]').inner_text()=='Tecno · sin dato'
+   assert 'Total 0' not in empty.inner_text() and '0 ×' not in empty.inner_text()
    assert page.locator('[data-order-summary="QA4|PANELES_2"] [aria-label="Pendientes de aluminio no disponibles"]').count()==1
    assert '2 × NC AL' in page.locator('[data-order-summary="QA5|PANELES_2"]').inner_text();assert page.locator('[data-order-summary="QA5|PANELES_2"] [data-summary-cause=NC_AL]').count()==1
    pending.locator('[data-summary-cause=NC_AL]').click();page.wait_for_selector('[data-order-type=NC_AL][aria-pressed=true]');assert all(x in page.locator('.lp-aluminum-pending').inner_text() for x in ['PRODUCCION','LEGACY','PICKING'])
