@@ -1,3 +1,45 @@
+## Disponible / lentitud · diagnóstico sobre v397 · 06/11/2026
+
+IMPLEMENTADO EN RAMA: únicamente este checkpoint de diagnóstico. Base y main
+remoto contrastados: `a45ddd8a8d95ecb1beb392e164908dc18ee3e3ba`.
+Rama aislada `fix/disponible-seguimiento-v397`; checkout original y dependencias
+sin seguimiento conservados. PR abiertos revisados: no se localizó una propuesta
+de sesión acotada publicada; no se creó PR duplicado.
+
+Se reutiliza evidencia previa de 12 timeouts 57014 (05/11 20:40–20:55 UTC),
+no se repitió consulta productiva. Cadena confirmada en fuentes versionadas:
+`sgp_lp_sale_orden_consultar_v1` y `sgp_lp_sale_orden_definir_v1` llaman varias
+veces a `sgp_lp_afectaciones.actor` y a `sgp_lp_sale_orden.fuentes`; actor usa
+`sgp_lp_operacion.sesion`, y fuentes consulta afectaciones. La sesión llama al
+lector SETOF PL/pgSQL VOLATILE `permisos_en_periodo()` antes de aplicar filtros
+externos de usuario/etapa/key/línea. La materialización amplia explica el coste
+común documentado. La escritura recorre la misma dependencia: es susceptible
+al mismo timeout, pero no se afirma haber reproducido un guardado productivo.
+Conservar también `verificar_temporal`, locks y revalidaciones tras esperas.
+
+Frontend v397 ya carga Disponible visible con máximo cuatro lecturas simultáneas;
+Seguimiento consulta resúmenes de todas las órdenes con tres workers (lector
+nativo y compartido). No cambiar UI ni elevar timeouts para ocultar este fallo.
+No hay delta frontend demostrado necesario para reutilizar una optimización de
+la misma firma de sesión. Contratos Disponible, roles COORDINADOR/ADMINISTRADOR,
+RLS, CAS, UUID idempotente, fuentes y auditoría deben permanecer intactos.
+
+BLOQUEO DE REVISIÓN: `fix/seguimiento-sesion-acotada-proposal` se cita arriba,
+pero no existe entre refs locales/worktrees ni refs remotas de origin observadas.
+Su SQL, SHA y evidencia no están en esta base. Se solicitó SHA/patch/ubicación a
+coordinación: no reimplementar ni inventar compatibilidad, grants o rollback.
+La propuesta existente requiere revisión de sus preflight/pins, propietario,
+SECURITY DEFINER/search_path/ACL, preservación de ámbitos/revocación y recuperación
+antes de una activación SQL separada. No usar `08R_recuperacion_ambitos_REVIEW.sql`
+como rollback de esa optimización: pertenece a otra instalación y otro cuerpo.
+No se certifica el estado instalado actual sin evidencia del paquete/readback.
+
+Verificación realizada: inspección focal de llamadas y límites de concurrencia,
+main remoto exacto y diff documental. No cambios ejecutables, pruebas repetidas,
+SQL productivo, permisos/flags, versión, fusión, push ni publicación.
+Siguiente acción: recuperar el paquete existente y contrastarlo con esta base;
+la integración y eventual activación corresponden a coordinación.
+
 ## PR208 · acople mínimo de distintivos · 06/11/2026
 
 Parche independiente sobre `5965f6c290c434ef92191d1d26f545a86817dc57`.
