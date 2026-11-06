@@ -10,3 +10,17 @@ test('shared editor preserves base revision when other stage saves during refres
 test('shared editor retries uncertain response with same UUID and forbids silent edits',async()=>{let calls=[];const editor=sharedOrderEditor({read:async()=>({revision:0,canReport:true}),command:async c=>{calls.push(c);if(calls.length===1)throw Error('NETWORK');return {duplicate:true};}},{uuid:()=> 'stable'});await editor.refresh();editor.edit({action:'CREATE',quantity:2});await assert.rejects(editor.save());assert.throws(()=>editor.edit({quantity:5}),/RETRY/);await editor.save();assert.deepEqual(calls[0],calls[1]);assert.equal(editor.state.draft,null);});
 import {sharedOrderSummary} from '../src/domain/lp01-shared-order-summary.js';
 test('row adapter never adds shared windows to possibly overlapping historical windows',()=>{const native={...scope,reports:[],aluminumPending:{status:'AVAILABLE',rows:[]}},shared={...scope,reports:[{cause:'NC_V',quantity:3,confirmed:0},{cause:'ACCESORIOS',quantity:1,confirmed:0}],legacyReports:[{causa:'NC_V',ventanas:2,confirmadas:0}]};const summary=sharedOrderSummary(native,shared);assert.equal(summary.categories.NC_V,null);assert.equal(summary.accessories,1);assert.equal(summary.total,null);assert.equal(summary.available,null);});
+
+import {compactSummaryMarkup} from '../src/modules/lp01-affectation-summary.js';
+test('saved shared aluminum replaces undefined indicator; unlinked sources retain estimates separately',()=>{
+ const native={...scope,reports:[],aluminumPending:{status:'AVAILABLE',rows:[{id:'p',state:'PENDIENTE',pieceQuantity:8,reference:'P'}]}};
+ const shared={...scope,revision:1,reports:[{cause:'NC_AL',quantity:3,confirmed:0,source_ref:'p'}],legacyReports:[]};
+ let s=sharedOrderSummary(native,shared);assert.equal(s.categories.NC_AL,3);assert.equal(s.aluminumNeedsIndicator,false);assert.deepEqual(s.estimates,[]);assert.doesNotMatch(compactSummaryMarkup(s),/por definir/);
+ shared.reports[0].source_ref=null;s=sharedOrderSummary(native,shared);assert.equal(s.categories.NC_AL,3);assert.equal(s.estimates[0].quantity,8);assert.match(compactSummaryMarkup(s),/pendientes sin vincular/);assert.doesNotMatch(compactSummaryMarkup(s),/por definir/);assert.equal(s.total,null);
+ shared.reports.push({cause:'NC_AL',quantity:2,confirmed:0});s=sharedOrderSummary(native,shared);assert.equal(s.categories.NC_AL,null);assert.match(compactSummaryMarkup(s),/reportadas: 3 \/ 2/);assert.equal(s.total,null);
+});
+test('estimates use active pieces and distinct known glass NC references without changing saved values',()=>{
+ const native={...scope,reports:[],aluminumPending:{status:'AVAILABLE',rows:[{id:'p',state:'PENDIENTE',pieceQuantity:4},{id:'closed',state:'CERRADO',pieceQuantity:9},{id:'missing',state:'PENDIENTE',pieceQuantity:null}]}};
+ const shared={...scope,revision:0,reports:[{cause:'NC_V',quantity:7,confirmed:0,nc_reference:'NC1'},{cause:'NC_V',quantity:2,confirmed:0,nc_reference:'NC1'}],legacyReports:[]};
+ const s=sharedOrderSummary(native,shared);assert.equal(s.estimates.length,1);assert.equal(s.estimates[0].quantity,4);assert.equal(s.ncEstimate,1);assert.deepEqual(s.reportedQuantities.NC_V,[7,2]);assert.equal(s.total,null);
+});

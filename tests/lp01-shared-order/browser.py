@@ -35,7 +35,7 @@ try:
     page.route('**/rpc/*',rpc);url=origin+'/tests/lp01-shared-order/fixture.html';page.goto(url)
     page.wait_for_selector('[data-shared-form]');assert page.locator('[data-shared-form] button[type=submit]').is_disabled()
     assert 'Reportes anteriores' in page.locator('[data-shared-legacy]').inner_text()
-    db.sql((ROOT/'docs/sql-proposals/lp01-shared-order/01_definition_REVIEW.sql').read_text());db.sql((ROOT/'docs/sql-proposals/lp01-shared-order/02_activate_REVIEW.sql').read_text())
+    db.sql((ROOT/'docs/sql-proposals/lp01-shared-order/01_definition_REVIEW.sql').read_text());db.sql((ROOT/'docs/sql-proposals/lp01-shared-order/02_activate_REVIEW.sql').read_text());db.sql((ROOT/'docs/sql-proposals/lp01-window-balance/01_patch_REVIEW.sql').read_text())
     page.reload();page.wait_for_selector('[data-shared-form]');form=page.locator('[data-shared-form]');form.locator('[name=ncReference]').fill('NC-123');form.locator('[name=quantity]').fill('2');form.locator('[name=observation]').fill('Dos ventanas informadas por Ensamble');lost[0]=True;form.locator('button[type=submit]').click()
     page.wait_for_function("document.querySelector('[data-shared-status]')?.textContent.includes('Reintenta')")
     assert form.locator('[name=quantity]').is_disabled();form.locator('button[type=submit]').click();page.wait_for_function("document.querySelector('[data-shared-status]')?.textContent==='Guardado.'")

@@ -17,10 +17,10 @@ try:
     const {mountSharedAffectationsPanel}=await import('/src/modules/lp01-shared-affectations-panel.js');
     window.qa={commands:[],revision:0,reports:[],canReport:true};
     const pending={status:'AVAILABLE',rows:[{id:'p1',contract:'V2',reference:'PERFIL-1',pieceQuantity:4},{id:'old',contract:'LEGACY',reference:'PERFIL-ANTERIOR',pieceQuantity:2},{id:'missing',contract:'V2',reference:'SIN-CANTIDAD',pieceQuantity:null}]};
-    window.qaMount=async cause=>mountSharedAffectationsPanel(document.querySelector('#panel'),{read:async()=>({reports:[],events:[],aluminumPending:pending}),shared:{read:async()=>({revision:qa.revision,reports:qa.reports,history:[],legacyReports:[],canReport:qa.canReport,accessories:[]}),command:async cmd=>{qa.commands.push(cmd);qa.revision++;qa.reports.push({id:cmd.id,cause:cmd.cause,quantity:cmd.quantity,solved:0,confirmed:0,observation:cmd.observation,nc_reference:cmd.ncReference});return {revision:qa.revision};}}},{fixedCause:cause});
+    window.qaMount=async cause=>mountSharedAffectationsPanel(document.querySelector('#panel'),{read:async()=>({reports:[],events:[],aluminumPending:pending}),shared:{read:async()=>({revision:qa.revision,reports:qa.reports,history:[],legacyReports:[],canReport:qa.canReport,stageBalance:20,accessories:[]}),command:async cmd=>{qa.commands.push(cmd);qa.revision++;qa.reports.push({id:cmd.id,cause:cmd.cause,quantity:cmd.quantity,solved:0,confirmed:0,observation:cmd.observation,nc_reference:cmd.ncReference});return {revision:qa.revision};}}},{fixedCause:cause});
     await qaMount('NC_AL');
    }''')
-   form=page.locator('[data-shared-form]');assert form.locator('h4').inner_text()=='Definir ventanas afectadas'
+   form=page.locator('[data-shared-form]');assert form.locator(':scope > h4').inner_text()=='Definir ventanas afectadas'
    assert form.bounding_box()['y']<page.locator('.lp-aluminum-pending').bounding_box()['y']
    form.locator('[name=sourceRef]').select_option('p1');assert form.locator('[name=quantity]').input_value()=='4';assert 'tentativa: 4' in page.locator('[data-window-proposal-text]').inner_text();assert page.evaluate('qa.commands.length')==0
    form.locator('[name=quantity]').fill('3');form.locator('[name=observation]').fill('Revisadas por líder');form.locator('[name=sourceRef]').select_option('proposal:1');assert form.locator('[name=quantity]').input_value()=='3'

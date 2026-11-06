@@ -3,6 +3,8 @@
   "results": [
     {
       "width": 1440,
+      "saved_row_immediate_and_reload": true,
+      "estimates_visible_editable_and_separate": true,
       "shared_cross_stage_and_accessories": true,
       "overlap_not_summed": true,
       "unavailable_labeled_legacy": true,
@@ -13,6 +15,8 @@
     },
     {
       "width": 390,
+      "saved_row_immediate_and_reload": true,
+      "estimates_visible_editable_and_separate": true,
       "shared_cross_stage_and_accessories": true,
       "overlap_not_summed": true,
       "unavailable_labeled_legacy": true,

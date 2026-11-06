@@ -1,3 +1,25 @@
+## Corrección de ventanas guardadas, estimaciones y máximo · candidata v399 · 06/11/2026
+
+Base publicada v398 bfdc639, Hosting d07db5ac57713655. La fila conservaba el
+indicador de pendientes calculado solo con reportes antiguos y no recibía el
+refresco del panel al guardar. Ahora usa vínculos compartidos y actualiza la fila
+sin recargar todo; revisiones atrasadas no sustituyen una lectura más reciente.
+Cantidades de varios reportes visibles por separado, sin sumar solapamientos.
+Estimaciones por pendiente de aluminio y por NC conocida, explícitas y editables.
+Un pendiente sin vínculo no invalida la cantidad manual guardada.
+
+Pruebas dirigidas sintéticas PC1440/móvil390 y PostgreSQL aislado: guardado,
+refresco de fila, recarga, estimaciones, máximo por etapa, atomicidad/replay y
+ACL conservadas. Sin escritura de pruebas productiva. Captura del usuario solo
+texto/puntero; capturas sintéticas locales inspeccionadas, sin atribuirlas a planta.
+
+Parche revisable docs/sql-proposals/lp01-window-balance/01_patch_REVIEW.sql:
+solo reemplaza lector/escritor existentes; limita CREATE/CORRECT al saldo Export
+vigente de la etapa del actor, sin limitar piezas ni sumar causas. Conserva
+idempotencia, permisos, revisión y recepción física. NO instalado todavía;
+requiere coordinación de la aplicación exacta. Sin GRANT/flags/datos nuevos.
+Publicación pendiente de CI, PR, revisión del artefacto y controles oficiales.
+
 ## Ventanas propuestas · corrección posterior a v397 · 06/11/2026
 
 Formulario Definir ventanas afectadas antes de reportes/pendientes, estado de
