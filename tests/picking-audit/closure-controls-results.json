@@ -1,0 +1,18 @@
+{
+  "environment": "PostgreSQL 17.11, synthetic only",
+  "passed": 3,
+  "tests": [
+    {
+      "name": "Recepci\u00f3n obtiene fuentes solo mediante contexto de auditor\u00eda; rutas generales denegadas",
+      "ok": true
+    },
+    {
+      "name": "ACL y search_path cerrados; diferencias hist\u00f3ricas sin DML directo de anon/authenticated",
+      "ok": true
+    },
+    {
+      "name": "informe conserva originales y expone recepci\u00f3n y tres decisiones; anulado no cuenta",
+      "ok": true
+    }
+  ]
+}

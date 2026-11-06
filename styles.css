@@ -1287,6 +1287,28 @@ button[data-receive]:hover{background:#104f8d;color:#fff}
 /* LAB v244 · recepción agrupada y diferencias */
 .pick-reception-group{border:1px solid #cbd9e8;border-radius:12px;overflow:hidden;background:#fff;margin-bottom:14px}.pick-reception-group>header{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#eaf3fb;border-bottom:1px solid #cbd9e8}.pick-reception-group>header small{display:block;margin-top:3px;color:#58718a}.pick-reception-group>header>strong{background:#174f86;color:#fff;border-radius:999px;padding:4px 9px;font-size:11px}.pick-reception-card.grouped{border:0;border-radius:0;border-bottom:1px solid #e3eaf1;margin:0}.pick-reception-card.grouped:last-child{border-bottom:0}.pick-audit-differences{margin-top:12px;border-top:1px solid #dbe4ee;padding-top:10px}.pick-audit-diff{border:1px solid #c8d8e8;border-radius:10px;padding:10px;margin:8px 0;background:#f8fbfe}.pick-audit-diff-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}.pick-audit-diff-head button{color:#b42318}.pick-audit-diff label{display:grid;gap:4px;font-size:11px;font-weight:800;margin:6px 0}.pick-audit-diff select,.pick-audit-diff input,.pick-audit-diff textarea{border:1px solid #b9cbe0;border-radius:7px;padding:7px;background:#fff}.pick-audit-diff-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.pick-audit-diff-summary{background:#eaf3fb;border-radius:7px;padding:8px;font-size:11px}
 
+/* Picking audit follows the shared SGP modal: fixed header/footer, scroll body. */
+#pickAuditModal .pick-audit-card{display:flex;flex-direction:column;max-height:calc(100dvh - 24px);overflow:hidden}
+#pickAuditModal .modal-header,#pickAuditModal .modal-actions{flex:none}
+#pickAuditModal .pick-audit-body{min-height:0;overflow-y:auto;overscroll-behavior:contain}
+#pickAuditModal .modal-actions{display:flex;flex-wrap:wrap;gap:8px;background:#fff;padding-bottom:max(12px,env(safe-area-inset-bottom))}
+#pickAuditModal button{min-height:44px}
+.pick-audit-decision{border:1px solid #cbd9e8;border-left:4px solid #1264c8;border-radius:10px;padding:12px;margin:12px 0;background:#f8fbff}
+.pick-audit-decision[data-state="ACEPTAR"]{border-left-color:#208250}
+.pick-audit-decision[data-state="ELIMINAR"]{border-left-color:#b42318;background:#fff6f5}
+.pick-audit-decision[data-state="MODIFICAR"]{border-left-color:#ad7100}
+.pick-audit-decision label,#pickAuditModal .pick-audit-body>label{display:grid;gap:5px;margin:10px 0}
+.pick-audit-decision select,.pick-audit-decision input,.pick-audit-decision textarea{min-width:0;max-width:100%;min-height:42px;width:100%;box-sizing:border-box}
+#pickAuditModal [data-error]{color:#b42318}
+#pickAuditModal :focus-visible{outline:2px solid #1264c8;outline-offset:2px}
+@media(max-width:600px){#pickAuditModal .rec-grid{grid-template-columns:1fr}#pickAuditModal .modal-actions button{flex:1 1 130px}}
+#pickAuditModal{overflow:hidden;box-sizing:border-box}
+#pickAuditModal .pick-audit-card{margin:0;box-sizing:border-box;max-height:calc(100dvh - 64px)}
+@media(max-width:720px){#pickAuditModal .pick-audit-card{max-height:calc(100dvh - 16px)}}
+#pickAuditModal{overflow:clip!important}
+#pickAuditModal .modal-header>div{min-width:0;padding:8px 12px}
+#pickAuditModal .modal-header strong,#pickAuditModal .modal-header small{display:block;overflow-wrap:anywhere}
+#pickAuditModal .modal-header small{font-size:12px;margin-top:4px}
 
 /* LAB v252 · Taste-inspired blue visual layer. Presentation only; existing IDs and functional classes remain intact. */
 :root{--sgp-blue:#0865ed;--sgp-blue-dark:#081c49;--sgp-sky:#eaf4ff;--sgp-border:#dce8fb;--sgp-text:#0d1d45;--sgp-muted:#667fa6}

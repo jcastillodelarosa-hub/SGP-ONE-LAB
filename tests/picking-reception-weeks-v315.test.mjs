@@ -76,7 +76,7 @@ test('UI muestra semana en cabecera y orden, filtra sin perder auditoría',()=>{
  assert.match(app,/data-audit-pieces=/);
  assert.match(app,/data-audit=/);
  assert.match(app,/function openPickingAudit\(id\)/);
- assert.match(app,/function savePickingAudit\(/);
+ assert.match(app,/await openAudit\(/);
 });
 
 test('fallo de consulta semanal no bloquea la recepción ni inventa semanas',()=>{

@@ -1,0 +1,202 @@
+{
+  "approvedInstallerSha256": "bfb3364a3b522790d920137c7e76915ee6bce4c7c82477cf19a03cd899f15935",
+  "execution": "single successful transaction",
+  "verification": {
+    "access": [
+      {
+        "role": "anon",
+        "save_execute": true,
+        "private_schema": false,
+        "context_execute": true,
+        "difference_delete": false,
+        "difference_insert": false,
+        "difference_update": false
+      },
+      {
+        "role": "authenticated",
+        "save_execute": true,
+        "private_schema": false,
+        "context_execute": true,
+        "difference_delete": false,
+        "difference_insert": false,
+        "difference_update": false
+      }
+    ],
+    "tables": [
+      {
+        "acl": null,
+        "rls": true,
+        "name": "eventos"
+      },
+      {
+        "acl": null,
+        "rls": true,
+        "name": "decisiones"
+      },
+      {
+        "acl": null,
+        "rls": true,
+        "name": "contextos"
+      },
+      {
+        "acl": null,
+        "rls": true,
+        "name": "correcciones"
+      }
+    ],
+    "functions": [
+      {
+        "acl": [
+          "=X/postgres",
+          "postgres=X/postgres",
+          "anon=X/postgres",
+          "authenticated=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "owner": "postgres",
+        "config": [
+          "search_path=public"
+        ],
+        "exists": true,
+        "definer": true,
+        "signature": "public.sgp_picking_piezas(text,uuid,text)",
+        "source_match": true
+      },
+      {
+        "acl": [
+          "postgres=X/postgres",
+          "service_role=X/postgres",
+          "anon=X/postgres",
+          "authenticated=X/postgres"
+        ],
+        "owner": "postgres",
+        "config": [
+          "search_path=public"
+        ],
+        "exists": true,
+        "definer": true,
+        "signature": "public.sgp_picking_reporte_entregas_v1(text,date,date,text,text,integer,integer)",
+        "source_match": true
+      },
+      {
+        "acl": [
+          "=X/postgres",
+          "postgres=X/postgres",
+          "anon=X/postgres",
+          "authenticated=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "owner": "postgres",
+        "config": [
+          "search_path=public"
+        ],
+        "exists": true,
+        "definer": true,
+        "signature": "public.sgp_picking_recepcion_cola(text)",
+        "source_match": true
+      },
+      {
+        "acl": [
+          "=X/postgres",
+          "postgres=X/postgres",
+          "anon=X/postgres",
+          "authenticated=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "owner": "postgres",
+        "config": [
+          "search_path=\"\""
+        ],
+        "exists": true,
+        "definer": true,
+        "signature": "public.sgp_picking_piezas_panel(text,uuid,text)",
+        "source_match": true
+      },
+      {
+        "acl": [
+          "postgres=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "owner": "postgres",
+        "config": [
+          "search_path=\"\""
+        ],
+        "exists": true,
+        "definer": true,
+        "signature": "public.sgp_pdt_guardar_contrato()",
+        "source_match": true
+      },
+      {
+        "acl": [
+          "postgres=X/postgres"
+        ],
+        "owner": "postgres",
+        "config": [
+          "search_path=\"\""
+        ],
+        "exists": true,
+        "definer": true,
+        "signature": "sgp_pdt_multiorigen.actor(text,text)",
+        "source_match": true
+      },
+      {
+        "acl": [
+          "postgres=X/postgres"
+        ],
+        "owner": "postgres",
+        "config": [
+          "search_path=\"\""
+        ],
+        "exists": true,
+        "definer": true,
+        "signature": "sgp_picking_audit.pendiente(public.sgp_picking_faltantes)",
+        "source_match": true
+      },
+      {
+        "acl": [
+          "postgres=X/postgres"
+        ],
+        "owner": "postgres",
+        "config": [
+          "search_path=\"\""
+        ],
+        "exists": true,
+        "definer": true,
+        "signature": "sgp_picking_audit.snapshot(uuid)",
+        "source_match": true
+      },
+      {
+        "acl": [
+          "postgres=X/postgres",
+          "anon=X/postgres",
+          "authenticated=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "owner": "postgres",
+        "config": [
+          "search_path=\"\""
+        ],
+        "exists": true,
+        "definer": true,
+        "signature": "public.sgp_picking_auditoria_contexto(text,uuid)",
+        "source_match": true
+      },
+      {
+        "acl": [
+          "postgres=X/postgres",
+          "anon=X/postgres",
+          "authenticated=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "owner": "postgres",
+        "config": [
+          "search_path=\"\""
+        ],
+        "exists": true,
+        "definer": true,
+        "signature": "public.sgp_picking_auditoria_guardar(text,uuid,text,uuid,date,text,jsonb,jsonb,text)",
+        "source_match": true
+      }
+    ]
+  }
+}
