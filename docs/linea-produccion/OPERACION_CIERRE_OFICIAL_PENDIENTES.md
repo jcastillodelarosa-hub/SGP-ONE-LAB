@@ -156,3 +156,12 @@ compartido siguen pendientes de entrega por coordinación; no imports rotos,
 lectura de worktree ajeno ni recreación del helper. Próximo: incorporar esos
 archivos y probar únicamente integración de resumen, indisponibilidad/legado y
 revocación; reservar CI completa y versión nueva para candidato final.
+
+### Incremento local: transporte oficial y resumen compartido (2026-11-06)
+- Base conservada: main `a068e14083bb92db6e72c71934d8cf240ef345ff`, v396 Picking. Sin cambios de publicación, SQL instalado ni permisos.
+- Cliente `submitOfficialClose` utiliza el mismo gateway Power BI con adaptador explícito V2; valida recibo, UUID y revisión. Respuestas perdidas/incompatibles quedan inciertas para reintentar el mismo comando. Aún no conectado al formulario de cierre ni habilitado en servidor.
+- Ambas hojas consultan el resumen compartido por identidad y etapa, incluyendo reportes del otro líder. Seguimiento usa la misma composición. Servicio ausente conserva lectura heredada identificada; revocación limpia vista; datos inválidos no se convierten en cero.
+- Copias exactas propiedad de Seguimiento, entregadas por coordinador desde c4b2dad/95e61e1: `src/domain/lp01-shared-order-summary.js` SHA256 `1e42b6e0d1d053485e26e86824444116adc2b618a3388a8d94422b3aeeb06320`; `src/services/lp01-shared-order.js` SHA256 `d80119996812c8fdaa39d70f31d13f0169aac42abd34894449c`. Ambas cotejadas. Al integrar ramas conservar una sola copia del proveedor, sin duplicar su commit ni mantener variantes.
+- Evidencia dirigida: 6 pruebas de composición (Ensamble/Empaque, compartido/legacy/revocación/identidad); 4 del cliente oficial; 5 del transporte previo afectado por extracción. PASS. Comprobación sintáctica y diff --check PASS. Sin repetir batería general ni las 11 pruebas anteriores.
+- Sigue pendiente: instalación autorizada del contrato oficial y su conexión con cierre nativo, formulario/importación/historial visible y Disponible persistente; apertura automática con configuración real e incorporación de Otras; terminar tabla compacta original y comparación PC/móvil contra píxeles B12/B13/B14 aún no accesibles. El resumen no constituye aceptación visual ni verificación productiva.
+- PR continúa denegado por revisión automática por falta de autorización específica para publicación externa. Sin reintento, push nuevo ni CI general; se reserva CI única para candidato completo.

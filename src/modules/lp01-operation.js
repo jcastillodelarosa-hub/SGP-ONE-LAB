@@ -1,5 +1,5 @@
 import {orderSaleTransport} from '../services/lp01-order-sale.js';
-import {affectationSummary} from '../domain/lp01-affectation-summary.js';
+import {readOperationSummary} from '../services/lp01-operation-summary.js';
 import {compactSummaryMarkup as summaryMarkup} from './lp01-affectation-summary.js';
 import {mountTrackingAffectations} from './lp01-tracking-affectations.js';
 import {mountOperationOrderContext} from './lp01-operation-context.js';
@@ -15,6 +15,7 @@ import {parsePowerBI,reconcilePowerBI,bytesBase64,POWERBI_VERSION} from '../doma
 import {importPowerBI} from './lp01-powerbi-client.js';
 import {operationalRows,officialBalance,quantity,AFFECTATIONS,validateAffectations,reportCSV,salePendingReason} from '../domain/lp01-operation.js';
 const esc=v=>String(v??'—').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const operationSummaryMarkup=s=>(s?.sharedUnavailable?'<small>Compartido no disponible · lectura heredada</small>':'')+summaryMarkup(s)+(Number.isSafeInteger(s?.accessories)?'<small>Accesorios: '+s.accessories+'</small>':'');
 const progress=r=>r.total_etapa_parte>=r.programada?'Parte ejecutada':r.sale===null?'SALE por validar':r.ejecutado>=r.sale&&r.sale>0?'SALE cubierto':r.ejecutado>0?'En proceso':'Pendiente';
 const n=v=>v===null||v===undefined?'Por validar':String(v);
 /** Real RPC controller. Missing installation is explicit, never replaced with a write stub. */
@@ -23,6 +24,7 @@ export function mountOperation({tracking,operation,bridge,legacyLoad,orderSaleEn
  let viewPanel='planificador',trackingViewState={},globalData=null,globalContext=null,globalSession=null,trackingRole=null,globalRequest=null,globalQueued=false;
  let operationRequest=null,enrichment=null;
  let orderSaleScope=null,orderSaleProvider=null;
+ let sheetSummaryRun=0;
  const trackingStates=new Map();
  let summaryFlight=null,summaryScope=null;const summaries=new Map();
  document.addEventListener('sgp:lp-role',e=>{trackingRole=e.detail;if(globalSession!==bridge.getToken()||!['COORDINADOR','ADMINISTRADOR'].includes(trackingRole)){globalData=null;trackingStates.clear();if(viewPanel==='seguimiento'){++seq;loading=false;live.replaceChildren();message.textContent='Seguimiento no autorizado';}}});
@@ -75,10 +77,10 @@ export function mountOperation({tracking,operation,bridge,legacyLoad,orderSaleEn
   summaryFlight=(async()=>{const client=await bridge.getClient();
    await Promise.all(Array.from({length:Math.min(3,keys.length)},async()=>{while(cursor<keys.length&&alive()){
     const key=keys[cursor++];let summary;
-    try{const transport=affectationsTransport({client,getToken:()=>alive()?bridge.getToken():null,contractVersion:2,context:{key,line:ctx.line,stage:ctx.stage}});summary=affectationSummary(await transport.read());}
+    try{summary=await readOperationSummary({client,getToken:()=>alive()?bridge.getToken():null,key,line:ctx.line,stage:ctx.stage});}
     catch(error){if(!alive())return;if(error.message==='NO_AUTORIZADO'){++seq;loading=false;globalData=null;summaries.clear();live.replaceChildren();message.textContent='Acceso revocado. Vuelve a consultar.';return;}summary={status:'UNAVAILABLE'};}
     if(!alive())return;summaries.set(key,summary);
-    live.querySelectorAll('[data-order-summary]').forEach(button=>{if(button.dataset.orderSummary===key){const row=globalData.orders.find(r=>r.key===key);const html=summaryMarkup(row?summaryFor(row):null);if(button.innerHTML!==html)button.innerHTML=html;}});
+    live.querySelectorAll('[data-order-summary]').forEach(button=>{if(button.dataset.orderSummary===key){const row=globalData.orders.find(r=>r.key===key);const html=operationSummaryMarkup(row?summaryFor(row):null);if(button.innerHTML!==html)button.innerHTML=html;}});
    }}));
   })().catch(()=>{}).finally(()=>{summaryFlight=null;if(scope!==summaryScope&&globalData)refreshSummaries();});
  }
@@ -163,6 +165,26 @@ export function mountOperation({tracking,operation,bridge,legacyLoad,orderSaleEn
   live.querySelector('[data-next-turn]')?.addEventListener('click',()=>{const next=data.continuity.next;get('[data-op-date]').value=next.date;get('[data-op-shift]').value=String(next.shift);load();});
   live.querySelectorAll('[data-live-operate],[data-affect]').forEach(b=>b.onclick=()=>{selected=b.dataset.liveOperate||b.dataset.affect;renderDetail();document.getElementById('productionOperationTab')?.click();});
   live.querySelectorAll('[data-glass]').forEach(b=>b.onclick=()=>glass(data.orders.find(r=>r.parte===b.dataset.glass)));
+  live.querySelectorAll('[data-order-part]').forEach(el=>{
+   const row=data.orders.find(r=>r.parte===el.dataset.orderPart);if(!row)return;
+   el.querySelectorAll('.lp-order-affects,.lp-affectation-chips').forEach(old=>{old.hidden=true;});
+   const summary=document.createElement('div');summary.dataset.sheetSummary=row.key;summary.textContent='Consultando afectaciones…';el.append(summary);
+  });
+  refreshSheetSummaries();
+ }
+ async function refreshSheetSummaries(){
+  const run=++sheetSummaryRun,token=bridge.getToken(),ctx={...context},snapshot=data;
+  const alive=()=>run===sheetSummaryRun&&token===bridge.getToken()&&data===snapshot&&viewPanel!=='seguimiento';
+  const keys=[...new Set(data.orders.map(r=>r.key))];let cursor=0;
+  try{const client=await bridge.getClient();
+   await Promise.all(Array.from({length:Math.min(3,keys.length)},async()=>{while(alive()&&cursor<keys.length){
+    const key=keys[cursor++];let summary;
+    try{summary=await readOperationSummary({client,getToken:()=>alive()?bridge.getToken():null,key,line:ctx.line,stage:ctx.stage});}
+    catch(error){if(!alive())return;if(error.message==='NO_AUTORIZADO'){++seq;loading=false;clear();message.textContent='Acceso revocado. Vuelve a consultar.';return;}summary={status:'UNAVAILABLE'};}
+    if(!alive())return;
+    live.querySelectorAll('[data-sheet-summary]').forEach(el=>{if(el.dataset.sheetSummary===key){el.innerHTML=operationSummaryMarkup(summary);el.querySelectorAll('button').forEach(button=>button.onclick=()=>{selected=snapshot.orders.find(r=>r.key===key).parte;renderDetail();document.getElementById('productionOperationTab')?.click();});}});
+   }}));
+  }catch{if(alive())live.querySelectorAll('[data-sheet-summary]').forEach(el=>{el.textContent='Afectaciones no disponibles';});}
  }
  async function glass(r){
   const host=operation.querySelector('[data-operation-detail]');selected=r.parte;renderDetail();document.getElementById('productionOperationTab')?.click();
