@@ -1,3 +1,4 @@
+import {openAudit} from './src/modules/picking-audit.js';
 import {filterReceptionRows as filterReceptionTableRows,receptionAluminumSummary} from './src/domain/reception-table.js';
 import {createReceptionColumns} from './src/modules/reception-columns.js';
 import {openPartialProgramming} from './src/modules/mecanizado-partes.js';
@@ -2482,7 +2483,7 @@ document.querySelector('#saveShiftConfig')?.addEventListener('click',async()=>{c
 
 let pickingRows=[];
 
-let pickingReceptionRows=[],pickAuditTarget=null,pickAuditDifferences=[],pickingReceptionLoadId=0;
+let pickingReceptionRows=[],pickingReceptionLoadId=0;
 async function loadPickingReception(){
  const host=document.querySelector('#pickReceptionBoard');
  if(!host||!getAppToken())return;
@@ -2542,58 +2543,28 @@ function renderPickingReception(){
   '<section class="pick-reception-group"><header><div class="pick-reception-group-head"><span class="pick-week-badge">SEM '+escapeHtml(g.semana||'—')+'</span><div><b>Reserva '+escapeHtml(g.reserva)+'</b><span> · Parte '+escapeHtml(g.parte)+'</span><small>'+escapeHtml(g.sistema)+' · '+escapeHtml(g.acabado)+'</small>'+sharedReserveNoticeHtml(g.reserva)+'</div></div><strong>'+g.rows.length+' orden'+(g.rows.length===1?'':'es')+'</strong></header>'+
   g.rows.map(x=>{
    const meta=sharedMetaFromEmbedded(x,x.reserva),semana=normalizeReceptionWeek(x.semana);
-   return '<div class="pick-reception-card grouped '+(isSharedMeta(meta)?'shared-row':'')+'"><div><strong>'+escapeHtml(x.produccion||'—')+' · '+escapeHtml(x.proyecto||'')+'</strong>'+(meta?sharedBadgeHtml(meta)+sharedDetailsHtml(meta):'')+'<small>Semana '+escapeHtml(semana||'sin identificar')+' · '+escapeHtml(x.cantidad_ventanas||0)+' ventanas</small></div><div><span class="prod-state pick-status-yellow">PICKING</span><span class="pick-delivery-state">'+(x.completa?'COMPLETA · POR VALIDAR':'CON PENDIENTES · POR VALIDAR')+'</span></div><div><small>Entrega '+escapeHtml(x.fecha_entrega||'—')+' · '+escapeHtml(x.turno_entrega||'—')+'</small><small>Por '+escapeHtml(x.usuario_entrega||'—')+'</small></div><div class="pick-reception-actions"><button data-audit-pieces="'+x.id_programacion+'" data-production="'+escapeHtml(x.produccion||'')+'">Ver piezas</button><button class="primary" data-audit="'+x.id_entrega+'">Auditar</button></div></div>';
+   return '<div class="pick-reception-card grouped '+(isSharedMeta(meta)?'shared-row':'')+'"><div><strong>'+escapeHtml(x.produccion||'—')+' · '+escapeHtml(x.proyecto||'')+'</strong>'+(meta?sharedBadgeHtml(meta)+sharedDetailsHtml(meta):'')+'<small>Semana '+escapeHtml(semana||'sin identificar')+' · '+escapeHtml(x.cantidad_ventanas||0)+' ventanas</small></div><div><span class="prod-state pick-status-yellow">PICKING</span><span class="pick-delivery-state">'+(x.completa?'COMPLETA · POR VALIDAR':'CON PENDIENTES · POR VALIDAR')+'</span></div><div><small>Entrega '+escapeHtml(x.fecha_entrega||'—')+' · '+escapeHtml(x.turno_entrega||'—')+'</small><small>Por '+escapeHtml(x.usuario_entrega||'—')+'</small></div><div class="pick-reception-actions"><button data-audit-pieces="'+x.id_entrega+'" data-production="'+escapeHtml(x.produccion||'')+'">Ver piezas</button><button class="primary" data-audit="'+x.id_entrega+'">Auditar</button></div></div>';
   }).join('')+'</section>'
  ).join(''):'<div class="empty-state">'+(pickingReceptionRows.length?'No hay órdenes pendientes de auditoría para los filtros seleccionados.':'No hay órdenes pendientes de auditoría.')+'</div>';
- host.querySelectorAll('[data-audit-pieces]').forEach(b=>b.onclick=()=>openPickingPieces(b.dataset.auditPieces,b.dataset.production));
+ host.querySelectorAll('[data-audit-pieces]').forEach(b=>b.onclick=()=>openPickingAuditPieces(b.dataset.auditPieces));
  host.querySelectorAll('[data-audit]').forEach(b=>b.onclick=()=>openPickingAudit(b.dataset.audit));
 }
-function openPickingAudit(id){
- const x=pickingReceptionRows.find(r=>r.id_entrega===id);if(!x)return;
- pickAuditTarget=x;pickAuditDifferences=[];
- const meta=sharedMetaFromEmbedded(x,x.reserva);
- document.querySelector('#pickAuditTitle').textContent='Auditoría · '+(x.produccion||'—');
- document.querySelector('#pickAuditMeta').innerHTML='Reserva '+escapeHtml(x.reserva||'—')+' · Parte '+escapeHtml(x.parte||'—')+' · '+escapeHtml(x.sistema||'—')+' · '+escapeHtml(x.acabado||'—')+(meta?sharedBadgeHtml(meta)+sharedDetailsHtml(meta):'');
- document.querySelector('#pickAuditDeliveryInfo').innerHTML='<div class="pick-audit-status"><span class="prod-state pick-status-yellow">PICKING</span><b>'+(x.completa?'COMPLETA':'CON PENDIENTES')+'</b><span>Entrega '+escapeHtml(x.fecha_entrega||'—')+' · '+escapeHtml(x.turno_entrega||'—')+'</span></div>';
- document.querySelector('#pickAuditMissing').innerHTML=(x.faltantes||[]).length?'<h4>Faltantes reportados por entrega</h4>'+(x.faltantes||[]).map(f=>'<div class="pick-audit-missing" data-fid="'+f.id_faltante+'"><div><b>'+escapeHtml(f.perfil||'—')+'</b><span>Reserva: '+escapeHtml(f.reserva||x.reserva||'—')+' · Acabado: '+escapeHtml(f.acabado||x.acabado||'—')+'</span><span>Marca: '+escapeHtml(f.marca||'—')+' · Fabricación: '+escapeHtml(f.fabricacion||'—')+' · Longitud: '+escapeHtml(f.longitud??'—')+' · Cant: '+escapeHtml(f.cantidad||1)+'</span><small>'+escapeHtml(f.observacion||'Sin observación')+'</small></div><label>Ventanas afectadas<input type="number" min="1" max="'+escapeHtml(x.cantidad_ventanas||999)+'" value="'+escapeHtml(f.ventanas_afectadas||1)+'" data-audit-windows></label></div>').join(''):'<div class="empty-state">La entrega fue reportada completa.</div>';
- document.querySelector('#pickAuditObs').value='';
- const dh=document.querySelector('#pickAuditDifferences');if(dh){dh.innerHTML='';dh.hidden=true}
- document.querySelector('#pickAuditModal').hidden=false
+async function openPickingAuditPieces(id){
+ const target=pickingReceptionRows.find(r=>r.id_entrega===id);if(!target)return;
+ try{
+  const db=await getSupabaseClient(),{data,error}=await db.rpc('sgp_picking_auditoria_contexto',{p_token:getAppToken(),p_id_entrega:id});if(error)throw error;
+  if(!Array.isArray(data?.fuentes))throw Error('Contrato de fuentes de auditoría inválido');
+  currentPieceRows=data.fuentes.map(p=>({...p,codigo_sap:p.codigo_sap||p.perfil,perfil:p.perfil||p.codigo_sap}));
+  currentPieceContext='order';currentPieceView='summary';els.pieceModalTitle.textContent='Orden '+target.produccion;
+  els.pieceModalMeta.textContent='Auditoría · Reserva '+target.reserva+' · '+target.sistema+' · '+target.acabado;
+  els.pieceModal.hidden=false;renderPieceModal();
+ }catch(e){alert('No fue posible cargar las piezas de auditoría: '+e.message);}
 }
-async function openAuditDifferenceEditor(){
- if(!pickAuditTarget)return;
- const host=document.querySelector('#pickAuditDifferences');host.hidden=false;
- if(!pickAuditDifferences.length){
-  try{
-   const db=await getSupabaseClient(),{data,error}=await db.rpc('sgp_picking_piezas_panel',{p_token:getAppToken(),p_id_programacion:pickAuditTarget.id_programacion,p_produccion:pickAuditTarget.produccion});if(error)throw error;
-   const meta=sharedMetaFromEmbedded(pickAuditTarget,pickAuditTarget.reserva),opts=sharedReserveOptions(meta,pickAuditTarget.reserva,pickAuditTarget.acabado),first=opts[0]||{};
-   pickAuditDifferences.push({id_pieza:'',perfil:'',marca:'',fabricacion:'',longitud:'',cantidad:1,ventanas_afectadas:1,observacion:'',reserva:first.reserva||'',acabado:first.acabado||'',pieces:data||[],collapsed:false});
-   renderAuditDifferences()
-  }catch(e){alert('No fue posible cargar las piezas de la orden: '+e.message)}
- }else renderAuditDifferences()
-}
-function auditDiffRefs(d){return [...new Set((d.pieces||[]).map(p=>p.perfil||p.codigo_sap).filter(Boolean))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}))}
-function renderAuditDifferences(){
- const host=document.querySelector('#pickAuditDifferences');if(!host)return;host.hidden=false;
- const meta=sharedMetaFromEmbedded(pickAuditTarget,pickAuditTarget?.reserva),opts=sharedReserveOptions(meta,pickAuditTarget?.reserva||'',pickAuditTarget?.acabado||'');
- const reserveSelect=(d,i)=>'<div class="shared-pending-choice"><label>Reserva del pendiente<select data-diff-reserve="'+i+'">'+opts.map(x=>'<option value="'+escapeHtml(x.reserva)+'" data-finish="'+escapeHtml(x.acabado||'')+'" '+(String(x.reserva)===String(d.reserva)?'selected':'')+'>'+escapeHtml(x.reserva)+' · '+escapeHtml(reserveRelationLabel(x))+' · '+escapeHtml(x.acabado||'ACABADO POR CONFIRMAR')+'</option>').join('')+'</select></label><label>Acabado<input data-diff-finish="'+i+'" value="'+escapeHtml(d.acabado||'')+'" placeholder="Indica el acabado real"></label></div>';
- host.innerHTML='<h4>Diferencias encontradas en auditoría</h4><p class="pick-delivery-help">Agrega cada faltante y selecciona la reserva/acabado del material. Cuando la orden tiene varias reservas asociadas, selecciona la combinación reserva/acabado correcta.</p>'+pickAuditDifferences.map((d,i)=>'<div class="pick-missing-card '+(d.collapsed?'pick-missing-collapsed':'')+'" data-audit-diff="'+i+'"><div class="pick-missing-card-head"><b>Faltante '+(i+1)+'</b><span class="pick-missing-summary">'+(d.perfil?escapeHtml(d.perfil)+' · '+escapeHtml(d.reserva||'—')+' · '+escapeHtml(d.acabado||'—'):'')+'</span><button type="button" data-diff-toggle="'+i+'">'+(d.collapsed?'Editar':'Contraer')+'</button>'+(i?'<button type="button" class="pick-remove-missing" data-diff-del="'+i+'">Eliminar</button>':'')+'</div><div class="pick-missing-body">'+reserveSelect(d,i)+'<div class="pick-missing-ref"><label>Referencia<select data-diff-ref="'+i+'"><option value="">Seleccionar…</option>'+auditDiffRefs(d).map(v=>'<option '+(v===d.perfil?'selected':'')+'>'+escapeHtml(v)+'</option>').join('')+'</select></label></div><div data-diff-choices="'+i+'" class="pick-piece-choices" '+(d.perfil?'':'hidden')+'></div><div class="pick-missing-entry" '+(d.id_pieza?'':'hidden')+' data-diff-entry="'+i+'"><div class="pick-selected-piece" data-diff-selected="'+i+'"></div><div class="pick-missing-inputs"><label>Cantidad faltante<input data-diff-k="cantidad" data-diff-i="'+i+'" type="number" min="1" value="'+escapeHtml(d.cantidad||1)+'"></label><label>Ventanas afectadas<input data-diff-k="ventanas_afectadas" data-diff-i="'+i+'" type="number" min="1" max="'+escapeHtml(pickAuditTarget.cantidad_ventanas||999)+'" value="'+escapeHtml(d.ventanas_afectadas||1)+'"></label></div><label>Observación<textarea data-diff-k="observacion" data-diff-i="'+i+'" rows="2" placeholder="Detalle del faltante…">'+escapeHtml(d.observacion||'')+'</textarea></label></div></div></div>').join('')+'<button type="button" class="pick-add-missing" id="pickAuditAddDifference">+ Agregar otro faltante</button>';
- pickAuditDifferences.forEach((d,i)=>renderAuditDiffChoices(i,d.perfil));
- host.querySelectorAll('[data-diff-reserve]').forEach(el=>el.onchange=()=>{const i=+el.dataset.diffReserve,d=pickAuditDifferences[i],op=el.selectedOptions[0];d.reserva=el.value;d.acabado=op?.dataset.finish||'';renderAuditDifferences()});
- host.querySelectorAll('[data-diff-finish]').forEach(el=>el.oninput=()=>{pickAuditDifferences[+el.dataset.diffFinish].acabado=el.value});
- host.querySelectorAll('[data-diff-ref]').forEach(el=>el.onchange=()=>{const i=+el.dataset.diffRef,d=pickAuditDifferences[i];Object.assign(d,{id_pieza:'',perfil:el.value,marca:'',fabricacion:'',longitud:''});renderAuditDifferences()});
- host.querySelectorAll('[data-diff-k]').forEach(el=>el.oninput=()=>{pickAuditDifferences[+el.dataset.diffI][el.dataset.diffK]=el.type==='number'?Number(el.value):el.value});
- host.querySelectorAll('[data-diff-toggle]').forEach(el=>el.onclick=()=>{const d=pickAuditDifferences[+el.dataset.diffToggle];d.collapsed=!d.collapsed;renderAuditDifferences()});
- host.querySelectorAll('[data-diff-del]').forEach(el=>el.onclick=()=>{pickAuditDifferences.splice(+el.dataset.diffDel,1);renderAuditDifferences()});
- document.querySelector('#pickAuditAddDifference')?.addEventListener('click',()=>{pickAuditDifferences.forEach(d=>d.collapsed=!!d.id_pieza);const pieces=pickAuditDifferences[0]?.pieces||[],first=opts[0]||{};pickAuditDifferences.push({id_pieza:'',perfil:'',marca:'',fabricacion:'',longitud:'',cantidad:1,ventanas_afectadas:1,observacion:'',reserva:first.reserva||'',acabado:first.acabado||'',pieces,collapsed:false});renderAuditDifferences()})
-}
-function renderAuditDiffChoices(i,ref){const d=pickAuditDifferences[i],box=document.querySelector('[data-diff-choices="'+i+'"]'),entry=document.querySelector('[data-diff-entry="'+i+'"]'),sel=document.querySelector('[data-diff-selected="'+i+'"]');if(!box)return;if(!ref){box.hidden=true;return}const rows=(d.pieces||[]).map((p,idx)=>({p,idx})).filter(x=>(x.p.perfil||x.p.codigo_sap)===ref);box.hidden=false;box.innerHTML='<div class="pick-choice-title">Selecciona la pieza faltante</div><div class="pick-choice-head"><span>Marca</span><span>Fabricación</span><span>Longitud</span><span>Cant.</span></div>'+rows.map(x=>'<button type="button" class="pick-choice-row '+(String(x.p.id_pieza)===String(d.id_pieza)?'selected':'')+'" data-audit-piece="'+x.idx+'"><span>'+escapeHtml(x.p.marca||'—')+'</span><span>'+escapeHtml(x.p.fabricacion||'—')+'</span><span>'+escapeHtml(x.p.longitud??'—')+'</span><span>'+escapeHtml(x.p.cantidad??0)+'</span></button>').join('');box.querySelectorAll('[data-audit-piece]').forEach(b=>b.onclick=()=>{const p=d.pieces[+b.dataset.auditPiece];Object.assign(d,{id_pieza:p.id_pieza,perfil:p.perfil||p.codigo_sap,marca:p.marca||'',fabricacion:p.fabricacion||'',longitud:p.longitud??'',cantidad:1});renderAuditDifferences()});if(d.id_pieza&&entry&&sel){entry.hidden=false;sel.innerHTML='<b>'+escapeHtml(d.perfil)+'</b><span>Marca: '+escapeHtml(d.marca||'—')+'</span><span>Fabricación: '+escapeHtml(d.fabricacion||'—')+'</span><span>Longitud: '+escapeHtml(d.longitud??'—')+'</span>'}}
-async function savePickingAudit(){
- if(!pickAuditTarget)return;
- const faltantes=[...document.querySelectorAll('.pick-audit-missing')].map(w=>({id_faltante:w.dataset.fid,id_pieza:(pickAuditTarget.faltantes||[]).find(f=>f.id_faltante===w.dataset.fid)?.id_pieza||'',ventanas_afectadas:Number(w.querySelector('[data-audit-windows]').value||0)}));
- if(faltantes.some(f=>f.ventanas_afectadas<1)){alert('Indica cuántas ventanas afecta cada faltante.');return}
- if(pickAuditDifferences.some(d=>!d.reserva||!String(d.acabado||'').trim())){alert('Cada diferencia debe indicar la reserva y el acabado correspondiente.');return}
- try{const db=await getSupabaseClient(),{error}=await db.rpc('sgp_picking_validar_recepcion',{p_token:getAppToken(),p_id_entrega:pickAuditTarget.id_entrega,p_faltantes:faltantes,p_diferencias:pickAuditDifferences,p_observacion:document.querySelector('#pickAuditObs').value||null});if(error)throw error;document.querySelector('#pickAuditModal').hidden=true;await Promise.all([loadPickingReception(),loadPicking()])}catch(e){alert('No fue posible validar la recepción: '+e.message)}
+async function openPickingAudit(id){
+ const target=pickingReceptionRows.find(r=>r.id_entrega===id);if(!target)return;
+ await openAudit({target,config:sgpGeneralConfig.HORARIOS_TURNOS,
+ rpc:async(name,args)=>{const db=await getSupabaseClient();const {data,error}=await db.rpc(name,{p_token:getAppToken(),...args});if(error)throw error;return data;},
+ onSaved:async()=>{await Promise.all([loadPickingReception(),loadPicking(),loadAluminumPending()]);}});
 }
 async function loadPicking(){
  const host=document.querySelector('#pickBoard');if(!host||!getAppToken())return;host.innerHTML='<div class="empty-state">Cargando cola de Picking…</div>';
@@ -3045,7 +3016,7 @@ document.querySelectorAll('[data-ui-scale]').forEach(b=>b.addEventListener('clic
  applyUiScale(b.dataset.uiScale);
 }));
 
-document.querySelector('#pickDeliveryTab')?.addEventListener('click',()=>{document.querySelector('#pickDeliveryTab').classList.add('active');document.querySelector('#pickReceptionTab').classList.remove('active');document.querySelector('#pickDeliveryPanel').hidden=false;document.querySelector('#pickReceptionPanel').hidden=true});document.querySelector('#pickReceptionTab')?.addEventListener('click',()=>{document.querySelector('#pickReceptionTab').classList.add('active');document.querySelector('#pickDeliveryTab').classList.remove('active');document.querySelector('#pickDeliveryPanel').hidden=true;document.querySelector('#pickReceptionPanel').hidden=false;loadPickingReception()});document.querySelector('#pickReceptionRefresh')?.addEventListener('click',loadPickingReception);document.querySelector('#pickReceptionSearch')?.addEventListener('input',renderPickingReception);document.querySelector('#pickReceptionWeek')?.addEventListener('change',renderPickingReception);document.querySelector('#pickAuditValidate')?.addEventListener('click',savePickingAudit);document.querySelector('#pickAuditClose')?.addEventListener('click',()=>document.querySelector('#pickAuditModal').hidden=true);document.querySelector('#pickAuditCancel')?.addEventListener('click',()=>document.querySelector('#pickAuditModal').hidden=true);document.querySelector('#pickAuditDifference')?.addEventListener('click',openAuditDifferenceEditor);
+document.querySelector('#pickDeliveryTab')?.addEventListener('click',()=>{document.querySelector('#pickDeliveryTab').classList.add('active');document.querySelector('#pickReceptionTab').classList.remove('active');document.querySelector('#pickDeliveryPanel').hidden=false;document.querySelector('#pickReceptionPanel').hidden=true});document.querySelector('#pickReceptionTab')?.addEventListener('click',()=>{document.querySelector('#pickReceptionTab').classList.add('active');document.querySelector('#pickDeliveryTab').classList.remove('active');document.querySelector('#pickDeliveryPanel').hidden=true;document.querySelector('#pickReceptionPanel').hidden=false;loadPickingReception()});document.querySelector('#pickReceptionRefresh')?.addEventListener('click',loadPickingReception);document.querySelector('#pickReceptionSearch')?.addEventListener('input',renderPickingReception);document.querySelector('#pickReceptionWeek')?.addEventListener('change',renderPickingReception);
 
 document.querySelector('#alCompactTab')?.addEventListener('click',()=>{document.querySelector('#alCompactTab').classList.add('active');document.querySelector('#alDetailTab').classList.remove('active');document.querySelector('#alCompactPanel').hidden=false;document.querySelector('#alDetailPanel').hidden=true;renderAlCompact()});document.querySelector('#alDetailTab')?.addEventListener('click',()=>{document.querySelector('#alDetailTab').classList.add('active');document.querySelector('#alCompactTab').classList.remove('active');document.querySelector('#alCompactPanel').hidden=true;document.querySelector('#alDetailPanel').hidden=false;renderAlTrackRows(alTrackRows)});
 

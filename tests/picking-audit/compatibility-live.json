@@ -1,0 +1,990 @@
+{
+  "functions": [
+    {
+      "signature": "sgp_picking_piezas(text,uuid,text)",
+      "schema": "public",
+      "name": "sgp_picking_piezas",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_picking_piezas(p_token text, p_id_programacion uuid, p_produccion text DEFAULT NULL::text)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\ndeclare u text; v_reserva text; v_parte text; v_prod_num text;\nbegin\n u:=sgp_validar_sesion_rol(p_token,array['ADMINISTRADOR','COORDINADOR','LIDER MECANIZADO','LIDER','PATINADOR','PICKING','SUPERVISOR DE PICKING','LIDER LINEA']);\n select reserva,prioridad_semanal into v_reserva,v_parte from sgp_mecanizado_programacion where id_programacion=p_id_programacion;\n v_prod_num:=nullif(substring(coalesce(p_produccion,'') from '^[[:space:]]*([0-9]+)'),'');\n return coalesce((select jsonb_agg(jsonb_build_object(\n  'id_pieza',a.id_pieza,'produccion',a.produccion,'codigo_sap',a.codigo_sap,'perfil',a.codigo_sap,'descripcion',a.descripcion,'marca',a.marca,'fabricacion',a.fabricacion,'longitud',a.longitud,'cantidad',a.cantidad,'sistema',a.sistema,'acabado',a.acabado,'tipo_pieza',a.tipo_pieza\n ) order by a.produccion,a.codigo_sap,a.fabricacion,a.longitud)\n from sgp_aluminio a\n where a.activo='SI'\n and (\n   (v_reserva is not null and a.key_produccion in (select pr.key_produccion from sgp_prioridades pr where pr.reserva=v_reserva and (v_parte is null or v_parte='' or pr.prioridad=v_parte) and pr.id_linea='PANELES_2')\n    and (p_produccion is null or a.produccion=p_produccion or a.id_orden_produccion::text=p_produccion))\n   or\n   (p_produccion is not null and a.produccion=p_produccion)\n   or\n   (v_prod_num is not null and (a.id_orden_produccion::text=v_prod_num or substring(coalesce(a.produccion,'') from '^[[:space:]]*([0-9]+)')=v_prod_num))\n )\n ),'[]'::jsonb);\nend $function$\n",
+      "owner": "postgres",
+      "security_definer": true,
+      "config": [
+        "search_path=public"
+      ],
+      "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}"
+    },
+    {
+      "acl": "{postgres=X/postgres,service_role=X/postgres,anon=X/postgres,authenticated=X/postgres}",
+      "name": "sgp_picking_reporte_entregas_v1",
+      "owner": "postgres",
+      "config": [
+        "search_path=public"
+      ],
+      "schema": "public",
+      "signature": "sgp_picking_reporte_entregas_v1(text,date,date,text,text,integer,integer)",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_picking_reporte_entregas_v1(p_token text, p_fecha_inicio date, p_fecha_fin date, p_turno text DEFAULT NULL::text, p_sistema text DEFAULT NULL::text, p_limit integer DEFAULT 100, p_offset integer DEFAULT 0)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nDECLARE v_user text; v_total bigint; v_summary jsonb; v_systems jsonb; v_rows jsonb;\nBEGIN\n v_user := public.sgp_validar_sesion_rol(p_token,ARRAY['ADMINISTRADOR','COORDINADOR','PICKING','SUPERVISOR DE PICKING']);\n IF p_fecha_inicio IS NULL OR p_fecha_fin IS NULL OR p_fecha_fin<p_fecha_inicio OR p_fecha_fin-p_fecha_inicio>30 THEN\n  RAISE EXCEPTION 'RANGO_FECHAS_INVALIDO';\n END IF;\n IF p_limit IS NULL OR p_limit<1 OR p_limit>500 OR p_offset IS NULL OR p_offset<0 THEN\n  RAISE EXCEPTION 'PAGINACION_INVALIDA';\n END IF;\n IF p_turno IS NOT NULL AND p_turno NOT IN ('TURNO 1','TURNO 2') THEN\n  RAISE EXCEPTION 'TURNO_INVALIDO';\n END IF;\n SELECT count(*) INTO v_total\n FROM public.sgp_picking_entregas e\n JOIN public.sgp_mecanizado_programacion p ON p.id_programacion=e.id_programacion\n WHERE e.fecha_operativa BETWEEN p_fecha_inicio AND p_fecha_fin\n   AND (p_turno IS NULL OR e.turno_entrega=p_turno)\n   AND (p_sistema IS NULL OR p.sistema=p_sistema);\n -- Repeating CTEs is deliberate: aggregate across ALL matching events, never just the page.\n SELECT jsonb_build_object(\n  'movimientos',count(*),\n  'producciones_unicas',count(DISTINCT (coalesce((select pt.key_produccion from sgp_mecanizado_parcial.partes pt where pt.id_programacion=e.id_programacion),e.id_programacion::text||'|'||e.produccion),p.sistema)),\n  'completas',count(*) FILTER (WHERE e.completa IS TRUE),\n  'parciales',count(*) FILTER (WHERE e.completa IS FALSE),\n  'filas_faltantes',coalesce(sum((SELECT count(*) FROM public.sgp_picking_faltantes f WHERE f.id_entrega=e.id_entrega)),0),\n  'cantidad_piezas_faltantes',coalesce(sum((SELECT sum(f.cantidad) FROM public.sgp_picking_faltantes f WHERE f.id_entrega=e.id_entrega)),0)\n ) INTO v_summary\n FROM public.sgp_picking_entregas e JOIN public.sgp_mecanizado_programacion p ON p.id_programacion=e.id_programacion\n WHERE e.fecha_operativa BETWEEN p_fecha_inicio AND p_fecha_fin\n   AND (p_turno IS NULL OR e.turno_entrega=p_turno)\n   AND (p_sistema IS NULL OR p.sistema=p_sistema);\n SELECT coalesce(jsonb_agg(to_jsonb(s) ORDER BY s.sistema),'[]'::jsonb) INTO v_systems FROM (\n  SELECT p.sistema,count(*) movimientos,\n   count(DISTINCT (coalesce((select pt.key_produccion from sgp_mecanizado_parcial.partes pt where pt.id_programacion=e.id_programacion),e.id_programacion::text||'|'||e.produccion),p.sistema)) producciones_unicas,\n   count(*) FILTER (WHERE e.completa IS TRUE) completas,\n   count(*) FILTER (WHERE e.completa IS FALSE) parciales,\n   coalesce(sum((SELECT count(*) FROM public.sgp_picking_faltantes f WHERE f.id_entrega=e.id_entrega)),0) filas_faltantes\n  FROM public.sgp_picking_entregas e JOIN public.sgp_mecanizado_programacion p ON p.id_programacion=e.id_programacion\n  WHERE e.fecha_operativa BETWEEN p_fecha_inicio AND p_fecha_fin\n    AND (p_turno IS NULL OR e.turno_entrega=p_turno)\n    AND (p_sistema IS NULL OR p.sistema=p_sistema)\n  GROUP BY p.sistema\n ) s;\n SELECT coalesce(jsonb_agg(to_jsonb(z) ORDER BY z.fecha_entrega,z.id_entrega),'[]'::jsonb) INTO v_rows FROM (\n  SELECT (select pt.key_produccion from sgp_mecanizado_parcial.partes pt where pt.id_programacion=e.id_programacion) key_produccion_parte,\n   (select pt.id_programacion from sgp_mecanizado_parcial.partes pt where pt.id_programacion=e.id_programacion) parte_id,\n   (select e.produccion||'-P'||pt.numero from sgp_mecanizado_parcial.partes pt where pt.id_programacion=e.id_programacion) identificador_parte,\n   (select en.cantidad from sgp_mecanizado_parcial.entregas en where en.id_entrega=e.id_entrega) cantidad_ventanas_entregadas,\n   e.id_entrega,e.id_programacion,e.produccion,e.completa,e.estado,e.observacion,\n   e.usuario_entrega,(SELECT u.nombre FROM public.sgp_usuarios u WHERE u.usuario=e.usuario_entrega LIMIT 1) AS nombre_responsable,e.fecha_entrega,e.fecha_operativa,e.turno_entrega,\n   e.usuario_validacion,e.fecha_validacion,p.reserva,p.prioridad_semanal AS parte,p.sistema,p.acabado,p.cantidad_programada,\n   coalesce((SELECT jsonb_agg(jsonb_build_object('id_faltante',f.id_faltante,'perfil',f.perfil,'marca',f.marca,'fabricacion',f.fabricacion,'longitud',f.longitud,'cantidad',f.cantidad,'observacion',f.observacion,'nc',f.nc,'reserva_pendiente',f.reserva_pendiente,'acabado_pendiente',f.acabado_pendiente,'ventanas_afectadas',f.ventanas_afectadas) ORDER BY f.id_faltante) FROM public.sgp_picking_faltantes f WHERE f.id_entrega=e.id_entrega),'[]'::jsonb) faltantes\n  FROM public.sgp_picking_entregas e JOIN public.sgp_mecanizado_programacion p ON p.id_programacion=e.id_programacion\n  WHERE e.fecha_operativa BETWEEN p_fecha_inicio AND p_fecha_fin\n   AND (p_turno IS NULL OR e.turno_entrega=p_turno)\n   AND (p_sistema IS NULL OR p.sistema=p_sistema)\n  ORDER BY e.fecha_entrega,e.id_entrega LIMIT p_limit OFFSET p_offset\n ) z;\n RETURN jsonb_build_object('ok',true,'filters',jsonb_build_object('fecha_inicio',p_fecha_inicio,'fecha_fin',p_fecha_fin,'turno',p_turno,'sistema',p_sistema),'summary',v_summary,'por_sistema',v_systems,'total_rows',v_total,'limit',p_limit,'offset',p_offset,'rows',v_rows);\nEND $function$\n",
+      "security_definer": true
+    },
+    {
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "name": "sgp_validar_sesion_rol",
+      "owner": "postgres",
+      "config": [
+        "search_path=public, extensions"
+      ],
+      "schema": "public",
+      "signature": "sgp_validar_sesion_rol(text,text[])",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_validar_sesion_rol(p_token text, p_roles text[])\n RETURNS text\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public', 'extensions'\nAS $function$ declare v_usuario text; v_rol text; begin select u.usuario,u.rol into v_usuario,v_rol from public.sgp_sesiones_app s join public.sgp_usuarios u on u.id_usuario=s.id_usuario where s.token_hash=encode(extensions.digest(coalesce(p_token,''),'sha256'),'hex') and s.revocado_en is null and s.expira_en>now() and u.activo=true; if v_usuario is null then raise exception 'PERMISO_DENEGADO'; end if; if v_rol=any(p_roles) then return v_usuario; end if; if v_rol='RECEPCION' and 'LIDER'=any(p_roles) then return v_usuario; end if; raise exception 'PERMISO_DENEGADO'; end $function$\n",
+      "security_definer": true
+    },
+    {
+      "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "name": "sgp_configuracion_general_obtener",
+      "owner": "postgres",
+      "config": [
+        "search_path=public"
+      ],
+      "schema": "public",
+      "signature": "sgp_configuracion_general_obtener(text)",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_configuracion_general_obtener(p_token text)\n RETURNS TABLE(clave text, valor jsonb, descripcion text)\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nbegin\n perform sgp_validar_sesion_rol(p_token,array['ADMINISTRADOR','COORDINADOR','LIDER MECANIZADO','LIDER LINEA','RECEPCION','PATINADOR','PICKING','SUPERVISOR DE PICKING','CONSULTA']);\n return query select c.clave,c.valor,c.descripcion from sgp_configuracion_general c order by c.clave;\nend $function$\n",
+      "security_definer": true
+    },
+    {
+      "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "name": "sgp_picking_recepcion_cola",
+      "owner": "postgres",
+      "config": [
+        "search_path=public"
+      ],
+      "schema": "public",
+      "signature": "sgp_picking_recepcion_cola(text)",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_picking_recepcion_cola(p_token text)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\ndeclare u text;\nbegin\n u:=public.sgp_validar_sesion_rol(p_token,array['ADMINISTRADOR','COORDINADOR','PICKING','SUPERVISOR DE PICKING','LIDER LINEA','LIDER']);\n return coalesce((select jsonb_agg(jsonb_build_object(\n  'parte_id',(select id_programacion from sgp_mecanizado_parcial.partes where id_programacion=pe.id_programacion),'identificador_parte',(select pe.produccion||'-P'||numero from sgp_mecanizado_parcial.partes where id_programacion=pe.id_programacion),'id_entrega',pe.id_entrega,'id_programacion',pe.id_programacion,'produccion',pe.produccion,'completa',pe.completa,'estado',pe.estado,\n  'observacion',pe.observacion,'usuario_entrega',pe.usuario_entrega,'fecha_entrega',pe.fecha_operativa,'turno_entrega',pe.turno_entrega,\n  'reserva',mp.reserva,'parte',mp.prioridad_semanal,'sistema',mp.sistema,'acabado',mp.acabado,\n  'cantidad_ventanas',coalesce((select en.cantidad from sgp_mecanizado_parcial.entregas en where en.id_entrega=pe.id_entrega),sp.cantidad,0),'proyecto',sp.proyecto,'key_produccion',sp.key_produccion,\n  'reserva_compartida',public.sgp_es_reserva_compartida(sp.key_produccion),\n  'reservas_compartidas',public.sgp_reservas_por_produccion_json(sp.key_produccion),\n  'faltantes',coalesce((select jsonb_agg(jsonb_build_object(\n    'id_faltante',pf.id_faltante,'id_pieza',pf.id_pieza,'perfil',pf.perfil,'marca',pf.marca,'fabricacion',pf.fabricacion,\n    'longitud',pf.longitud,'cantidad',pf.cantidad,'observacion',pf.observacion,'nc',pf.nc,'ventanas_afectadas',pf.ventanas_afectadas,\n    'reserva',pf.reserva_pendiente,'acabado',pf.acabado_pendiente\n  ) order by pf.perfil,pf.fabricacion,pf.longitud) from public.sgp_picking_faltantes pf where pf.id_entrega=pe.id_entrega),'[]'::jsonb)\n ) order by pe.fecha_entrega)\n from public.sgp_picking_entregas pe\n join public.sgp_mecanizado_programacion mp on mp.id_programacion=pe.id_programacion\n left join lateral (\n   select s.key_produccion,s.proyecto,s.cantidad\n   from public.sgp_producciones s\n   join public.sgp_prioridades pr on pr.key_produccion=s.key_produccion and pr.reserva=mp.reserva and pr.id_linea='PANELES_2'\n   where s.produccion=pe.produccion and s.id_linea='PANELES_2' and (not public.sgp_mecanizado_es_parte(pe.id_programacion) or s.key_produccion=(select key_produccion from sgp_mecanizado_parcial.partes where id_programacion=pe.id_programacion))\n   order by coalesce(s.semana_actual,s.semana_base) desc limit 1\n ) sp on true\n where pe.estado='PENDIENTE_VALIDACION' AND EXISTS (SELECT 1 FROM public.sgp_producciones sx JOIN public.sgp_prioridades px ON px.key_produccion=sx.key_produccion AND px.reserva=mp.reserva AND px.id_linea='PANELES_2' WHERE sx.produccion=pe.produccion AND sx.id_linea='PANELES_2' AND sx.activa='SI' AND (NOT public.sgp_mecanizado_es_parte(pe.id_programacion) OR sx.key_produccion=(SELECT key_produccion FROM sgp_mecanizado_parcial.partes WHERE id_programacion=pe.id_programacion)))),'[]'::jsonb);\nend $function$\n",
+      "security_definer": true
+    },
+    {
+      "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "name": "sgp_aluminio_pendientes_listar",
+      "owner": "postgres",
+      "config": [
+        "search_path=public, extensions",
+        "statement_timeout=60s"
+      ],
+      "schema": "public",
+      "signature": "sgp_aluminio_pendientes_listar(text,boolean)",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_aluminio_pendientes_listar(p_token text, p_solo_abiertos boolean DEFAULT true)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public', 'extensions'\n SET statement_timeout TO '60s'\nAS $function$\ndeclare u text;\nbegin\n u:=public.sgp_validar_sesion_rol(\n   p_token,\n   array['ADMINISTRADOR','COORDINADOR','LIDER MECANIZADO','LIDER','LIDER LINEA','SUPERVISOR DE PICKING','PATINADOR','CONSULTA']\n );\n return coalesce((select jsonb_agg(jsonb_build_object(\n 'id_pendiente',p.id_pendiente,'semana',sem.semana,'reserva',p.reserva,'reserva_principal',coalesce(p.reserva_principal,rel.reserva_principal,p.reserva),\n 'produccion',p.produccion,'key_produccion',coalesce(p.key_produccion,rel.key_produccion),'perfil',p.perfil,\n 'acabado',coalesce(p.acabado_pendiente,rel.acabado_reserva,fin.acabado),'es_reserva_compartida',coalesce(p.es_reserva_compartida,rel.es_reserva_compartida,false),\n 'cantidad',p.cantidad,'longitud',p.longitud,'id_pieza',p.id_pieza,'marca',p.marca,'fabricacion',p.fabricacion,\n 'nc',p.nc,'estado_repo',p.estado_repo,'fecha_repo_ok',p.fecha_repo_ok,'origen',p.origen,'causa',p.causa,\n 'observacion',p.observacion,'estado',p.estado,'nc_enlazada',(n.consecutivo is not null),'estado_nc',n.estado,\n 'nc_produccion',n.produccion,'nc_reserva',n.reserva,'nc_referencia',n.referencia,\n 'reserva_solucion_nc',n.reserva_solucion,'reserva_solucion_manual',p.reserva_solucion_manual,\n 'reserva_solucion',coalesce(nullif(trim(n.reserva_solucion),''),nullif(trim(p.reserva_solucion_manual),'')),\n 'origen_reserva_solucion',case when nullif(trim(n.reserva_solucion),'') is not null then 'NC' when nullif(trim(p.reserva_solucion_manual),'') is not null then 'MANUAL' else null end,\n 'validacion_estado',coalesce(p.validacion_estado,'POR_VALIDAR'),'validado_por',upper(coalesce(uv.nombre,p.validado_por,'')),\n 'fecha_validacion',p.fecha_validacion,'observacion_validacion',p.observacion_validacion,\n 'reportado_por',upper(coalesce(ur.nombre,p.usuario_reporte,'\u2014')),'fecha_reporte',p.fecha_reporte,\n 'cerrado_por',upper(coalesce(uc.nombre,p.usuario_cierre,'\u2014')),'fecha_cierre',p.fecha_cierre\n ) order by case when p.estado='RESUELTO' or p.estado_repo='PICKING' then 9 else case p.estado_repo when 'REPO_OK' then 0 when 'CORTE' then 1 when 'MECANIZADO' then 2 when 'PROCESADO' then 3 else 5 end end,p.fecha_reporte)\n from public.sgp_aluminio_pendientes p\n left join lateral(\n   select n.consecutivo,n.estado,n.produccion,n.reserva,n.referencia,n.reserva_solucion\n   from public.sgp_nc_aluminio n\n   where n.activo=true and (n.consecutivo=p.nc or n.cod_nc=p.nc)\n   order by n.fecha_actualizacion desc nulls last limit 1\n )n on true\n left join lateral(\n   select v.key_produccion,v.reserva_principal,v.acabado_reserva,v.semana_reserva,v.es_reserva_compartida\n   from public.sgp_produccion_reservas_v v\n   where (p.key_produccion is not null and v.key_produccion=p.key_produccion and v.reserva=p.reserva)\n      or (p.key_produccion is null and p.produccion is not null and v.produccion=p.produccion and v.reserva=p.reserva)\n   order by v.semana_produccion desc limit 1\n ) rel on true\n left join lateral(select coalesce(\n   (select string_agg(distinct sp.acabado,' / ') from public.sgp_producciones sp where sp.produccion=p.produccion and p.reserva=any(regexp_split_to_array(coalesce(sp.reserva_al,''),'\\\\s*,\\\\s*')) and sp.acabado is not null),\n   (select case when count(distinct sp.acabado)=1 then min(sp.acabado) end from public.sgp_producciones sp where p.reserva=any(regexp_split_to_array(coalesce(sp.reserva_al,''),'\\\\s*,\\\\s*')) and sp.acabado is not null),\n   (select max(sa.acabado) from public.sgp_seguimiento_aluminio sa where sa.reserva=p.reserva and sa.acabado is not null)\n ) acabado) fin on true\n left join lateral(select coalesce(rel.semana_reserva,\n   (select max(coalesce(sp.semana_actual,sp.semana_base)) from public.sgp_producciones sp where sp.produccion=p.produccion and p.reserva=any(regexp_split_to_array(coalesce(sp.reserva_al,''),'\\\\s*,\\\\s*'))),\n   (select max(coalesce(sp.semana_actual,sp.semana_base)) from public.sgp_producciones sp where p.reserva=any(regexp_split_to_array(coalesce(sp.reserva_al,''),'\\\\s*,\\\\s*'))),\n   (select max(coalesce(sa.semana_prog,sa.semana)) from public.sgp_seguimiento_aluminio sa where sa.reserva=p.reserva),\n   (select max(pr.semana) from public.sgp_prioridades pr where pr.reserva=p.reserva)\n ) semana) sem on true\n left join public.sgp_usuarios ur on lower(ur.usuario)=lower(p.usuario_reporte)\n left join public.sgp_usuarios uc on lower(uc.usuario)=lower(p.usuario_cierre)\n left join public.sgp_usuarios uv on lower(uv.usuario)=lower(p.validado_por)\n where (p.estado='PENDIENTE' or p.estado='RESUELTO')\n   and (not p_solo_abiertos or (p.estado='PENDIENTE' and coalesce(p.estado_repo,'PENDIENTE')<>'PICKING'))\n ),'[]'::jsonb);\nend $function$\n",
+      "security_definer": true
+    },
+    {
+      "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "name": "sgp_picking_piezas_panel",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "public",
+      "signature": "sgp_picking_piezas_panel(text,uuid,text)",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_picking_piezas_panel(p_token text, p_id_programacion uuid, p_produccion text DEFAULT NULL::text)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\ndeclare\n  v_sistema text;\n  v_acabado text;\n  v_reserva text;\n  v_multi boolean:=false;\nbegin\n if exists(select 1 from sgp_mecanizado_parcial.partes where id_programacion=p_id_programacion) then\n  perform public.sgp_validar_sesion_rol(p_token,array['ADMINISTRADOR','COORDINADOR','LIDER MECANIZADO','LIDER','PATINADOR','PICKING','SUPERVISOR DE PICKING','LIDER LINEA']);\n  if p_produccion is not null and p_produccion is distinct from\n   (select produccion from public.sgp_mecanizado_programacion where id_programacion=p_id_programacion and estado<>'CANCELADA') then\n   raise exception 'PRODUCCION_AJENA_A_PARTE'; end if;\n  return coalesce((select jsonb_agg(q.pieza) from (\n   select distinct to_jsonb(a)||jsonb_build_object('key_produccion',pt.key_produccion,'perfil',a.codigo_sap,'ambito','REFERENCIA_PRODUCCION') pieza\n   from sgp_mecanizado_parcial.partes pt\n   join public.sgp_mecanizado_programacion mp using(id_programacion)\n   join public.sgp_produccion_reservas_v r on r.key_produccion=pt.key_produccion and r.reserva_principal=mp.reserva\n   cross join lateral public.sgp_pdt_origenes_internal_v3(r.reserva,null,mp.produccion,null,null) x\n   join public.sgp_aluminio a on a.id_pieza=x->>'id_pieza'\n   where pt.id_programacion=p_id_programacion and mp.estado<>'CANCELADA'\n    and x->>'key_produccion'=pt.key_produccion and x->>'tipo_pieza'='PANEL' and x->>'id_linea'='PANELES_2'\n    and upper(btrim(x->>'sistema'))=upper(btrim(mp.sistema))\n  ) q),'[]'::jsonb);\n end if;\n\n  select sistema,acabado,reserva into v_sistema,v_acabado,v_reserva\n  from public.sgp_mecanizado_programacion\n  where id_programacion=p_id_programacion;\n\n  if p_produccion is not null then\n    select coalesce(count(distinct v.reserva)>1,false) into v_multi\n    from public.sgp_produccion_reservas_v v\n    where v.produccion=p_produccion and v.reserva_principal=v_reserva;\n  else\n    select exists(\n      select 1\n      from public.sgp_prioridades pr\n      join public.sgp_produccion_reservas_v v on v.key_produccion=pr.key_produccion\n      join public.sgp_mecanizado_programacion mp on mp.id_programacion=p_id_programacion\n      where pr.reserva=mp.reserva and pr.id_linea='PANELES_2'\n        and (mp.prioridad_semanal is null or pr.prioridad=mp.prioridad_semanal)\n      group by v.key_produccion\n      having count(distinct v.reserva)>1\n    ) into v_multi;\n  end if;\n\n  return coalesce((\n    select jsonb_agg(x)\n    from jsonb_array_elements(\n      public.sgp_picking_piezas(p_token,p_id_programacion,p_produccion)\n    ) x\n    join public.sgp_maestro_piezas m\n      on trim(m.codigo_sap)=trim(coalesce(x->>'codigo_sap',x->>'perfil'))\n     and m.activo='SI'\n     and m.tipo_pieza='PANEL'\n    where (v_sistema is null or trim(v_sistema)='' or upper(trim(coalesce(x->>'sistema','')))=upper(trim(v_sistema)))\n      and (\n        v_multi\n        or v_acabado is null\n        or trim(v_acabado)=''\n        or upper(trim(coalesce(x->>'acabado','')))=upper(trim(v_acabado))\n      )\n  ),'[]'::jsonb);\nend\n$function$\n",
+      "security_definer": true
+    },
+    {
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "name": "sgp_pdt_guardar_contrato",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "public",
+      "signature": "sgp_pdt_guardar_contrato()",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_pdt_guardar_contrato()\n RETURNS trigger\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\nDECLARE has_details boolean;\nBEGIN\n IF TG_OP='DELETE' AND OLD.contrato_pdt='LEGACY' THEN RETURN OLD; END IF;\n IF TG_OP='UPDATE' AND OLD.contrato_pdt='V2' AND NEW.contrato_pdt<>'V2' THEN RAISE EXCEPTION 'PDT_NO_DEGRADABLE'; END IF;\n IF TG_OP='UPDATE' AND OLD.contrato_pdt='LEGACY' AND NEW.contrato_pdt='V2' THEN\n  IF OLD.validacion_estado='VALIDADO' OR NEW.validacion_estado<>'VALIDADO' OR NOT EXISTS(\n   SELECT 1 FROM public.sgp_aluminio_pendiente_detalles d JOIN public.sgp_pdt_fuentes f USING(id_detalle)\n   WHERE d.id_pendiente=OLD.id_pendiente) THEN RAISE EXCEPTION 'PDT_CONVERSION_NO_CONCILIADA'; END IF;\n END IF;\n IF TG_OP<>'DELETE' AND NEW.contrato_pdt='LEGACY' THEN RETURN NEW; END IF;\n IF TG_OP='DELETE' THEN\n  RAISE EXCEPTION 'PDT_DELETE_REQUIERE_CONCILIACION';\n END IF;\n IF (TG_OP='INSERT' AND (NEW.estado='RESUELTO' OR NEW.estado_repo='PICKING' OR NEW.fecha_cierre IS NOT NULL)) THEN\n  RAISE EXCEPTION 'PDT_CIERRE_SIN_EVIDENCIA_CUANTITATIVA';\n END IF;\n IF TG_OP='UPDATE' THEN\n  IF (NEW.estado='RESUELTO' AND OLD.estado IS DISTINCT FROM NEW.estado)\n   OR (NEW.estado_repo='PICKING' AND OLD.estado_repo IS DISTINCT FROM NEW.estado_repo)\n   OR (NEW.fecha_cierre IS NOT NULL AND OLD.fecha_cierre IS DISTINCT FROM NEW.fecha_cierre) THEN\n   IF NOT public.sgp_pdt_cierre_acreditado(NEW.id_pendiente) THEN RAISE EXCEPTION 'PDT_CIERRE_SIN_EVIDENCIA_CUANTITATIVA'; END IF;\n  END IF;\n  IF OLD.estado='RESUELTO' OR OLD.fecha_cierre IS NOT NULL OR OLD.estado_repo='PICKING' THEN\n   IF NEW IS DISTINCT FROM OLD THEN RAISE EXCEPTION 'PDT_CERRADO_INMUTABLE'; END IF;\n  END IF;\n  IF NEW.cantidad IS DISTINCT FROM OLD.cantidad THEN\n   RAISE EXCEPTION 'PDT_CANTIDAD_REPORTADA_INMUTABLE';\n  END IF;\n  SELECT EXISTS(SELECT 1 FROM public.sgp_aluminio_pendiente_detalles d\n   WHERE d.id_pendiente=OLD.id_pendiente) INTO has_details;\n  IF OLD.validacion_estado='VALIDADO' AND (\n   NEW.validacion_estado IS DISTINCT FROM OLD.validacion_estado OR\n   ROW(NEW.fabricacion,NEW.longitud,NEW.reserva,NEW.acabado_pendiente,NEW.perfil,NEW.key_produccion,NEW.produccion,NEW.id_pieza)\n   IS DISTINCT FROM ROW(OLD.fabricacion,OLD.longitud,OLD.reserva,OLD.acabado_pendiente,OLD.perfil,OLD.key_produccion,OLD.produccion,OLD.id_pieza)) THEN\n   RAISE EXCEPTION 'PDT_DISTRIBUCION_VALIDADA_INMUTABLE';\n  END IF;\n  IF has_details AND NEW.estado_repo IS DISTINCT FROM OLD.estado_repo THEN\n   IF NOT coalesce((OLD.estado_repo='PENDIENTE' AND NEW.estado_repo='CORTE') OR\n    (OLD.estado_repo='CORTE' AND NEW.estado_repo='MECANIZADO') OR\n    (OLD.estado_repo='MECANIZADO' AND NEW.estado_repo='PROCESADO') OR\n    (OLD.estado_repo='PROCESADO' AND NEW.estado_repo='MECANIZADO' AND EXISTS(SELECT 1 FROM public.sgp_aluminio_pendiente_movimientos m WHERE m.id_pendiente=OLD.id_pendiente AND m.tipo='REVERSO')) OR\n    (OLD.estado_repo='PROCESADO' AND NEW.estado_repo='PICKING' AND public.sgp_pdt_cierre_acreditado(NEW.id_pendiente)),false) THEN\n    RAISE EXCEPTION 'PDT_TRANSICION_NO_PERMITIDA';\n   END IF;\n   IF NEW.estado_repo='PROCESADO' AND EXISTS(\n    SELECT 1 FROM public.sgp_aluminio_pendiente_detalles d\n    WHERE d.id_pendiente=OLD.id_pendiente AND d.cantidad_validada<>(\n     SELECT coalesce(sum(CASE WHEN m.tipo='AVANCE' THEN m.cantidad ELSE -m.cantidad END),0)\n     FROM public.sgp_aluminio_pendiente_movimientos m WHERE m.id_detalle=d.id_detalle)) THEN\n    RAISE EXCEPTION 'PDT_MECANIZADO_CON_SALDO';\n   END IF;\n  END IF;\n END IF;\n RETURN NEW;\nEND $function$\n",
+      "security_definer": true
+    },
+    {
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "name": "sgp_pdt_validar_rol_real",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "public",
+      "signature": "sgp_pdt_validar_rol_real(text,text[])",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_pdt_validar_rol_real(p_token text, p_roles text[])\n RETURNS text\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\nDECLARE sesion jsonb; rol_real text;\nBEGIN\n IF p_token IS NULL OR p_roles IS NULL OR cardinality(p_roles)=0 THEN\n  RAISE EXCEPTION 'PDT_ROL_REAL_NO_AUTORIZADO';\n END IF;\n sesion:=to_jsonb(public.sgp_sesion_actual(p_token));\n IF jsonb_typeof(sesion) IS DISTINCT FROM 'object' OR sesion->'valida' IS DISTINCT FROM 'true'::jsonb THEN\n  RAISE EXCEPTION 'PDT_SESION_NO_VALIDA';\n END IF;\n rol_real:=upper(btrim(sesion->>'rol'));\n IF rol_real IS NULL OR NOT coalesce(rol_real=ANY(p_roles),false) THEN\n  RAISE EXCEPTION 'PDT_ROL_REAL_NO_AUTORIZADO';\n END IF;\n -- Preserve legacy actor resolution only AFTER the exact-role check.\n RETURN public.sgp_validar_sesion_rol(p_token,p_roles);\nEND $function$\n",
+      "security_definer": true
+    },
+    {
+      "acl": "{postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "name": "sgp_aluminio_pendientes_listar_v2",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "public",
+      "signature": "sgp_aluminio_pendientes_listar_v2(text,boolean)",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_aluminio_pendientes_listar_v2(p_token text, p_solo_abiertos boolean DEFAULT true)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\nDECLARE u text; resultado jsonb;\nBEGIN\n u:=public.sgp_validar_sesion_rol(p_token,ARRAY['ADMINISTRADOR','COORDINADOR','PATINADOR','LIDER MECANIZADO','LIDER','LIDER LINEA','SUPERVISOR DE PICKING','CONSULTA','RECEPCION','PICKING']);\n SELECT coalesce(jsonb_agg(jsonb_build_object(\n  'contrato_pdt',p.contrato_pdt,'tipo_pieza',(SELECT m.tipo_pieza FROM public.sgp_maestro_piezas m WHERE m.codigo_sap=btrim(p.perfil) AND m.activo='SI'),'id_pendiente',p.id_pendiente,'produccion',p.produccion,'perfil',p.perfil,\n  'estado',p.estado,'estado_repo',p.estado_repo,'validacion_estado',p.validacion_estado,\n  'cantidad_reportada',p.cantidad,'nc_historica',p.nc,\n  'reserva',p.reserva,'key_produccion',p.key_produccion,'acabado',p.acabado_pendiente,\n  'semana',(SELECT coalesce(to_jsonb(r)->>'semana_reserva',to_jsonb(r)->>'semana_produccion') FROM public.sgp_produccion_reservas_v r WHERE r.key_produccion=p.key_produccion AND r.reserva=p.reserva LIMIT 1),\n  'picking',jsonb_build_object('cobertura','NO_VERIFICADA'),'cierre_habilitado',false,'fecha_reporte',p.fecha_reporte,\n  'movimientos',coalesce((SELECT jsonb_agg(to_jsonb(m) ORDER BY m.registrado_en) FROM public.sgp_aluminio_pendiente_movimientos m WHERE m.id_pendiente=p.id_pendiente),'[]'::jsonb),\n  'detalles',coalesce((SELECT jsonb_agg(jsonb_build_object(\n   'id_detalle',d.id_detalle,'id_pieza',d.id_pieza,'fabricacion',d.fabricacion,'longitud',d.longitud::text,\n   'acabado',d.acabado,'cantidad_validada',d.cantidad_validada,\n   'avance_neto',coalesce((SELECT sum(CASE WHEN m.tipo='AVANCE' THEN m.cantidad ELSE -m.cantidad END)\n    FROM public.sgp_aluminio_pendiente_movimientos m WHERE m.id_detalle=d.id_detalle),0),\n   'saldo',d.cantidad_validada-coalesce((SELECT sum(CASE WHEN m.tipo='AVANCE' THEN m.cantidad ELSE -m.cantidad END)\n    FROM public.sgp_aluminio_pendiente_movimientos m WHERE m.id_detalle=d.id_detalle),0)\n  )) FROM public.sgp_aluminio_pendiente_detalles d WHERE d.id_pendiente=p.id_pendiente),'[]'::jsonb),\n  'ncs',coalesce((SELECT jsonb_agg(jsonb_build_object(\n    'referencia',refs.ref,'consecutivo',nc.consecutivo,'cod_nc',nc.cod_nc,\n    'estado',nc.estado,'responsable',nc.responsable,'creacion',nc.creacion,\n    'resolucion',CASE WHEN matching.total>1 THEN 'AMBIGUA' WHEN nc.consecutivo IS NULL THEN 'NO_ENCONTRADA'\n      WHEN nc.activo IS TRUE THEN 'ACTIVA' ELSE 'INACTIVA' END,\n    'ultimo_estado_conocido',refs.snapshot->>'estado','snapshot_enlace',refs.snapshot,\n    'finalizada_en',NULL,'origen',refs.origen) ORDER BY refs.ref)\n   FROM (\n    SELECT n.consecutivo ref,'VINCULO'::text origen,n.snapshot\n    FROM public.sgp_aluminio_pendiente_ncs n WHERE n.id_pendiente=p.id_pendiente\n    UNION ALL\n    SELECT pending.ref,'HISTORICA'::text,NULL::jsonb\n    FROM (\n     SELECT btrim(x) ref FROM regexp_split_to_table(coalesce(p.nc,''),'[,;\\n]+') x\n     UNION\n     SELECT btrim(j.value #>> '{}') ref\n     FROM public.sgp_aluminio_pendientes_historial h\n     CROSS JOIN LATERAL jsonb_array_elements(\n      CASE WHEN jsonb_typeof(h.datos_nuevos->'ncs')='array'\n       THEN h.datos_nuevos->'ncs' ELSE '[]'::jsonb END) j\n     WHERE h.id_pendiente=p.id_pendiente AND h.tipo_evento IN ('REGISTRO_MULTIORIGEN_V4','VINCULACION_NC_PDT')\n       AND jsonb_typeof(j.value)='string'\n    ) pending\n    WHERE pending.ref<>'' AND NOT EXISTS (\n     SELECT 1 FROM public.sgp_aluminio_pendiente_ncs linked\n     WHERE linked.id_pendiente=p.id_pendiente AND\n      (linked.consecutivo=pending.ref OR EXISTS (\n       SELECT 1 FROM public.sgp_nc_aluminio nc_link\n       WHERE nc_link.consecutivo=linked.consecutivo AND nc_link.cod_nc=pending.ref))\n    )\n   ) refs\n   CROSS JOIN LATERAL (\n    SELECT count(DISTINCT n.consecutivo) total FROM public.sgp_nc_aluminio n\n    WHERE n.consecutivo=refs.ref OR n.cod_nc=refs.ref\n   ) matching\n   LEFT JOIN LATERAL (\n    SELECT n.* FROM public.sgp_nc_aluminio n WHERE matching.total=1 AND (n.consecutivo=refs.ref OR n.cod_nc=refs.ref)\n    ORDER BY n.fecha_actualizacion DESC NULLS LAST,n.creacion DESC NULLS LAST,n.consecutivo LIMIT 1\n   ) nc ON true),'[]'::jsonb)\n  )),'[]'::jsonb)\n INTO resultado FROM public.sgp_aluminio_pendientes p\n WHERE p.estado IN ('PENDIENTE','RESUELTO') AND (NOT coalesce(p_solo_abiertos,true) OR (p.estado='PENDIENTE' AND coalesce(p.estado_repo,'PENDIENTE')<>'PICKING'));\n RETURN jsonb_build_object('ok',true,'contract_version',2,'pendientes',resultado);\nEND $function$\n",
+      "security_definer": true
+    },
+    {
+      "acl": "{postgres=X/postgres}",
+      "name": "registrar",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "sgp_pdt_multiorigen",
+      "signature": "sgp_pdt_multiorigen.registrar(text,text,jsonb,jsonb,uuid,uuid)",
+      "definition": "CREATE OR REPLACE FUNCTION sgp_pdt_multiorigen.registrar(p_token text, p_origen text, p_contexto jsonb, p_piezas jsonb, p_evento uuid, p_entrega uuid DEFAULT NULL::uuid)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\nDECLARE actor text; sources jsonb; row jsonb; source jsonb; ctx jsonb; id uuid; ids jsonb:='[]'; n integer; quantity numeric; nc text; snap jsonb; matches integer; ncs jsonb; nc_item jsonb; raw_nc text; seen_raw text[]; seen_links text[];\nBEGIN\n actor:=sgp_pdt_multiorigen.actor(p_token,p_origen);\n IF jsonb_typeof(p_piezas) IS DISTINCT FROM 'array' OR jsonb_array_length(p_piezas) NOT BETWEEN 1 AND 100 THEN RAISE EXCEPTION 'PDT_PIEZAS_REQUERIDAS'; END IF;\n IF (SELECT count(DISTINCT jsonb_build_array(x->>'id_pieza',x->>'key_produccion',x->>'reserva')) FROM jsonb_array_elements(p_piezas) x)<>jsonb_array_length(p_piezas) THEN RAISE EXCEPTION 'PDT_PIEZA_REPETIDA_EN_EVENTO'; END IF;\n sources:=sgp_pdt_multiorigen.fuentes(p_token,p_origen,p_contexto);\n FOR row IN SELECT value FROM jsonb_array_elements(p_piezas) LOOP\n IF nullif(row->>'id_pieza','') IS NULL OR nullif(row->>'key_produccion','') IS NULL OR nullif(row->>'reserva','') IS NULL THEN RAISE EXCEPTION 'PDT_IDENTIDAD_REQUERIDA'; END IF;\n SELECT count(*),jsonb_agg(x)->0 INTO n,source FROM jsonb_array_elements(sources) x\n WHERE x->>'id_pieza'=row->>'id_pieza' AND x->>'key_produccion'=row->>'key_produccion' AND x->>'reserva'=row->>'reserva'\n AND x->>'codigo_sap'=row->>'perfil' AND x->>'fabricacion' IS NOT DISTINCT FROM row->>'fabricacion'\n AND (x->>'longitud')::numeric=(row->>'longitud')::numeric\n AND x->>'acabado'=row->>'acabado';\n IF n<>1 THEN RAISE EXCEPTION 'PDT_PIEZA_NO_CORRESPONDE_AL_CONTEXTO'; END IF;\n -- Locks prevent a concurrent source/master/relationship edit from silently\n -- changing the identity during the transaction (the view relations are asserted\n -- again by the strict identity trigger on INSERT).\n PERFORM 1 FROM public.sgp_aluminio WHERE id_pieza=row->>'id_pieza' FOR SHARE;\n PERFORM 1 FROM public.sgp_maestro_piezas WHERE codigo_sap=row->>'perfil' FOR SHARE;\n PERFORM 1 FROM public.sgp_producciones WHERE key_produccion=row->>'key_produccion' FOR SHARE;\n ctx:=public.sgp_pdt_contexto_internal_v3(row->>'reserva',row->>'perfil',p_contexto->>'produccion',row->>'acabado',row->>'id_pieza',row->>'key_produccion',row->>'reserva_principal',(row->>'longitud')::numeric);\n SELECT ctx||jsonb_build_object('id_carga',a.id_carga,'fila_origen',a.fila_origen) INTO ctx FROM public.sgp_aluminio a WHERE a.id_pieza=row->>'id_pieza';\n quantity:=(row->>'cantidad')::numeric; nc:=nullif(btrim(row->>'nc'),'');\n IF quantity IS NULL OR quantity<=0 OR quantity<>trunc(quantity) OR quantity>2147483647 OR (SELECT cantidad FROM public.sgp_aluminio WHERE id_pieza=row->>'id_pieza') IS NULL OR quantity>(SELECT cantidad FROM public.sgp_aluminio WHERE id_pieza=row->>'id_pieza') THEN RAISE EXCEPTION 'PDT_CANTIDAD_INVALIDA'; END IF;\n IF nc IS NOT NULL AND (length(nc)>120 OR nc~'[[:cntrl:]]') THEN RAISE EXCEPTION 'PDT_NC_INVALIDA'; END IF;\n IF row ? 'ncs' THEN\n  IF p_origen<>'PICKING' OR jsonb_typeof(row->'ncs') IS DISTINCT FROM 'array'\n  THEN RAISE EXCEPTION 'PDT_NCS_INVALIDAS'; END IF;\n  IF jsonb_array_length(row->'ncs')>20 THEN RAISE EXCEPTION 'PDT_NCS_INVALIDAS'; END IF;\n  ncs:=row->'ncs';\n  IF EXISTS(SELECT 1 FROM jsonb_array_elements(ncs) x\n   WHERE jsonb_typeof(x.value)<>'string' OR btrim(x.value #>> '{}')=''\n   OR length(btrim(x.value #>> '{}'))>120 OR btrim(x.value #>> '{}')~'[[:cntrl:]]')\n  THEN RAISE EXCEPTION 'PDT_NC_INVALIDA'; END IF;\n  IF (jsonb_array_length(ncs)=0 AND nc IS NOT NULL)\n   OR (jsonb_array_length(ncs)>0 AND nc IS DISTINCT FROM btrim(ncs->>0))\n  THEN RAISE EXCEPTION 'PDT_NC_PRINCIPAL_NO_COINCIDE'; END IF;\n ELSE\n  ncs:=CASE WHEN nc IS NULL THEN '[]'::jsonb ELSE jsonb_build_array(nc) END;\n END IF;\n INSERT INTO public.sgp_aluminio_pendientes(reserva,reserva_principal,key_produccion,es_reserva_compartida,acabado_pendiente,produccion,perfil,cantidad,longitud,origen,causa,observacion,usuario_reporte,id_pieza,marca,fabricacion,nc,contrato_pdt)\n VALUES(ctx->>'reserva',ctx->>'reserva_principal',ctx->>'key_produccion',coalesce((ctx->>'es_reserva_compartida')::boolean,false),ctx->>'acabado',ctx->>'produccion',row->>'perfil',quantity,(ctx->>'longitud')::numeric,p_origen,CASE p_origen WHEN 'PICKING' THEN 'FALTANTE_ENTREGA' ELSE 'DANO_'||p_origen END,nullif(btrim(row->>'observacion'),''),actor,ctx->>'id_pieza',ctx->>'marca',ctx->>'fabricacion',nc,'V2') RETURNING id_pendiente INTO id;\n INSERT INTO sgp_pdt_multiorigen.detalles VALUES(id,p_evento,p_entrega,ctx);\n seen_raw:=ARRAY[]::text[]; seen_links:=ARRAY[]::text[];\n FOR nc_item IN SELECT value FROM jsonb_array_elements(ncs) LOOP\n  raw_nc:=btrim(nc_item #>> '{}');\n  IF raw_nc=ANY(seen_raw) THEN RAISE EXCEPTION 'PDT_NC_DUPLICADA'; END IF;\n  seen_raw:=array_append(seen_raw,raw_nc);\n  SELECT count(DISTINCT consecutivo) INTO matches FROM public.sgp_nc_aluminio WHERE consecutivo=raw_nc OR cod_nc=raw_nc;\n  IF matches>1 THEN RAISE EXCEPTION 'PDT_NC_AMBIGUA'; END IF;\n  IF matches=1 THEN\n   SELECT to_jsonb(c) INTO snap FROM public.sgp_nc_aluminio c WHERE consecutivo=raw_nc OR cod_nc=raw_nc ORDER BY fecha_actualizacion DESC NULLS LAST,creacion DESC NULLS LAST LIMIT 1;\n   IF snap->>'consecutivo'=ANY(seen_links) THEN RAISE EXCEPTION 'PDT_NC_DUPLICADA'; END IF;\n   seen_links:=array_append(seen_links,snap->>'consecutivo');\n   INSERT INTO public.sgp_aluminio_pendiente_ncs(id_pendiente,consecutivo,enlazado_por,snapshot) VALUES(id,snap->>'consecutivo',actor,snap);\n  END IF;\n END LOOP;\n INSERT INTO public.sgp_aluminio_pendientes_historial(id_pendiente,usuario,estado_anterior,estado_nuevo,tipo_evento,datos_nuevos)\n VALUES(id,actor,NULL,'PENDIENTE','REGISTRO_MULTIORIGEN_V4',jsonb_build_object('origen',p_origen,'id_evento',p_evento,'id_entrega',p_entrega,'fuente',ctx,'nc',nc,'ncs',ncs));\n ids:=ids||jsonb_build_array(id);\n END LOOP;\n RETURN jsonb_build_object('ok',true,'contract_version',4,'ids_pendientes',ids);\nEND $function$\n",
+      "security_definer": true
+    },
+    {
+      "acl": "{postgres=X/postgres}",
+      "name": "actor",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "sgp_pdt_multiorigen",
+      "signature": "sgp_pdt_multiorigen.actor(text,text)",
+      "definition": "CREATE OR REPLACE FUNCTION sgp_pdt_multiorigen.actor(p_token text, p_origen text)\n RETURNS text\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\nBEGIN\n IF p_origen='PICKING' THEN\n RETURN public.sgp_pdt_validar_rol_real(p_token,ARRAY['ADMINISTRADOR','COORDINADOR','LIDER MECANIZADO','LIDER','LIDER LINEA','PATINADOR','PICKING','SUPERVISOR DE PICKING']);\n ELSIF p_origen IN ('ENSAMBLE','EMPAQUE') THEN\n RETURN public.sgp_pdt_validar_rol_real(p_token,ARRAY['ADMINISTRADOR','COORDINADOR','LIDER','LIDER LINEA']);\n ELSE RAISE EXCEPTION 'PDT_ORIGEN_INVALIDO'; END IF;\nEND $function$\n",
+      "security_definer": true
+    },
+    {
+      "acl": "{postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "name": "sgp_pdt_registrar_v4",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "schema": "public",
+      "signature": "sgp_pdt_registrar_v4(text,text,jsonb,jsonb,uuid)",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_pdt_registrar_v4(p_token text, p_origen text, p_contexto jsonb, p_piezas jsonb, p_idempotency_key uuid)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\ndeclare u text; pt sgp_mecanizado_parcial.partes%rowtype; mp public.sgp_mecanizado_programacion%rowtype;\n prior sgp_mecanizado_parcial.solicitudes%rowtype; payload jsonb; result jsonb; qty integer; used integer; gate text;\nbegin\n if p_origen<>'PICKING' or not public.sgp_mecanizado_es_parte((p_contexto->>'id_programacion')::uuid) then\n  return sgp_mecanizado_parcial.registro_legacy(p_token,p_origen,p_contexto,p_piezas,p_idempotency_key);\n end if;\n u:=public.sgp_validar_sesion_rol(p_token,array['ADMINISTRADOR','COORDINADOR','LIDER MECANIZADO','LIDER','PATINADOR','PICKING','SUPERVISOR DE PICKING','LIDER LINEA']);\n if p_idempotency_key is null then raise exception 'CLAVE_REQUERIDA'; end if;\n payload:=jsonb_build_array('PICKING_PARTE',p_contexto,p_piezas);\n perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended(p_idempotency_key::text,741));\n select * into prior from sgp_mecanizado_parcial.solicitudes where clave=p_idempotency_key;\n if found then\n  if prior.usuario<>u or prior.payload<>payload then raise exception 'CLAVE_REUTILIZADA_CON_OTROS_DATOS'; end if;\n  return prior.resultado;\n end if;\n select * into strict pt from sgp_mecanizado_parcial.partes where id_programacion=(p_contexto->>'id_programacion')::uuid;\n select * into strict mp from public.sgp_mecanizado_programacion where id_programacion=pt.id_programacion for update;\n if mp.estado='CANCELADA' or p_contexto->>'produccion' is distinct from mp.produccion then raise exception 'PARTE_NO_ENTREGABLE'; end if;\n if not exists(select 1 from public.sgp_mecanizado_ejecucion_orden where id_programacion=pt.id_programacion and estado='PROCESADO') then raise exception 'PARTE_NO_PROCESADA'; end if;\n if jsonb_typeof(p_contexto->'cantidad_ventanas') is distinct from 'number'\n or (p_contexto->>'cantidad_ventanas')::numeric<>trunc((p_contexto->>'cantidad_ventanas')::numeric) then raise exception 'CANTIDAD_VENTANAS_REQUERIDA'; end if;\n qty:=(p_contexto->>'cantidad_ventanas')::integer;\n select coalesce(sum(en.cantidad),0) into used from sgp_mecanizado_parcial.entregas en join public.sgp_picking_entregas pe using(id_entrega)\n where en.id_programacion=pt.id_programacion and pe.estado in ('PENDIENTE_VALIDACION','VALIDADA','AUDITADA_DIFERENCIA');\n if qty<0 or qty>pt.cantidad-used then raise exception 'CANTIDAD_SUPERA_SALDO_ENTREGA'; end if;\n if qty=0 and coalesce(p_contexto->>'completa','true')<>'false' and not exists(\n  select 1 from sgp_mecanizado_parcial.contextos_pdt src\n  join public.sgp_aluminio_pendientes ap using(id_pendiente)\n  join public.sgp_picking_entregas original on original.id_entrega=src.id_entrega\n  where original.id_programacion=pt.id_programacion and ap.key_produccion=pt.key_produccion\n  and ap.estado='PENDIENTE' and ap.validacion_estado='VALIDADO' and ap.estado_repo='PROCESADO'\n ) then raise exception 'REPOSICION_SIN_PDT_PROCESADO'; end if;\n gate:=current_setting('sgp.parte_entrega',true);\n perform pg_catalog.set_config('sgp.parte_entrega',pt.id_programacion::text,true);\n result:=sgp_mecanizado_parcial.registro_legacy(p_token,p_origen,p_contexto,p_piezas,p_idempotency_key);\n perform pg_catalog.set_config('sgp.parte_entrega',coalesce(gate,''),true);\n insert into sgp_mecanizado_parcial.entregas values((result->>'id_entrega')::uuid,pt.id_programacion,qty);\n insert into sgp_mecanizado_parcial.solicitudes values(p_idempotency_key,u,payload,result);\n insert into sgp_mecanizado_parcial.movimientos(id_programacion,tipo,nuevo,usuario)\n values(pt.id_programacion,'ENTREGA',jsonb_build_object('cantidad',qty,'id_entrega',result->>'id_entrega'),u);\n return result;\nend $function$\n",
+      "security_definer": true
+    },
+    {
+      "acl": "{postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "name": "sgp_pdt_registro_fuentes_v4",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\"",
+        "statement_timeout=45s"
+      ],
+      "schema": "public",
+      "signature": "sgp_pdt_registro_fuentes_v4(text,text,jsonb)",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_pdt_registro_fuentes_v4(p_token text, p_origen text, p_contexto jsonb)\n RETURNS jsonb\n LANGUAGE sql\n SECURITY DEFINER\n SET search_path TO ''\n SET statement_timeout TO '45s'\nAS $function$\n SELECT jsonb_build_object('ok',true,'contract_version',4,'fuentes',sgp_pdt_multiorigen.fuentes(p_token,p_origen,p_contexto));\n$function$\n",
+      "security_definer": true
+    },
+    {
+      "acl": "{postgres=X/postgres}",
+      "name": "fuentes",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\"",
+        "statement_timeout=45s"
+      ],
+      "schema": "sgp_pdt_multiorigen",
+      "signature": "sgp_pdt_multiorigen.fuentes(text,text,jsonb)",
+      "definition": "CREATE OR REPLACE FUNCTION sgp_pdt_multiorigen.fuentes(p_token text, p_origen text, p_contexto jsonb)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\n SET statement_timeout TO '45s'\nAS $function$\nDECLARE program public.sgp_mecanizado_programacion%rowtype; allowed jsonb; result jsonb;\nBEGIN\n PERFORM sgp_pdt_multiorigen.actor(p_token,p_origen);\n IF nullif(btrim(p_contexto->>'produccion'),'') IS NULL THEN RAISE EXCEPTION 'PDT_PRODUCCION_REQUERIDA'; END IF;\n IF p_origen='PICKING' THEN\n SELECT * INTO STRICT program FROM public.sgp_mecanizado_programacion WHERE id_programacion=(p_contexto->>'id_programacion')::uuid AND estado<>'CANCELADA' FOR SHARE;\n allowed:=public.sgp_picking_piezas_panel(p_token,program.id_programacion,p_contexto->>'produccion');\n ELSE\n IF nullif(p_contexto->>'key_produccion','') IS NULL THEN RAISE EXCEPTION 'PDT_CLAVE_REQUERIDA'; END IF;\n END IF;\n SELECT coalesce(jsonb_agg(x ORDER BY x->>'codigo_sap',x->>'fabricacion',x->>'longitud',x->>'id_pieza'),'[]'::jsonb) INTO result\n FROM (SELECT DISTINCT x||jsonb_build_object('id_carga',a.id_carga,'fila_origen',a.fila_origen) AS x FROM public.sgp_produccion_reservas_v r\n CROSS JOIN LATERAL public.sgp_pdt_origenes_internal_v3(r.reserva,NULL,p_contexto->>'produccion',NULL,NULL) x\n JOIN public.sgp_aluminio a ON a.id_pieza=x->>'id_pieza'\n WHERE r.produccion=p_contexto->>'produccion' AND r.key_produccion=x->>'key_produccion' AND r.reserva=x->>'reserva'\n AND (p_origen<>'PICKING' OR NOT public.sgp_mecanizado_es_parte(program.id_programacion) OR x->>'key_produccion'=(SELECT key_produccion FROM sgp_mecanizado_parcial.partes WHERE id_programacion=program.id_programacion)) AND x->>'tipo_pieza'='PANEL' AND x->>'id_linea'='PANELES_2'\n AND (nullif(p_contexto->>'reserva','') IS NULL OR x->>'reserva'=p_contexto->>'reserva')\n AND (nullif(p_contexto->>'key_produccion','') IS NULL OR x->>'key_produccion'=p_contexto->>'key_produccion')\n AND (p_origen<>'PICKING' OR (\n coalesce(x->>'reserva_principal',x->>'reserva')=program.reserva\n AND upper(btrim(x->>'sistema'))=upper(btrim(program.sistema))\n AND (public.sgp_mecanizado_es_parte(program.id_programacion) OR upper(btrim(x->>'acabado'))=upper(btrim(program.acabado)))\n AND EXISTS(SELECT 1 FROM jsonb_array_elements(allowed) a WHERE a->>'id_pieza'=x->>'id_pieza')))) q;\n IF jsonb_array_length(result)>1000 THEN RAISE EXCEPTION 'PDT_FUENTES_EXCEDEN_LIMITE'; END IF;\n RETURN result;\nEND $function$\n",
+      "security_definer": true
+    }
+  ],
+  "relations": [
+    {
+      "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}",
+      "rls": true,
+      "kind": "r",
+      "name": "sgp_aluminio_pendientes",
+      "view": null,
+      "schema": "public",
+      "columns": [
+        {
+          "name": "id_pendiente",
+          "type": "uuid",
+          "notnull": true
+        },
+        {
+          "name": "reserva",
+          "type": "text",
+          "notnull": false
+        },
+        {
+          "name": "produccion",
+          "type": "text",
+          "notnull": false
+        },
+        {
+          "name": "perfil",
+          "type": "text",
+          "notnull": true
+        },
+        {
+          "name": "cantidad",
+          "type": "numeric",
+          "notnull": true
+        },
+        {
+          "name": "longitud",
+          "type": "numeric",
+          "notnull": false
+        },
+        {
+          "name": "origen",
+          "type": "text",
+          "notnull": true
+        },
+        {
+          "name": "causa",
+          "type": "text",
+          "notnull": false
+        },
+        {
+          "name": "observacion",
+          "type": "text",
+          "notnull": false
+        },
+        {
+          "name": "estado",
+          "type": "text",
+          "notnull": true
+        },
+        {
+          "name": "usuario_reporte",
+          "type": "text",
+          "notnull": false
+        },
+        {
+          "name": "fecha_reporte",
+          "type": "timestamp with time zone",
+          "notnull": true
+        },
+        {
+          "name": "usuario_cierre",
+          "type": "text",
+          "notnull": false
+        },
+        {
+          "name": "fecha_cierre",
+          "type": "timestamp with time zone",
+          "notnull": false
+        },
+        {
+          "name": "id_pieza",
+          "type": "text",
+          "notnull": false
+        },
+        {
+          "name": "marca",
+          "type": "text",
+          "notnull": false
+        },
+        {
+          "name": "fabricacion",
+          "type": "text",
+          "notnull": false
+        },
+        {
+          "name": "nc",
+          "type": "text",
+          "notnull": false
+        },
+        {
+          "name": "estado_repo",
+          "type": "text",
+          "notnull": true
+        },
+        {
+          "name": "fecha_repo_ok",
+          "type": "timestamp with time zone",
+          "notnull": false
+        },
+        {
+          "name": "usuario_estado",
+          "type": "text",
+          "notnull": false
+        },
+        {
+          "name": "fecha_estado",
+          "type": "timestamp with time zone",
+          "notnull": false
+        },
+        {
+          "name": "ventanas_afectadas",
+          "type": "integer",
+          "notnull": false
+        },
+        {
+          "name": "auditado",
+          "type": "boolean",
+          "notnull": true
+        },
+        {
+          "name": "key_produccion",
+          "type": "text",
+          "notnull": false
+        },
+        {
+          "name": "reserva_principal",
+          "type": "text",
+          "notnull": false
+        },
+        {
+          "name": "acabado_pendiente",
+          "type": "text",
+          "notnull": false
+        },
+        {
+          "name": "es_reserva_compartida",
+          "type": "boolean",
+          "notnull": true
+        },
+        {
+          "name": "validacion_estado",
+          "type": "text",
+          "notnull": true
+        },
+        {
+          "name": "validado_por",
+          "type": "text",
+          "notnull": false
+        },
+        {
+          "name": "fecha_validacion",
+          "type": "timestamp with time zone",
+          "notnull": false
+        },
+        {
+          "name": "observacion_validacion",
+          "type": "text",
+          "notnull": false
+        },
+        {
+          "name": "reserva_solucion_manual",
+          "type": "text",
+          "notnull": false
+        },
+        {
+          "name": "contrato_pdt",
+          "type": "text",
+          "notnull": true
+        }
+      ],
+      "triggers": [
+        {
+          "name": "trg_sgp_pdt_contrato",
+          "enabled": "O",
+          "function": "CREATE OR REPLACE FUNCTION public.sgp_pdt_guardar_contrato()\n RETURNS trigger\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\nDECLARE has_details boolean;\nBEGIN\n IF TG_OP='DELETE' AND OLD.contrato_pdt='LEGACY' THEN RETURN OLD; END IF;\n IF TG_OP='UPDATE' AND OLD.contrato_pdt='V2' AND NEW.contrato_pdt<>'V2' THEN RAISE EXCEPTION 'PDT_NO_DEGRADABLE'; END IF;\n IF TG_OP='UPDATE' AND OLD.contrato_pdt='LEGACY' AND NEW.contrato_pdt='V2' THEN\n  IF OLD.validacion_estado='VALIDADO' OR NEW.validacion_estado<>'VALIDADO' OR NOT EXISTS(\n   SELECT 1 FROM public.sgp_aluminio_pendiente_detalles d JOIN public.sgp_pdt_fuentes f USING(id_detalle)\n   WHERE d.id_pendiente=OLD.id_pendiente) THEN RAISE EXCEPTION 'PDT_CONVERSION_NO_CONCILIADA'; END IF;\n END IF;\n IF TG_OP<>'DELETE' AND NEW.contrato_pdt='LEGACY' THEN RETURN NEW; END IF;\n IF TG_OP='DELETE' THEN\n  RAISE EXCEPTION 'PDT_DELETE_REQUIERE_CONCILIACION';\n END IF;\n IF (TG_OP='INSERT' AND (NEW.estado='RESUELTO' OR NEW.estado_repo='PICKING' OR NEW.fecha_cierre IS NOT NULL)) THEN\n  RAISE EXCEPTION 'PDT_CIERRE_SIN_EVIDENCIA_CUANTITATIVA';\n END IF;\n IF TG_OP='UPDATE' THEN\n  IF (NEW.estado='RESUELTO' AND OLD.estado IS DISTINCT FROM NEW.estado)\n   OR (NEW.estado_repo='PICKING' AND OLD.estado_repo IS DISTINCT FROM NEW.estado_repo)\n   OR (NEW.fecha_cierre IS NOT NULL AND OLD.fecha_cierre IS DISTINCT FROM NEW.fecha_cierre) THEN\n   IF NOT public.sgp_pdt_cierre_acreditado(NEW.id_pendiente) THEN RAISE EXCEPTION 'PDT_CIERRE_SIN_EVIDENCIA_CUANTITATIVA'; END IF;\n  END IF;\n  IF OLD.estado='RESUELTO' OR OLD.fecha_cierre IS NOT NULL OR OLD.estado_repo='PICKING' THEN\n   IF NEW IS DISTINCT FROM OLD THEN RAISE EXCEPTION 'PDT_CERRADO_INMUTABLE'; END IF;\n  END IF;\n  IF NEW.cantidad IS DISTINCT FROM OLD.cantidad THEN\n   RAISE EXCEPTION 'PDT_CANTIDAD_REPORTADA_INMUTABLE';\n  END IF;\n  SELECT EXISTS(SELECT 1 FROM public.sgp_aluminio_pendiente_detalles d\n   WHERE d.id_pendiente=OLD.id_pendiente) INTO has_details;\n  IF OLD.validacion_estado='VALIDADO' AND (\n   NEW.validacion_estado IS DISTINCT FROM OLD.validacion_estado OR\n   ROW(NEW.fabricacion,NEW.longitud,NEW.reserva,NEW.acabado_pendiente,NEW.perfil,NEW.key_produccion,NEW.produccion,NEW.id_pieza)\n   IS DISTINCT FROM ROW(OLD.fabricacion,OLD.longitud,OLD.reserva,OLD.acabado_pendiente,OLD.perfil,OLD.key_produccion,OLD.produccion,OLD.id_pieza)) THEN\n   RAISE EXCEPTION 'PDT_DISTRIBUCION_VALIDADA_INMUTABLE';\n  END IF;\n  IF has_details AND NEW.estado_repo IS DISTINCT FROM OLD.estado_repo THEN\n   IF NOT coalesce((OLD.estado_repo='PENDIENTE' AND NEW.estado_repo='CORTE') OR\n    (OLD.estado_repo='CORTE' AND NEW.estado_repo='MECANIZADO') OR\n    (OLD.estado_repo='MECANIZADO' AND NEW.estado_repo='PROCESADO') OR\n    (OLD.estado_repo='PROCESADO' AND NEW.estado_repo='MECANIZADO' AND EXISTS(SELECT 1 FROM public.sgp_aluminio_pendiente_movimientos m WHERE m.id_pendiente=OLD.id_pendiente AND m.tipo='REVERSO')) OR\n    (OLD.estado_repo='PROCESADO' AND NEW.estado_repo='PICKING' AND public.sgp_pdt_cierre_acreditado(NEW.id_pendiente)),false) THEN\n    RAISE EXCEPTION 'PDT_TRANSICION_NO_PERMITIDA';\n   END IF;\n   IF NEW.estado_repo='PROCESADO' AND EXISTS(\n    SELECT 1 FROM public.sgp_aluminio_pendiente_detalles d\n    WHERE d.id_pendiente=OLD.id_pendiente AND d.cantidad_validada<>(\n     SELECT coalesce(sum(CASE WHEN m.tipo='AVANCE' THEN m.cantidad ELSE -m.cantidad END),0)\n     FROM public.sgp_aluminio_pendiente_movimientos m WHERE m.id_detalle=d.id_detalle)) THEN\n    RAISE EXCEPTION 'PDT_MECANIZADO_CON_SALDO';\n   END IF;\n  END IF;\n END IF;\n RETURN NEW;\nEND $function$\n",
+          "definition": "CREATE TRIGGER trg_sgp_pdt_contrato BEFORE INSERT OR DELETE OR UPDATE ON public.sgp_aluminio_pendientes FOR EACH ROW EXECUTE FUNCTION sgp_pdt_guardar_contrato()"
+        },
+        {
+          "name": "trg_sgp_pdt_identidad_v3",
+          "enabled": "O",
+          "function": "CREATE OR REPLACE FUNCTION public.sgp_pdt_proteger_identidad_v3()\n RETURNS trigger\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\nDECLARE ctx jsonb;\nBEGIN\n IF TG_OP='UPDATE' AND ROW(NEW.key_produccion,NEW.produccion,NEW.reserva,NEW.perfil,NEW.acabado_pendiente,NEW.id_pieza,NEW.longitud,NEW.contrato_pdt)\n IS NOT DISTINCT FROM ROW(OLD.key_produccion,OLD.produccion,OLD.reserva,OLD.perfil,OLD.acabado_pendiente,OLD.id_pieza,OLD.longitud,OLD.contrato_pdt) THEN RETURN NEW; END IF;\n ctx:=public.sgp_pdt_contexto_internal_v3(NEW.reserva,NEW.perfil,NEW.produccion,NEW.acabado_pendiente,NEW.id_pieza,NEW.key_produccion,NEW.reserva_principal,NEW.longitud);\n IF NEW.key_produccion IS DISTINCT FROM ctx->>'key_produccion' THEN RAISE EXCEPTION 'PDT_CLAVE_NO_VERIFICADA'; END IF;\n IF NEW.contrato_pdt='V2' AND ctx->>'tipo_pieza'<>'PANEL' THEN RAISE EXCEPTION 'PDT_V2_REQUIERE_PIEZA_PANEL'; END IF;\n RETURN NEW;\nEND $function$\n",
+          "definition": "CREATE TRIGGER trg_sgp_pdt_identidad_v3 BEFORE INSERT OR UPDATE ON public.sgp_aluminio_pendientes FOR EACH ROW EXECUTE FUNCTION sgp_pdt_proteger_identidad_v3()"
+        }
+      ]
+    },
+    {
+      "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}",
+      "rls": false,
+      "kind": "r",
+      "name": "sgp_picking_auditoria_diferencias",
+      "view": null,
+      "schema": "public",
+      "columns": [
+        {
+          "name": "id_diferencia",
+          "type": "uuid",
+          "notnull": true
+        },
+        {
+          "name": "id_entrega",
+          "type": "uuid",
+          "notnull": true
+        },
+        {
+          "name": "id_pieza",
+          "type": "text",
+          "notnull": false
+        },
+        {
+          "name": "perfil",
+          "type": "text",
+          "notnull": true
+        },
+        {
+          "name": "marca",
+          "type": "text",
+          "notnull": false
+        },
+        {
+          "name": "fabricacion",
+          "type": "text",
+          "notnull": false
+        },
+        {
+          "name": "longitud",
+          "type": "numeric",
+          "notnull": false
+        },
+        {
+          "name": "cantidad",
+          "type": "numeric",
+          "notnull": true
+        },
+        {
+          "name": "ventanas_afectadas",
+          "type": "integer",
+          "notnull": true
+        },
+        {
+          "name": "observacion",
+          "type": "text",
+          "notnull": false
+        },
+        {
+          "name": "usuario_auditoria",
+          "type": "text",
+          "notnull": true
+        },
+        {
+          "name": "fecha_auditoria",
+          "type": "timestamp with time zone",
+          "notnull": true
+        },
+        {
+          "name": "reserva_pendiente",
+          "type": "text",
+          "notnull": false
+        },
+        {
+          "name": "acabado_pendiente",
+          "type": "text",
+          "notnull": false
+        }
+      ],
+      "triggers": null
+    },
+    {
+      "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}",
+      "rls": true,
+      "kind": "r",
+      "name": "sgp_picking_faltantes",
+      "view": null,
+      "schema": "public",
+      "columns": [
+        {
+          "name": "id_faltante",
+          "type": "uuid",
+          "notnull": true
+        },
+        {
+          "name": "id_entrega",
+          "type": "uuid",
+          "notnull": true
+        },
+        {
+          "name": "id_pieza",
+          "type": "text",
+          "notnull": false
+        },
+        {
+          "name": "produccion",
+          "type": "text",
+          "notnull": false
+        },
+        {
+          "name": "perfil",
+          "type": "text",
+          "notnull": true
+        },
+        {
+          "name": "marca",
+          "type": "text",
+          "notnull": false
+        },
+        {
+          "name": "fabricacion",
+          "type": "text",
+          "notnull": false
+        },
+        {
+          "name": "longitud",
+          "type": "numeric",
+          "notnull": false
+        },
+        {
+          "name": "cantidad",
+          "type": "numeric",
+          "notnull": true
+        },
+        {
+          "name": "observacion",
+          "type": "text",
+          "notnull": false
+        },
+        {
+          "name": "nc",
+          "type": "text",
+          "notnull": false
+        },
+        {
+          "name": "ventanas_afectadas",
+          "type": "integer",
+          "notnull": false
+        },
+        {
+          "name": "auditado",
+          "type": "boolean",
+          "notnull": true
+        },
+        {
+          "name": "usuario_auditoria",
+          "type": "text",
+          "notnull": false
+        },
+        {
+          "name": "fecha_auditoria",
+          "type": "timestamp with time zone",
+          "notnull": false
+        },
+        {
+          "name": "reserva_pendiente",
+          "type": "text",
+          "notnull": false
+        },
+        {
+          "name": "acabado_pendiente",
+          "type": "text",
+          "notnull": false
+        }
+      ],
+      "triggers": null
+    },
+    {
+      "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}",
+      "rls": true,
+      "kind": "r",
+      "name": "sgp_picking_entregas",
+      "view": null,
+      "schema": "public",
+      "columns": [
+        {
+          "name": "id_entrega",
+          "type": "uuid",
+          "notnull": true
+        },
+        {
+          "name": "id_programacion",
+          "type": "uuid",
+          "notnull": true
+        },
+        {
+          "name": "produccion",
+          "type": "text",
+          "notnull": false
+        },
+        {
+          "name": "completa",
+          "type": "boolean",
+          "notnull": true
+        },
+        {
+          "name": "estado",
+          "type": "text",
+          "notnull": true
+        },
+        {
+          "name": "observacion",
+          "type": "text",
+          "notnull": false
+        },
+        {
+          "name": "usuario_entrega",
+          "type": "text",
+          "notnull": true
+        },
+        {
+          "name": "fecha_entrega",
+          "type": "timestamp with time zone",
+          "notnull": true
+        },
+        {
+          "name": "usuario_validacion",
+          "type": "text",
+          "notnull": false
+        },
+        {
+          "name": "fecha_validacion",
+          "type": "timestamp with time zone",
+          "notnull": false
+        },
+        {
+          "name": "observacion_validacion",
+          "type": "text",
+          "notnull": false
+        },
+        {
+          "name": "creado_en",
+          "type": "timestamp with time zone",
+          "notnull": true
+        },
+        {
+          "name": "actualizado_en",
+          "type": "timestamp with time zone",
+          "notnull": true
+        },
+        {
+          "name": "fecha_operativa",
+          "type": "date",
+          "notnull": false
+        },
+        {
+          "name": "turno_entrega",
+          "type": "text",
+          "notnull": false
+        }
+      ],
+      "triggers": [
+        {
+          "name": "parcial_proteger_entrega",
+          "enabled": "O",
+          "function": "CREATE OR REPLACE FUNCTION sgp_mecanizado_parcial.proteger_entrega()\n RETURNS trigger\n LANGUAGE plpgsql\n SET search_path TO ''\nAS $function$\nbegin\n if not public.sgp_mecanizado_es_parte(coalesce(new.id_programacion,old.id_programacion)) then return coalesce(new,old); end if;\n if current_user<>'postgres' then raise exception 'USAR_RPC_DE_PARTES'; end if;\n if tg_op='INSERT' then\n  if current_setting('sgp.parte_entrega',true) is distinct from new.id_programacion::text then raise exception 'INDICAR_CANTIDAD_DE_VENTANAS_ENTREGADAS'; end if;\n elsif tg_op='DELETE' then raise exception 'HISTORIAL_DE_ENTREGA_INMUTABLE';\n elsif (new.id_programacion,new.produccion,new.completa) is distinct from (old.id_programacion,old.produccion,old.completa) then\n  raise exception 'IDENTIDAD_DE_ENTREGA_INMUTABLE';\n end if;\n return coalesce(new,old);\nend $function$\n",
+          "definition": "CREATE TRIGGER parcial_proteger_entrega BEFORE INSERT OR DELETE OR UPDATE ON public.sgp_picking_entregas FOR EACH ROW EXECUTE FUNCTION sgp_mecanizado_parcial.proteger_entrega()"
+        },
+        {
+          "name": "trg_pdt_manual_entrega_origen",
+          "enabled": "O",
+          "function": "CREATE OR REPLACE FUNCTION sgp_pdt_manual.proteger_entrega_origen()\n RETURNS trigger\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\nBEGIN\n IF EXISTS(SELECT 1 FROM sgp_pdt_manual.entregas WHERE id_entrega=OLD.id_entrega AND estado='VALIDADA') THEN\n  IF TG_OP='DELETE' THEN RAISE EXCEPTION 'PDT_MANUAL_ENTREGA_ACREDITADA'; END IF;\n  IF ROW(NEW.produccion,NEW.id_programacion,NEW.estado) IS DISTINCT FROM\n     ROW(OLD.produccion,OLD.id_programacion,OLD.estado)\n  THEN RAISE EXCEPTION 'PDT_MANUAL_CONCILIAR_ENTREGA_ANTES_DE_CAMBIO'; END IF;\n END IF;\n IF TG_OP='DELETE' THEN RETURN OLD; END IF;\n RETURN NEW;\nEND $function$\n",
+          "definition": "CREATE TRIGGER trg_pdt_manual_entrega_origen BEFORE DELETE OR UPDATE ON public.sgp_picking_entregas FOR EACH ROW EXECUTE FUNCTION sgp_pdt_manual.proteger_entrega_origen()"
+        },
+        {
+          "name": "trg_sgp_pdt_entrega_origen",
+          "enabled": "O",
+          "function": "CREATE OR REPLACE FUNCTION public.sgp_pdt_proteger_entrega_origen()\n RETURNS trigger\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\nBEGIN\n IF EXISTS(SELECT 1 FROM public.sgp_pdt_entrega_lineas WHERE id_entrega=OLD.id_entrega AND estado<>'ANULADA') THEN\n  IF TG_OP='DELETE' THEN RAISE EXCEPTION 'Entrega con evidencia PDT vigente'; END IF;\n  IF ROW(NEW.produccion,NEW.id_programacion) IS DISTINCT FROM ROW(OLD.produccion,OLD.id_programacion) THEN\n   RAISE EXCEPTION 'Conciliar evidencia PDT antes de modificar entrega';\n  END IF;\n  -- Registered quantities do not certify delivery: let the legacy audit produce\n  -- VALIDADA or AUDITADA_DIFERENCIA. Once certified, annul explicitly first.\n  IF NEW.estado IS DISTINCT FROM OLD.estado AND EXISTS(\n   SELECT 1 FROM public.sgp_pdt_entrega_lineas WHERE id_entrega=OLD.id_entrega AND estado='VALIDADA') THEN\n   RAISE EXCEPTION 'Conciliar evidencia PDT antes de modificar entrega';\n  END IF;\n END IF;\n IF TG_OP='DELETE' THEN RETURN OLD; END IF;\n RETURN NEW;\nEND $function$\n",
+          "definition": "CREATE TRIGGER trg_sgp_pdt_entrega_origen BEFORE DELETE OR UPDATE ON public.sgp_picking_entregas FOR EACH ROW EXECUTE FUNCTION sgp_pdt_proteger_entrega_origen()"
+        },
+        {
+          "name": "trg_sgp_picking_no_duplicar_completa",
+          "enabled": "O",
+          "function": "CREATE OR REPLACE FUNCTION public.sgp_picking_rechazar_entrega_completa_duplicada()\n RETURNS trigger\n LANGUAGE plpgsql\n SET search_path TO 'public'\nAS $function$\nbegin\nif public.sgp_mecanizado_es_parte(new.id_programacion) then return new; end if;\n  if new.completa is distinct from true then\n    return new;\n  end if;\n  perform pg_advisory_xact_lock(hashtextextended(new.id_programacion::text || '|' || new.produccion, 0));\n  if exists (\n    select 1 from public.sgp_picking_entregas e\n    where e.id_programacion = new.id_programacion\n      and e.produccion = new.produccion\n      and e.completa is true\n      and e.estado in ('PENDIENTE_VALIDACION','VALIDADA','AUDITADA_DIFERENCIA')\n  ) then\n    raise exception 'ENTREGA_COMPLETA_YA_REGISTRADA: la producci\u00f3n ya tiene una entrega completa activa'\n      using errcode = '23505';\n  end if;\n  return new;\nend;\n$function$\n",
+          "definition": "CREATE TRIGGER trg_sgp_picking_no_duplicar_completa BEFORE INSERT ON public.sgp_picking_entregas FOR EACH ROW EXECUTE FUNCTION sgp_picking_rechazar_entrega_completa_duplicada()"
+        },
+        {
+          "name": "trg_sgp_picking_validar_jornada_insert",
+          "enabled": "O",
+          "function": "CREATE OR REPLACE FUNCTION public.sgp_picking_validar_jornada_insert()\n RETURNS trigger\n LANGUAGE plpgsql\n SET search_path TO ''\nAS $function$\nDECLARE\n  v_now timestamptz := statement_timestamp();\n  v_local timestamp := v_now AT TIME ZONE 'America/Bogota';\n  v_date date := v_local::date;\n  v_hour time := v_local::time;\n  v_prev date := v_date - 1;\n  v_prev_sunday boolean := extract(isodow from v_prev) = 7;\n  v_expected_date date;\n  v_expected_turn text;\n  v_start timestamptz;\n  v_start_hour integer;\nBEGIN\n  IF v_hour >= time '07:00' THEN\n    v_expected_date := v_date;\n    IF extract(isodow from v_date) = 7 THEN\n      v_expected_turn := CASE WHEN v_hour < time '18:00' THEN 'TURNO 1' ELSE 'TURNO 2' END;\n    ELSE\n      v_expected_turn := CASE WHEN v_hour < time '19:00' THEN 'TURNO 1' ELSE 'TURNO 2' END;\n    END IF;\n  ELSIF v_prev_sunday AND v_hour >= time '05:00' THEN\n    v_expected_date := NULL; -- No active shift Monday 05:00-07:00.\n  ELSE\n    v_expected_date := v_prev;\n    v_expected_turn := 'TURNO 2';\n  END IF;\n\n  -- Legacy 6-argument RPC omits both fields. Fill both from the actual active shift.\n  IF NEW.fecha_operativa IS NULL AND NEW.turno_entrega IS NULL THEN\n    IF v_expected_date IS NULL THEN\n      RAISE EXCEPTION 'PICKING_SIN_TURNO_ACTIVO';\n    END IF;\n    NEW.fecha_operativa := v_expected_date;\n    NEW.turno_entrega := v_expected_turn;\n  ELSIF NEW.fecha_operativa IS NULL OR NEW.turno_entrega IS NULL THEN\n    RAISE EXCEPTION 'PICKING_FECHA_TURNO_REQUERIDOS';\n  END IF;\n\n  NEW.turno_entrega := upper(btrim(NEW.turno_entrega));\n  IF NEW.turno_entrega NOT IN ('TURNO 1','TURNO 2') THEN\n    RAISE EXCEPTION 'PICKING_TURNO_INVALIDO';\n  END IF;\n  v_start_hour := CASE\n    WHEN NEW.turno_entrega = 'TURNO 1' THEN 7\n    WHEN extract(isodow from NEW.fecha_operativa) = 7 THEN 18\n    ELSE 19\n  END;\n  v_start := (NEW.fecha_operativa::timestamp + make_interval(hours => v_start_hour))\n    AT TIME ZONE 'America/Bogota';\n  IF v_start > v_now THEN\n    RAISE EXCEPTION 'PICKING_TURNO_FUTURO';\n  END IF;\n  RETURN NEW;\nEND;\n$function$\n",
+          "definition": "CREATE TRIGGER trg_sgp_picking_validar_jornada_insert BEFORE INSERT ON public.sgp_picking_entregas FOR EACH ROW EXECUTE FUNCTION sgp_picking_validar_jornada_insert()"
+        }
+      ]
+    },
+    {
+      "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}",
+      "rls": true,
+      "kind": "r",
+      "name": "sgp_aluminio_pendiente_movimientos",
+      "view": null,
+      "schema": "public",
+      "columns": [
+        {
+          "name": "id_movimiento",
+          "type": "uuid",
+          "notnull": true
+        },
+        {
+          "name": "id_pendiente",
+          "type": "uuid",
+          "notnull": true
+        },
+        {
+          "name": "id_detalle",
+          "type": "uuid",
+          "notnull": true
+        },
+        {
+          "name": "tipo",
+          "type": "text",
+          "notnull": true
+        },
+        {
+          "name": "cantidad",
+          "type": "integer",
+          "notnull": true
+        },
+        {
+          "name": "id_movimiento_revertido",
+          "type": "uuid",
+          "notnull": false
+        },
+        {
+          "name": "idempotency_key",
+          "type": "uuid",
+          "notnull": true
+        },
+        {
+          "name": "usuario",
+          "type": "text",
+          "notnull": true
+        },
+        {
+          "name": "turno",
+          "type": "text",
+          "notnull": true
+        },
+        {
+          "name": "fecha_operativa",
+          "type": "date",
+          "notnull": true
+        },
+        {
+          "name": "registrado_en",
+          "type": "timestamp with time zone",
+          "notnull": true
+        },
+        {
+          "name": "observacion",
+          "type": "text",
+          "notnull": false
+        }
+      ],
+      "triggers": [
+        {
+          "name": "trg_sgp_pdt_movimiento_inmutable",
+          "enabled": "O",
+          "function": "CREATE OR REPLACE FUNCTION public.sgp_pdt_detalle_inmutable()\n RETURNS trigger\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\nBEGIN\n RAISE EXCEPTION 'PDT_DETALLE_VALIDADO_INMUTABLE';\nEND $function$\n",
+          "definition": "CREATE TRIGGER trg_sgp_pdt_movimiento_inmutable BEFORE DELETE OR UPDATE ON public.sgp_aluminio_pendiente_movimientos FOR EACH ROW EXECUTE FUNCTION sgp_pdt_detalle_inmutable()"
+        }
+      ]
+    },
+    {
+      "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}",
+      "rls": true,
+      "kind": "r",
+      "name": "sgp_aluminio_pendiente_ncs",
+      "view": null,
+      "schema": "public",
+      "columns": [
+        {
+          "name": "id_pendiente",
+          "type": "uuid",
+          "notnull": true
+        },
+        {
+          "name": "consecutivo",
+          "type": "text",
+          "notnull": true
+        },
+        {
+          "name": "snapshot",
+          "type": "jsonb",
+          "notnull": false
+        },
+        {
+          "name": "enlazado_por",
+          "type": "text",
+          "notnull": false
+        },
+        {
+          "name": "enlazado_en",
+          "type": "timestamp with time zone",
+          "notnull": true
+        }
+      ],
+      "triggers": [
+        {
+          "name": "trg_sgp_pdt_nc_inmutable",
+          "enabled": "O",
+          "function": "CREATE OR REPLACE FUNCTION public.sgp_pdt_detalle_inmutable()\n RETURNS trigger\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\nBEGIN\n RAISE EXCEPTION 'PDT_DETALLE_VALIDADO_INMUTABLE';\nEND $function$\n",
+          "definition": "CREATE TRIGGER trg_sgp_pdt_nc_inmutable BEFORE DELETE OR UPDATE ON public.sgp_aluminio_pendiente_ncs FOR EACH ROW EXECUTE FUNCTION sgp_pdt_detalle_inmutable()"
+        }
+      ]
+    },
+    {
+      "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}",
+      "rls": true,
+      "kind": "r",
+      "name": "sgp_aluminio_pendiente_detalles",
+      "view": null,
+      "schema": "public",
+      "columns": [
+        {
+          "name": "id_detalle",
+          "type": "uuid",
+          "notnull": true
+        },
+        {
+          "name": "id_pendiente",
+          "type": "uuid",
+          "notnull": true
+        },
+        {
+          "name": "id_pieza",
+          "type": "text",
+          "notnull": true
+        },
+        {
+          "name": "fabricacion",
+          "type": "text",
+          "notnull": true
+        },
+        {
+          "name": "longitud",
+          "type": "numeric",
+          "notnull": true
+        },
+        {
+          "name": "acabado",
+          "type": "text",
+          "notnull": true
+        },
+        {
+          "name": "cantidad_validada",
+          "type": "integer",
+          "notnull": true
+        },
+        {
+          "name": "creado_por",
+          "type": "text",
+          "notnull": true
+        },
+        {
+          "name": "creado_en",
+          "type": "timestamp with time zone",
+          "notnull": true
+        }
+      ],
+      "triggers": [
+        {
+          "name": "trg_sgp_pdt_detalle_inmutable",
+          "enabled": "O",
+          "function": "CREATE OR REPLACE FUNCTION public.sgp_pdt_detalle_inmutable()\n RETURNS trigger\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\nBEGIN\n RAISE EXCEPTION 'PDT_DETALLE_VALIDADO_INMUTABLE';\nEND $function$\n",
+          "definition": "CREATE TRIGGER trg_sgp_pdt_detalle_inmutable BEFORE DELETE OR UPDATE ON public.sgp_aluminio_pendiente_detalles FOR EACH ROW EXECUTE FUNCTION sgp_pdt_detalle_inmutable()"
+        }
+      ]
+    },
+    {
+      "acl": "{postgres=arwdDxtm/postgres}",
+      "rls": true,
+      "kind": "r",
+      "name": "partes",
+      "view": null,
+      "schema": "sgp_mecanizado_parcial",
+      "columns": [
+        {
+          "name": "id_programacion",
+          "type": "uuid",
+          "notnull": true
+        },
+        {
+          "name": "key_produccion",
+          "type": "text",
+          "notnull": true
+        },
+        {
+          "name": "numero",
+          "type": "integer",
+          "notnull": true
+        },
+        {
+          "name": "cantidad",
+          "type": "integer",
+          "notnull": true
+        },
+        {
+          "name": "creado_por",
+          "type": "text",
+          "notnull": true
+        },
+        {
+          "name": "creado_en",
+          "type": "timestamp with time zone",
+          "notnull": true
+        }
+      ],
+      "triggers": null
+    },
+    {
+      "acl": "{postgres=arwdDxtm/postgres}",
+      "rls": false,
+      "kind": "v",
+      "name": "contextos_pdt",
+      "view": " SELECT detalles.id_pendiente,\n    detalles.id_entrega\n   FROM sgp_pdt_multiorigen.detalles\nUNION ALL\n SELECT origenes_pdt.id_pendiente,\n    origenes_pdt.id_entrega\n   FROM sgp_mecanizado_parcial.origenes_pdt;",
+      "schema": "sgp_mecanizado_parcial",
+      "columns": [
+        {
+          "name": "id_pendiente",
+          "type": "uuid",
+          "notnull": false
+        },
+        {
+          "name": "id_entrega",
+          "type": "uuid",
+          "notnull": false
+        }
+      ],
+      "triggers": null
+    },
+    {
+      "acl": "{postgres=arwdDxtm/postgres}",
+      "rls": false,
+      "kind": "r",
+      "name": "eventos",
+      "view": null,
+      "schema": "sgp_pdt_multiorigen",
+      "columns": [
+        {
+          "name": "id_evento",
+          "type": "uuid",
+          "notnull": true
+        },
+        {
+          "name": "usuario",
+          "type": "text",
+          "notnull": true
+        },
+        {
+          "name": "solicitud",
+          "type": "jsonb",
+          "notnull": true
+        },
+        {
+          "name": "respuesta",
+          "type": "jsonb",
+          "notnull": true
+        },
+        {
+          "name": "creado_en",
+          "type": "timestamp with time zone",
+          "notnull": true
+        }
+      ],
+      "triggers": null
+    },
+    {
+      "acl": "{postgres=arwdDxtm/postgres}",
+      "rls": false,
+      "kind": "r",
+      "name": "detalles",
+      "view": null,
+      "schema": "sgp_pdt_multiorigen",
+      "columns": [
+        {
+          "name": "id_pendiente",
+          "type": "uuid",
+          "notnull": true
+        },
+        {
+          "name": "id_evento",
+          "type": "uuid",
+          "notnull": true
+        },
+        {
+          "name": "id_entrega",
+          "type": "uuid",
+          "notnull": false
+        },
+        {
+          "name": "fuente",
+          "type": "jsonb",
+          "notnull": true
+        }
+      ],
+      "triggers": null
+    }
+  ]
+}
