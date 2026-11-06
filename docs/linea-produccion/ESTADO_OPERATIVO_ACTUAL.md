@@ -1,3 +1,11 @@
+## Disponible manual integrado en candidata v399 · 06/11/2026
+
+Frontend exacto de 82c46056c981644402d95585e4a81b737203fe0a: definición manual
+limitada por saldo real de etapa, sin exigir disponibilidad conciliada. Reutiliza
+pruebas dirigidas PC/móvil y PostgreSQL del responsable. Coordinación confirmó
+SQL07 aplicado en SGP-ONE-LAB; este hilo NO reaplica SQL03/05/07 ni cambia permisos.
+Guardado real por Johan pendiente; CI del SHA integrado antes de publicar.
+
 ## Corrección de ventanas guardadas, estimaciones y máximo · candidata v399 · 06/11/2026
 
 Base publicada v398 bfdc639, Hosting d07db5ac57713655. La fila conservaba el
@@ -17,7 +25,9 @@ Parche revisable docs/sql-proposals/lp01-window-balance/01_patch_REVIEW.sql:
 solo reemplaza lector/escritor existentes; limita CREATE/CORRECT al saldo Export
 vigente de la etapa del actor, sin limitar piezas ni sumar causas. Conserva
 idempotencia, permisos, revisión y recepción física. NO instalado todavía;
-requiere coordinación de la aplicación exacta. Sin GRANT/flags/datos nuevos.
+La revisión automática denegó aplicar lp_shared_window_balance_v399 por falta
+de autorización explícita del despliegue productivo de dos SECURITY DEFINER.
+No se ejecutó ni se reintentó. Paquete intacto; sin GRANT/flags/datos nuevos.
 Publicación pendiente de CI, PR, revisión del artefacto y controles oficiales.
 
 ## Ventanas propuestas · corrección posterior a v397 · 06/11/2026
