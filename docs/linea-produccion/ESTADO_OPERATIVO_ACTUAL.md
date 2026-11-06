@@ -1,3 +1,18 @@
+## Orden compartida · contrato en desarrollo · 06/11/2026
+
+Rama feat/seguimiento-glass-nc-link rebasada sobre d45c5ed (v394).
+NC local previo preservado en stash y worktree; sin escrituras productivas.
+Contrato nuevo compartido entre líderes/coordinador por producción/línea,
+sin turno obligatorio; NC exacta/asociada, accesorios canónicos y cantidades
+manuales. Nota global existente reutilizada; Tecno añade techo aprobado.
+PostgreSQL sintético y Node focalizado PASS; vistas aún sin conectar al contrato.
+Guía original Library: materialización falló `download failed`; sin bytes/píxeles
+locales, sin reintento ni rediseño. Próximo: desbloquear inspección B10 y conectar
+cinco pestañas; PC/móvil y CI completa del candidato al terminar. No instalación,
+GRANT, bandera, sesión optimizada, integración o publicación desde este corte.
+API compartida de montaje preservada; hojas/PDA y PR206 fuera del alcance.
+Detalles y permisos exactos: docs/sql-proposals/lp01-shared-order/README.md.
+
 ## Seguimiento · corrección visual v394 propuesta · 05/11/2026
 
 Base publicada LAB v393: main `2dedc5e055a2472d034d20d23463e66310fdc64f`,

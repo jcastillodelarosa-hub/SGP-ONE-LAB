@@ -1,0 +1,12 @@
+{
+  "status": "PASS",
+  "environment": "Isolated PostgreSQL; synthetic rows only",
+  "checks": [
+    "shared read/edit across coordinator and stage-specific supervisors",
+    "closed turns untouched; no fake turn or assignment",
+    "canonical accessory source only; manual windows independent of pieces",
+    "NC exact source and explicit association; finalization never physical receipt",
+    "legacy reports retained in original context",
+    "shared CAS concurrency, idempotency, audit rollback, private ACL and global containment"
+  ]
+}

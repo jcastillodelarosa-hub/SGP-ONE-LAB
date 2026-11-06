@@ -1,0 +1,55 @@
+{
+  "environment": "expected isolated catalog, not production",
+  "functions": [
+    {
+      "acl": "{postgres=X/postgres}",
+      "owner": "postgres",
+      "signature": "sgp_lp_shared_order.authorize(text,text,text,boolean)",
+      "search_path": [
+        "search_path=\"\""
+      ],
+      "definition_md5": "d658365a02ae350693966bf0875f6f66",
+      "security_definer": false
+    },
+    {
+      "acl": "{postgres=X/postgres}",
+      "owner": "postgres",
+      "signature": "sgp_lp_shared_order.nc_source(text)",
+      "search_path": [
+        "search_path=\"\""
+      ],
+      "definition_md5": "a1aaa56e5a971b71d277c5d23f3d8422",
+      "security_definer": false
+    },
+    {
+      "acl": "{postgres=X/postgres}",
+      "owner": "postgres",
+      "signature": "sgp_lp_shared_nc_lookup_v1(text,text,text,text)",
+      "search_path": [
+        "search_path=\"\""
+      ],
+      "definition_md5": "04d110092bb986cc0a0fe8eca730c27a",
+      "security_definer": true
+    },
+    {
+      "acl": "{postgres=X/postgres}",
+      "owner": "postgres",
+      "signature": "sgp_lp_shared_order_command_v1(text,text,text,jsonb)",
+      "search_path": [
+        "search_path=\"\""
+      ],
+      "definition_md5": "90b9f7a1e2c7711d2f9caeea4a01869d",
+      "security_definer": true
+    },
+    {
+      "acl": "{postgres=X/postgres}",
+      "owner": "postgres",
+      "signature": "sgp_lp_shared_order_read_v1(text,text,text)",
+      "search_path": [
+        "search_path=\"\""
+      ],
+      "definition_md5": "be7b206c5ecd28726594fd1f48331328",
+      "security_definer": true
+    }
+  ]
+}
