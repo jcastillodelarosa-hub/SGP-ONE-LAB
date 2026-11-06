@@ -1,3 +1,15 @@
+## Estimación numérica NC AL y Producción NC Vidrio · candidata v401 · 06/11/2026
+
+Base publicada v400 37fa457. La estimación de aluminio suma una ventana por cada
+pieza pendiente, explícitamente Estimado/por validar, sin recortar al saldo ni sumar
+con cantidades guardadas u otras causas. Advierte si supera el saldo: debe ajustarse
+antes de confirmar; se conservan máximos y guardado existentes. Detalle intacto.
+NC Vidrio muestra Producción (orden), usando el campo fuente orden y preservando
+preferencias de columnas. No implica vínculo persistido NC→producción.
+Pruebas focales: 18 de resumen/contrato y 5 de columna PASS, sintaxis PASS.
+Sin SQL, permisos ni pins modificados. Integración v401 pendiente de CI y publicación
+controlada. Vínculo/navegación NC se prepara por separado, no incluido aquí.
+
 ## Resumen único NC AL · candidata v400 · 06/11/2026
 
 Base main v399 e0624964. Un único distintivo de aluminio en la fila contraída:
