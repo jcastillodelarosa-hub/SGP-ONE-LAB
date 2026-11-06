@@ -8,7 +8,7 @@
   "approved_lp_files": {
     "production-line-tabs.js": "7cb31492565f71b0b64d840012f58c572b7b7f93e4a5eb66277d7daf63ffbf84",
     "src/modules/lp01-followup.js": "e445ee6d696053a4539cdf8ee5503e1e2aa1dfc84a612fac14a3a60c0ebc6315",
-    "src/modules/lp01-operation.js": "f5358313e93f27e961ceca0d28bfc652272f9db165bac231b2869d84e5a3cc79",
+    "src/modules/lp01-operation.js": "49444e38f6400f86fa82cc06823ca3cfb176ef2fa6e1dcf2ba27992b09523ff6",
     "src/domain/lp01-visual-bridge.js": "6d4694f08e2724a34cd23a10f15ac5dd13b5936ad161fd73f322526dc84917aa",
     "scripts/prepare-lp-main-visual.py": "942601e7986e36cff74f2475c9f8a9c638993c15e4b7b91e5ffde6cbd62da5c5",
     "tests/lp01-integration/fixtures/lp-synthetic.json": "ed5812201e96feff0ab8b7bf5b4bcb06567978a4ab52207ac91056a22251d81b",
