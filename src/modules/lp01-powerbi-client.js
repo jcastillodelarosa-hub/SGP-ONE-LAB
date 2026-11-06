@@ -33,3 +33,10 @@ export async function submitOfficialClose({token,command,filename,base64,observa
  }
  return data;
 }
+
+export async function readOfficialClose({token,context}){
+ const command={...context,id:crypto.randomUUID(),revision:0,action:'READ'};
+ const data=await requestPowerBI({adapter:OFFICIAL_POWERBI_VERSION,p_token:token,command});
+ if(data?.contract!=='LP-OFFICIAL-VIEW-1'||!Number.isSafeInteger(data.revision)||data.revision<0||!data.state||['stage','line','date','shift'].some(k=>data.context?.[k]!==context[k]))throw Error('OFFICIAL_READ_INVALID');
+ return data;
+}

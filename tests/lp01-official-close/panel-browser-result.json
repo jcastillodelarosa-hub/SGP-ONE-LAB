@@ -1,0 +1,15 @@
+{
+  "scope": "Local UI fixture; no production/backend save certification",
+  "results": [
+    {
+      "width": 1440,
+      "upload_close_reload": true,
+      "pageErrors": []
+    },
+    {
+      "width": 390,
+      "upload_close_reload": true,
+      "pageErrors": []
+    }
+  ]
+}

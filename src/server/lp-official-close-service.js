@@ -9,7 +9,7 @@ import {applyOfficialImport,closeOfficialPeriod} from '../domain/lp01-official-c
 export function officialCloseService({rpc,DOMParser}){
  async function call(name,args){const {data,error}=await rpc(name,args);if(error)throw Object.assign(Error(error.message),{code:error.code});return data;}
  async function run({token,command,filename,bytes,observation}){
-  if(!command||!['IMPORT','CLOSE'].includes(command.action)||!/^[a-f0-9-]{36}$/i.test(command.id??'')||!['ENSAMBLE','EMPAQUE'].includes(command.stage)||!['PANELES_2','FRAMES_2'].includes(command.line)||!/^\d{4}-\d{2}-\d{2}$/.test(command.date??'')||![1,2].includes(command.shift)||!Number.isSafeInteger(command.revision)||command.revision<0||Object.keys(command).some(k=>!['id','action','stage','line','date','shift','revision'].includes(k)))throw Error('OFFICIAL_COMMAND_INVALID');
+  if(!command||!['READ','IMPORT','CLOSE'].includes(command.action)||!/^[a-f0-9-]{36}$/i.test(command.id??'')||!['ENSAMBLE','EMPAQUE'].includes(command.stage)||!['PANELES_2','FRAMES_2'].includes(command.line)||!/^\d{4}-\d{2}-\d{2}$/.test(command.date??'')||![1,2].includes(command.shift)||!Number.isSafeInteger(command.revision)||command.revision<0||Object.keys(command).some(k=>!['id','action','stage','line','date','shift','revision'].includes(k)))throw Error('OFFICIAL_COMMAND_INVALID');
   if(command.action==='IMPORT'&&(!(bytes instanceof Uint8Array)||bytes.length>2097152||!/^.+\.xlsx$/i.test(filename??'')||filename.length>255))throw Error('OFFICIAL_FILE_INVALID');
   if(command.action==='CLOSE'&&(typeof observation!=='string'||!observation.trim()||observation.length>4000))throw Error('OFFICIAL_REASON_REQUIRED');
   const context=Object.fromEntries(['stage','line','date','shift'].map(k=>[k,command[k]]));
@@ -18,6 +18,7 @@ export function officialCloseService({rpc,DOMParser}){
   const requestHash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify(payload)))),b=>b.toString(16).padStart(2,'0')).join('');
   const current=await call('sgp_lp_official_context_v1',{p_token:token,p_context:context,p_id:command.id,p_request_hash:requestHash});
   if(current?.contract!=='LP-OFFICIAL-CONTEXT-1')throw Error('OFFICIAL_CONTEXT_INVALID');
+  if(command.action==='READ'){if(!current.state)throw Error('OFFICIAL_READ_INVALID');return {contract:'LP-OFFICIAL-VIEW-1',context,revision:current.state.revision,state:{...current.state,receipts:[]},plan:current.plan,schedule:current.schedule};}
   if(current.receipt){if(current.receipt.contract!=='LP-OFFICIAL-COMMITTED-1'||current.receipt.id!==command.id||current.receipt.revision!==command.revision+1)throw Error('OFFICIAL_RECEIPT_INVALID');return current.receipt;}
   if(current.state?.revision!==command.revision)throw Error('CONFLICTO_REVISION');
   const args={id:command.id,expectedRevision:command.revision,actor:current.actor,recordedAt:current.observedAt,plan:current.plan};
