@@ -1,3 +1,35 @@
+## Disponible manual integrado en candidata v399 · 06/11/2026
+
+Frontend exacto de 82c46056c981644402d95585e4a81b737203fe0a: definición manual
+limitada por saldo real de etapa, sin exigir disponibilidad conciliada. Reutiliza
+pruebas dirigidas PC/móvil y PostgreSQL del responsable. Coordinación confirmó
+SQL07 aplicado en SGP-ONE-LAB; este hilo NO reaplica SQL03/05/07 ni cambia permisos.
+Guardado real por Johan pendiente; CI del SHA integrado antes de publicar.
+
+## Corrección de ventanas guardadas, estimaciones y máximo · candidata v399 · 06/11/2026
+
+Base publicada v398 bfdc639, Hosting d07db5ac57713655. La fila conservaba el
+indicador de pendientes calculado solo con reportes antiguos y no recibía el
+refresco del panel al guardar. Ahora usa vínculos compartidos y actualiza la fila
+sin recargar todo; revisiones atrasadas no sustituyen una lectura más reciente.
+Cantidades de varios reportes visibles por separado, sin sumar solapamientos.
+Estimaciones por pendiente de aluminio y por NC conocida, explícitas y editables.
+Un pendiente sin vínculo no invalida la cantidad manual guardada.
+
+Pruebas dirigidas sintéticas PC1440/móvil390 y PostgreSQL aislado: guardado,
+refresco de fila, recarga, estimaciones, máximo por etapa, atomicidad/replay y
+ACL conservadas. Sin escritura de pruebas productiva. Captura del usuario solo
+texto/puntero; capturas sintéticas locales inspeccionadas, sin atribuirlas a planta.
+
+Parche revisable docs/sql-proposals/lp01-window-balance/01_patch_REVIEW.sql:
+solo reemplaza lector/escritor existentes; limita CREATE/CORRECT al saldo Export
+vigente de la etapa del actor, sin limitar piezas ni sumar causas. Conserva
+idempotencia, permisos, revisión y recepción física. NO instalado todavía;
+La revisión automática denegó aplicar lp_shared_window_balance_v399 por falta
+de autorización explícita del despliegue productivo de dos SECURITY DEFINER.
+No se ejecutó ni se reintentó. Paquete intacto; sin GRANT/flags/datos nuevos.
+Publicación pendiente de CI, PR, revisión del artefacto y controles oficiales.
+
 ## Ventanas propuestas · corrección posterior a v397 · 06/11/2026
 
 Formulario Definir ventanas afectadas antes de reportes/pendientes, estado de

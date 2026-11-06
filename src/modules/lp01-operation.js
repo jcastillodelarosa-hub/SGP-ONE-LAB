@@ -86,7 +86,7 @@ export function mountOperation({tracking,operation,bridge,legacyLoad,orderSaleEn
      catch(error){if(error.message!=='SHARED_ORDER_UNAVAILABLE')throw error;summary={...affectationSummary(nativeSnapshot),sharedUnavailable:true,total:null,available:null};}
     }
     catch(error){if(!alive())return;if(error.message==='NO_AUTORIZADO'){++seq;loading=false;globalData=null;summaries.clear();live.replaceChildren();message.textContent='Acceso revocado. Vuelve a consultar.';return;}summary={status:'UNAVAILABLE'};}
-    if(!alive())return;summaries.set(key,summary);
+    if(!alive())return;if(Number.isSafeInteger(summary.sharedRevision)&&(summaries.get(key)?.sharedRevision??-1)>summary.sharedRevision)continue;summaries.set(key,summary);
     paintSummaries(key);
    }}));
   })().catch(()=>{}).finally(()=>{summaryFlight=null;if(scope!==summaryScope&&globalData)refreshSummaries();});
@@ -117,7 +117,7 @@ export function mountOperation({tracking,operation,bridge,legacyLoad,orderSaleEn
    onAffectations:async({host,row,target,cause})=>{
     const token=bridge.getToken(),scope=globalContext;host.textContent='Consultando afectaciones…';
     try{const client=await bridge.getClient();if(!host.isConnected||token!==bridge.getToken()||(scope.line!==globalContext?.line||scope.stage!==globalContext?.stage))return;
-     await mountTrackingAffectations({host,row,target,cause,scope,client,getToken:()=>bridge.getToken(),isCurrent:()=>scope.line===globalContext?.line&&scope.stage===globalContext?.stage});
+     await mountTrackingAffectations({host,row,target,cause,scope,client,onSummary:summary=>{if(token!==bridge.getToken()||scope.line!==globalContext?.line||scope.stage!==globalContext?.stage||viewPanel!=='seguimiento')return;if((summaries.get(row.key)?.sharedRevision??-1)>(summary.sharedRevision??-1))return;summaries.set(row.key,summary);paintSummaries(row.key);},getToken:()=>bridge.getToken(),isCurrent:()=>scope.line===globalContext?.line&&scope.stage===globalContext?.stage});
     }catch(error){if(host.isConnected)host.textContent='Afectaciones no disponibles: '+error.message;}
    },
    onOperate:async(id,focusSale,target)=>{

@@ -21,9 +21,9 @@ try:
     before=legacy_snapshot()
     db.sql((ROOT/'docs/sql-proposals/lp01-afectaciones/13_all_origins_read_REVIEW.sql').read_text());db.sql((ROOT/'docs/sql-proposals/lp01-order-sale/01_definition_REVIEW.sql').read_text())
     db.sql('GRANT EXECUTE ON FUNCTION public.sgp_lp_sale_orden_consultar_v1(text,text,text),public.sgp_lp_sale_orden_definir_v1(text,text,text,jsonb) TO anon;UPDATE sgp_lp_sale_orden.config SET definitions_enabled=true;UPDATE sgp_lp_afectaciones.config SET writes=true')
-    legacy=json.loads(db.sql("SET ROLE anon;SELECT public.sgp_lp_afectaciones_legado_v1('COORDINADOR','QA|PANELES_2','ENSAMBLE')"))
-    db.sql("SET ROLE anon;SELECT public.sgp_lp_afectaciones_conciliar_v1('COORDINADOR','QA|PANELES_2','ENSAMBLE',"+f.lit(str(uuid.uuid4()))+","+f.lit(legacy['fingerprint'])+","+str(legacy['revision'])+",'[]'::jsonb,'QA native empty legacy')")
-    x.run(x.command('VALIDATE',0,user='COORDINADOR'),user='COORDINADOR')
+    db.sql((ROOT/'docs/sql-proposals/lp01-order-sale/07_manual_balance_REVIEW.sql').read_text())
+    assert db.sql('SELECT count(*) FROM sgp_lp_afectaciones.consolidados')=='0'
+    assert db.sql('SELECT count(*) FROM sgp_lp_afectaciones.conciliacion')=='0'
     page=browser.new_page(viewport={'width':width,'height':950});errors=[];page.on('pageerror',lambda e:errors.append(str(e)));lost=[False];ids=[]
     page.route('**/*',lambda r:r.continue_() if r.request.url.startswith(origin) else r.abort())
     def rpc(route):
@@ -57,8 +57,11 @@ try:
     (HERE/'evidence').mkdir(exist_ok=True);page.screenshot(path=str(HERE/f'evidence/cell-{width}.png'),full_page=True)
     page.evaluate("qaToken='se';mount()");page.wait_for_function("document.querySelector('#cell .lp-sale-value')?.textContent.includes('10')");assert page.locator('[data-sale-edit]').count()==0
     page.evaluate("qaToken='invalid'");page.wait_for_function("document.querySelector('#cell').textContent===''")
+    db.sql((ROOT/'docs/sql-proposals/lp01-order-sale/08_manual_balance_ROLLBACK_REVIEW.sql').read_text())
+    assert db.sql("SELECT md5(prosrc) FROM pg_proc WHERE oid='public.sgp_lp_sale_orden_definir_v1(text,text,text,jsonb)'::regprocedure")=='d7aa1edaea6a22004226e4a73a6fb61f'
+    assert db.sql('SELECT count(*) FROM sgp_lp_sale_orden.eventos')=='2'
     assert not errors,errors
-    results.append({'width':width,'status':'PASS','nativePostgres':True,'saveReloadHistory':True,'lostResponseSameIdRetry':True,'existingTurnSaleAndAuditUnchanged':True,'roleAndSessionCleanup':True,'refreshSerializesWrites':True,'oldDisposeCannotClearNewMount':True,'isolatedCellOnly':True});page.close()
+    results.append({'width':width,'status':'PASS','nativePostgres':True,'manualWithoutConsolidation':True,'rollbackPreservesAudit':True,'saveReloadHistory':True,'lostResponseSameIdRetry':True,'existingTurnSaleAndAuditUnchanged':True,'roleAndSessionCleanup':True,'refreshSerializesWrites':True,'oldDisposeCannotClearNewMount':True,'isolatedCellOnly':True});page.close()
    finally:x.close()
   browser.close()
  (HERE/'browser-result.json').write_text(json.dumps(results,indent=2)+'\n');print(json.dumps(results))

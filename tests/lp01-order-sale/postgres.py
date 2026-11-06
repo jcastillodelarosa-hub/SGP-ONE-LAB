@@ -21,14 +21,14 @@ try:
  assert read()['quantity'] is None and read()['revision']==0 and read()['history']==[]
  denied(command(),'SALE_ORDER_DEFINITIONS_DISABLED')
  db.sql('UPDATE sgp_lp_sale_orden.config SET definitions_enabled=true')
- denied(command(),'SALE_ORDER_AVAILABILITY_PENDING')
+ db.sql((ROOT/'docs/sql-proposals/lp01-order-sale/07_manual_balance_REVIEW.sql').read_text())
+ pending=command();db.sql("UPDATE public.sgp_producciones SET saldos_inicializados=false WHERE key_produccion='QA|PANELES_2'")
+ denied(pending,'SALE_ORDER_BALANCE_PENDING')
+ db.sql("UPDATE public.sgp_producciones SET saldos_inicializados=true WHERE key_produccion='QA|PANELES_2'")
  db.sql('DELETE FROM sgp_lp_operacion.ordenes;DELETE FROM public.sgp_linea_plan_asignaciones;UPDATE sgp_lp_afectaciones.config SET writes=true')
- for stage in ['ENSAMBLE','EMPAQUE']:
-  legacy=json.loads(db.sql("SET ROLE anon;SELECT public.sgp_lp_afectaciones_legado_v1('COORDINADOR','QA|PANELES_2',"+f.lit(stage)+")"))
-  db.sql("SET ROLE anon;SELECT public.sgp_lp_afectaciones_conciliar_v1('COORDINADOR','QA|PANELES_2',"+f.lit(stage)+","+f.lit(str(uuid.uuid4()))+","+f.lit(legacy['fingerprint'])+","+str(legacy['revision'])+",'[]'::jsonb,'QA no legacy sources')")
-  x.run(x.command('VALIDATE',0,user='COORDINADOR',stage=stage),user='COORDINADOR',stage=stage)
-
- initial=read();assert initial['source']['available']==288 and 'DEFINE' in initial['capabilities']
+ initial=read();assert initial['source']['available'] is None and initial['source']['exportBalance']==288 and 'DEFINE' in initial['capabilities']
+ assert db.sql('SELECT count(*) FROM sgp_lp_afectaciones.consolidados')=='0'
+ assert db.sql('SELECT count(*) FROM sgp_lp_afectaciones.conciliacion')=='0'
  first=command();receipt=save(first);assert receipt['quantity']==8 and receipt['operational'] is False and receipt['temporalPolicy']=='UNRESOLVED'
  assert save(first)['duplicate'] is True and len(read()['history'])==1
  db.sql("UPDATE public.sgp_usuarios SET rol='LIDER LINEA' WHERE usuario='COORDINADOR'")
@@ -42,7 +42,7 @@ try:
   assert db.run(query(command(),user=user)).returncode
  assert db.run("SET ROLE anon;SELECT * FROM sgp_lp_sale_orden.eventos").returncode
  for extra in [{'turn':1},{'assignment':'fake'},{'date':'2026-11-01'},{'quantity':-1},{'quantity':1.5}]:denied({**command(),**extra},'SALE_ORDER_COMMAND_INVALID')
- denied(command(289),'SALE_ORDER_EXCEEDS_AVAILABLE')
+ denied(command(289),'SALE_ORDER_EXCEEDS_BALANCE')
  assert save(command(10,user='QAADMIN'),user='QAADMIN')['quantity']==10
  assert save(command(4,stage='EMPAQUE'),stage='EMPAQUE')['quantity']==4
  assert read()['quantity']==10 and read(stage='EMPAQUE')['quantity']==4
@@ -83,6 +83,6 @@ try:
  assert db.run(query(admin_cmd,user='QAADMIN')).returncode
  retry=command(15);save(retry);db.sql("UPDATE public.sgp_sesiones_app SET revocado_en=clock_timestamp() WHERE id_usuario=(SELECT id_usuario FROM public.sgp_usuarios WHERE usuario='COORDINADOR')")
  assert db.run(query(retry)).returncode
- result={'status':'PASS','environment':'isolated native PostgreSQL synthetic only','noDefaultExecute':True,'disabledByDefault':True,'coordinatorAdminOnlyWrite':True,'scopedLeaderRead':True,'unassignedOrderPersistence':True,'stageSeparation':True,'validatedAvailabilityRequired':True,'sourceRevisionChecked':True,'idempotencyAndConcurrentCAS':True,'auditFailureRollsBack':True,'immutableHistory':True,'revocationRejectsRetry':True,'concurrentRevocationSerialized':True,'roleDowngradeDenied':True,'expiredDuringWaitRejectedByWallClock':True,'noExportTurnAssignmentWrites':True,'operational':False,'temporalPolicy':'UNRESOLVED'}
+ result={'status':'PASS','environment':'isolated native PostgreSQL synthetic only','noDefaultExecute':True,'disabledByDefault':True,'coordinatorAdminOnlyWrite':True,'scopedLeaderRead':True,'unassignedOrderPersistence':True,'stageSeparation':True,'manualWithoutReconciliation':True,'realStageBalanceRequired':True,'sourceRevisionChecked':True,'idempotencyAndConcurrentCAS':True,'auditFailureRollsBack':True,'immutableHistory':True,'revocationRejectsRetry':True,'concurrentRevocationSerialized':True,'roleDowngradeDenied':True,'expiredDuringWaitRejectedByWallClock':True,'noExportTurnAssignmentWrites':True,'operational':False,'temporalPolicy':'UNRESOLVED'}
  (Path(__file__).parent/'result.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result))
 finally:x.close()

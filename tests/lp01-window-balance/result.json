@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "environment": "isolated PostgreSQL synthetic only",
+  "checks": [
+    "stage-specific bounds, zero and missing source",
+    "rejected changes atomic",
+    "overlapping categories not summed",
+    "cross-stage correction",
+    "exact replay after Export change",
+    "ACL owner search_path unchanged",
+    "unauthorized denied and drift blocks repeat"
+  ]
+}

@@ -18,8 +18,8 @@ try:
    page.evaluate("""async () => {
     const {retainOrderSaleRows}=await import('/src/modules/lp01-order-sale-rows.js');
     document.body.innerHTML='<div id="qa"></div>';
-    window.qa={quantity:null,history:[],revision:0,calls:0,saves:[],unknown:false,current:true,active:0,max:0};
-    const provider=key=>({isCurrent:()=>qa.current,read:async()=>{qa.active++;qa.max=Math.max(qa.max,qa.active);await new Promise(r=>setTimeout(r,10));qa.active--;qa.calls++;return {quantity:qa.quantity,history:qa.history,revision:qa.revision,capabilities:['READ','DEFINE'],source:{available:20,fingerprint:'qa'}};},save:async c=>{qa.saves.push(c);if(qa.unknown){qa.unknown=false;qa.quantity=c.quantity;qa.revision++;qa.history.push({quantity:c.quantity,observation:c.observation});throw Error('NETWORK_UNCERTAIN');}if(qa.revision===c.revision){qa.quantity=c.quantity;qa.revision++;qa.history.push({quantity:c.quantity,observation:c.observation});}}});
+    window.qa={balance:20,quantity:null,history:[],revision:0,calls:0,saves:[],unknown:false,current:true,active:0,max:0};
+    const provider=key=>({isCurrent:()=>qa.current,read:async()=>{qa.active++;qa.max=Math.max(qa.max,qa.active);await new Promise(r=>setTimeout(r,10));qa.active--;qa.calls++;return {quantity:qa.quantity,history:qa.history,revision:qa.revision,capabilities:['READ','DEFINE'],source:{available:null,exportBalance:qa.balance,fingerprint:'qa'}};},save:async c=>{qa.saves.push(c);if(qa.unknown){qa.unknown=false;qa.quantity=c.quantity;qa.revision++;qa.history.push({quantity:c.quantity,observation:c.observation});throw Error('NETWORK_UNCERTAIN');}if(qa.revision===c.revision){qa.quantity=c.quantity;qa.revision++;qa.history.push({quantity:c.quantity,observation:c.observation});}}});
     window.qaRender=(keys=['A','B','C','D','E','F'])=>{const host=document.querySelector('#qa'),attach=retainOrderSaleRows(host,provider,keys);host.innerHTML=keys.map(k=>'<div data-sale-order-key="'+k+'"></div>').join('');attach();};
     qaRender();
    }""")
@@ -29,7 +29,11 @@ try:
    assert page.evaluate('qa.max')<=4
    cell=page.locator('.lp-sale-row').first
    cell.locator('[data-sale-edit]').click()
-   cell.locator('[name=quantity]').fill('8');cell.locator('[name=observation]').fill('Motivo de prueba')
+   cell.locator('[name=quantity]').fill('21');cell.locator('[name=observation]').fill('Motivo de prueba')
+   cell.locator('[data-sale-save]').click()
+   assert 'supera el saldo real' in cell.locator('[data-sale-status]').inner_text()
+   assert not page.evaluate('qa.saves.length')
+   cell.locator('[name=quantity]').fill('8')
    page.evaluate('qaRender()')
    assert cell.locator('.lp-sale-dialog:modal').count()==1
    assert cell.locator('[name=observation]').input_value()=='Motivo de prueba'

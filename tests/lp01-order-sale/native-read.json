@@ -3,14 +3,14 @@
   "role": "COORDINADOR",
   "stage": "ENSAMBLE",
   "source": {
-    "available": 288,
-    "fingerprint": "d1f2ef3fc2a0194670d266aca95b3c3c",
+    "available": null,
+    "fingerprint": "e0123ae68ba5a3995a178fbc179d71a0",
     "exportBalance": 288
   },
   "history": [
     {
-      "at": "2026-11-05T14:40:32.358092+00:00",
-      "id": "5922cb07-d593-407f-940d-77eca355b87f",
+      "at": "2026-11-06T12:06:59.930187+00:00",
+      "id": "4561d71b-c055-4169-87be-8b1a3deff1ac",
       "user": "COORDINADOR",
       "before": {
         "key": null,
@@ -25,8 +25,8 @@
       "observation": "QA definici\u00f3n por orden"
     },
     {
-      "at": "2026-11-05T14:40:36.325197+00:00",
-      "id": "ba1208e9-2f37-4dbc-84e4-636aa5b64489",
+      "at": "2026-11-06T12:07:03.551106+00:00",
+      "id": "ed90d4ed-1e87-4cb5-b342-9ed9d06787c0",
       "user": "qaadmin",
       "before": {
         "key": "QA|PANELES_2",
@@ -34,15 +34,15 @@
         "usuario": "COORDINADOR",
         "cantidad": 8,
         "revision": 1,
-        "registrado_en": "2026-11-05T14:40:32.358092+00:00"
+        "registrado_en": "2026-11-06T12:06:59.930187+00:00"
       },
       "quantity": 10,
       "revision": 2,
       "observation": "QA definici\u00f3n por orden"
     },
     {
-      "at": "2026-11-05T14:40:38.039178+00:00",
-      "id": "b59686c2-9d9a-482c-8cbf-373d21b3e968",
+      "at": "2026-11-06T12:07:05.125095+00:00",
+      "id": "53c41902-b974-4bd4-aeeb-b7f7516877b1",
       "user": "COORDINADOR",
       "before": {
         "key": "QA|PANELES_2",
@@ -50,15 +50,15 @@
         "usuario": "qaadmin",
         "cantidad": 10,
         "revision": 2,
-        "registrado_en": "2026-11-05T14:40:36.325197+00:00"
+        "registrado_en": "2026-11-06T12:07:03.551106+00:00"
       },
       "quantity": 11,
       "revision": 3,
       "observation": "QA definici\u00f3n por orden"
     },
     {
-      "at": "2026-11-05T14:40:38.33277+00:00",
-      "id": "c40c6b43-8f15-4616-ba3d-b351fe04c0ca",
+      "at": "2026-11-06T12:07:05.374116+00:00",
+      "id": "af7109cc-fef2-44bf-bde0-b1d940ed8d29",
       "user": "COORDINADOR",
       "before": {
         "key": "QA|PANELES_2",
@@ -66,7 +66,7 @@
         "usuario": "COORDINADOR",
         "cantidad": 11,
         "revision": 3,
-        "registrado_en": "2026-11-05T14:40:38.039178+00:00"
+        "registrado_en": "2026-11-06T12:07:05.125095+00:00"
       },
       "quantity": 13,
       "revision": 4,

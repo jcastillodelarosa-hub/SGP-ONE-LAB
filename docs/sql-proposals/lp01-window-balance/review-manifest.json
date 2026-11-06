@@ -1,0 +1,48 @@
+{
+  "before": [
+    {
+      "acl": "{postgres=X/postgres,anon=X/postgres}",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "definer": true,
+      "signature": "sgp_lp_shared_order_command_v1(text,text,text,jsonb)",
+      "definition_md5": "90b9f7a1e2c7711d2f9caeea4a01869d"
+    },
+    {
+      "acl": "{postgres=X/postgres,anon=X/postgres}",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "definer": true,
+      "signature": "sgp_lp_shared_order_read_v1(text,text,text)",
+      "definition_md5": "be7b206c5ecd28726594fd1f48331328"
+    }
+  ],
+  "after": [
+    {
+      "acl": "{postgres=X/postgres,anon=X/postgres}",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "definer": true,
+      "signature": "sgp_lp_shared_order_command_v1(text,text,text,jsonb)",
+      "definition_md5": "90ed49a62696d59997db69d0f52e9f37"
+    },
+    {
+      "acl": "{postgres=X/postgres,anon=X/postgres}",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "definer": true,
+      "signature": "sgp_lp_shared_order_read_v1(text,text,text)",
+      "definition_md5": "1d518be4bd908e87da1ca444533e894e"
+    }
+  ],
+  "sha256": "e453865481db241d52ffe85290fcbfb43ed1e7395428a5c5b11c3c3fe8b69c46",
+  "scope": "isolated only; not installed"
+}
