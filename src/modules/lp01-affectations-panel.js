@@ -1,3 +1,4 @@
+import {mountSharedAffectationsPanel} from './lp01-shared-affectations-panel.js';
 import {affectationSummary} from '../domain/lp01-affectation-summary.js';
 import {pendingCompact} from './lp01-pending-compact.js';
 /** Isolated panel contract. transport must provide scoped read/command; no production RPC fallback. */
@@ -5,6 +6,7 @@ const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const mounts=new WeakMap();
 const actions={CREATE:['REPORT','Registrar afectación'],CORRECT:['REPORT','Corregir cantidad total'],SOLVE:['SOLVE','Registrar solución parcial'],CONFIRM:['CONFIRM','Confirmar recepción física'],VALIDATE:['VALIDATE','Validar consolidado']};
 export async function mountAffectationsPanel(host,transport,{cause:initialCause=null,registrationFirst=false,fixedCause=null,pendingOnly=false,allowCreate=true,ncReferences=null}={}){
+ if(transport.shared)return mountSharedAffectationsPanel(host,transport,{fixedCause});
  let disposed=false,busy=false,snapshot,retry,selectedCause=initialCause;
  const token={};mounts.set(host,token);const alive=()=>!disposed&&mounts.get(host)===token;
  const denied=error=>{if(error.message==='NO_AUTORIZADO'&&alive()){disposed=true;host.textContent='Acceso revocado. Vuelve a ingresar con una sesión autorizada.';return true;}return false;};

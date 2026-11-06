@@ -7,7 +7,8 @@
     "atomicPdtWithoutNC": true,
     "retryNoDuplicate": true,
     "assignmentsCreated": 0,
-    "closedTurnDenied": true,
+    "sharedClosedTurnSavedWithoutMutation": true,
+    "legacyNativeWriterOpenTurnPreserved": true,
     "draft20sPreserved": true,
     "existingController": true,
     "externalRequests": 0
@@ -20,7 +21,8 @@
     "atomicPdtWithoutNC": true,
     "retryNoDuplicate": true,
     "assignmentsCreated": 0,
-    "closedTurnDenied": true,
+    "sharedClosedTurnSavedWithoutMutation": true,
+    "legacyNativeWriterOpenTurnPreserved": true,
     "draft20sPreserved": true,
     "existingController": true,
     "externalRequests": 0

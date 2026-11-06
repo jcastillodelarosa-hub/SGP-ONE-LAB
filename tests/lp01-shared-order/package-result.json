@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "environment": "isolated synthetic PostgreSQL only",
+  "checks": [
+    "definition hashes/owner/search_path/ACL gate passes before activation",
+    "only new anon RPC grants and new local flag",
+    "non-destructive containment revokes new grants; tables remain private"
+  ]
+}

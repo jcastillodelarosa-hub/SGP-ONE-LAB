@@ -1,3 +1,12 @@
+## Candidato integrado local · 06/11/2026
+
+Dependencia Seguimiento PR208 / 95e61e1144d575591985078a95959d11cc5ba156
+incorporada completa mediante merge. Helpers compartidos idénticos; una sola
+implementación por archivo. Base Picking v396 intacta. Disponible, Otras y cierre/
+apertura oficial locales conectados; activación separada y no ejecutada.
+Los cortes históricos siguientes conservan la trazabilidad y sus pendientes ya
+superados; el alcance vigente está en el README del cierre oficial.
+
 ## Rebase LP sobre Picking v396 publicado · 06/11/2026
 
 Base vigente a068e14083bb92db6e72c71934d8cf240ef345ff; incrementos locales
@@ -47,6 +56,46 @@ Materialización de guía y XLSX nuevos falló con único reintento; sin píxele
 prueba de los archivos 03/11. 535 Node PASS, release PASS, DOM1440/390 PASS;
 CI remota pendiente del SHA. Sin SQL productivo, ACL, flags, sesión, merge o
 publicación. [Alcance y próximo paso](OPERACION_CIERRE_OFICIAL_PENDIENTES.md).
+## Orden compartida · continuidad sobre v396 · 06/11/2026
+
+Base main a068e14 (v396), rebase sin conflictos; cambios previos y borrador NC
+conservados. Sin consultar skills propias por instrucción de Johan. Historial del
+panel conserva ahora movimientos nativos por reporte/etapa, separados de los
+compartidos; referencia NC heredada preservada también sin backend compartido.
+Prueba dirigida legacy-history.py PC1440/móvil390 PASS (sintética, sin SQL).
+Las cinco pruebas antiguas de turno ya quedaron adaptadas y pasaron; no se
+repitieron. Acople de filas/hojas sigue a cargo del otro hilo, con fuentes exactas
+entregadas. CI conjunta al congelar; PR denegado, sin nuevo intento ni push.
+Contrato compartido sigue PROPUESTO, no instalado; tres RPC anon y bandera local
+requieren aprobación específica. No cambios en Picking, SQL productivo ni release.
+
+## Orden compartida · conexión local · 06/11/2026
+
+Cinco pestañas actuales conectadas sin turno obligatorio y sin rediseño;
+legacy visible, nota global separada, NC explícita y Accesorios operativos en
+PostgreSQL sintético. PC1440/móvil390 guardar/reintentar/recargar/compartir entre
+líderes PASS; recorrido B10 real y nota CAS PASS. Tecno usa techo aprobado.
+API mountTrackingAffectations intacta; resumen de fila requiere acople por dueño
+de lp01-operation.js con sharedOrderSummary (no suma heredado/compartido).
+PDF B10 leído por Library solo como texto/puntero; no píxeles originales aquí.
+Pendientes acople de filas, actualización de expectativas antiguas de turno y
+CI conjunta al congelar. Sin nuevo PR (denegado), SQL ni publicación.
+Detalle: docs/sql-proposals/lp01-shared-order/README.md.
+
+## Orden compartida · contrato en desarrollo · 06/11/2026
+
+Rama feat/seguimiento-glass-nc-link rebasada sobre d45c5ed (v394).
+NC local previo preservado en stash y worktree; sin escrituras productivas.
+Contrato nuevo compartido entre líderes/coordinador por producción/línea,
+sin turno obligatorio; NC exacta/asociada, accesorios canónicos y cantidades
+manuales. Nota global existente reutilizada; Tecno añade techo aprobado.
+PostgreSQL sintético y Node focalizado PASS; vistas aún sin conectar al contrato.
+Guía original Library: materialización falló `download failed`; sin bytes/píxeles
+locales, sin reintento ni rediseño. Próximo: desbloquear inspección B10 y conectar
+cinco pestañas; PC/móvil y CI completa del candidato al terminar. No instalación,
+GRANT, bandera, sesión optimizada, integración o publicación desde este corte.
+API compartida de montaje preservada; hojas/PDA y PR206 fuera del alcance.
+Detalles y permisos exactos: docs/sql-proposals/lp01-shared-order/README.md.
 
 ## Seguimiento · corrección visual v394 propuesta · 05/11/2026
 

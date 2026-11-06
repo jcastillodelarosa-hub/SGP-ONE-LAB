@@ -1,0 +1,46 @@
+name: Shared order contracts (isolated)
+on:
+  pull_request:
+    paths:
+      - 'docs/sql-proposals/lp01-shared-order/**'
+      - 'tests/lp01-shared-order/**'
+      - 'tests/lp01-shared-order.test.mjs'
+      - 'src/domain/lp01-shared-order-editor.js'
+      - 'src/domain/lp01-shared-order-summary.js'
+      - 'src/modules/lp01-shared-affectations-panel.js'
+      - 'src/modules/lp01-tracking-affectations.js'
+      - 'src/modules/lp01-affectation-tabs.js'
+      - 'src/services/lp01-shared-order.js'
+      - 'src/domain/lp01-export-glass.js'
+      - '.github/workflows/lp01-shared-order.yml'
+permissions:
+  contents: read
+jobs:
+  contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: node --test tests/lp01-shared-order.test.mjs tests/lp01-export-glass.test.mjs
+      - run: docker pull postgres:17.11
+      - run: python tests/lp01-shared-order/contracts.py
+      - run: python tests/lp01-shared-order/package.py
+      - run: pip install playwright==1.55.0
+      - run: python -m playwright install --with-deps chromium
+      - run: python tests/lp01-shared-order/browser.py
+      - run: python tests/lp01-shared-order/legacy-history.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: shared-order-synthetic-contracts
+          path: |
+            tests/lp01-shared-order/*result.json
+            tests/lp01-shared-order/evidence/

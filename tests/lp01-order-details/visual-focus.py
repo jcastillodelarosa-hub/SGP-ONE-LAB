@@ -12,31 +12,28 @@ try:
   browser=pw.chromium.launch(**({'executable_path':'/usr/bin/chromium'} if Path('/usr/bin/chromium').exists() else {}),args=['--no-sandbox'])
   for width in ([390] if '--copy-only' in sys.argv else [1440,390]):
    page=browser.new_page(viewport={'width':width,'height':1000});page.route('**/*',lambda r:r.continue_() if r.request.url.startswith(origin) else r.abort());errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
-   page.goto(origin+'/tests/lp01-summary-ui/fixture.html');page.wait_for_selector('[data-summary-cause=NC_V]');page.locator('[data-summary-cause=NC_V]').first.click();page.wait_for_selector('[data-nc-references]')
+   page.goto(origin+'/tests/lp01-summary-ui/fixture.html');page.wait_for_selector('[data-summary-cause=NC_V]');page.locator('[data-summary-cause=NC_V]').first.click();page.wait_for_selector('[data-shared-legacy]')
+   legacy=page.locator('[data-shared-legacy] article:visible');assert legacy.count()==1
+   assert '8 ventanas reportadas' in legacy.inner_text()
+   assert 'Vinculada' not in legacy.inner_text() and 'Número informado' not in legacy.inner_text()
+   assert page.locator('[data-shared-form] button[type=submit]').is_disabled()
    if '--copy-only' in sys.argv:
-    cells=page.locator('[data-nc-references] tbody tr').first.locator('td')
-    assert cells.nth(0).inner_text()=='No informado';assert cells.nth(1).inner_text()=='Sin número informado'
-    print('PASS: missing NC number does not claim an informed reference');page.close();continue
-   assert page.locator('[data-report-context]').is_visible()
+    print('PASS: legacy NC without number does not claim a reference or verified link');page.close();continue
+   assert page.locator('[data-report-context]').count()==0
    nav=page.locator('.lp-order-type-tabs');top=nav.evaluate('(e)=>e.offsetTop')
-   page.locator('[data-order-type=TECNO]').click();page.wait_for_selector('.lp-glass-estimate');assert page.locator('[data-report-context]').is_hidden()
-   page.locator('[data-order-note-refresh]').click();page.wait_for_timeout(200);assert page.locator('[data-report-context]').is_hidden();assert page.locator('[data-order-note-refresh]').inner_text()=='Actualizar datos'
+   page.locator('[data-order-type=TECNO]').click();page.wait_for_selector('.lp-glass-estimate');assert page.locator('[data-report-context]').count()==0
+   page.locator('[data-order-note-refresh]').click();page.wait_for_timeout(200);assert page.locator('[data-report-context]').count()==0;assert page.locator('[data-order-note-refresh]').inner_text()=='Actualizar datos'
    page.locator('#lp-tracking-drawer').screenshot(path=str(HERE/f'evidence/tecno-context-hidden-{width}.png'))
-   for kind in ['ACCESORIOS']:
-    page.locator('[data-order-type='+kind+']').click();assert page.locator('[data-report-context]').is_hidden()
-   for kind in ['NC_AL','NOVEDAD','NC_V']:
-    page.locator('[data-order-type='+kind+']').click();assert page.locator('[data-report-context]').is_visible()
-    assert page.locator('[data-type-pane='+kind+'] > [data-report-context]').count()==1
+   for kind in ['ACCESORIOS','NC_AL','NOVEDAD','NC_V']:
+    page.locator('[data-order-type='+kind+']').click();assert page.locator('[data-report-context]').count()==0
+    assert page.locator('[data-type-pane='+kind+'] [data-shared-form] button[type=submit]').is_disabled()
     assert abs(nav.evaluate('(e)=>e.offsetTop')-top)<2
-   cells=page.locator('[data-nc-references] tbody tr').first.locator('td');assert cells.count()==4
-   assert cells.nth(1).inner_text()=='Sin número informado';assert cells.nth(2).inner_text()=='Sin dato confirmado';assert cells.nth(3).inner_text()=='8'
+   legacy=page.locator('[data-shared-legacy] article:visible');assert '8 ventanas reportadas' in legacy.inner_text()
    if width==390:
-    for cell in cells.all():
-     cell.scroll_into_view_if_needed();box=cell.bounding_box();assert box['x']>=0 and box['x']+box['width']<=width
-     assert cell.evaluate('(el)=>el.scrollWidth<=el.clientWidth && el.scrollHeight<=el.clientHeight')
-    assert cells.nth(1).bounding_box()['y']>cells.nth(0).bounding_box()['y']
+    legacy.scroll_into_view_if_needed();box=legacy.bounding_box();assert box['x']>=0 and box['x']+box['width']<=width
+    assert legacy.evaluate('(el)=>el.scrollWidth<=el.clientWidth && el.scrollHeight<=el.clientHeight')
    page.locator('#lp-tracking-drawer').screenshot(path=str(HERE/f'evidence/nc-accessible-{width}.png'))
-   assert not errors,errors;results.append({'width':width,'contextOnlyManualTabs':True,'refreshReadLabel':True,'allNCFieldsAccessible':True,'syntheticReadOnly':True});page.close()
+   assert not errors,errors;results.append({'width':width,'noShiftRequired':True,'missingBackendDisablesSave':True,'refreshReadLabel':True,'legacyNCVisibleWithoutInventedLink':True,'syntheticReadOnly':True});page.close()
   browser.close()
  if '--copy-only' not in sys.argv:(HERE/'visual-focus-result.json').write_text(json.dumps(results,indent=2)+'\n');print(json.dumps(results))
 finally:server.shutdown()

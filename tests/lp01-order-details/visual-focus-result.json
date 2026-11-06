@@ -1,16 +1,18 @@
 [
   {
     "width": 1440,
-    "contextOnlyManualTabs": true,
+    "noShiftRequired": true,
+    "missingBackendDisablesSave": true,
     "refreshReadLabel": true,
-    "allNCFieldsAccessible": true,
+    "legacyNCVisibleWithoutInventedLink": true,
     "syntheticReadOnly": true
   },
   {
     "width": 390,
-    "contextOnlyManualTabs": true,
+    "noShiftRequired": true,
+    "missingBackendDisablesSave": true,
     "refreshReadLabel": true,
-    "allNCFieldsAccessible": true,
+    "legacyNCVisibleWithoutInventedLink": true,
     "syntheticReadOnly": true
   }
 ]
