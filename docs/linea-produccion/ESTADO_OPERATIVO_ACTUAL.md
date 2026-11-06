@@ -1,3 +1,19 @@
+## Disponible manual · SQL07 aplicado, frontend para integración · 06/11/2026
+
+Coordinación autorizó aplicación tras contraste. Migración
+lp_order_sale_manual_balance_v397: success=true. Postcheck12:10:19UTC confirma
+27342a35c3c7e6a0e0910f5d327323af, postgres/DEFINER/search_path vacío/ACL existente.
+Actor, operaciones_rol, saldo, sesión y fuentes coinciden antes/después. RLS
+activo en config/definiciones/eventos. Ningún dato productivo de prueba creado.
+Evidencia: ../sql-proposals/lp01-order-sale/manual-balance-production-evidence.json.
+
+Commit funcional82c4605 contiene UI/SQL/pruebas; rama
+fix/disponible-seguimiento-v397 preparada para push autorizado. No desplegar
+esta rama: Seguimiento integra frontend, versión conjunta y publicación.
+No reaplicar03/05/07: ya instalados. Recuperaciones04/06/08 no ejecutadas.
+Pendiente después de publicar: guardado real de Johan y lectura tras recarga;
+pruebas aisladas aprobadas no acreditan ese resultado productivo.
+
 ## Disponible manual · regla aclarada y corrección preparada · 06/11/2026
 
 Coordinación confirma regla aprobada: editable por orden, sin asignación ni

@@ -1,3 +1,11 @@
+> 06/11/2026: SQL07 **APLICADO EN SUPABASE** bajo autorización expresa de
+> coordinación. Migración lp_order_sale_manual_balance_v397; postcheck12:10:19UTC
+> confirma27342a35c3c7e6a0e0910f5d327323af y ACL intacta; dependencias sin cambios,
+> RLS activo en config/definiciones/eventos. Evidencia en
+> manual-balance-production-evidence.json. Sin datos de prueba productivos.
+> Frontend aún pendiente de integración/publicación conjunta con Seguimiento.
+> SQL08 preparado, no ejecutado. Notas siguientes conservan el estado de revisión.
+
 # Disponible manual por orden: corrección del límite
 
 Regla confirmada por coordinación/Johan: Disponible es editable directamente
