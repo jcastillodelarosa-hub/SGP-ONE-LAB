@@ -3,6 +3,7 @@ from pathlib import Path
 import importlib.util,json,http.server,threading,uuid
 from playwright.sync_api import sync_playwright
 HERE=Path(__file__).parent;ROOT=HERE.parents[1]
+shared_spec=importlib.util.spec_from_file_location('shared_test_helpers',ROOT/'tests/lp01-shared-order/testing.py');shared=importlib.util.module_from_spec(shared_spec);shared_spec.loader.exec_module(shared)
 spec=importlib.util.spec_from_file_location('atomic_app_fixture',HERE/'atomic.py');f=importlib.util.module_from_spec(spec);spec.loader.exec_module(f)
 class Files(http.server.SimpleHTTPRequestHandler):
  def __init__(self,*a,**kw):super().__init__(*a,directory=str(ROOT),**kw)
@@ -16,6 +17,7 @@ try:
    x=f.Fixture()
    try:
     db=x.db;db.sql('GRANT EXECUTE ON FUNCTION public.sgp_lp_seguimiento_consultar(text,text,text) TO anon;UPDATE sgp_lp_afectaciones.config SET writes=true,physical=true,atomic_pdt=true,pdt_links=true')
+    shared.install(db)
     ctx={'id_programacion':'00000000-0000-0000-0000-000000000001','produccion':'QA ORDER','completa':False,'fecha_entrega':'2026-11-01','turno':'TURNO 1'}
     original=json.loads(db.sql('SET ROLE anon;SELECT public.sgp_pdt_registrar_v4('+','.join([f.lit('COORDINADOR'),f.lit('PICKING'),f.lit(json.dumps(ctx))+'::jsonb',f.lit(json.dumps(x.pieces()))+'::jsonb',f.lit(str(uuid.uuid4()))])+')'))['ids_pendientes'][0]
     for user in ['COORDINADOR','ll']:
@@ -24,7 +26,8 @@ try:
      def rpc(route):
       name=route.request.url.split('/rpc/')[-1];a=route.request.post_data_json
       try:
-       if name=='sgp_sesion_actual':data=json.loads(db.sql('SELECT public.sgp_sesion_actual('+f.lit(a['p_token'])+')'))
+       if name in shared.RPCS:data=shared.rpc(db,name,a)
+       elif name=='sgp_sesion_actual':data=json.loads(db.sql('SELECT public.sgp_sesion_actual('+f.lit(a['p_token'])+')'))
        elif name=='sgp_mis_accesos':data=json.loads(db.sql("SELECT coalesce(jsonb_agg(to_jsonb(x)),'[]') FROM public.sgp_mis_accesos("+f.lit(a['p_token'])+') x'))
        elif name=='sgp_lp_operacion_consultar':data=db.rpc(name,a)
        elif name=='sgp_lp_seguimiento_consultar':reads[0]+=1;data=json.loads(db.sql('SET ROLE anon;SELECT public.sgp_lp_seguimiento_consultar('+','.join(f.lit(a[k]) for k in ['p_token','p_etapa','p_linea'])+')'))
@@ -39,8 +42,8 @@ try:
      if user=='COORDINADOR':
       page.locator('#productionTrackingTab').click();
       page.wait_for_selector('.lp-tracking-table');page.locator('.lp-tracking-table tbody summary').first.click();page.locator('[data-tracking-tab=Afectaciones]').click();page.wait_for_selector('.lp-pdt-compact');assert any(r['id']==original for r in (x.read2(user).get('aluminumPending') or x.read2(user)['pickingPending'])['rows']);assert page.locator('.lp-aluminum-pending').is_visible()
-      assert page.locator('[data-affect-content=NC_AL] form').is_hidden()
-      page.locator('[data-tracking-tab=Historial]').click();page.locator('[data-advance-context] summary').click();value=page.locator('[data-tracking-context] option').nth(1).get_attribute('value');page.locator('[data-tracking-context]').select_option(value);page.locator('[data-tracking-tab=Afectaciones]').click();page.locator('[data-order-type=NC_AL]').click();page.locator('[data-register-affectation] summary').click();page.locator('[data-affect-context] button').click();page.locator('[data-order-type=NOVEDAD]').click();page.wait_for_selector('[data-affect-content=NOVEDAD] form:visible')
+      assert page.locator('[data-affect-content=NC_AL] form button[type=submit]').is_enabled();assert page.locator('[data-affect-context]').count()==0
+      page.locator('[data-order-type=NOVEDAD]').click();page.wait_for_selector('[data-affect-content=NOVEDAD] form:visible')
       page.locator('[data-order-type=NOVEDAD]').click();page.locator('[data-type-pane=NOVEDAD] [name=observation]').fill('Borrador que debe conservarse')
       page.evaluate("window.qaPanel=document.querySelector('[data-affect-content=NOVEDAD] form')");prior_reads=reads[0]
       db.sql("UPDATE public.sgp_producciones SET saldo_ensamble=287 WHERE key_produccion="+f.lit(x.key));page.clock.fast_forward(20000)

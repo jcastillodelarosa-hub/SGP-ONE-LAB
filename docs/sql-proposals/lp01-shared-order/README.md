@@ -98,11 +98,12 @@ posiblemente coincidentes, devuelve cantidad desconocida, no suma ni valida uni�
 El adaptador siempre deja total/disponible desconocidos; no acredita el antiguo
 consolidado contra el conjunto nuevo. Este acople de distintivos está pendiente.
 
-Antes de congelar CI deben adaptarse las expectativas obsoletas de contexto
-obligatorio en `lp01-b12-b13/browser.py` (coordinar con dueño de hojas),
-`lp01-afectaciones-rpc/native-app.py`, `unassigned-app.py`,
-`lp01-b10-correction/browser.py`, `lp01-pending-ui/browser.py` y
-`lp01-order-details/visual-focus.py`. La prueba nueva cubre el reemplazo funcional
-con SQL real aislado; no se quitarán verificaciones nativas de origen/recepción.
+Se adaptaron las pruebas de contexto obligatorio en `native-app.py`,
+`unassigned-app.py`, B10, pending-ui y visual-focus. Conservan origen nativo,
+revocación, borrador y protección frente a respuestas tardías. El guardado sin
+turno se prueba contra PostgreSQL aislado sin modificar turnos/asignaciones;
+el escritor nativo anterior conserva su prueba de turno real abierto.
+`lp01-b12-b13/browser.py` queda con el dueño de hojas: su rama de coordinador
+no se ejecuta en la lista actual de usuarios, y no se modifica aquí.
 No se reintentó crear PR tras la denegación reiterada; pendiente autorización
 específica. Este delta permanece local hasta coordinación.
