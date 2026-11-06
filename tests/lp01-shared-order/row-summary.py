@@ -44,7 +44,7 @@ try:
    assert '10 × NC V' not in row.inner_text() and '1 × Accesorios' in row.inner_text() and 'Total 12' not in row.inner_text()
    page.locator('[data-columns-reset]').click();assert '1 × Accesorios' in row.inner_text()
    page.evaluate("qaMode='save';controller.load()")
-   page.wait_for_function("document.querySelector('[data-order-summary]')?.textContent.includes('estimación 8')")
+   page.wait_for_function("document.querySelector('[data-order-summary]')?.textContent.includes('8 × NC AL · Estimado')")
    page.locator('[data-register-order]').click();page.wait_for_selector('[data-source-estimates]')
    assert '8 ventanas estimadas' in page.locator('[data-source-estimates]').inner_text()
    page.locator('[data-estimate-source]').click();form=page.locator('[data-shared-form]')
@@ -52,7 +52,8 @@ try:
    form.locator('[name=quantity]').fill('21');assert not form.locator('[name=quantity]').evaluate('(el)=>el.checkValidity()');assert page.evaluate('qaSaved.length')==0
    form.locator('[name=quantity]').fill('3');form.locator('[name=observation]').fill('Revisadas, tres ventanas')
    form.locator('[type=submit]').click();page.wait_for_function("document.querySelector('[data-shared-status]')?.textContent==='Guardado.'")
-   assert '3 × NC AL' in row.inner_text() and 'por definir' not in row.inner_text() and 'estimación 8' not in row.inner_text()
+   assert '3 × NC AL' in row.inner_text() and 'por definir' not in row.inner_text() and 'Estimado' not in row.inner_text()
+   assert row.locator('[data-summary-cause="NC_AL"]').count()==1
    assert page.evaluate('qaSaved.length')==1
    page.locator('[data-order-type=NC_V]').click();form=page.locator('[data-type-pane=NC_V] [data-shared-form]')
    form.locator('[name=ncReference]').fill('NC-ONE');assert form.locator('[name=quantity]').input_value()=='1'
@@ -81,7 +82,7 @@ try:
    page.wait_for_function('typeof qaRelease===\'function\'')
    page.evaluate("qaToken='changed';document.dispatchEvent(new CustomEvent('sgp:lp-role',{detail:'CONSULTA'}));qaRelease()")
    page.wait_for_timeout(100);assert page.locator('[data-order-summary]').count()==0
-   assert not errors,errors;results.append({'width':width,'saved_row_immediate_and_reload':True,'estimates_visible_editable_and_separate':True,'shared_cross_stage_and_accessories':True,'overlap_not_summed':True,'unavailable_labeled_legacy':True,'internal_table_redraw_preserves_badges':True,'invalid_identity_unavailable':True,'revocation_and_stale_response_cleared':True,'pageErrors':errors});page.close()
+   assert not errors,errors;results.append({'width':width,'saved_row_immediate_and_reload':True,'single_aluminum_badge_with_editable_estimate_in_detail':True,'shared_cross_stage_and_accessories':True,'overlap_not_summed':True,'unavailable_labeled_legacy':True,'internal_table_redraw_preserves_badges':True,'invalid_identity_unavailable':True,'revocation_and_stale_response_cleared':True,'pageErrors':errors});page.close()
   browser.close()
  (HERE/'row-summary-result.json').write_text(json.dumps({'scope':'Synthetic browser integration only; no backend writes or activation','results':results},indent=2)+'\n');print(json.dumps(results))
 finally:server.shutdown()
