@@ -12,12 +12,12 @@ import {sharedOrderSummary} from '../src/domain/lp01-shared-order-summary.js';
 test('row adapter never adds shared windows to possibly overlapping historical windows',()=>{const native={...scope,reports:[],aluminumPending:{status:'AVAILABLE',rows:[]}},shared={...scope,reports:[{cause:'NC_V',quantity:3,confirmed:0},{cause:'ACCESORIOS',quantity:1,confirmed:0}],legacyReports:[{causa:'NC_V',ventanas:2,confirmadas:0}]};const summary=sharedOrderSummary(native,shared);assert.equal(summary.categories.NC_V,null);assert.equal(summary.accessories,1);assert.equal(summary.total,null);assert.equal(summary.available,null);});
 
 import {compactSummaryMarkup} from '../src/modules/lp01-affectation-summary.js';
-test('saved shared aluminum replaces undefined indicator; unlinked sources retain estimates separately',()=>{
+test('saved aluminum is the only compact badge; unlinked estimates remain in the data',()=>{
  const native={...scope,reports:[],aluminumPending:{status:'AVAILABLE',rows:[{id:'p',state:'PENDIENTE',pieceQuantity:8,reference:'P'}]}};
  const shared={...scope,revision:1,reports:[{cause:'NC_AL',quantity:3,confirmed:0,source_ref:'p'}],legacyReports:[]};
  let s=sharedOrderSummary(native,shared);assert.equal(s.categories.NC_AL,3);assert.equal(s.aluminumNeedsIndicator,false);assert.deepEqual(s.estimates,[]);assert.doesNotMatch(compactSummaryMarkup(s),/por definir/);
- shared.reports[0].source_ref=null;s=sharedOrderSummary(native,shared);assert.equal(s.categories.NC_AL,3);assert.equal(s.estimates[0].quantity,8);assert.match(compactSummaryMarkup(s),/pendientes sin vincular/);assert.doesNotMatch(compactSummaryMarkup(s),/por definir/);assert.equal(s.total,null);
- shared.reports.push({cause:'NC_AL',quantity:2,confirmed:0});s=sharedOrderSummary(native,shared);assert.equal(s.categories.NC_AL,null);assert.match(compactSummaryMarkup(s),/reportadas: 3 \/ 2/);assert.equal(s.total,null);
+ shared.reports[0].source_ref=null;s=sharedOrderSummary(native,shared);assert.equal(s.categories.NC_AL,3);assert.equal(s.estimates[0].quantity,8);assert.match(compactSummaryMarkup(s),/>3 × NC AL<\/button>/);assert.equal((compactSummaryMarkup(s).match(/data-summary-cause="NC_AL"/g)||[]).length,1);assert.doesNotMatch(compactSummaryMarkup(s),/Estimado|pendientes sin vincular/);assert.doesNotMatch(compactSummaryMarkup(s),/por definir/);assert.equal(s.total,null);
+ shared.reports.push({cause:'NC_AL',quantity:2,confirmed:0});s=sharedOrderSummary(native,shared);assert.equal(s.categories.NC_AL,null);assert.deepEqual(s.reportedQuantities.NC_AL,[3,2]);assert.match(compactSummaryMarkup(s),/>NC AL · por validar<\/button>/);assert.equal((compactSummaryMarkup(s).match(/data-summary-cause="NC_AL"/g)||[]).length,1);assert.equal(s.total,null);
 });
 test('estimates use active pieces and distinct known glass NC references without changing saved values',()=>{
  const native={...scope,reports:[],aluminumPending:{status:'AVAILABLE',rows:[{id:'p',state:'PENDIENTE',pieceQuantity:4},{id:'closed',state:'CERRADO',pieceQuantity:9},{id:'missing',state:'PENDIENTE',pieceQuantity:null}]}};
