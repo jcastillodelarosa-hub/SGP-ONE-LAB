@@ -1,3 +1,17 @@
+## Ventanas propuestas · corrección posterior a v397 · 06/11/2026
+
+Formulario Definir ventanas afectadas antes de reportes/pendientes, estado de
+guardado junto al formulario. Aluminio propone una ventana por pieza del pendiente
+seleccionado; NC vidrio propone una por referencia informada. Ambas editables,
+sin sumar categorías, escribir automáticamente ni confirmar recepción. Cantidades
+faltantes/fraccionarias no se inventan; corrección manual no se pisa al cambiar
+fuente. Pendiente legado sirve de referencia informativa, sin fabricar vínculo.
+Prueba dirigida sintética PC1440/móvil390 PASS; transporte y permisos existentes.
+Sin SQL ni cambios de Disponible/rendimiento. Candidata v398, publicación conjunta
+pendiente de coordinación con el responsable de esos otros ajustes.
+Capturas de usuario resueltas por Library como texto/puntero; materialización
+falló download failed. No se afirma inspección de sus píxeles ni se rediseña B10.
+
 ## PR208 · acople mínimo de distintivos · 06/11/2026
 
 Parche independiente sobre `5965f6c290c434ef92191d1d26f545a86817dc57`.
