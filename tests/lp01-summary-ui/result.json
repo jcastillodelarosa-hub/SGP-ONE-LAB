@@ -1,7 +1,7 @@
 [
   {
     "width": 1440,
-    "categories10and8Union12": true,
+    "legacyCategories10and8SharedUnionUnknown": true,
     "legacy19PiecesUnknownWindows": true,
     "ncStateIndependent": true,
     "detailKeyboard": true,
@@ -16,7 +16,7 @@
   },
   {
     "width": 390,
-    "categories10and8Union12": true,
+    "legacyCategories10and8SharedUnionUnknown": true,
     "legacy19PiecesUnknownWindows": true,
     "ncStateIndependent": true,
     "detailKeyboard": true,
