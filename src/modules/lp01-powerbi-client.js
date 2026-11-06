@@ -1,3 +1,4 @@
+import {OFFICIAL_POWERBI_VERSION} from '../domain/powerbi/adapter.js';
 /** Calls the authoritative parser. No service key is accepted or exposed here. */
 function gatewayJwt(config){
  const token=config.lpPowerBiGatewayJwt;
@@ -10,11 +11,25 @@ function gatewayJwt(config){
   return token;
  }catch{throw Error('JWT público del gateway Power BI ausente, vencido o incompatible; no se envió el archivo');}
 }
-export async function importPowerBI({token,command,filename,base64}){
+async function requestPowerBI(payload,{official=false}={}){
  const config=window.SGP_CONFIG||{},url=config.lpPowerBiUrl||(config.supabaseUrl?config.supabaseUrl.replace(/\/$/,'')+'/functions/v1/lp-powerbi':null);
  if(!url)throw Error('Servicio Power BI pendiente de configuración autorizada');
  const gateway=gatewayJwt(config);
- const response=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+gateway,...(config.supabasePublishableKey?{apikey:config.supabasePublishableKey}:{})},body:JSON.stringify({p_token:token,command,filename,base64})});let body;
- try{body=await response.json();}catch{const e=Error('No se confirmó la respuesta del servicio Power BI');e.code='FETCH_ERROR';throw e;}
- if(!response.ok||body.error){const error=Error(typeof body.error==='string'?body.error:'No se confirmó la importación Power BI');if(response.status<500)error.code=body.code||'PBI_REJECTED';else error.code='FETCH_ERROR';throw error;}return body.data;
+ let response;try{response=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+gateway,...(config.supabasePublishableKey?{apikey:config.supabasePublishableKey}:{})},body:JSON.stringify(payload)});}catch(error){if(official)error.code='OFFICIAL_COMMIT_UNCERTAIN';throw error;}let body;
+ try{body=await response.json();}catch{const e=Error('No se confirmó la respuesta del servicio Power BI');e.code=official?'OFFICIAL_COMMIT_UNCERTAIN':'FETCH_ERROR';throw e;}
+ if(!response.ok||body?.error){const error=Error(typeof body?.error==='string'?body.error:'No se confirmó la importación Power BI');if(response.status<500)error.code=body?.code||'PBI_REJECTED';else error.code=official?'OFFICIAL_COMMIT_UNCERTAIN':'FETCH_ERROR';throw error;}return body?.data;
+}
+
+export function importPowerBI({token,command,filename,base64}){
+ return requestPowerBI({p_token:token,command,filename,base64});
+}
+/** Same gateway and parser; callers retain the UUID and exact payload on an
+ * uncertain response. This does not enable the server contract or native close. */
+export async function submitOfficialClose({token,command,filename,base64,observation}){
+ if(!command||!['IMPORT','CLOSE'].includes(command.action))throw Error('OFFICIAL_COMMAND_INVALID');
+ const data=await requestPowerBI({adapter:OFFICIAL_POWERBI_VERSION,p_token:token,command,filename,base64,observation},{official:true});
+ if(data?.ok!==true||data.contract!=='LP-OFFICIAL-COMMITTED-1'||data.id!==command.id||data.revision!==command.revision+1){
+  throw Object.assign(Error('No se confirmó el cierre oficial; reintenta la misma solicitud'),{code:'OFFICIAL_COMMIT_UNCERTAIN'});
+ }
+ return data;
 }
