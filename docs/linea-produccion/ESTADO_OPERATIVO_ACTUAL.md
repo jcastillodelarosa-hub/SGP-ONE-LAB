@@ -1,3 +1,81 @@
+## PR208 · acople mínimo de distintivos · 06/11/2026
+
+Parche independiente sobre `5965f6c290c434ef92191d1d26f545a86817dc57`.
+Único archivo de producción alterado: `src/modules/lp01-operation.js`.
+Combina los snapshots nativo y compartido con los contratos existentes; muestra
+Accesorios y conserva lectura heredada identificada cuando falta el servicio
+compartido, sin reutilizar totales/disponibilidad como vigentes. Revocación limpia
+la vista; identidad incompatible queda pendiente. Ordenar/filtrar conserva chips
+y etiqueta heredada. Helpers originales sin cambios, hashes cotejados.
+
+Prueba dirigida `tests/lp01-shared-order/row-summary.py`: PASS en 1440 y 390 px,
+con respuestas RPC sintéticas, sin escrituras ni activación. Incluye reportes de
+la otra etapa, solapamientos, ausencia del servicio, identidad inválida,
+revocación y respuesta tardía tras cambio de sesión. Sintaxis y diff check PASS.
+No incorpora el bloque de hojas/cierre; no crea PR, publica ni modifica backend.
+Pendiente aplicar este commit al PR208 y la integración coordinada del candidato.
+
+## PR208 · backend activado · 06/11/2026
+
+Instalación y activación autorizadas del paquete e419c27 en Supabase SGP-ONE-LAB.
+Readback 09:52:59 UTC: tres RPC anon, writes local true, helpers/tablas privados,
+RLS y huellas exactas; controles existentes sin cambios. No reportes sintéticos
+productivos. Evidencia en docs/sql-proposals/lp01-shared-order/production-activation-evidence.json.
+NC conserva referencia por verificar sin vínculo. Frontend no integrado/publicado;
+versión se incrementará en integración coordinada, main sigue v396 a068e14.
+
+## PR208 · corrección NC y privacidad · 06/11/2026
+
+Se restaura estado NC en pendientes del panel compartido reutilizando el lector,
+sin liberar ventanas. Prueba dirigida summary-ui PC1440/móvil390 PASS.
+No se acredita relación NC-producción/línea canónica en el contrato de fuente:
+se conserva número por verificar, lectura sin existencia/estado ajenos y enlace
+rechazado en servidor. `nc-scope.py` PASS en PostgreSQL aislado con números
+existentes/ausentes, permisos de etapa y rechazo atómico. Paquete SQL propuesto
+actualizado; ninguna activación. La evidencia antigua de vínculo exitoso queda
+superada. Versión nueva se sellará en la integración coordinada, sin pisar v396.
+
+## Orden compartida · continuidad sobre v396 · 06/11/2026
+
+Base main a068e14 (v396), rebase sin conflictos; cambios previos y borrador NC
+conservados. Sin consultar skills propias por instrucción de Johan. Historial del
+panel conserva ahora movimientos nativos por reporte/etapa, separados de los
+compartidos; referencia NC heredada preservada también sin backend compartido.
+Prueba dirigida legacy-history.py PC1440/móvil390 PASS (sintética, sin SQL).
+Las cinco pruebas antiguas de turno ya quedaron adaptadas y pasaron; no se
+repitieron. Acople de filas/hojas sigue a cargo del otro hilo, con fuentes exactas
+entregadas. CI conjunta al congelar; PR denegado, sin nuevo intento ni push.
+Contrato compartido sigue PROPUESTO, no instalado; tres RPC anon y bandera local
+requieren aprobación específica. No cambios en Picking, SQL productivo ni release.
+
+## Orden compartida · conexión local · 06/11/2026
+
+Cinco pestañas actuales conectadas sin turno obligatorio y sin rediseño;
+legacy visible, nota global separada, NC explícita y Accesorios operativos en
+PostgreSQL sintético. PC1440/móvil390 guardar/reintentar/recargar/compartir entre
+líderes PASS; recorrido B10 real y nota CAS PASS. Tecno usa techo aprobado.
+API mountTrackingAffectations intacta; resumen de fila requiere acople por dueño
+de lp01-operation.js con sharedOrderSummary (no suma heredado/compartido).
+PDF B10 leído por Library solo como texto/puntero; no píxeles originales aquí.
+Pendientes acople de filas, actualización de expectativas antiguas de turno y
+CI conjunta al congelar. Sin nuevo PR (denegado), SQL ni publicación.
+Detalle: docs/sql-proposals/lp01-shared-order/README.md.
+
+## Orden compartida · contrato en desarrollo · 06/11/2026
+
+Rama feat/seguimiento-glass-nc-link rebasada sobre d45c5ed (v394).
+NC local previo preservado en stash y worktree; sin escrituras productivas.
+Contrato nuevo compartido entre líderes/coordinador por producción/línea,
+sin turno obligatorio; NC exacta/asociada, accesorios canónicos y cantidades
+manuales. Nota global existente reutilizada; Tecno añade techo aprobado.
+PostgreSQL sintético y Node focalizado PASS; vistas aún sin conectar al contrato.
+Guía original Library: materialización falló `download failed`; sin bytes/píxeles
+locales, sin reintento ni rediseño. Próximo: desbloquear inspección B10 y conectar
+cinco pestañas; PC/móvil y CI completa del candidato al terminar. No instalación,
+GRANT, bandera, sesión optimizada, integración o publicación desde este corte.
+API compartida de montaje preservada; hojas/PDA y PR206 fuera del alcance.
+Detalles y permisos exactos: docs/sql-proposals/lp01-shared-order/README.md.
+
 ## Seguimiento · corrección visual v394 propuesta · 05/11/2026
 
 Base publicada LAB v393: main `2dedc5e055a2472d034d20d23463e66310fdc64f`,

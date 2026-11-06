@@ -10,7 +10,7 @@
     "conflictNotOverwritten": true,
     "uncertainRetrySameUUID": true,
     "notePersistence": true,
-    "manualNCAtomic": true,
+    "missingSharedBackendNoWriteFallback": true,
     "unsupportedActionsDisabled": true,
     "B10GeometryAndNoOverflow": true
   },
@@ -25,7 +25,7 @@
     "conflictNotOverwritten": true,
     "uncertainRetrySameUUID": true,
     "notePersistence": true,
-    "manualNCAtomic": true,
+    "missingSharedBackendNoWriteFallback": true,
     "unsupportedActionsDisabled": true,
     "B10GeometryAndNoOverflow": true
   }

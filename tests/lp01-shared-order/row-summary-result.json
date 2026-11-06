@@ -1,0 +1,25 @@
+{
+  "scope": "Synthetic browser integration only; no backend writes or activation",
+  "results": [
+    {
+      "width": 1440,
+      "shared_cross_stage_and_accessories": true,
+      "overlap_not_summed": true,
+      "unavailable_labeled_legacy": true,
+      "internal_table_redraw_preserves_badges": true,
+      "invalid_identity_unavailable": true,
+      "revocation_and_stale_response_cleared": true,
+      "pageErrors": []
+    },
+    {
+      "width": 390,
+      "shared_cross_stage_and_accessories": true,
+      "overlap_not_summed": true,
+      "unavailable_labeled_legacy": true,
+      "internal_table_redraw_preserves_badges": true,
+      "invalid_identity_unavailable": true,
+      "revocation_and_stale_response_cleared": true,
+      "pageErrors": []
+    }
+  ]
+}

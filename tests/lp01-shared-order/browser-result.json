@@ -1,0 +1,28 @@
+[
+  {
+    "width": 1440,
+    "status": "PASS",
+    "checks": [
+      "missing backend disables writes while legacy remains visible",
+      "closed-turn shared create and uncertain replay",
+      "NC stays unverified without canonical relation, no disclosure or physical credit",
+      "note and report persist across stage-specific leaders",
+      "accessory windows independent from pieces",
+      "Tecno ceiling 1.5 to 2",
+      "five tabs, no shift selector, reload and mobile no overflow"
+    ]
+  },
+  {
+    "width": 390,
+    "status": "PASS",
+    "checks": [
+      "missing backend disables writes while legacy remains visible",
+      "closed-turn shared create and uncertain replay",
+      "NC stays unverified without canonical relation, no disclosure or physical credit",
+      "note and report persist across stage-specific leaders",
+      "accessory windows independent from pieces",
+      "Tecno ceiling 1.5 to 2",
+      "five tabs, no shift selector, reload and mobile no overflow"
+    ]
+  }
+]
