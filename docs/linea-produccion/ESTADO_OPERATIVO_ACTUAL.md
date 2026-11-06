@@ -1,3 +1,12 @@
+## PR208 · backend activado · 06/11/2026
+
+Instalación y activación autorizadas del paquete e419c27 en Supabase SGP-ONE-LAB.
+Readback 09:52:59 UTC: tres RPC anon, writes local true, helpers/tablas privados,
+RLS y huellas exactas; controles existentes sin cambios. No reportes sintéticos
+productivos. Evidencia en docs/sql-proposals/lp01-shared-order/production-activation-evidence.json.
+NC conserva referencia por verificar sin vínculo. Frontend no integrado/publicado;
+versión se incrementará en integración coordinada, main sigue v396 a068e14.
+
 ## PR208 · corrección NC y privacidad · 06/11/2026
 
 Se restaura estado NC en pendientes del panel compartido reutilizando el lector,

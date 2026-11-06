@@ -1,3 +1,14 @@
+## Activación productiva confirmada · 06/11/2026 09:52 UTC
+
+Paquete exacto de e419c27 instalado y activado en SGP-ONE-LAB
+(ocvxbwzqxbrfndkvjmfx) con autorización específica. Tres RPC habilitadas a anon,
+cuatro tablas privadas con RLS, helpers privados y bandera local writes=true.
+Controles global/afectaciones/physical conservados. Definiciones, owners,
+search_path y ACL cotejados antes y después. Sin escrituras de prueba de negocio.
+Evidencia: `production-activation-evidence.json`. NC sigue por verificar;
+no se habilitó vínculo ni acceso a fuente ajena. Frontend aún no integrado/publicado.
+Las menciones históricas de «propuesta/no instalada» debajo describen preparación.
+
 > Corrección dirigida PR208: estado NC de pendientes hidratado por el lector
 > existente, con concurrencia limitada, revocación y descarte al desmontar.
 > NC vidrio queda por verificar hasta disponer de relación canónica segura.
