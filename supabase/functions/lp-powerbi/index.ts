@@ -2,6 +2,7 @@
 import {DOMParser} from 'npm:@xmldom/xmldom@0.9.12';
 import {createClient} from 'npm:@supabase/supabase-js@2.76.1';
 import {createPowerBIHandler} from '../../../src/server/lp-powerbi-handler.js';
+import {officialCloseBinding} from '../../../src/server/lp-official-binding.js';
 import {powerBIOrigins} from '../../../src/server/lp-powerbi-origins.js';
 const url=Deno.env.get('SUPABASE_URL');
 const serverKey=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
@@ -11,7 +12,9 @@ if(!url||!serverKey||!origins.length)throw Error('Configuración servidor LP inc
 // Only session read and the protected import RPC are used. No direct table writes.
 const client=createClient(url,serverKey,{auth:{persistSession:false,autoRefreshToken:false}});
 const allowedRPC=new Set(['sgp_sesion_actual','sgp_lp_operacion_importar_xlsx']);
-Deno.serve(createPowerBIHandler({DOMParser,rpc:(name:string,args:object)=>{
+// New path remains disabled until separately approved deployment configuration.
+const officialService=officialCloseBinding({enabled:Deno.env.get('SGP_LP_OFFICIAL_CLOSE_ENABLED')==='true',DOMParser,rpc:(name:string,args:object)=>client.rpc(name,args)});
+Deno.serve(createPowerBIHandler({DOMParser,officialService,rpc:(name:string,args:object)=>{
  if(!allowedRPC.has(name))throw Error('RPC servidor LP no permitida');
  return client.rpc(name,args);
 },allowedOrigins:origins}));
