@@ -1,0 +1,19 @@
+{
+  "scope": "Integrated PR208 + operation adapter, ephemeral PostgreSQL",
+  "results": [
+    {
+      "width": 1440,
+      "adapter_to_shared_component": "PASS",
+      "both_stage_summaries": 2,
+      "native_turn_mutations": 0,
+      "pageErrors": []
+    },
+    {
+      "width": 390,
+      "adapter_to_shared_component": "PASS",
+      "both_stage_summaries": 2,
+      "native_turn_mutations": 0,
+      "pageErrors": []
+    }
+  ]
+}

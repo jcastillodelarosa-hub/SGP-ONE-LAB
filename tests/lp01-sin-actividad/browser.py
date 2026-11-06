@@ -34,7 +34,8 @@ try:
     }''')
     page.locator('#productionPackingTab' if page.locator('[data-op-stage]').input_value()=='EMPAQUE' else '#productionAssemblyTab').click();page.wait_for_selector('[data-op-date]');page.locator('[data-op-date]').fill('2026-11-01');page.locator('[data-op-date]').dispatch_event('change')
     page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('NO_ABIERTO')")
-    page.locator('[data-open]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Guardado confirmado')")
+    db.execute(db.cmd('ABRIR',stage=page.locator('[data-op-stage]').input_value(),date=page.locator('[data-op-date]').input_value(),shift=int(page.locator('[data-op-shift]').input_value())))  # Server fixture: no manual start control in the UI.
+    page.locator('[data-op-load]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Turno ABIERTO')")
     page.locator('[data-turn-operation]').click();page.wait_for_selector('[data-empty-close]')
     assert page.locator('[data-bi-file]').is_disabled() and page.locator('[data-close-empty]').is_enabled()
     page.locator('[data-close-empty]').click();page.wait_for_function("document.querySelector('[data-close-status]').textContent.includes('Confirma explícitamente')")
@@ -57,7 +58,8 @@ try:
     page.locator('#productionReportsPanel').screenshot(path=str(OUT/f'empty-report-{width}.png'))
     page.locator('#productionPackingTab' if page.locator('[data-op-stage]').input_value()=='EMPAQUE' else '#productionAssemblyTab').click();page.wait_for_selector('[data-next-turn]');page.locator('[data-next-turn]').click()
     page.wait_for_function("document.querySelector('[data-op-shift]').value==='2'&&document.querySelector('[data-op-status]').textContent.includes('NO_ABIERTO')")
-    page.locator('[data-open]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Guardado confirmado')")
+    db.execute(db.cmd('ABRIR',stage=page.locator('[data-op-stage]').input_value(),date=page.locator('[data-op-date]').input_value(),shift=int(page.locator('[data-op-shift]').input_value())))  # Server fixture: no manual start control in the UI.
+    page.locator('[data-op-load]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Turno ABIERTO')")
     page.locator('[data-turn-operation]').click();page.locator('[data-empty-confirm]').check();page.locator('[data-close-note]').fill('QA siguiente turno vacío');page.locator('[data-close-empty]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Guardado confirmado')")
     assert db.snapshot(shift=2)['turn']['estado']=='CERRADO';first=db.snapshot(shift=2)['reports'][0]['snapshot']
     page.evaluate("window.SGPPlannerBridge.getToken=()=> 'LIDER'");page.locator('#productionPackingTab' if page.locator('[data-op-stage]').input_value()=='EMPAQUE' else '#productionAssemblyTab').click();page.locator('[data-op-load]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('CERRADO')")
@@ -75,7 +77,8 @@ try:
     page.locator('[data-close-empty]').click();page.wait_for_function("document.querySelector('[data-close-status]').textContent.includes('tiene órdenes asignadas o abiertas')")
     assert len(db.snapshot(shift=2)['reports'])==2
     page.locator('#productionPackingTab' if page.locator('[data-op-stage]').input_value()=='EMPAQUE' else '#productionAssemblyTab').click();page.locator('[data-op-load]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('EN_REVISION')")
-    page.locator('[data-open]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Guardado confirmado')")
+    db.execute(db.cmd('ABRIR',stage=page.locator('[data-op-stage]').input_value(),date=page.locator('[data-op-date]').input_value(),shift=int(page.locator('[data-op-shift]').input_value())))  # Server fixture: no manual start control in the UI.
+    page.locator('[data-op-load]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Turno ABIERTO')")
     page.locator('[data-turn-operation]').click();assert page.locator('[data-close-empty]').count()==0
     assert db.snapshot(shift=2)['orders'][0]['ejecutado']==0 and page.locator('[data-close]').is_disabled()
     assert official==db.sql('SELECT jsonb_agg(to_jsonb(a) ORDER BY key_produccion) FROM public.sgp_producciones a') and new_plan==db.sql('SELECT jsonb_agg(to_jsonb(a) ORDER BY id) FROM public.sgp_linea_plan_asignaciones a')

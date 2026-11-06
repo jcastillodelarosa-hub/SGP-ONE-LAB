@@ -36,3 +36,15 @@ Los originales XLSX de noviembre y los píxeles originales B12/B13/B14 siguen si
 ## Reversión no destructiva
 
 Contener con 02 y detener el job aprobado si llegara a existir. Deshabilitar `native_close`/`automatic_open` cuando 03 esté instalado. No borrar ni reabrir turnos automáticamente, no convertir archivos V2 a V1, no retirar el formato V2 mientras existan evidencias de ese tipo. La reversión de pantallas debe mantener accesible el historial oficial preservado.
+
+## Candidato integrado para PR dependiente de #208
+
+Componentes completos de Seguimiento `95e61e1144d575591985078a95959d11cc5ba156` incorporados mediante merge; `bed206f72` conservado en la ascendencia. Los dos helpers coinciden byte por byte con el proveedor y no aparecen en el diff exclusivo de hojas. Un único conflicto documental resuelto conservando ambos historiales.
+
+La celda Disponible de Seguimiento consume ahora el mismo ledger oficial que las hojas. Solo permite definir cuando el servidor devuelve un período nativo activo compatible; no inventa turno y muestra Base pendiente cuando falta evidencia. Se conserva el cierre nativo SIN ACTIVIDAD cuando el servidor acredita elegibilidad y no existen adiciones/entradas oficiales pendientes. No se recaptura Realizado ni se muestran los formularios de afectaciones heredados como una segunda vía de escritura.
+
+Se corrigió una carrera de arranque: si el evento de rol precede al montaje, la vista usa la respuesta de la RPC protegida para acreditar rol/ámbito; una revocación explícita sigue limpiando la vista. La captura integrada detectó el caso. El instalador contiene privilegios heredados de service_role exclusivamente sobre las funciones nuevas antes de verificar ACL privadas, sin modificar default ACL.
+
+Evidencia adicional: `shared-integration-result.json` acredita adaptador real de hojas → componente compartido y resumen de ambos líderes con turnos cerrados; `integrated-views-result.json` y `tests/lp01-official-close/evidence/` muestran la aplicación completa con filas/chips/detalles. Datos sintéticos; el coordinador compara contra los originales.
+
+La aceptación del flujo manual sustituido pasa al workflow `lp01-operation-official.yml`. Se conservan los contratos SQL heredados y pruebas de revocación/roles/fuentes; las pruebas UI que exigían Iniciar turno y Realizado manual quedan históricas. El cierre vacío conserva su aceptación UI con apertura preparada por el fixture servidor. La CI conjunta del candidato se ejecuta al abrir el PR; no se desplegará nada.

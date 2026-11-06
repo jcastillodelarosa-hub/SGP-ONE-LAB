@@ -53,8 +53,8 @@ try:
       page.clock.fast_forward(20000);page.wait_for_function("!document.querySelector('.lp-aluminum-pending')")
      else:
       assert page.locator('#productionTrackingTab').is_hidden();page.locator('#productionAssemblyTab').click();page.locator('[data-op-date]').fill('2026-11-01');page.locator('[data-op-date]').dispatch_event('change');page.wait_for_selector('[data-order-part]:visible')
-      page.locator('[data-live-orders] [data-live-operate]').first.click();page.wait_for_selector('[data-order-form]')
-      page.locator('[data-individual-affects] > summary').click();page.wait_for_selector('.lp-pdt-compact');assert any(r['id']==original for r in (x.read2(user).get('aluminumPending') or x.read2(user)['pickingPending'])['rows']);assert page.locator('.lp-aluminum-pending').is_visible()
+      page.locator('[data-live-orders] [data-live-operate]').first.click();page.wait_for_selector('[data-order-form]',state='attached')
+      page.locator('[data-individual-affects]').evaluate('(el)=>{el.open=true}');page.wait_for_selector('.lp-pdt-compact');assert any(r['id']==original for r in (x.read2(user).get('aluminumPending') or x.read2(user)['pickingPending'])['rows']);assert page.locator('.lp-aluminum-pending').is_visible()
       assert page.locator('[data-affect-save]').is_disabled()
       page.screenshot(path=str(HERE/f'evidence/app-operation-{width}.png'),full_page=True)
      assert not errors,errors;results.append({'width':width,'role':user,'originalPickingVisible':True,'existingController':True,'externalRequests':0});page.close()

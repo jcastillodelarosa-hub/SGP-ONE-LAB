@@ -82,6 +82,7 @@ BEGIN
 END $$;
 REVOKE ALL ON FUNCTION public.sgp_lp_official_open_due_v1(text,text,text) FROM PUBLIC,anon,authenticated;
 DO $$ BEGIN
+ IF EXISTS(SELECT 1 FROM pg_roles WHERE rolname='service_role') THEN REVOKE ALL ON FUNCTION public.sgp_lp_official_open_due_v1(text,text,text),sgp_lp_official.native_close() FROM service_role;END IF;
  IF EXISTS(SELECT 1 FROM pg_proc p CROSS JOIN LATERAL aclexplode(coalesce(p.proacl,acldefault('f',p.proowner))) a WHERE p.oid IN('public.sgp_lp_official_open_due_v1(text,text,text)'::regprocedure,'sgp_lp_official.native_close()'::regprocedure) AND a.grantee<>p.proowner) THEN RAISE EXCEPTION 'OFFICIAL_BRIDGE_ACL_REQUIRES_REVIEW';END IF;
 END $$;
 COMMIT;

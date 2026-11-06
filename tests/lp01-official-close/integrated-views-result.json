@@ -1,0 +1,17 @@
+{
+  "scope": "Actual app controllers, synthetic PostgreSQL; original comparison left to coordinator",
+  "results": [
+    {
+      "width": 1440,
+      "tracking_chips_and_detail": true,
+      "both_operation_tables_and_details": true,
+      "pageErrors": []
+    },
+    {
+      "width": 390,
+      "tracking_chips_and_detail": true,
+      "both_operation_tables_and_details": true,
+      "pageErrors": []
+    }
+  ]
+}

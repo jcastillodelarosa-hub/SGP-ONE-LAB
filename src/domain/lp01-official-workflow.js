@@ -21,6 +21,8 @@ export function changeOfficialWorkflow(state,{command,actor,role,recordedAt,cata
  const next=structuredClone(state),base={id:command.id,key:command.key,...context,actor,recordedAt,observation,quantity:command.quantity};let record;
  if(command.action==='DEFINE_AVAILABLE'){
   if(!['COORDINADOR','ADMINISTRADOR'].includes(role))throw Error('DEFINICION_REQUIERE_COORDINADOR');
+  const source=catalog.find(r=>r.key_produccion===command.key),balance=source[command.stage==='ENSAMBLE'?'saldo_ensamble':'saldo_empaque'];
+  if(source.saldos_inicializados!==true||source.presente_ultimo_export!==true||!['number','string'].includes(typeof balance)||String(balance).trim()===''||!integer(Number(balance))||command.quantity>Number(balance))throw Error('DISPONIBLE_SUPERA_SALDO_ACREDITADO');
   // A missing current-period baseline stays missing; summaries cannot prove an invented zero.
   const baselines=state.entries.filter(r=>r.key===command.key&&r.stage===command.stage&&r.line===command.line).map(r=>({key:r.key,stage:r.stage,line:r.line,date:r.date,shift:r.shift,quantity:r.quantity,sha256:r.sha256}));
   record={...base,definedAt:recordedAt,baselines};next.definitions=[...(next.definitions||[]),record];

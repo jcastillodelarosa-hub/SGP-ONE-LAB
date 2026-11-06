@@ -131,16 +131,14 @@ jobs:
           python tests/lp01-roles/postgres.py
           python tests/lp01-roles/activation.py
           python tests/lp01-roles/xlsx.py
-      - name: Real persistence PC and mobile acceptance
+      # Manual execution/start-turn UI was replaced by official imports and server opening.
+      # Its current UI/SQL integration runs in lp01-operation-official.yml; native SQL regressions above remain.
+      - name: Remaining native UI and historical acceptance
         run: |
           pip install playwright==1.62.0
           python -m playwright install --with-deps chromium
-          python tests/lp01-powerbi/browser.py
-          python tests/lp01-cierres-integrados/browser.py
           python tests/lp01-roles/browser.py
-          python tests/lp01-continuidad/browser.py
           python tests/lp01-sin-actividad/browser.py
-          python tests/lp01-apertura/browser.py
           python tests/lp01-fuentes/browser.py
           python tests/lp01-seguimiento/browser.py
       - uses: actions/upload-artifact@v4
@@ -272,7 +270,7 @@ jobs:
             tests/lp01-afectaciones-rpc/evidence/
 
   operation-b12-b13:
-    name: B12 B13 assignment capture and disabled proposal (isolated)
+    name: B12 B13 grouping, disabled proposal and volume (isolated)
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -302,7 +300,7 @@ jobs:
         run: |
           node --test tests/lp01-operation-orders.test.mjs
           python tests/lp01-b12-b13/proposal.py
-          python tests/lp01-b12-b13/browser.py
+          node --test tests/lp01-official-panel.test.mjs
           node tests/lp01-b12-b13/performance.mjs
           python tests/lp01-b12-b13/dom-performance.py
       - uses: actions/upload-artifact@v4

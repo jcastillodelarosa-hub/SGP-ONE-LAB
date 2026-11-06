@@ -106,7 +106,10 @@ BEGIN
  FOR r IN SELECT value FROM jsonb_array_elements(plan_rows) LOOP PERFORM sgp_lp_operacion.sesion(p_token,et,r->>'key',lin);END LOOP;
  plan:=p_context||jsonb_build_object('revision',md5(plan_rows::text),'rows',plan_rows);
  fingerprint:=md5(jsonb_build_object('catalog',catalog,'plan',plan,'schedule',period,'turn',native_turn)::text);
- RETURN jsonb_build_object('contract','LP-OFFICIAL-CONTEXT-1','actor',s->>'usuario','role',s->>'rol','observedAt',clock_timestamp(),'state',st,'catalog',catalog,'plan',plan,'schedule',period,'fingerprint',fingerprint);
+ SELECT jsonb_build_object('stage',et,'line',lin,'date',x.fecha,'shift',x.turno) INTO native_turn
+ FROM (SELECT * FROM sgp_lp_operacion.turnos WHERE etapa=et AND linea=lin ORDER BY fecha DESC,turno DESC LIMIT 1) x
+ WHERE x.estado='ABIERTO' AND clock_timestamp()>=(sgp_lp_operacion.periodo(x.fecha,x.turno)->>'start')::timestamptz AND clock_timestamp()<(sgp_lp_operacion.periodo(x.fecha,x.turno)->>'end')::timestamptz;
+ RETURN jsonb_build_object('contract','LP-OFFICIAL-CONTEXT-1','actor',s->>'usuario','role',s->>'rol','observedAt',clock_timestamp(),'state',st,'catalog',catalog,'plan',plan,'schedule',period,'fingerprint',fingerprint,'activeContext',native_turn);
 END $$;
 REVOKE ALL ON FUNCTION public.sgp_lp_official_read_v1(text,jsonb) FROM PUBLIC,anon,authenticated;
 
@@ -156,6 +159,12 @@ BEGIN
  RETURN result;
 END $$;
 REVOKE ALL ON FUNCTION public.sgp_lp_official_commit_v1(text,jsonb,uuid,text,text,bigint,jsonb,jsonb,jsonb) FROM PUBLIC,anon,authenticated;
+-- Contain inherited EXECUTE on these new functions only; never alter default ACL.
+DO $$ BEGIN
+ IF EXISTS(SELECT 1 FROM pg_roles WHERE rolname='service_role') THEN
+  REVOKE ALL ON FUNCTION public.sgp_lp_official_read_v1(text,jsonb),public.sgp_lp_official_context_v1(text,jsonb,uuid,text),public.sgp_lp_official_commit_v1(text,jsonb,uuid,text,text,bigint,jsonb,jsonb,jsonb) FROM service_role;
+ END IF;
+END $$;
 -- Fail closed if deployment-specific default ACL would expose newly defined objects.
 -- Do not change global/default ACL or create a technical principal to pass this guard.
 DO $$ BEGIN

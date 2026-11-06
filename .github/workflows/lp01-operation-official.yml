@@ -1,0 +1,62 @@
+name: Integrated operation official close (isolated)
+on:
+  pull_request:
+    paths:
+      - 'src/domain/lp01-official*'
+      - 'src/domain/lp01-operation*'
+      - 'src/domain/powerbi/**'
+      - 'src/modules/lp01-operation*'
+      - 'src/modules/lp01-official-close-panel.js'
+      - 'src/modules/lp01-powerbi-client.js'
+      - 'src/services/lp01-operation-summary.js'
+      - 'src/services/lp01-official-availability.js'
+      - 'src/modules/lp01-order-sale-cell.js'
+      - 'src/server/lp-official*'
+      - 'src/server/lp-powerbi-handler.js'
+      - 'supabase/functions/lp-powerbi/index.ts'
+      - 'docs/sql-proposals/lp01-official-close/**'
+      - 'tests/lp01-official*'
+      - 'tests/lp01-official-close/**'
+      - '.github/workflows/lp01-operation-official.yml'
+permissions:
+  contents: read
+jobs:
+  integrated:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm install --no-audit --no-fund
+      - run: npm run build:vendor
+      - run: npm run verify:release
+      - run: npm test
+      - name: Syntax
+        run: rg --files src -g '*.js' -0 | xargs -0 -n1 node --check
+      - run: docker pull postgres:17.11
+      - name: Official persistence and workflow (isolated)
+        run: |
+          python tests/lp01-official-close/postgres.py
+          python tests/lp01-official-close/workflow-postgres.py
+          python tests/lp01-official-close/native-bridge-postgres.py
+      - run: pip install playwright==1.55.0
+      - run: python -m playwright install --with-deps chromium
+      - name: Integrated component and operation panels
+        run: |
+          python tests/lp01-official-close/shared-integration.py
+          python tests/lp01-official-close/panel-browser.py
+          python tests/lp01-official-close/integrated-views.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: integrated-operation-synthetic-evidence
+          path: |
+            tests/lp01-official-close/*result.json
+            tests/lp01-official-close/evidence/

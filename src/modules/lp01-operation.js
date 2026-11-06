@@ -1,6 +1,6 @@
 import {officialSheet} from '../domain/lp01-official-sheet.js';
 import {officialCloseController,mountOfficialClosePanel} from './lp01-official-close-panel.js';
-import {orderSaleTransport} from '../services/lp01-order-sale.js';
+import {officialAvailabilityTransport} from '../services/lp01-official-availability.js';
 import {readOperationSummary} from '../services/lp01-operation-summary.js';
 import {compactSummaryMarkup as summaryMarkup} from './lp01-affectation-summary.js';
 import {mountTrackingAffectations} from './lp01-tracking-affectations.js';
@@ -59,12 +59,13 @@ export function mountOperation({tracking,operation,bridge,legacyLoad,orderSaleEn
   const request=++seq;globalRequest={scope,request};loading=true;globalControls(true);
   if(!quiet||!sameScope){live.replaceChildren();message.textContent='Consultando todas las semanas…';}
   try{
-   if(!['COORDINADOR','ADMINISTRADOR'].includes(trackingRole))throw Error('Seguimiento no autorizado');
+   // The auth event may precede module mounting; the protected RPC remains authoritative.
+   if(trackingRole!==null&&!['COORDINADOR','ADMINISTRADOR'].includes(trackingRole))throw Error('Seguimiento no autorizado');
    const next=await rpc('sgp_lp_seguimiento_consultar',{p_etapa:ctx.stage,p_linea:ctx.line});
    if(request!==seq||viewPanel!=='seguimiento')return;
    if(token!==bridge.getToken())throw Error('La sesión cambió. Vuelve a consultar.');
    const normalized=globalTrackingData(next,ctx),changed=JSON.stringify(normalized)!==JSON.stringify(globalData);
-   globalData=normalized;globalContext=ctx;globalSession=token;
+   globalData=normalized;globalContext=ctx;globalSession=token;trackingRole=normalized.role;
    if(summaryScope!==scope){summaryScope=scope;summaries.clear();}
    const key=JSON.stringify([ctx.line,ctx.stage]);if(!trackingStates.has(key))trackingStates.set(key,{});trackingViewState=trackingStates.get(key);
    message.textContent='';const editing=quiet&&sameScope&&trackingViewState.open&&['Afectaciones','Materiales'].includes(trackingViewState.tab)&&globalData.orders.some(r=>trackingIdentity(r)===trackingViewState.selected);if(!editing&&(changed||!quiet||!sameScope))renderGlobal();
@@ -95,10 +96,10 @@ export function mountOperation({tracking,operation,bridge,legacyLoad,orderSaleEn
   const saleScope=JSON.stringify([globalSession,globalContext.line,globalContext.stage,globalData.role]);
   if(orderSaleEnabled&&saleScope!==orderSaleScope){
    orderSaleScope=saleScope;const token=globalSession,ctx={...globalContext};
-   orderSaleProvider=key=>orderSaleTransport({key,stage:ctx.stage,getToken:()=>viewPanel==='seguimiento'&&bridge.getToken()===token&&globalContext?.line===ctx.line&&globalContext?.stage===ctx.stage&&globalData?.orders.some(r=>r.key===key)?token:null,
+   orderSaleProvider=key=>officialAvailabilityTransport({key,context:{stage:ctx.stage,line:ctx.line,date:get('[data-op-date]').value,shift:Number(get('[data-op-shift]').value)},getToken:()=>viewPanel==='seguimiento'&&bridge.getToken()===token&&globalContext?.line===ctx.line&&globalContext?.stage===ctx.stage&&globalData?.orders.some(r=>r.key===key)?token:null,
     client:{rpc:async(name,args)=>(await bridge.getClient()).rpc(name,args)}});
   }
-  renderTracking({host:live,orderSaleProvider:orderSaleEnabled?orderSaleProvider:null,data:{...globalData,orders:globalData.orders.map(r=>({...r,get affectationSummary(){return summaryFor(r);}}))},context:globalContext,state:trackingViewState,search:'',canReviewSale:true,
+  renderTracking({host:live,orderSaleProvider:orderSaleEnabled?orderSaleProvider:null,data:{...globalData,officialAvailability:true,orders:globalData.orders.map(r=>({...r,get affectationSummary(){return summaryFor(r);}}))},context:globalContext,state:trackingViewState,search:'',canReviewSale:true,
    onDetailClose:()=>renderGlobal(),
    onAffectations:async({host,row,target,cause})=>{
     const token=bridge.getToken(),scope=globalContext;host.textContent='Consultando afectaciones…';
@@ -212,7 +213,7 @@ export function mountOperation({tracking,operation,bridge,legacyLoad,orderSaleEn
    nav.querySelectorAll('[data-live-operate]').forEach(b=>b.onclick=()=>{selected=b.dataset.liveOperate;renderDetail();});
    const form=host.querySelector('[data-order-form]');
    if(context.stage==='ENSAMBLE'){const box=document.createElement('details');box.innerHTML='<summary>Propuesta de disponibilidad del siguiente turno</summary><div data-proposal-panel></div>';form.after(box);box.addEventListener('toggle',()=>{if(!box.open||box.dataset.loaded)return;box.dataset.loaded='true';const token=bridge.getToken(),scope={...context,key:r.key};mountProposal(box.querySelector('[data-proposal-panel]'),{rpc,scope,onDirty:()=>{dirty=true;},isCurrent:()=>token===bridge.getToken()&&selected===r.parte&&context.stage===scope.stage&&context.date===scope.date&&context.shift===scope.shift&&context.line===scope.line});});}
-   form.insertAdjacentHTML('beforebegin','<p data-order-total>Semana '+esc(group.week?.label??'no disponible')+' · Total reportado de la orden en este turno: <b>'+n(group.executed)+'</b></p>'+(group.rows.length>1?'<label>Asignación que vas a actualizar<select data-assignment-select>'+group.rows.map((a,i)=>'<option value="'+esc(a.parte)+'" '+(a.parte===r.parte?'selected':'')+'>Asignación '+(i+1)+' · reportado '+n(a.ejecutado)+' · SALE '+n(a.sale)+'</option>').join('')+'</select></label><p>Esta orden tiene varias asignaciones. Actualiza cada cantidad identificada; no se reparte el total automáticamente.</p>':''));
+   form.insertAdjacentHTML('beforebegin','<p data-order-total>Semana '+esc(group.week?.label??'no disponible')+' · Realizado oficial en este turno: <b>'+n(group.officialRealized)+'</b></p>');
    host.querySelector('[data-assignment-select]')?.addEventListener('change',e=>{selected=e.target.value;renderDetail();});
    if(group.rows.length>1)form.querySelector('[data-executed]').closest('label').firstChild.textContent='Total de esta asignación en el turno';
    const save=form.querySelector('button[type=submit]');if(r.sale===null||r.sale===undefined)save.disabled=true;
@@ -272,9 +273,11 @@ export function mountOperation({tracking,operation,bridge,legacyLoad,orderSaleEn
   host.querySelector('[data-close]').onclick=()=>attempt(()=>{const reasons=Object.fromEntries([...host.querySelectorAll('[data-close-reason]')].map(x=>[x.dataset.closeReason,x.value.trim()]));return send('CERRAR',{file_id:fileId,reasons,observation:required(host.querySelector('[data-close-note]').value)},null);});
   host.querySelector('[data-reopen]')?.addEventListener('click',()=>attempt(()=>send('REABRIR',{observation:required(host.querySelector('[data-close-note]').value)},null)));
   const closeHost=host.querySelector('.lp-close'),closeContext={...context},closeToken=bridge.getToken();
-  mountOfficialClosePanel({host:closeHost,context:closeContext,controller:officialController,onSaved:()=>load({quiet:true}),isCurrent:()=>bridge.getToken()===closeToken&&JSON.stringify(context)===JSON.stringify(closeContext)});
+  const sameOfficialPeriod=row=>['stage','line','date','shift'].every(k=>row[k]===closeContext[k]);
+  const nativeEmpty=data.emptyCloseEligible===true&&(!data.officialView||(!data.officialView.plan.rows.length&&!data.officialView.state.entries.some(sameOfficialPeriod)&&!data.officialView.state.pending.some(sameOfficialPeriod)));
+  if(!nativeEmpty)mountOfficialClosePanel({host:closeHost,context:closeContext,controller:officialController,onSaved:()=>load({quiet:true}),isCurrent:()=>bridge.getToken()===closeToken&&JSON.stringify(context)===JSON.stringify(closeContext)});
   const manual=host.querySelector('[data-executed]');if(manual){manual.disabled=true;manual.closest('label').hidden=true;const save=host.querySelector('[data-order-form] button[type=submit]');save.disabled=true;save.hidden=true;}
-  const manualForm=host.querySelector('[data-order-form]');if(manualForm)manualForm.onsubmit=e=>e.preventDefault();
+  const manualForm=host.querySelector('[data-order-form]');if(manualForm){manualForm.onsubmit=e=>e.preventDefault();manualForm.hidden=true;}
   const sharedDetail=host.querySelector('[data-individual-affects]');if(sharedDetail)sharedDetail.open=true;
 
  }

@@ -12,7 +12,7 @@ origin=f'http://127.0.0.1:{server.server_port}'
 results=[]
 try:
  with sync_playwright() as p:
-  browser=p.chromium.launch(executable_path='/usr/bin/chromium',args=['--no-sandbox'])
+  browser=p.chromium.launch(**({'executable_path':'/usr/bin/chromium'} if Path('/usr/bin/chromium').exists() else {}),args=['--no-sandbox'])
   for width in [1440,390]:
    page=browser.new_page(viewport={'width':width,'height':950});errors=[]
    page.on('pageerror',lambda e:errors.append(str(e)))

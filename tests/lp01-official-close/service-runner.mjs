@@ -11,7 +11,7 @@ const service=officialCloseService({DOMParser,rpc:async(name,args)=>{
  if(!parameters[name])throw Error('Unexpected RPC');
  try{
   const sql=`SELECT public.${name}(${parameters[name].map(k=>lit(args[k])).join(',')});`;
-  const value=execFileSync('docker',['--host=unix:///var/run/docker.sock','exec','-i',input.container,'psql','-X','-qAt','-U','postgres','-v','ON_ERROR_STOP=1'],{input:sql,encoding:'utf8',env,stdio:['pipe','pipe','pipe']});
+  const value=execFileSync('docker',['--host=unix:///var/run/docker.sock','exec','-i',input.container,'psql','-d',input.database||'postgres','-X','-qAt','-U','postgres','-v','ON_ERROR_STOP=1'],{input:sql,encoding:'utf8',env,stdio:['pipe','pipe','pipe']});
   return {data:JSON.parse(value)};
  }catch(e){return {error:{message:e.stderr?.toString()||e.message}};}
 }});
