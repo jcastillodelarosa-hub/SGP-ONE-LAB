@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {orderDetailsTransport} from '../src/services/lp01-order-details.js';
 import {orderNoteEditor} from '../src/domain/lp01-order-note-editor.js';
+import {mountOrderNote} from '../src/modules/lp01-order-note.js';
 const key='QA|PANELES_2',line='PANELES_2',stage='ENSAMBLE';
 const data=()=>({contract:'LP-ORDER-DETAILS-1',key,line,stage,note:{revision:0,observation:''},history:[],capabilities:['READ','NOTE'],export:{quantity:'3',percentage:'50',present:true}});
 const transport=response=>orderDetailsTransport({key,line,stage,getToken:()=> 'qa',client:{rpc:async()=>response}});
@@ -45,4 +46,51 @@ test('dirty draft retains r1 after B saves r2 and refresh; explicit discard adop
  await editor.load();assert.equal(editor.state.draftRevision,1);assert.equal(editor.state.draft,'Draft A');
  editor.discardDraft();assert.equal(editor.state.draft,'Saved by B');assert.equal(editor.state.draftRevision,2);
  editor.edit('A after reviewing B');await editor.save();assert.equal(stored.revision,3);
+});
+
+// Control-state double only; actual browser geometry remains in browser.py.
+function noteControls(){
+ const input={value:'',disabled:true},save={disabled:true},refresh={disabled:false},discard={hidden:true},status={},text={},current={hidden:true,querySelector:()=>text};
+ const controls={'textarea':input,'[data-order-note-save]':save,'[data-order-note-refresh]':refresh,'[data-order-note-discard]':discard,'[role=status]':status,'[data-order-note-current]':current};
+ return {host:{isConnected:true,querySelector:selector=>controls[selector]},input,save,refresh,discard,status,current,text};
+}
+const deferredNote=()=>{let resolve,reject;const promise=new Promise((a,b)=>{resolve=a;reject=b;});return {promise,resolve,reject};};
+const noteTick=async()=>{for(let i=0;i<8;i++)await Promise.resolve();};
+
+test('note controls stay locked through post-save reread, then preserve A against B revision',async()=>{
+ const ui=noteControls(),reread=deferredNote(),commands=[];let reads=0,stored={revision:0,observation:''};
+ const snapshot=()=>({...data(),note:{...stored}});
+ const transport={isCurrent:()=>true,read:()=>++reads===2?reread.promise:Promise.resolve(snapshot()),save:async cmd=>{
+  commands.push({...cmd});if(cmd.revision!==stored.revision){const error=Error('ORDER_NOTE_REVISION_STALE');error.confirmedRejected=true;throw error;}
+  stored={revision:stored.revision+1,observation:cmd.observation};return {...stored};
+ }};
+ mountOrderNote(ui.host,transport);await noteTick();ui.input.value='Borrador general';ui.input.oninput();
+ const saving=ui.save.onclick();await noteTick();assert.equal(reads,2);assert.match(ui.status.textContent,/guardada/);
+ assert.equal(ui.input.disabled,true);assert.equal(ui.refresh.disabled,true);assert.equal(ui.save.disabled,true);
+ reread.resolve(snapshot());await saving;assert.equal(ui.input.disabled,false);assert.equal(ui.refresh.disabled,false);
+ ui.input.value='Edición A';ui.input.oninput();stored={revision:2,observation:'Edición B'};
+ const refreshing=ui.refresh.onclick();assert.equal(ui.input.disabled,true);assert.equal(ui.refresh.disabled,true);await refreshing;
+ assert.equal(ui.input.value,'Edición A');assert.equal(ui.current.hidden,false);assert.equal(ui.text.textContent,'Edición B');
+ await ui.save.onclick();assert.equal(commands.at(-1).revision,1);assert.equal(stored.observation,'Edición B');assert.match(ui.status.textContent,/Otra persona/);
+});
+
+test('note refresh disables controls until a denied read clears the private draft',async()=>{
+ const ui=noteControls(),wait=deferredNote();let reads=0;
+ mountOrderNote(ui.host,{isCurrent:()=>true,read:()=>++reads===1?Promise.resolve(data()):wait.promise});await noteTick();
+ ui.input.value='private draft';ui.input.oninput();const reading=ui.refresh.onclick();
+ assert.equal(ui.input.disabled,true);assert.equal(ui.refresh.disabled,true);assert.equal(ui.save.disabled,true);
+ wait.reject(Error('NO_AUTORIZADO'));await reading;
+ assert.equal(ui.input.value,'');assert.equal(ui.input.disabled,true);assert.equal(ui.current.hidden,true);assert.match(ui.status.textContent,/Acceso revocado/);
+});
+
+test('failed post-save reread retains acknowledged note and revision for later edits',async()=>{
+ const ui=noteControls(),wait=deferredNote(),commands=[];let reads=0,stored={revision:0,observation:''};
+ mountOrderNote(ui.host,{isCurrent:()=>true,read:()=>++reads===2?wait.promise:Promise.resolve({...data(),note:{...stored}}),save:async cmd=>{
+  commands.push({...cmd});stored={revision:cmd.revision+1,observation:cmd.observation};return {...stored};
+ }});await noteTick();ui.input.value='Confirmed note';ui.input.oninput();const saving=ui.save.onclick();await noteTick();
+ assert.equal(ui.input.disabled,true);wait.reject(Error('ORDER_DETAILS_UNAVAILABLE'));await saving;
+ assert.match(ui.status.textContent,/Observación guardada\. No se pudo actualizar/);assert.equal(ui.input.value,'Confirmed note');
+ assert.equal(commands.length,1);assert.equal(ui.refresh.disabled,false);assert.equal(ui.save.disabled,true);
+ await ui.refresh.onclick();ui.input.value='Next edit';ui.input.oninput();await ui.save.onclick();
+ assert.equal(commands[1].revision,1);assert.equal(stored.observation,'Next edit');
 });
