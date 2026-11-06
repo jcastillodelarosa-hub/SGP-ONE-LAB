@@ -1,3 +1,20 @@
+## PR208 · acople mínimo de distintivos · 06/11/2026
+
+Parche independiente sobre `5965f6c290c434ef92191d1d26f545a86817dc57`.
+Único archivo de producción alterado: `src/modules/lp01-operation.js`.
+Combina los snapshots nativo y compartido con los contratos existentes; muestra
+Accesorios y conserva lectura heredada identificada cuando falta el servicio
+compartido, sin reutilizar totales/disponibilidad como vigentes. Revocación limpia
+la vista; identidad incompatible queda pendiente. Ordenar/filtrar conserva chips
+y etiqueta heredada. Helpers originales sin cambios, hashes cotejados.
+
+Prueba dirigida `tests/lp01-shared-order/row-summary.py`: PASS en 1440 y 390 px,
+con respuestas RPC sintéticas, sin escrituras ni activación. Incluye reportes de
+la otra etapa, solapamientos, ausencia del servicio, identidad inválida,
+revocación y respuesta tardía tras cambio de sesión. Sintaxis y diff check PASS.
+No incorpora el bloque de hojas/cierre; no crea PR, publica ni modifica backend.
+Pendiente aplicar este commit al PR208 y la integración coordinada del candidato.
+
 ## PR208 · backend activado · 06/11/2026
 
 Instalación y activación autorizadas del paquete e419c27 en Supabase SGP-ONE-LAB.

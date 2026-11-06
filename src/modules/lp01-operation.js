@@ -1,5 +1,7 @@
 import {orderSaleTransport} from '../services/lp01-order-sale.js';
 import {affectationSummary} from '../domain/lp01-affectation-summary.js';
+import {sharedOrderSummary} from '../domain/lp01-shared-order-summary.js';
+import {sharedOrderTransport} from '../services/lp01-shared-order.js';
 import {compactSummaryMarkup as summaryMarkup} from './lp01-affectation-summary.js';
 import {mountTrackingAffectations} from './lp01-tracking-affectations.js';
 import {enrichOperationEvidence} from '../services/lp01-operation-evidence.js';
@@ -29,6 +31,8 @@ export function mountOperation({tracking,operation,bridge,legacyLoad,orderSaleEn
  const today=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'America/Bogota',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
  tracking.querySelector('.lp-followup-filters').insertAdjacentHTML('afterend','<div class="lp-operational-context"><label>Etapa<select data-op-stage><option>ENSAMBLE</option><option>EMPAQUE</option></select></label><label>Fecha operativa<input type="date" data-op-date value="'+today()+'"></label><label>Turno<select data-op-shift><option value="1">Turno 1</option><option value="2">Turno 2</option></select></label><button type="button" data-op-load>Consultar turno</button><span data-op-status role="status"></span><button type="button" data-retry-pending hidden>Reintentar guardado sin respuesta</button></div><section data-live-orders></section>');
  const get=s=>tracking.querySelector(s),live=get('[data-live-orders]'),message=get('[data-op-status]');
+ // Sorting/filtering replaces the table directly; repaint only after that replacement.
+ new MutationObserver(()=>paintSummaries()).observe(live,{childList:true});
  get('[data-live-orders]').insertAdjacentHTML('beforebegin','<nav data-tracking-stages hidden aria-label="Etapa de Seguimiento"><button type="button" data-tracking-stage="ENSAMBLE">Ensamble</button><button type="button" data-tracking-stage="EMPAQUE">Empaque</button></nav>');
  get('[data-tracking-stages]').querySelectorAll('button').forEach(b=>b.onclick=()=>{get('[data-op-stage]').value=b.dataset.trackingStage;load();});
  const capture=()=>({line:tracking.querySelector('[data-line]').value,stage:get('[data-op-stage]').value,date:get('[data-op-date]').value,shift:Number(get('[data-op-shift]').value)});
@@ -75,12 +79,27 @@ export function mountOperation({tracking,operation,bridge,legacyLoad,orderSaleEn
   summaryFlight=(async()=>{const client=await bridge.getClient();
    await Promise.all(Array.from({length:Math.min(3,keys.length)},async()=>{while(cursor<keys.length&&alive()){
     const key=keys[cursor++];let summary;
-    try{const transport=affectationsTransport({client,getToken:()=>alive()?bridge.getToken():null,contractVersion:2,context:{key,line:ctx.line,stage:ctx.stage}});summary=affectationSummary(await transport.read());}
+    try{
+     const getToken=()=>alive()?bridge.getToken():null;
+     const nativeSnapshot=await affectationsTransport({client,getToken,contractVersion:2,context:{key,line:ctx.line,stage:ctx.stage}}).read();
+     try{const sharedSnapshot=await sharedOrderTransport({client,getToken,key,line:ctx.line,stage:ctx.stage}).read();summary=sharedOrderSummary(nativeSnapshot,sharedSnapshot);}
+     catch(error){if(error.message!=='SHARED_ORDER_UNAVAILABLE')throw error;summary={...affectationSummary(nativeSnapshot),sharedUnavailable:true,total:null,available:null};}
+    }
     catch(error){if(!alive())return;if(error.message==='NO_AUTORIZADO'){++seq;loading=false;globalData=null;summaries.clear();live.replaceChildren();message.textContent='Acceso revocado. Vuelve a consultar.';return;}summary={status:'UNAVAILABLE'};}
     if(!alive())return;summaries.set(key,summary);
-    live.querySelectorAll('[data-order-summary]').forEach(button=>{if(button.dataset.orderSummary===key){const row=globalData.orders.find(r=>r.key===key);const html=summaryMarkup(row?summaryFor(row):null);if(button.innerHTML!==html)button.innerHTML=html;}});
+    paintSummaries(key);
    }}));
   })().catch(()=>{}).finally(()=>{summaryFlight=null;if(scope!==summaryScope&&globalData)refreshSummaries();});
+ }
+ function paintSummaries(key){
+  if(!globalData||globalSession!==bridge.getToken()||viewPanel!=='seguimiento')return;
+  live.querySelectorAll('[data-order-summary]').forEach(host=>{
+   if(key!==undefined&&host.dataset.orderSummary!==key)return;
+   const row=globalData.orders.find(r=>r.key===host.dataset.orderSummary),summary=row?summaryFor(row):null;
+   const legacy=summary?.sharedUnavailable?'<small>Compartido no disponible · lectura heredada</small>':'';
+   const accessories=Number.isSafeInteger(summary?.accessories)&&summary.accessories>0?'<button type="button" data-summary-cause="ACCESORIOS" class="lp-tracking-chip">'+summary.accessories+' × Accesorios</button>':'';
+   const html=legacy+summaryMarkup(summary)+accessories;if(host.innerHTML!==html)host.innerHTML=html;
+  });
  }
  function renderGlobal(){
   if(!globalData||globalSession!==bridge.getToken())return;
@@ -109,6 +128,7 @@ export function mountOperation({tracking,operation,bridge,legacyLoad,orderSaleEn
     const current=data.orders.find(r=>r.key===target.key&&r.parte===target.parte);if(!current){message.textContent='La asignación ya no está disponible en ese contexto.';return;}
     selected=current.parte;renderDetail();document.getElementById('productionOperationTab')?.click();if(focusSale)operation.querySelector('[data-sale]')?.focus();
    },onGlass:r=>glass(r)});
+  paintSummaries();
  }
  function stopEnrichment(){enrichment?.controller.abort();enrichment=null;}
  function startEnrichment(){
