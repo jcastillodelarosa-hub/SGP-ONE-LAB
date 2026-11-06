@@ -1,3 +1,16 @@
+## Orden compartida · continuidad sobre v396 · 06/11/2026
+
+Base main a068e14 (v396), rebase sin conflictos; cambios previos y borrador NC
+conservados. Sin consultar skills propias por instrucción de Johan. Historial del
+panel conserva ahora movimientos nativos por reporte/etapa, separados de los
+compartidos; referencia NC heredada preservada también sin backend compartido.
+Prueba dirigida legacy-history.py PC1440/móvil390 PASS (sintética, sin SQL).
+Las cinco pruebas antiguas de turno ya quedaron adaptadas y pasaron; no se
+repitieron. Acople de filas/hojas sigue a cargo del otro hilo, con fuentes exactas
+entregadas. CI conjunta al congelar; PR denegado, sin nuevo intento ni push.
+Contrato compartido sigue PROPUESTO, no instalado; tres RPC anon y bandera local
+requieren aprobación específica. No cambios en Picking, SQL productivo ni release.
+
 ## Orden compartida · conexión local · 06/11/2026
 
 Cinco pestañas actuales conectadas sin turno obligatorio y sin rediseño;
