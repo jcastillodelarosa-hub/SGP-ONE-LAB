@@ -5,9 +5,11 @@ on:
       - 'docs/sql-proposals/lp01-shared-order/**'
       - 'tests/lp01-shared-order/**'
       - 'tests/lp01-shared-order.test.mjs'
+      - 'tests/lp01-pending-nc.test.mjs'
       - 'src/domain/lp01-shared-order-editor.js'
       - 'src/domain/lp01-shared-order-summary.js'
       - 'src/modules/lp01-shared-affectations-panel.js'
+      - 'src/modules/lp01-pending-compact.js'
       - 'src/modules/lp01-tracking-affectations.js'
       - 'src/modules/lp01-affectation-tabs.js'
       - 'src/services/lp01-shared-order.js'
@@ -29,8 +31,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: node --test tests/lp01-shared-order.test.mjs tests/lp01-export-glass.test.mjs
+      - run: node --test tests/lp01-shared-order.test.mjs tests/lp01-export-glass.test.mjs tests/lp01-pending-nc.test.mjs
       - run: docker pull postgres:17.11
+      - run: python tests/lp01-shared-order/nc-scope.py
       - run: python tests/lp01-shared-order/contracts.py
       - run: python tests/lp01-shared-order/package.py
       - run: pip install playwright==1.55.0

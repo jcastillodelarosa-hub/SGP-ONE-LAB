@@ -1,6 +1,12 @@
+> Corrección dirigida PR208: estado NC de pendientes hidratado por el lector
+> existente, con concurrencia limitada, revocación y descarte al desmontar.
+> NC vidrio queda por verificar hasta disponer de relación canónica segura.
+> La evidencia previa de enlace exitoso queda superada por `nc-scope.py`;
+> no acredita disponibilidad actual de enlace. No hay SQL productivo ejecutado.
+
 # Orden compartida — propuesta en desarrollo
 
-Base `d45c5ed28a3cbafbb08179bdfaa138afaed8464c` (LAB v394). No instalada,
+Base `a068e14083bb92db6e72c71934d8cf240ef345ff` (LAB v396). No instalada,
 activada ni publicada. No cambia hojas/PDA, PR206, sesión, roles existentes,
 pins, HOLD o política. El incremento NC previo permanece respaldado en stash.
 
@@ -14,10 +20,12 @@ pins, HOLD o política. El incremento NC previo permanece respaldado en stash.
 - Ventanas informadas por actor autorizado, independientes de piezas.
   Accesorio importado opcional solo por ID y key exacta; claves ambiguas excluidas.
   Faltante manual sin fuente se identifica como tal, sin inventar vínculo.
-- NC por consecutivo exacto. Escribir referencia no acredita asociación.
-  LINK_NC explícito coteja huella actual, guarda evidencia y snapshot; finalizada
-  nunca acredita solución ni recepción física. La consulta actual es independiente
-  del snapshot histórico. Se reutiliza la lógica de fuente/reintento del bloque NC guardado.
+- NC escrita se conserva por verificar. No se acredita una relación canónica
+  entre la fuente NC y producción/línea: orden, OVE y texto de línea no bastan.
+  Consulta devuelve fuente/huella nulas tanto para números existentes como ausentes;
+  LINK_NC rechaza en servidor. No se exponen orden, estado ni existencia ajenos.
+  Para habilitar vínculo falta definir una relación canónica auditada y revisarla;
+  no se crea ni se infiere aquí. NC finalizada no acredita recepción física.
 - Reportes anteriores se leen en `legacyReports` sin migrarlos, clonarlos ni
   sumar sus cantidades al conjunto nuevo. Conservan etapa/turno originales.
 - Observación reutiliza las RPC globales de PR203 sin nuevos permisos; comprobada

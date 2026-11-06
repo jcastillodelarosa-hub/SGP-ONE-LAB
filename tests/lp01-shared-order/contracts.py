@@ -35,8 +35,9 @@ try:
  nc={**cmd(),'cause':'NC_V','ncReference':'NC-123'};r=save(nc,user='se');rid=r['reportId']
  lookup=lambda:json.loads(db.sql("SET ROLE anon;SELECT public.sgp_lp_shared_nc_lookup_v1('sp','QA|PANELES_2','EMPAQUE','NC-123')"))
  link={**cmd(),'action':'LINK_NC','reportId':rid,'fingerprint':lookup()['fingerprint'],'observation':'Verificado explícitamente para esta orden y línea'}
- save(link,user='sp',stage='EMPAQUE')
- n=[a for a in read()['reports'] if a['id']==rid][0];assert n['nc_link'] and n['confirmed']==0 and n['sourceNow']['state']=='FINALIZADA'
+ assert lookup()['source'] is None and lookup()['fingerprint'] is None
+ assert db.run(query(link,user='sp',stage='EMPAQUE')).returncode
+ n=[a for a in read()['reports'] if a['id']==rid][0];assert n['nc_link'] is None and n['confirmed']==0 and n['sourceNow'] is None
  assert len(read()['legacyReports'])==1 and read()['legacyReports'][0]['etapa']=='ENSAMBLE'
  # Changes in the other stage cause a shared CAS conflict; exact concurrent retry inserts once.
  race=[cmd(),cmd()]
@@ -63,6 +64,6 @@ try:
  db.sql("UPDATE public.sgp_usuario_accesos SET permitido=false WHERE id_usuario=(SELECT id_usuario FROM public.sgp_usuarios WHERE usuario='se')")
  assert db.run(query(cmd(),user='se')).returncode
  assert db.run("SET ROLE anon;SELECT public.sgp_lp_shared_order_read_v1('se','QA|PANELES_2','ENSAMBLE')").returncode
- result={'status':'PASS','environment':'Isolated PostgreSQL; synthetic rows only','checks':['shared read/edit across coordinator and stage-specific supervisors','closed turns untouched; no fake turn or assignment','canonical accessory source only; manual windows independent of pieces','NC exact source and explicit association; finalization never physical receipt','legacy reports retained in original context','shared CAS concurrency, idempotency, audit rollback, private ACL and global containment']}
+ result={'status':'PASS','environment':'Isolated PostgreSQL; synthetic rows only','checks':['shared read/edit across coordinator and stage-specific supervisors','closed turns untouched; no fake turn or assignment','canonical accessory source only; manual windows independent of pieces','NC stays unverified without canonical relation; no source disclosure or physical receipt','legacy reports retained in original context','shared CAS concurrency, idempotency, audit rollback, private ACL and global containment']}
  (Path(__file__).parent/'contracts-result.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result))
 finally:x.close()

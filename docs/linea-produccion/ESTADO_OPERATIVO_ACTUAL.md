@@ -1,3 +1,14 @@
+## PR208 · corrección NC y privacidad · 06/11/2026
+
+Se restaura estado NC en pendientes del panel compartido reutilizando el lector,
+sin liberar ventanas. Prueba dirigida summary-ui PC1440/móvil390 PASS.
+No se acredita relación NC-producción/línea canónica en el contrato de fuente:
+se conserva número por verificar, lectura sin existencia/estado ajenos y enlace
+rechazado en servidor. `nc-scope.py` PASS en PostgreSQL aislado con números
+existentes/ausentes, permisos de etapa y rechazo atómico. Paquete SQL propuesto
+actualizado; ninguna activación. La evidencia antigua de vínculo exitoso queda
+superada. Versión nueva se sellará en la integración coordinada, sin pisar v396.
+
 ## Orden compartida · continuidad sobre v396 · 06/11/2026
 
 Base main a068e14 (v396), rebase sin conflictos; cambios previos y borrador NC

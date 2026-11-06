@@ -45,8 +45,10 @@ DECLARE s jsonb;enabled boolean;BEGIN
  RETURN s;
 END $$;
 CREATE FUNCTION sgp_lp_shared_order.nc_source(ref text) RETURNS jsonb LANGUAGE sql STABLE SET search_path='' AS $$
- SELECT jsonb_build_object('reference',consecutivo,'state',estado_nc,'active',activo,'updatedAt',fecha_actualizacion,'order',orden,'affectedLine',linea_afectada)
- FROM public.sgp_nc_vidrio WHERE consecutivo=ref
+ -- No authoritative canonical NC/production/line relation is defined in the source.
+ -- Do not expose existence, status, order or line by guessing from orden/OVE/names.
+ -- Keep manual references unverified until a reviewed canonical relation is available.
+ SELECT NULL::jsonb
 $$;
 CREATE FUNCTION public.sgp_lp_shared_nc_lookup_v1(p_token text,p_key text,p_stage text,p_reference text) RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
 DECLARE s jsonb;n jsonb;BEGIN

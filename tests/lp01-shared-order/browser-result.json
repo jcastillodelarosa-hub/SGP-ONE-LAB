@@ -5,7 +5,7 @@
     "checks": [
       "missing backend disables writes while legacy remains visible",
       "closed-turn shared create and uncertain replay",
-      "explicit NC link, no physical credit",
+      "NC stays unverified without canonical relation, no disclosure or physical credit",
       "note and report persist across stage-specific leaders",
       "accessory windows independent from pieces",
       "Tecno ceiling 1.5 to 2",
@@ -18,7 +18,7 @@
     "checks": [
       "missing backend disables writes while legacy remains visible",
       "closed-turn shared create and uncertain replay",
-      "explicit NC link, no physical credit",
+      "NC stays unverified without canonical relation, no disclosure or physical credit",
       "note and report persist across stage-specific leaders",
       "accessory windows independent from pieces",
       "Tecno ceiling 1.5 to 2",
