@@ -1,3 +1,23 @@
+## Disponible persiste · causa funcional y segundo coste · 06/11/2026
+
+Johan confirmó fallo tras primer ajuste. Nuevo contraste: definiciones0,
+consolidados0, conciliaciones0; definitions_enabled=true. Sin disponibilidad
+validada, fuentes devuelve null y formulario bloquea antes de enviar. Logs
+11:12:30–12:00: 69 lecturas Disponible200, media1143ms; 649 lecturas afectaciones200,
+media614ms; no peticiones definir ni nuevos57014 encontrados. No afirmar pérdida
+de un guardado exitoso. Necesario conciliar/validar con contrato actual o decisión
+explícita de cambiar semántica de Disponible manual. No retirar guardas.
+
+Causa residual de coste: lector v1 aún materializaba permisos dos veces por orden.
+05_affectations_scoped_REVIEW.sql aplicado como lp_affectations_scoped_read_v397;
+postcheck12:04:32: 2d414bbf24bb3167af71e50a92f536c9 y ACL privada intacta.
+30 comparaciones PostgreSQL17.11 aislado PASS, evita materialización en perfil,
+conserva rama heredada y rollback06. No datos productivos de prueba, RLS/roles/
+flags/contratos alterados; no frontend/versionado/publicación. Latencia real tras
+segundo ajuste pendiente. Coordinación debe resolver el requisito de guardado y
+el enriquecimiento de todas las filas cada20s sin duplicar la UI en curso.
+Detalles/evidencia: ../sql-proposals/lp01-order-sale/PERSISTENT_FAILURE_V397.md.
+
 ## Disponible / sesión acotada · APLICADO EN SUPABASE · 06/11/2026
 
 Autorización delegada por coordinación con instrucciones de Johan para corregir
