@@ -1,10 +1,13 @@
 # Hojas y cierre oficial · entrega parcial para coordinación · 06/11/2026
 
-Base: `d45c5ed28a3cbafbb08179bdfaa138afaed8464c` (main v394), comprobada por fetch
-y ls-remote. Rama aislada `feat/lp01-operation-official-close`; checkout original
+Base vigente tras rebase: `a068e14083bb92db6e72c71934d8cf240ef345ff`
+(main Picking v396), comprobada por fetch. Base inicial histórica: d45c5ed/v394. Rama aislada `feat/lp01-operation-official-close`; checkout original
 `/workspace/SGP-ONE-LAB` conservado (rama work, dependencias sin seguimiento).
-PR206/v395 pertenece a Auditoría Picking y no se modifica. Candidata v396,
-sin publicación ni cambio de HOLD/pins/política. No integrar como bloque terminado.
+PR207/Picking v396 publicado se preserva íntegro. La reserva anterior v396
+para LP queda retirada; versión futura pendiente de coordinación, no reutilizar
+v396 como entrega nueva. Metadatos del checkout conservan temporalmente la
+baseline publicada. Sin publicación ni cambio de HOLD/pins/política. No integrar
+como bloque terminado.
 
 ## Implementado y verificable en esta rama
 
@@ -135,3 +138,21 @@ ni se retiró el campo manual de UI. Sigue siendo una entrega parcial sin
 activación, producción, push nuevo o PR. 7 escenarios PG nuevos y5 HTTP PASS;
 se reutiliza evidencia previa intacta, CI completa única pendiente de congelación.
 sharedOrderSummary pendiente de ruta/contrato exactos del dueño; sin duplicación.
+
+## Rebase sobre Picking publicado · 06/11/2026
+
+Main exacto `a068e14083bb92db6e72c71934d8cf240ef345ff`. Commits conservados:
+`d5fa54b → 3f5feb0`, `26fc8fdd → d594b14`, `e7ddbf0 → 8760a4b`.
+Respaldo local `backup/lp01-official-close-before-a068e14` apunta a e7ddbf0.
+Solo conflicto de index.html (título/cache de release), resuelto con main íntegro.
+index.html, build-release-info, app.js, styles.css, módulos/SQL/evidencia Picking
+y política no tienen diff contra main. LP, contrato SQL nuevo y sus pruebas
+coinciden byte por byte con el incremento previo; se reutilizan las pruebas
+válidas, sin nueva batería SQL/Node/Picking. verify:release y diff-check PASS.
+Ese verify conserva la versión de baseline396; no acredita una nueva entrega396.
+
+Sin push/PR ni ejecución productiva. Archivos completos exactos del resumen
+compartido siguen pendientes de entrega por coordinación; no imports rotos,
+lectura de worktree ajeno ni recreación del helper. Próximo: incorporar esos
+archivos y probar únicamente integración de resumen, indisponibilidad/legado y
+revocación; reservar CI completa y versión nueva para candidato final.

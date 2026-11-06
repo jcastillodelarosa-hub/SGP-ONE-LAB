@@ -1,3 +1,15 @@
+## Rebase LP sobre Picking v396 publicado · 06/11/2026
+
+Base vigente a068e14083bb92db6e72c71934d8cf240ef345ff; incrementos locales
+rebasados hasta8760a4b, respaldo e7ddbf0 conservado. Único conflicto index.html,
+resuelto preservando rótulo/cache Picking de main. Sin diff en Picking, SQL
+publicado, app/styles ni política. LP/SQL nuevo/tests idénticos al corte previo;
+no repetir pruebas ya válidas. verify:release y diff-check PASS. Se retira reserva
+LPv396: metadatos son baseline publicada, versión futura pendiente de coordinación.
+Sin push, PR, SQL/grants ni publicación. Helper de resumen exacto pendiente del
+autor; no recrearlo. Próximo: integrar sus archivos y probar estados compartidos
+con prueba dirigida; CI completa única al congelar candidato.
+
 ## Cierre oficial · persistencia real aislada · 06/11/2026
 
 Incremento local posterior a26fc8fdd: servicio servidor sobre parser existente,
