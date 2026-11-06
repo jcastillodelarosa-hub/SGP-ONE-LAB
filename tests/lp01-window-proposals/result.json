@@ -1,0 +1,22 @@
+[
+  {
+    "width": 1440,
+    "formVisibleBeforePending": true,
+    "tentativePerSourceEditable": true,
+    "noAutomaticWritesOrSum": true,
+    "manualCorrectionSurvivesSourceChanges": true,
+    "legacyNoInventedLink": true,
+    "ncOneProposedManualSavedAndReloaded": true,
+    "permissionsPreserved": true
+  },
+  {
+    "width": 390,
+    "formVisibleBeforePending": true,
+    "tentativePerSourceEditable": true,
+    "noAutomaticWritesOrSum": true,
+    "manualCorrectionSurvivesSourceChanges": true,
+    "legacyNoInventedLink": true,
+    "ncOneProposedManualSavedAndReloaded": true,
+    "permissionsPreserved": true
+  }
+]
