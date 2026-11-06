@@ -1,3 +1,16 @@
+## Orden compartida · conexión local · 06/11/2026
+
+Cinco pestañas actuales conectadas sin turno obligatorio y sin rediseño;
+legacy visible, nota global separada, NC explícita y Accesorios operativos en
+PostgreSQL sintético. PC1440/móvil390 guardar/reintentar/recargar/compartir entre
+líderes PASS; recorrido B10 real y nota CAS PASS. Tecno usa techo aprobado.
+API mountTrackingAffectations intacta; resumen de fila requiere acople por dueño
+de lp01-operation.js con sharedOrderSummary (no suma heredado/compartido).
+PDF B10 leído por Library solo como texto/puntero; no píxeles originales aquí.
+Pendientes acople de filas, actualización de expectativas antiguas de turno y
+CI conjunta al congelar. Sin nuevo PR (denegado), SQL ni publicación.
+Detalle: docs/sql-proposals/lp01-shared-order/README.md.
+
 ## Orden compartida · contrato en desarrollo · 06/11/2026
 
 Rama feat/seguimiento-glass-nc-link rebasada sobre d45c5ed (v394).

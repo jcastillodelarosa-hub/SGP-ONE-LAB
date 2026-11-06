@@ -6,6 +6,10 @@ on:
       - 'tests/lp01-shared-order/**'
       - 'tests/lp01-shared-order.test.mjs'
       - 'src/domain/lp01-shared-order-editor.js'
+      - 'src/domain/lp01-shared-order-summary.js'
+      - 'src/modules/lp01-shared-affectations-panel.js'
+      - 'src/modules/lp01-tracking-affectations.js'
+      - 'src/modules/lp01-affectation-tabs.js'
       - 'src/services/lp01-shared-order.js'
       - 'src/domain/lp01-export-glass.js'
       - '.github/workflows/lp01-shared-order.yml'
@@ -29,8 +33,13 @@ jobs:
       - run: docker pull postgres:17.11
       - run: python tests/lp01-shared-order/contracts.py
       - run: python tests/lp01-shared-order/package.py
+      - run: pip install playwright==1.55.0
+      - run: python -m playwright install --with-deps chromium
+      - run: python tests/lp01-shared-order/browser.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: shared-order-synthetic-contracts
-          path: tests/lp01-shared-order/*result.json
+          path: |
+            tests/lp01-shared-order/*result.json
+            tests/lp01-shared-order/evidence/

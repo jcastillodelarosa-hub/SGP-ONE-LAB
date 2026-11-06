@@ -55,13 +55,54 @@ service_role por defecto. `02_activate_REVIEW.sql` concede solo esas tres a anon
 Pruebas Node: transporte/identidad, borrador conserva revisión y UUID incierto,
  techo decimal. No sesión productiva ni aceptación en planta.
 
-**Vistas todavía no conectadas al contrato nuevo.** Se conserva API de montaje
+**Vistas conectadas localmente al contrato nuevo; no activadas en producción.** Se conserva API de montaje
 `mountTrackingAffectations({host,row,target,cause,scope,client,getToken,isCurrent})`;
-`target` será opcional, `scope.stage` seguirá como ámbito de autorización.
-No se han modificado archivos de hojas/PDA ni la estructura visual en este corte.
+`target` es opcional, `scope.stage` sigue como ámbito de autorización.
+No se han modificado archivos de hojas/PDA ni la geometría visual en este corte.
 La guía original `libfile_8eb9eaa8a3388191b3ce358f9a22661a` fue resuelta por
 prepare_materialize; devolvió transferencia, no workspace_path. El helper vigente
 falló con `download failed` a destino `/workspace/approved-guide/SGP_Guia_Visual_27_Bocetos.html`.
 Sin archivo local ni inspección de píxeles; no se reintentó ni eludió restricción.
-Pendiente inspección B10 y conexión de las cinco pestañas existentes; luego pruebas
-PC/móvil integradas, CI del candidato completo y coordinación de versión/integración.
+Pendiente inspección de píxeles B10 original, acople de distintivos por el hilo
+de hojas y CI del candidato completo al congelar. La conexión PC/móvil de las
+cinco pestañas ya pasó en aislamiento, según la evidencia siguiente.
+
+## Conexión funcional local — 06/11/2026
+
+Las cinco pestañas existentes ya usan el servicio compartido a través de la API
+original `mountTrackingAffectations`. No hay selector de turno ni fallback de
+escritura al contrato antiguo. Si falta el backend nuevo, los reportes anteriores
+siguen visibles y el guardado compartido queda deshabilitado. La nota global sigue
+independiente. Se conserva la geometría existente, sin rediseño.
+
+Chromium + PostgreSQL sintético PC1440/móvil390: registro, pérdida de respuesta y
+reintento mismo UUID, vínculo NC, nota desde Ensamble visible en Empaque,
+corrección desde Empaque visible en Ensamble, Accesorios y techo Tecno PASS.
+`tests/lp01-shared-order/browser-result.json` y `evidence/shared-*.png`.
+`tests/lp01-order-details/browser.py` adaptada al backend compartido ausente y
+techo aprobado: nota CAS/reintento, cinco pestañas, panel B10 inferior y sin
+sobresalir en móvil PASS. No equivale a prueba productiva.
+
+La lectura Library directa del PDF maestro `libfile_2f0d0baa08f481919c5a2e27786f5d96`
+página14 devolvió texto y `image_asset_pointer`, sin bloque de píxeles renderizado.
+No se afirma inspección original; se siguió la especificación del coordinador y
+se inspeccionaron las capturas sintéticas propias.
+
+### Integración mínima para el hilo de hojas
+
+Sin modificar `lp01-operation.js` aquí: al refrescar el resumen de fila, consultar
+`sharedOrderTransport({client,getToken,key,line,stage}).read()` y pasar el resultado
+junto al snapshot nativo a `sharedOrderSummary(nativeSnapshot,sharedSnapshot)` de
+`src/domain/lp01-shared-order-summary.js`. Si hay reportes compartidos y heredados
+posiblemente coincidentes, devuelve cantidad desconocida, no suma ni valida unión.
+El adaptador siempre deja total/disponible desconocidos; no acredita el antiguo
+consolidado contra el conjunto nuevo. Este acople de distintivos está pendiente.
+
+Antes de congelar CI deben adaptarse las expectativas obsoletas de contexto
+obligatorio en `lp01-b12-b13/browser.py` (coordinar con dueño de hojas),
+`lp01-afectaciones-rpc/native-app.py`, `unassigned-app.py`,
+`lp01-b10-correction/browser.py`, `lp01-pending-ui/browser.py` y
+`lp01-order-details/visual-focus.py`. La prueba nueva cubre el reemplazo funcional
+con SQL real aislado; no se quitarán verificaciones nativas de origen/recepción.
+No se reintentó crear PR tras la denegación reiterada; pendiente autorización
+específica. Este delta permanece local hasta coordinación.
