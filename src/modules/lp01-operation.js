@@ -2,12 +2,12 @@ import {orderSaleTransport} from '../services/lp01-order-sale.js';
 import {affectationSummary} from '../domain/lp01-affectation-summary.js';
 import {compactSummaryMarkup as summaryMarkup} from './lp01-affectation-summary.js';
 import {mountTrackingAffectations} from './lp01-tracking-affectations.js';
+import {mountOperationOrderContext} from './lp01-operation-context.js';
 import {enrichOperationEvidence} from '../services/lp01-operation-evidence.js';
 import {mountProposal} from './lp01-proposal.js';
 import {operationOrders,validateTurnEntry} from '../domain/lp01-operation-orders.js';
 import {operationOrderList} from './lp01-operation-orders.js';
 import {affectationsTransport} from '../services/lp01-affectations.js';
-import {mountAffectationsPanel} from './lp01-affectations-panel.js';
 import {globalTrackingData,trackingIdentity} from '../domain/lp01-tracking-global.js';
 import {renderTracking} from './lp01-tracking.js';
 import {materialContext} from '../domain/lp01-sources.js';
@@ -200,11 +200,11 @@ export function mountOperation({tracking,operation,bridge,legacyLoad,orderSaleEn
    host.querySelector('[data-sale-save]')?.addEventListener('click',()=>attempt(()=>send('SALE',{quantity:quantity(host.querySelector('[data-sale]').value),observation:required(note())},r)));
    const individual=host.querySelector('[data-individual-affects]');let individualLoaded=false;
    individual.ontoggle=async()=>{if(!individual.open||individualLoaded)return;individualLoaded=true;dirty=true;const box=host.querySelector('[data-individual-affects-panel]'),token=bridge.getToken(),ctx={...context};box.textContent='Consultando afectaciones…';
-    try{const client=await bridge.getClient();if(!box.isConnected||token!==bridge.getToken())return;
-     const transport=affectationsTransport({client,getToken:()=>bridge.getToken(),contractVersion:2,context:{key:r.key,line:ctx.line,stage:ctx.stage,date:ctx.date,shift:ctx.shift,production:r.produccion}}),read=transport.read;
-     transport.read=async()=>{const value=await read();if(!box.isConnected)throw Error('NO_AUTORIZADO');if(data.turn.estado!=='ABIERTO')value.capabilities=['READ'];
-      if(value.capabilities.includes('REPORT'))for(const el of host.querySelectorAll('[data-affect-save],[data-validate-save],[data-affectation],[data-consolidated]'))el.disabled=true;
-      return value;};await mountAffectationsPanel(box,transport);
+    try{
+     // No second authoring path. Capability/turn policy belongs to the shared component.
+     for(const el of host.querySelectorAll('[data-affect-save],[data-validate-save],[data-affectation],[data-consolidated],[data-note-save]'))el.disabled=true;
+     await mountOperationOrderContext({host:box,row:r,scope:ctx,bridge,mount:mountTrackingAffectations,
+      isCurrent:()=>token===bridge.getToken()&&selected===r.parte&&data?.orders.some(x=>x.parte===r.parte&&x.key===r.key)&&['line','stage','date','shift'].every(k=>context?.[k]===ctx[k])});
     }catch(error){if(box.isConnected)box.textContent='Afectaciones no disponibles: '+error.message;}
    };
    const affect=()=>Object.fromEntries([...host.querySelectorAll('[data-affectation]')].map(el=>[el.dataset.affectation,quantity(el.value)]));

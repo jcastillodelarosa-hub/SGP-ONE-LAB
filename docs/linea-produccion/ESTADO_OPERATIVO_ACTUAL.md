@@ -1,3 +1,13 @@
+## Integración compartida en hojas · incremento local · 06/11/2026
+
+Ensamble/Empaque consumen mountTrackingAffectations desde su panel existente,
+misma key y scope.stage, sin target de turno inventado ni duplicación de API.
+Contrato compartido37b5f6e leído, no copiado. 3 pruebas nuevas+8 listas PASS;
+no nueva batería general ni CI hasta congelar. PDF maestro páginas16–18 leído:
+solo notas/punteros, sin píxeles; comparación visual sigue pendiente.
+Creación del PR propio denegada por revisión automática; no reintento. Incremento
+solo local. [Detalles y límites](OPERACION_CIERRE_OFICIAL_PENDIENTES.md).
+
 ## Hojas / cierre oficial · entrega parcial aislada · 06/11/2026
 
 Base main d45c5ed/v394; rama feat/lp01-operation-official-close, candidata v396

@@ -91,3 +91,33 @@ el ingreso manual en UI. Para activar backend, preparar en esa entrega SQL
 revisable, dependencias, ACL antes/después, hashes y recuperación no destructiva;
 **este PR no contiene un instalador listo ni solicita aprobación de activación**.
 No repetir auditoría general de Export o grants. No fusionar ni publicar.
+
+## Incremento local tras coordinación del componente compartido
+
+Se leyó el contrato de `feat/seguimiento-glass-nc-link` en
+`37b5f6e53b20209e2d11ed9312a5daf13e38c1e9`, sin copiar su implementación.
+El contenedor existente de afectaciones del detalle de ambas etapas consume
+ahora `mountTrackingAffectations` mediante un adaptador de ámbito:
+`mountOperationOrderContext`. Target null, key canónica y scope.stage; el
+componente compartido decide capacidades y requisitos de registro. La hoja
+no recorta capacidades por estado del turno. Al abrir ese panel deshabilita
+los controles antiguos de afectaciones/nota para evitar dos escritores activos.
+No se reescribe ninguna pestaña ni transporte compartido. Su backend nuevo y
+sus vistas siguen en el hilo dueño; este cambio no acredita su activación.
+
+Pruebas dirigidas del incremento: 3 nuevas (ambas etapas, sesión/selección/host
+obsoletos) y8 de listas PASS; sintaxis/diff PASS. Se reutilizan las535 anteriores
+para código intacto; no se atribuyen al SHA nuevo ni se repite CI completa.
+
+Ruta PDF directa proporcionada por coordinación: Library
+`libfile_2f0d0baa08f481919c5a2e27786f5d96`, páginas16–18. La lectura devolvió
+notas B12/B13/B14 y solo `image_asset_pointer`, sin ImageContent ni bytes de
+imagen visibles. No es inspección de píxeles. No se materializó el PDF completo,
+ni se repitió HTML, ni se reconstruyeron URLs. Continúa la limitación visual.
+
+PR propio: creación denegada por revisión automática tras push confirmado de
+`d5fa54b`. Motivo: autorización de implementación no acredita permiso específico
+para abrir PR/compartir contenido. Se consultó historial; sin evidencia nueva
+suficiente, no se reintentó ni se cambió de herramienta. PR del otro bloque
+igualmente fuera de alcance. Este incremento se conserva **solo local** para
+coordinación; ninguna publicación. CI del candidato completo sigue pendiente.
