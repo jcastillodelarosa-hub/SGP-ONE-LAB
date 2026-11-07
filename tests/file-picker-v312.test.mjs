@@ -97,7 +97,7 @@ test('conserva flujos de validación, foto/cámara y versión consistente',()=>{
   assert.ok(html.includes('id="'+id+'"'),'Falta control existente '+id);
  }
  assert.match(app,/els\.files\.files/);
- assert.match(app,/els\.dailyExportFile\?\.files/);
+ assert.match(readFileSync(new URL('../src/modules/export-review.js',import.meta.url),'utf8'),/el\('dailyExportFile'\)\.files/);
  assert.match(app,/\#recChoosePhotos'\)\?\.addEventListener/);
  assert.match(app,/\#recTakePhoto'\)\?\.addEventListener/);
  assert.match(html,new RegExp(releaseLabel));

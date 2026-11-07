@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-const source=readFileSync(new URL('../app.js',import.meta.url),'utf8');
-function block(start,end){const i=source.indexOf(start);const j=source.indexOf(end,i+start.length);assert.ok(i>=0&&j>i);return source.slice(i,j)}
-test('export preview uses the unified session getter',()=>{const s=block('async function previewDailyExport()','async function applyDailyExport()');assert.match(s,/const token=getAppToken\(\)/);assert.doesNotMatch(s,/sessionStorage\.getItem\(APP_SESSION_KEY\)/);assert.match(s,/sgp_previsualizar_export_diario/)});
-test('export apply uses the same token and preserves confirmation',()=>{const s=block('async function applyDailyExport()','async function ');assert.match(s,/const token=getAppToken\(\)/);assert.match(s,/window\.confirm/);assert.match(s,/sgp_aplicar_export_diario/);});
+const app=readFileSync(new URL('../app.js',import.meta.url),'utf8');
+const source=readFileSync(new URL('../src/modules/export-review.js',import.meta.url),'utf8');
+test('export review uses the unified session getter',()=>{assert.match(app,/getToken:getAppToken/);assert.match(source,/const token=getToken\(\)/);assert.doesNotMatch(source,/sessionStorage/);assert.match(source,/sgp_export_preparar/)});
+test('export approval preserves confirmation and does not bypass pending changes',()=>{assert.match(source,/window\.confirm/);assert.match(source,/sgp_export_aprobar/);assert.doesNotMatch(source,/sgp_aplicar_export_diario/);});

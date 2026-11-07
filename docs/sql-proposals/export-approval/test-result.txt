@@ -1,0 +1,1 @@
+PASS: new, quantity, absence scope, selective approval, replay, reappearance, partial imports, moved week, stale atomic rejection, role/table access, legacy bypass blocked, five exact-source reader patches compile.
