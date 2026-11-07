@@ -1,0 +1,5 @@
+{
+  "fixture_sha256": "83cc944a58e75b176ac1422b15704908a74b59160b0afb6fc4a099ad4a7eb523",
+  "source": "Existing PGlite setup + captured real session/permission/command/planner functions. All user/production rows synthetic.",
+  "parts": 34
+}

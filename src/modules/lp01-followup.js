@@ -1,4 +1,4 @@
-import {mountOperation} from './lp01-operation.js?v=tabs-aprobadas-1';
+import {mountOperation} from './lp01-operation.js?v=405-hoja-ensamble';
 import {followupRows,filterFollowup,weekRange} from '../domain/lp01-followup.js';
 const esc=v=>String(v??'—').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const show=v=>v===null||v===undefined?'Sin dato':String(v);

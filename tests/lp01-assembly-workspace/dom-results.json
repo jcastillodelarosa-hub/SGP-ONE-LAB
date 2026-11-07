@@ -1,0 +1,21 @@
+{
+  "status": "PASS",
+  "type": "Synthetic DOM, not visual browser QA",
+  "visibility": "NO_OBSERVER_FALLBACK",
+  "checks": [
+    "Three production groups render without opening or manual-advance controls",
+    "A shared-affectation read failure does not hide an independently valid order note",
+    "Quiet refresh retains table host, local search and visible group filter",
+    "A pending row-level Disponible command cannot be discarded by opening a detail",
+    "Compact row notes protect dirty drafts and in-flight saves before detail, close or reports navigation",
+    "B12 preserves its editor node/draft during quiet Export balance refresh",
+    "Uncertain note command blocks leaving the detail and retains the original editor",
+    "Every mounted affectation panel, including a hidden nonfirst panel, guards drafts and uncertain saves",
+    "Closure/reports route explicitly; unavailable incorporation is disabled, never simulated",
+    "Removed/revoked production closes stale detail and clears its editor",
+    "Current-turn shortcut uses the server schedule and only requests consultation",
+    "Viewing, filtering and refreshing make authenticated reads only; no write RPC",
+    "Synthetic incorporation modal locks uncertain input/cancel and retries the same controller command"
+  ],
+  "reads": 19
+}

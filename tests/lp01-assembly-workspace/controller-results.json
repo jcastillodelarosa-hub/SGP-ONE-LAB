@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "type": "Synthetic integrated controller DOM, not browser QA",
+  "checks": [
+    "Existing stage navigation loads the scoped catalog into new Ensamble workspace",
+    "Ensamble route does not expose the old manual execution/closure controls; local preview is explicit",
+    "Controller-owned close navigation preserves an uncertain detail command without new reads",
+    "A transient refresh failure preserves the existing editor, draft and uncertain retry",
+    "Reports navigation remains available after resolving the pending command",
+    "An authorization denial clears the prior Ensamble data rather than preserving it as a network failure",
+    "The real controller routes V2 CSV through the validated model, keeps null coverage and stops downloads after session change"
+  ],
+  "reads": 22
+}

@@ -1,0 +1,13 @@
+{
+  "base": "75b05b842f866163cd6fea6b54dc21e66eba0ade",
+  "project": "ocvxbwzqxbrfndkvjmfx",
+  "status": "PROPOSED_NOT_APPLIED",
+  "original_source_md5": "9f9f3ef8861c4fb410a4132f74204930",
+  "candidate_source_md5": "2e4eeacbfc331f2c6dcde32ee96701d7",
+  "files": {
+    "01_catalog_REVIEW.sql": "d19d3a4b7a3a735a726333cb066f83377e0213bf918672f5e97b4142431ee750",
+    "02_restore_REVIEW.sql": "19f231b7d7e09d0c5e59ffaa064fa67d05b2e09ab34b3acc9e0414cf083e20c8",
+    "catalog-fragment.sql": "3e253b6dab417854158c841a47afd289daa90c9ca9468c6255fde5ce9767f7a8"
+  },
+  "scope": "existing authorized productions only; unchanged SGP session and permissions helpers; no new ACL, credential, role, job or write"
+}

@@ -1,0 +1,13 @@
+{
+  "status": "PREPARATION_PASS_CONCURRENCY_NOT_RUN",
+  "engine": "PGlite0.5.15 PostgreSQL18.6",
+  "verified": [
+    "Synthetic fixture compiles",
+    "Captured programar/mover execute against fixture",
+    "Exact guarded INCORPORAR proposal installs disabled"
+  ],
+  "notVerified": [
+    "PostgreSQL17 execution",
+    "Multiple sessions, blocking, CAS races or contention"
+  ]
+}

@@ -1,0 +1,39 @@
+name: LP01 incorporation concurrency (synthetic PostgreSQL17)
+on:
+  pull_request:
+    paths:
+      - 'docs/sql-proposals/lp01-incorporar/**'
+      - 'tests/lp01-incorporar/**'
+      - 'tests/lp01-hoja/base-fixture.sql'
+      - 'tests/lp01-hoja/production-readonly/**'
+      - '.github/workflows/lp01-incorporar-concurrency.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  postgres17-concurrency:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify setup cleanup without Docker
+        run: python -B tests/lp01-incorporar/concurrency/test-container-cleanup.py
+      - name: Fetch official pinned PostgreSQL test image
+        run: docker pull postgres:17.11
+      - name: Verify deterministic synthetic fixture
+        run: |
+          python tests/lp01-incorporar/concurrency/build-fixture.py
+          git diff --exit-code -- tests/lp01-incorporar/concurrency/fixture.sql tests/lp01-incorporar/concurrency/fixture-manifest.json
+      - name: Real multi-session locks, CAS, revocation and atomicity
+        run: python tests/lp01-incorporar/concurrency/postgres17.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lp01-incorporar-postgres17-synthetic
+          path: tests/lp01-incorporar/concurrency/result-postgres17.json
+          if-no-files-found: error

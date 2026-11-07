@@ -1,0 +1,14 @@
+{
+  "tests/lp01-incorporar/concurrency/README.md": "e5c2c067fee267222213e353fdb4bce7aa3aff66eeb6b1920be427125cade2f7",
+  "tests/lp01-incorporar/concurrency/build-fixture.py": "83c480b17dabb10ca7822ece1ec24dab0b891a521f8efb7b6295fb2ecc796248",
+  "tests/lp01-incorporar/concurrency/fixture-manifest.json": "79c9ca65581a860b30b305616ee60bfb5b6c4681b3bca2d5537c9317bbc53cc4",
+  "tests/lp01-incorporar/concurrency/fixture.sql": "83cc944a58e75b176ac1422b15704908a74b59160b0afb6fc4a099ad4a7eb523",
+  "tests/lp01-incorporar/concurrency/postgres17.py": "97512ef29c39b010d0b9a396550fdd277fe757ee59fcc936a0eb6fa800871e0b",
+  "tests/lp01-incorporar/concurrency/preparation-check.json": "9ddfffb63ffaf72f03eb0485d25884ef1153bd29632b0b333027e134aca29143",
+  "tests/lp01-incorporar/concurrency/production-readonly/sgp_linea_plan_mover.sql": "1a12358767f1d894d5aaef8465d2b7933eb396e68ca5b7bd80c922b61a34f32d",
+  "tests/lp01-incorporar/concurrency/production-readonly/sgp_linea_plan_programar.sql": "27970f56855f6fe95e9a3ea037e6e8e7362dedbbc809a3e1ae976f54d7c475cc",
+  "tests/lp01-incorporar/concurrency/production-readonly/sgp_validar_sesion_rol.sql": "5941bb8d48f761b03e8953abfa37c9d5ee9c8fe8542973e4ecbef65e053ebbd6",
+  "tests/lp01-incorporar/concurrency/result-postgres17.json": "7049c3fd806e371ed722b3e1e056fe428d9babeb70e37bb2d01e6ebca5790531",
+  "tests/lp01-incorporar/concurrency/test-container-cleanup.py": "8c55a8e5cdd877056aa297e76844816af18fd58b94b45d88683ace0fb67cef0a",
+  ".github/workflows/lp01-incorporar-concurrency.yml": "ae74ad2eaee83628abf0ab71795803e3f8ac86ca6bcacceeb96a6890019bcab4"
+}

@@ -1,0 +1,45 @@
+/* B15: confirmed result of the approved review/close screen; shared SGP tokens. */
+.lp-assembly-reports{min-width:0;color:var(--sgp-ink,#0b2442)}
+.lp-assembly-reports>details{margin:12px 0;border:1px solid #d4e0ed;border-radius:8px;background:#fff;overflow:hidden}
+.lp-assembly-reports>details>summary{padding:13px;cursor:pointer;background:var(--sgp-surface-soft,#eaf2fb);font-weight:650;overflow-wrap:anywhere;min-height:44px;box-sizing:border-box}
+.lp-assembly-report{padding:16px;font:inherit;color:var(--sgp-ink,#0b2442);min-width:0;background:#fff}
+.lp-assembly-report-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.lp-assembly-report-heading h3{margin:0 0 6px;font-size:20px;color:var(--sgp-ink,#0b2442)}
+.lp-assembly-report-heading p{margin:0;color:#526782;font-size:13px}
+.lp-assembly-report-state{padding:5px 9px;border-radius:16px;background:#eaf0f7;color:#3d526d;font-size:12px;font-weight:650}
+.lp-assembly-report-state.is-current{background:#e4f1e6;color:#295c35}
+.lp-assembly-report-provenance,.lp-assembly-report-footnote{font-size:11px;color:#526782;overflow-wrap:anywhere;line-height:1.6}
+.lp-assembly-report-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:14px 0}
+.lp-assembly-report-kpis>div{min-width:0;background:#f7f9fc;border:1px solid #e1e9f2;border-radius:8px;padding:12px;font-size:12px}
+.lp-assembly-report-kpis b{display:block;font-size:23px;color:var(--sgp-ink,#0b2442);margin-top:4px;overflow-wrap:anywhere}
+.lp-assembly-report-kpis small{font-size:12px;font-weight:400}
+.lp-assembly-report-card{border:1px solid #e1e9f2;border-radius:8px;padding:12px;margin:12px 0}
+.lp-assembly-report-card h4{margin:0 0 9px;font-size:14px}
+.lp-assembly-report-table-wrap{max-width:100%;overflow:auto;overscroll-behavior:contain}
+.lp-assembly-report-table{width:100%;border-collapse:collapse;font-size:12px}
+.lp-assembly-report-table th,.lp-assembly-report-table td{padding:8px;text-align:left;vertical-align:top;border-bottom:1px solid #e6edf5;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.lp-assembly-report-table thead th{background:var(--sgp-surface-soft,#eaf2fb);color:#3d526d;font-size:11px;font-weight:600;text-transform:none;letter-spacing:normal}
+.lp-assembly-report-table tbody th{font-weight:500;min-width:90px}
+.lp-assembly-report-table small{display:block;font-size:10px;font-weight:400;color:#526782;margin-top:3px}
+.lp-assembly-report-table tfoot{background:var(--sgp-surface-soft,#eaf2fb);font-weight:700}
+.lp-assembly-report-observation{white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px;line-height:1.5;margin:0}
+.lp-assembly-report-downloads{display:flex;flex-wrap:wrap;gap:8px;padding:0 16px 12px}
+.lp-assembly-report-downloads button{min-height:44px;border:1px solid #cbdcf0;border-radius:8px;background:#fff;color:var(--sgp-action,#1264c8);padding:9px 12px}
+.lp-assembly-report-downloads button:disabled{opacity:.6;cursor:wait}
+.lp-assembly-reports [data-assembly-report-status]{margin:0;padding:0 16px 12px;font-size:12px;overflow-wrap:anywhere}
+.lp-assembly-reports :focus-visible{outline:3px solid var(--sgp-action,#1264c8);outline-offset:2px}
+@media(max-width:700px){
+ .lp-assembly-report{padding:10px}
+ .lp-assembly-report-heading h3{font-size:17px}
+ .lp-assembly-report-kpis{gap:6px}
+ .lp-assembly-report-kpis>div{padding:8px;font-size:10px}
+ .lp-assembly-report-kpis b{font-size:18px}
+ .lp-assembly-report-orders,.lp-assembly-report-orders tbody{display:block;width:100%}
+ .lp-assembly-report-orders thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+ .lp-assembly-report-orders tbody{display:grid;gap:8px}
+ .lp-assembly-report-orders tbody tr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid #dce6f1;border-radius:7px;padding:6px;min-width:0}
+ .lp-assembly-report-orders tbody th,.lp-assembly-report-orders tbody td{display:block;min-width:0;border:0;padding:5px;font-size:12px}
+ .lp-assembly-report-orders tbody th,.lp-assembly-report-orders tbody td:nth-child(2),.lp-assembly-report-orders tbody td:last-child{grid-column:1/-1}
+ .lp-assembly-report-orders tbody td:before{content:attr(data-label);display:block;font-size:10px;color:#526782;margin-bottom:3px}
+ .lp-assembly-report-downloads button{flex:1 1 42%;font-size:12px}
+}

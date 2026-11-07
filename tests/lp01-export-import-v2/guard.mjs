@@ -1,0 +1,12 @@
+import {readFile} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+import assert from 'node:assert/strict';
+const root=new URL('../../',import.meta.url),read=p=>readFile(new URL(p,root));
+const manifest=JSON.parse(await read('docs/sql-proposals/lp01-export-import-v2/manifest.json'));
+for(const [path,sha] of Object.entries(manifest.artifact_sha256))assert.equal(createHash('sha256').update(await read(path)).digest('hex'),sha,path);
+assert.equal(createHash('sha256').update(await read('supabase/functions/lp-powerbi/index.ts')).digest('hex'),manifest.entrypoint_sha256);
+const entry=(await read('supabase/functions/lp-powerbi/index.ts')).toString();assert(!entry.includes('exportProductionV2'));
+const install=(await read('docs/sql-proposals/lp01-export-import-v2/01_import_adapter_REVIEW.sql')).toString();
+assert(!/\bGRANT\b|CREATE\s+(?:ROLE|POLICY)|UPDATE\s+sgp_lp_operacion\.config\s+SET\s+export_production_v2/i.test(install));
+assert(install.includes('export_production_v2 boolean NOT NULL DEFAULT false'));
+console.log(`PASS ${Object.keys(manifest.artifact_sha256).length} adapter artifact pins; unchanged disabled entry point; no grants or activation.`);

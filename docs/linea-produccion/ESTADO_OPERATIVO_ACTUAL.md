@@ -1,3 +1,100 @@
+## Candidata LAB v405 · integración sobre v404 publicada · 07/11/2026
+
+Recuperación de transferencia: el envío monolítico de 155 archivos no respondió y
+se canceló. Main sigue en v404; el árbol esperado devuelve 404 y no se creó rama
+ni PR. Se retoma por envíos pequeños con resultado comprobable, sin repetir el lote.
+Compatibilidad de órdenes ausentes aprobadas: el lector excluye solo el booleano
+`oficial.excluida_export=true` de la hoja activa, conservando cierres históricos.
+No interpreta ausencia del archivo como aprobación. 39 pruebas focales PASS.
+La columna, alerta/aprobación y exposición del campo en RPC son del paquete Export
+v406 separado, todavía no aplicado; esta compatibilidad por sí sola no lo activa.
+
+Base main `0f412504d1ea67edb966688cd3b2e9ef875b0d28`, Hosting v404
+`d3e4f12f98a7cded`. Observaciones integrada y publicada previamente; su CSS final,
+notas compactas y controles se preservan. Ensamble v405 aún NO publicado.
+
+Catálogo/horario **APLICADO EN SUPABASE**: RPC consultar con cuerpo exacto
+`2e4eeacbfc331f2c6dcde32ee96701d7`, readback 13:20:40 UTC. Permisos, roles, RLS,
+flags y datos operativos intactos. Evidencia de instalación en
+`docs/sql-proposals/lp01-hoja/installation-evidence.json`. Falta respuesta visible
+con sesión de planta; no confundir metadata comprobada con aceptación funcional.
+
+Alcance de esta publicación: hoja de abiertas/programadas/otras órdenes autorizadas,
+observación/afectaciones/Disponible mediante editores existentes, detalle compartido,
+lectura e informes de cierres confirmados y revisión local del XLSX sin guardarlo.
+No habilita INCORPORAR, cierre Export3, actualización de Disponible por avance,
+continuidad ni apertura automática. Esas funciones quedan explícitamente contenidas;
+no presentar la entrega como módulo operativo completo ni activar por publicar UI.
+
+Corte local integrado: 808/808 Node PASS sin omitidos, build/verify:release405,
+tres guards de los contratos contenidos y política pura PASS. Se recuperó el
+objeto histórico Git requerido por la prueba de política; no se cambió su control.
+QA nueva PC/móvil pendiente de CI exacta.
+
+v405 acredita baseline y rollback v404. Los pins cambiados corresponden únicamente
+al frontend integrado, su cache-bust y handler opcional aún desactivado en Edge.
+Mantener HOLD hasta CI exacta y revisión independiente del ZIP oficial. Nueva QA
+PC/móvil aislada preparada para CI; no se reintenta el navegador local restringido.
+Detalle y próximos pasos: [checkpoint de Ensamble](ENSAMBLE_NOV7_CHECKPOINT.md).
+
+## Estado vigente de la preparación de Ensamble · 07/11/2026
+
+Base de código comprobada: main `75b05b842f866163cd6fea6b54dc21e66eba0ade`,
+LAB v403. La preparación local de Ensamble está en la rama
+`feat/ensamble-hoja-export-v405`, desde `4c0170d` (último corte verificado `96e4f90`);
+**NO publicada, NO aplicada y NO verificada en planta**. Observaciones v404 tiene candidato remoto PR216 `8815fc84`. Su acople está
+preparado localmente mediante merge de tres vías, sin sobrescribir operation.js;
+falta confirmar el HEAD final publicado e integrar versión/política de release.
+
+B12/B13, nota/afectaciones compartidas, lectura Realizado de cierre vigente, revisión
+local XLSX y B15 histórico/PDF/imagen están implementados localmente. Catálogo y
+horario tienen propuesta SQL de lectura; INCORPORAR tiene propuesta desactivada con
+CAS y descubrimiento. No hay permiso nuevo habilitado, ejecutor automático ni cierre
+V2 productivo. Las funciones LP actuales se leyeron de catálogo: no asumir ausente
+el esquema ni repetir instalaciones/auditorías antiguas por las notas históricas.
+
+Importación V2 transaccional preparada y desactivada: guarda original y cobertura
+por producción, conserva revocación/CAS y contiene el cierre manual legacy. Siete
+grupos SQL aislados y pins del paquete PASS. Aún no conecta un cierre operativo.
+CERRAR V2 también persiste snapshot por producción en una propuesta SQL con puerta
+propia `export_close_v2=false`; seis grupos SQL aislados PASS. Plan/comparación y
+continuidad quedan pendientes, sin sumar SALE ni inventar arrastre. El lector
+versionado Realizado/B15/CSV ya distingue V2 de legacy, conserva cobertura ausente
+y usa identidad histórica. No se anuncia autoridad de cierre ni se habilita su botón.
+La nota compacta de v404 ya está acoplada localmente: conserva borradores al
+filtrar y protege salida durante edición/guardado/reintento. Cuatro grupos DOM
+del adaptador real PASS, workspace13 y controlador7. Sin publicación de Ensamble.
+La revisión focal del nuevo frontend corrigió borradores en paneles secundarios,
+refrescos transitorios que borraban el editor y programación parcial presentada
+como cero; evidencia DOM sintética 12+7 grupos y cierre 4 casos PASS.
+
+Corrección integrada localmente después de recuperar decisiones previas: la recarga debe
+actualizar solo las producciones presentes, conservando el último valor conocido
+de las ausentes y su fuente individual. El contrato 2 local de lote completo queda
+superado; contrato 3 integrado, todavía sin aplicar ni publicar. El cumplimiento
+frente al plan vigente al cierre **ya está aprobado**, junto con conservar plan
+original/cambios con motivo y hora. Falta la conexión técnica versionada, no decidir
+otra vez esa regla. Disponible debe bajar con avance nuevo y restituir correcciones
+hacia abajo; la primera carga necesita una referencia técnica para evitar duplicar
+el descuento. No se infiere corte/fórmula ni se escribe Disponible todavía.
+
+Delta vigente: 83/83 Node UI/lectura y 57/57 dominio/referencia PASS, siete grupos
+DOM controlador y tres guards. SQL aislado importación7/cierre6/recarga5 PASS.
+B15/CSV reutiliza readbacks SQL guardados sin repetirlos; conserva fuente individual
+y cero, distingue nunca informado y rechaza contract2. Evidencia en el checkpoint.
+No se repitió la suite integral para esta corrección focal.
+
+Último corte integral anterior a esta corrección: 786/786 pruebas Node PASS sin omitidos (incluidos los 22
+casos de referencia V2), más pruebas SQL/DOM acotadas. Concurrencia PG17 real,
+QA visual, activación y publicación siguen pendientes. La cadena SQL sintética
+→ consultar real → lector V2 → B15/CSV también PASS, con una importación/cierre.
+No está decidido qué debe hacer la apertura automática si el turno previo no cerró.
+Tampoco se debe convertir el Disponible global (`temporalPolicy:UNRESOLVED`) o una
+suma de SALE legacy por UUID en objetivo del turno nuevo. Comparación operativa y
+corte de Export para continuidad siguen contenidos hasta acreditar su fuente.
+Detalle y continuación exacta: [checkpoint de Ensamble](ENSAMBLE_NOV7_CHECKPOINT.md).
+Las entradas siguientes conservan antecedentes y no sustituyen este estado.
+
 ## Estimación numérica NC AL y Producción NC Vidrio · candidata v401 · 06/11/2026
 
 Base publicada v400 37fa457. La estimación de aluminio suma una ventana por cada
@@ -1437,3 +1534,46 @@ reglas/archivos ya aprobados o recibidos.
 **Directriz de trabajo del usuario:** elegir siempre la vía más sencilla y rápida que sea segura; plantear de inmediato una decisión concreta cuando desbloquee el trabajo. Evitar auditorías generales, arquitectura adicional, reabrir decisiones aprobadas, pruebas repetidas y conversaciones largas de Codex. Un único encargo técnico acotado al PR #183, con evidencia y parada ante bloqueo real. Mantener SGP_ONE_GOOGLE y LAC separados.
 
 **Estado al registrar esta decisión:** DOCUMENTACIÓN ACTUALIZADA; IMPLEMENTADO EN RAMA / VERIFICADO EN AISLAMIENTO; **NO FUSIONADO / NO APLICADO / NO PUBLICADO / NO VERIFICADO EN PLANTA**. Esta actualización documental no modifica SQL, permisos, usuarios, producción ni Firebase.
+
+## Hoja Ensamble B12/B13: trabajo local del 7 de noviembre de 2026
+
+**Estado: IMPLEMENTACIÓN LOCAL Y PRUEBAS AISLADAS. No fusionado, aplicado ni publicado.**
+Base real `75b05b842f866163cd6fea6b54dc21e66eba0ade` / LAB v403. La entrega
+Observación compacta v404 se mantiene separada y debe integrarse primero. No sustituir
+esta base por los antecedentes históricos de SQL10/PR183 citados arriba.
+
+- B13: una fila por producción autorizada, abiertas por saldo Export parcial,
+  programadas sin iniciar, otras y completadas en historial. No suma SALE ni
+  ejecución manual entre asignaciones. PC usa tabla y móvil las mismas filas como
+  tarjetas. Semana original, sistema y reserva conservados.
+- B12: detalle por producción con Disponible existente, afectaciones y observación
+  compartidas; reutiliza los transportes y permisos vigentes. No crea registro de
+  producción manual ni abre turno al consultar. B16 reutiliza las pestañas y los
+  pendientes ya existentes; no se declara un formulario Picking nuevo terminado.
+- Realizado: solo `power_bi` del cierre confirmado vigente, con vínculo de archivo,
+  versión, etapa y período. Reabrir deja el valor pendiente. No infiere una cantidad
+  por diferencia de saldos y no convierte ausencia en cero.
+- B15: resumen por sistema y acceso a informes confirmados. El nuevo cierre está
+  contenido porque el backend vigente usa ejecución manual por UUID de asignación.
+  No se habilita el cierre nuevo ni se afirma terminado el arrastre por producción.
+- Catálogo/horario: propuesta aditiva de la RPC de lectura existente, con controles
+  de sesión/ámbito originales y rollback por huella. Sin GRANT, roles, RLS ni jobs.
+  Véase [paquete exacto](../sql-proposals/lp01-hoja/README.md).
+
+Pendientes que impiden declarar operativo integral: ejecutor automático autorizado,
+comando INCORPORAR del líder con motivo y cierre/continuidad por producción. La
+publicación pública requiere la confirmación solicitada por separado; ninguna ruta
+alternativa de subida se ejecutó. No publicar silenciosamente un alcance reducido.
+La prueba de navegador no pudo iniciarse por restricción de socket del entorno.
+Las pruebas DOM sintéticas no sustituyen QA visual ni operación en planta.
+
+Evidencia y alcance de esta preparación: [checkpoint](ENSAMBLE_NOV7_CHECKPOINT.md).
+
+Ampliación local de la misma noche: INCORPORAR ya está implementado como propuesta
+contenida (bandera false y descubrimiento explícito), con modal frontend y siete
+grupos SQL aislados aprobados. Sigue pendiente activación autorizada y prueba
+concurrente PG17. B15 incorpora revisión local del XLSX sin guardarlo, informes de
+cierres confirmados por sistema y descargas PDF/imagen con vendor existente. La
+referencia de cierre V2 tiene 22 pruebas y modelo SQL aislado, pero no RPC/adaptador
+productivo conectado. Suite integrada UI/reportes: 728/728 PASS. No modifica el
+estado NO PUBLICADO/NO APLICADO ni acredita QA visual o uso en planta.

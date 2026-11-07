@@ -1,0 +1,1 @@
+v3_import_id uuid;v3_import_version bigint;v3_universe_sha text;v3_current_file sgp_lp_operacion.archivos%rowtype;v3_groups jsonb;v3_coverage jsonb;v3_key text;v3_group jsonb;v3_origin sgp_lp_operacion.auditoria%rowtype;v3_origin_row jsonb;v3_origin_file sgp_lp_operacion.archivos%rowtype;v3_quantity bigint;v3_source jsonb;v3_status text;v3_context jsonb;

@@ -1,0 +1,7 @@
+{
+  "status": "NOT_RUN",
+  "engine": "postgres:17.11",
+  "results": [],
+  "safety": "Local disposable Docker container; --network none; no ports/mounts; no DB URL or production credentials accepted.",
+  "reason": "docker executable unavailable; PostgreSQL17 concurrency cases were not run"
+}

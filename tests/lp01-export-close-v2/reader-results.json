@@ -1,0 +1,46 @@
+{
+  "status": "PASS",
+  "contract": "LP-EXPORT-CLOSE-3",
+  "type": "Saved synthetic SQL readback through current reader, B15, CSV and sheet; no SQL rerun",
+  "sourceSha256": {
+    "src/domain/lp01-closure-export-v2.js": "55c4be9144eb4498580c8dc6cfdb2e6e285a69c9534e0040fc6beeac2f6df5e5",
+    "src/domain/lp01-closure-export.js": "146999f4d1921807954b21208d2752efcfde9077f5cd45de978b692aca1c56ab",
+    "src/modules/lp01-assembly-reports.js": "c98cc18c9b58d6074d5d41ac54a11799d8dbaf836f7744f938d19d903248d607",
+    "src/modules/lp01-assembly-sheet.js": "fd3c33cf30b2b827f45dac4cd1814cbab8cb37145012678e57be8397be2df522",
+    "src/modules/lp01-assembly-close.js": "6a9e6a13ee853e389cd5a35a21f0f2df897c193fc8ddd927f6fd159da769c036",
+    "src/modules/lp01-operation.js": "68773d550d9a1fb17a325b7e5445b1e7632f797678f740eea650d7a6da0ebe55",
+    "tests/lp01-export-close-v2/reader.mjs": "3102a9031a30afda0110d0f634edcdf842271fca7fbdcc1c24bffbd7e40dc386",
+    "tests/lp01-export-close-v2-reader.test.mjs": "ee126eabcae38b04abcc3b5367d649bdf8097bf572a0c312d2d6a90947290478",
+    "docs/sql-proposals/lp01-export-import-v2/01_import_adapter_REVIEW.sql": "b7998f2cc1790e94c28593fb0fccd48c006e4592eeeeb423930e02a2261ef291",
+    "docs/sql-proposals/lp01-export-close-v2/01_close_adapter_REVIEW.sql": "512dbc1dfe52bb241abc424c0ff3dae47b3595920e9747876b2857e4ecdd3bc2"
+  },
+  "fixtureSha256": {
+    "tests/fixtures/lp01-export-partial-v3-sql-readback.json": "110abb2d046447dfc2c7203419ddee1701031e86d41c69c73f294b259745dc37",
+    "tests/fixtures/lp01-export-partial-v3-corrected-readback.json": "07cab5a56653ededc35127b8cff179e63db81dc1a9fe013c7c84434ada20033d",
+    "tests/fixtures/lp01-export-close-v2-sql-readback.json": "ccd518295f9a89e051472d05c68be65ce8a6e6db2b4124a71d6f3217329ba792"
+  },
+  "node": {
+    "tests": 83,
+    "pass": 83,
+    "skipped": 0,
+    "result": "tests/lp01-assembly-workspace/partial-v3-node-results.txt",
+    "sha256": "f3c4cadfacfd3f7afba67b71721c075abb355157dc250996365f0cd5116aa38f"
+  },
+  "controllerDom": {
+    "groups": 7,
+    "status": "PASS",
+    "evidence": "tests/lp01-assembly-workspace/controller-results.json"
+  },
+  "checks": [
+    "A7/B5 then A3-only reports A3+B5=8 without summing imports; current and prior files retain individual provenance.",
+    "SQL readbacks distinguish current, preserved, never reported and retained zero; three old closes remain immutable.",
+    "Sheet marks preserved/no-report; B15, CSV and PNG/PDF input preserve unknown plan/continuity and distinguish current file from effective value source.",
+    "Original download hooks target both real files, deduplicate by file ID and stop after stale session/context.",
+    "Contract2 is explicitly incompatible; preserved fixture is only negative regression. Legacy helper SHA unchanged."
+  ],
+  "limits": [
+    "Synthetic DOM is not real browser visual QA.",
+    "No live database, activation, publication or multi-session PostgreSQL17 execution.",
+    "Plan history/version source and initial Export reconciliation remain unimplemented; no Disponible update."
+  ]
+}

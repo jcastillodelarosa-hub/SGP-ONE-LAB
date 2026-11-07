@@ -1,0 +1,46 @@
+name: Ensamble sheet (isolated UI)
+on:
+  pull_request:
+    paths:
+      - 'src/modules/lp01-assembly*'
+      - 'src/modules/lp01-operation.js'
+      - 'src/modules/lp01-order-note*'
+      - 'src/domain/lp01-assembly*'
+      - 'src/domain/lp01-closure-export*'
+      - 'tests/lp01-assembly*'
+      - 'tests/lp01-assembly-workspace/**'
+      - 'tests/fixtures/lp01-closure-export-v2.mjs'
+      - '.github/workflows/lp01-assembly-sheet.yml'
+permissions:
+  contents: read
+jobs:
+  ui:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm install --prefix tests/lp01-assembly-workspace --ignore-scripts --no-audit --no-fund
+      - name: Synthetic DOM integration
+        run: |
+          export LP_DOM_PACKAGE="file://$GITHUB_WORKSPACE/tests/lp01-assembly-workspace/node_modules/linkedom/esm/index.js"
+          node tests/lp01-assembly-workspace/dom.mjs
+          node tests/lp01-assembly-workspace/controller-dom.mjs
+          node tests/lp01-assembly-workspace/compact-notes-dom.mjs
+      - run: pip install playwright==1.55.0
+      - run: python -m playwright install --with-deps chromium
+      - run: python tests/lp01-assembly-workspace/browser.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ensamble-sheet-isolated-ui
+          path: |
+            tests/lp01-assembly-workspace/*results.json
+            tests/lp01-assembly-workspace/evidence/

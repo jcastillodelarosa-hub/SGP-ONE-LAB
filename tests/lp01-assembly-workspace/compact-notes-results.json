@@ -1,0 +1,12 @@
+{
+  "status": "PASS",
+  "type": "Actual local modules with synthetic DOM and RPC; not browser or production verification",
+  "checks": [
+    "Actual compact editor and its dirty draft survive quiet refresh, filtering out and reopening",
+    "Dirty compact draft blocks detail/close/reports navigation without silently discarding",
+    "In-flight and uncertain saves cannot be abandoned; retry keeps exact UUID/payload and only one acknowledged revision",
+    "Session reset removes old editor; the only writes are the explicitly invoked synthetic note save/retry"
+  ],
+  "saveAttempts": 2,
+  "storedNoteRevisions": 1
+}

@@ -1,0 +1,19 @@
+{
+  "status": "PASS",
+  "engine": "PostgreSQL 18.6 (PGlite 0.5.15) on wasm32-unknown-emscripten, compiled by emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 6.0.13 (e13ee988ce3d87a738dd8f3661d02223308c412a), 32-bit",
+  "groups": 7,
+  "results": [
+    "Atomic install/rollback; existing function metadata preserved; default false blocks writes and creates no business/audit rows",
+    "Separate discovery contract fails closed with flag off, writes contained, consultation or another stage; only authorized pilot actors see canIncorporate",
+    "Only leader/assembly supervisor candidates; wrong stage/line/role, individual or role revocation, expired/unknown sessions denied by real guards",
+    "Rejects invalid quantity/reason/payload/CAS, missing/closed/review turn, absent/stale/zero Export, open/already planned/inactive orders and over-allocation against existing plan",
+    "Atomic planner root + LP row + audited motive; appended priority; no SALE/execution/Export/other assignment changes; same request replays exactly, changed payload or duplicate enrollment denied",
+    "Assembly supervisor enrollment and own scoped receipt work; other-user receipt denied; feature containment blocks writes but preserves receipts; preexisting NOTA unchanged",
+    "Contained rollback restores exact bodies/ACL and retains all planner/order/audit rows; stale rollback rejected"
+  ],
+  "limits": [
+    "In-memory synthetic PostgreSQL WASM 18.6, not production17.11. No live writes or access activation.",
+    "Concurrent execution/locking has not been certified by this single-connection harness. SQL uses the existing lock order plus NOWAIT planner table lock; multi-session PG17 test required before activation.",
+    "Only ENSAMBLE/PANELES_2. No Empaque, automatic opening, authoritative close V2 or UI integration."
+  ]
+}

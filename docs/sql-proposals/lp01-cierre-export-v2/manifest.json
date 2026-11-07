@@ -1,0 +1,43 @@
+{
+  "version": "LP-EXPORT-PRODUCTION-3.0.0-ISOLATED",
+  "base": "75b05b842f866163cd6fea6b54dc21e66eba0ade",
+  "status": "ISOLATED_IMPLEMENTATION_NOT_APPLIED",
+  "enabled": false,
+  "scope": {
+    "stage": "ENSAMBLE",
+    "line": "PANELES_2"
+  },
+  "source_sha256": {
+    "src/domain/lp01-closure-export.js": "146999f4d1921807954b21208d2752efcfde9077f5cd45de978b692aca1c56ab",
+    "src/domain/powerbi/adapter.js": "2a351985243ab3035736a12916773feabbb721dc208689582374143a9ba52c8c",
+    "src/domain/powerbi/xlsx-reader.js": "c2810f57e72c92a779f4ee905ef57e85b01a2663375906f10699c729141cfa7f",
+    "src/server/lp-powerbi-handler.js": "764b26970293b9e7096aebf226e9bad3b6ee466daa43c4751b51362ae2af53c7",
+    "supabase/functions/lp-powerbi/index.ts": "defc3a654ce6d640c68079301b1bc2ebd82349317170aaeaa4d636f8e885505f",
+    "docs/sql-proposals/lp01-operacion/01_operacion_REVIEW.sql": "b1d1da0941e75293de5a8d60937fbab3c76d2c0bb14127a11149dd9db05e4098",
+    "docs/sql-proposals/lp01-operacion/06_powerbi_xlsx_REVIEW.sql": "fbe88b89bfa4dade5c55517c078c4e00abdf865c9b20fb0cebce865fed308ca4",
+    "docs/sql-proposals/lp01-hoja/01_catalog_REVIEW.sql": "d19d3a4b7a3a735a726333cb066f83377e0213bf918672f5e97b4142431ee750",
+    "docs/sql-proposals/lp01-hoja/02_restore_REVIEW.sql": "19f231b7d7e09d0c5e59ffaa064fa67d05b2e09ab34b3acc9e0414cf083e20c8",
+    "tests/lp01-hoja/production-readonly/sesion.sql": "770e8dc15610f125759dd7d20a4c4b4782284a6fa033529c943151cfd3969e77",
+    "tests/lp01-hoja/production-readonly/verificar_temporal.sql": "6533e69645aabffcbd4f2c5e99cd6d7aa88f5ce76d19e3653cb3e7364ee76683",
+    "tests/lp01-hoja/production-readonly/operaciones_rol.sql": "75ea1fd58b6bbac7901b82df7c65e8e759beea00783d2c54f3effaf02f93949e"
+  },
+  "package_sha256": {
+    "src/server/lp-export-production-v2.js": "614a8b096dabd21656aacd77c83fdd13c9a031d9754ad1347ba8249ab01966d2",
+    "tests/lp01-export-production-v2.test.mjs": "4f5d33c3059e8878205a90ae5bef9c944267e9837b662f315f4fc20085d934c8",
+    "tests/lp01-cierre-export-v2/fixture.mjs": "064ec001b7aa5984904e2711ab01261151dc3e912599133dd7c55bec7212ba87",
+    "tests/lp01-cierre-export-v2/model.mjs": "40cc4a030df54cb3a16c9edfcc7f977f1b45dd683396da1413bd86b3e54f9568",
+    "tests/lp01-cierre-export-v2/guard.mjs": "ccd6ca2b476c9bc34a51e89da4229826a51558781b1762a50ae2ff2543d565b4",
+    "docs/sql-proposals/lp01-cierre-export-v2/01_model_ISOLATED.sql": "3f47fbd3c38e651b3b30d534cd8a4c40b1a9b31a678c1330a84dfb8ffbda896a",
+    "docs/sql-proposals/lp01-cierre-export-v2/02_restore_empty_model_ISOLATED.sql": "6da50f908cdf247a98b6606920d743f5f7e83260eebf25d18df270bb417b7d7c",
+    "docs/sql-proposals/lp01-cierre-export-v2/README.md": "f89f3ae26bf29bdfbca5fdae68ba42ae17aac91864d7eec153b9b629c04bcff8",
+    "docs/linea-produccion/CIERRE_EXPORT_V2_NOV7_CHECKPOINT.md": "fa874b1accb6a98232303e98386b367723c24fa4bc86e39dac217354d1318fdf",
+    "tests/lp01-cierre-export-v2/package.json": "8caaf484fa036f13e13127f3473781bef74b306104d9a4e9827800a94244553d"
+  },
+  "source_verification": "Local snapshot only. Existing helpers/ACL/version pins retained unchanged; no live source re-audit or migration performed.",
+  "rollback": "Remove exact new files after their hashes match; no live state changed. SQL rollback only accepts empty exact QA model.",
+  "source_updates": {
+    "src/server/lp-powerbi-handler.js": "Contract3 response guard for approved partial reimports; capability and deployed entrypoint remain disabled."
+  },
+  "plan_reference_status": "PLAN_SOURCE_REQUIRED: approved effective-at-close rule; complete technical version/reason/time history still required. No SALE comparison.",
+  "model_status": "Frozen historical format2 QA model only; not persistence for the contract3 reference or adapters."
+}

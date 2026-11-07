@@ -1,0 +1,30 @@
+{
+  "status": "PROPOSED_NOT_APPLIED_DISABLED",
+  "scope": "ENSAMBLE PANELES_2 only; no activation or new grant",
+  "functions": {
+    "sgp_lp_operacion.puede_operar(text,text,text)": {
+      "before_source_md5": "b0b7459a0be0a7ea5a4a392eecb2afde",
+      "candidate_source_md5": "e15abadfa88a13b01e2f7c167609cb3a"
+    },
+    "public.sgp_lp_operacion_comando(text,jsonb)": {
+      "before_source_md5": "5d962fc5b2595e0420124b340f9bbe3a",
+      "candidate_source_md5": "4d73b1b0df7d7edb53d1adf3e462f48e"
+    },
+    "public.sgp_lp_operacion_resultado(text,uuid)": {
+      "before_source_md5": "0ecca76056be1784fdaaeaa9921427c5",
+      "candidate_source_md5": "23ce7654c7478bec15978bd09c97a67c"
+    }
+  },
+  "sha256": {
+    "01_incorporar_REVIEW.sql": "d582ba035cc80c44f97dfc1a57d0875898c7af9a2451465b8506c57338145c01",
+    "02_restore_REVIEW.sql": "7cfe9b96c0626cd66031322f0ba188fc5ed0d1fb02b4d11a11f978e81caa14f3",
+    "command-fragment.sql": "24682f5b0ae98485517576754998082beffa11ce5e4f41f38318b4a01bf3e6c8",
+    "03_discovery_REVIEW.sql": "251dec5ec2c906175aa619631f9a0e40886943631258b148aeca6deb659e9054",
+    "04_restore_discovery_REVIEW.sql": "978200482289ca0e9bf1addb957c76c61b3ed696b878432ec58cd05ec6264810"
+  },
+  "discovery": {
+    "signature": "public.sgp_lp_operacion_consultar(text,text,text,date,integer)",
+    "before_source_md5": "2e4eeacbfc331f2c6dcde32ee96701d7",
+    "candidate_source_md5": "3d5184e53fd8aafe7cc2f1829ecc5a81"
+  }
+}

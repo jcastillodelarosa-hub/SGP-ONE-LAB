@@ -1,0 +1,42 @@
+{
+  "status": "PROPOSED_NOT_APPLIED_DISABLED",
+  "scope": "ENSAMBLE PANELES_2 import only; legacy CERRAR fenced from V2 evidence; no permission expansion",
+  "functions": {
+    "public.sgp_lp_operacion_importar_xlsx(text,jsonb,text,text,jsonb)": {
+      "before_source_md5": "eae247d88b7e82d4dc365840dfb03e45",
+      "candidate_source_md5": "2e892039eb0a940f41ffa19c9373e46e"
+    },
+    "public.sgp_lp_operacion_comando(text,jsonb)": {
+      "before_source_md5": "4d73b1b0df7d7edb53d1adf3e462f48e",
+      "candidate_source_md5": "73590860eab986bc35d690556c1be6a9"
+    }
+  },
+  "files": {
+    "01_import_adapter_REVIEW.sql": "b7998f2cc1790e94c28593fb0fccd48c006e4592eeeeb423930e02a2261ef291",
+    "02_restore_adapter_REVIEW.sql": "af686fb24c695b93daff3225dce7ecd56699004cc242e7c384c684c142b90715",
+    "close-containment-fragment.sql": "a5a9145820c1da32137b99dafb51be5975d62c5305beee4487acd3c93955a648",
+    "coverage-fragment.sql": "9a20d7ca45619a6777857793c31dd8527a10858319ab8cec9e043a1bdf8aa87f",
+    "import-fragment.sql": "f0d30302623ecf3eb23b58d27901be617b8fa636df6dca269ace0f23792160c2",
+    "project-rows-fragment.sql": "69b3beff87f1cd4f8377919ea264512ee68c185bd8137af8c4f8431589609687",
+    "projection-declarations.sql": "00c37a69d8b57e118d31984fb14820e36e094e55081bb97470d43908b4e024d5"
+  },
+  "artifact_sha256": {
+    "src/server/lp-powerbi-handler.js": "764b26970293b9e7096aebf226e9bad3b6ee466daa43c4751b51362ae2af53c7",
+    "docs/sql-proposals/lp01-export-import-v2/README.md": "a2f44c84c5dfdeea511fa72488b19a0814a6b23874c1cf312acbc056a6c6c6dd",
+    "docs/sql-proposals/lp01-export-import-v2/build-proposal.py": "1f8e339a7c64e606938d94bb977aeb2d52b44736467287b19dda652312b5e719",
+    "tests/lp01-export-import-v2/adapter.mjs": "836bd23c3c0cd9f59210599f95c644a185b9eff7c23088232fe0f2765f8bb4f8",
+    "tests/lp01-export-import-v2/bootstrap.mjs": "aaabbaa8847d05b7bf451cf52f5f7288060b4633e419ba97626a2bfe2d66dec2",
+    "tests/lp01-export-import-v2/guard.mjs": "b0b80c42413ddabb2a74610a0ac82f93f8f67c08b8bc679e6db870a78a9b3887",
+    "tests/lp01-export-import-v2/package.json": "a204a2aa070ccd03f3eaaede81d1e5b93cbb4421862b3533eec9feb4e21560ca",
+    "tests/lp01-export-import-v2/production-readonly/importar_xlsx.sql": "8da68bde8be6d3ddfe55729bec5d75619b67b50748bc739a2a0dc7b8442515c3",
+    "tests/lp01-export-import-v2/production-readonly/comando_after_incorporar.sql": "6da1a8ed9b95f06e11e15bbcd18a67ee2696cea9c078002e917ef4b0c1fc1ff5",
+    "docs/sql-proposals/lp01-export-import-v2/01_import_adapter_REVIEW.sql": "b7998f2cc1790e94c28593fb0fccd48c006e4592eeeeb423930e02a2261ef291",
+    "docs/sql-proposals/lp01-export-import-v2/02_restore_adapter_REVIEW.sql": "af686fb24c695b93daff3225dce7ecd56699004cc242e7c384c684c142b90715",
+    "docs/sql-proposals/lp01-export-import-v2/close-containment-fragment.sql": "a5a9145820c1da32137b99dafb51be5975d62c5305beee4487acd3c93955a648",
+    "docs/sql-proposals/lp01-export-import-v2/coverage-fragment.sql": "9a20d7ca45619a6777857793c31dd8527a10858319ab8cec9e043a1bdf8aa87f",
+    "docs/sql-proposals/lp01-export-import-v2/import-fragment.sql": "f0d30302623ecf3eb23b58d27901be617b8fa636df6dca269ace0f23792160c2",
+    "docs/sql-proposals/lp01-export-import-v2/project-rows-fragment.sql": "69b3beff87f1cd4f8377919ea264512ee68c185bd8137af8c4f8431589609687",
+    "docs/sql-proposals/lp01-export-import-v2/projection-declarations.sql": "00c37a69d8b57e118d31984fb14820e36e094e55081bb97470d43908b4e024d5"
+  },
+  "entrypoint_sha256": "defc3a654ce6d640c68079301b1bc2ebd82349317170aaeaa4d636f8e885505f"
+}
