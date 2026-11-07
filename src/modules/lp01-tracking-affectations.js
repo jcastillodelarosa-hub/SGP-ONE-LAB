@@ -7,7 +7,7 @@ import {mountAffectationTabs} from './lp01-affectation-tabs.js';
 import {orderDetailsTransport} from '../services/lp01-order-details.js';
 import {mountOrderNote} from './lp01-order-note.js';
 /** Order-scoped reads and writes; selecting an NC never performs a write or verified link. */
-export async function mountTrackingAffectations({host,row,target,cause,scope,client,getToken,isCurrent,onSummary=()=>{},ncHints=null,initialDetails=null,getLatestDetails=()=>undefined,getDetailsGeneration=()=>0,onDetails=()=>{}}){
+export async function mountTrackingAffectations({host,row,target,cause,scope,client,getToken,isCurrent,onSummary=()=>{},ncHints=null,initialDetails=null,getLatestDetails=()=>undefined,getDetailsGeneration=()=>0,onDetails=()=>{},onNoteSaved=()=>{}}){
  const token=getToken();let orderDetails=initialDetails,tabs,latestSummary=null,disposed=false,originTransport=null;
  const alive=()=>!disposed&&host.isConnected&&getToken()===token&&isCurrent();
  const currentDetails=()=>{const latest=getLatestDetails();return latest===undefined?orderDetails:latest;};
@@ -28,6 +28,6 @@ export async function mountTrackingAffectations({host,row,target,cause,scope,cli
  const noteTransport=orderDetailsTransport({client,getToken:()=>alive()?getToken():null,key:row.key,line:scope.line,stage:scope.stage});
  const noteRead=noteTransport.read;let initial=initialDetails;
  noteTransport.read=async()=>{if(initial&&alive()&&(getLatestDetails()===undefined||getLatestDetails()===initial)){const value=initial;initial=null;return Promise.resolve(value);}const generation=getDetailsGeneration(),value=await noteRead();if(generation!==getDetailsGeneration())throw Error('ORDER_DETAILS_UNAVAILABLE');return value;};
- mountOrderNote(host.querySelector('[data-order-note-section]'),noteTransport,{onRead:d=>{orderDetails=d;onDetails(d);orderDetails=currentDetails();tabs?.refreshGlass();publish();}});
+ mountOrderNote(host.querySelector('[data-order-note-section]'),noteTransport,{onSaved:onNoteSaved,onRead:d=>{orderDetails=d;onDetails(d);orderDetails=currentDetails();tabs?.refreshGlass();publish();}});
  return ()=>{disposed=true;tabs.dispose();};
 }

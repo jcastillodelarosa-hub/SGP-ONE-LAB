@@ -1,3 +1,4 @@
+import {paintOrderNoteRows} from './lp01-order-note-rows.js';
 import {ncGlassOrderHints,isActiveGlassNc} from '../services/nc-glass-order-hints.js';
 import {withExportGlassSummary} from '../domain/lp01-export-glass-summary.js';
 import {orderDetailsTransport} from '../services/lp01-order-details.js';
@@ -28,7 +29,7 @@ export function mountOperation({tracking,operation,bridge,legacyLoad,orderSaleEn
  let data=null,context=null,selected=null,seq=0,pending=null,busy=false,bi=null,fileId=null,session=null,loading=false,missing=false,dirty=false,fileSequence=0;
  let viewPanel='planificador',trackingViewState={},globalData=null,globalContext=null,globalSession=null,trackingRole=null,globalRequest=null,globalQueued=false;
  let operationRequest=null,enrichment=null,navigationGeneration=0,navigating=false,navigationFlight=null,revealing=false,temporaryTrackingState=null;
- let orderSaleScope=null,orderSaleProvider=null;
+ let orderSaleScope=null,orderSaleProvider=null,orderNoteScope=null,orderNoteProvider=null;
  const trackingStates=new Map();
  let summaryFlight=null,summaryScope=null,ncHints=null,ncHintsScope=null,ncHintsReadAt=0;const summaries=new Map(),summaryTimes=new Map(),orderDetails=new Map(),detailsAt=new Map(),detailsGenerations=new Map();
  document.addEventListener('sgp:lp-role',e=>{cancelNavigation();++navigationGeneration;trackingRole=e.detail;if(globalSession!==bridge.getToken()||!['COORDINADOR','ADMINISTRADOR'].includes(trackingRole)){globalData=null;trackingStates.clear();trackingViewState={};temporaryTrackingState=null;if(viewPanel==='seguimiento'){++seq;loading=false;live.replaceChildren();message.textContent='Seguimiento no autorizado';}}});
@@ -80,7 +81,8 @@ export function mountOperation({tracking,operation,bridge,legacyLoad,orderSaleEn
   const previous=orderDetails.get(key),before=detailsAt.get(key)??Date.parse(previous?.export?.at),after=Date.parse(details?.export?.at);
   if(Number.isFinite(before)&&Number.isFinite(after)&&after<before)return previous??null;
   if(Number.isFinite(after))detailsAt.set(key,Math.max(Number.isFinite(before)?before:after,after));
-  orderDetails.set(key,details);return details;
+  if(previous?.note?.revision>details?.note?.revision)details={...details,note:previous.note,history:previous.history};
+  orderDetails.set(key,details);paintOrderNoteRows(live,key,details);return details;
  }
  function summaryFor(row){const s=summaries.get(row.key);return s&&s.balance!==officialBalance(row,globalContext.stage)?{...s,total:null,available:null}:s;}
  function refreshNcHints({force=false}={}){
@@ -107,7 +109,7 @@ export function mountOperation({tracking,operation,bridge,legacyLoad,orderSaleEn
     catch(error){if(!alive())return;if(error.message==='NO_AUTORIZADO'){++seq;loading=false;globalData=null;summaries.clear();live.replaceChildren();message.textContent='Acceso revocado. Vuelve a consultar.';return;}summary={status:'UNAVAILABLE'};}
     if(!alive())return;
     try{const details=await orderDetailsTransport({client,getToken:()=>alive()?bridge.getToken():null,key,line:ctx.line,stage:ctx.stage}).read();if(!alive())return;const latest=rememberDetails(key,details);summary=withExportGlassSummary(summary,latest,{key,line:ctx.line,stage:ctx.stage});}
-    catch(error){if(!alive())return;if(error.message==='NO_AUTORIZADO'){++seq;globalData=null;summaries.clear();live.replaceChildren();message.textContent='Acceso revocado. Vuelve a consultar.';return;}detailsGenerations.set(key,(detailsGenerations.get(key)||0)+1);orderDetails.set(key,null);summary=withExportGlassSummary(summary,null,{key,line:ctx.line,stage:ctx.stage});}
+    catch(error){if(!alive())return;if(error.message==='NO_AUTORIZADO'){++seq;globalData=null;summaries.clear();live.replaceChildren();message.textContent='Acceso revocado. Vuelve a consultar.';return;}detailsGenerations.set(key,(detailsGenerations.get(key)||0)+1);orderDetails.set(key,null);paintOrderNoteRows(live,key,null);summary=withExportGlassSummary(summary,null,{key,line:ctx.line,stage:ctx.stage});}
     if(!alive())return;summaryTimes.set(key,Date.now());if(Number.isSafeInteger(summary.sharedRevision)&&(summaries.get(key)?.sharedRevision??-1)>summary.sharedRevision)continue;summaries.set(key,summary);summaryTimes.set(key,Date.now());
     paintSummaries(key);
    }}));
@@ -136,12 +138,21 @@ export function mountOperation({tracking,operation,bridge,legacyLoad,orderSaleEn
    orderSaleProvider=key=>orderSaleTransport({key,stage:ctx.stage,getToken:()=>viewPanel==='seguimiento'&&bridge.getToken()===token&&globalContext?.line===ctx.line&&globalContext?.stage===ctx.stage&&globalData?.orders.some(r=>r.key===key)?token:null,
     client:{rpc:async(name,args)=>(await bridge.getClient()).rpc(name,args)}});
   }
-  renderTracking({host:live,orderSaleProvider:orderSaleEnabled?orderSaleProvider:null,data:{...globalData,orders:globalData.orders.map(r=>({...r,get affectationSummary(){return summaryFor(r);}}))},context:globalContext,state:trackingViewState,search:'',canReviewSale:true,
+  if(saleScope!==orderNoteScope){
+   orderNoteScope=saleScope;const token=globalSession,ctx={...globalContext};
+   orderNoteProvider=key=>{
+    const transport=orderDetailsTransport({key,line:ctx.line,stage:ctx.stage,getToken:()=>viewPanel==='seguimiento'&&bridge.getToken()===token&&globalContext?.line===ctx.line&&globalContext?.stage===ctx.stage&&globalData?.orders.some(r=>r.key===key)?token:null,
+     client:{rpc:async(name,args)=>(await bridge.getClient()).rpc(name,args)}});
+    transport.onDetails=details=>{rememberDetails(key,details);};
+    return transport;
+   };
+  }
+  renderTracking({host:live,orderNoteProvider,orderSaleProvider:orderSaleEnabled?orderSaleProvider:null,data:{...globalData,orders:globalData.orders.map(r=>({...r,get orderDetails(){return orderDetails.get(r.key);},get affectationSummary(){return summaryFor(r);}}))},context:globalContext,state:trackingViewState,search:'',canReviewSale:true,
    onDetailClose:()=>{if(temporaryTrackingState){temporaryTrackingState=null;trackingViewState=trackingStates.get(JSON.stringify([globalContext.line,globalContext.stage]))||{};trackingViewState.open=false;}renderGlobal();},
    onAffectations:async({host,row,target,cause})=>{
     const token=bridge.getToken(),scope=globalContext,candidateOrigin=temporaryTrackingState?.origin,origin=candidateOrigin?.key===row.key&&candidateOrigin.line===scope.line&&candidateOrigin.stage===scope.stage?candidateOrigin:null;host.textContent='Consultando afectaciones…';
     try{const client=await bridge.getClient();if(!host.isConnected||token!==bridge.getToken()||(scope.line!==globalContext?.line||scope.stage!==globalContext?.stage))return;
-     await mountTrackingAffectations({host,row,target,cause,scope,client,ncHints,initialDetails:orderDetails.get(row.key),getLatestDetails:()=>orderDetails.get(row.key),getDetailsGeneration:()=>detailsGenerations.get(row.key)||0,onDetails:details=>rememberDetails(row.key,details),onSummary:summary=>{if(token!==bridge.getToken()||scope.line!==globalContext?.line||scope.stage!==globalContext?.stage||viewPanel!=='seguimiento')return;if((summaries.get(row.key)?.sharedRevision??-1)>(summary.sharedRevision??-1))return;summaries.set(row.key,summary);summaryTimes.set(row.key,Date.now());paintSummaries(row.key);},getToken:()=>bridge.getToken(),isCurrent:()=>scope.line===globalContext?.line&&scope.stage===globalContext?.stage});
+     await mountTrackingAffectations({host,row,target,cause,scope,client,ncHints,initialDetails:orderDetails.get(row.key),getLatestDetails:()=>orderDetails.get(row.key),getDetailsGeneration:()=>detailsGenerations.get(row.key)||0,onDetails:details=>rememberDetails(row.key,details),onNoteSaved:details=>paintOrderNoteRows(live,row.key,details),onSummary:summary=>{if(token!==bridge.getToken()||scope.line!==globalContext?.line||scope.stage!==globalContext?.stage||viewPanel!=='seguimiento')return;if((summaries.get(row.key)?.sharedRevision??-1)>(summary.sharedRevision??-1))return;summaries.set(row.key,summary);summaryTimes.set(row.key,Date.now());paintSummaries(row.key);},getToken:()=>bridge.getToken(),isCurrent:()=>scope.line===globalContext?.line&&scope.stage===globalContext?.stage});
      if(origin&&host.isConnected&&token===bridge.getToken()&&temporaryTrackingState?.origin===origin){const notice=document.createElement('p');notice.className='nc-tracking-origin';notice.textContent='NC de origen '+origin.reference+' · Referencia sin guardar; no vinculada a esta orden.';host.prepend(notice);}
     }catch(error){if(host.isConnected)host.textContent='Afectaciones no disponibles: '+error.message;}
    },

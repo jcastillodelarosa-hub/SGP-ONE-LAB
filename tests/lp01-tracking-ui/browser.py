@@ -1,4 +1,4 @@
-"""Real controller/rendering with synthetic read-only transport. No production calls."""
+"""Real controller/rendering with synthetic transport. No production calls."""
 from pathlib import Path
 import http.server,threading,json
 from playwright.sync_api import sync_playwright
@@ -33,8 +33,8 @@ with sync_playwright() as p:
     return {label:label.textContent,interactive:label.tagName==='BUTTON',font:style.fontFamily,size:style.fontSize,weight:style.fontWeight,spacing:style.letterSpacing,transform:style.textTransform,lineHeight:style.lineHeight,alignment:getComputedStyle(cell).verticalAlign,centerY:rect.y+rect.height/2};
    });
   }""")
-  assert [h['label'] for h in header_appearance[-2:]]==['Disponible','Afectaciones']
-  assert all(not h['interactive'] for h in header_appearance[-2:])
+  assert [h['label'] for h in header_appearance[-3:]]==['Disponible','Afectaciones','Observación']
+  assert all(not h['interactive'] for h in header_appearance[-3:])
   if width>=700:
    for h in header_appearance:
     assert h['size']=='13px' and h['weight']=='700',h
@@ -43,11 +43,12 @@ with sync_playwright() as p:
     assert abs(h['centerY']-header_appearance[0]['centerY'])<=1.5,h
   else:
    assert page.locator('.lp-tracking-table > thead').is_hidden()
-   for label in ['Disponible','Afectaciones']:
+   for label in ['Disponible','Afectaciones','Observación']:
     cell=page.locator('.lp-tracking-table > tbody > tr').first.locator('[data-label="'+label+'"]')
     assert cell.is_visible()
     assert cell.evaluate('(cell)=>getComputedStyle(cell,"::before").content')=='"'+label+'"'
   if width<700:assert page.locator('.lp-tracking-mobile-week').first.is_visible()
+  page.wait_for_function("![...document.querySelectorAll('[data-order-note-preview]')].some(n=>n.textContent.includes('Consultando'))")
   page.evaluate("window.node=document.querySelector('.lp-tracking-table');window.observer=new MutationObserver(()=>window.mutations++);window.mutations=0;observer.observe(document.querySelector('[data-live-orders]'),{childList:true,subtree:true})")
   for _ in range(3):page.clock.fast_forward(20000);page.wait_for_function('window.inflight===0')
   assert page.evaluate("window.node===document.querySelector('.lp-tracking-table') && window.mutations===0")
@@ -110,8 +111,10 @@ with sync_playwright() as p:
   assert page.locator('tbody tr').count()==30
   assert page.locator('[data-stage-reports]').is_hidden()
   assert page.locator('[data-turn-operation]').is_hidden()
+  from compact_note import check_compact_note
+  check_compact_note(page,width,OUT)
   assert not errors,errors
-  results.append({'width':width,'unchanged_20s_cycles':3,'filters_sort_focus_panel':True,'no_overlap':True,'scope_session_role_clear':True,'external_requests':0,'single_stage_balance':True,'header_menu_search_apply_cancel_escape_focus':True,'approved_header_removed_in_tracking':True,'operation_and_closure_navigation_preserved':True});page.close()
+  results.append({'width':width,'unchanged_20s_cycles':3,'filters_sort_focus_panel':True,'no_overlap':True,'scope_session_role_clear':True,'external_requests':0,'single_stage_balance':True,'header_menu_search_apply_cancel_escape_focus':True,'approved_header_removed_in_tracking':True,'operation_and_closure_navigation_preserved':True,'compact_note_edit_cancel_save_draft_refresh_shared_readonly_conflict_retry':True});page.close()
   results[-1]['header_appearance']=header_appearance
  browser.close()
 server.shutdown();(OUT/'browser.json').write_text(json.dumps(results,indent=2)+'\n');print(json.dumps(results))

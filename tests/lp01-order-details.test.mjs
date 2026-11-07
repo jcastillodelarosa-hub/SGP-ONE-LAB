@@ -49,10 +49,12 @@ test('dirty draft retains r1 after B saves r2 and refresh; explicit discard adop
 });
 
 // Control-state double only; actual browser geometry remains in browser.py.
-function noteControls(){
+function noteControls(withCancel=false){
  const input={value:'',disabled:true},save={disabled:true},refresh={disabled:false},discard={hidden:true},status={},text={},current={hidden:true,querySelector:()=>text};
+ const cancel={disabled:false};
  const controls={'textarea':input,'[data-order-note-save]':save,'[data-order-note-refresh]':refresh,'[data-order-note-discard]':discard,'[role=status]':status,'[data-order-note-current]':current};
- return {host:{isConnected:true,querySelector:selector=>controls[selector]},input,save,refresh,discard,status,current,text};
+ if(withCancel)controls['[data-order-note-cancel]']=cancel;
+ return {host:{isConnected:true,querySelector:selector=>controls[selector]},input,save,refresh,discard,status,current,text,cancel};
 }
 const deferredNote=()=>{let resolve,reject;const promise=new Promise((a,b)=>{resolve=a;reject=b;});return {promise,resolve,reject};};
 const noteTick=async()=>{for(let i=0;i<8;i++)await Promise.resolve();};
@@ -93,4 +95,26 @@ test('failed post-save reread retains acknowledged note and revision for later e
  assert.equal(commands.length,1);assert.equal(ui.refresh.disabled,false);assert.equal(ui.save.disabled,true);
  await ui.refresh.onclick();ui.input.value='Next edit';ui.input.oninput();await ui.save.onclick();
  assert.equal(commands[1].revision,1);assert.equal(stored.observation,'Next edit');
+});
+
+
+test('compact cancel cannot abandon a busy or uncertain save; confirmed save publishes preview before reread',async()=>{
+ const ui=noteControls(true),read=deferredNote(),commands=[],published=[];let reads=0,cancelled=0,lost=true,stored={revision:0,observation:''};
+ mountOrderNote(ui.host,{isCurrent:()=>true,read:()=>++reads===2?read.promise:Promise.resolve({...data(),note:{...stored}}),save:async cmd=>{
+  commands.push({...cmd});stored={revision:1,observation:cmd.observation};if(lost){lost=false;throw Error('uncertain');}return {...stored};
+ }},{onSaved:d=>published.push(d.note),onCancel:()=>cancelled++});
+ assert.equal(ui.cancel.disabled,true);ui.cancel.onclick();assert.equal(cancelled,0);await noteTick();
+ ui.input.value='Desde compacta';ui.input.oninput();assert.equal(ui.cancel.textContent,'Cancelar');
+ await ui.save.onclick();assert.equal(ui.cancel.disabled,true);ui.cancel.onclick();assert.equal(cancelled,0);
+ const retry=ui.save.onclick();await noteTick();assert.deepEqual(commands[0],commands[1]);
+ assert.deepEqual(published,[{revision:1,observation:'Desde compacta'}]);assert.equal(ui.cancel.disabled,true);
+ read.resolve({...data(),note:{...stored}});await retry;assert.equal(ui.cancel.disabled,false);assert.equal(ui.cancel.textContent,'Cerrar');
+ ui.cancel.onclick();assert.equal(cancelled,1);
+});
+
+test('compact cancel makes no write; read-only capability never enables note save',async()=>{
+ const ui=noteControls(true);let cancelled=0,writes=0;
+ mountOrderNote(ui.host,{isCurrent:()=>true,read:async()=>({...data(),capabilities:['READ'],note:{revision:1,observation:'Compartida'}}),save:async()=>{writes++;}},{onCancel:()=>cancelled++});
+ await noteTick();assert.equal(ui.input.value,'Compartida');assert.equal(ui.input.disabled,true);assert.equal(ui.save.disabled,true);
+ ui.cancel.onclick();assert.equal(cancelled,1);assert.equal(writes,0);
 });
