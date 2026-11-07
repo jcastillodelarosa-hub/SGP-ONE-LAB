@@ -33,15 +33,15 @@ test('Empaque reads authenticated existing RPC and excludes machining status',()
 });
 test('successful daily export refreshes active production-line sheet',()=>{
  const app=readFileSync('app.js','utf8');
- assert.match(app,/if\(document\.getElementById\('productionPackingTab'\)\?\.getAttribute\('aria-selected'\)==='true'\)void loadPackingSheet\(\)/);
- assert.match(app,/if\(document\.getElementById\('productionAssemblyTab'\)\?\.getAttribute\('aria-selected'\)==='true'\)void loadAssembly\(\)/);
+ assert.match(app,/if\(document\.getElementById\('productionPackingTab'\)\?\.getAttribute\('aria-selected'\)==='true'\)await loadPackingSheet\(\)/);
+ assert.match(app,/if\(document\.getElementById\('productionAssemblyTab'\)\?\.getAttribute\('aria-selected'\)==='true'\)await loadAssembly\(\)/);
 });
 
 test('Export success remains successful if optional event summary fails',()=>{
- const app=readFileSync('app.js','utf8');
- assert.match(app,/Export aplicado; resumen de eventos no disponible/);
- assert.match(app,/dailyExportPreview=null;dailyExportRows=\[\];\s*\/\/ The Export has already committed/);
- assert.match(app,/catch\(reportError\)/);
+ const source=readFileSync('src/modules/export-review.js','utf8');
+ assert.match(source,/revision=null/);
+ assert.match(source,/try\{await afterApply\(data\);\}catch\(reportError\)/);
+ assert.match(source,/la actualización sí quedó aplicada/);
 });
 test('Empaque does not present stale or invalid balance as assembled',()=>{
  const app=readFileSync('app.js','utf8');

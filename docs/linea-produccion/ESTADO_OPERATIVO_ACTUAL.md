@@ -1,3 +1,23 @@
+## Revisión selectiva Export diario · candidata v406 · 07/11/2026
+
+IMPLEMENTADO EN RAMA `feat/export-approval-nov7`, base v405 publicada 3fd6276.
+No aplicado en Supabase, no fusionado, no publicado. Coordinar integración después
+de Ensamble v405; no sobrescribir esa entrega.
+
+Johan definió aprobación del coordinador para cantidad, semana, nueva orden y
+ausencia. Ausencias aprobadas se consultan aparte, conservan historia y no suman
+métricas semanales. No sincronizar cantidades automáticamente. Reaparición requiere
+aprobación para volver a las vistas activas. Las órdenes sin diferencias estructurales
+conservan actualización normal. Cambios pendientes no mezclan saldos nuevos con
+cantidades antiguas.
+
+Interfaz en `src/modules/export-review.js`; SQL revisable, sin autoejecución, en
+`docs/sql-proposals/export-approval/`. Preparar guarda propuestas, no cambia órdenes.
+Pruebas focales: 8 Node PASS, sintaxis PASS y verify:release v406 PASS.
+Backend: pruebas locales PGlite PASS (selección, scopes, reaparición, permisos,
+idempotencia y conflictos). Cinco parches de lectores activos/métricas compilados localmente. Pendiente: integración
+v405 y entrega coordinada backend/frontend. Sin pruebas sobre datos reales.
+
 ## Candidata LAB v405 · integración sobre v404 publicada · 07/11/2026
 
 Recuperación completada: PR218 remoto, base v404; árbol inicial idéntico al
@@ -1582,3 +1602,12 @@ cierres confirmados por sistema y descargas PDF/imagen con vendor existente. La
 referencia de cierre V2 tiene 22 pruebas y modelo SQL aislado, pero no RPC/adaptador
 productivo conectado. Suite integrada UI/reportes: 728/728 PASS. No modifica el
 estado NO PUBLICADO/NO APLICADO ni acredita QA visual o uso en planta.
+
+### Integración Export v406 / hoja v405
+
+Preparado `docs/sql-proposals/export-approval/03_lp_hoja_REVIEW.sql` contra
+MD5 instalado `2e4eeacbfc331f2c6dcde32ee96701d7`. Proyección de excluida_export
+ y filtro simultáneo de órdenes/catálogo activos. Historial, reportes, horarios y
+ permisos intactos. Prueba local PGlite de compilación, predicados y conservación
+ PASS; endpoint productivo no ejecutado. Instalar 01/02/03 conjuntamente después
+ de integrar v405, no aplicar aislado. Sin SQL productivo ni publicación.

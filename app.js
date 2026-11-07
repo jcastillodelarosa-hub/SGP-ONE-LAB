@@ -1,3 +1,4 @@
+import {createExportReview} from './src/modules/export-review.js';
 import {openNcGlassTracking} from './src/modules/nc-glass-tracking.js';
 import {openAudit} from './src/modules/picking-audit.js';
 import {filterReceptionRows as filterReceptionTableRows,receptionAluminumSummary} from './src/domain/reception-table.js';
@@ -58,8 +59,6 @@ let validatedAccessories = null;
 let validatedGlass = null;
 let validatedPieces = null;
 let targetWeek = null;
-let dailyExportPreview = null;
-let dailyExportRows = [];
 let glassLocationPreview = null;
 let glassLocationRows = [];
 let ncAlRows=[]; let ncAlPreview=null; let ncAlNewRows=[];
@@ -1220,70 +1219,18 @@ document.getElementById('productionPackingTab')?.addEventListener('click',()=>{v
 for(const id of ['packingWeek','packingLine'])document.getElementById(id)?.addEventListener('change',()=>{void loadPackingSheet();});
 for(const id of ['packingPreviewSearch','packingPreviewFilter','packingPreviewSort'])document.getElementById(id)?.addEventListener('input',renderPackingSheet);
 
-function resetDailyExport(){
-  dailyExportPreview=null;dailyExportRows=[];
-  if(els.applyDailyExport)els.applyDailyExport.disabled=true;
-  if(els.dailyExportMetrics)els.dailyExportMetrics.innerHTML='<span class="daily-metric-card metric-received"><i class="metric-icon icon-file"></i><span><small>Registros recibidos</small><strong>—</strong></span></span><span class="daily-metric-card metric-match"><i class="metric-icon icon-check">✓</i><span><small>Coinciden con SGP</small><strong>—</strong></span></span><span class="daily-metric-card metric-out"><i class="metric-icon icon-warning">!</i><span><small>Fuera de base</small><strong>—</strong></span></span><span class="daily-metric-card metric-absent"><i class="metric-icon icon-minus">−</i><span><small>Ausentes (sem. incluidas)</small><strong>—</strong></span></span>'; if(els.dailyExportWeeks)els.dailyExportWeeks.innerHTML='';
-}
-function renderDailyExportMetrics(p){
-  const weeks=p.semanas||[]; const absent=weeks.reduce((n,w)=>n+(w.ausentes||0),0);
-  els.dailyExportMetrics.innerHTML=`<span class="daily-metric-card metric-received"><i class="metric-icon icon-file"></i><span><small>Registros recibidos</small><strong>${p.recibidos}</strong></span></span><span class="daily-metric-card metric-match"><i class="metric-icon icon-check">✓</i><span><small>Coinciden con SGP</small><strong>${p.coinciden}</strong></span></span><span class="daily-metric-card metric-out"><i class="metric-icon icon-warning">!</i><span><small>Fuera de base</small><strong>${p.nuevos}</strong></span></span><span class="daily-metric-card metric-absent"><i class="metric-icon icon-minus">−</i><span><small>Ausentes (sem. incluidas)</small><strong>${absent}</strong></span></span>`;
-  if(els.dailyExportWeeks)els.dailyExportWeeks.innerHTML='<table><thead><tr><th>Semana</th><th>Export<br><small>(Registros)</small></th><th>Base SGP<br><small>(Registros)</small></th><th>Coinciden</th><th>Fuera de base</th><th>Ausentes</th><th>Acción / estado</th></tr></thead><tbody>'+weeks.map(w=>{const cls=w.accion==='FUERA_BASE'?'week-out':w.accion==='NO_INCLUIDA_NO_TOCAR'?'week-safe':'week-update';const label=w.accion==='NO_INCLUIDA_NO_TOCAR'?'No incluida · no tocar':w.accion==='FUERA_BASE'?'Fuera de base':'Se actualizará';return `<tr class="${cls}"><td><strong>${w.semana}</strong></td><td class="cell-export">${w.registros_export}</td><td class="cell-base">${w.registros_base}</td><td class="cell-match">${w.coinciden}</td><td class="cell-out">${w.fuera_base}</td><td class="cell-absent">${w.ausentes}</td><td><span class="week-status">${label}</span></td></tr>`}).join('')+'</tbody></table>';
-}
-async function previewDailyExport(){
-  const token=getAppToken(),file=els.dailyExportFile?.files?.[0],line=els.dailyExportLine?.value;
-  resetDailyExport();
-  if(!token){els.dailyExportStatus.textContent='Inicia sesión para validar el Export.';return}
-  if(!file){els.dailyExportStatus.textContent='Selecciona el archivo Export XLSX.';return}
-  els.previewDailyExport.disabled=true;els.dailyExportStatus.textContent='Leyendo y comparando Export…';
-  try{
-    const parsed=await readProgrammingWorkbook(file);
-    if(parsed.errors.length)throw new Error(`El archivo tiene ${parsed.errors.length} registro(s) inválido(s).`);
-    const other=parsed.rows.filter(r=>r.id_linea!==line);
-    if(other.length)throw new Error(`Este archivo contiene ${other.length} registro(s) que no pertenecen a ${line}. Usa un Export exclusivo de la línea.`);
-    dailyExportRows=parsed.rows;
-    const client=await getSupabaseClient();
-    const {data,error}=await client.rpc('sgp_previsualizar_export_diario',{p_token:token,p_linea:line,p_datos:dailyExportRows});
-    if(error)throw error;
-    dailyExportPreview={...data,fileName:file.name,line};
-    renderDailyExportMetrics(data);
-    els.dailyExportStatus.textContent=`Comparación lista ✓ ${data.recibidos} registros. Revisa los cambios antes de aplicar.`;
-    els.applyDailyExport.disabled=false;
-  }catch(e){els.dailyExportStatus.textContent='Validación rechazada ✕ '+e.message}
-  finally{els.previewDailyExport.disabled=false}
-}
-async function applyDailyExport(){
-  if(!dailyExportPreview||!dailyExportRows.length)return;
-  const token=getAppToken(),p=dailyExportPreview;
-  const msg=`APLICAR EXPORT DIARIO\n\nLínea: ${p.line}\nArchivo: ${p.fileName}\nRecibidos: ${p.recibidos}\nCoinciden: ${p.coinciden}\nFuera de base: ${p.nuevos}\nLa ausencia se aplica únicamente a semanas incluidas en el Export.\n\nLa programación base semanal no se elimina. ¿Aplicar actualización?`;
-  if(!window.confirm(msg))return;
-  els.applyDailyExport.disabled=true;els.dailyExportStatus.textContent='Aplicando actualización diaria…';
-  try{
-    const client=await getSupabaseClient();
-    const {data,error}=await client.rpc('sgp_aplicar_export_diario',{p_token:token,p_linea:p.line,p_nombre_archivo:p.fileName,p_datos:dailyExportRows});
-    if(error)throw error;
-    els.dailyExportStatus.textContent=`Actualización aplicada ✓ ${data.actualizados} actualizados · ${data.nuevos} nuevos · ${data.ausentes} ya no aparecen.`;
-    window.alert(`EXPORT ACTUALIZADO ✓\n\nLínea: ${p.line}\nActualizados: ${data.actualizados}\nFuera de base: ${data.fuera_base}\nAusentes en semanas incluidas: ${data.ausentes}`);
-    dailyExportPreview=null;dailyExportRows=[];
-    // The Export has already committed. Reporting/refresh failures must not relabel it as rejected.
-    try{
-      const {data:chg,error:chgErr}=await client.rpc('sgp_resumen_eventos_actualizacion',{p_token:token,p_id_lote:data.id_carga_diaria,p_fuente:'EXPORT'});
-      if(chgErr)throw chgErr;
-      window.exportChangeData=chg||{};
-      const cs=document.querySelector('#dailyExportChangeSummary');if(cs)cs.hidden=false;
-      const eo=document.querySelector('#expOpenAssembly'),ea=document.querySelector('#expAssemblyDone'),ep=document.querySelector('#expPackingDone');
-      if(eo)eo.textContent=(chg.ABIERTA_ENSAMBLE||[]).length;
-      if(ea)ea.textContent=(chg.ENSAMBLADA_COMPLETA||[]).length;
-      if(ep)ep.textContent=(chg.ORDEN_COMPLETADA||[]).length;
-    }catch(reportError){
-      console.warn('Export aplicado; resumen de eventos no disponible',reportError);
-      els.dailyExportStatus.textContent+=' · No fue posible consultar el resumen de eventos.';
-    }
-    if(document.getElementById('productionPackingTab')?.getAttribute('aria-selected')==='true')void loadPackingSheet();
-    if(document.getElementById('productionAssemblyTab')?.getAttribute('aria-selected')==='true')void loadAssembly();
-  }catch(e){els.dailyExportStatus.textContent='Actualización rechazada ✕ '+e.message;els.applyDailyExport.disabled=false}
-}
+const exportReview=createExportReview({getClient:getSupabaseClient,getToken:getAppToken,readWorkbook:readProgrammingWorkbook,afterApply:async(result)=>{
+ if(result.id_carga_diaria){
+  const client=await getSupabaseClient();const {data,error}=await client.rpc('sgp_resumen_eventos_actualizacion',{p_token:getAppToken(),p_id_lote:result.id_carga_diaria,p_fuente:'EXPORT'});
+  if(!error){window.exportChangeData=data||{};document.querySelector('#dailyExportChangeSummary').hidden=false;for(const [id,key] of [['expOpenAssembly','ABIERTA_ENSAMBLE'],['expAssemblyDone','ENSAMBLADA_COMPLETA'],['expPackingDone','ORDEN_COMPLETADA']])document.getElementById(id).textContent=(data?.[key]||[]).length;}
+ }
 
+ if(document.getElementById('productionPackingTab')?.getAttribute('aria-selected')==='true')await loadPackingSheet();
+ if(document.getElementById('productionAssemblyTab')?.getAttribute('aria-selected')==='true')await loadAssembly();
+}});
+function resetDailyExport(){exportReview.reset();}
+async function previewDailyExport(){await exportReview.preview();}
+async function applyDailyExport(){await exportReview.apply();}
 
 function resetGlassLocation(){
   glassLocationPreview=null; glassLocationRows=[];
