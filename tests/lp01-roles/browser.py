@@ -73,33 +73,39 @@ try:
     assert page.locator('#productionLocationsTab').evaluate('(e)=>e.hidden')
     page.evaluate("document.querySelector('#productionPackingTab').click()")
     assert page.locator('[data-op-stage]').input_value()=='ENSAMBLE'
+    page.evaluate("document.querySelector('[data-op-date]').value='2026-11-02';document.querySelector('[data-op-shift]').value='2'")
+    page.locator('#productionAssemblyTab').click();page.wait_for_selector('[data-assembly-close]')
+    assert page.locator('[data-empty-close],[data-close-empty],[data-order-form]').count()==0
+    assert db.snapshot(date='2026-11-02',shift=2,token='se')['turn']['estado']=='ABIERTO'
+    page.screenshot(path=str(HERE/f'evidence/assembly-contained-{width}.png'));page.close()
+    db.execute(db.cmd('ABRIR',stage='EMPAQUE',date='2026-11-02',shift=2))
+    page=page_for('sp');page.wait_for_function("document.querySelector('#productionAssemblyTab').hidden && document.querySelector('[data-op-stage]').value==='EMPAQUE'")
+    page.evaluate("document.querySelector('#productionAssemblyTab').click()")
+    assert page.locator('[data-op-stage]').input_value()=='EMPAQUE'
     def confirm(d):
      confirmations.append(d.message)
      if len(confirmations)==1:d.dismiss()
      else:d.accept()
     page.on('dialog',confirm)
     page.evaluate("document.querySelector('[data-op-date]').value='2026-11-02';document.querySelector('[data-op-shift]').value='2'")
-    page.locator('#productionAssemblyTab').click();page.wait_for_selector('[data-empty-close]',state='attached');page.locator('[data-turn-operation]').click();page.wait_for_selector('[data-empty-close]')
+    page.locator('#productionPackingTab').click();page.wait_for_selector('[data-empty-close]',state='attached');page.locator('[data-turn-operation]').click();page.wait_for_selector('[data-empty-close]')
     page.locator('[data-empty-confirm]').check();page.locator('[data-close-note]').fill('QA cierre individual T2 sin actividad')
     page.locator('[data-close-empty]').click();page.wait_for_function("document.querySelector('[data-save-status]')?.textContent.includes('cancelado')||document.querySelector('[data-close-status]')?.textContent.includes('cancelado')")
     assert db.sql("SELECT count(*) FROM sgp_lp_operacion.cierres")=='0'
     page.locator('[data-close-empty]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Guardado confirmado')")
     assert 'T2' in confirmations[-1] and '2026-11-02' in confirmations[-1]
-    assert db.sql("SELECT rol_efectivo FROM sgp_lp_operacion.auditoria WHERE usuario='se' AND operacion='CERRAR'")=='SUPERVISOR ENSAMBLE'
-    assert db.snapshot(date='2026-11-02',shift=2,token='se')['turn']['estado']=='CERRADO'
-    page.locator('[data-back]').click();page.wait_for_function("document.querySelector('#productionAssemblyTab').getAttribute('aria-selected')==='true'")
+    assert db.sql("SELECT rol_efectivo FROM sgp_lp_operacion.auditoria WHERE usuario='sp' AND operacion='CERRAR'")=='SUPERVISOR EMPAQUE'
+    assert db.snapshot('EMPAQUE',date='2026-11-02',shift=2,token='sp')['turn']['estado']=='CERRADO'
+    page.locator('[data-back]').click();page.wait_for_function("document.querySelector('#productionPackingTab').getAttribute('aria-selected')==='true'")
     assert not page.locator('#productionTrackingTab').is_visible()
-    page.screenshot(path=str(HERE/f'evidence/individual-{width}.png'));page.close()
-    page=page_for('sp');page.wait_for_function("document.querySelector('#productionAssemblyTab').hidden && document.querySelector('[data-op-stage]').value==='EMPAQUE'")
-    page.evaluate("document.querySelector('#productionAssemblyTab').click()")
-    assert page.locator('[data-op-stage]').input_value()=='EMPAQUE'
+    page.screenshot(path=str(HERE/f'evidence/individual-{width}.png'))
     page.screenshot(path=str(HERE/f'evidence/packing-{width}.png'));page.close()
     page=page_for('ll')
     for tab,stage in [('productionAssemblyTab','ENSAMBLE'),('productionPackingTab','EMPAQUE')]:
      assert not page.locator('#'+tab).evaluate('(e)=>e.hidden')
      page.locator('#'+tab).click();assert page.locator('[data-op-stage]').input_value()==stage
     page.close()
-    results.append({'width':width,'native_menu_navigation':'PASS','direct_users_without_prior_roles_visit':'PASS','native_role_edit_revocation':'PASS','native_user_create_edit_and_defaults':'PASS','individual_T2_confirmation_cancel_and_close':'PASS','server_role_audit':'PASS','supervisor_single_stage_navigation':'PASS','leader_both_stages_navigation':'PASS','transport':'real local SDK; REST routed to actual captured admin/session and LP SQL; unrelated sources unavailable'})
+    results.append({'width':width,'native_menu_navigation':'PASS','direct_users_without_prior_roles_visit':'PASS','native_role_edit_revocation':'PASS','native_user_create_edit_and_defaults':'PASS','assembly_manual_close_contained':'PASS','packing_individual_T2_confirmation_cancel_and_close':'PASS','server_role_audit':'PASS','supervisor_single_stage_navigation':'PASS','leader_both_stages_navigation':'PASS','transport':'real local SDK; REST routed to actual captured admin/session and LP SQL; unrelated sources unavailable'})
    finally:db.close()
   browser.close()
 finally:server.shutdown()

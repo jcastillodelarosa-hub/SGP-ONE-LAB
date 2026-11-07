@@ -26,9 +26,9 @@ try:
   for width in [1440,390]:
    db=PowerBIDatabase();Handler.db=db
    try:
-    model=db.models['ENSAMBLE'];key=db.keys[model['records'][0]['production']];part1,part2=db.parts[(key,1)][:2]
-    for part,n in [(part1,10),(part2,18)]:db.execute(db.cmd('SALE',date='2026-10-31',key=key,part=part,quantity=n,observation='QA capacidad'))
-    db.execute(db.cmd('EJECUTAR',date='2026-10-31',key=key,part=part2,quantity=17,observation='QA último acumulado'),'LIDER')
+    model=db.models['EMPAQUE'];key=db.keys[model['records'][0]['production']];part1,part2=db.parts[(key,1)][:2]
+    for part,n in [(part1,10),(part2,18)]:db.execute(db.cmd('SALE',stage='EMPAQUE',date='2026-10-31',key=key,part=part,quantity=n,observation='QA capacidad'))
+    db.execute(db.cmd('EJECUTAR',stage='EMPAQUE',date='2026-10-31',key=key,part=part2,quantity=17,observation='QA último acumulado'),'LIDER')
     original_assignments=db.sql('SELECT jsonb_agg(to_jsonb(a) ORDER BY id) FROM public.sgp_linea_plan_asignaciones a')
     if width==1440:
      def probe(body,origin_header=origin):
@@ -36,7 +36,7 @@ try:
       try:
        with urllib.request.urlopen(req) as result:return result.status
       except urllib.error.HTTPError as error:return error.code
-     a=db.upload_args();body={'p_token':'LIDER','command':a['p_contexto'],'filename':a['p_nombre'],'base64':a['p_base64']}
+     a=db.upload_args(stage='EMPAQUE');body={'p_token':'LIDER','command':a['p_contexto'],'filename':a['p_nombre'],'base64':a['p_base64']}
      assert probe(body,'https://unapproved.example')==403
      assert probe({**body,'document':a['p_documento']})==422
      assert probe({**body,'p_token':'invalid'})==401
@@ -51,14 +51,14 @@ try:
      window.SGP_CONFIG={...window.SGP_CONFIG,lpPowerBiUrl:endpoint};window.qaRole='LIDER';window.calls=[];
      window.SGPPlannerBridge.getToken=()=>window.qaRole;
      window.SGPPlannerBridge.getClient=async()=>({rpc:async(name,args)=>{window.calls.push({name,args});return(await fetch('/rpc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,args})})).json();}});
-     document.querySelector('[data-op-date]').value='2026-10-31';
+     document.querySelector('[data-op-date]').value='2026-10-31';document.querySelector('[data-op-stage]').value='EMPAQUE';
     }''',{'endpoint':endpoint})
     page.locator('#productionPackingTab' if page.locator('[data-op-stage]').input_value()=='EMPAQUE' else '#productionAssemblyTab').click();page.wait_for_selector('[data-live-operate]',state='attached')
     open_assignment(page,part1);page.wait_for_selector('[data-executed]')
     page.locator('[data-executed]').fill('10');page.locator('[data-operation-note]').fill('QA acumulado de esta asignación');page.locator('[data-order-form] button[type=submit]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Guardado confirmado')")
-    page.locator('[data-bi-file]').set_input_files(str(HERE/'fixtures/empaque.xlsx'));page.wait_for_function("document.querySelector('[data-close-status]').textContent.includes('otra etapa')")
-    page.locator('[data-bi-file]').set_input_files(str(HERE/'fixtures/ensamble.xlsx'));page.wait_for_selector('[data-import]')
-    preview=page.locator('[data-bi-preview]').inner_text();assert 'Líder 27 · Power BI 28 · Diferencia 1' in preview
+    page.locator('[data-bi-file]').set_input_files(str(HERE/'fixtures/ensamble.xlsx'));page.wait_for_function("document.querySelector('[data-close-status]').textContent.includes('otra etapa')")
+    page.locator('[data-bi-file]').set_input_files(str(HERE/'fixtures/empaque.xlsx'));page.wait_for_selector('[data-import]')
+    preview=page.locator('[data-bi-preview]').inner_text();assert 'Líder 27 · Power BI 31 · Diferencia 4' in preview
     drop={'next':True}
     def lose_reply(route):
      if drop['next']:
@@ -75,16 +75,16 @@ try:
     for field in page.locator('[data-close-reason]').all():field.fill('QA diferencia por producción contrastada')
     page.locator('[data-close-note]').fill('QA cierre XLSX por producción');page.locator('#productionOperationPanel').screenshot(path=str(OUT/f'reconciliation-{width}.png'))
     page.locator('[data-close]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Guardado confirmado')")
-    report=db.snapshot(date='2026-10-31')['reports'][0]['snapshot'];assert next(r for r in report['rows'] if r['key']==key)['ejecutado']==27
+    report=db.snapshot('EMPAQUE',date='2026-10-31')['reports'][0]['snapshot'];assert next(r for r in report['rows'] if r['key']==key)['ejecutado']==27
     page.locator('[data-stage-reports]').click();page.wait_for_selector('[data-report]',state='attached');page.locator('#productionReportsPanel details summary').click()
     with page.expect_download() as d:page.locator('[data-original]').click()
-    d.value.save_as(OUT/f'original-{width}.xlsx');assert (OUT/f'original-{width}.xlsx').read_bytes()==(HERE/'fixtures/ensamble.xlsx').read_bytes()
+    d.value.save_as(OUT/f'original-{width}.xlsx');assert (OUT/f'original-{width}.xlsx').read_bytes()==(HERE/'fixtures/empaque.xlsx').read_bytes()
     page.locator('#productionReportsPanel').screenshot(path=str(OUT/f'report-{width}.png'))
     # Reopening and versioning are tested in actual PostgreSQL; UI prevents leader reopening.
-    assert db.snapshot('EMPAQUE',date='2026-10-31')['turn']['estado']=='ABIERTO'
+    assert db.snapshot('ENSAMBLE',date='2026-10-31')['turn']['estado']=='ABIERTO'
     assert original_assignments==db.sql('SELECT jsonb_agg(to_jsonb(a) ORDER BY id) FROM public.sgp_linea_plan_asignaciones a')
     assert page.evaluate('document.documentElement.scrollWidth<=innerWidth');assert not errors,errors
-    results.append({'viewport':width,'flow':'Browser→shared XLSX server parser→real PostgreSQL service RPC with SGP auth→grouped versioned closure','latest_sum':27,'power_bi':28,'difference':1,'assignments_preserved':True,'original_download_identical':True,'wrong_stage_rejected':True,'lost_reply_retried_once':True,'untrusted_origin_and_normalized_payload_rejected':'PASS' if width==1440 else 'NOT_REPEATED; server checks verified once at 1440','external_network':'blocked','page_errors':errors});page.close()
+    results.append({'viewport':width,'flow':'Browser→shared XLSX server parser→real PostgreSQL service RPC with SGP auth→grouped versioned closure','latest_sum':27,'stage':'EMPAQUE','power_bi':31,'difference':4,'assignments_preserved':True,'original_download_identical':True,'wrong_stage_rejected':True,'lost_reply_retried_once':True,'untrusted_origin_and_normalized_payload_rejected':'PASS' if width==1440 else 'NOT_REPEATED; server checks verified once at 1440','external_network':'blocked','page_errors':errors});page.close()
    except Exception:
     (OUT/f'failure-{width}.json').write_text(json.dumps({'operation':page.locator('#productionOperationPanel').inner_text(),'status':page.locator('[data-op-status]').inner_text(),'errors':errors},indent=2));raise
    finally:db.close()

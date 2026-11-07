@@ -34,7 +34,7 @@
  .lp-assembly-report-kpis{gap:6px}
  .lp-assembly-report-kpis>div{padding:8px;font-size:10px}
  .lp-assembly-report-kpis b{font-size:18px}
- .lp-assembly-report-orders,.lp-assembly-report-orders tbody{display:block;width:100%}
+ .lp-assembly-report-orders,.lp-assembly-report-orders tbody{display:block;width:100%;min-width:0}
  .lp-assembly-report-orders thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
  .lp-assembly-report-orders tbody{display:grid;gap:8px}
  .lp-assembly-report-orders tbody tr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid #dce6f1;border-radius:7px;padding:6px;min-width:0}

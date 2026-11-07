@@ -42,7 +42,20 @@ def run(page,db,stage,origin,endpoint,width):
   window.SGPPlannerBridge.getClient=async()=>({rpc:async(name,args)=>(await fetch('/rpc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,args})})).json()});
   document.querySelector('[data-op-date]').value='2026-10-31';document.querySelector('[data-op-stage]').value=stage;
  }''',{'stage':stage,'endpoint':endpoint})
- page.locator('#productionPackingTab' if page.locator('[data-op-stage]').input_value()=='EMPAQUE' else '#productionAssemblyTab').click();page.wait_for_selector('[data-live-operate]',state='attached')
+ audit_before=db.sql('SELECT count(*) FROM sgp_lp_operacion.auditoria')
+ page.locator('#productionPackingTab' if stage=='EMPAQUE' else '#productionAssemblyTab').click()
+ if stage=='ENSAMBLE':
+  # Manual Ensamble closure was deliberately replaced, not silently re-enabled
+  # merely because the synthetic legacy SQL still supports its old command.
+  page.wait_for_selector('[data-assembly-key]');page.locator('button[data-assembly-detail]').first.click();page.wait_for_selector('section[data-assembly-detail]')
+  assert page.locator('[data-order-form],[data-executed],[data-close],[data-import],[data-open]').count()==0
+  assert db.sql('SELECT count(*) FROM sgp_lp_operacion.auditoria')==audit_before
+  assert before==db.sql('SELECT jsonb_agg(to_jsonb(p) ORDER BY key_produccion) FROM public.sgp_producciones p')
+  assert plan==db.sql('SELECT jsonb_agg(to_jsonb(a) ORDER BY id) FROM public.sgp_linea_plan_asignaciones a')
+  assert not errors,errors
+  page.screenshot(path=str(OUT/f'sql08-ensamble-contained-{width}.png'))
+  return {'stage':stage,'width':width,'status':'PASS_CONTAINED','manual_legacy_commands_absent':True,'no_new_audit':True,'export_and_programming_unchanged':True,'errors':errors}
+ page.wait_for_selector('[data-live-operate]',state='attached')
  open_assignment(page,roots[0])
  page.locator('[data-executed]').fill(str(total//2));page.locator('[data-operation-note]').fill('QA acumulado corregido')
  page.locator('[data-order-form] button[type=submit]').click();confirmed(page)

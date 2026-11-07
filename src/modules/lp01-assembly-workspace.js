@@ -17,7 +17,7 @@ const labels={ABIERTAS:'Abierta',PROGRAMADAS:'Programada',OTRAS:'Otras órdenes'
 
 /** B12/B13 share the existing order-scoped transports. No turn is opened and no
  * manual production quantity is written by viewing or refreshing this sheet. */
-export function mountAssemblyWorkspace({host,bridge,isCurrent,onClose,onReports,onGlass,onCurrentPeriod=null,onIncorporate=null,canIncorporate=()=>false,noteRows=null}){
+export function mountAssemblyWorkspace({host,bridge,isCurrent,onClose,onReports,onGlass,onCurrentPeriod=null,onIncorporate=null,canIncorporate=()=>false,noteRows=null,onAccessRevoked=null}){
  let data,context,rows=[],token,scope='',generation=0,selected=null,cause=null,detailDispose=null,saleDispose=null,provider=null,noteRowsProvider=null,flight=null;
  let state={},lastExternalSearch;const summaries=new Map(),summaryAt=new Map(),details=new Map();
  const visibleKeys=new Set(),observedSlots=new Map();
@@ -125,7 +125,7 @@ export function mountAssemblyWorkspace({host,bridge,isCurrent,onClose,onReports,
      const [native,shared,note]=outcomes,detail=note.status==='fulfilled'?note.value:null;
      const base=native.status==='fulfilled'&&shared.status==='fulfilled'?sharedOrderSummary(native.value,shared.value):{status:'UNAVAILABLE'};
      const summary=withExportGlassSummary(base,detail,{key,line:context.line,stage:context.stage});summaries.set(key,summary);rememberDetails(key,detail);paintNote(key);
-    }catch(error){if(!alive(version))return;if(error.message==='NO_AUTORIZADO'){clear();host.textContent='Acceso revocado. Vuelve a consultar la hoja.';return;}summaries.set(key,{status:'UNAVAILABLE'});}
+    }catch(error){if(!alive(version))return;if(error.message==='NO_AUTORIZADO'){clear();onAccessRevoked?.();host.textContent='Acceso revocado. Vuelve a consultar la hoja.';return;}summaries.set(key,{status:'UNAVAILABLE'});}
     summaryAt.set(key,Date.now());
     if(!selected)host.querySelectorAll('[data-order-summary]').forEach(slot=>{if(slot.dataset.orderSummary===key){slot.innerHTML=compactSummaryMarkup(summaryFor(rows.find(r=>r.key===key)));slot.querySelectorAll('[data-summary-cause]').forEach(button=>button.onclick=()=>open(key,button.dataset.summaryCause));}});
    }}));

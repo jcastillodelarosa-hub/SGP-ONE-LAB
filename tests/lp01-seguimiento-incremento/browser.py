@@ -56,17 +56,28 @@ try:
       if width<700:
        drawer.locator('[data-advance-context] summary').click();rect=drawer.locator('[data-tracking-context]').bounding_box();assert rect['x']+rect['width']<=width
       if token=='COORDINADOR':page.screenshot(path='/tmp/sgp-global-'+str(width)+'-'+stage+'.png')
-      drawer.locator('[data-live-operate]').click();page.wait_for_selector('[data-order-form]');assert page.locator('[data-op-date]').input_value()=='2026-11-01'
-      assert page.locator('[data-validate-save]').count()==(1 if token=='COORDINADOR' else 0)
-      page.locator('[data-back]').click();page.wait_for_selector('#lp-tracking-drawer:not([hidden])');assert page.locator('[data-tracking-context]').input_value()==value;page.locator('#lp-tracking-drawer').press('Escape')
+      drawer.locator('[data-live-operate]').click();assert page.locator('[data-op-date]').input_value()=='2026-11-01'
+      if stage=='ENSAMBLE':
+       page.wait_for_selector('section[data-assembly-detail]');assert 'QA|PANELES_2' in page.locator('section[data-assembly-detail] h3').inner_text()
+       assert page.locator('[data-order-form],[data-validate-save],[data-executed]').count()==0
+       page.locator('[data-assembly-back]').click();page.wait_for_selector('[data-assembly-key]');page.locator('#productionTrackingTab').click()
+      else:
+       page.wait_for_selector('[data-order-form]');assert page.locator('[data-validate-save]').count()==(1 if token=='COORDINADOR' else 0)
+       page.locator('[data-back]').click()
+      page.wait_for_selector('#lp-tracking-drawer:not([hidden])');assert page.locator('[data-tracking-context]').input_value()==value;page.locator('#lp-tracking-drawer').press('Escape')
       assert page.evaluate('document.documentElement.scrollWidth<=innerWidth'),width
      results.append({'width':width,'role':token,'global_stages':True,'unknown_and_zero_pending':True,'unassigned_no_action':True,'exact_context_return':True})
     else:
      assert page.locator('#productionTrackingTab').is_hidden()
      page.evaluate("document.querySelector('#productionTrackingTab').click()")
      assert page.locator('#productionTrackingTab').get_attribute('aria-selected')!='true'
-     page.locator('#productionPackingTab' if token=='sp' else '#productionAssemblyTab').click();page.locator('[data-op-date]').fill('2026-11-01');page.locator('[data-op-date]').dispatch_event('change');page.wait_for_selector('[data-order-part]:visible')
-     open_assignment(page,page.locator('[data-live-orders] [data-order-part]').first.get_attribute('data-order-part'));page.wait_for_selector('[data-order-form]');assert not page.locator('[data-validate-save]').count();page.locator('[data-back]').click();page.wait_for_selector('[data-order-part]:visible')
+     page.locator('#productionPackingTab' if token=='sp' else '#productionAssemblyTab').click();page.locator('[data-op-date]').fill('2026-11-01');page.locator('[data-op-date]').dispatch_event('change')
+     if token=='sp':
+      page.wait_for_selector('[data-order-part]:visible');open_assignment(page,page.locator('[data-live-orders] [data-order-part]').first.get_attribute('data-order-part'));page.wait_for_selector('[data-order-form]');assert not page.locator('[data-validate-save]').count();page.locator('[data-back]').click();page.wait_for_selector('[data-order-part]:visible')
+     else:
+      page.wait_for_selector('[data-assembly-key]');page.locator('button[data-assembly-detail]').first.click();page.wait_for_selector('section[data-assembly-detail]')
+      assert page.locator('[data-order-form],[data-validate-save],[data-executed]').count()==0
+      page.locator('[data-assembly-back]').click();page.wait_for_selector('[data-assembly-key]')
      results.append({'width':width,'role':token,'tracking_denied':True,'operation_return_preserved':True})
     assert not errors,errors
     page.close()

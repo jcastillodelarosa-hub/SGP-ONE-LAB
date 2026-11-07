@@ -31,6 +31,8 @@ try:
    page.locator('[data-assembly-key="A|PANELES_2"] [data-assembly-detail]').first.click();page.wait_for_selector('section[data-assembly-detail]');assert page.locator('[data-assembly-order-note], [data-order-note-section], [data-order-note]').count()>0
    assert page.evaluate('document.documentElement.scrollWidth<=innerWidth');page.screenshot(path=str(OUT/f'detail-{width}.png'),full_page=True)
    page.locator('[data-assembly-back]').click();page.locator('[data-assembly-reports]').click();page.wait_for_selector('[data-assembly-report-content]');latest=page.locator('[data-assembly-report-index="0"]');assert 'valor anterior conservado' in latest.inner_text();assert 'Plan y cumplimiento: Por validar' in latest.inner_text();assert latest.locator('[data-original]').count()==2
+   if width<=700:
+    assert latest.locator('.lp-assembly-report-orders tbody tr').evaluate_all("rows=>rows.length>0&&rows.every(row=>row.getBoundingClientRect().width<=row.closest('.lp-assembly-report-table-wrap').clientWidth+1)"),'Mobile production cards must fit their container without hiding Realizado to the right'
    assert page.evaluate('document.documentElement.scrollWidth<=innerWidth');page.screenshot(path=str(OUT/f'report-{width}.png'),full_page=True)
    assert not errors,errors;assert not external,external;results.append({'width':width,'groups':3,'bodyOverflow':False,'noteDraftRefreshSave':True,'detail':True,'historicalReportOwnSources':True,'externalRequests':0,'productionCalls':0});page.close()
   browser.close()

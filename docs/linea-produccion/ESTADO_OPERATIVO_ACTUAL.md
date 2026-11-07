@@ -1,8 +1,13 @@
 ## Candidata LAB v405 · integración sobre v404 publicada · 07/11/2026
 
-Recuperación de transferencia: el envío monolítico de 155 archivos no respondió y
-se canceló. Main sigue en v404; el árbol esperado devuelve 404 y no se creó rama
-ni PR. Se retoma por envíos pequeños con resultado comprobable, sin repetir el lote.
+Recuperación completada: PR218 remoto, base v404; árbol inicial idéntico al
+candidato local. Los dos rechazos de publicación documental se resolvieron con
+autorización específica del documento y del paquete público, sin cambiar de canal.
+CI inicial: pruebas generales, sintaxis, contratos, UI nueva PC/móvil y PostgreSQL17
+PASS. La UI heredada aún esperaba el formulario manual de Ensamble sustituido;
+se adapta a la hoja y contención vigente, preservando cierre real en Empaque.
+Revisión focal corrigió respuesta antigua tras revocación de acceso (DOM de carrera
+PASS) y ancho de tarjetas de informe móvil. CI exacta del delta sigue pendiente.
 Compatibilidad de órdenes ausentes aprobadas: el lector excluye solo el booleano
 `oficial.excluida_export=true` de la hoja activa, conservando cierres históricos.
 No interpreta ausencia del archivo como aprobación. 39 pruebas focales PASS.

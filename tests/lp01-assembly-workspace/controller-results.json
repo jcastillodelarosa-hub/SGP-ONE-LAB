@@ -8,7 +8,8 @@
     "A transient refresh failure preserves the existing editor, draft and uncertain retry",
     "Reports navigation remains available after resolving the pending command",
     "An authorization denial clears the prior Ensamble data rather than preserving it as a network failure",
+    "A native-source revocation invalidates a pending operational refresh so its older response cannot repopulate the sheet",
     "The real controller routes V2 CSV through the validated model, keeps null coverage and stops downloads after session change"
   ],
-  "reads": 22
+  "reads": 28
 }
