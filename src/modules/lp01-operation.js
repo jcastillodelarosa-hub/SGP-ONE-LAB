@@ -23,7 +23,8 @@ import {globalTrackingData,trackingIdentity} from '../domain/lp01-tracking-globa
 import {renderTracking} from './lp01-tracking.js';
 import {materialContext} from '../domain/lp01-sources.js';
 import {parsePowerBI,reconcilePowerBI,bytesBase64,POWERBI_VERSION} from '../domain/powerbi/adapter.js';
-import {importPowerBI,powerBICommand} from './lp01-powerbi-client.js';
+import {importPowerBI} from './lp01-powerbi-client.js';
+import {powerBICommand} from './lp01-powerbi-client.js';
 import {operationalRows,officialBalance,quantity,AFFECTATIONS,validateAffectations,reportCSV,salePendingReason} from '../domain/lp01-operation.js';
 const esc=v=>String(v??'—').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const progress=r=>r.total_etapa_parte>=r.programada?'Parte ejecutada':r.sale===null?'SALE por validar':r.ejecutado>=r.sale&&r.sale>0?'SALE cubierto':r.ejecutado>0?'En proceso':'Pendiente';
