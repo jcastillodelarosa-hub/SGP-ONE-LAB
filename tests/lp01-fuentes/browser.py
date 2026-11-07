@@ -29,11 +29,18 @@ try:
     page=browser.new_page(viewport={'width':width,'height':950 if width>400 else 844});errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
     page.route('**/*',lambda r:r.continue_() if r.request.url.startswith(base) else r.abort());page.goto(base+'/')
     page.evaluate('''()=>{document.querySelector('[data-view-panel="ensamble"]').hidden=false;window.qaToken='COORDINADOR';window.SGPPlannerBridge.getToken=()=>window.qaToken;window.SGPPlannerBridge.getClient=async()=>({rpc:async(name,args)=>(await fetch('/rpc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,args})})).json()});}''')
-    page.locator('#productionPackingTab' if page.locator('[data-op-stage]').input_value()=='EMPAQUE' else '#productionAssemblyTab').click();page.wait_for_selector('[data-op-date]')
+    page.locator('#productionPackingTab').click();page.wait_for_selector('[data-op-date]')
     page.locator('[data-op-date]').fill('2026-11-01');page.locator('[data-op-date]').dispatch_event('change')
     page.wait_for_selector('[data-order-part="'+part+'"]')
     for stage in ['ENSAMBLE','EMPAQUE']:
-     page.locator('#productionPackingTab' if page.locator('[data-op-stage]').input_value()=='EMPAQUE' else '#productionAssemblyTab').click();page.locator('[data-op-stage]').select_option(stage)
+     page.locator('#productionPackingTab' if stage=='EMPAQUE' else '#productionAssemblyTab').click()
+     if stage=='ENSAMBLE':
+      page.wait_for_selector('[data-assembly-key]');page.locator('button[data-assembly-detail]').first.click();page.wait_for_selector('section[data-assembly-detail]')
+      pane=page.locator('section[data-assembly-detail]');assert pane.locator('[data-assembly-balance]').inner_text()=='Pendiente'
+      pane.locator('.lp-assembly-materials summary').click();text=pane.locator('.lp-assembly-materials').inner_text()
+      assert 'PDT 3 REF' not in text and 'homónimas' in text and 'no libera ventanas' in text
+      assert page.locator('[data-order-form]').count()==0;pane.screenshot(path=str(OUT/f'{stage.lower()}-{width}.png'))
+      continue
      page.wait_for_function("s=>document.querySelector('[data-op-status]').textContent.includes('ABIERTO') && document.querySelector('[data-live-orders]').textContent.includes(s)",arg=stage)
      open_assignment(page,part)
      page.wait_for_function("s=>document.querySelector('.lp-operation-form-pane h4, [data-operation-detail]>.lp-turn-header h4').textContent.includes(s)",arg=stage)

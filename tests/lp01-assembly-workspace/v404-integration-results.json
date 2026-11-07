@@ -1,0 +1,40 @@
+{
+  "status": "LOCAL_INTEGRATION_PREPARED_NOT_PUBLISHED",
+  "base": "75b05b842f866163cd6fea6b54dc21e66eba0ade",
+  "ensamblePreviousHead": "3ab7f58c3f15ff29a59b9d25d0956cc3652b95b3",
+  "observationsCandidate": {
+    "pr": "https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/pull/216",
+    "head": "8815fc843bddd74534c24b06a3d1201b4ededf94",
+    "operationSha256": "e54efc3ac67b14e04068da060d75cc44573605ba54ad36e474cc90550aad2ba2",
+    "unchangedSourceSha256": {
+      "src/modules/lp01-tracking.js": "cbffe565a4dcf613fa1a48eb9c03b6b6b23fe690d874e74b024457e7a2cfe4c0",
+      "src/modules/lp01-tracking-affectations.js": "221fb074677e1f81e36e260b6a6a49af753a5f112950194f685ee0b4dc7f0923",
+      "src/modules/lp01-order-note.js": "339fcc031aceac244dd31774e70dff6582360144d382000a7bf2d8d18b6ffc81",
+      "src/modules/lp01-order-note-rows.js": "103b911212c1fb6d47a868077337ef2ac974ba354dcdabf95e15a00e3eedfd69",
+      "src/modules/lp01-followup.css": "fb2f4b61933d2fbb1952a59c7b20fe55373c841ef5edef49444f8b0e5674daca",
+      "tests/lp01-order-details.test.mjs": "5836d138694239256c95ea08418d5cc7c31ffe5cdaf3228e39dca49c5b2d6155",
+      "tests/lp01-tracking-ui/browser.py": "b2dabe69e68f15d0e4dad1b20942e5013c31fd1eb8f1abc7fdaddedd3ad646da",
+      "tests/lp01-tracking-ui/fixture.html": "4a3681059aa210cbdebb359c15490b57b0d12e7b3560ddbe95fcd38142ad2a89",
+      "tests/lp01-tracking-ui/compact_note.py": "011e3912c6f36a32c47533acde59d1bcc002e6bd212ae1e8b4fa4e609629bd86"
+    }
+  },
+  "integratedSha256": {
+    "src/modules/lp01-operation.js": "49c45b4c34104c5ff97a27f78ad6ceb78e00a1805e28536c32ae44dc360b0fbc",
+    "src/modules/lp01-assembly-workspace.js": "3bca57cf2375a5d1d0c4b036f6d476e511941ab3f3c2e13e1b8a654587d2d860",
+    "tests/lp01-assembly-workspace/compact-notes-dom.mjs": "4c4cf9f7ec2c2733622266c6fe64779776ed9406a7802fa2840b23a6d4eaf18e"
+  },
+  "checks": {
+    "operationMerge": "Three-way against shared v403 base; only import conflict, preserving both integrations",
+    "workspaceDomGroups": 13,
+    "controllerDomGroups": 7,
+    "actualCompactAdapterDomGroups": 4,
+    "uncertainSaveAttempts": 2,
+    "storedNoteRevisions": 1
+  },
+  "limits": [
+    "Observations PR still pending final merge/publication confirmation at this checkpoint.",
+    "No Ensamble upload, deploy, SQL, permissions, secrets or job changes.",
+    "Synthetic DOM/RPC only; not browser visual or production acceptance.",
+    "Release version and protected pins still require final v404-main integration; existing v403 marker is not a release claim."
+  ]
+}

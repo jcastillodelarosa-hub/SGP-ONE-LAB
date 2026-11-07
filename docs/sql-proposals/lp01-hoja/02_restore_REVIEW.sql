@@ -1,0 +1,67 @@
+-- RECUPERACION EXACTA LP-HOJA-1; not applied. Same existing endpoint and authorization. No grants, roles or data writes.
+BEGIN;
+SET LOCAL lock_timeout='5s';
+DO $patch$
+DECLARE target oid:=to_regprocedure('public.sgp_lp_operacion_consultar(text,text,text,date,integer)');
+ before_def text;before_body text;before_owner oid;before_acl aclitem[];before_config text[];before_definer boolean;
+BEGIN
+ IF target IS NULL THEN RAISE EXCEPTION 'LP_HOJA_CONSULTA_AUSENTE'; END IF;
+ SELECT pg_get_functiondef(p.oid),p.prosrc,p.proowner,p.proacl,p.proconfig,p.prosecdef
+ INTO before_def,before_body,before_owner,before_acl,before_config,before_definer FROM pg_proc p WHERE p.oid=target;
+ IF md5(before_body) IS DISTINCT FROM '2e4eeacbfc331f2c6dcde32ee96701d7' THEN RAISE EXCEPTION 'LP_HOJA_CONTRATO_CAMBIO'; END IF;
+ IF NOT before_definer OR before_config IS DISTINCT FROM ARRAY['search_path=""']::text[]
+ OR before_acl::text IS DISTINCT FROM '{postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}'
+ THEN RAISE EXCEPTION 'LP_HOJA_PERIMETRO_CAMBIO'; END IF;
+ IF EXISTS(SELECT 1 FROM (VALUES
+  ('sgp_lp_operacion.permisos_en_periodo(date,integer)','2bcf1551c9de003898e4bf663fe544b6'),
+  ('sgp_lp_operacion.sesion(text,text,text,text)','3416a2f6e5640577a4a07c554e26c55e'),
+  ('sgp_lp_operacion.verificar_temporal(text,text,text,date,integer,text,text)','c39ce5692affad2b1edc4a7dbf66faf2'),
+  ('sgp_lp_operacion.periodo(date,integer)','a4e8df3180750acdbc4646394e73e3ba'),
+  ('sgp_lp_operacion.siguiente(date,integer)','a9aa777f841d44dddfc1fceda162be35')
+ ) pin(signature,source_md5) LEFT JOIN pg_proc p ON p.oid=to_regprocedure(pin.signature)
+ WHERE md5(p.prosrc) IS DISTINCT FROM pin.source_md5) THEN RAISE EXCEPTION 'LP_HOJA_AMBITO_U_HORARIO_CAMBIO'; END IF;
+ IF EXISTS(SELECT 1 FROM (VALUES
+  ('sgp_producciones','key_produccion'),('sgp_producciones','id_linea'),
+  ('sgp_producciones','produccion'),('sgp_producciones','sistema'),('sgp_producciones','reserva_al'),
+  ('sgp_producciones','cantidad'),('sgp_producciones','activa'),('sgp_producciones','estado_produccion'),
+  ('sgp_producciones','anio'),('sgp_producciones','semana_base'),('sgp_producciones','semana_actual'),
+  ('sgp_producciones','saldos_inicializados'),('sgp_producciones','presente_ultimo_export'),
+  ('sgp_producciones','saldo_ensamble'),('sgp_producciones','saldo_empaque'),
+  ('sgp_producciones','ensamblado'),('sgp_producciones','empacado'),
+  ('sgp_producciones','ultima_vez_export'),('sgp_producciones','ultima_carga_diaria'),
+  ('sgp_linea_plan_asignaciones','id'),('sgp_linea_plan_asignaciones','key_produccion'),
+  ('sgp_linea_plan_asignaciones','cantidad'),('sgp_linea_plan_asignaciones','fecha'),
+  ('sgp_linea_plan_asignaciones','turno'),('sgp_linea_plan_asignaciones','prioridad'),
+  ('sgp_linea_plan_asignaciones','estado'),('sgp_linea_plan_asignaciones','observacion')
+ ) field(table_name,column_name) WHERE NOT EXISTS(SELECT 1 FROM information_schema.columns c
+ WHERE c.table_schema='public' AND c.table_name=field.table_name AND c.column_name=field.column_name))
+ THEN RAISE EXCEPTION 'LP_HOJA_COLUMNAS_CAMBIO'; END IF;
+ EXECUTE replace(before_def,before_body,$body$
+DECLARE s jsonb;res jsonb;source_sheet jsonb;materials jsonb:=jsonb_build_object('status','UNAVAILABLE','filas','[]'::jsonb); BEGIN s:=sgp_lp_operacion.sesion(p_token,p_etapa,NULL,p_linea); PERFORM sgp_lp_operacion.verificar_temporal(s->>'usuario',p_etapa,p_linea,p_fecha,p_turno,NULL,'LEER');
+ IF p_fecha IS NULL OR p_turno IS NULL OR p_turno NOT IN(1,2) THEN RAISE EXCEPTION 'TURNO_INVALIDO'; END IF;
+ -- Reuse the historical reader inside the protected facade, never expose its whole-line payload.
+ IF EXISTS(SELECT 1 FROM sgp_lp_operacion.ordenes o JOIN sgp_lp_operacion.permisos_en_periodo(p_fecha,p_turno) a ON a.key=o.key AND a.etapa=o.etapa WHERE a.usuario=s->>'usuario' AND o.etapa=p_etapa AND o.linea=p_linea AND o.fecha=p_fecha AND o.turno=p_turno) THEN
+  BEGIN
+   source_sheet:=public.sgp_consultar_ensamble(p_token,NULL,p_linea);
+   IF jsonb_typeof(source_sheet->'filas') IS DISTINCT FROM 'array' THEN RAISE EXCEPTION 'MATERIAL_SOURCE_INCOMPATIBLE'; END IF;
+   SELECT jsonb_build_object('status','AVAILABLE','filas',coalesce(jsonb_agg(
+    CASE WHEN EXISTS(SELECT 1 FROM public.sgp_producciones other WHERE other.produccion=x->>'produccion' AND other.key_produccion<>x->>'key_produccion')
+    THEN x||jsonb_build_object('identity_ambiguous',true,'estado_mecanizado',NULL,'observacion_mecanizado',NULL,'pendientes_mecanizado',NULL,'pdt_repo_ok',NULL,'pdt_por_validar',NULL)
+    ELSE x||jsonb_build_object('identity_ambiguous',false) END),'[]'::jsonb)) INTO materials
+   FROM jsonb_array_elements(source_sheet->'filas') x
+   WHERE x->>'id_linea'=p_linea AND EXISTS(SELECT 1 FROM sgp_lp_operacion.ordenes o JOIN sgp_lp_operacion.permisos_en_periodo(p_fecha,p_turno) a ON a.key=o.key AND a.etapa=o.etapa WHERE a.usuario=s->>'usuario' AND o.etapa=p_etapa AND o.linea=p_linea AND o.fecha=p_fecha AND o.turno=p_turno AND o.key=x->>'key_produccion');
+  EXCEPTION WHEN OTHERS THEN materials:=jsonb_build_object('status','UNAVAILABLE','filas','[]'::jsonb); END;
+ END IF;
+ SELECT jsonb_build_object('contract','LP-OPERACION-1','writeContract','LP-OPERACION-CAS-2','role',s->>'rol','automaticOpening',sgp_lp_operacion.apertura_preparada(p_etapa,p_linea),'emptyCloseEligible',sgp_lp_operacion.turno_vacio(p_etapa,p_linea,p_fecha,p_turno),'continuity',sgp_lp_operacion.continuidad(p_fecha,p_turno),'writes',(SELECT escrituras FROM sgp_lp_operacion.config WHERE id),'biFormatApproved',(SELECT formato_bi_aprobado FROM sgp_lp_operacion.config WHERE id),'biAdapter',(SELECT adaptador_bi FROM sgp_lp_operacion.config WHERE id),
+ 'materialContext',materials,
+ 'turn',coalesce((SELECT to_jsonb(t) FROM sgp_lp_operacion.turnos t WHERE etapa=p_etapa AND linea=p_linea AND fecha=p_fecha AND turno=p_turno),jsonb_build_object('estado','NO_ABIERTO','revision',0)),
+ 'orders',coalesce((SELECT jsonb_agg(to_jsonb(o)||jsonb_build_object('produccion',p.produccion,'programada',(SELECT cantidad FROM public.sgp_linea_plan_asignaciones a WHERE a.id=o.parte),'total_etapa_parte',(SELECT coalesce(sum(q.ejecutado),0) FROM sgp_lp_operacion.ordenes q WHERE q.key=o.key AND q.etapa=o.etapa AND q.parte=o.parte),'oficial',to_jsonb(p),'abierta',o.origen_fecha IS NOT NULL) ORDER BY CASE WHEN o.origen_fecha IS NOT NULL AND o.sale>0 THEN 0 WHEN o.origen_fecha IS NOT NULL THEN 1 ELSE 2 END,coalesce(o.antiguedad_fecha,o.origen_fecha,o.fecha),coalesce(o.antiguedad_turno,o.origen_turno,o.turno),o.prioridad,o.key,o.parte) FROM sgp_lp_operacion.ordenes o JOIN public.sgp_producciones p ON p.key_produccion=o.key WHERE o.etapa=p_etapa AND o.linea=p_linea AND o.fecha=p_fecha AND o.turno=p_turno AND EXISTS(SELECT 1 FROM sgp_lp_operacion.permisos_en_periodo(p_fecha,p_turno) a WHERE a.usuario=s->>'usuario' AND a.etapa=o.etapa AND a.key=o.key)),'[]'),
+ 'history',coalesce((SELECT jsonb_agg(to_jsonb(a) ORDER BY creado_en) FROM sgp_lp_operacion.auditoria a WHERE a.etapa=p_etapa AND a.linea=p_linea AND a.fecha=p_fecha AND a.turno=p_turno AND((a.key IS NOT NULL AND EXISTS(SELECT 1 FROM sgp_lp_operacion.permisos_en_periodo(p_fecha,p_turno) b WHERE b.usuario=s->>'usuario' AND b.etapa=a.etapa AND b.key=a.key)) OR (a.key IS NULL AND NOT EXISTS(SELECT 1 FROM sgp_lp_operacion.ordenes o WHERE o.etapa=a.etapa AND o.linea=a.linea AND o.fecha=a.fecha AND o.turno=a.turno AND NOT EXISTS(SELECT 1 FROM sgp_lp_operacion.permisos_en_periodo(p_fecha,p_turno) b WHERE b.usuario=s->>'usuario' AND b.etapa=o.etapa AND b.key=o.key))))),'[]'),
+ 'notifications',coalesce((SELECT jsonb_agg(to_jsonb(n) ORDER BY creado_en) FROM sgp_lp_operacion.notificaciones n WHERE n.etapa=p_etapa AND n.linea=p_linea AND n.fecha=p_fecha AND n.turno=p_turno AND EXISTS(SELECT 1 FROM sgp_lp_operacion.permisos_en_periodo(p_fecha,p_turno) b WHERE b.usuario=s->>'usuario' AND b.etapa=n.etapa AND b.key=n.key)),'[]'),
+ 'reports',coalesce((SELECT jsonb_agg(to_jsonb(c) ORDER BY version) FROM sgp_lp_operacion.cierres c WHERE c.etapa=p_etapa AND c.linea=p_linea AND c.fecha=p_fecha AND c.turno=p_turno AND NOT EXISTS(SELECT 1 FROM jsonb_array_elements(c.snapshot->'rows') r WHERE NOT EXISTS(SELECT 1 FROM sgp_lp_operacion.permisos_en_periodo(p_fecha,p_turno) b WHERE b.usuario=s->>'usuario' AND b.etapa=c.etapa AND b.key=r->>'key'))),'[]')) INTO res;
+ RETURN res||CASE WHEN (SELECT habilitado FROM sgp_lp_operacion.perfil_roles WHERE id) THEN jsonb_build_object('canValidate',sgp_lp_operacion.puede_operar(s->>'usuario',p_etapa,'VALIDAR'),'operations',to_jsonb(sgp_lp_operacion.operaciones_rol(s->>'rol',p_etapa)),'individualClose',true) ELSE '{}'::jsonb END; END $body$);
+ IF NOT EXISTS(SELECT 1 FROM pg_proc p WHERE p.oid=target AND p.proowner=before_owner
+ AND p.proacl IS NOT DISTINCT FROM before_acl AND p.proconfig IS NOT DISTINCT FROM before_config
+ AND p.prosecdef=before_definer) THEN RAISE EXCEPTION 'LP_HOJA_METADATA_CAMBIO'; END IF;
+END $patch$;
+COMMIT;

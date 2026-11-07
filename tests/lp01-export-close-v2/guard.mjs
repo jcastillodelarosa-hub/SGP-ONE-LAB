@@ -1,0 +1,12 @@
+import {readFile} from 'node:fs/promises';import {createHash} from 'node:crypto';import assert from 'node:assert/strict';
+const root=new URL('../../',import.meta.url),read=p=>readFile(new URL(p,root));
+const manifest=JSON.parse(await read('docs/sql-proposals/lp01-export-close-v2/manifest.json'));
+for(const [path,sha] of Object.entries(manifest.artifact_sha256))assert.equal(createHash('sha256').update(await read(path)).digest('hex'),sha,path);
+for(const [path,sha] of Object.entries(manifest.unchanged_sha256))assert.equal(createHash('sha256').update(await read(path)).digest('hex'),sha,path);
+const install=(await read('docs/sql-proposals/lp01-export-close-v2/01_close_adapter_REVIEW.sql')).toString();
+assert(!/\bGRANT\b|CREATE\s+(?:ROLE|POLICY)|UPDATE\s+sgp_lp_operacion\.config\s+SET/i.test(install));
+assert(install.includes('export_close_v2 boolean NOT NULL DEFAULT false'));
+assert(install.includes("'identity',(SELECT jsonb_build_object('key',p.key_produccion,'line',p.id_linea,'production',p.produccion,'system',p.sistema)"));
+assert(install.includes('EXPORT_V2_REVISION_TURNO_INVALIDA'));
+assert(!install.includes("'closeAuthority'"));assert(!install.includes('sgp_lp_operacion_consultar'));
+console.log(`PASS ${Object.keys(manifest.artifact_sha256).length} close artifact pins; ${Object.keys(manifest.unchanged_sha256).length} unchanged sources; no grants/activation/discovery.`);

@@ -1,5 +1,14 @@
 # Apertura automática — preparación y decisión de identidad
 
+
+> Estado vigente 07/11/2026: este documento conserva un diseño histórico, no una
+> autorización de activación. La regla de abrir al llegar el horario cuando el
+> turno anterior no cerró sigue **sin decisión funcional inequívoca** en el encargo
+> actual. No habilitar ni agregar un bloqueo usando este antecedente como permiso.
+> El esquema LP sí existe en la base actual; la observación de ausencia del
+> 02/11 que figura abajo no describe el estado vigente. El principal, sus permisos,
+> secretos y tareas no se han creado ni activado en esta preparación.
+
 > Actualización desde 0a6b48d: **A seleccionada solo para diseño/preparación**.
 > [Diseño verificable, pruebas y bloqueo real PUBLIC](principal-a/DISENO.md).
 > No autoriza creación de identidad, grants, conexión, secretos, jobs o instalación.

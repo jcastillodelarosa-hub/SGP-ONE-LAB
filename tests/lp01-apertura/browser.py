@@ -28,7 +28,7 @@ try:
     page=browser.new_page(viewport={'width':width,'height':950 if width>400 else 844});errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
     page.route('**/*',lambda r:r.continue_() if r.request.url.startswith(origin) else r.abort());page.goto(origin+'/')
     page.evaluate('''()=>{document.querySelector('[data-view-panel="ensamble"]').hidden=false;window.SGPPlannerBridge.getToken=()=> 'COORDINADOR';window.SGPPlannerBridge.getClient=async()=>({rpc:async(name,args)=>(await fetch('/rpc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,args})})).json()});}''')
-    page.locator('#productionPackingTab' if page.locator('[data-op-stage]').input_value()=='EMPAQUE' else '#productionAssemblyTab').click();page.wait_for_selector('[data-op-date]');page.locator('[data-op-date]').fill('2026-11-01');page.locator('[data-op-date]').dispatch_event('change')
+    page.locator('#productionPackingTab').click();page.wait_for_selector('[data-op-date]');page.locator('[data-op-date]').fill('2026-11-01');page.locator('[data-op-date]').dispatch_event('change')
     page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('NO_ABIERTO')")
     assert 'primer turno' in page.locator('[data-auto-opening]').inner_text()
     page.locator('[data-open]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Guardado confirmado')")
@@ -43,22 +43,22 @@ try:
     assert db.sql('SELECT count(*) FROM sgp_lp_operacion.turnos')=='1'
     page.locator('[data-op-shift]').select_option('1');page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Turno ABIERTO')")
     page.locator('[data-turn-operation]').click();page.locator('[data-empty-confirm]').check();page.locator('[data-close-note]').fill('QA responsable cierra el origen vacío');page.locator('[data-close-empty]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Guardado confirmado')")
-    page.locator('#productionPackingTab' if page.locator('[data-op-stage]').input_value()=='EMPAQUE' else '#productionAssemblyTab').click();page.wait_for_selector('[data-next-turn]')
+    page.locator('#productionPackingTab').click();page.wait_for_selector('[data-next-turn]')
     assert 'pendiente de autorización técnica' in page.locator('[data-auto-opening]').inner_text()
-    assert db.snapshot()['automaticOpening']['state']=='READY_PENDING_TECHNICAL_APPROVAL'
+    assert db.snapshot('EMPAQUE')['automaticOpening']['state']=='READY_PENDING_TECHNICAL_APPROVAL'
     audit=db.sql('SELECT count(*) FROM sgp_lp_operacion.auditoria')
     page.locator('[data-op-load]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Turno CERRADO')")
     assert audit==db.sql('SELECT count(*) FROM sgp_lp_operacion.auditoria') and db.sql('SELECT count(*) FROM sgp_lp_operacion.turnos')=='1'
     page.locator('#productionTrackingPanel').screenshot(path=str(OUT/f'technical-approval-pending-{width}.png'))
     page.locator('[data-next-turn]').click();page.wait_for_function("document.querySelector('[data-op-shift]').value==='2'&&document.querySelector('[data-op-status]').textContent.includes('NO_ABIERTO')")
     page.locator('[data-open]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Guardado confirmado')")
-    assert db.snapshot(shift=2)['turn']['estado']=='ABIERTO' and db.snapshot(shift=2)['orders']==[]
+    assert db.snapshot('EMPAQUE',shift=2)['turn']['estado']=='ABIERTO' and db.snapshot('EMPAQUE',shift=2)['orders']==[]
     assert 'anterior sigue abierto' in page.locator('[data-auto-opening]').inner_text()
     page.evaluate("window.SGPPlannerBridge.getToken=()=> 'LIDER'");page.locator('[data-op-load]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Turno ABIERTO')")
     assert page.locator('[data-open]').count()==0 and page.locator('[data-auto-opening]').count()==0
     assert official==db.sql('SELECT jsonb_agg(to_jsonb(x)) FROM public.sgp_producciones x') and planning==db.sql('SELECT jsonb_agg(to_jsonb(x)) FROM public.sgp_linea_plan_asignaciones x')
     assert page.evaluate('document.documentElement.scrollWidth<=innerWidth') and not errors,errors
-    results.append({'viewport':width,'actual_protected_sql':True,'read_plan_no_writes':True,'prior_open_block_visible':True,'prior_open_not_closed_or_skipped':True,'technical_binding_explicitly_pending':True,'manual_fallback_after_valid_empty_close':True,'leader_not_granted_opening':True,'planning_and_export_unchanged':True,'page_errors':errors,'automatic_executor':'NOT IMPLEMENTED OR CERTIFIED; manual actions only'});page.close()
+    results.append({'viewport':width,'stage':'EMPAQUE','actual_protected_sql':True,'read_plan_no_writes':True,'prior_open_block_visible':True,'prior_open_not_closed_or_skipped':True,'technical_binding_explicitly_pending':True,'manual_fallback_after_valid_empty_close':True,'leader_not_granted_opening':True,'planning_and_export_unchanged':True,'page_errors':errors,'automatic_executor':'NOT IMPLEMENTED OR CERTIFIED; manual actions only'});page.close()
    finally:db.close()
   browser.close()
 finally:server.shutdown()

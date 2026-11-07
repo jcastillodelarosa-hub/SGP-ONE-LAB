@@ -1,0 +1,30 @@
+✔ V2 is disconnected and rejects any ordinary production adapter or enable switch (1.324462ms)
+✔ original XLSX is parsed server-side; one production for two UUIDs; manual execution never added (34.20952ms)
+✔ ABSENT preserves the production/history and remains null; explicit source zero is zero (8.874582ms)
+✔ reimports replace the whole projection; prior original and absent prior quantities stay historical (8.380641ms)
+✔ same request replays exactly; same file new request creates history but never adds realization (8.601827ms)
+✔ simultaneous different requests with same revision cannot both commit; same request safely replays (4.702394ms)
+✔ closure compares Export with plan, not manual counts; deviations in either direction require reasons (8.207975ms)
+✔ plan unknown cannot be replaced with executed or implicit zero (3.356361ms)
+✔ plan/source revision and universe changes invalidate imported evidence until reimported (8.378417ms)
+✔ authorization and scopes are checked at execution, replay and before commit (7.535965ms)
+✔ mid-transaction source drift or persistence failure rolls back original and receipt atomically (6.508017ms)
+✔ reopen invalidates current Realizado; correction keeps immutable older closure (8.689122ms)
+✔ reopen cannot silently invalidate a consumed successor; no automatic replacement of downstream plan (4.69217ms)
+✔ outside catalog, ambiguous names, unincorporated productions and required missing orders fail closed (8.29289ms)
+✔ selected shift only; omitted selected period and exact duplicate Export rows never imply zero or add (6.371485ms)
+✔ client totals, forged parsed rows, manual commands, Empaque and malformed contexts rejected (1.218364ms)
+✔ SIN ACTIVIDAD requires truly empty required universe and explicit confirmation, not absent Export (2.027752ms)
+✔ source fingerprint changes for same-revision plan drift; malformed/duplicated assignment roots rejected (0.942906ms)
+✔ parser input is copied before awaits so caller mutation cannot replace original evidence (2.885563ms)
+✔ historical reports never become current after invalid revision or duplicate closure (3.539882ms)
+✔ current reader rejects tampered context, authority, provenance, quantity or absent coverage (4.42306ms)
+✔ correction privilege revoked before close commit rejects the entire corrected close (8.022305ms)
+ℹ tests 22
+ℹ suites 0
+ℹ pass 22
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 265.303147

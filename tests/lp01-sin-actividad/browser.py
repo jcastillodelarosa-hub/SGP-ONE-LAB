@@ -32,7 +32,7 @@ try:
      window.SGPPlannerBridge.getToken=()=> 'COORDINADOR';
      window.SGPPlannerBridge.getClient=async()=>({rpc:async(name,args)=>(await fetch('/rpc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,args})})).json()});
     }''')
-    page.locator('#productionPackingTab' if page.locator('[data-op-stage]').input_value()=='EMPAQUE' else '#productionAssemblyTab').click();page.wait_for_selector('[data-op-date]');page.locator('[data-op-date]').fill('2026-11-01');page.locator('[data-op-date]').dispatch_event('change')
+    page.locator('#productionPackingTab').click();page.wait_for_selector('[data-op-date]');page.locator('[data-op-date]').fill('2026-11-01');page.locator('[data-op-date]').dispatch_event('change')
     page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('NO_ABIERTO')")
     page.locator('[data-open]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Guardado confirmado')")
     page.locator('[data-turn-operation]').click();page.wait_for_selector('[data-empty-close]')
@@ -55,33 +55,33 @@ try:
     with page.expect_download() as d:page.locator('[data-report]').click()
     d.value.save_as(OUT/f'empty-close-{width}.csv');csv=(OUT/f'empty-close-{width}.csv').read_text(encoding='utf-8-sig');assert 'SIN ACTIVIDAD' in csv and 'QA turno vacío confirmado' in csv and 'No aplica: turno sin órdenes' in csv
     page.locator('#productionReportsPanel').screenshot(path=str(OUT/f'empty-report-{width}.png'))
-    page.locator('#productionPackingTab' if page.locator('[data-op-stage]').input_value()=='EMPAQUE' else '#productionAssemblyTab').click();page.wait_for_selector('[data-next-turn]');page.locator('[data-next-turn]').click()
+    page.locator('#productionPackingTab').click();page.wait_for_selector('[data-next-turn]');page.locator('[data-next-turn]').click()
     page.wait_for_function("document.querySelector('[data-op-shift]').value==='2'&&document.querySelector('[data-op-status]').textContent.includes('NO_ABIERTO')")
     page.locator('[data-open]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Guardado confirmado')")
     page.locator('[data-turn-operation]').click();page.locator('[data-empty-confirm]').check();page.locator('[data-close-note]').fill('QA siguiente turno vacío');page.locator('[data-close-empty]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Guardado confirmado')")
-    assert db.snapshot(shift=2)['turn']['estado']=='CERRADO';first=db.snapshot(shift=2)['reports'][0]['snapshot']
-    page.evaluate("window.SGPPlannerBridge.getToken=()=> 'LIDER'");page.locator('#productionPackingTab' if page.locator('[data-op-stage]').input_value()=='EMPAQUE' else '#productionAssemblyTab').click();page.locator('[data-op-load]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('CERRADO')")
+    assert db.snapshot('EMPAQUE',shift=2)['turn']['estado']=='CERRADO';first=db.snapshot('EMPAQUE',shift=2)['reports'][0]['snapshot']
+    page.evaluate("window.SGPPlannerBridge.getToken=()=> 'LIDER'");page.locator('#productionPackingTab').click();page.locator('[data-op-load]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('CERRADO')")
     page.locator('[data-turn-operation]').click();assert page.locator('[data-reopen]').count()==0
-    page.evaluate("window.SGPPlannerBridge.getToken=()=> 'COORDINADOR'");page.locator('#productionPackingTab' if page.locator('[data-op-stage]').input_value()=='EMPAQUE' else '#productionAssemblyTab').click();page.locator('[data-op-load]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('CERRADO')")
+    page.evaluate("window.SGPPlannerBridge.getToken=()=> 'COORDINADOR'");page.locator('#productionPackingTab').click();page.locator('[data-op-load]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('CERRADO')")
     page.locator('[data-turn-operation]').click();page.locator('[data-close-note]').fill('QA reapertura autorizada');page.locator('[data-reopen]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Guardado confirmado')")
-    assert db.snapshot(shift=2)['turn']['estado']=='EN_REVISION'
+    assert db.snapshot('EMPAQUE',shift=2)['turn']['estado']=='EN_REVISION'
     page.locator('[data-empty-confirm]').check();page.locator('[data-close-note]').fill('QA segunda versión vacía');page.locator('[data-close-empty]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Guardado confirmado')")
-    reports=db.snapshot(shift=2)['reports'];assert len(reports)==2 and reports[0]['snapshot']==first and reports[1]['snapshot']['version']>first['version']
+    reports=db.snapshot('EMPAQUE',shift=2)['reports'];assert len(reports)==2 and reports[0]['snapshot']==first and reports[1]['snapshot']['version']>first['version']
     assert planning==db.sql('SELECT jsonb_agg(to_jsonb(a) ORDER BY id) FROM public.sgp_linea_plan_asignaciones a')
     page.locator('[data-close-note]').fill('QA incorporar nueva programación');page.locator('[data-reopen]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Guardado confirmado')")
     page.locator('[data-empty-confirm]').check();page.locator('[data-close-note]').fill('QA vista previa obsoleta no debe cerrar')
     db.sql(h.insert_assignment(key,shift=2)) # Synthetic assignment arriving after preview, not app behavior.
     new_plan=db.sql('SELECT jsonb_agg(to_jsonb(a) ORDER BY id) FROM public.sgp_linea_plan_asignaciones a')
     page.locator('[data-close-empty]').click();page.wait_for_function("document.querySelector('[data-close-status]').textContent.includes('tiene órdenes asignadas o abiertas')")
-    assert len(db.snapshot(shift=2)['reports'])==2
-    page.locator('#productionPackingTab' if page.locator('[data-op-stage]').input_value()=='EMPAQUE' else '#productionAssemblyTab').click();page.locator('[data-op-load]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('EN_REVISION')")
+    assert len(db.snapshot('EMPAQUE',shift=2)['reports'])==2
+    page.locator('#productionPackingTab').click();page.locator('[data-op-load]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('EN_REVISION')")
     page.locator('[data-open]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Guardado confirmado')")
     page.locator('[data-turn-operation]').click();assert page.locator('[data-close-empty]').count()==0
-    assert db.snapshot(shift=2)['orders'][0]['ejecutado']==0 and page.locator('[data-close]').is_disabled()
+    assert db.snapshot('EMPAQUE',shift=2)['orders'][0]['ejecutado']==0 and page.locator('[data-close]').is_disabled()
     assert official==db.sql('SELECT jsonb_agg(to_jsonb(a) ORDER BY key_produccion) FROM public.sgp_producciones a') and new_plan==db.sql('SELECT jsonb_agg(to_jsonb(a) ORDER BY id) FROM public.sgp_linea_plan_asignaciones a')
     assert page.evaluate('document.documentElement.scrollWidth<=innerWidth') and not errors,errors
     page.locator('[data-operation-detail]').screenshot(path=str(OUT/f'order-blocks-empty-{width}.png'))
-    results.append({'viewport':width,'actual_sql':True,'explicit_confirmation_and_motive':True,'no_powerbi_file':True,'lost_close_reply_one_version_one_audit':True,'csv_metadata_download':True,'next_configured_shift_opens':True,'leader_cannot_reopen':True,'coordinator_reopen_immutable_versions':True,'assignment_after_preview_rejected':True,'zero_execution_order_requires_normal_close':True,'planning_and_export_unchanged_by_app':True,'page_errors':errors,'network':'local only; external blocked'});page.close()
+    results.append({'viewport':width,'stage':'EMPAQUE','actual_sql':True,'explicit_confirmation_and_motive':True,'no_powerbi_file':True,'lost_close_reply_one_version_one_audit':True,'csv_metadata_download':True,'next_configured_shift_opens':True,'leader_cannot_reopen':True,'coordinator_reopen_immutable_versions':True,'assignment_after_preview_rejected':True,'zero_execution_order_requires_normal_close':True,'planning_and_export_unchanged_by_app':True,'page_errors':errors,'network':'local only; external blocked'});page.close()
    finally:db.close()
   browser.close()
 finally:server.shutdown()

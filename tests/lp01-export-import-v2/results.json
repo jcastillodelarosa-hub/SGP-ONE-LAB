@@ -1,0 +1,19 @@
+{
+  "status": "PASS",
+  "engine": "PostgreSQL 18.6 (PGlite 0.5.15) on wasm32-unknown-emscripten, compiled by emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 6.0.13 (e13ee988ce3d87a738dd8f3661d02223308c412a), 32-bit",
+  "checks": 7,
+  "results": [
+    "Guarded real-function delta preserves owner/ACL/SECURITY/search_path/RLS; atomic rollback and default-disabled HTTP+SQL paths pass",
+    "Actual shared handler parses original XLSX into service_role RPC; scoped transaction persists original/SHA/coverage/universe and receipt; two UUIDs remain untouched",
+    "Zero is explicit; never-reported stays null, reimport preserves absent prior values with original provenance; only PRESENT replaces, never adds; same original deduplicates bytes only",
+    "Existing CERRAR cannot reinterpret V2 import as manual/UUID evidence; no closure, ABRIR, budget or realized write is introduced",
+    "Real captured session/profile/temporal guards reject expired/invalid/revoked/other-stage/direct-browser requests; CAS, duplicate rows, unknown incorporation and coordinator-only corrections pass",
+    "Missing scheduled roots cannot be omitted; real deferred scope trigger rejects revocation at commit and rolls back file, audit, revision and revocation atomically",
+    "Legacy complete-coverage path unchanged; containment-required exact rollback restores post-INCORPORAR bodies and preserves all new evidence; stale rollback rejected"
+  ],
+  "limits": [
+    "Synthetic in-process PostgreSQL and local HTTP Request handler only. No production connection or deployment.",
+    "Production Deno entry point stays disabled; no actual edge network or service credential used.",
+    "No multi-session PostgreSQL lock/concurrency proof; Operational activation and plan/budget history remain pending; the separate close3 adapter is tested in its own package."
+  ]
+}

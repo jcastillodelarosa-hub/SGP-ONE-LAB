@@ -1,0 +1,66 @@
+{
+  "status": "APPLIED_IN_SUPABASE_AND_METADATA_VERIFIED",
+  "project_id": "ocvxbwzqxbrfndkvjmfx",
+  "migration": "lp01_hoja_catalog_schedule_read_v1",
+  "sql_sha256": "d19d3a4b7a3a735a726333cb066f83377e0213bf918672f5e97b4142431ee750",
+  "source_md5_before": "9f9f3ef8861c4fb410a4132f74204930",
+  "source_md5_after": "2e4eeacbfc331f2c6dcde32ee96701d7",
+  "readback": {
+    "target": {
+      "acl": "{postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "signature": "sgp_lp_operacion_consultar(text,text,text,date,integer)",
+      "source_md5": "2e4eeacbfc331f2c6dcde32ee96701d7",
+      "security_definer": true,
+      "has_catalog_contract": true,
+      "has_schedule_contract": true
+    },
+    "checked_at": "2026-11-07T13:20:40.365769+00:00",
+    "dependencies": [
+      {
+        "actual": "2bcf1551c9de003898e4bf663fe544b6",
+        "matches": true,
+        "expected": "2bcf1551c9de003898e4bf663fe544b6",
+        "signature": "sgp_lp_operacion.permisos_en_periodo(date,integer)"
+      },
+      {
+        "actual": "3416a2f6e5640577a4a07c554e26c55e",
+        "matches": true,
+        "expected": "3416a2f6e5640577a4a07c554e26c55e",
+        "signature": "sgp_lp_operacion.sesion(text,text,text,text)"
+      },
+      {
+        "actual": "c39ce5692affad2b1edc4a7dbf66faf2",
+        "matches": true,
+        "expected": "c39ce5692affad2b1edc4a7dbf66faf2",
+        "signature": "sgp_lp_operacion.verificar_temporal(text,text,text,date,integer,text,text)"
+      },
+      {
+        "actual": "a4e8df3180750acdbc4646394e73e3ba",
+        "matches": true,
+        "expected": "a4e8df3180750acdbc4646394e73e3ba",
+        "signature": "sgp_lp_operacion.periodo(date,integer)"
+      },
+      {
+        "actual": "a9aa777f841d44dddfc1fceda162be35",
+        "matches": true,
+        "expected": "a9aa777f841d44dddfc1fceda162be35",
+        "signature": "sgp_lp_operacion.siguiente(date,integer)"
+      }
+    ],
+    "server_version": "17.11",
+    "missing_columns": []
+  },
+  "tool_success": true,
+  "attempts": 1,
+  "scope": "Only exact existing consultar function body; additive authorized catalog and schedule. No grants, roles, RLS, flags, credentials, jobs or operational data changes.",
+  "not_verified": [
+    "Authenticated plant-session response and visible UI",
+    "INCORPORAR activation",
+    "Export V2 closure",
+    "Automatic opening"
+  ]
+}

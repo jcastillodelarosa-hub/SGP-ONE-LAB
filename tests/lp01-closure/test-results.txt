@@ -1,0 +1,18 @@
+✔ Realizado exclusively from current confirmed closure and original file provenance (1.253192ms)
+✔ open or reopened turn has no current Realizado even if an older report/manual count exists (0.664652ms)
+✔ mismatched stage/line/turn/file/version or duplicate latest closure fails closed (0.375905ms)
+✔ explicit zero is Realizado zero; absent is never manual execution or zero (0.148269ms)
+✔ SIN ACTIVIDAD remains explicit empty closure, not quantities fabricated for catalog (0.158454ms)
+✔ preview groups by production, preserves absent orders and never writes/allocates roots (6.36932ms)
+✔ preview accepts explicit zero, distinguishes source outside turn, and filters other shift (0.369867ms)
+✔ preview rejects missing/ambiguous canonical identity and wrong context (0.556022ms)
+✔ unchanged parser rejects exact duplicate source rows instead of double counting (1.054187ms)
+✔ reimport is a replacement projection, never added to the prior preview or manual count (0.398859ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 99.898643

@@ -1,0 +1,1 @@
+{"private":true,"type":"module","scripts":{"test":"node dom.mjs"},"dependencies":{"linkedom":"0.18.12"}}

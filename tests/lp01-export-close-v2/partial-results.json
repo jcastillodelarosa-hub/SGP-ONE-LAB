@@ -1,0 +1,25 @@
+{
+  "status": "PASS",
+  "engine": "PostgreSQL 18.6 (PGlite 0.5.15) on wasm32-unknown-emscripten, compiled by emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 6.0.13 (e13ee988ce3d87a738dd8f3661d02223308c412a), 32-bit",
+  "command": {
+    "before_source_md5": "73590860eab986bc35d690556c1be6a9",
+    "candidate_source_md5": "6a0357405be58a0965d520f5b662a9c5"
+  },
+  "checks": 5,
+  "results": [
+    "A7/B5 then A3-only yields A3, B5 preserved from its original file/import, never-reported C null; scoped current/preserved/never counts and exact idempotency pass",
+    "Removing and re-including a production restores its last same-context source without addition; an actual import from another shift does not populate a never-reported value here",
+    "CERRAR reconstructs provenance against original bytes/hash/receipt and rejects corruption, cross-context source and contract2; universe change requires reimport; real consultar readback validates through reader3 without touching balances",
+    "Coordinator reopen/correction keeps all earlier snapshots and absent B5; explicit A0 later remains preserved zero when only B changes to2; never-reported C stays null and sources/budgets are untouched",
+    "Both gates remain contained after tests; exact rollback refuses history-destroying legacy restoration after contract3 closes"
+  ],
+  "fixtures": {
+    "lp01-export-partial-v3-sql-readback.json": "110abb2d046447dfc2c7203419ddee1701031e86d41c69c73f294b259745dc37",
+    "lp01-export-partial-v3-corrected-readback.json": "07cab5a56653ededc35127b8cff179e63db81dc1a9fe013c7c84434ada20033d"
+  },
+  "limits": [
+    "Disposable synthetic single-connection PostgreSQL only. No production changes, source re-audit or activation.",
+    "Plan source history and initial Export reconciliation remain unimplemented; budget and plan comparison are null.",
+    "B15/CSV integration belongs to the parent; this test imports only the production domain readers."
+  ]
+}
