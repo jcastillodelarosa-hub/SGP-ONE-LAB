@@ -23,7 +23,7 @@
 .lp-tracking-table-wrap{max-height:60vh;overflow:auto;overscroll-behavior:contain;border:1px solid #cbdcf0;border-radius:9px;scrollbar-gutter:stable}
 .lp-tracking-table{width:100%;min-width:960px;border-collapse:separate;border-spacing:0;font-size:13px;table-layout:auto}
 .lp-tracking-table>thead>tr>th,.lp-tracking-table>tbody>tr>td{padding:9px 10px;border-bottom:1px solid #dce6f1;text-align:left;vertical-align:top}
-.lp-tracking-table>thead>tr>th{position:sticky;top:0;z-index:1;background:#eef5fd;color:#25496f;font-size:11px;white-space:nowrap}
+.lp-followup .lp-tracking-table>thead>tr>th{position:sticky;top:0;z-index:1;background:#eef5fd;color:#25496f;font-size:13px;font-weight:700;line-height:1.25;letter-spacing:normal;text-transform:none;vertical-align:middle;white-space:nowrap}
 .lp-tracking-table>thead>tr>th:nth-child(n+4):nth-child(-n+6),.lp-tracking-table>tbody>tr>td:nth-child(n+4):nth-child(-n+6){text-align:right;font-variant-numeric:tabular-nums}
 .lp-tracking-table>tbody>tr>td:nth-child(n+4):nth-child(-n+6){min-width:70px;font-weight:700}
 .lp-tracking-table>tbody>tr.selected>td{background:#e5f2ff}.lp-tracking-table>tbody>tr:hover>td{background:#f3f8fe}

@@ -25,6 +25,28 @@ with sync_playwright() as p:
    page.locator('[data-column-origin="'+('mobile' if width<700 else 'table')+'"][data-column-menu="'+key+'"]').click()
    page.locator('[data-menu-section="'+section+'"] > summary').click()
   assert page.locator('thead th').all_text_contents()[:2]==['Semana ▾','Producción / asignación ▾']
+  header_appearance=page.evaluate("""() => {
+   const cells=[...document.querySelectorAll('.lp-tracking-table > thead > tr > th')];
+   return cells.map(cell=>{
+    const label=cell.querySelector('button')||cell,style=getComputedStyle(label);
+    const range=document.createRange();range.selectNodeContents(label);const rect=range.getBoundingClientRect();
+    return {label:label.textContent,interactive:label.tagName==='BUTTON',font:style.fontFamily,size:style.fontSize,weight:style.fontWeight,spacing:style.letterSpacing,transform:style.textTransform,lineHeight:style.lineHeight,alignment:getComputedStyle(cell).verticalAlign,centerY:rect.y+rect.height/2};
+   });
+  }""")
+  assert [h['label'] for h in header_appearance[-2:]]==['Disponible','Afectaciones']
+  assert all(not h['interactive'] for h in header_appearance[-2:])
+  if width>=700:
+   for h in header_appearance:
+    assert h['size']=='13px' and h['weight']=='700',h
+    assert h['transform']=='none' and h['spacing']=='normal' and h['alignment']=='middle',h
+    assert h['font']==header_appearance[0]['font'] and h['lineHeight']==header_appearance[0]['lineHeight'],h
+    assert abs(h['centerY']-header_appearance[0]['centerY'])<=1.5,h
+  else:
+   assert page.locator('.lp-tracking-table > thead').is_hidden()
+   for label in ['Disponible','Afectaciones']:
+    cell=page.locator('.lp-tracking-table > tbody > tr').first.locator('[data-label="'+label+'"]')
+    assert cell.is_visible()
+    assert cell.evaluate('(cell)=>getComputedStyle(cell,"::before").content')=='"'+label+'"'
   if width<700:assert page.locator('.lp-tracking-mobile-week').first.is_visible()
   page.evaluate("window.node=document.querySelector('.lp-tracking-table');window.observer=new MutationObserver(()=>window.mutations++);window.mutations=0;observer.observe(document.querySelector('[data-live-orders]'),{childList:true,subtree:true})")
   for _ in range(3):page.clock.fast_forward(20000);page.wait_for_function('window.inflight===0')
@@ -90,5 +112,6 @@ with sync_playwright() as p:
   assert page.locator('[data-turn-operation]').is_hidden()
   assert not errors,errors
   results.append({'width':width,'unchanged_20s_cycles':3,'filters_sort_focus_panel':True,'no_overlap':True,'scope_session_role_clear':True,'external_requests':0,'single_stage_balance':True,'header_menu_search_apply_cancel_escape_focus':True,'approved_header_removed_in_tracking':True,'operation_and_closure_navigation_preserved':True});page.close()
+  results[-1]['header_appearance']=header_appearance
  browser.close()
 server.shutdown();(OUT/'browser.json').write_text(json.dumps(results,indent=2)+'\n');print(json.dumps(results))
