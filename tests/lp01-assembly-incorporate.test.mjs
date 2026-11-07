@@ -13,6 +13,6 @@ test('incorporation requires exact server capability and open writable pilot con
 test('explicit quantity and reason, active other order, never inferred from manual execution',()=>{
  assert.deepEqual(incorporationInput(row,'3',' Cambio acordado '),{key:row.key,quantity:3,observation:'Cambio acordado'});
  for(const value of ['',null,0,-1,'1.5','07',7,Infinity])assert.throws(()=>incorporationInput(row,value,'motivo'));
- for(const patch of [{key:'QA|FRAMES_2'},{key:'|PANELES_2'},{key:null},{state:'ABIERTAS'},{state:'PROGRAMADAS'},{balance:null},{balance:0},{oficial:{activa:'NO'}}])assert.throws(()=>incorporationInput({...row,...patch},1,'motivo'));
+ for(const patch of [{key:'QA|FRAMES_2'},{key:'|PANELES_2'},{key:null},{state:'ABIERTAS'},{state:'PROGRAMADAS'},{balance:null},{balance:0},{oficial:{activa:'NO'}},{oficial:{activa:'SI',excluida_export:true}}])assert.throws(()=>incorporationInput({...row,...patch},1,'motivo'));
  for(const reason of ['','   ','x'.repeat(2001)])assert.throws(()=>incorporationInput(row,1,reason));
 });

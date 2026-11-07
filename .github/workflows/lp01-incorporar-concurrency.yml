@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - 'docs/sql-proposals/lp01-incorporar/**'
+      - 'docs/sql-proposals/lp01-incorporar-post-export/**'
       - 'tests/lp01-incorporar/**'
       - 'tests/lp01-hoja/base-fixture.sql'
       - 'tests/lp01-hoja/production-readonly/**'
@@ -31,9 +32,13 @@ jobs:
           git diff --exit-code -- tests/lp01-incorporar/concurrency/fixture.sql tests/lp01-incorporar/concurrency/fixture-manifest.json
       - name: Real multi-session locks, CAS, revocation and atomicity
         run: python tests/lp01-incorporar/concurrency/postgres17.py
+      - name: Post-Export exclusion recheck and unchanged concurrency controls
+        run: python tests/lp01-incorporar/concurrency/postgres17.py --post-export
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: lp01-incorporar-postgres17-synthetic
-          path: tests/lp01-incorporar/concurrency/result-postgres17.json
+          path: |
+            tests/lp01-incorporar/concurrency/result-postgres17.json
+            tests/lp01-incorporar/concurrency/result-post-export-postgres17.json
           if-no-files-found: error

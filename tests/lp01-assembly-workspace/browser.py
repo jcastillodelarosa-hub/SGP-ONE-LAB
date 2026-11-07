@@ -34,7 +34,11 @@ try:
    if width<=700:
     assert latest.locator('.lp-assembly-report-orders tbody tr').evaluate_all("rows=>rows.length>0&&rows.every(row=>row.getBoundingClientRect().width<=row.closest('.lp-assembly-report-table-wrap').clientWidth+1)"),'Mobile production cards must fit their container without hiding Realizado to the right'
    assert page.evaluate('document.documentElement.scrollWidth<=innerWidth');page.screenshot(path=str(OUT/f'report-{width}.png'),full_page=True)
-   assert not errors,errors;assert not external,external;results.append({'width':width,'groups':3,'bodyOverflow':False,'noteDraftRefreshSave':True,'detail':True,'historicalReportOwnSources':True,'externalRequests':0,'productionCalls':0});page.close()
+   page.evaluate('window.showPlanReport()');page.wait_for_function("document.querySelector('#reports').textContent.includes('Plan vigente al cierre')")
+   assert 'historia anterior desconocida' in page.locator('#reports').inner_text();assert 'Comparación incompleta' in page.locator('#reports').inner_text()
+   assert '70 %' in page.locator('#reports').inner_text();assert page.locator('#reports [data-report]').count()==1
+   assert page.evaluate('document.documentElement.scrollWidth<=innerWidth');page.screenshot(path=str(OUT/f'report-plan-v4-{width}.png'),full_page=True)
+   assert not errors,errors;assert not external,external;results.append({'width':width,'groups':3,'bodyOverflow':False,'noteDraftRefreshSave':True,'detail':True,'historicalReportOwnSources':True,'planV4FromSQL':True,'externalRequests':0,'productionCalls':0});page.close()
   browser.close()
 finally:server.shutdown()
 (OUT/'browser-results.json').write_text(json.dumps({'status':'PASS','type':'Isolated real browser with synthetic RPC, not plant verification','results':results},indent=2)+'\n')

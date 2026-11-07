@@ -1,7 +1,8 @@
 import {POWERBI_VERSION} from './powerbi/adapter.js';
 import {closureExportRealized} from './lp01-closure-export.js';
+import {assemblyPlanComparison} from './lp01-assembly-plan.js';
 
-const CONTRACT='LP-EXPORT-CLOSE-3',AUTHORITY='EXPORT_PRODUCTION_V2';
+const CONTRACT='LP-EXPORT-CLOSE-3',PLAN_CONTRACT='LP-EXPORT-CLOSE-4',AUTHORITY='EXPORT_PRODUCTION_V2';
 const PLAN='PLAN_SOURCE_REQUIRED',RECONCILIATION='RECONCILIATION_REQUIRED';
 const object=v=>v!==null&&typeof v==='object'&&!Array.isArray(v);
 const own=(v,key)=>object(v)&&Object.prototype.hasOwnProperty.call(v,key);
@@ -89,13 +90,18 @@ function valueSource(row,s,context,files,imports,usedRows){
   context:{stage:context.stage,line:context.line,date:context.date,shift:context.shift},file,sourceRows:[...source.sourceRows]};
 }
 
-function projectV2(report,context){
- const s=report.snapshot,invalid=()=>pending('INCOMPATIBLE_CLOSE');
+function projectV2(report,context,expectedContract=CONTRACT){
+ const s=report.snapshot,withPlan=expectedContract===PLAN_CONTRACT,invalid=()=>pending('INCOMPATIBLE_CLOSE');
  // V2 writer's contained pilot. Supporting another stage/line needs its own
  // accredited writer contract; a matching label alone cannot extend the pilot.
  if(context.stage!=='ENSAMBLE'||context.line!=='PANELES_2')return invalid();
- if(!object(s)||s.contract!==CONTRACT||s.authority!==AUTHORITY||s.ok!==true||!exact(s,context)||!id(s.id)||s.id!==report.id||s.version!==report.version||s.version<2||s.type!=='CON_ACTIVIDAD'||report.tipo!=='CON_ACTIVIDAD')return invalid();
- if(!id(s.importId)||!hash(s.universeRevision)||s.canContinue!==false||s.comparisonComplete!==false||s.planComparison!==PLAN||s.reconciliation!==RECONCILIATION)return invalid();
+ if(!object(s)||s.contract!==expectedContract||s.authority!==AUTHORITY||s.ok!==true||!exact(s,context)||!id(s.id)||s.id!==report.id||s.version!==report.version||s.version<2||s.type!=='CON_ACTIVIDAD'||report.tipo!=='CON_ACTIVIDAD')return invalid();
+ if(!id(s.importId)||!hash(s.universeRevision)||s.canContinue!==false||s.reconciliation!==RECONCILIATION)return invalid();
+ let comparison=null;
+ if(withPlan){
+  if(s.operationalReady!==false||!object(s.initialReference)||s.initialReference.status!=='EXPORT_CUT_REFERENCE_REQUIRED'||s.initialReference.cut!==null||s.initialReference.includedClosureVersions!==null)return invalid();
+  try{comparison=assemblyPlanComparison({contract:'LP-ENSAMBLE-PLAN-COMPARISON-1',planSnapshot:s.planSnapshot,planComparison:s.planComparison,comparisonComplete:s.comparisonComplete,rows:s.rows},context);}catch{return invalid();}
+ }else if(s.comparisonComplete!==false||s.planComparison!==PLAN)return invalid();
  const file=s.file;
  if(!object(file)||!id(file.id)||!id(report.archivo)||file.id!==report.archivo||file.adapter!==POWERBI_VERSION||!hash(file.sha256)||typeof file.name!=='string'||!file.name.trim())return invalid();
  if(!Array.isArray(s.rows)||!s.rows.length||!object(s.reasons))return invalid();
@@ -104,7 +110,7 @@ function projectV2(report,context){
   if(!object(row)||!keyInLine(row.key,context.line)||keys.has(row.key))return invalid();
   keys.add(row.key);
   if(['power_bi','ejecutado','sale','assignments','diferencia'].some(k=>own(row,k)))return invalid();
-  if(row.plan!==null||row.planStatus!==PLAN||row.difference!==null||row.pendingAgainstPlan!==null)return invalid();
+  if(!withPlan&&(row.plan!==null||row.planStatus!==PLAN||row.difference!==null||row.pendingAgainstPlan!==null))return invalid();
   if(!object(row.budget)||row.budget.status!==RECONCILIATION||row.budget.available!==null||!object(row.continuity)||row.continuity.status!==RECONCILIATION||row.continuity.quantity!==null||row.continuity.allocation!=='NONE')return invalid();
   if(!Array.isArray(row.sourceRows))return invalid();
   if(row.coverage==='PRESENT'){
@@ -119,17 +125,18 @@ function projectV2(report,context){
   if(rawReason!==null&&(typeof rawReason!=='string'||rawReason.length>2000))return invalid();
   // PostgreSQL btrim(text) removes spaces, not newlines/tabs inside a recorded reason.
   const reason=rawReason===null?null:rawReason.replace(/^ +| +$/g,'')||null;
-  if(row.reason!==reason||(row.coverage==='ABSENT'&&!reason?.trim()))return invalid();
+  if(row.reason!==reason||((row.coverage==='ABSENT'||(withPlan&&row.pendingAgainstPlan>0))&&!reason?.trim()))return invalid();
   if(!historicalReferences(row,context,assignmentIds,scheduledIds))return invalid();
   const identity=snapshotIdentity(row,context);if(identity===false)return invalid();
   rows.push({key:row.key,quantity:row.realized,coverage:row.coverage,preserve:row.preserve,reason,sourceRows:[...row.sourceRows],identity,valueStatus:row.valueStatus,valueSource:origin,
    source:'EXPORT_CIERRE_V2',closureId:report.id,version:report.version,fileId:origin?.file.id??null,sha256:origin?.file.sha256??null,importId:origin?.importId??null,universeRevision:origin?.universeRevision??null,
-   plan:null,planStatus:PLAN,difference:null,pendingAgainstPlan:null,budget:{status:RECONCILIATION,available:null},continuity:{status:RECONCILIATION,quantity:null,allocation:'NONE'}});
+   plan:row.plan,planStatus:row.planStatus,difference:row.difference,pendingAgainstPlan:row.pendingAgainstPlan,budget:{status:RECONCILIATION,available:null},continuity:{status:RECONCILIATION,quantity:null,allocation:'NONE'}});
  }
  if(Object.entries(s.reasons).some(([key,value])=>!keys.has(key)||typeof value!=='string'||value.length>2000))return invalid();
- return {contract:'LP-REALIZADO-CIERRE-3',status:'CONFIRMED',authority:AUTHORITY,closureId:report.id,version:report.version,
+ return {contract:withPlan?'LP-REALIZADO-CIERRE-4':'LP-REALIZADO-CIERRE-3',status:'CONFIRMED',authority:AUTHORITY,closureId:report.id,version:report.version,
   importId:s.importId,universeRevision:s.universeRevision,file:{id:file.id,name:file.name,sha256:file.sha256,adapter:file.adapter},rows,
-  canContinue:false,comparisonComplete:false,planComparison:PLAN,reconciliation:RECONCILIATION};
+  canContinue:false,comparisonComplete:withPlan?comparison.comparisonComplete:false,planComparison:withPlan?'ACCREDITED_CURRENT':PLAN,reconciliation:RECONCILIATION,
+  ...(withPlan?{planSnapshot:comparison.planSnapshot,operationalReady:false,initialReference:{status:'EXPORT_CUT_REFERENCE_REQUIRED',cut:null,includedClosureVersions:null}}:{})};
 }
 
 /** Strict read-only V2 projection. Hashes/import IDs are immutable provenance
@@ -146,6 +153,15 @@ export function closureExportRealizedV2(data,context){
  return selected.status==='CURRENT'?projectV2(selected.report,context):pending(selected.status);
 }
 
+/** Version 4 adds the immutable plan captured at close. It does not establish
+ * an Export cut reference or enable future-turn continuity. Version 3 remains
+ * strict and never upgrades itself using today's planner or an appended object.
+ */
+export function closureExportRealizedV4(data,context){
+ const selected=currentReport(data,context);
+ return selected.status==='CURRENT'?projectV2(selected.report,context,PLAN_CONTRACT):pending(selected.status);
+}
+
 /** The current snapshot selects its reader. Unknown/missing V2 discriminators
  * fail closed and never fall back to an earlier/legacy report with a quantity.
  * Native legacy snapshots have no contract/authority markers; their pinned
@@ -156,6 +172,7 @@ export function currentClosureExportRealized(data,context){
  if(selected.status!=='CURRENT')return pending(selected.status);
  const s=selected.report.snapshot;
  if(s?.contract===CONTRACT&&s?.authority===AUTHORITY)return projectV2(selected.report,context);
+ if(s?.contract===PLAN_CONTRACT&&s?.authority===AUTHORITY)return projectV2(selected.report,context,PLAN_CONTRACT);
  if(!object(s)||own(s,'contract')||own(s,'authority')||['importId','universeRevision','planComparison','reconciliation'].some(k=>own(s,k))||(Array.isArray(s.rows)&&s.rows.some(r=>['realized','coverage','manualHistory'].some(k=>own(r,k)))))return pending('INCOMPATIBLE_CLOSE');
  return closureExportRealized(data,context);
 }

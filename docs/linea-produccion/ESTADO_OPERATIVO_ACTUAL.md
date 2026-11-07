@@ -1,3 +1,118 @@
+## LAB v407 · paquete integrado sobre v406 · 07/11/2026
+
+**IMPLEMENTADO LOCAL / NO FUSIONADO / SQL NO APLICADO / NO PUBLICADO.** Base
+main199d03135cb228b61d9203a20c4b6bc546a04b5a, Hosting30ba2ca7beb40220.
+Se agrupan incorporación post-Export, plan versionado y cadena CIERRE4 con lector,
+B15 y CSV. Plan al cierre, motivos/hora, exclusiones y procedencia parcial preservados;
+revocación de keys históricas también contiene reportes, historial y recibos.
+V3 permanece estricto. No concede roles, credenciales ni jobs. Flags SQL false.
+Disponible/continuidad requieren saldo inicial y trabajo ya incluido en ese saldo;
+no se inventa el corte. Apertura con anterior pendiente está aprobada, no activada.
+
+Evidencia reutilizada: incorporación 8 grupos, plan 8+4, cadena V4 8 y preflight3,
+SQL final→lector independiente PASS; todo sintético. Lector/B15/CSV 76 pruebas
+PASS incluidas DOM, sin repetir SQL remoto ni auditorías generales. Prueba PC/móvil
+V4 agregada a CI permitido; PostgreSQL17 concurrente V4 sigue sin acreditar.
+Integración final: 833 Node PASS, sin omisiones; 16 pins, política y release PASS.
+
+Subida pública en progreso, bloqueada específicamente en el test
+`tests/lp01-ensamble-plan/pglite.mjs` por autorización de su detalle de esquema/ACL.
+No omitirlo ni cambiar canal para sortear el rechazo. Paquete sin rama/PR aún.
+Siguiente: autorización pendiente → subida final → CI exacta → revisión de artefacto
+antes de publicar. Aplicación/activaciones SQL requieren su aprobación separada.
+Detalles: [V4](../sql-proposals/lp01-export-plan-v4/README.md),
+[incorporación](../sql-proposals/lp01-incorporar-post-export/README.md).
+
+Los hitos siguientes son antecedentes y no sustituyen este estado integrado.
+
+## Lector e informe de cierre V4 · siguiente incremento aislado · 07/11/2026
+
+IMPLEMENTADO LOCALMENTE, NO FUSIONADO/APLICADO/PUBLICADO. Base local cc8316e
+(candidata v407, aún sin PR). El lector selecciona LP-EXPORT-CLOSE-4 explícito y
+valida el plan persistido íntegro junto con procedencia Export existente. V3 sigue
+estricto y no adopta el plan actual. B15/CSV muestran objetivo, cumplimiento cuando
+es calculable, motivo/hora/versión, historia anterior UNKNOWN y ausencia como null.
+No activa carga/cierre, no modifica SQL ni concede permisos. Conserva canContinue y
+operationalReady false; referencia inicial Export aún requerida. Primer readback
+SQL sintético de la cadena V4 validado, no datos ni certificación productivos.
+9 pruebas nuevas PASS incluidas DOM, escape y CSV; 67 regresiones de V3/B15 PASS
+con dependencia DOM aislada. Sin repetir auditorías SQL ni navegador bloqueado.
+
+Siguiente: integrar propuesta SQL V4 cuando cierre reautorización histórica del
+plan, revisión focal conjunta y sello/pins/CI del incremento final. No publicar
+esta rama directamente ni confundirla con candidata v407, que queda intacta.
+
+## Candidata LAB v407 · base v406 publicada · 07/11/2026
+
+Base remota `199d03135cb228b61d9203a20c4b6bc546a04b5a`, Hosting
+`30ba2ca7beb40220`, publicación 42391913872 SUCCESS. Export01/02/03 aplicado por
+su responsable, sin repetirlo. Árbol base local a2e7e56 cotejado idéntico a main.
+Incorporación post-Export y plan versionado integrados **solo como propuestas
+contenidas**, no instalados ni activos. Runtime mantiene los botones contenidos;
+la nueva regla de apertura se informa como aprobada pero aún sin motor activado.
+Publicación del paquete público autorizada explícitamente por Johan; rechazo de
+blob documental resuelto en único reintento. CI exacta y activaciones separadas
+siguen pendientes. Verificación local final: Node 815 PASS / 9 omitidas, cero fallas;
+política, 16 pins, sintaxis y verify:release PASS. No confundir esta candidata con
+una entrega operativa completa.
+
+## Cierre Export con plan V4 · siguiente incremento contenido · 07/11/2026
+
+**SQL IMPLEMENTADO/PROBADO AISLADAMENTE, NO APLICADO NI ACTIVADO.** Paquete nuevo
+`lp01-export-plan-v4`, desde f2b073c; no modifica cadenas antiguas ni runtime.
+Rebase sobre INCORPORAR post-v406 ee5acef, captura de plan integrada y cierre con
+selector LP-EXPORT-CLOSE-4. Plan vigente/realizado/comparación persistidos bajo lock;
+null no es cero, historia previa UNKNOWN, fuente no materializada bloquea explícito.
+Exclusiones activas respetadas, historia conservada. Guarda V4 abarca también keys
+canceladas/excluidas del baseline en COMMIT, report/history, receipt y replay;
+ACL y filtros activos orders/catalog exactos. 8 grupos PGlite PASS, preflight focal
+PASS y readback SQL compatible con lector independiente 8738305. No prueba PG17
+concurrente ni productiva. Corte Export inicial sigue desconocido: presupuesto,
+Disponible/continuidad/carry bloqueados específicamente, operationalReady=false.
+Nueva apertura con anterior abierto está autorizada pero se integra aparte, sin
+autocierre/arrastre ni privilegios aquí. Próximo: integrar lector4 y revisar cadena
+final contenida; no aplicar/activar hasta autorización y controles correspondientes.
+Detalle: [paquete V4](../sql-proposals/lp01-export-plan-v4/README.md).
+
+## v405 publicada; continuación operativa posterior a Export v406 · 07/11/2026
+
+**PUBLICADO / IDENTIDAD VERIFICADA:** PR218 integrado en main
+`3fd6276acf28a6f36104ec2d7500d284bdba6823`. [Publicación protegida 42389313884](https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/actions/runs/42389313884)
+SUCCESS; Hosting `0b477bbb5a8e2dc1`, 137 archivos públicos byte-idénticos al ZIP
+revisado y v404 retenida. Sello LAB v405 visible, sin sesión de planta. Aceptación
+humana pendiente. No equivale a activar cierre, incorporación o apertura automática.
+
+Siguiente delta **IMPLEMENTADO LOCAL / NO APLICADO / NO PUBLICADO**:
+`lp01-incorporar-post-export` conserva exclusiones aprobadas v406 en hoja y escritor,
+incluida una vista antigua. 8 grupos PGlite PASS y revisión independiente focal PASS.
+Prueba nueva PG17 de exclusión concurrente preparada, pendiente de CI del SHA final.
+Lector v406 aplicado y acreditado: MD5 3ecf0a9ec4497de02b1d7ac89bc80819.
+La interfaz también rechaza explícitamente `excluida_export=true` (2 pruebas PASS).
+Instalación deja bandera false; roles limitados requieren aprobación de activación.
+No se han concedido permisos, creado credenciales/jobs ni ejecutado SQL operativo.
+
+Adaptación adicional contenida: transporte Power BI conserva la autoridad V2 en
+reintentos, sin degradarla a legacy ni habilitarla en servidor (10 pruebas PASS).
+Lector puro LP-ENSAMBLE-PLAN-1 valida versión/alcance/cadena y objetivos exactos,
+con historia anterior explícitamente desconocida (6 grupos Node PASS, incluidos
+fixtures emitidos por SQL). Plan SQL integrado como propuesta privada: 8 + 4 grupos
+PGlite PASS. Aún no está conectado al cierre ni acredita comparación operativa.
+Pins y sello v407 sincronizados sobre v406; pendiente CI del SHA final y publicación
+protegida, sin activar SQL ni permisos.
+
+Reglas originales recuperadas: objetivo del planificador por proceso/turno;
+conservar plan original y cambios con motivo/hora, cumplir contra el vigente al
+cierre. Disponible es por orden/etapa, no ese objetivo. Una consulta puntual confirmó
+programar/mover iguales a las fuentes capturadas y sin triggers de historial en
+asignaciones: se prepara conexión versionada, sin inventar historia anterior.
+Primera carga de Export necesita referencia acreditada; no se eligió un corte
+concreto. Johan confirmó que el nuevo turno permite trabajar a su hora aunque
+el anterior siga pendiente, sin cerrarlo automáticamente ni inferir arrastre.
+El impedimento PUBLIC del principal automático todavía no está resuelto. Detalle del paquete y recuperación:
+[incorporación posterior a Export](../sql-proposals/lp01-incorporar-post-export/README.md).
+
+Las secciones siguientes son antecedentes y no sustituyen este estado.
+
 ## Revisión selectiva Export diario · candidata v406 · 07/11/2026
 
 IMPLEMENTADO EN RAMA `feat/export-approval-nov7`, base v405 publicada 3fd6276.
@@ -17,6 +132,27 @@ Pruebas focales: 8 Node PASS, sintaxis PASS y verify:release v406 PASS.
 Backend: pruebas locales PGlite PASS (selección, scopes, reaparición, permisos,
 idempotencia y conflictos). Cinco parches de lectores activos/métricas compilados localmente. Pendiente: integración
 v405 y entrega coordinada backend/frontend. Sin pruebas sobre datos reales.
+
+## Plan versionado de Ensamble · incremento aislado · 07/11/2026
+
+**IMPLEMENTADO/PROBADO AISLADAMENTE; SQL PROPUESTO, NO APLICADO, DESACTIVADO.**
+Checkout independiente desde `518eb2d` (árbol v405), sin modificar integración.
+Paquete `docs/sql-proposals/lp01-ensamble-plan`: versiones persistentes por turno,
+fuente planificador solo Ensamble/PANELES_2, baseline observado con historia anterior
+UNKNOWN, cambios autenticados/motivo/hora y objetivo vigente sin sumar SALE.
+Bandera false preserva planner legacy; sin RPC público ni GRANT. Triggers contenidos
+registran cambios externos de asignaciones/exclusión/línea sin atribución y bloquean
+comparación obsoleta, incluso cambiar/deshacer. Snapshot verifica huella bajo lock.
+Comparación une universo completo; realizado desconocido no es cero, plan0 solo
+para key elegible actual. Exige columna v406, conserva historia de excluidas.
+Evidencia: 8 + 4 grupos PGlite PASS y JSON SQL compatible con lector estructural.
+No acredita PostgreSQL17 concurrente ni producción. Comando/import/cierre/runtime
+intactos. Próximo paso: rebase e integración coordinada de INCORPORAR post-v406 y
+fachada/motivo del planner; luego cierre/import, sin activar ni alterar permisos.
+Decisión posterior del usuario: nuevo turno permite trabajar a su horario aunque
+el anterior siga sin cerrar; no cierre implícito ni arrastre inferido. Se implementa
+aparte, sin ampliar este paquete ni activar ejecutor/privilegios.
+Detalles y límites: [paquete del plan](../sql-proposals/lp01-ensamble-plan/README.md).
 
 ## Candidata LAB v405 · integración sobre v404 publicada · 07/11/2026
 

@@ -1,0 +1,20 @@
+{
+  "status": "PASS",
+  "groups": 8,
+  "results": [
+    "Transactional installer requires v406 exclusion column; native source/body/OID/owner/ACL unchanged; false gate leaves the real legacy planner working without new inputs or history claims",
+    "All new helpers and journal tables stay private; no endpoint, technical grant, credential or new role; supplied actor/GUC cannot reach a writer",
+    "Real authenticated planner mutation atomically records observed baseline and current target, server actor/reason/time, request replay and unchanged native metadata; no invented prior history or SALE",
+    "Captured native move/split versions both periods, preserves origin IDs and all earlier snapshots; current targets follow quantities per turn rather than SALE",
+    "Versions/events/receipts are immutable; rollback removes mutation+versions together; unfinished trusted contexts cannot commit",
+    "Out-of-route real planner changes and uninstrumented cancellation are retained as unattributed evidence and invalidate close, including a change followed by undo",
+    "Approval exclusion changes invalidate current source but never erase history; fresh observed baseline filters excluded targets, not absence from Export; every disable/re-enable requires a new generation",
+    "Close helper rereads canonical source under SHARE NOWAIT locks and detects stale fingerprint independently of dirty tracking; command/import/close bodies unchanged"
+  ],
+  "engine": "PostgreSQL 18.6 (PGlite 0.5.15) on wasm32-unknown-emscripten, compiled by emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 6.0.13 (e13ee988ce3d87a738dd8f3661d02223308c412a), 32-bit",
+  "limits": [
+    "Synthetic PGlite single connection only; no PostgreSQL17 multi-session proof or production SQL.",
+    "Private helpers only. No public RPC, frontend, import/close integration, grant or activation.",
+    "Baseline history before enrollment is explicitly UNKNOWN; original historical plan is not reconstructed."
+  ]
+}

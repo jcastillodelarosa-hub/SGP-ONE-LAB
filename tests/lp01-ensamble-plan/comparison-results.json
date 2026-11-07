@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "groups": 4,
+  "results": [
+    "SQL comparison joins the entire current target universe; known actual including zero is distinct from missing/null; comparison may be complete with pre-enrollment history UNKNOWN; difference=actual-plan and no percentage for zero target",
+    "Plan zero is accepted only for an explicit currently eligible pilot key; excluded/missing/foreign scope, duplicates and untrusted extra fields fail closed",
+    "Private planner adapters reuse locked native session/individual/role/temporal scope before real planner RPC; revoked access denies without changing target/version",
+    "Exclusion change+undo retains an unaccredited marker despite matching final fingerprint; containment preserves all history and leaves native planner operational"
+  ],
+  "limits": [
+    "Synthetic PGlite, not production or concurrent PostgreSQL17.",
+    "No public endpoint, no active CERRAR; caller must authorize the complete plan+Export universe and pass authenticated Export values."
+  ]
+}

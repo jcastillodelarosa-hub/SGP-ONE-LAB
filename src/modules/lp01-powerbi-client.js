@@ -1,4 +1,17 @@
 /** Calls the authoritative parser. No service key is accepted or exposed here. */
+/** Build only the existing gateway command fields. A future contained V2 UI must
+ * preserve its authority marker across retries, not silently import as legacy.
+ * This marker is not authorization: the gateway and SQL independently gate V2.
+ */
+export function powerBICommand(command){
+ if(!command||typeof command!=='object'||Array.isArray(command))throw Error('Contexto Power BI incompatible');
+ const result=Object.fromEntries(['id','stage','line','date','shift','revision'].map(key=>[key,command[key]]));
+ if(Object.prototype.hasOwnProperty.call(command,'authority')){
+  if(command.authority!=='EXPORT_PRODUCTION_V2'||command.stage!=='ENSAMBLE'||command.line!=='PANELES_2')throw Error('Autoridad Power BI incompatible');
+  result.authority=command.authority;
+ }
+ return result;
+}
 function gatewayJwt(config){
  const token=config.lpPowerBiGatewayJwt;
  try{

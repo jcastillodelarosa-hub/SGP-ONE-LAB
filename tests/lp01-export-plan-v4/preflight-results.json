@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "checks": [
+    "Installer drains existing command config before plan-control lock",
+    "Active INCORPORAR blocks installation without changing its source",
+    "Final installation succeeds only with INCORPORAR/plan/import/close contained"
+  ],
+  "limits": [
+    "Single-connection synthetic preflight only; not lock-concurrency proof."
+  ]
+}

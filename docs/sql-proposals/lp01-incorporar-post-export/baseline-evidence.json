@@ -1,0 +1,9 @@
+{
+  "status": "BASELINE_READBACK_CONFIRMED_NO_INCORPORATION_INSTALLATION",
+  "project": "ocvxbwzqxbrfndkvjmfx",
+  "migration": "export_revision_selectiva_v406",
+  "function": "public.sgp_lp_operacion_consultar(text,text,text,date,integer)",
+  "source_md5": "3ecf0a9ec4497de02b1d7ac89bc80819",
+  "column": { "name": "excluida_export", "type": "boolean", "nullable": "NO", "default": "false" },
+  "source": "Readback supplied by the Export deployment owner, 2026-11-07. No repeat installation or production test writes."
+}

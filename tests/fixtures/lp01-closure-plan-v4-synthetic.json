@@ -1,0 +1,591 @@
+{
+  "provenance": "SYNTHETIC_SQL_V4_NOT_PRODUCTION",
+  "context": {
+    "stage": "ENSAMBLE",
+    "line": "PANELES_2",
+    "date": "2026-11-07",
+    "shift": 1
+  },
+  "readback": {
+    "contract": "LP-OPERACION-1",
+    "turn": {
+      "etapa": "ENSAMBLE",
+      "fecha": "2026-11-07",
+      "linea": "PANELES_2",
+      "turno": 1,
+      "estado": "CERRADO",
+      "revision": 4,
+      "capacidad": null
+    },
+    "reports": [
+      {
+        "id": "00000000-0000-0000-0000-000000003012",
+        "tipo": "CON_ACTIVIDAD",
+        "etapa": "ENSAMBLE",
+        "fecha": "2026-11-07",
+        "linea": "PANELES_2",
+        "turno": 1,
+        "archivo": "00000000-0000-0000-0000-000000003000",
+        "usuario": "leader",
+        "version": 4,
+        "snapshot": {
+          "id": "00000000-0000-0000-0000-000000003012",
+          "ok": true,
+          "date": "2026-11-07",
+          "file": {
+            "id": "00000000-0000-0000-0000-000000003000",
+            "name": "Export.xlsx",
+            "sha256": "cc5153f973ffcbad5b7ebcdaff2c765f76efe9692da8e59da6763f2a7bbb18ce",
+            "adapter": "LP-PBI-XLSX-1"
+          },
+          "line": "PANELES_2",
+          "rows": [
+            {
+              "key": "OPEN|PANELES_2",
+              "plan": 5,
+              "budget": {
+                "status": "RECONCILIATION_REQUIRED",
+                "available": null
+              },
+              "reason": null,
+              "coverage": "PRESENT",
+              "identity": {
+                "key": "OPEN|PANELES_2",
+                "line": "PANELES_2",
+                "system": "QA SYSTEM",
+                "production": "OPEN"
+              },
+              "preserve": false,
+              "realized": 5,
+              "continuity": {
+                "status": "RECONCILIATION_REQUIRED",
+                "quantity": null,
+                "allocation": "NONE"
+              },
+              "difference": 0,
+              "planStatus": "ACCREDITED_CURRENT",
+              "sourceRows": [
+                3
+              ],
+              "valueSource": {
+                "file": {
+                  "id": "00000000-0000-0000-0000-000000003000",
+                  "name": "Export.xlsx",
+                  "sha256": "cc5153f973ffcbad5b7ebcdaff2c765f76efe9692da8e59da6763f2a7bbb18ce",
+                  "adapter": "LP-PBI-XLSX-1"
+                },
+                "context": {
+                  "date": "2026-11-07",
+                  "line": "PANELES_2",
+                  "shift": 1,
+                  "stage": "ENSAMBLE"
+                },
+                "importId": "00000000-0000-0000-0000-000000003010",
+                "sourceRows": [
+                  3
+                ],
+                "importVersion": 3,
+                "universeRevision": "026feaa4eb8bedaaedeb8072df33ed3665f706aabe3bf0ef30d2a7b9a5c0d7fb"
+              },
+              "valueStatus": "CURRENT_FILE",
+              "manualHistory": {
+                "authority": "HISTORICAL_ONLY",
+                "assignments": [
+                  {
+                    "key": "OPEN|PANELES_2",
+                    "sale": 5,
+                    "etapa": "ENSAMBLE",
+                    "fecha": "2026-11-07",
+                    "linea": "PANELES_2",
+                    "parte": "00000000-0000-0000-0000-000000000010",
+                    "turno": 1,
+                    "revision": 0,
+                    "validado": false,
+                    "ejecutado": 444,
+                    "prioridad": null,
+                    "apertura_id": null,
+                    "consolidado": null,
+                    "observacion": "",
+                    "sale_estado": "POR_VALIDAR",
+                    "sale_fuente": "PENDIENTE",
+                    "afectaciones": {},
+                    "origen_fecha": null,
+                    "origen_turno": null,
+                    "contexto_origen": {},
+                    "antiguedad_fecha": null,
+                    "antiguedad_turno": null
+                  }
+                ]
+              },
+              "assignmentRefs": [
+                "00000000-0000-0000-0000-000000000010"
+              ],
+              "pendingAgainstPlan": 0,
+              "scheduledReference": {
+                "quantity": null,
+                "authority": "HISTORICAL_REFERENCE_ONLY",
+                "assignments": [
+                  {
+                    "id": "00000000-0000-0000-0000-000000000010",
+                    "fecha": "2026-11-07",
+                    "turno": 1,
+                    "estado": "PROGRAMADA",
+                    "cantidad": 5,
+                    "origen_id": null,
+                    "prioridad": 3,
+                    "creado_por": null,
+                    "observacion": null,
+                    "actualizado_en": "2026-11-07T16:52:43.961+00:00",
+                    "key_produccion": "OPEN|PANELES_2"
+                  }
+                ]
+              }
+            },
+            {
+              "key": "OTHER|PANELES_2",
+              "plan": 2,
+              "budget": {
+                "status": "RECONCILIATION_REQUIRED",
+                "available": null
+              },
+              "reason": "No informado en el filtro",
+              "coverage": "ABSENT",
+              "identity": {
+                "key": "OTHER|PANELES_2",
+                "line": "PANELES_2",
+                "system": "QA SYSTEM",
+                "production": "OTHER"
+              },
+              "preserve": true,
+              "realized": null,
+              "continuity": {
+                "status": "RECONCILIATION_REQUIRED",
+                "quantity": null,
+                "allocation": "NONE"
+              },
+              "difference": null,
+              "planStatus": "ACCREDITED_CURRENT",
+              "sourceRows": [],
+              "valueSource": null,
+              "valueStatus": "NEVER_REPORTED",
+              "manualHistory": {
+                "authority": "HISTORICAL_ONLY",
+                "assignments": [
+                  {
+                    "key": "OTHER|PANELES_2",
+                    "sale": null,
+                    "etapa": "ENSAMBLE",
+                    "fecha": "2026-11-07",
+                    "linea": "PANELES_2",
+                    "parte": "a35baeac-85aa-472c-abd9-319a89cc2242",
+                    "turno": 1,
+                    "revision": 0,
+                    "validado": false,
+                    "ejecutado": 0,
+                    "prioridad": 4,
+                    "apertura_id": "00000000-0000-0000-0000-000000003008",
+                    "consolidado": null,
+                    "observacion": "Cambio aprobado de programación",
+                    "sale_estado": "POR_VALIDAR",
+                    "sale_fuente": "PENDIENTE",
+                    "afectaciones": {},
+                    "origen_fecha": null,
+                    "origen_turno": null,
+                    "contexto_origen": {},
+                    "antiguedad_fecha": "2026-11-07",
+                    "antiguedad_turno": 1
+                  }
+                ]
+              },
+              "assignmentRefs": [
+                "a35baeac-85aa-472c-abd9-319a89cc2242"
+              ],
+              "pendingAgainstPlan": null,
+              "scheduledReference": {
+                "quantity": null,
+                "authority": "HISTORICAL_REFERENCE_ONLY",
+                "assignments": [
+                  {
+                    "id": "a35baeac-85aa-472c-abd9-319a89cc2242",
+                    "fecha": "2026-11-07",
+                    "turno": 1,
+                    "estado": "PROGRAMADA",
+                    "cantidad": 2,
+                    "origen_id": null,
+                    "prioridad": 4,
+                    "creado_por": "leader",
+                    "observacion": "Cambio aprobado de programación",
+                    "actualizado_en": "2026-11-07T16:52:44.398+00:00",
+                    "key_produccion": "OTHER|PANELES_2"
+                  }
+                ]
+              }
+            },
+            {
+              "key": "PLAN|PANELES_2",
+              "plan": 10,
+              "budget": {
+                "status": "RECONCILIATION_REQUIRED",
+                "available": null
+              },
+              "reason": "Pendiente de programación",
+              "coverage": "PRESENT",
+              "identity": {
+                "key": "PLAN|PANELES_2",
+                "line": "PANELES_2",
+                "system": "QA SYSTEM",
+                "production": "PLAN"
+              },
+              "preserve": false,
+              "realized": 7,
+              "continuity": {
+                "status": "RECONCILIATION_REQUIRED",
+                "quantity": null,
+                "allocation": "NONE"
+              },
+              "difference": -3,
+              "planStatus": "ACCREDITED_CURRENT",
+              "sourceRows": [
+                2
+              ],
+              "valueSource": {
+                "file": {
+                  "id": "00000000-0000-0000-0000-000000003000",
+                  "name": "Export.xlsx",
+                  "sha256": "cc5153f973ffcbad5b7ebcdaff2c765f76efe9692da8e59da6763f2a7bbb18ce",
+                  "adapter": "LP-PBI-XLSX-1"
+                },
+                "context": {
+                  "date": "2026-11-07",
+                  "line": "PANELES_2",
+                  "shift": 1,
+                  "stage": "ENSAMBLE"
+                },
+                "importId": "00000000-0000-0000-0000-000000003010",
+                "sourceRows": [
+                  2
+                ],
+                "importVersion": 3,
+                "universeRevision": "026feaa4eb8bedaaedeb8072df33ed3665f706aabe3bf0ef30d2a7b9a5c0d7fb"
+              },
+              "valueStatus": "CURRENT_FILE",
+              "manualHistory": {
+                "authority": "HISTORICAL_ONLY",
+                "assignments": [
+                  {
+                    "key": "PLAN|PANELES_2",
+                    "sale": 6,
+                    "etapa": "ENSAMBLE",
+                    "fecha": "2026-11-07",
+                    "linea": "PANELES_2",
+                    "parte": "00000000-0000-0000-0000-000000000001",
+                    "turno": 1,
+                    "revision": 0,
+                    "validado": false,
+                    "ejecutado": 999,
+                    "prioridad": null,
+                    "apertura_id": null,
+                    "consolidado": null,
+                    "observacion": "",
+                    "sale_estado": "POR_VALIDAR",
+                    "sale_fuente": "PENDIENTE",
+                    "afectaciones": {},
+                    "origen_fecha": null,
+                    "origen_turno": null,
+                    "contexto_origen": {},
+                    "antiguedad_fecha": null,
+                    "antiguedad_turno": null
+                  },
+                  {
+                    "key": "PLAN|PANELES_2",
+                    "sale": 4,
+                    "etapa": "ENSAMBLE",
+                    "fecha": "2026-11-07",
+                    "linea": "PANELES_2",
+                    "parte": "00000000-0000-0000-0000-000000000002",
+                    "turno": 1,
+                    "revision": 0,
+                    "validado": false,
+                    "ejecutado": 999,
+                    "prioridad": null,
+                    "apertura_id": null,
+                    "consolidado": null,
+                    "observacion": "",
+                    "sale_estado": "POR_VALIDAR",
+                    "sale_fuente": "PENDIENTE",
+                    "afectaciones": {},
+                    "origen_fecha": null,
+                    "origen_turno": null,
+                    "contexto_origen": {},
+                    "antiguedad_fecha": null,
+                    "antiguedad_turno": null
+                  }
+                ]
+              },
+              "assignmentRefs": [
+                "00000000-0000-0000-0000-000000000001",
+                "00000000-0000-0000-0000-000000000002"
+              ],
+              "pendingAgainstPlan": 3,
+              "scheduledReference": {
+                "quantity": null,
+                "authority": "HISTORICAL_REFERENCE_ONLY",
+                "assignments": [
+                  {
+                    "id": "00000000-0000-0000-0000-000000000001",
+                    "fecha": "2026-11-07",
+                    "turno": 1,
+                    "estado": "PROGRAMADA",
+                    "cantidad": 6,
+                    "origen_id": null,
+                    "prioridad": 1,
+                    "creado_por": null,
+                    "observacion": "QA split1",
+                    "actualizado_en": "2026-11-07T16:52:43.961+00:00",
+                    "key_produccion": "PLAN|PANELES_2"
+                  },
+                  {
+                    "id": "00000000-0000-0000-0000-000000000002",
+                    "fecha": "2026-11-07",
+                    "turno": 1,
+                    "estado": "PROGRAMADA",
+                    "cantidad": 4,
+                    "origen_id": null,
+                    "prioridad": 2,
+                    "creado_por": null,
+                    "observacion": "QA split2",
+                    "actualizado_en": "2026-11-07T16:52:43.961+00:00",
+                    "key_produccion": "PLAN|PANELES_2"
+                  }
+                ]
+              }
+            }
+          ],
+          "type": "CON_ACTIVIDAD",
+          "user": "leader",
+          "shift": 1,
+          "stage": "ENSAMBLE",
+          "reasons": {
+            "PLAN|PANELES_2": "Pendiente de programación",
+            "OTHER|PANELES_2": "No informado en el filtro"
+          },
+          "version": 4,
+          "contract": "LP-EXPORT-CLOSE-4",
+          "importId": "00000000-0000-0000-0000-000000003010",
+          "authority": "EXPORT_PRODUCTION_V2",
+          "canContinue": false,
+          "observation": "Cierre sintético con plan vigente",
+          "planSnapshot": {
+            "date": "2026-11-07",
+            "line": "PANELES_2",
+            "shift": 1,
+            "stage": "ENSAMBLE",
+            "source": "PROGRAMACION_LINEA",
+            "status": "ACCREDITED_CURRENT",
+            "changes": [
+              {
+                "at": "2026-11-07T16:52:44.344+00:00",
+                "actor": null,
+                "motive": null,
+                "version": 0,
+                "operation": "OBSERVED_AT_ENROLLMENT",
+                "requestId": null,
+                "versionId": "8a26cd07-02cb-4bff-80b1-6e84f2481ce6",
+                "fingerprint": "5698c3490b0a4f19fe9488aa22c3f520a8a2775ab2734c7ecc7f4c66d497c7f8",
+                "previousVersionId": null
+              },
+              {
+                "at": "2026-11-07T16:52:44.412+00:00",
+                "actor": "leader",
+                "motive": "Cambio aprobado de programación",
+                "version": 1,
+                "operation": "INCORPORAR",
+                "requestId": "00000000-0000-0000-0000-000000003008",
+                "versionId": "cc503626-4e23-4f72-a330-0b5747382830",
+                "fingerprint": "c8bd1ed3c95edff3356007f59bf5b94f4da6608fe81e06e4f3c4f55d6e526fbd",
+                "previousVersionId": "8a26cd07-02cb-4bff-80b1-6e84f2481ce6"
+              }
+            ],
+            "targets": [
+              {
+                "key": "OPEN|PANELES_2",
+                "quantity": 5,
+                "assignmentIds": [
+                  "00000000-0000-0000-0000-000000000010"
+                ]
+              },
+              {
+                "key": "OTHER|PANELES_2",
+                "quantity": 2,
+                "assignmentIds": [
+                  "a35baeac-85aa-472c-abd9-319a89cc2242"
+                ]
+              },
+              {
+                "key": "PLAN|PANELES_2",
+                "quantity": 10,
+                "assignmentIds": [
+                  "00000000-0000-0000-0000-000000000001",
+                  "00000000-0000-0000-0000-000000000002"
+                ]
+              }
+            ],
+            "version": 1,
+            "baseline": {
+              "kind": "OBSERVED_AT_ENROLLMENT",
+              "versionId": "8a26cd07-02cb-4bff-80b1-6e84f2481ce6",
+              "capturedAt": "2026-11-07T16:52:44.344+00:00",
+              "sourceRows": [
+                {
+                  "line": "PANELES_2",
+                  "excluded": false,
+                  "assignment": {
+                    "id": "00000000-0000-0000-0000-000000000010",
+                    "fecha": "2026-11-07",
+                    "turno": 1,
+                    "estado": "PROGRAMADA",
+                    "cantidad": 5,
+                    "origen_id": null,
+                    "prioridad": 3,
+                    "creado_por": null,
+                    "observacion": null,
+                    "actualizado_en": "2026-11-07T16:52:43.961+00:00",
+                    "key_produccion": "OPEN|PANELES_2"
+                  }
+                },
+                {
+                  "line": "PANELES_2",
+                  "excluded": false,
+                  "assignment": {
+                    "id": "00000000-0000-0000-0000-000000000001",
+                    "fecha": "2026-11-07",
+                    "turno": 1,
+                    "estado": "PROGRAMADA",
+                    "cantidad": 6,
+                    "origen_id": null,
+                    "prioridad": 1,
+                    "creado_por": null,
+                    "observacion": "QA split1",
+                    "actualizado_en": "2026-11-07T16:52:43.961+00:00",
+                    "key_produccion": "PLAN|PANELES_2"
+                  }
+                },
+                {
+                  "line": "PANELES_2",
+                  "excluded": false,
+                  "assignment": {
+                    "id": "00000000-0000-0000-0000-000000000002",
+                    "fecha": "2026-11-07",
+                    "turno": 1,
+                    "estado": "PROGRAMADA",
+                    "cantidad": 4,
+                    "origen_id": null,
+                    "prioridad": 2,
+                    "creado_por": null,
+                    "observacion": "QA split2",
+                    "actualizado_en": "2026-11-07T16:52:43.961+00:00",
+                    "key_produccion": "PLAN|PANELES_2"
+                  }
+                }
+              ],
+              "historyBefore": "UNKNOWN"
+            },
+            "contract": "LP-ENSAMBLE-PLAN-1",
+            "versionId": "cc503626-4e23-4f72-a330-0b5747382830",
+            "capturedAt": "2026-11-07T16:52:44.412+00:00",
+            "generation": 1,
+            "sourceRows": [
+              {
+                "line": "PANELES_2",
+                "excluded": false,
+                "assignment": {
+                  "id": "00000000-0000-0000-0000-000000000010",
+                  "fecha": "2026-11-07",
+                  "turno": 1,
+                  "estado": "PROGRAMADA",
+                  "cantidad": 5,
+                  "origen_id": null,
+                  "prioridad": 3,
+                  "creado_por": null,
+                  "observacion": null,
+                  "actualizado_en": "2026-11-07T16:52:43.961+00:00",
+                  "key_produccion": "OPEN|PANELES_2"
+                }
+              },
+              {
+                "line": "PANELES_2",
+                "excluded": false,
+                "assignment": {
+                  "id": "a35baeac-85aa-472c-abd9-319a89cc2242",
+                  "fecha": "2026-11-07",
+                  "turno": 1,
+                  "estado": "PROGRAMADA",
+                  "cantidad": 2,
+                  "origen_id": null,
+                  "prioridad": 4,
+                  "creado_por": "leader",
+                  "observacion": "Cambio aprobado de programación",
+                  "actualizado_en": "2026-11-07T16:52:44.398+00:00",
+                  "key_produccion": "OTHER|PANELES_2"
+                }
+              },
+              {
+                "line": "PANELES_2",
+                "excluded": false,
+                "assignment": {
+                  "id": "00000000-0000-0000-0000-000000000001",
+                  "fecha": "2026-11-07",
+                  "turno": 1,
+                  "estado": "PROGRAMADA",
+                  "cantidad": 6,
+                  "origen_id": null,
+                  "prioridad": 1,
+                  "creado_por": null,
+                  "observacion": "QA split1",
+                  "actualizado_en": "2026-11-07T16:52:43.961+00:00",
+                  "key_produccion": "PLAN|PANELES_2"
+                }
+              },
+              {
+                "line": "PANELES_2",
+                "excluded": false,
+                "assignment": {
+                  "id": "00000000-0000-0000-0000-000000000002",
+                  "fecha": "2026-11-07",
+                  "turno": 1,
+                  "estado": "PROGRAMADA",
+                  "cantidad": 4,
+                  "origen_id": null,
+                  "prioridad": 2,
+                  "creado_por": null,
+                  "observacion": "QA split2",
+                  "actualizado_en": "2026-11-07T16:52:43.961+00:00",
+                  "key_produccion": "PLAN|PANELES_2"
+                }
+              }
+            ],
+            "fingerprint": "c8bd1ed3c95edff3356007f59bf5b94f4da6608fe81e06e4f3c4f55d6e526fbd",
+            "historyComplete": false,
+            "historySinceEnrollment": "COMPLETE"
+          },
+          "planComparison": "ACCREDITED_CURRENT",
+          "reconciliation": "RECONCILIATION_REQUIRED",
+          "initialReference": {
+            "cut": null,
+            "status": "EXPORT_CUT_REFERENCE_REQUIRED",
+            "includedClosureVersions": null
+          },
+          "operationalReady": false,
+          "universeRevision": "026feaa4eb8bedaaedeb8072df33ed3665f706aabe3bf0ef30d2a7b9a5c0d7fb",
+          "comparisonComplete": false
+        },
+        "creado_en": "2026-11-07T16:52:44.553+00:00"
+      }
+    ]
+  },
+  "source": {
+    "path": "tests/lp01-export-plan-v4/sql-readback.json",
+    "sha256": "7950d09d7e19659c4e574128693b410ce14e53d5efa258fd7cb26e99fbfc3b1a",
+    "projection": "Only contract, turn and reports; source fields unmodified. All rows synthetic."
+  }
+}

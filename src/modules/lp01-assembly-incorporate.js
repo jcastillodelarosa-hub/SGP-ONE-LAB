@@ -6,7 +6,7 @@ export function canIncorporateAssembly(data,context){
 }
 export function incorporationInput(row,quantity,observation){
  const value=String(quantity??''),reason=String(observation??'').trim();
- if(typeof row?.key!=='string'||!row.key.endsWith('|PANELES_2')||row.key==='|PANELES_2'||row?.state!=='OTRAS'||row.oficial?.activa!=='SI'||!Number.isSafeInteger(row.balance)||row.balance<=0)throw Error('La orden no está disponible para incorporación. Actualiza la hoja.');
+ if(typeof row?.key!=='string'||!row.key.endsWith('|PANELES_2')||row.key==='|PANELES_2'||row?.state!=='OTRAS'||row.oficial?.activa!=='SI'||row.oficial?.excluida_export===true||!Number.isSafeInteger(row.balance)||row.balance<=0)throw Error('La orden no está disponible para incorporación. Actualiza la hoja.');
  if(!/^[1-9]\d*$/.test(value)||!Number.isSafeInteger(Number(value))||Number(value)>2147483647||Number(value)>row.balance)throw Error('Indica una cantidad entera positiva hasta el saldo de Ensamble.');
  if(!reason||Array.from(reason).length>2000)throw Error('Escribe un motivo de hasta 2000 caracteres.');
  return {key:row.key,quantity:Number(value),observation:reason};

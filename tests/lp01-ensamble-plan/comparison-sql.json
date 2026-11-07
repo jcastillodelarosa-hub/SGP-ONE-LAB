@@ -1,0 +1,109 @@
+{
+  "rows": [
+    {
+      "key": "QA-A|PANELES_2",
+      "plan": 3,
+      "realized": 4,
+      "difference": 1,
+      "planStatus": "ACCREDITED_CURRENT",
+      "pendingAgainstPlan": 0
+    },
+    {
+      "key": "QA-B|PANELES_2",
+      "plan": 0,
+      "realized": 2,
+      "difference": 2,
+      "planStatus": "ACCREDITED_CURRENT",
+      "pendingAgainstPlan": 0
+    }
+  ],
+  "contract": "LP-ENSAMBLE-PLAN-COMPARISON-1",
+  "planSnapshot": {
+    "date": "2026-11-12",
+    "line": "PANELES_2",
+    "shift": 1,
+    "stage": "ENSAMBLE",
+    "source": "PROGRAMACION_LINEA",
+    "status": "ACCREDITED_CURRENT",
+    "changes": [
+      {
+        "at": "2026-11-07T16:33:55.362+00:00",
+        "actor": null,
+        "motive": null,
+        "version": 0,
+        "operation": "OBSERVED_AT_ENROLLMENT",
+        "requestId": null,
+        "versionId": "e9c2b644-807b-4013-8805-404bff8de16b",
+        "fingerprint": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "previousVersionId": null
+      },
+      {
+        "at": "2026-11-07T16:33:55.37+00:00",
+        "actor": "coordinator",
+        "motive": "Prioridad vigente",
+        "version": 1,
+        "operation": "PROGRAMAR",
+        "requestId": "560f5eff-2980-46f5-9468-df33a62c433b",
+        "versionId": "182a8c0b-57a6-4cfc-bf82-2f55658557b3",
+        "fingerprint": "75d9a584f98ce56a717476da4960171b4ef4c54d6d82edd311666c6dfe413890",
+        "previousVersionId": "e9c2b644-807b-4013-8805-404bff8de16b"
+      },
+      {
+        "at": "2026-11-07T16:33:55.386+00:00",
+        "actor": "coordinator",
+        "motive": "Reprogramación parcial",
+        "version": 2,
+        "operation": "MOVER",
+        "requestId": "f76b5683-bbfb-44b8-b84b-317bb94b2d9c",
+        "versionId": "61d7fecb-b53a-4937-accb-07181c67bdab",
+        "fingerprint": "d0abc2d5d0f63362a168949f80e3891ddf229576475f24537651b027a4097294",
+        "previousVersionId": "182a8c0b-57a6-4cfc-bf82-2f55658557b3"
+      }
+    ],
+    "targets": [
+      {
+        "key": "QA-A|PANELES_2",
+        "quantity": 3,
+        "assignmentIds": [
+          "63ba4fc6-e0bb-4371-bfe4-4ccd80dd176e"
+        ]
+      }
+    ],
+    "version": 2,
+    "baseline": {
+      "kind": "OBSERVED_AT_ENROLLMENT",
+      "versionId": "e9c2b644-807b-4013-8805-404bff8de16b",
+      "capturedAt": "2026-11-07T16:33:55.362+00:00",
+      "sourceRows": [],
+      "historyBefore": "UNKNOWN"
+    },
+    "contract": "LP-ENSAMBLE-PLAN-1",
+    "versionId": "61d7fecb-b53a-4937-accb-07181c67bdab",
+    "capturedAt": "2026-11-07T16:33:55.386+00:00",
+    "generation": 1,
+    "sourceRows": [
+      {
+        "line": "PANELES_2",
+        "excluded": false,
+        "assignment": {
+          "id": "63ba4fc6-e0bb-4371-bfe4-4ccd80dd176e",
+          "fecha": "2026-11-12",
+          "turno": 1,
+          "estado": "PROGRAMADA",
+          "cantidad": 3,
+          "origen_id": null,
+          "prioridad": 2,
+          "creado_por": "coordinator",
+          "observacion": null,
+          "actualizado_en": "2026-11-07T16:33:55.372+00:00",
+          "key_produccion": "QA-A|PANELES_2"
+        }
+      }
+    ],
+    "fingerprint": "d0abc2d5d0f63362a168949f80e3891ddf229576475f24537651b027a4097294",
+    "historyComplete": false,
+    "historySinceEnrollment": "COMPLETE"
+  },
+  "planComparison": "ACCREDITED_CURRENT",
+  "comparisonComplete": true
+}

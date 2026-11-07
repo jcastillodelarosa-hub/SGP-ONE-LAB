@@ -1,5 +1,14 @@
 # Apertura automática — preparación y decisión de identidad
 
+> Decisión posterior confirmada por Johan el 07/11/2026: **el nuevo turno debe
+> permitir trabajar al llegar su horario aunque el anterior aún no esté cerrado**.
+> El anterior permanece pendiente; no se cierra automáticamente ni se infieren
+> cantidades de arrastre. Esta decisión sustituye la falta de definición descrita
+> abajo. No activa el principal técnico, permisos, credenciales ni jobs. El motor
+> legacy/preparador 1 aún requieren actualización; conservar sus controles hasta
+> implementar el contrato nuevo, no presentar su bloqueo como regla aprobada.
+
+
 
 > Estado vigente 07/11/2026: este documento conserva un diseño histórico, no una
 > autorización de activación. La regla de abrir al llegar el horario cuando el

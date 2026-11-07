@@ -10,6 +10,8 @@ on:
       - 'tests/lp01-assembly*'
       - 'tests/lp01-assembly-workspace/**'
       - 'tests/fixtures/lp01-closure-export-v2.mjs'
+      - 'tests/fixtures/lp01-closure-plan-v4-synthetic.json'
+      - 'tests/lp01-closure-plan-v4.test.mjs'
       - '.github/workflows/lp01-assembly-sheet.yml'
 permissions:
   contents: read
@@ -34,6 +36,7 @@ jobs:
           node tests/lp01-assembly-workspace/dom.mjs
           node tests/lp01-assembly-workspace/controller-dom.mjs
           node tests/lp01-assembly-workspace/compact-notes-dom.mjs
+          node --test tests/lp01-assembly-reports.test.mjs tests/lp01-closure-plan-v4.test.mjs
       - run: pip install playwright==1.55.0
       - run: python -m playwright install --with-deps chromium
       - run: python tests/lp01-assembly-workspace/browser.py

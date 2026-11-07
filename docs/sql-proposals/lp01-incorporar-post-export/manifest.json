@@ -1,0 +1,35 @@
+{
+  "status": "PROPOSED_POST_EXPORT_NOT_APPLIED_DISABLED",
+  "scope": "ENSAMBLE PANELES_2 only; no activation or new grant",
+  "functions": {
+    "sgp_lp_operacion.puede_operar(text,text,text)": {
+      "before_source_md5": "b0b7459a0be0a7ea5a4a392eecb2afde",
+      "candidate_source_md5": "e15abadfa88a13b01e2f7c167609cb3a"
+    },
+    "public.sgp_lp_operacion_comando(text,jsonb)": {
+      "before_source_md5": "5d962fc5b2595e0420124b340f9bbe3a",
+      "candidate_source_md5": "ee5acef7b560bf3864d4e419e9925a4b"
+    },
+    "public.sgp_lp_operacion_resultado(text,uuid)": {
+      "before_source_md5": "0ecca76056be1784fdaaeaa9921427c5",
+      "candidate_source_md5": "23ce7654c7478bec15978bd09c97a67c"
+    }
+  },
+  "sha256": {
+    "01_incorporar_REVIEW.sql": "dfc53bd580c01a0bffc757a36b8e861f7787658d8a4495be94a33fea298eadfc",
+    "02_restore_REVIEW.sql": "8f10e662a5ce96b16a57a79f888436d6d516fb51a73941ff2ca3a4247c5a3a3f",
+    "03_discovery_REVIEW.sql": "98b8a90101f778458ce35912c0f5a8313e9dcd184349eb79905334e300df6ed6",
+    "04_restore_discovery_REVIEW.sql": "f6243bc9dd1036b545b85cb91caa09214ff435eaa5e2911505f9baaa0cf711b8"
+  },
+  "discovery": {
+    "signature": "public.sgp_lp_operacion_consultar(text,text,text,date,integer)",
+    "before_source_md5": "3ecf0a9ec4497de02b1d7ac89bc80819",
+    "candidate_source_md5": "fcc85da24ee89094789722c03397d1d9"
+  },
+  "source": {
+    "export_reader_candidate_sha256": "59f0506dfb46a4974db62d88fe3457f9b6b34215be907dcd01969ca73f5f7ac9",
+    "export_reader_live_verified": true,
+    "readback_evidence_sha256": "6a3c15f7b7eaa8329e35ad3c659e6543d9656ff3244bed061134c710d6dfdabe",
+    "baseline_package_manifest_sha256": "b0dc1975f119bb51c68ff0a67a05b6ac1b1bb2035cba45b418ab24c905523245"
+  }
+}
