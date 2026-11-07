@@ -29,7 +29,7 @@ try:
    page.locator('[data-tracking-close]').click();page.locator('details[data-order-part] summary').filter(has_text='Producción 0').first.click()
    assert 'Consultando ventanas' not in page.locator('#lp-tracking-drawer').inner_text()
    page.locator('[data-tracking-close]').click()
-   page.evaluate("window.holdSummary=true;void controller.load({quiet:true})");page.wait_for_function('window.summaryActive===3')
+   page.evaluate("window.holdSummary=true");page.clock.fast_forward(20001);page.evaluate("void controller.load({quiet:true})");page.wait_for_function('window.summaryActive===3')
    page.evaluate("window.delay=true;void controller.load({quiet:true})");page.wait_for_function('window.inflight===1')
    page.clock.fast_forward(40000);assert page.evaluate('window.summaryActive===3 && window.maxSummaryActive<=3')
    page.evaluate("window.denySummary=true;window.summaryReleases.forEach(fn=>fn())");page.wait_for_function("document.querySelectorAll('.lp-tracking-table').length===0")
