@@ -245,3 +245,10 @@ test('sheet never-reported row is unknown, not a missing close or explicit zero'
  assert.match(html,/data-label="Prioridad"[^>]*>1.2/);
  assert.doesNotMatch(html,/data-label="Prioridad"[^>]*>9/);
  });
+
+test('Otras and Por revisar share reservation ordering without changing their states',()=>{
+ const ready=production('ready'),pending=production('pending',{quantity:null});
+ ready.oficial.reserva_al='R10';pending.oficial.reserva_al='R1';
+ const rows=all(data([ready,pending]));
+ assert.deepEqual(rows.map(r=>[r.produccion,r.state]),[['pending','POR_REVISAR'],['ready','OTRAS']]);
+});

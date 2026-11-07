@@ -3,6 +3,7 @@ import {originalWeek} from './lp01-tracking.js';
 import {currentClosureExportRealized} from './lp01-closure-export-v2.js';
 
 export const ASSEMBLY_STATES=['ABIERTAS','PROGRAMADAS','OTRAS','POR_REVISAR','COMPLETADAS'];
+const groupRank=state=>ASSEMBLY_STATES.indexOf(state==='POR_REVISAR'?'OTRAS':state);
 const text=v=>typeof v==='string'?v.trim():'';
 const date=v=>typeof v==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(v)&&!Number.isNaN(Date.parse(v+'T12:00:00Z'))&&new Date(v+'T12:00:00Z').toISOString().slice(0,10)===v;
 const shift=v=>[1,2].includes(v);
@@ -86,7 +87,7 @@ export function assemblySheetRows(data,context,filters={}){
    excludedExport:p.oficial.excluida_export===true,scheduled,priority:Math.min(...currentAssignments.map(priority)),originDate:originDates[0]??null,observations,observation:observations.join(' · '),partial:Boolean(p.partial),reviewReason:!valid?'Cantidad o saldo Export pendiente de validar':scheduleInvalid?'Programación pendiente de validar':null};
  });
  if(catalog&&[...operations.keys()].some(key=>!seen.has(key)))throw Error('El catálogo no contiene una producción del ámbito operativo');
- all.sort((a,b)=>ASSEMBLY_STATES.indexOf(a.state)-ASSEMBLY_STATES.indexOf(b.state)||compareReservation(a,b)||compareAge(a,b)||a.key.localeCompare(b.key,'es',{numeric:true}));
+ all.sort((a,b)=>groupRank(a.state)-groupRank(b.state)||compareReservation(a,b)||compareAge(a,b)||a.key.localeCompare(b.key,'es',{numeric:true}));
  // Only the explicit, coordinator-approved backend flag excludes an active row.
  // An absent daily-file row alone is not approval. Historical reports stay intact.
  return filterAssemblySheetRows(all.filter(r=>!r.excludedExport),filters);
