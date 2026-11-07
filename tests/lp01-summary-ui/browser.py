@@ -14,11 +14,13 @@ try:
    row=page.locator('[data-order-summary="QA0|PANELES_2"]');page.wait_for_function("document.querySelector('[data-order-summary=\"QA0|PANELES_2\"]').textContent.includes('Compartido no disponible')")
    assert '10 × NC AL' in row.inner_text() and '8 × NC V' in row.inner_text() and 'Total por validar' in row.inner_text()
    assert 'lectura heredada' in row.inner_text() and 'Disponibles 8' not in row.inner_text() and 'Accesorios' not in row.inner_text()
-   if width==1440:assert row.locator('xpath=ancestor::tr').bounding_box()['height']<140
+   geometry=row.evaluate("el=>{const tr=el.closest('tr');return {rowHeight:tr.getBoundingClientRect().height,columns:[...tr.cells].map(td=>({label:td.dataset.label,width:td.getBoundingClientRect().width,height:td.getBoundingClientRect().height}))};}")
+   # Capture the current candidate before the size assertion; never leave stale evidence on failure.
+   page.screenshot(path=str(OUT/f'summary-list-{width}.png'))
+   if width==1440:assert geometry['rowHeight']<140,geometry
    assert page.locator('[data-order-sale-draft]').count()==0
    assert 'No disponible por orden' in page.locator('tbody tr').first.inner_text()
    assert 'week-' in page.locator('.lp-tracking-week-cell .lp-week-label').first.get_attribute('class')
-   page.screenshot(path=str(OUT/f'summary-list-{width}.png'))
    legacy=page.locator('[data-order-summary="QA1|PANELES_2"]');assert 'Total por validar' in legacy.inner_text();legacy.locator('[data-summary-cause=NC_AL]').click()
    card=page.locator('.lp-pdt-compact');card.wait_for();page.wait_for_function("document.querySelector('[data-pdt-nc]').textContent==='SOLUCIONADA'")
    summary=card.locator('summary');text=summary.inner_text();assert all(s in text for s in ['ES-EL400-004','19 piezas','NC1','SOLUCIONADA','PRODUCCION']);assert 'synthetic-legacy-id' not in text
@@ -35,7 +37,7 @@ try:
    page.evaluate("window.denySummary=true;window.summaryReleases.forEach(fn=>fn())");page.wait_for_function("document.querySelectorAll('.lp-tracking-table').length===0")
    page.evaluate("window.delay=false;window.release()");page.wait_for_function('window.inflight===0')
    assert page.locator('.lp-tracking-table').count()==0,'Old global response must not restore revoked data'
-   assert not errors,errors;results.append({'width':width,'legacyCategories10and8SharedUnionUnknown':True,'legacy19PiecesUnknownWindows':True,'ncStateIndependent':True,'detailKeyboard':True,'quiet20sPreserved':True,'scopeRevocationClears':True,'staleGlobalAfterRevocationRejected':True,'maxSummaryConcurrency':3,'drawerSummaryCurrent':True,'compactChips':True,'weekColorAndText':True,'noSaleDraftEditor':True});page.close()
+   assert not errors,errors;results.append({'width':width,'legacyCategories10and8SharedUnionUnknown':True,'legacy19PiecesUnknownWindows':True,'ncStateIndependent':True,'detailKeyboard':True,'quiet20sPreserved':True,'scopeRevocationClears':True,'staleGlobalAfterRevocationRejected':True,'maxSummaryConcurrency':3,'drawerSummaryCurrent':True,'compactChips':True,'weekColorAndText':True,'noSaleDraftEditor':True,'compactGeometry':geometry});page.close()
   browser.close()
  (OUT.parent/'result.json').write_text(json.dumps(results,indent=2)+'\n');print(json.dumps(results))
 finally:server.shutdown()

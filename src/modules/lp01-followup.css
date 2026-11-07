@@ -182,3 +182,11 @@
 .lp-order-note-dialog .lp-followup-actions{display:flex;flex-wrap:wrap;gap:8px}
 .lp-order-note-dialog [data-order-note-current] p{white-space:pre-wrap;overflow-wrap:anywhere}
 @media(max-width:700px){.lp-tracking-table .lp-tracking-note-cell{grid-column:1/-1;padding:8px 10px;max-width:none}.lp-order-note-dialog{padding:16px}.lp-order-note-dialog .lp-followup-actions button{flex:1 1 140px}}
+
+/* Reserve compact desktop space so the observation column cannot stack every cause. */
+@media(min-width:701px){
+ .lp-tracking-table:has(.lp-tracking-note-cell) .lp-tracking-affects{width:330px;min-width:330px;max-width:none}
+ .lp-tracking-table:has(.lp-tracking-note-cell) .lp-tracking-affects .lp-affect-summary-compact{max-width:none}
+ .lp-tracking-table .lp-tracking-note-cell{width:220px;min-width:220px;max-width:220px}
+ .lp-tracking-note-cell .lp-order-note-compact{width:200px;max-width:100%}
+}
