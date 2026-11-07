@@ -10,12 +10,14 @@ try:
  with sync_playwright() as pw:
   browser=pw.chromium.launch(executable_path='/usr/bin/chromium',args=['--no-sandbox'])
   for width in (1440,390):
-   page=browser.new_page(viewport={'width':width,'height':900});errors=[];page.on('pageerror',lambda e:errors.append(str(e)));page.route('**/*',lambda r:r.continue_() if r.request.url.startswith(origin) else r.abort())
+   page=browser.new_page(viewport={'width':width,'height':900});page.clock.install();errors=[];page.on('pageerror',lambda e:errors.append(str(e)));page.route('**/*',lambda r:r.continue_() if r.request.url.startswith(origin) else r.abort())
    page.goto(origin+'/tests/lp01-pending-ui/fixture.html');page.wait_for_selector('[data-order-summary="QA3|PANELES_2"] [data-summary-cause=NC_AL]')
    for key,label in [('QA3|PANELES_2','aluminio'),('QA1|PANELES_2','reportadas')]:
     row=page.locator('tr').filter(has=page.locator('[data-order-summary="'+key+'"]'));assert row.locator('details[data-order-part]').get_attribute('open') is None;row.scroll_into_view_if_needed();row.locator('[data-sale-edit]').wait_for(state='visible');assert 'Por definir' in row.locator('.lp-sale-row').inner_text();row.screenshot(path=f'/tmp/afectaciones-contraida-{label}-{width}.png')
    pending=page.locator('[data-order-summary="QA3|PANELES_2"]');assert '15 × NC AL · Estimado ⚠' in pending.inner_text();assert pending.locator('[data-summary-cause=NC_AL]').count()==1;assert '19 ×' not in pending.inner_text()
-   assert page.locator('[data-order-summary="QA2|PANELES_2"] [aria-label="Sin reportes ni pendientes de aluminio devueltos"]').count()==1
+   empty=page.locator('[data-order-summary="QA2|PANELES_2"]');assert empty.locator('[data-summary-cause]:not([data-summary-source="EXPORT"])').count()==0
+   assert empty.locator('[data-summary-source="EXPORT"][aria-label="Vidrio Tecno: datos de Export no disponibles"]').inner_text()=='Tecno · sin dato'
+   assert 'Total 0' not in empty.inner_text() and '0 ×' not in empty.inner_text()
    assert page.locator('[data-order-summary="QA4|PANELES_2"] [aria-label="Pendientes de aluminio no disponibles"]').count()==1
    assert '2 × NC AL' in page.locator('[data-order-summary="QA5|PANELES_2"]').inner_text();assert page.locator('[data-order-summary="QA5|PANELES_2"] [data-summary-cause=NC_AL]').count()==1
    pending.locator('[data-summary-cause=NC_AL]').click();page.wait_for_selector('[data-order-type=NC_AL][aria-pressed=true]');assert all(x in page.locator('.lp-aluminum-pending').inner_text() for x in ['PRODUCCION','LEGACY','PICKING'])
@@ -26,6 +28,7 @@ try:
    page.locator('[data-tracking-close]').click();page.evaluate('window.delayShared=true');pending.locator('[data-summary-cause=NC_AL]').click();page.wait_for_function('!!window.releaseShared');page.locator('[data-tracking-close]').click();page.evaluate('window.delayShared=false;window.releaseShared()');page.wait_for_timeout(150);assert page.locator('#lp-tracking-drawer').is_hidden()
    pending.locator('[data-summary-cause=NC_AL]').click();page.wait_for_selector('[data-shared-form]:visible');page.locator('[data-order-type=NOVEDAD]').click();form=page.locator('[data-type-pane=NOVEDAD] form');form.locator('[name=quantity]').fill('1');form.locator('[name=observation]').fill('permiso revocado al guardar');form.locator('button[type=submit]').click();page.wait_for_function("document.querySelector('[data-type-pane=NOVEDAD]').textContent.includes('Acceso revocado')");assert page.locator('[data-type-pane=NOVEDAD] form').count()==0
    page.locator('#lp-tracking-drawer').screenshot(path=f'/tmp/b10-pending-detail-{width}.png');page.screenshot(path=f'/tmp/b10-pending-{width}.png',full_page=True);assert page.evaluate('document.documentElement.scrollWidth<=innerWidth');assert not errors,errors
-   page.evaluate("window.denied=true;void controller.load({quiet:true})");page.wait_for_function("!document.querySelector('.lp-tracking-table')");page.close();print('PASS',width,'presence, linked, unknown, origins, no turn, late read, draft, revoked')
+   # Only the row sources deny access; expire the quiet-read cache before the next poll.
+   page.evaluate("window.denied=true;void controller.load({quiet:true})");page.clock.fast_forward(20001);page.wait_for_function("!document.querySelector('.lp-tracking-table')");page.close();print('PASS',width,'presence, linked, unknown, origins, no turn, late read, draft, revoked')
   browser.close()
 finally:server.shutdown()

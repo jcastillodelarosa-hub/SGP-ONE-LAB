@@ -5,8 +5,8 @@ import {pendingCompact,hydratePendingNc} from './lp01-pending-compact.js';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const mounts=new WeakMap();
 const actions={CREATE:['REPORT','Registrar afectación'],CORRECT:['REPORT','Corregir cantidad total'],SOLVE:['SOLVE','Registrar solución parcial'],CONFIRM:['CONFIRM','Confirmar recepción física'],VALIDATE:['VALIDATE','Validar consolidado']};
-export async function mountAffectationsPanel(host,transport,{cause:initialCause=null,registrationFirst=false,fixedCause=null,pendingOnly=false,allowCreate=true,ncReferences=null}={}){
- if(transport.shared)return mountSharedAffectationsPanel(host,transport,{fixedCause});
+export async function mountAffectationsPanel(host,transport,{cause:initialCause=null,registrationFirst=false,fixedCause=null,pendingOnly=false,allowCreate=true,ncReferences=null,ncReview=null}={}){
+ if(transport.shared)return mountSharedAffectationsPanel(host,transport,{fixedCause,ncReview});
  let disposed=false,busy=false,snapshot,retry,selectedCause=initialCause;
  const token={};mounts.set(host,token);const alive=()=>!disposed&&mounts.get(host)===token;
  const denied=error=>{if(error.message==='NO_AUTORIZADO'&&alive()){disposed=true;host.textContent='Acceso revocado. Vuelve a ingresar con una sesión autorizada.';return true;}return false;};
@@ -84,3 +84,4 @@ export async function mountAffectationsPanel(host,transport,{cause:initialCause=
  try{snapshot=await transport.read();show();}catch(error){if(!denied(error)&&alive())host.textContent='Afectaciones no disponibles: '+error.message;}
  return ()=>{if(alive())host.replaceChildren();disposed=true;};
 }
+

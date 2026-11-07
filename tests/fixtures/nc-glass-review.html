@@ -1,0 +1,30 @@
+<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="../../styles.css"><title>NC review fixture</title>
+<body style="padding:12px"><main id="review" style="width:100%;max-width:660px;margin:0 auto"></main><div id="form"></div><script type="module">
+import {mountNcGlassReview} from '../../src/modules/lp01-nc-glass-review.js';
+const originalSource={consecutivo:'NC-DEMO-17',orden:'982383 - Producción con nombre completo para revisar sin recortar',sistema:'ES-TEST',semana_maestro:45,estado_nc:'ABIERTA',activo:true,linea_responsable:'PANELES 2',cant_repo:23};
+window.reviewState={mode:'normal',current:true,calls:[],prepared:[],pending:[],preparePending:[],pausePrepare:false};
+const state=window.reviewState;let dispose=()=>{};
+window.mountReview=()=>{
+ dispose();document.querySelector('#form').replaceChildren();
+ state.row={key:'1314100|PANELES_2',produccion:originalSource.orden,oficial:{sistema:originalSource.sistema},linea:'PANELES_2'};
+ state.scope={line:'PANELES_2',stage:'ENSAMBLE'};
+ if(state.mode==='hostile'){state.row.produccion='<img src=x onerror="window.xss=true">'+originalSource.orden;state.row.key='<svg onload="window.xss=true">';}
+ dispose=mountNcGlassReview(document.querySelector('#review'),{row:state.row,scope:state.scope,isCurrent:()=>state.current,
+  readCandidates:async options=>{
+   state.calls.push(options);if(state.mode==='delay')await new Promise(resolve=>state.pending.push(resolve));
+   if(state.mode==='throw')throw Error('network');
+   if(state.mode==='denied')return {status:'UNAUTHORIZED',count:null,candidates:[]};
+   if(state.mode==='unavailable')return {status:'UNAVAILABLE',count:null,candidates:[]};
+   const base={...originalSource,orden:state.row.produccion};
+   const sources=state.mode==='empty'?[]:state.mode==='multiple'?[{...base,consecutivo:'NC-DEMO-18',linea_responsable:'FRAMES 2'},base]:[base];
+   if(state.mode==='hostile'){sources[0].consecutivo='<img src=x onerror="window.xss=true">';sources[0].linea_responsable='<svg onload="window.xss=true">';}
+   if(state.mode==='changed')sources[0].linea_responsable='FRAMES 2';
+   if(state.mode==='inactive')sources[0].activo=false;
+   const candidates=sources.map(source=>({reference:source.consecutivo,source,sources:[source],sameResponsibleLine:source.linea_responsable==='PANELES 2'}));
+   return {status:'READY',count:candidates.length,candidates};
+  },
+  onPrepare:async choice=>{state.prepared.push(choice);if(state.pausePrepare)await new Promise(resolve=>state.preparePending.push(resolve));document.querySelector('#form').textContent='Formulario existente preparado: '+choice.reference+' · '+choice.stage;}
+ });
+};
+window.disposeReview=()=>dispose();window.mountReview();window.fixtureReady=true;
+</script></body></html>

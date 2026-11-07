@@ -20,10 +20,11 @@ try:
     page.route('**/*',lambda r:r.continue_() if r.request.url.startswith(origin) else r.abort())
     def rpc(route):
      name=route.request.url.split('/rpc/')[-1];a=route.request.post_data_json;calls.append(name)
-     assert name in ['sgp_lp_shared_order_read_v1','sgp_lp_seguimiento_consultar','sgp_lp_afectaciones_consultar_v2','sgp_lp_order_details_read_v1','sgp_lp_order_note_save_v1','sgp_lp_glass_nc_read_v1','sgp_lp_glass_nc_report_v1','sgp_lp_operacion_consultar','sgp_lp_afectaciones_comando_v1','sgp_lp_afectaciones_legado_v1','sgp_pdt_manual_nc_consultar_v1']
+     # Keep NC reads on native SQL: the uninstalled source must return 42883, not an empty success.
+     assert name in ['sgp_lp_shared_order_read_v1','sgp_lp_seguimiento_consultar','sgp_consultar_nc_vidrio','sgp_lp_afectaciones_consultar_v2','sgp_lp_order_details_read_v1','sgp_lp_order_note_save_v1','sgp_lp_glass_nc_read_v1','sgp_lp_glass_nc_report_v1','sgp_lp_operacion_consultar','sgp_lp_afectaciones_comando_v1','sgp_lp_afectaciones_legado_v1','sgp_pdt_manual_nc_consultar_v1']
      args=[]
      for key,value in a.items():
-      assert key in ['p_token','p_key','p_stage','p_etapa','p_linea','p_fecha','p_turno','p_date','p_shift','p_cmd','p_nc','p_referencia']
+      assert key in ['p_token','p_key','p_stage','p_etapa','p_linea','p_fecha','p_turno','p_date','p_shift','p_cmd','p_nc','p_referencia','p_semana']
       args.append(key+'=>'+('NULL' if value is None else f.lit(json.dumps(value))+'::jsonb' if isinstance(value,dict) else str(value) if isinstance(value,int) else f.lit(value)))
      if name=='sgp_lp_order_note_save_v1':ids.append(a['p_cmd']['id'])
      try:response={'data':json.loads(db.sql('SET ROLE anon;SELECT public.'+name+'('+','.join(args)+')'))}
@@ -41,6 +42,7 @@ try:
     page.locator('[data-order-note-refresh]').click();page.wait_for_function("!document.querySelector('[data-order-note]').disabled")
     page.locator('[data-order-note]').fill('Borrador general');page.locator('[data-order-type=TECNO]').click();page.wait_for_selector('.lp-glass-estimate');assert '2' in page.locator('.lp-glass-estimate').inner_text();assert 'Resultado exacto: 1.5' in page.locator('[data-type-pane=TECNO]').inner_text()
     page.locator('[data-order-type=NOVEDAD]').click();page.locator('[data-order-type=NC_V]').click();page.wait_for_selector('[data-type-pane=NC_V] [data-shared-form]');assert page.locator('[data-order-note]').input_value()=='Borrador general'
+    page.wait_for_function("document.querySelector('[data-nc-review-status]')?.textContent.includes('No se pudo consultar NC Vidrio')");assert page.locator('[data-nc-review-prepare]').is_disabled()
     assert page.locator('[data-type-pane=NC_V] [data-shared-form] button[type=submit]').is_disabled()
     page.locator('[data-order-note-save]').click();page.wait_for_function("document.querySelector('[data-order-note-status]').textContent.includes('guardada')")
     assert db.sql('SELECT observation FROM sgp_lp_order_details.notes')=='Borrador general'

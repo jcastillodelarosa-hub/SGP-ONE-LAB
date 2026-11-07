@@ -2,7 +2,7 @@ import {mountAffectationsPanel} from './lp01-affectations-panel.js';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const types=[['NC_AL','PDT Aluminio'],['NC_V','NC Vidrio'],['TECNO','Vidrio Tecno'],['NOVEDAD','Novedades'],['ACCESORIOS','Accesorios']];
 /** Panes stay mounted while changing tabs so their forms keep independent drafts. */
-export function mountAffectationTabs(host,{transport,cause,onSelect=()=>{},details=()=>null}){
+export function mountAffectationTabs(host,{transport,cause,onSelect=()=>{},details=()=>null,ncReview=null}){
  let selected=types.some(([k])=>k===cause)?cause:'NC_AL',disposed=false;const cleanups=[],mounted=new Set();
  host.innerHTML='<nav class="lp-affect-cause-tabs lp-order-type-tabs" aria-label="Tipos de afectación">'+types.map(([key,label])=>'<button type="button" data-order-type="'+key+'" aria-pressed="false">'+label+'</button>').join('')+'</nav>'+types.map(([key,label])=>'<section data-type-pane="'+key+'" aria-label="'+label+'" hidden></section>').join('');
  const alive=()=>!disposed&&host.isConnected;
@@ -16,8 +16,9 @@ export function mountAffectationTabs(host,{transport,cause,onSelect=()=>{},detai
   let ncReferences=null;if(key==='NC_V'&&!transport.shared){box.textContent='Consultando referencias NC…';try{ncReferences=await transport.readGlassNc();}catch(e){if(e.message==='NO_AUTORIZADO'){box.textContent='Acceso revocado.';return;}ncReferences={available:false,canReport:false,references:[]};}}
   if(!alive())return;
   const content=document.createElement('div');content.dataset.affectContent=key;box.append(content);
-  const cleanup=await mountAffectationsPanel(content,transport,{fixedCause:key,cause:key,ncReferences});if(!alive())cleanup();else cleanups.push(cleanup);
+  const cleanup=await mountAffectationsPanel(content,transport,{fixedCause:key,cause:key,ncReferences,ncReview:key==='NC_V'?ncReview:null});if(!alive())cleanup();else cleanups.push(cleanup);
  }
  host.querySelectorAll('[data-order-type]').forEach(b=>{b.onclick=()=>void select(b.dataset.orderType);b.onkeydown=e=>{if(!['ArrowRight','ArrowLeft','Home','End'].includes(e.key))return;e.preventDefault();const i=types.findIndex(([k])=>k===selected),next=e.key==='Home'?0:e.key==='End'?types.length-1:(i+(e.key==='ArrowRight'?1:types.length-1))%types.length;const button=host.querySelector('[data-order-type="'+types[next][0]+'"]');button.focus();void select(types[next][0]);};});
  void select(selected);return {refreshGlass:glass,dispose(){disposed=true;cleanups.forEach(f=>f());}};
 }
+

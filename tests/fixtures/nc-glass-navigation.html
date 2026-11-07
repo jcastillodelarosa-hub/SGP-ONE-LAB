@@ -1,0 +1,13 @@
+<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="../../styles.css"><title>NC navigation fixture</title><body style="padding:20px"><button id="start">Buscar orden</button><nav class="nav"><button data-view="other">Otro módulo</button></nav><main id="destination"></main><script type="module">
+import {openNcGlassTracking} from '../../src/modules/nc-glass-tracking.js';
+import {globalTrackingData} from '../../src/domain/lp01-tracking-global.js';
+import {requireNcTrackingTarget,NC_TRACKING_LINES,NC_TRACKING_STAGES} from '../../src/services/nc-glass-tracking.js';
+window.testState={token:'A',role:'COORDINADOR',calls:[],opened:[],mode:'normal',pending:[]};
+const state=window.testState;
+const source={consecutivo:'NC-DEMO-17',orden:'982383 - Producción de prueba con nombre completo',sistema:'ES-TEST',semana_maestro:45,linea_responsable:'PANELES 2'};
+const payload=(line,stage)=>({contract:'LP-SEGUIMIENTO-1',role:'COORDINADOR',line,stage,productions:(state.mode==='empty'?[]:['1314100','1314101']).map(id=>({key:id+'|'+line,line,stage,classification:'ABIERTA',assignments:[],operations:[],oficial:{key_produccion:id+'|'+line,id_linea:line,produccion:source.orden,sistema:source.sistema,saldos_inicializados:true,presente_ultimo_export:true,saldo_ensamble:3,saldo_empaque:2}}))});
+const read=async(name,args)=>{state.calls.push(name);if(state.mode==='delay'){await new Promise(r=>state.pending.push(r));}if(state.mode==='deny'&&name==='sgp_lp_seguimiento_consultar')return {error:Error('NO_AUTORIZADO')};return {data:name==='sgp_consultar_nc_vidrio'?{rows:[source]}:payload(args.p_linea,args.p_etapa)};};
+const bridge={getToken:()=>state.token,getRole:()=>state.role,getClient:async()=>({rpc:read}),openTarget:async target=>{const {data,error}=await read('sgp_lp_seguimiento_consultar',{p_linea:target.line,p_etapa:target.stage});if(error)throw error;if(!target.isCurrent())throw Error('Cancelled');const row=requireNcTrackingTarget(globalTrackingData(data,target),target);state.opened.push({key:row.key,line:target.line,stage:target.stage});document.querySelector('#destination').textContent='Afectaciones · NC Vidrio · '+row.key+' · NC de origen '+target.ncReference+' · Referencia sin guardar; no vinculada.';}};
+document.querySelector('#start').onclick=()=>openNcGlassTracking({source,sourceSession:state.token,bridge});
+window.fixtureReady=true;
+</script></body></html>

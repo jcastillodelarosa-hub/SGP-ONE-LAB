@@ -56,7 +56,8 @@ try:
    assert row.locator('[data-summary-cause="NC_AL"]').count()==1
    assert page.evaluate('qaSaved.length')==1
    page.locator('[data-order-type=NC_V]').click();form=page.locator('[data-type-pane=NC_V] [data-shared-form]')
-   form.locator('[name=ncReference]').fill('NC-ONE');assert form.locator('[name=quantity]').input_value()=='1'
+   form.locator('[name=ncReference]').fill('NC-ONE');assert form.locator('[name=quantity]').input_value()==''
+   assert not form.locator('[name=quantity]').evaluate('(el)=>el.checkValidity()');assert page.evaluate('qaSaved.length')==1
    form.locator('[name=quantity]').fill('2');form.locator('[name=observation]').fill('Dos ventanas, una NC');form.locator('[type=submit]').click()
    page.wait_for_function("document.querySelector('[data-order-summary]')?.textContent.includes('2 × NC V')")
    assert 'estimación 1 (1 por NC)' in row.inner_text() and 'Total por validar' in row.inner_text()
@@ -74,7 +75,9 @@ try:
    page.locator('[data-tracking-status]').select_option('ABIERTA');assert 'lectura heredada' in row.inner_text()
    page.evaluate('controller.load()');page.wait_for_function("document.querySelector('[data-order-summary]')?.textContent.includes('lectura heredada')")
    page.evaluate("qaMode='mismatch';controller.load()")
-   page.wait_for_function("document.querySelector('[data-order-summary]')?.textContent==='Datos pendientes'")
+   page.wait_for_function("document.querySelector('[data-order-summary] .lp-summary-pending')?.textContent==='Datos pendientes'")
+   assert row.locator('[data-summary-source=EXPORT]').inner_text()=='Tecno · sin dato'
+   assert row.locator('[data-summary-cause]:not([data-summary-source=EXPORT])').count()==0 and 'Total ' not in row.inner_text()
    page.evaluate("qaMode='revoked';controller.load()")
    page.wait_for_function("document.querySelector('[data-op-status]')?.textContent.includes('Acceso revocado')")
    assert page.locator('[data-order-summary]').count()==0

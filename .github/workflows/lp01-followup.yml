@@ -208,6 +208,9 @@ jobs:
           python tests/lp01-tracking-ui/browser.py
           python tests/lp01-summary-ui/browser.py
           python tests/lp01-pending-ui/browser.py
+          python tests/nc-glass-navigation-ui.py
+          python tests/nc-glass-navigation-integrated.py
+          python tests/nc-glass-alert-ui.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -219,6 +222,8 @@ jobs:
             tests/lp01-tracking-ui/evidence/
             tests/lp01-summary-ui/result.json
             tests/lp01-summary-ui/evidence/
+            test-artifacts/ncv-navigation/
+            test-artifacts/ncv-alert/
 
   affectations:
     name: Affectations native PDT, revocation and UI (isolated)
@@ -312,3 +317,4 @@ jobs:
           path: |
             tests/lp01-b12-b13/*result.json
             tests/lp01-b12-b13/evidence/
+
