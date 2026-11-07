@@ -8,7 +8,8 @@ import contextlib,hashlib,json,os,queue,re,shutil,subprocess,sys,threading,time,
 ROOT=Path(__file__).resolve().parents[3]
 HERE=Path(__file__).parent
 IMAGE='postgres:17.11'
-OUT=HERE/'result-postgres17.json'
+POST_EXPORT='--post-export' in sys.argv
+OUT=HERE/('result-post-export-postgres17.json' if POST_EXPORT else 'result-postgres17.json')
 
 def lit(value):return "'"+str(value).replace("'","''")+"'"
 def cmd(key='QA-A|PANELES_2',**extra):
@@ -97,7 +98,10 @@ class Container:
    assert 170000<=int(result.stdout.splitlines()[0])<180000,result.stdout
    db=Database(self,'qa_template');fixture=(HERE/'fixture.sql').read_text();manifest=json.loads((HERE/'fixture-manifest.json').read_text())
    assert hashlib.sha256(fixture.encode()).hexdigest()==manifest['fixture_sha256']
-   db.sql(fixture);db.sql((ROOT/'docs/sql-proposals/lp01-incorporar/01_incorporar_REVIEW.sql').read_text())
+   db.sql(fixture)
+   if POST_EXPORT:db.sql('ALTER TABLE public.sgp_producciones ADD COLUMN excluida_export boolean NOT NULL DEFAULT false')
+   folder='lp01-incorporar-post-export' if POST_EXPORT else 'lp01-incorporar'
+   db.sql((ROOT/('docs/sql-proposals/'+folder+'/01_incorporar_REVIEW.sql')).read_text())
    assert db.sql('SELECT incorporar_ensamble FROM sgp_lp_operacion.config WHERE id')=='f'
    # Explicitly synthetic feature activation. The proposed installer remains false.
    db.sql('UPDATE sgp_lp_operacion.config SET incorporar_ensamble=true WHERE id')
@@ -174,6 +178,15 @@ def run_cases(container):
   denied(db.run(call(cmd('QA-B|PANELES_2',revision=1,turn_revision=1))),'INCORPORAR_NO_HABILITADO')
   receipt=db.value('SELECT public.sgp_lp_operacion_resultado(\'leader\','+lit(request['id'])+');');assert receipt['committed'] is True and db.counts()['audit']==1
   checks.append('Containment drains already admitted request, blocks later enrollment and preserves its authorized receipt')
+  if POST_EXPORT:
+   db=container.case('export_excluded');before=db.counts()
+   with Session(db,'qa_export_approver') as approver:
+    approver.execute("BEGIN;UPDATE public.sgp_producciones SET excluida_export=true WHERE key_produccion='QA-A|PANELES_2';")
+    pending=db.worker(pool,'qa_enroll',call(cmd()));db.wait_blocked('qa_enroll','qa_export_approver')
+    approver.execute('COMMIT;');denied(pending.result(timeout=30),'PRODUCCION_NO_DISPONIBLE')
+   assert db.counts()==before
+   assert db.sql("SELECT excluida_export FROM public.sgp_producciones WHERE key_produccion='QA-A|PANELES_2'")=='t'
+   checks.append('Approved Export exclusion committed while INCORPORAR waits on production lock is rechecked before any planner/order/audit effects')
   db=container.case('atomic_failure');before=db.state()
   db.sql("CREATE FUNCTION public.qa_fail_audit() RETURNS trigger LANGUAGE plpgsql AS $$BEGIN RAISE EXCEPTION 'QA_FORCED_AUDIT_FAILURE';END $$;CREATE TRIGGER qa_failure BEFORE INSERT ON sgp_lp_operacion.auditoria FOR EACH ROW EXECUTE FUNCTION public.qa_fail_audit();")
   denied(db.run(call(cmd())),'QA_FORCED_AUDIT_FAILURE');assert db.state()==before

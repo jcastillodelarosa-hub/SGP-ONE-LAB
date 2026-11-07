@@ -30,9 +30,9 @@ try:
     page.evaluate('''()=>{document.querySelector('[data-view-panel="ensamble"]').hidden=false;window.SGPPlannerBridge.getToken=()=> 'COORDINADOR';window.SGPPlannerBridge.getClient=async()=>({rpc:async(name,args)=>(await fetch('/rpc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,args})})).json()});}''')
     page.locator('#productionPackingTab').click();page.wait_for_selector('[data-op-date]');page.locator('[data-op-date]').fill('2026-11-01');page.locator('[data-op-date]').dispatch_event('change')
     page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('NO_ABIERTO')")
-    assert 'primer turno' in page.locator('[data-auto-opening]').inner_text()
+    assert 'El inicio por horario está aprobado; falta activar el motor automático seguro.' in page.locator('[data-auto-opening]').inner_text()
     page.locator('[data-open]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Guardado confirmado')")
-    assert 'anterior sigue abierto' in page.locator('[data-auto-opening]').inner_text()
+    assert all(text in page.locator('[data-auto-opening]').inner_text() for text in ['aunque el anterior siga pendiente', 'El motor anterior todavía requiere actualización', 'no se cerrará el anterior automáticamente'])
     audit=db.sql('SELECT count(*) FROM sgp_lp_operacion.auditoria');turns=db.sql('SELECT count(*) FROM sgp_lp_operacion.turnos')
     for _ in range(2):
      page.locator('[data-op-load]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Turno ABIERTO')")
@@ -53,7 +53,7 @@ try:
     page.locator('[data-next-turn]').click();page.wait_for_function("document.querySelector('[data-op-shift]').value==='2'&&document.querySelector('[data-op-status]').textContent.includes('NO_ABIERTO')")
     page.locator('[data-open]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Guardado confirmado')")
     assert db.snapshot('EMPAQUE',shift=2)['turn']['estado']=='ABIERTO' and db.snapshot('EMPAQUE',shift=2)['orders']==[]
-    assert 'anterior sigue abierto' in page.locator('[data-auto-opening]').inner_text()
+    assert all(text in page.locator('[data-auto-opening]').inner_text() for text in ['aunque el anterior siga pendiente', 'El motor anterior todavía requiere actualización', 'no se cerrará el anterior automáticamente'])
     page.evaluate("window.SGPPlannerBridge.getToken=()=> 'LIDER'");page.locator('[data-op-load]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Turno ABIERTO')")
     assert page.locator('[data-open]').count()==0 and page.locator('[data-auto-opening]').count()==0
     assert official==db.sql('SELECT jsonb_agg(to_jsonb(x)) FROM public.sgp_producciones x') and planning==db.sql('SELECT jsonb_agg(to_jsonb(x)) FROM public.sgp_linea_plan_asignaciones x')

@@ -1,0 +1,58 @@
+{
+  "status": "PROPOSED_NOT_APPLIED_DISABLED",
+  "base_head": "f2b073c5fb25e50fa24fc1d4b8e3e93defbe2f4e",
+  "contracts": {
+    "import": "LP-EXPORT-IMPORT-3",
+    "close": "LP-EXPORT-CLOSE-4",
+    "plan": "LP-ENSAMBLE-PLAN-1"
+  },
+  "functions": {
+    "importer": {
+      "before": "eae247d88b7e82d4dc365840dfb03e45",
+      "after": "1e7dd4adcdc646ea7a1d55fbe48e561f"
+    },
+    "command": {
+      "post_incorporar": "ee5acef7b560bf3864d4e419e9925a4b",
+      "post_import": "4d401394592e726b8b438cdbe45eea3c",
+      "post_close": "5afb27d854217c9ed589e785f71d2504"
+    },
+    "consultar": {
+      "before": "fcc85da24ee89094789722c03397d1d9",
+      "after": "28c21e49ac52b570fbd961a31ec7eada"
+    },
+    "resultado": {
+      "before": "23ce7654c7478bec15978bd09c97a67c",
+      "after": "eda9da0046533d8710a5cdbea96d0887"
+    }
+  },
+  "files": {
+    "01_import_plan_REVIEW.sql": "a687e394b2a4ba4a46a8186b081a2836ed0e0dc16c033c63e05ea7fea166442c",
+    "02_close_v4_REVIEW.sql": "da6b8d3dc249698df63802edea3757b459bb34789c75e29478de3ccc4e76ee75",
+    "03_restore_close_without_history_REVIEW.sql": "1ef3a378a64e33aff05f2e0195656efa61aae6473259ef4a67c3bb270638cd5c",
+    "04_restore_import_without_history_REVIEW.sql": "79c0bee1db4e3d79a98fe6e2ab2f94a236f6179562eb5a3558eb464fea8fa248",
+    "visibility-fragment.sql": "0b4e37813ec0797fc91223dc0d6cee37b141909341c3972769ad0293cee7d70f"
+  },
+  "unchanged": {
+    "docs/sql-proposals/lp01-export-import-v2/manifest.json": "8e385d2d2b83b4d7b3015d39d41e33191ecd221bd1549fc3bbe8730f3725d515",
+    "docs/sql-proposals/lp01-export-close-v2/manifest.json": "81647fbb5f9d9b0ba44f7c3890f4c0759704608248addf8d202bf259f98cf8c0",
+    "docs/sql-proposals/lp01-ensamble-plan/manifest.json": "44ef55c473a7928ec6a4067caaf3096fd8fe5e7960606d6241fca0755bf22e63",
+    "src/domain/lp01-closure-export-v2.js": "55c4be9144eb4498580c8dc6cfdb2e6e285a69c9534e0040fc6beeac2f6df5e5",
+    "src/server/lp-powerbi-handler.js": "764b26970293b9e7096aebf226e9bad3b6ee466daa43c4751b51362ae2af53c7"
+  },
+  "artifact_sha256": {
+    "docs/sql-proposals/lp01-export-plan-v4/01_import_plan_REVIEW.sql": "a687e394b2a4ba4a46a8186b081a2836ed0e0dc16c033c63e05ea7fea166442c",
+    "docs/sql-proposals/lp01-export-plan-v4/02_close_v4_REVIEW.sql": "da6b8d3dc249698df63802edea3757b459bb34789c75e29478de3ccc4e76ee75",
+    "docs/sql-proposals/lp01-export-plan-v4/03_restore_close_without_history_REVIEW.sql": "1ef3a378a64e33aff05f2e0195656efa61aae6473259ef4a67c3bb270638cd5c",
+    "docs/sql-proposals/lp01-export-plan-v4/04_restore_import_without_history_REVIEW.sql": "79c0bee1db4e3d79a98fe6e2ab2f94a236f6179562eb5a3558eb464fea8fa248",
+    "docs/sql-proposals/lp01-export-plan-v4/README.md": "c81f3ef7a37f78ef2551810cf85d94cbce672503e6ac129e75106c62fd76e62e",
+    "docs/sql-proposals/lp01-export-plan-v4/build-proposal.py": "60cb51e2bda0efdcb5a0694d7da4030f902ad7accd3bd995390f22e4be957175",
+    "docs/sql-proposals/lp01-export-plan-v4/visibility-fragment.sql": "0b4e37813ec0797fc91223dc0d6cee37b141909341c3972769ad0293cee7d70f",
+    "tests/lp01-export-plan-v4/adapter.mjs": "ebc223c137f51cec7104e144defe6a5bbe0dfd79c2455951494b39dc5b639765",
+    "tests/lp01-export-plan-v4/bootstrap.mjs": "22626eadf46a570b8726d65394e2f8b93ef6a195ed743c7cfa872d531247dd1e",
+    "tests/lp01-export-plan-v4/interface-results.json": "e1deb4429b52493618f6d1209c2afa9ec74ebbbc6d5ef5bbc198931e22607f72",
+    "tests/lp01-export-plan-v4/package.json": "1e25858a49d8676aef3fc904b71f4182288990df4cd7037eb95060e2c341d6e5",
+    "tests/lp01-export-plan-v4/preflight-results.json": "e8455d6f1522ab2264d2d29ad4ea5c367cd9e81a72d0ee7a4105ced768f8d17e",
+    "tests/lp01-export-plan-v4/results.json": "30748fbd62103d32a96bdaccd683c0ecb013e24836819290c185c468bbd4f6ed",
+    "tests/lp01-export-plan-v4/sql-readback.json": "0fb32f8f92829ac374d3bc456edd5b868ad99517b73f1bc70d27d983e668ae73"
+  }
+}

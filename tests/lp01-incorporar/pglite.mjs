@@ -4,6 +4,8 @@ import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import {createHash,randomUUID} from 'node:crypto';
 const ROOT=new URL('../../',import.meta.url);
+const postExport=process.argv.includes('--post-export');
+const proposal='docs/sql-proposals/'+(postExport?'lp01-incorporar-post-export':'lp01-incorporar')+'/';
 const read=p=>readFile(new URL(p,ROOT),'utf8');
 const db=new PGlite({extensions:{pgcrypto}});await db.waitReady;
 const checks=[],sql=q=>db.exec(q),value=async q=>(await db.query(q)).rows[0]?.v;
@@ -70,8 +72,9 @@ DECLARE p jsonb;v bigint; BEGIN SELECT to_jsonb(x) INTO p FROM public.sgp_produc
  async function call(cmd,token='leader'){await sql('SET ROLE anon;');try{return await value(`SELECT public.sgp_lp_operacion_comando(${lit(token)},${lit(JSON.stringify(cmd))}::jsonb) AS v`);}finally{await sql('RESET ROLE;');}}
  async function reject(cmd,expected,token='leader'){let e;try{await call(cmd,token)}catch(error){e=error}assert(e,'Expected rejection');assert.match(e.message,new RegExp(expected));await sql('ROLLBACK;RESET ROLE;');}
  async function receipt(id,token='leader'){await sql('SET ROLE anon;');try{return await value(`SELECT public.sgp_lp_operacion_resultado(${lit(token)},${lit(id)}) AS v`);}finally{await sql('RESET ROLE;');}}
- const manifest=JSON.parse(await read('docs/sql-proposals/lp01-incorporar/manifest.json'));
- const install=await read('docs/sql-proposals/lp01-incorporar/01_incorporar_REVIEW.sql'),restore=await read('docs/sql-proposals/lp01-incorporar/02_restore_REVIEW.sql');
+ if(postExport)await sql('ALTER TABLE public.sgp_producciones ADD COLUMN excluida_export boolean NOT NULL DEFAULT false');
+ const manifest=JSON.parse(await read(proposal+'manifest.json'));
+ const install=await read(proposal+'01_incorporar_REVIEW.sql'),restore=await read(proposal+'02_restore_REVIEW.sql');
  const metadata=async()=>value(`SELECT jsonb_agg(jsonb_build_object('oid',p.oid,'owner',p.proowner,'acl',p.proacl::text,'config',p.proconfig,'definer',p.prosecdef) ORDER BY p.oid) AS v FROM pg_proc p WHERE oid IN(${Object.keys(manifest.functions).map(s=>lit(s)+'::regprocedure').join(',')})`);
  const beforeMeta=await metadata();
  await deny(install.replace('COMMIT;','SELECT 1/0;COMMIT;'),'division by zero');
@@ -80,7 +83,8 @@ DECLARE p jsonb;v bigint; BEGIN SELECT to_jsonb(x) INTO p FROM public.sgp_produc
  for(const [sig,pin]of Object.entries(manifest.functions))assert.equal(await value(`SELECT md5(prosrc) AS v FROM pg_proc WHERE oid=${lit(sig)}::regprocedure`),pin.candidate_source_md5);
  assert.equal(await value('SELECT incorporar_ensamble AS v FROM sgp_lp_operacion.config WHERE id'),false);
  await sql(await read('docs/sql-proposals/lp01-hoja/01_catalog_REVIEW.sql'));
- const discovery=await read('docs/sql-proposals/lp01-incorporar/03_discovery_REVIEW.sql'),restoreDiscovery=await read('docs/sql-proposals/lp01-incorporar/04_restore_discovery_REVIEW.sql');
+ if(postExport)await sql(await read('tests/lp01-incorporar/post-export/export-reader-candidate.sql'));
+ const discovery=await read(proposal+'03_discovery_REVIEW.sql'),restoreDiscovery=await read(proposal+'04_restore_discovery_REVIEW.sql');
  await sql(discovery);
  assert.deepEqual((await snapshot()).incorporation,{contract:'LP-INCORPORAR-1',enabled:false,canIncorporate:false,stage:'ENSAMBLE',line:'PANELES_2'});
  await reject(command(),'INCORPORAR_NO_HABILITADO');
@@ -115,6 +119,16 @@ DECLARE p jsonb;v bigint; BEGIN SELECT to_jsonb(x) INTO p FROM public.sgp_produc
  await reject(command({key:'PLAN|PANELES_2'}),'YA_INCORPORADA');
  await sql("UPDATE public.sgp_producciones SET activa='NO' WHERE key_produccion='OTHER|PANELES_2'");await reject(command(),'PRODUCCION_NO_DISPONIBLE');await sql("UPDATE public.sgp_producciones SET activa='SI'");
  checks.push('Rejects invalid quantity/reason/payload/CAS, missing/closed/review turn, absent/stale/zero Export, open/already planned/inactive orders and over-allocation against existing plan');
+ if(postExport){
+  const unchanged=await value(`SELECT jsonb_build_object('turn',(SELECT to_jsonb(t) FROM sgp_lp_operacion.turnos t),'audit',(SELECT count(*) FROM sgp_lp_operacion.auditoria),'plan',(SELECT count(*) FROM public.sgp_linea_plan_asignaciones)) AS v`);
+  await sql("UPDATE public.sgp_producciones SET excluida_export=true WHERE key_produccion='OTHER|PANELES_2'");
+  assert(!(await snapshot()).catalog.productions.some(row=>row.key==='OTHER|PANELES_2'));
+  await reject(command(),'PRODUCCION_NO_DISPONIBLE');
+  assert.deepEqual(await value(`SELECT jsonb_build_object('turn',(SELECT to_jsonb(t) FROM sgp_lp_operacion.turnos t),'audit',(SELECT count(*) FROM sgp_lp_operacion.auditoria),'plan',(SELECT count(*) FROM public.sgp_linea_plan_asignaciones)) AS v`),unchanged);
+  await sql("UPDATE public.sgp_producciones SET excluida_export=false WHERE key_produccion='OTHER|PANELES_2'");
+  assert((await snapshot()).catalog.productions.some(row=>row.key==='OTHER|PANELES_2'));
+  checks.push('Post-Export approved exclusion is absent from active catalog and denied by the writer without plan/turn/audit effects; explicit restored inclusion remains eligible');
+ }
  const sourceBefore=await value('SELECT jsonb_agg(to_jsonb(p) ORDER BY key_produccion) AS v FROM public.sgp_producciones p'),oldPlan=await value('SELECT jsonb_agg(to_jsonb(a) ORDER BY id) AS v FROM public.sgp_linea_plan_asignaciones a');
  const cmd=command({turn_revision:0}),created=await call(cmd);assert.equal(created.quantity,4);assert.equal(created.turnRevision,1);assert.equal(created.priority,3);
  assert.equal((await call(cmd)).duplicate,true);assert.deepEqual((await receipt(cmd.id)).result,created);
@@ -126,7 +140,7 @@ DECLARE p jsonb;v bigint; BEGIN SELECT to_jsonb(x) INTO p FROM public.sgp_produc
  assert.deepEqual(await value('SELECT jsonb_agg(to_jsonb(p) ORDER BY key_produccion) AS v FROM public.sgp_producciones p'),sourceBefore);
  assert.deepEqual(await value(`SELECT jsonb_agg(to_jsonb(a) ORDER BY id) AS v FROM public.sgp_linea_plan_asignaciones a WHERE id<>${lit(created.part)}`),oldPlan);
  checks.push('Atomic planner root + LP row + audited motive; appended priority; no SALE/execution/Export/other assignment changes; same request replays exactly, changed payload or duplicate enrollment denied');
- await sql(`INSERT INTO public.sgp_producciones SELECT 'SUP|PANELES_2','QA SUP',id_linea,sistema,reserva_al,cantidad,activa,estado_produccion,anio,semana_base,semana_actual,saldos_inicializados,presente_ultimo_export,saldo_ensamble,saldo_empaque,ensamblado,empacado,ultima_carga_diaria,ultima_vez_export FROM public.sgp_producciones WHERE key_produccion='OTHER|PANELES_2'`);
+ await sql(`INSERT INTO public.sgp_producciones(key_produccion,produccion,id_linea,sistema,reserva_al,cantidad,activa,estado_produccion,anio,semana_base,semana_actual,saldos_inicializados,presente_ultimo_export,saldo_ensamble,saldo_empaque,ensamblado,empacado,ultima_carga_diaria,ultima_vez_export) SELECT 'SUP|PANELES_2','QA SUP',id_linea,sistema,reserva_al,cantidad,activa,estado_produccion,anio,semana_base,semana_actual,saldos_inicializados,presente_ultimo_export,saldo_ensamble,saldo_empaque,ensamblado,empacado,ultima_carga_diaria,ultima_vez_export FROM public.sgp_producciones WHERE key_produccion='OTHER|PANELES_2'`);
  const supCmd=command({key:'SUP|PANELES_2',revision:1,quantity:2}),sup=await call(supCmd,'ensamble');assert.equal(sup.turnRevision,2);assert.equal((await receipt(supCmd.id,'ensamble')).committed,true);
  let denied;try{await receipt(cmd.id,'ensamble')}catch(e){denied=e}assert(denied);assert.match(denied.message,/AMBITO/);
  await sql('UPDATE sgp_lp_operacion.config SET incorporar_ensamble=false WHERE id');assert.equal((await receipt(supCmd.id,'ensamble')).committed,true);
@@ -141,5 +155,5 @@ DECLARE p jsonb;v bigint; BEGIN SELECT to_jsonb(x) INTO p FROM public.sgp_produc
  await reject(command({revision:3}),'COMANDO_INVALIDO');await deny(restore,'CUERPO_CAMBIO');
  checks.push('Contained rollback restores exact bodies/ACL and retains all planner/order/audit rows; stale rollback rejected');
  const report={status:'PASS',engine:await value('SELECT version() AS v'),groups:checks.length,results:checks,limits:['In-memory synthetic PostgreSQL WASM 18.6, not production17.11. No live writes or access activation.','Concurrent execution/locking has not been certified by this single-connection harness. SQL uses the existing lock order plus NOWAIT planner table lock; multi-session PG17 test required before activation.','Only ENSAMBLE/PANELES_2. No Empaque, automatic opening, authoritative close V2 or UI integration.']};
- await writeFile(new URL('tests/lp01-incorporar/results.json',ROOT),JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));
+ await writeFile(new URL('tests/lp01-incorporar/'+(postExport?'post-export/':'')+'results.json',ROOT),JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));
 }finally{await db.close();}

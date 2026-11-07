@@ -1,0 +1,12 @@
+{
+  "status": "PASS",
+  "readerCommit": "8738305e3b1901bd99b07b384a8c355bcb969408",
+  "sourceSha256": "0fb32f8f92829ac374d3bc456edd5b868ad99517b73f1bc70d27d983e668ae73",
+  "checks": [
+    "Final SQL CLOSE-4 readback with cancelled baseline key validates through independent strict reader",
+    "Target10/actual7/difference-3/pending3 and missing actual null survive; comparisonComplete false"
+  ],
+  "limits": [
+    "No reader edits or repeated reader suite; no UI/production validation."
+  ]
+}

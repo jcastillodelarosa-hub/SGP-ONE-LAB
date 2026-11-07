@@ -1,0 +1,38 @@
+{
+  "status": "PASS",
+  "groups": 8,
+  "results": [
+    "Exact post-v406 chain installs transactionally over ee5acef with independent false gates, unchanged ACL/metadata, narrowed V4 history visibility and exact no-history inverses; old proposal files remain unchanged",
+    "V4 must be selected explicitly and have an accredited enabled plan; V3 selector/unknown baseline cannot silently become plan authority; existing pending reason remains required",
+    "Actual post-Export INCORPORAR rejects excluded production, captures before/after plan under existing locks with authenticated actor/motive, replays once and invalidates the older import",
+    "CERRAR4 persists immutable current plan plus actual Export comparison, not SALE/manual999; missing actual stays null; commit revocation rolls back; strict V3 rejects V4; initial cut/budget/carry remain specifically blocked",
+    "V4 scope covers active rows plus cancelled/excluded baseline/source keys: final-audit revocation rolls back, and subsequent revocation hides report/history and denies receipt/replay without changing V3 rules",
+    "Partial reimport after a V4 close accepts its explicit history, replaces only PRESENT, preserves prior original-file provenance and plan snapshot without rewriting any earlier close",
+    "Approved exclusions are refused as file rows and removed from active import/close/plan together; dirty history blocks stale comparison; explicit fresh baseline keeps old excluded snapshots intact",
+    "Unmaterialized active targets fail explicitly instead of disappearing; history prevents unsafe rollback and legacy carry interpretation even after containment; v406 active orders/catalog filters and all existing ACLs remain exact; V4 history reads are narrowed"
+  ],
+  "functions": {
+    "importer": {
+      "before": "eae247d88b7e82d4dc365840dfb03e45",
+      "after": "1e7dd4adcdc646ea7a1d55fbe48e561f"
+    },
+    "command": {
+      "post_incorporar": "ee5acef7b560bf3864d4e419e9925a4b",
+      "post_import": "4d401394592e726b8b438cdbe45eea3c",
+      "post_close": "5afb27d854217c9ed589e785f71d2504"
+    },
+    "consultar": {
+      "before": "fcc85da24ee89094789722c03397d1d9",
+      "after": "28c21e49ac52b570fbd961a31ec7eada"
+    },
+    "resultado": {
+      "before": "23ce7654c7478bec15978bd09c97a67c",
+      "after": "eda9da0046533d8710a5cdbea96d0887"
+    }
+  },
+  "limits": [
+    "Synthetic single-connection PostgreSQL18/PGlite, not PostgreSQL17 concurrency or production.",
+    "No remote SQL, activation, new grants, endpoint, UI or strict V4 runtime reader.",
+    "Unknown first Export cut keeps budget/continuity/operationalReady blocked. New-turn scheduling is a separate authorized integration, not implicit close/carry."
+  ]
+}

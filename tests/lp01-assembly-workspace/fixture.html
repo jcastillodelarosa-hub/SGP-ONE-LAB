@@ -14,4 +14,5 @@ const bridge={getToken:()=>token,getClient:async()=>({rpc:async(name,args)=>{cal
 const host=document.querySelector('#workspace'),reports=document.querySelector('#reports');
 window.workspace=mountAssemblyWorkspace({host,bridge,noteRows:{paintOrderNoteRows,retainOrderNoteRows},isCurrent:()=>true,onClose:()=>renderAssemblyClose({host,data,context,onBack:()=>workspace.update(data,context),onReports:()=>showReports()}),onReports:()=>showReports(),onGlass:()=>{}});
 window.showReports=()=>{host.hidden=true;reports.hidden=false;renderAssemblyReports({host:reports,data,context});};window.refresh=()=>workspace.update(structuredClone(data),context);workspace.update(data,context);
+window.showPlanReport=async()=>{const f=await fetch('/tests/fixtures/lp01-closure-plan-v4-synthetic.json').then(r=>r.json());host.hidden=true;reports.hidden=false;renderAssemblyReports({host:reports,data:f.readback,context:f.context});};
 </script></body></html>

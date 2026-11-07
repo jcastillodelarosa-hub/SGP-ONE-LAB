@@ -1,0 +1,91 @@
+{
+  "status": "PROPOSED_NOT_APPLIED_DISABLED",
+  "source_head": "518eb2d76c2036be1bc31d225b01068129fbdebe",
+  "scope": "ENSAMBLE/PANELES_2 only; private helpers, no public RPC or new grant",
+  "functions": {
+    "plan_generation": {
+      "body_md5": "5d2f657e167fce03692831028eee8219",
+      "body_sha256": "a32645a4f22bb07db4fcb5d313246ac62d3106a1da447b24ee748a72167cb6dc"
+    },
+    "plan_inmutable": {
+      "body_md5": "6787f3da15dbd802a54b226af980b93e",
+      "body_sha256": "02c2cab516cea6fdbad202bc757fbf3732d68261e3562e51d8d7a3b00d459d72"
+    },
+    "plan_fuente": {
+      "body_md5": "cf0b64670e27ab500479ed134dc3da4e",
+      "body_sha256": "57d698e8d47107a924e591b944da1c4a7c16c2739b220cd8cb34b1961fffb740"
+    },
+    "plan_huella": {
+      "body_md5": "5211695d02a726f476ab7f37ccb8a4dc",
+      "body_sha256": "e7f901fec1f85ad7185384b818db22d72ae0cd70b794c7c2760522bc6f5a6b9a"
+    },
+    "plan_periodos": {
+      "body_md5": "eb5e20dc26513d43a818a0c9a9c0c1c4",
+      "body_sha256": "96a2184d3719d659cd58f560d30401e98c376a987b9c8cd8e0ba2335bd59fbd6"
+    },
+    "plan_base": {
+      "body_md5": "72b5218f9ed6ea378be2a8d0bfd9ac13",
+      "body_sha256": "b9d7d78a509a064db2b563cab66b9313f74d2fb6745bbca34742942746ecf285"
+    },
+    "plan_iniciar_cambio": {
+      "body_md5": "9237a83666d01b39e675cae82588a55e",
+      "body_sha256": "e6dc982e1a9902b469cc3e8ebb18109630d28570bb569f961ff7bea497f5a579"
+    },
+    "plan_observar_mutacion": {
+      "body_md5": "64401908cebd50e9aedd6bbe0ad4e4e7",
+      "body_sha256": "29c6f41448ac87480f746bb6dc9f9c68854bb27819fd52952ecd0643636a2c38"
+    },
+    "plan_observar_catalogo": {
+      "body_md5": "27e8262d6a5fcb6264d52a9b66f9a7bc",
+      "body_sha256": "fb4fc1c9a1bcc5bf803ca422bfaa813425871db78ac1ea5711c436d8948f227d"
+    },
+    "plan_finalizar_cambio": {
+      "body_md5": "b8547203d6ab46575fad436b8530bd4a",
+      "body_sha256": "572cf6b9ff71f73f726ce6d8dc82dbad5ada3badfbb5535d41ab545ce5a55258"
+    },
+    "plan_contexto_completo": {
+      "body_md5": "e68d009c647c62b367f239093f492d8b",
+      "body_sha256": "04d55de003ad3db9d5d5a3c58fb78c4cee7a3220b58c174a3fd9e064e76a0559"
+    },
+    "plan_programar": {
+      "body_md5": "c20c20cbf3b432977dc7311d2321158f",
+      "body_sha256": "9ac0aa6fc906649e29fd8815201071550285a0d2e5a36b00cbbd23e2fce0b855"
+    },
+    "plan_mover": {
+      "body_md5": "02c7e11a0bc4396aee45c0fe4a6b1dba",
+      "body_sha256": "4ec6b8d822ae691ca91d518333d5b8cef12cee0888dacb49876bdd7ec85d66d8"
+    },
+    "plan_snapshot": {
+      "body_md5": "5a7100188a30713f3b49a4e48fcdf5a4",
+      "body_sha256": "e55315d3d99322fc9cf7ec0720454bd4c46faa496b642f99c4ba4937cd93cd1e"
+    },
+    "plan_comparar": {
+      "body_md5": "9d19540887133568b6e14e53ac7bc008",
+      "body_sha256": "215e1ce72d27926ef4aa9d710e9c463444fa1942cb76b01e764fd1c4849c384a"
+    }
+  },
+  "source_pins": {
+    "programar": "248f9feb45f1c2d260896aa95c3e1569",
+    "mover": "52752c4887c68f8336e38c08a58cc38b"
+  },
+  "artifact_sha256": {
+    "docs/sql-proposals/lp01-ensamble-plan/01_plan_REVIEW.sql": "90999780ca4c00d4ac80fe3370f2d0a26a546504431333788838e21d18a41c51",
+    "docs/sql-proposals/lp01-ensamble-plan/02_contain_REVIEW.sql": "72e4f9ccd04bb7006cca340646c3371ceec0fc130dd56084f86735f840d1accb",
+    "docs/sql-proposals/lp01-ensamble-plan/CONTRACT.md": "22375bacb3ff1b70df1c60ceb06a9d6b74897683cfb383e9ee9645a41c680901",
+    "docs/sql-proposals/lp01-ensamble-plan/INTEGRATION.md": "a3b56cf9a89e0cb3d4a969c8a0a23fabb2180b9d92402a67c18de101a7997d0e",
+    "docs/sql-proposals/lp01-ensamble-plan/README.md": "84c745fa809b68144545cb6c7709b56cb6d1f06122328379d93225be2959edbf",
+    "docs/sql-proposals/lp01-ensamble-plan/build-manifest.py": "3267d692c54d61b16a3b18fb34e3734c5fe8008574344cb5cea9d1bf9a34809a",
+    "tests/lp01-ensamble-plan/comparison-results.json": "05f414137bd275df7249b7a05490282bf2a0b494d5947d88b29c8f129bf4c5f2",
+    "tests/lp01-ensamble-plan/comparison-sql.json": "e2e934adbe06b351c4072b1b7adaac6a23229c05fa9225aed6c400a3920ee655",
+    "tests/lp01-ensamble-plan/comparison.mjs": "1cefac842799beeb9aff42f9bb8f3a2ecbf4c5089131b1adb699123f0d0a44ba",
+    "tests/lp01-ensamble-plan/package.json": "4973754d6f84520ce359b8528f20838b76f265269be898eea4c2ef23898b7c8b",
+    "tests/lp01-ensamble-plan/pglite.mjs": "d23cdbc6cbfaa7cf4d7200755283141ef6ef99d336b97c799d01cf4026c7acc5",
+    "tests/lp01-ensamble-plan/results.json": "19d997b6bbd0a695bb8aad002cce0a09a6899034b7a77d26049273c7edc7304e",
+    "tests/lp01-ensamble-plan/snapshot-sql.json": "34192786ade3a8360824582a270df1d91928b93480cc93b88edad4635e500f82"
+  },
+  "limits": [
+    "No live SQL/activation or multiconnection PostgreSQL17 evidence",
+    "No command/import/close/runtime integration",
+    "Prior history UNKNOWN, never reconstructed"
+  ]
+}
