@@ -1,3 +1,4 @@
+import {glassLocationDetailMarkup} from './src/modules/glass-location-detail.js';
 import {createExportReview} from './src/modules/export-review.js';
 import {openNcGlassTracking} from './src/modules/nc-glass-tracking.js';
 import {openAudit} from './src/modules/picking-audit.js';
@@ -821,10 +822,11 @@ async function openGlassDetail(key,id,category=null){
  const token=window.SGPPlannerBridge?.getToken?.()||getAppToken();if(!token)return;const request=++glassDetailRequest;glassDetailReturnFocus=document.activeElement;
  els.glassDetailModal.hidden=false;els.glassDetailTitle.textContent="Orden "+id;els.glassDetailMeta.textContent="Consultando ubicación actual…";els.glassDetailSummary.innerHTML="";els.glassDetailBody.innerHTML="";
  try{const client=await window.SGPPlannerBridge.getClient();const {data,error}=await client.rpc("sgp_detalle_ubicacion_vidrio",{p_token:token,p_key_produccion:key});if(error)throw error;if(request!==glassDetailRequest||token!==window.SGPPlannerBridge.getToken()||els.glassDetailModal.hidden)return;
-  const pr=data.produccion||{};els.glassDetailTitle.innerHTML=`<span>Orden ${escapeHtml(id)}</span><span class="glass-production-title">${escapeHtml(pr.produccion||"—")}</span>`;els.glassDetailMeta.innerHTML=`<span><strong>Sistema:</strong> ${escapeHtml(pr.sistema||"—")}</span><span><strong>Cant. ventanas:</strong> ${pr.cantidad??"—"}</span><span><strong>Vidrios:</strong> ${data.unidades||0}</span><span><strong>Burros:</strong> ${data.burros||0}</span>`;
-  els.glassDetailSummary.innerHTML=(data.resumen||[]).map(x=>`<span class="glass-summary ${String(x.categoria).toLowerCase()}"><strong>${x.unidades}</strong><small>${escapeHtml(x.categoria)} · ${x.burros} burros</small></span>`).join("");
-  const groups=category?[category]:["PREPARADO","NOVEDAD","TRASLADO","OTROS"];const icons={PREPARADO:"✓",NOVEDAD:"!",TRASLADO:"↔",OTROS:"•"};
-  els.glassDetailBody.innerHTML=groups.map(g=>{const rows=(data.detalle||[]).filter(x=>x.categoria===g);if(!rows.length)return category?`<p>No hay detalle ${escapeHtml(g)} informado por la fuente.</p>`:"";return `<section class="glass-detail-group group-${g.toLowerCase()}"><h4><i>${icons[g]}</i> ${g}</h4>${rows.map(x=>`<div class="glass-detail-row"><div><strong>(${x.unidades}) ${escapeHtml(x.posicion||"Sin ubicación")}</strong><span>${escapeHtml(x.estado||g)}</span></div><p>${escapeHtml(x.composiciones||"—")}</p></div>`).join("")}</section>`}).join("");
+  const markup=glassLocationDetailMarkup(data,id,category);
+ els.glassDetailTitle.innerHTML=markup.title;
+ els.glassDetailMeta.innerHTML=markup.meta;
+ els.glassDetailSummary.innerHTML=(data.resumen||[]).map(x=>`<span class="glass-summary ${String(x.categoria).toLowerCase()}"><strong>${x.unidades}</strong><small>${escapeHtml(x.categoria)} · ${x.burros} burros</small></span>`).join("");
+  els.glassDetailBody.innerHTML=markup.body;
  }catch(e){if(request===glassDetailRequest&&!els.glassDetailModal.hidden)els.glassDetailMeta.textContent="No se pudo consultar: "+e.message}
 }
 els.closeGlassDetail?.addEventListener('click',()=>{glassDetailRequest++;glassDetailReturnFocus?.focus?.();});

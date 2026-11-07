@@ -35,9 +35,9 @@ test('approved Export exclusions leave the active sheet, never erase historical 
  const legacy=data([], [operation('hidden','h',{oficial:hidden.oficial}),operation('active','a')]);delete legacy.catalog;
  assert.deepEqual(all(legacy).map(r=>r.produccion),['active']);
 });
-test('oldest original Export week first, then original dates; scheduled rows follow priority',()=>{
+test('reservation grouping precedes age and planner ranking within state groups',()=>{
  const d=data([production('new',{balance:2,week:44}),production('older',{balance:3,week:40}),production('p2',{assignments:[plan('p2','a',{prioridad:2})]}),production('p1',{assignments:[plan('p1','b',{prioridad:1})]})]);
- assert.deepEqual(all(d).map(r=>r.produccion),['older','new','p1','p2']);
+ assert.deepEqual(all(d).map(r=>r.produccion),['new','older','p1','p2']);
 });
 test('no invented opening date; missing original week is sorted after known weeks',()=>{
  const [r]=all(data([production('unknown',{balance:1,week:null})]));assert.equal(r.week,null);assert.equal(r.originDate,null);
@@ -129,7 +129,7 @@ test('fallback incompatible Export snapshots stay for review instead of selectin
 test('markup preserves compact PC columns, mobile data labels, real detail and glass actions',()=>{
  const rows=all(data([production('A',{balance:6}),production('B',{assignments:[plan('B','b')]}),production('C'),production('D',{balance:0})]));
  const html=assemblySheetMarkup(rows,{onDetail(){},onGlass(){},onAvailable(){}});
- for(const label of ['Producción / reserva','Semana','Sistema','Saldo Export','Disponible','Realizado','Afectaciones','Observaciones'])assert.ok(html.includes(label),label);
+ for(const label of ['Semana','Producción','Reserva','Prioridad','Sistema','Saldo Export','Disponible','Realizado','Afectaciones','Observaciones'])assert.ok(html.includes(label),label);
  assert.equal((html.match(/data-assembly-key=/g)||[]).length,3);
  for(const group of ['ABIERTAS','PROGRAMADAS','OTRAS'])assert.ok(html.includes('data-assembly-group="'+group+'"'));
  assert.match(html,/Pendiente de cierre/);assert.match(html,/data-assembly-glass/);assert.match(html,/data-assembly-detail/);assert.doesNotMatch(html,/>Reportado</);assert.doesNotMatch(html,/>SALE</);
@@ -233,3 +233,15 @@ test('sheet never-reported row is unknown, not a missing close or explicit zero'
  const fixture=closureV2Fixture(),row=assemblySheetRows(fixture.data,fixture.context).find(row=>row.key==='B|PANELES_2'),markup=assemblySheetMarkup([row]);
  assert.equal(row.realized,null);assert.match(markup,/>No informado<\/span>/);assert.doesNotMatch(markup,/>Pendiente de cierre<\/span>/);
 });
+
+ test('reservation parts use natural order and never planner priority or assignment UUID',()=>{
+ const ps=['late','early','other'].map(name=>production(name,{assignments:[plan(name,'uuid-'+name,{prioridad:name==='late'?1:9})]}));
+ ps[0].oficial.reserva_al='R1';ps[0].oficial.prioridad_reserva='1.10';
+ ps[1].oficial.reserva_al='R1';ps[1].oficial.prioridad_reserva='1.2';
+ ps[2].oficial.reserva_al='R2';
+ assert.deepEqual(all(data(ps)).map(r=>r.produccion),['early','late','other']);
+ const html=assemblySheetMarkup(all(data(ps)));
+ assert.ok(html.indexOf('<th scope="col">Semana')<html.indexOf('<th scope="col">Producción'));
+ assert.match(html,/data-label="Prioridad"[^>]*>1.2/);
+ assert.doesNotMatch(html,/data-label="Prioridad"[^>]*>9/);
+ });
