@@ -6,6 +6,29 @@ import {mountOperation} from '/src/modules/lp01-operation.js';
 document.querySelector('#productionTrackingPanel').append(document.querySelector('#tracking'));document.querySelector('#productionOperationPanel').append(document.querySelector('#operation'));
 window.token='qa';window.calls=0;window.inflight=0;window.maxInflight=0;window.delay=false;window.fail=false;window.version=0;
 window.payload=(args)=>({contract:'LP-SEGUIMIENTO-1',role:'COORDINADOR',line:args.p_linea,stage:args.p_etapa,productions:Array.from({length:30},(_,i)=>{const key='QA'+i+'|'+args.p_linea;return {key,line:args.p_linea,stage:args.p_etapa,classification:i===0?'PENDIENTE_CONCILIACION':'ABIERTA',assignments:[{id:'P'+i,key_produccion:key}],operations:[1,2].map(turno=>({key,linea:args.p_linea,etapa:args.p_etapa,fecha:'2026-11-02',turno,parte:'P'+i,ejecutado:turno+1,sale:8})),oficial:{key_produccion:key,id_linea:args.p_linea,produccion:'Producción '+i,sistema:i%2?'A':'B',reserva_al:'R'+i,saldos_inicializados:true,presente_ultimo_export:i!==0,saldo_ensamble:i===1?window.version+10:i,saldo_empaque:i+1,semana_base:i%2?1:52,anio:i%2?2026:2025}};})});
-window.controller=mountOperation({tracking:document.querySelector('#tracking'),operation:document.querySelector('#operation'),bridge:{getToken:()=>window.token,getClient:async()=>({rpc:async(name,args)=>{if(name==='sgp_lp_operacion_consultar')return {error:{code:'PGRST202',message:'QA contrato operativo no instalado'}};if(name!=='sgp_lp_seguimiento_consultar')throw Error('Unexpected RPC');window.calls++;window.inflight++;window.maxInflight=Math.max(window.maxInflight,window.inflight);try{if(window.delay)await new Promise(resolve=>window.release=resolve);return window.fail?{error:{message:'QA permiso revocado'}}:{data:window.payload(args)};}finally{window.inflight--;}}})}});
+// Synthetic order-note store exercises the existing contract, never a production service.
+window.noteWritable=true;window.noteUnavailable=false;window.noteReads=0;window.noteWrites=[];window.noteDelay=false;window.noteLost=false;
+window.notes=new Map();window.noteResponses=new Map();
+window.setNote=(key,text,stage='ENSAMBLE',actor='LIDER')=>{const note=window.notes.get(key)||{revision:0,observation:'',history:[]};const revision=note.revision+1;window.notes.set(key,{revision,observation:text,history:[...note.history,{id:crypto.randomUUID(),revision,stage,actor,observation:text}]});};
+window.setNote('QA2|PANELES_2','Observación compartida por el líder');
+window.noteRpc=async(name,args)=>{
+ if(name==='sgp_lp_order_details_read_v1'){
+  window.noteReads++;if(window.noteUnavailable)return {error:{code:'PGRST202',message:'QA contrato no disponible'}};
+  const stored=window.notes.get(args.p_key)||{revision:0,observation:'',history:[]};
+  const snapshot={contract:'LP-ORDER-DETAILS-1',key:args.p_key,line:args.p_key.split('|').at(-1),stage:args.p_stage,note:{revision:stored.revision,observation:stored.observation},history:stored.history,capabilities:window.noteWritable?['READ','NOTE']:['READ'],export:{quantity:'30',percentage:null,present:true,at:'2026-11-07T12:00:00Z'}};
+  if(window.noteDelay){window.noteDelay=false;await new Promise(resolve=>window.releaseNote=resolve);}
+  return {data:snapshot};
+ }
+ const cmd=args.p_cmd;window.noteWrites.push(structuredClone(cmd));
+ if(!window.noteWritable)return {error:{code:'P0001',message:'ORDER_NOTE_PERMISSION_DENIED'}};
+ if(window.noteResponses.has(cmd.id))return {data:{...window.noteResponses.get(cmd.id),duplicate:true}};
+ const stored=window.notes.get(args.p_key)||{revision:0};
+ if(stored.revision!==cmd.revision)return {error:{code:'P0001',message:'ORDER_NOTE_REVISION_STALE'}};
+ window.setNote(args.p_key,cmd.observation,args.p_stage,'COORDINADOR');
+ const result={contract:'LP-ORDER-NOTE-SAVED-1',key:args.p_key,id:cmd.id,revision:cmd.revision+1,observation:cmd.observation,duplicate:false};window.noteResponses.set(cmd.id,result);
+ if(window.noteLost){window.noteLost=false;throw Error('QA respuesta perdida');}
+ return {data:result};
+};
+window.controller=mountOperation({tracking:document.querySelector('#tracking'),operation:document.querySelector('#operation'),bridge:{getToken:()=>window.token,getClient:async()=>({rpc:async(name,args)=>{if(['sgp_lp_order_details_read_v1','sgp_lp_order_note_save_v1'].includes(name))return window.noteRpc(name,args);if(name==='sgp_lp_operacion_consultar')return {error:{code:'PGRST202',message:'QA contrato operativo no instalado'}};if(name!=='sgp_lp_seguimiento_consultar')throw Error('Unexpected RPC');window.calls++;window.inflight++;window.maxInflight=Math.max(window.maxInflight,window.inflight);try{if(window.delay)await new Promise(resolve=>window.release=resolve);return window.fail?{error:{message:'QA permiso revocado'}}:{data:window.payload(args)};}finally{window.inflight--;}}})}});
 document.dispatchEvent(new CustomEvent('sgp:lp-role',{detail:'COORDINADOR'}));document.querySelector('#productionTrackingTab').click();
 </script></section></main></div></body></html>

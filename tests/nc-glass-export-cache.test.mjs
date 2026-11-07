@@ -6,14 +6,14 @@ const controller=readFileSync(new URL('../src/modules/lp01-operation.js',import.
 const detail=readFileSync(new URL('../src/modules/lp01-tracking-affectations.js',import.meta.url),'utf8');
 const old={export:{at:'2026-11-06T10:00:00Z',percentage:'20'}},fresh={export:{at:'2026-11-06T11:00:00Z',percentage:'40'}};
 test('an older Export response cannot replace a newer central snapshot',()=>{
- const body=controller.slice(controller.indexOf(' function rememberDetails('),controller.indexOf(' function summaryFor('));const orderDetails=new Map([['key',fresh]]),c=vm.createContext({orderDetails,detailsAt:new Map(),Date,Number,Math});vm.runInContext(body,c);
- assert.equal(c.rememberDetails('key',old),fresh);assert.equal(orderDetails.get('key'),fresh);
- c.rememberDetails('key',fresh);orderDetails.set('key',null);assert.equal(c.rememberDetails('key',old),null);assert.equal(orderDetails.get('key'),null);
+ const body=controller.slice(controller.indexOf(' function rememberDetails('),controller.indexOf(' function summaryFor('));const orderDetails=new Map([['key',fresh]]),live={},painted=[],c=vm.createContext({orderDetails,detailsAt:new Map(),Date,Number,Math,live,paintOrderNoteRows:(host,key,details)=>painted.push({host,key,details})});vm.runInContext(body,c);
+ assert.equal(c.rememberDetails('key',old),fresh);assert.equal(orderDetails.get('key'),fresh);assert.equal(painted.length,0);
+ c.rememberDetails('key',fresh);orderDetails.set('key',null);assert.equal(c.rememberDetails('key',old),null);assert.equal(orderDetails.get('key'),null);assert.deepEqual(painted,[{host:live,key:'key',details:fresh}]);
 });
 test('details publish the latest central Export and respect an explicit failed-read null',()=>{
  const declaration=detail.match(/const currentDetails=\(\)=>\{[^\n]+/)[0];let current=fresh;const c=vm.createContext({getLatestDetails:()=>current,orderDetails:old});vm.runInContext(declaration+';globalThis.get=currentDetails;',c);
  assert.equal(c.get(),fresh);current=null;assert.equal(c.get(),null);current=undefined;assert.equal(c.get(),old);
- assert.match(detail,/withExportGlassSummary\(latestSummary,currentDetails\(\)/);assert.match(controller,/orderDetails\.set\(key,null\);summary=withExportGlassSummary\(summary,null/);
+ assert.match(detail,/withExportGlassSummary\(latestSummary,currentDetails\(\)/);assert.match(controller,/orderDetails\.set\(key,null\);paintOrderNoteRows\(live,key,null\);summary=withExportGlassSummary\(summary,null/);
 });
 test('initial cache reuse is conditional, and fresh note reads update the shared cache first',()=>{
  assert.match(detail,/getLatestDetails\(\)===undefined\|\|getLatestDetails\(\)===initial/);

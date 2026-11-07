@@ -169,3 +169,24 @@
  .lp-tracking [data-turn-history] td{white-space:normal;overflow:visible;text-overflow:clip;padding:6px;overflow-wrap:anywhere}
  [data-turn-history] td::before{content:attr(data-label);display:block;font-size:11px;font-weight:700;color:#30445e}
 }
+
+/* Order observation stays visible in compact rows; editing reuses the shared note form. */
+.lp-tracking-table .lp-tracking-note-cell{min-width:200px;max-width:280px;text-align:left;font-weight:400}
+.lp-followup .lp-order-note-preview{display:flex;align-items:center;gap:10px;width:100%;min-height:44px;padding:7px 9px;text-align:left;font-size:12px;font-weight:400;border-color:#b6c9df;background:#fff}
+.lp-order-note-preview [data-order-note-preview]{flex:1;min-width:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere;white-space:pre-line;line-height:1.4}
+.lp-order-note-preview small{flex-shrink:0;font-size:11px;color:#1264c8}
+.lp-order-note-dialog{box-sizing:border-box;width:min(580px,calc(100vw - 24px));max-height:calc(100dvh - 32px);overflow:auto;border:1px solid #b6c9df;border-radius:12px;padding:20px;color:#103b73;background:#fff;box-shadow:0 16px 48px #0b244233}
+.lp-order-note-dialog::backdrop{background:#0b244277}
+.lp-order-note-dialog .lp-order-note{border:0;margin:0;padding:0}
+.lp-order-note-dialog .lp-order-note-identity{margin:0 0 8px;font-weight:700;overflow-wrap:anywhere}
+.lp-order-note-dialog .lp-followup-actions{display:flex;flex-wrap:wrap;gap:8px}
+.lp-order-note-dialog [data-order-note-current] p{white-space:pre-wrap;overflow-wrap:anywhere}
+@media(max-width:700px){.lp-tracking-table .lp-tracking-note-cell{grid-column:1/-1;padding:8px 10px;max-width:none}.lp-order-note-dialog{padding:16px}.lp-order-note-dialog .lp-followup-actions button{flex:1 1 140px}}
+
+/* Reserve compact desktop space so the observation column cannot stack every cause. */
+@media(min-width:701px){
+ .lp-tracking-table:has(.lp-tracking-note-cell) .lp-tracking-affects{width:330px;min-width:330px;max-width:none}
+ .lp-tracking-table:has(.lp-tracking-note-cell) .lp-tracking-affects .lp-affect-summary-compact{max-width:none}
+ .lp-tracking-table .lp-tracking-note-cell{width:220px;min-width:220px;max-width:220px}
+ .lp-tracking-note-cell .lp-order-note-compact{width:200px;max-width:100%}
+}
