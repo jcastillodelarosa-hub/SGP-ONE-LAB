@@ -1750,3 +1750,16 @@ MD5 instalado `2e4eeacbfc331f2c6dcde32ee96701d7`. Proyección de excluida_export
 
 ## 2026-11-07 — Candidato v408 hoja/vidrio (no publicado)
 Diseño aprobado implementado en rama `feat/hoja-vidrio-acordeon`: Semana primero, Reserva/Prioridad (parte real), orden por reserva/parte y vidrio con OVES/Tipo V + acordeón cantidad/dimensiones/Marca. SQL aditivo preparado con guard, no aplicado. 43 tests focales PASS. Continuidad: `docs/linea-produccion/hoja-vidrio-v408/README.md`. Depende de integración v407 bloqueada en subida específica; no se reintentó ni evitó el control.
+
+## 2026-11-08 — Hoja: filtros y ordenación v409 (en rama)
+Base main 5246771 / v408 publicada y aceptada visualmente por Johan. Filtros por
+Semana, Producción, Reserva, Prioridad (parte), Sistema, Saldo Export y Realizado:
+menú del encabezado como Seguimiento, ascendente/descendente, búsqueda de valores,
+selección múltiple, aplicar/cancelar y limpiar. Mantiene grupos Abiertas/Programadas/
+Otras/Historial y orden por reserva/parte al limpiar. En móvil, mismos encabezados
+accesibles sobre tarjetas. Disponible, afectaciones y notas conservan sus editores;
+no se filtran datos aún no consultados. Sin SQL, permisos ni automatismos nuevos.
+44 pruebas focales y DOM existentes PASS. Chromium local bloqueado por socket del
+contenedor; recorrido PC/móvil incorporado al workflow UI existente, pendiente CI.
+No fusionado ni publicado. Siguiente: CI del commit, revisión de artefacto y
+publicación por controles vigentes. Baseline v408 y 16 pins conservados.

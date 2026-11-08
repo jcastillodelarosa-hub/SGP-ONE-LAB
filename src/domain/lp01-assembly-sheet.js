@@ -105,7 +105,29 @@ function compareAge(a,b){
  const wa=a.week,wb=b.week;
  return (wa&&wb?wa.year-wb.year||wa.week-wb.week:Number(!wa)-Number(!wb))||String(a.originDate??'9999').localeCompare(String(b.originDate??'9999'));
 }
-export function filterAssemblySheetRows(rows,{search='',status='',includeCompleted=false}={}){
+export const ASSEMBLY_COLUMNS=[['week','Semana'],['production','Producción'],['reservation','Reserva'],['part','Prioridad'],['system','Sistema'],['balance','Saldo Export'],['realized','Realizado']];
+export function assemblyColumnValue(row,key){
+ switch(key){
+  case 'week':return row.week?`${row.week.year}-W${String(row.week.week).padStart(2,'0')}`:null;
+  case 'production':return row.produccion;
+  case 'reservation':return text(row.oficial.reserva_al)||null;
+  case 'part':return text(row.oficial.prioridad_reserva)||null;
+  case 'system':return text(row.oficial.sistema)||null;
+  case 'balance':return row.balance;
+  case 'realized':return row.realized;
+  default:return null;
+ }
+}
+export const assemblyValueKey=value=>JSON.stringify(value??null);
+export function filterAssemblySheetRows(rows,{search='',status='',includeCompleted=false,columnFilters={},sort='',direction='asc'}={}){
  const query=text(search).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('es');
- return rows.filter(r=>(includeCompleted||status==='COMPLETADAS'||r.state!=='COMPLETADAS')&&(!status||r.state===status)&&(!query||[r.produccion,r.key,r.oficial.sistema,r.oficial.reserva_al,r.oficial.prioridad_reserva,r.week?.label,r.observation,...r.assignments.map(a=>a.id)].some(v=>String(v??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('es').includes(query))));
+ const result=rows.filter(r=>(includeCompleted||status==='COMPLETADAS'||r.state!=='COMPLETADAS')&&(!status||r.state===status)&&(!query||[r.produccion,r.key,r.oficial.sistema,r.oficial.reserva_al,r.oficial.prioridad_reserva,r.week?.label,r.observation,...r.assignments.map(a=>a.id)].some(v=>String(v??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('es').includes(query)))).filter(r=>ASSEMBLY_COLUMNS.every(([key])=>!Array.isArray(columnFilters[key])||columnFilters[key].includes(assemblyValueKey(assemblyColumnValue(r,key)))));
+ if(ASSEMBLY_COLUMNS.some(([key])=>key===sort))result.sort((a,b)=>{
+  const group=groupRank(a.state)-groupRank(b.state);if(group)return group;
+  const left=assemblyColumnValue(a,sort),right=assemblyColumnValue(b,sort);
+  // Unknown values remain last in either direction; never turn pending into zero.
+  if(left===null||right===null)return Number(left===null)-Number(right===null);
+  return (typeof left==='number'&&typeof right==='number'?left-right:String(left).localeCompare(String(right),'es',{numeric:true}))*(direction==='desc'?-1:1);
+ });
+ return result;
 }
