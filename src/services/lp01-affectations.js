@@ -1,3 +1,4 @@
+import {packingNativeEvidence} from '../domain/lp01-packing-affectation-scope.js';
 import {progressEvidence} from '../domain/lp01-progress-evidence.js';
 import {mountPdtRegistration} from '../modules/pdt-registration-form.js';
 const integer=n=>Number.isSafeInteger(n)&&n>=0;
@@ -26,7 +27,7 @@ export function affectationsTransport({client,getToken,context,contractVersion=1
      if(evidence.opening?.eventId!==p.opening?.eventId||evidence.opening?.date!==p.opening?.date||evidence.opening?.shift!==p.opening?.shift)throw Error('APERTURA_NO_ACREDITADA');
     }
    }
-   return data;
+   return packingNativeEvidence(data);
   },
   async command(command){
    const {pieces,sourcePicking,ncReference,...cmd}=command;

@@ -113,3 +113,4 @@
 .lp-assembly-table th button[aria-expanded=true],.lp-assembly-table th[aria-sort=ascending] button,.lp-assembly-table th[aria-sort=descending] button{color:#1264c8}
 .lp-assembly-sheet .lp-mobile-columns{display:none}
 @media(max-width:700px){.lp-assembly-sheet .lp-mobile-columns{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.lp-assembly-sheet .lp-mobile-columns button{min-height:44px;border:1px solid #cbd9ea;background:#f6f9fd;color:#103b73;border-radius:7px;padding:6px 10px}}
+.lp-packing-assembly-state{display:inline-block;padding:4px 8px;border-radius:8px;font-size:12px;font-weight:650;white-space:nowrap;background:#edf0f4;color:#475569}.lp-packing-assembly-state.is-complete{background:#dcfce7;color:#166534}.lp-packing-assembly-state.is-open{background:#fef3c7;color:#92400e}.lp-packing-assembly-state.is-unstarted{background:#e0edff;color:#1e40af}
