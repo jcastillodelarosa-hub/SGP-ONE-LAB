@@ -2,6 +2,10 @@
 from pathlib import Path
 import importlib.util,json,http.server,threading
 from playwright.sync_api import sync_playwright
+import sys
+from pathlib import Path
+sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'lp01-b12-b13'))
+from current_sheet import inspect_sheet
 sp=importlib.util.spec_from_file_location('role_fixture',Path(__file__).with_name('postgres.py'));fixture=importlib.util.module_from_spec(sp);sp.loader.exec_module(fixture)
 Database,setup,ROOT,lit=fixture.Database,fixture.setup,fixture.ROOT,fixture.lit
 HERE=Path(__file__).parent
@@ -82,31 +86,20 @@ try:
     page=page_for('sp');page.wait_for_function("document.querySelector('#productionAssemblyTab').hidden && document.querySelector('[data-op-stage]').value==='EMPAQUE'")
     page.evaluate("document.querySelector('#productionAssemblyTab').click()")
     assert page.locator('[data-op-stage]').input_value()=='EMPAQUE'
-    def confirm(d):
-     confirmations.append(d.message)
-     if len(confirmations)==1:d.dismiss()
-     else:d.accept()
-    page.on('dialog',confirm)
     page.evaluate("document.querySelector('[data-op-date]').value='2026-11-02';document.querySelector('[data-op-shift]').value='2'")
-    page.locator('#productionPackingTab').click();page.wait_for_selector('[data-empty-close]',state='attached');page.locator('[data-turn-operation]').click();page.wait_for_selector('[data-empty-close]')
-    page.locator('[data-empty-confirm]').check();page.locator('[data-close-note]').fill('QA cierre individual T2 sin actividad')
-    page.locator('[data-close-empty]').click();page.wait_for_function("document.querySelector('[data-save-status]')?.textContent.includes('cancelado')||document.querySelector('[data-close-status]')?.textContent.includes('cancelado')")
-    assert db.sql("SELECT count(*) FROM sgp_lp_operacion.cierres")=='0'
-    page.locator('[data-close-empty]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Guardado confirmado')")
-    assert 'T2' in confirmations[-1] and '2026-11-02' in confirmations[-1]
-    assert db.sql("SELECT rol_efectivo FROM sgp_lp_operacion.auditoria WHERE usuario='sp' AND operacion='CERRAR'")=='SUPERVISOR EMPAQUE'
-    assert db.snapshot('EMPAQUE',date='2026-11-02',shift=2,token='sp')['turn']['estado']=='CERRADO'
-    page.locator('[data-back]').click();page.wait_for_function("document.querySelector('#productionPackingTab').getAttribute('aria-selected')==='true'")
+    audit=db.sql('SELECT count(*) FROM sgp_lp_operacion.auditoria')
+    page.locator('#productionPackingTab').click();inspect_sheet(page)
+    assert db.sql('SELECT count(*) FROM sgp_lp_operacion.auditoria')==audit
+    assert db.snapshot('EMPAQUE',date='2026-11-02',shift=2,token='sp')['turn']['estado']=='ABIERTO'
     assert not page.locator('#productionTrackingTab').is_visible()
-    page.screenshot(path=str(HERE/f'evidence/individual-{width}.png'))
-    page.screenshot(path=str(HERE/f'evidence/packing-{width}.png'));page.close()
+    page.screenshot(path=str(HERE/f'evidence/packing-contained-{width}.png'));page.close()
     page=page_for('ll')
     for tab,stage in [('productionAssemblyTab','ENSAMBLE'),('productionPackingTab','EMPAQUE')]:
      assert not page.locator('#'+tab).evaluate('(e)=>e.hidden')
      page.locator('#'+tab).click();assert page.locator('[data-op-stage]').input_value()==stage
     page.close()
-    results.append({'width':width,'native_menu_navigation':'PASS','direct_users_without_prior_roles_visit':'PASS','native_role_edit_revocation':'PASS','native_user_create_edit_and_defaults':'PASS','assembly_manual_close_contained':'PASS','packing_individual_T2_confirmation_cancel_and_close':'PASS','server_role_audit':'PASS','supervisor_single_stage_navigation':'PASS','leader_both_stages_navigation':'PASS','transport':'real local SDK; REST routed to actual captured admin/session and LP SQL; unrelated sources unavailable'})
+    results.append({'width':width,'native_menu_navigation':'PASS','direct_users_without_prior_roles_visit':'PASS','native_role_edit_revocation':'PASS','native_user_create_edit_and_defaults':'PASS','assembly_manual_close_contained':'PASS','packing_manual_close_contained':'PASS','legacy_role_audit_coverage':'postgres.py/hardening.py unchanged','supervisor_single_stage_navigation':'PASS','leader_both_stages_navigation':'PASS','transport':'real local SDK; REST routed to actual captured admin/session and LP SQL; unrelated sources unavailable'})
    finally:db.close()
   browser.close()
 finally:server.shutdown()
-(HERE/'evidence/browser.json').write_text(json.dumps({'status':'PASS','results':results,'limits':['Only synthetic accounts/catalog/production. No productive network or privileged identity','Ancillary source requests unavailable; no certification of their behavior','Individual empty close exercised here; normal closure, both stages/turns and quantities covered by real SQL tests; existing XLSX evidence reused']},indent=2)+'\n');print(json.dumps(results,indent=2))
+(HERE/'evidence/browser.json').write_text(json.dumps({'status':'PASS','results':results,'limits':['Only synthetic accounts/catalog/production. No productive network or privileged identity','Ancillary source requests unavailable; no certification of their behavior','Current sheets contain manual closure; individual close/role audits remain covered by unchanged SQL/API suites']},indent=2)+'\n');print(json.dumps(results,indent=2))

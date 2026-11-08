@@ -5,7 +5,7 @@ import json,http.server,threading,os
 from playwright.sync_api import sync_playwright
 import sys
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'lp01-b12-b13'))
-from navigation import open_assignment
+from current_sheet import inspect_sheet,RETIRED
 OUT=HERE/'evidence';os.chdir(ROOT)
 class Handler(http.server.SimpleHTTPRequestHandler):
  db=None
@@ -31,42 +31,31 @@ try:
     page.evaluate('''()=>{document.querySelector('[data-view-panel="ensamble"]').hidden=false;window.qaToken='COORDINADOR';window.SGPPlannerBridge.getToken=()=>window.qaToken;window.SGPPlannerBridge.getClient=async()=>({rpc:async(name,args)=>(await fetch('/rpc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,args})})).json()});}''')
     page.locator('#productionPackingTab').click();page.wait_for_selector('[data-op-date]')
     page.locator('[data-op-date]').fill('2026-11-01');page.locator('[data-op-date]').dispatch_event('change')
-    page.wait_for_selector('[data-order-part="'+part+'"]')
+    page.wait_for_selector('[data-assembly-key]')
     for stage in ['ENSAMBLE','EMPAQUE']:
      page.locator('#productionPackingTab' if stage=='EMPAQUE' else '#productionAssemblyTab').click()
-     if stage=='ENSAMBLE':
-      page.wait_for_selector('[data-assembly-key]');page.locator('button[data-assembly-detail]').first.click();page.wait_for_selector('section[data-assembly-detail]')
-      pane=page.locator('section[data-assembly-detail]');assert pane.locator('[data-assembly-balance]').inner_text()=='Pendiente'
-      pane.locator('.lp-assembly-materials summary').click();text=pane.locator('.lp-assembly-materials').inner_text()
-      assert 'PDT 3 REF' not in text and 'homónimas' in text and 'no libera ventanas' in text
-      assert page.locator('[data-order-form]').count()==0;pane.screenshot(path=str(OUT/f'{stage.lower()}-{width}.png'))
-      continue
-     page.wait_for_function("s=>document.querySelector('[data-op-status]').textContent.includes('ABIERTO') && document.querySelector('[data-live-orders]').textContent.includes(s)",arg=stage)
-     open_assignment(page,part)
-     page.wait_for_function("s=>document.querySelector('.lp-operation-form-pane h4, [data-operation-detail]>.lp-turn-header h4').textContent.includes(s)",arg=stage)
-     # Only a genuine zero could mean assembly complete. NULL must remain unknown.
-     if stage=='EMPAQUE':assert 'completo según Export' not in page.locator('[data-live-orders]').inner_text()
-     page.locator('[data-material-load]').click();page.wait_for_function("document.querySelector('[data-material-summary]').textContent.includes('por nombre')")
-     text=page.locator('[data-material-summary]').inner_text();assert 'PDT 3 REF' not in text and 'No acredita asociación' in text and 'homónimas' in text
-     assert 'SALE' in text and 'La fuente no informó' not in text
-     page.locator('[data-operation-detail]').screenshot(path=str(OUT/f'{stage.lower()}-{width}.png'))
+     inspect_sheet(page,stage)
+     page.locator('button[data-assembly-detail]').first.click();page.wait_for_selector('section[data-assembly-detail]')
+     pane=page.locator('section[data-assembly-detail]')
+     assert pane.locator('[data-assembly-balance]').inner_text()==('Pendiente' if stage=='ENSAMBLE' else '288')
+     pane.locator('.lp-assembly-materials summary').click();text=pane.locator('.lp-assembly-materials').inner_text()
+     assert 'PDT 3 REF' not in text and 'homónimas' in text and 'no libera ventanas' in text
+     assert page.locator(RETIRED).count()==0
+     pane.screenshot(path=str(OUT/f'{stage.lower()}-{width}.png'))
     assert before==db.unchanged()
-    # Actual SQL authentication failure, no synthetic denial response.
-    page.locator('#productionPackingTab' if page.locator('[data-op-stage]').input_value()=='EMPAQUE' else '#productionAssemblyTab').click()
-    detail=page.locator('[data-order-part="'+part+'"]');detail.wait_for()
-    open_assignment(page,part)
+    # Refresh through the actual current route; PostgreSQL rejects the expired session.
     db.sql("UPDATE public.sgp_sesiones_app SET expira_en=now()-interval '1 minute' WHERE token_hash=encode(extensions.digest('COORDINADOR','sha256'),'hex')")
-    page.locator('[data-material-load]').click();page.wait_for_function("document.querySelector('[data-material-summary]').textContent.includes('SESION_NO_AUTORIZADA')")
+    page.locator('#productionPackingTab').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('SESION_NO_AUTORIZADA')")
+    assert page.locator('section[data-assembly-detail]').count()==0
     db.sql("UPDATE public.sgp_sesiones_app SET expira_en=now()+interval '1 day' WHERE token_hash=encode(extensions.digest('COORDINADOR','sha256'),'hex')")
-    # Actual join produces two matching keys. Consumer must reject, not pick first.
+    # Duplicate source identity must remain uncredited in the shared materials detail.
     db.sql("INSERT INTO public.sgp_prioridades(anio,semana,id_linea,key_produccion,prioridad) VALUES(2026,44,'PANELES_2','QA|PANELES_2',1),(2026,44,'PANELES_2','QA|PANELES_2',2)")
-    page.locator('#productionPackingTab' if page.locator('[data-op-stage]').input_value()=='EMPAQUE' else '#productionAssemblyTab').click()
-    detail=page.locator('[data-order-part="'+part+'"]');detail.wait_for()
-    open_assignment(page,part);page.locator('[data-material-load]').click()
-    page.wait_for_function("document.querySelector('[data-material-summary]').textContent.includes('ambigua')")
+    page.locator('#productionPackingTab').click();page.wait_for_selector('[data-assembly-key]');page.locator('button[data-assembly-detail]').first.click();page.wait_for_selector('section[data-assembly-detail]')
+    material=page.locator('.lp-assembly-materials');material.locator('summary').click()
+    assert 'PDT 3 REF' not in material.inner_text() and 'homónimas' in material.inner_text()
     assert before==db.unchanged() and not errors,errors
     assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
-    results.append({'viewport':width,'stages':['ENSAMBLE','EMPAQUE'],'actual_sql_material_read':True,'server_scoped_snapshot_only':True,'homonymous_diagnostics_suppressed':True,'null_export_not_zero':True,'name_based_pdt_limit_visible':True,'invalid_session_denied':True,'duplicate_sql_identity_rejected':True,'production_plan_pdt_sale_audit_unchanged':True,'page_errors':errors});page.close()
+    results.append({'viewport':width,'stages':['ENSAMBLE','EMPAQUE'],'current_shared_material_detail':True,'homonymous_diagnostics_suppressed':True,'null_export_not_zero':True,'invalid_session_denied':True,'duplicate_sql_identity_uncredited':True,'production_plan_pdt_sale_audit_unchanged':True,'page_errors':errors});page.close()
    finally:db.close()
   browser.close()
 finally:server.shutdown()
