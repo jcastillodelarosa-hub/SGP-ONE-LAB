@@ -2836,8 +2836,12 @@ button.active,[aria-pressed="true"]{border-color:#0865ed}
 .glass-burro[open]>summary{background:#f5f8fc}
 .glass-burro[open] .glass-burro-chevron{transform:rotate(180deg)}
 .glass-burro-table-wrap{overflow-x:auto;padding:0 14px 14px}
-.glass-burro-table{width:100%;border-collapse:collapse;text-align:left}
+table.glass-burro-table{width:100%;min-width:0;table-layout:fixed;border-collapse:collapse;text-align:left;padding:0;flex:none}
 .glass-burro-table th,.glass-burro-table td{padding:10px;border-bottom:1px solid #e0e7f1;vertical-align:top;overflow-wrap:anywhere}
 .glass-burro-table th{font-size:12px;background:#f5f8fc}
-.glass-burro-table td:first-child{width:90px}
+table.glass-burro-table th:first-child{width:28%}
+table.glass-burro-table th:not(:first-child){width:36%}
+#glassDetailModal>.modal-card{width:min(1050px,100%);min-width:0}
+#glassDetailModal .modal-head>div{min-width:0;overflow-wrap:anywhere}
+@media(max-width:650px){.glass-burro-table-wrap{padding:0 8px 12px}table.glass-burro-table th,table.glass-burro-table td{padding:9px 5px;font-size:11px}}
 .glass-burro-empty{margin:0;padding:14px;color:#68768b}

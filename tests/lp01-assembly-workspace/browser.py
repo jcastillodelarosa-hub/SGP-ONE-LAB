@@ -33,6 +33,8 @@ try:
    burro.locator('summary').click();burro.locator('table').wait_for(state='visible')
    assert burro.locator('tbody tr').count()==2 and '100 × 200' in burro.inner_text() and 'MARCA-QA-A' in burro.inner_text()
    assert page.locator('.modal:not([hidden]),dialog[open]').count()==1,'Expanding a burro must not stack another modal'
+   assert burro.locator('table').evaluate("table=>{const wrap=table.parentElement,r=wrap.getBoundingClientRect();return wrap.scrollWidth<=wrap.clientWidth+1&&Array.from(table.querySelectorAll('th')).every(th=>{const b=th.getBoundingClientRect();return b.left>=r.left&&b.right<=r.right+1&&b.right<=innerWidth;});}"),'Cantidad, Dimensiones and Marca must fit without horizontal scrolling'
+   assert glass.locator('.modal-card').evaluate("card=>{const r=card.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth;}"),'Glass modal must remain inside the viewport'
    assert page.evaluate('document.documentElement.scrollWidth<=innerWidth');glass.screenshot(path=str(OUT/f'glass-inline-{width}.png'))
    burro.locator('summary').press('Enter');assert burro.get_attribute('open') is None
    burro.locator('summary').press('Enter');burro.locator('table').wait_for(state='visible')
