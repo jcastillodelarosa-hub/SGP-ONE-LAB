@@ -1,6 +1,8 @@
+import {packingNativeEvidence,packingSharedEvidence} from './lp01-packing-affectation-scope.js';
 import {affectationSummary} from './lp01-affectation-summary.js';
 /** Conservative row adapter: historical and shared reports may describe the same windows. */
 export function sharedOrderSummary(nativeSnapshot,sharedSnapshot){
+ nativeSnapshot=packingNativeEvidence(nativeSnapshot);sharedSnapshot=packingSharedEvidence(sharedSnapshot);
  const original=affectationSummary(nativeSnapshot);
  if(!sharedSnapshot||sharedSnapshot.key!==nativeSnapshot.key||sharedSnapshot.line!==nativeSnapshot.line||sharedSnapshot.stage!==nativeSnapshot.stage)throw Error('SHARED_SUMMARY_SCOPE_MISMATCH');
  const categories={...original.categories},reportedQuantities={};let accessories=null;

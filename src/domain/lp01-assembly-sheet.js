@@ -138,3 +138,12 @@ export function filterAssemblySheetRows(rows,{search='',status='',includeComplet
  });
  return result;
 }
+
+/** Assembly readiness shown alongside the independent packing balance. */
+export function packingAssemblyState(official){
+ const quantity=exportQuantity(official?.cantidad),balance=exportBalance(official,'ENSAMBLE');
+ if(quantity===null||quantity<=0||balance===null||balance>quantity)return {state:'unknown',label:'Por validar'};
+ if(balance===0)return {state:'complete',label:'Ensamblada'};
+ if(balance===quantity)return {state:'unstarted',label:'Sin iniciar'};
+ return {state:'open',label:'Abierta ('+balance+')'};
+}

@@ -1,3 +1,4 @@
+import {packingSharedEvidence} from '../domain/lp01-packing-affectation-scope.js';
 const valid=n=>Number.isSafeInteger(n)&&n>=0;
 /** Same canonical identity in both leader sheets and Seguimiento. No shift arguments. */
 export function sharedOrderTransport({client,getToken,key,line,stage}){
@@ -17,7 +18,7 @@ export function sharedOrderTransport({client,getToken,key,line,stage}){
    if(!identity(d)||d.contract!=='LP-SHARED-ORDER-1'||!valid(d.revision)||typeof d.canReport!=='boolean'||!Array.isArray(d.reports)||!Array.isArray(d.history)||!Array.isArray(d.legacyReports)||!Array.isArray(d.accessories))throw Error('SHARED_ORDER_CONTRACT_INVALID');
    const ids=new Set();for(const r of d.reports){if(!r.id||ids.has(r.id)||r.key!==key||!['ENSAMBLE','EMPAQUE'].includes(r.origin_stage)||!['NC_AL','NC_V','NOVEDAD','ACCESORIOS'].includes(r.cause)||![r.quantity,r.solved,r.confirmed].every(valid)||r.confirmed>r.solved||r.solved>r.quantity||(r.nc_link&&r.nc_link.source?.reference!==r.nc_reference)||(r.sourceNow&&r.sourceNow.reference!==r.nc_reference))throw Error('SHARED_ORDER_REPORT_INVALID');ids.add(r.id);}
    if(d.history.length!==d.revision||d.history.some((e,i)=>e.revision!==i+1||!ids.has(e.reportId)))throw Error('SHARED_ORDER_HISTORY_INVALID');
-   return d;
+   return packingSharedEvidence(d);
   },
   async command(cmd){
    const d=await rpc('sgp_lp_shared_order_command_v1',{p_cmd:cmd});

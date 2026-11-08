@@ -1802,3 +1802,13 @@ controlador Empaque PASS. Falta paquete SQL dual rebasado y fixture de readback 
 prueba conjunta backend/UI, pins y versión integrados por coordinador. No publicar
 este tramo aislado. Manifest/guard gateway antiguo necesita actualización explícita
 junto al nuevo backend, no relajación del pin.
+
+## 2026-11-08 — Corrección Empaque v414 (candidato, no publicado)
+Saldo Empaque explícito en tabla/tarjetas/filtro. Estado Ensamble antes del saldo:
+Ensamblada verde para cero, Abierta(saldo) estrictamente parcial, Sin iniciar para
+saldo=cantidad, Por validar para fuente inválida. Sin cambiar saldos ni órdenes.
+Empaque filtra evidencia compartida por origin_stage/etapa y PDT por origen/vínculo
+explícito, en transportes (detalle/selector/historial) y resumen. No deriva Tecno de
+Export global en Empaque. Afectaciones propias y observaciones globales conservadas;
+revisión CAS original intacta. Sin SQL ni permisos. 60 pruebas focales PASS; pendiente
+CI/publicación por flujo existente. No se declara cambio aplicado hasta esa entrega.
