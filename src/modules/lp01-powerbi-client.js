@@ -7,7 +7,7 @@ export function powerBICommand(command){
  if(!command||typeof command!=='object'||Array.isArray(command))throw Error('Contexto Power BI incompatible');
  const result=Object.fromEntries(['id','stage','line','date','shift','revision'].map(key=>[key,command[key]]));
  if(Object.prototype.hasOwnProperty.call(command,'authority')){
-  if(command.authority!=='EXPORT_PRODUCTION_V2'||command.stage!=='ENSAMBLE'||command.line!=='PANELES_2')throw Error('Autoridad Power BI incompatible');
+  if(command.authority!=='EXPORT_PRODUCTION_V2'||!['ENSAMBLE','EMPAQUE'].includes(command.stage)||command.line!=='PANELES_2')throw Error('Autoridad Power BI incompatible');
   result.authority=command.authority;
  }
  return result;

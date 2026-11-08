@@ -1,3 +1,4 @@
+import {packingPlanComparison} from './lp01-packing-plan.js';
 import {POWERBI_VERSION} from './powerbi/adapter.js';
 import {closureExportRealized} from './lp01-closure-export.js';
 import {assemblyPlanComparison} from './lp01-assembly-plan.js';
@@ -43,6 +44,7 @@ function currentReport(data,context){
 }
 
 function historicalReferences(row,context,assignmentIds,scheduledIds){
+ if(context.stage==='EMPAQUE')return Array.isArray(row.assignmentRefs)&&row.assignmentRefs.length===0&&row.manualHistory?.authority==='HISTORICAL_ONLY'&&Array.isArray(row.manualHistory.assignments)&&row.manualHistory.assignments.length===0&&row.scheduledReference?.authority==='HISTORICAL_REFERENCE_ONLY'&&row.scheduledReference.quantity===null&&Array.isArray(row.scheduledReference.assignments)&&row.scheduledReference.assignments.length===0;
  const refs=row.assignmentRefs,manual=row.manualHistory,scheduled=row.scheduledReference;
  if(!Array.isArray(refs)||!refs.length||refs.some(ref=>!id(ref))||new Set(refs).size!==refs.length||refs.some(ref=>assignmentIds.has(ref)))return false;
  if(!object(manual)||manual.authority!=='HISTORICAL_ONLY'||!Array.isArray(manual.assignments)||manual.assignments.length!==refs.length)return false;
@@ -94,13 +96,13 @@ function projectV2(report,context,expectedContract=CONTRACT){
  const s=report.snapshot,withPlan=expectedContract===PLAN_CONTRACT,invalid=()=>pending('INCOMPATIBLE_CLOSE');
  // V2 writer's contained pilot. Supporting another stage/line needs its own
  // accredited writer contract; a matching label alone cannot extend the pilot.
- if(context.stage!=='ENSAMBLE'||context.line!=='PANELES_2')return invalid();
+ if(context.line!=='PANELES_2'||(context.stage==='EMPAQUE'&&(!withPlan||s.writerScope!=='LP-EXPORT-DUAL-1'))||(s.writerScope!==undefined&&s.writerScope!=='LP-EXPORT-DUAL-1'))return invalid();
  if(!object(s)||s.contract!==expectedContract||s.authority!==AUTHORITY||s.ok!==true||!exact(s,context)||!id(s.id)||s.id!==report.id||s.version!==report.version||s.version<2||s.type!=='CON_ACTIVIDAD'||report.tipo!=='CON_ACTIVIDAD')return invalid();
  if(!id(s.importId)||!hash(s.universeRevision)||s.canContinue!==false||s.reconciliation!==RECONCILIATION)return invalid();
  let comparison=null;
  if(withPlan){
   if(s.operationalReady!==false||!object(s.initialReference)||s.initialReference.status!=='EXPORT_CUT_REFERENCE_REQUIRED'||s.initialReference.cut!==null||s.initialReference.includedClosureVersions!==null)return invalid();
-  try{comparison=assemblyPlanComparison({contract:'LP-ENSAMBLE-PLAN-COMPARISON-1',planSnapshot:s.planSnapshot,planComparison:s.planComparison,comparisonComplete:s.comparisonComplete,rows:s.rows},context);}catch{return invalid();}
+  try{comparison=(context.stage==='EMPAQUE'?packingPlanComparison:assemblyPlanComparison)({contract:context.stage==='EMPAQUE'?'LP-EMPAQUE-PLAN-COMPARISON-1':'LP-ENSAMBLE-PLAN-COMPARISON-1',planSnapshot:s.planSnapshot,planComparison:s.planComparison,comparisonComplete:s.comparisonComplete,rows:s.rows},context);}catch{return invalid();}
  }else if(s.comparisonComplete!==false||s.planComparison!==PLAN)return invalid();
  const file=s.file;
  if(!object(file)||!id(file.id)||!id(report.archivo)||file.id!==report.archivo||file.adapter!==POWERBI_VERSION||!hash(file.sha256)||typeof file.name!=='string'||!file.name.trim())return invalid();

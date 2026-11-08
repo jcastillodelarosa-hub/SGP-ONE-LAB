@@ -21,7 +21,17 @@ function selectProduction(key){pendingPart=null;$('sgpPlanPartBatch').hidden=tru
 function selectPart(keys,meta={}){refreshProductions();const distinct=[...new Set(keys.map(String))];const selected=distinct.map(key=>rows().find(r=>String(r.key_produccion)===key));if(!distinct.length||selected.some(r=>!r))return {ok:false,message:'No se pudo preparar la parte: faltan producciones en la hoja cargada.'};if(selected.some(r=>!Number.isInteger(Number(r.saldo_ensamble))||Number(r.saldo_ensamble)<1))return {ok:false,message:'La parte contiene producciones sin saldo positivo; revisa los pendientes antes de programar.'};pendingPart=selected.map(r=>({key:r.key_produccion,name:r.produccion,quantity:Number(r.saldo_ensamble)}));$('sgpPlanPartBatch').hidden=false;$('sgpPlanPartTitle').textContent='Parte '+(meta.parte||'')+' · '+pendingPart.length+' producciones';$('sgpPlanPartPreview').textContent='Cantidades propuestas según saldo de ensamble: '+pendingPart.map(r=>r.name+' ('+r.quantity+')').join(' · ')+'. Verifica asignaciones previas; no equivale al saldo sin programar.';notify('Parte preparada. Revisa fecha, turno, prioridad y cantidades. El guardado masivo está bloqueado hasta contar con una operación transaccional.');return {ok:true,message:'Parte '+(meta.parte||'')+' preparada con '+pendingPart.length+' producciones. Revisa el resumen y confirma la programación.'};}
 window.SGPLinePlanner=Object.freeze({selectProduction,selectPart,getAssignments:()=>items.slice(),reloadAssignments:()=>load(),programDirect,moveDirect,programGroup,groupBalances});
 
-async function rpc(name,params){const token=window.SGPPlannerBridge?.getToken?.();if(!token)throw Error('No hay sesión accesible para el Planificador');const client=await window.SGPPlannerBridge.getClient();const {data,error}=await client.rpc(name,{p_token:token,...params});if(error)throw error;return data}
+let trackedWriter;
+async function rpc(name,params,requestScope=null){
+ const token=window.SGPPlannerBridge?.getToken?.();if(!token)throw Error('No hay sesión accesible para el Planificador');
+ const client=await window.SGPPlannerBridge.getClient();
+ const send=async(method,payload)=>{if(token!==window.SGPPlannerBridge?.getToken?.())throw Error('La sesión cambió; consulta nuevamente el plan');const result=await client.rpc(method,{p_token:token,...payload});if(token!==window.SGPPlannerBridge?.getToken?.())throw Error('La sesión cambió durante el guardado; verifica la solicitud pendiente');return result;};
+ if(['sgp_linea_plan_programar','sgp_linea_plan_mover'].includes(name)&&$('assemblyLine')?.value==='PANELES_2'){
+  if(!trackedWriter)trackedWriter=import('./src/services/lp01-planner-write.js').then(({createPlannerWriter})=>createPlannerWriter({storage:window.sessionStorage,uuid:()=>crypto.randomUUID(),promptReason:()=>window.prompt('Motivo de la programación o cambio','')}));
+  return (await trackedWriter)({name,params,send,requestScope});
+ }
+ const {data,error}=await send(name,params);if(error)throw error;return data;
+}
 const inFlight=new Set();
 async function groupBalances(keys){
  // The visible week is not the global balance. Do not infer a safe amount here.
@@ -35,7 +45,7 @@ async function programGroup({requestId,day,shift,items:productions}){
  try{
   for(const item of productions){
    try{
-    const result=await rpc('sgp_linea_plan_programar',{p_key_produccion:item.key_produccion,p_fecha:day,p_turno:Number(shift),p_cantidad:Number(item.cantidad),p_prioridad:Number(item.prioridad)});
+    const result=await rpc('sgp_linea_plan_programar',{p_key_produccion:item.key_produccion,p_fecha:day,p_turno:Number(shift),p_cantidad:Number(item.cantidad),p_prioridad:Number(item.prioridad)},String(requestId)+'|'+String(item.key_produccion));
     if(result?.ok===false)throw Error(result.mensaje||result.error||'Rechazada');
     accepted.push({key_produccion:item.key_produccion,cantidad:Number(item.cantidad),id_asignacion:result});
    }catch(error){rejected.push({key_produccion:item.key_produccion,cantidad:Number(item.cantidad),motivo:'No programada; revisar saldo, sesión o datos'});}

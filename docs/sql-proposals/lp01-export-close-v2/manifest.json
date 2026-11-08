@@ -20,7 +20,7 @@
     "docs/sql-proposals/lp01-export-close-v2/README.md": "8ed47701f89eb432102acb85834944137a82eee24b7f551f2c666175cae890e0",
     "docs/sql-proposals/lp01-export-close-v2/build-proposal.py": "7c81c43f6bd09bae4cd2b04f7f30b149e860320a3fa1272e740f4e4b52fb93cb",
     "tests/lp01-export-close-v2/adapter.mjs": "c03174e85890cf828ef8a3af694de62c23e202f4f04e16c847c7bdc67ea21d64",
-    "tests/lp01-export-close-v2/guard.mjs": "63c2881850e945dd939752b851ce2161a5f8208ab9ab5f7d4c0032f420d44d3c",
+    "tests/lp01-export-close-v2/guard.mjs": "b6c180bbe8c171a92e0d2e55d37b941a0c60e6b6c9ed8be4c53352fc991e69d6",
     "tests/lp01-export-close-v2/package.json": "a204a2aa070ccd03f3eaaede81d1e5b93cbb4421862b3533eec9feb4e21560ca",
     "docs/sql-proposals/lp01-export-close-v2/01_close_adapter_REVIEW.sql": "512dbc1dfe52bb241abc424c0ff3dae47b3595920e9747876b2857e4ecdd3bc2",
     "docs/sql-proposals/lp01-export-close-v2/02_restore_without_closures_REVIEW.sql": "16267e165334979ba4258f4e6300ebc5391edf033e81241af41f21b90ae1302a",
@@ -28,10 +28,22 @@
     "docs/sql-proposals/lp01-export-close-v2/close-fragment.sql": "732be825a8d13f50534de7c75ea467583856f6280427e5320822cb6b96a8084c"
   },
   "unchanged_sha256": {
-    "src/server/lp-powerbi-handler.js": "764b26970293b9e7096aebf226e9bad3b6ee466daa43c4751b51362ae2af53c7",
-    "supabase/functions/lp-powerbi/index.ts": "defc3a654ce6d640c68079301b1bc2ebd82349317170aaeaa4d636f8e885505f",
     "src/domain/lp01-closure-export.js": "146999f4d1921807954b21208d2752efcfde9077f5cd45de978b692aca1c56ab",
-    "docs/sql-proposals/lp01-export-import-v2/manifest.json": "8e385d2d2b83b4d7b3015d39d41e33191ecd221bd1549fc3bbe8730f3725d515",
     "docs/sql-proposals/lp01-incorporar/manifest.json": "b0dc1975f119bb51c68ff0a67a05b6ac1b1bb2035cba45b418ab24c905523245"
+  },
+  "runtime_transition": {
+    "writerScope": "LP-EXPORT-DUAL-1",
+    "defaultMode": "LEGACY",
+    "predecessor_sha256": {
+      "src/server/lp-powerbi-handler.js": "764b26970293b9e7096aebf226e9bad3b6ee466daa43c4751b51362ae2af53c7",
+      "supabase/functions/lp-powerbi/index.ts": "defc3a654ce6d640c68079301b1bc2ebd82349317170aaeaa4d636f8e885505f",
+      "docs/sql-proposals/lp01-export-import-v2/manifest.json": "8e385d2d2b83b4d7b3015d39d41e33191ecd221bd1549fc3bbe8730f3725d515"
+    },
+    "note": "Historical SQL and source reader pins unchanged; changed runtime has exact current pins, not an unchanged-runtime claim."
+  },
+  "compatible_runtime_sha256": {
+    "src/server/lp-powerbi-handler.js": "532d55c0a58ac96adf55946bb077bd3347d870a2912708475e916c387d159335",
+    "supabase/functions/lp-powerbi/index.ts": "6f112e248ab0259e16e56a4ad3cef72e9a26922fe33539af305825ee8cd1debc",
+    "docs/sql-proposals/lp01-export-import-v2/manifest.json": "22ba1505e00fe26733e5d0d741e70c8d3635a859b327854f5555cdc020427463"
   }
 }

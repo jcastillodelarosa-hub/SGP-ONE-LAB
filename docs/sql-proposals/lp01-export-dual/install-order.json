@@ -1,0 +1,10 @@
+[
+ "docs/sql-proposals/lp01-ensamble-plan/01_plan_REVIEW.sql",
+ "docs/sql-proposals/lp01-plan-writers/01_facades_REVIEW.sql",
+ "docs/sql-proposals/lp01-turno-horario-empaque/01_horario_empaque_REVIEW.sql",
+ "docs/sql-proposals/lp01-empaque-inclusion/01_inclusion_REVIEW.sql",
+ "docs/sql-proposals/lp01-export-dual/00_scope_helpers_REVIEW.sql",
+ "docs/sql-proposals/lp01-export-dual/visibility-fragment.sql",
+ "docs/sql-proposals/lp01-export-dual/01_import_close_REVIEW.sql",
+ "docs/sql-proposals/lp01-export-dual/02_reader_REVIEW.sql"
+]

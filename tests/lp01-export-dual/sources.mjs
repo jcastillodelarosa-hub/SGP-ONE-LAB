@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';import{readFile}from'node:fs/promises';import{bootstrap}from'../lp01-export-plan-v4/bootstrap.mjs';
+const db=await bootstrap(),exec=s=>db.exec(s),q=async s=>(await db.query(s)).rows;
+await exec(`CREATE TABLE sgp_lp_operacion.inclusiones_empaque(id uuid PRIMARY KEY,linea text,fecha date,turno int,key text,cantidad int,prioridad int,motivo text,usuario text,creado_en timestamptz,UNIQUE(linea,fecha,turno,key));
+INSERT INTO sgp_lp_operacion.inclusiones_empaque VALUES('00000000-0000-0000-0000-000000000101','PANELES_2','2026-11-07',1,'OPEN|PANELES_2',4,1,'Prioridad de cierre','coordinator','2026-11-07 13:00Z'),('00000000-0000-0000-0000-000000000102','PANELES_2','2026-11-07',1,'OTHER|PANELES_2',6,2,'Trabajo incorporado','coordinator','2026-11-07 13:01Z');`);
+await exec(await readFile(new URL('../../docs/sql-proposals/lp01-export-dual/00_scope_helpers_REVIEW.sql',import.meta.url),'utf8'));
+const compare=async actual=>(await q(`SELECT sgp_lp_operacion.export_dual_comparar('EMPAQUE','PANELES_2','2026-11-07',1,'${JSON.stringify(actual)}') v`))[0].v;
+let c=await compare([{key:'OPEN|PANELES_2',realized:3}]);assert.equal(c.planSnapshot.contract,'LP-EMPAQUE-PLAN-1');assert.equal(c.rows.length,2);assert.equal(c.rows[0].pendingAgainstPlan,1);assert.equal(c.rows[1].realized,null);assert.equal(c.comparisonComplete,false);assert.equal(c.planSnapshot.baseline,undefined);
+c=await compare([{key:'OPEN|PANELES_2',realized:5},{key:'OTHER|PANELES_2',realized:0}]);assert.equal(c.rows[0].difference,1);assert.equal(c.rows[0].pendingAgainstPlan,0);assert.equal(c.rows[1].pendingAgainstPlan,6);assert.equal(c.comparisonComplete,true);
+await assert.rejects(compare([{key:'PLAN|PANELES_2',realized:1}]),/OUTSIDE_PLAN/);await assert.rejects(compare([{key:'OPEN|PANELES_2',realized:-1}]),/INVALID/);
+let orders=await q(`SELECT * FROM sgp_lp_operacion.export_dual_ordenes('EMPAQUE','PANELES_2','2026-11-07',1)`);assert.equal(orders.length,2);assert.ok(orders.every(o=>o.sale===null&&o.ejecutado===null));
+await exec("UPDATE public.sgp_producciones SET excluida_export=true WHERE key_produccion='OTHER|PANELES_2'");assert.equal((await compare([])).rows.length,1);
+await exec("INSERT INTO sgp_lp_operacion.turnos(etapa,linea,fecha,turno) VALUES('EMPAQUE','PANELES_2','2026-11-07',1);INSERT INTO sgp_lp_operacion.ordenes(etapa,linea,fecha,turno,key,parte,sale,ejecutado) SELECT 'EMPAQUE',linea,fecha,turno,key,parte,sale,ejecutado FROM sgp_lp_operacion.ordenes WHERE key='PLAN|PANELES_2'");
+await assert.rejects(q(`SELECT * FROM sgp_lp_operacion.export_dual_ordenes('EMPAQUE','PANELES_2','2026-11-07',1)`),/EXPLICIT_INCLUSION/);
+assert.equal((await q("SELECT has_function_privilege('anon','sgp_lp_operacion.export_dual_comparar(text,text,date,integer,jsonb)','EXECUTE') v"))[0].v,false);
+console.log('PASS: explicit packing targets, null absence, exclusions, overproduction, no legacy quantities, scope and private ACL');await db.close();

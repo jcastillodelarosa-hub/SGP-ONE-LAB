@@ -14,6 +14,8 @@ test('explicit production Export authority and request identity survive identica
 });
 test('unknown authority or scope never silently downgrades to legacy',()=>{
  for(const authority of [null,undefined,'',true,'LEGACY','EXPORT_PRODUCTION_V3'])assert.throws(()=>powerBICommand({...base,authority}),/Autoridad/);
- for(const patch of [{stage:'EMPAQUE'},{line:'FRAMES_2'}])assert.throws(()=>powerBICommand({...base,...patch,authority:'EXPORT_PRODUCTION_V2'}),/Autoridad/);
+ for(const patch of [{stage:'OTHER'},{line:'FRAMES_2'}])assert.throws(()=>powerBICommand({...base,...patch,authority:'EXPORT_PRODUCTION_V2'}),/Autoridad/);
  for(const input of [null,[],false,'payload'])assert.throws(()=>powerBICommand(input),/Contexto/);
 });
+
+test('packing authority retains exact stage for independently enabled server',()=>assert.equal(powerBICommand({...base,stage:'EMPAQUE',authority:'EXPORT_PRODUCTION_V2'}).stage,'EMPAQUE'));
