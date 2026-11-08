@@ -22,7 +22,7 @@ CREATE TABLE sgp_lp_operacion.aperturas_horario(
 ALTER TABLE sgp_lp_operacion.aperturas_horario ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON sgp_lp_operacion.aperturas_horario FROM PUBLIC,anon,authenticated,service_role;
 CREATE FUNCTION sgp_lp_operacion.confirmar_apertura_horario() RETURNS trigger
-LANGUAGE plpgsql SET search_path='' AS $$ BEGIN
+LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$ BEGIN
  IF NOT sgp_lp_operacion.puede_operar(NEW.usuario,'ENSAMBLE','CERRAR')
  OR NOT EXISTS(SELECT 1 FROM public.sgp_usuarios WHERE usuario=NEW.usuario AND activo
  AND rol IN('LIDER LINEA','SUPERVISOR ENSAMBLE','COORDINADOR','ADMINISTRADOR'))
@@ -30,6 +30,7 @@ LANGUAGE plpgsql SET search_path='' AS $$ BEGIN
  PERFORM sgp_lp_operacion.verificar_temporal(NEW.usuario,'ENSAMBLE','PANELES_2',NEW.fecha,NEW.turno,NULL,'LEER');
  RETURN NEW;
 END $$;
+ALTER FUNCTION sgp_lp_operacion.confirmar_apertura_horario() OWNER TO postgres;
 CREATE FUNCTION sgp_lp_operacion.apertura_horario_inmutable() RETURNS trigger
 LANGUAGE plpgsql SET search_path='' AS $$ BEGIN RAISE EXCEPTION 'HISTORIAL_INMUTABLE'; END $$;
 CREATE TRIGGER inmutable BEFORE UPDATE OR DELETE ON sgp_lp_operacion.aperturas_horario

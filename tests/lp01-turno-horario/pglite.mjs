@@ -54,7 +54,11 @@ try{
  assert.ok(original.includes('observed:=clock_timestamp()'));
  await sql(original.replace('observed:=clock_timestamp()','observed:=qa_clock.now()'));
  await sql(`INSERT INTO sgp_lp_operacion.turnos(etapa,linea,fecha,turno,estado) VALUES('ENSAMBLE','PANELES_2','2026-11-06',2,'ABIERTO');`);
- const x=await call();assert.equal(x.created,true);assert.equal(x.currentPeriod.date,'2026-11-07');assert.equal(x.currentPeriod.shift,1);
+ await sql('BEGIN;SET LOCAL ROLE anon;');
+ const x=await call();
+ // Deferred trigger must execute at COMMIT while caller is still anon.
+ await sql('COMMIT;');
+ assert.equal(x.created,true);assert.equal(x.currentPeriod.date,'2026-11-07');assert.equal(x.currentPeriod.shift,1);
  assert.equal(x.turn.estado,'ABIERTO');assert.equal(x.turn.revision,0);assert.equal(x.ordersCopied,0);
  assert.equal(await value("SELECT estado v FROM sgp_lp_operacion.turnos WHERE fecha='2026-11-06'"),'ABIERTO');
  assert.equal(await value('SELECT count(*)::int v FROM sgp_lp_operacion.ordenes'),0);
@@ -62,7 +66,9 @@ try{
  assert.equal(await value('SELECT count(*)::int v FROM sgp_lp_operacion.aperturas_horario'),1);
  await sql('SET ROLE anon;');assert.equal((await call('ensamble')).created,false);await sql('RESET ROLE;');
  assert.equal(await value('SELECT count(*)::int v FROM sgp_lp_operacion.aperturas_horario'),1);
- results.push('07:00 exact; prior open untouched; empty turn; retry no duplicate/audit/revision');
+ assert.equal(await value("SELECT prosecdef v FROM pg_proc WHERE oid='sgp_lp_operacion.confirmar_apertura_horario()'::regprocedure"),true);
+ assert.equal(await value("SELECT has_function_privilege('anon','sgp_lp_operacion.confirmar_apertura_horario()','EXECUTE') v"),false);
+ results.push('07:00 exact; COMMIT under anon with private definer trigger; prior open untouched; retry no duplicate/audit/revision');
  await sql("UPDATE qa_clock.t SET v='2026-11-08 00:00Z'");
  const night=await call();assert.equal(night.currentPeriod.date,'2026-11-07');assert.equal(night.currentPeriod.shift,2);assert.equal(night.created,true);
  await sql("UPDATE qa_clock.t SET v='2026-11-08 04:00Z'");assert.equal((await call()).currentPeriod.date,'2026-11-07');
