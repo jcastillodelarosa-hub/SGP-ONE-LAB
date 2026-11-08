@@ -1779,3 +1779,10 @@ Export4 preparado con operativo: faltan integración plan, UI/servicio y primera
 referencia para conciliación; ausentes del archivo parcial nunca se vuelven cero.
 Siguiente: prueba concurrente acotada, instalación conjunta+readback, activación
 autorizada, CI/artefacto y publicación protegida. No repetir auditorías generales.
+
+### 2026-11-08 — Hoja de Empaque v411
+Tabla y detalle compartidos con Ensamble, filtros y ordenación, saldo propio,
+Abiertas/Programadas/Otras, observaciones y afectaciones. Sin vista de ubicaciones
+ni detalle de vidrio. No copia objetivos del plan común sin etapa. Planificación
+nueva, incorporación y cierre por Export de Empaque siguen pendientes de conexión.
+Alcance: `docs/linea-produccion/EMPAQUE_V411.md`.

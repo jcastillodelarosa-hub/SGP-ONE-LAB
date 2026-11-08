@@ -79,7 +79,17 @@ try:
    assert 'historia anterior desconocida' in page.locator('#reports').inner_text();assert 'Comparación incompleta' in page.locator('#reports').inner_text()
    assert '70 %' in page.locator('#reports').inner_text();assert page.locator('#reports [data-report]').count()==1
    assert page.evaluate('document.documentElement.scrollWidth<=innerWidth');page.screenshot(path=str(OUT/f'report-plan-v4-{width}.png'),full_page=True)
-   assert not errors,errors;assert not external,external;results.append({'width':width,'groups':3,'bodyOverflow':False,'noteDraftRefreshSave':True,'detail':True,'historicalReportOwnSources':True,'planV4FromSQL':True,'glassInlineExpandKeyboardReopen':True,'mobileWeekLeft':width<=700,'externalRequests':0,'productionCalls':0});page.close()
+   page.evaluate('window.showPacking()');page.wait_for_function("document.querySelector('#workspace').textContent.includes('Hoja de Empaque')")
+   assert page.locator('[data-assembly-key]').count()==3 and page.locator('[data-assembly-group]').count()==3
+   assert page.locator('#workspace [data-assembly-glass],[data-assembly-incorporate]').count()==0
+   page.locator(origin_selector+'[data-column-menu="reservation"]').click();page.locator('dialog.lp-column-menu [data-menu-section="sort"] summary').click();page.locator('[data-column-order="desc"]').click()
+   assert page.locator('th[aria-sort="descending"]').count()==3
+   assert page.evaluate('document.documentElement.scrollWidth<=innerWidth');page.screenshot(path=str(OUT/f'packing-{width}.png'),full_page=True)
+   page.locator('[data-assembly-key="A|PANELES_2"] [data-assembly-detail]').first.click();page.wait_for_selector('section[data-assembly-detail]')
+   assert 'Saldo Empaque' in page.locator('[data-assembly-detail]').inner_text() and page.locator('[data-assembly-balance]').inner_text()=='5'
+   assert page.locator('#workspace [data-assembly-glass],[data-assembly-incorporate]').count()==0
+   page.screenshot(path=str(OUT/f'packing-detail-{width}.png'),full_page=True)
+   assert not errors,errors;assert not external,external;results.append({'width':width,'groups':3,'bodyOverflow':False,'noteDraftRefreshSave':True,'detail':True,'historicalReportOwnSources':True,'planV4FromSQL':True,'glassInlineExpandKeyboardReopen':True,'mobileWeekLeft':width<=700,'externalRequests':0,'productionCalls':0,'packingStageNoGlass':True});page.close()
   browser.close()
 finally:server.shutdown()
 (OUT/'browser-results.json').write_text(json.dumps({'status':'PASS','type':'Isolated real browser with synthetic RPC, not plant verification','results':results},indent=2)+'\n')

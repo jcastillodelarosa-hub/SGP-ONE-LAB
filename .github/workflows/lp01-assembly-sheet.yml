@@ -8,6 +8,7 @@ on:
       - 'src/domain/lp01-assembly*'
       - 'src/domain/lp01-closure-export*'
       - 'tests/lp01-assembly*'
+      - 'tests/lp01-packing-sheet.test.mjs'
       - 'tests/lp01-assembly-workspace/**'
       - 'tests/fixtures/lp01-closure-export-v2.mjs'
       - 'tests/fixtures/lp01-closure-plan-v4-synthetic.json'
@@ -35,6 +36,8 @@ jobs:
           export LP_DOM_PACKAGE="file://$GITHUB_WORKSPACE/tests/lp01-assembly-workspace/node_modules/linkedom/esm/index.js"
           node tests/lp01-assembly-workspace/dom.mjs
           node tests/lp01-assembly-workspace/controller-dom.mjs
+          node tests/lp01-assembly-workspace/packing-controller-dom.mjs
+          node --test tests/lp01-packing-sheet.test.mjs
           node tests/lp01-assembly-workspace/compact-notes-dom.mjs
           node --test tests/lp01-assembly-reports.test.mjs tests/lp01-closure-plan-v4.test.mjs
       - run: pip install playwright==1.55.0

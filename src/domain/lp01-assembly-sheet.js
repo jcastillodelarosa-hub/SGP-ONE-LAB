@@ -38,16 +38,17 @@ function validateProduction(p,context){
   seen.add(a.id);
  }
 }
-const officialSignature=o=>JSON.stringify([o.key_produccion,o.id_linea,o.cantidad,o.saldo_ensamble,o.saldos_inicializados,o.presente_ultimo_export,o.excluida_export,o.anio,o.semana_base,o.sistema,o.reserva_al]);
+const officialSignature=o=>JSON.stringify([o.key_produccion,o.id_linea,o.cantidad,o.saldo_ensamble,o.saldo_empaque,o.saldos_inicializados,o.presente_ultimo_export,o.excluida_export,o.anio,o.semana_base,o.sistema,o.reserva_al]);
 
 /** LP-OPERACION-1 + additive LP-HOJA-1. Exactly one row per authorized production.
- * Context: {line,stage:'ENSAMBLE',date:'YYYY-MM-DD',shift:1|2}.
- * Catalog assignments describe PROGRAMACION_LINEA, not writes/permissions.
+ * Context: {line,stage:'ENSAMBLE'|'EMPAQUE',date:'YYYY-MM-DD',shift:1|2}.
+ * Ensamble catalog assignments describe PROGRAMACION_LINEA. Empaque requires
+ * explicit PROGRAMACION_EMPAQUE + stage, or existing scoped operational rows.
  * Current operational targets are retained separately and never fabricated.
  * Missing catalog is explicitly partial: current operations only.
  */
 export function assemblySheetRows(data,context,filters={}){
- if(!context||!['PANELES_2','FRAMES_2'].includes(context.line)||context.stage!=='ENSAMBLE'||!date(context.date)||!shift(context.shift))throw Error('Ámbito de hoja de Ensamble incompatible');
+ if(!context||!['PANELES_2','FRAMES_2'].includes(context.line)||!['ENSAMBLE','EMPAQUE'].includes(context.stage)||!date(context.date)||!shift(context.shift))throw Error('Ámbito de hoja de Ensamble incompatible');
  if(data?.contract!=='LP-OPERACION-1'||!Array.isArray(data.orders)||(data.reports!==undefined&&!Array.isArray(data.reports)))throw Error('Contrato de hoja de Ensamble incompatible');
  const operations=new Map(),operationIds=new Set();
  for(const r of data.orders){
@@ -68,15 +69,21 @@ export function assemblySheetRows(data,context,filters={}){
   validateProduction(p,context);
   if(seen.has(p.key))throw Error('Producción duplicada en la hoja de Ensamble');
   seen.add(p.key);
-  const cancelledIds=new Set(p.assignments.filter(cancelled).map(a=>a.id));
+  // The legacy planner has no packing stage. Never relabel its roots as Empaque.
+  const source=context.stage==='EMPAQUE'?'PROGRAMACION_EMPAQUE':'PROGRAMACION_LINEA';
+  const stageAssignments=context.stage==='EMPAQUE'?p.assignments.filter(a=>a.source===source&&a.stage==='EMPAQUE'):p.assignments;
+  const scheduleUnavailable=context.stage==='EMPAQUE'&&catalog?.assignmentStage!=='EMPAQUE';
+  const cancelledIds=new Set(stageAssignments.filter(cancelled).map(a=>a.id));
   const targets=(operations.get(p.key)||[]).filter(r=>!cancelledIds.has(r.parte)).slice().sort(byPriority);
-  const assignments=p.assignments.filter(a=>!cancelled(a)).map(a=>({...a}));
-  const currentAssignments=assignments.filter(a=>a.source==='PROGRAMACION_LINEA'&&date(a.fecha)&&shift(a.turno)&&a.fecha===context.date&&a.turno===context.shift).sort(byPriority);
-  const scheduleInvalid=assignments.some(a=>a.source!=='PROGRAMACION_LINEA'||!date(a.fecha)||!shift(a.turno)||exportQuantity(a.cantidad)===null||exportQuantity(a.prioridad)===null);
+  const assignments=stageAssignments.filter(a=>!cancelled(a)).map(a=>({...a}));
+  const currentAssignments=assignments.filter(a=>a.source===source&&date(a.fecha)&&shift(a.turno)&&a.fecha===context.date&&a.turno===context.shift).sort(byPriority);
+  const scheduleInvalid=assignments.some(a=>a.source!==source||!date(a.fecha)||!shift(a.turno)||exportQuantity(a.cantidad)===null||exportQuantity(a.prioridad)===null);
   const quantity=exportQuantity(p.oficial.cantidad),rawBalance=exportBalance(p.oficial,context.stage);
   const valid=quantity!==null&&quantity>0&&rawBalance!==null&&rawBalance<=quantity&&!p.conflictingOfficial;
   const balance=valid?rawBalance:null;
-  const scheduled=currentAssignments.length>0;
+  // A persisted EMPAQUE row is already incorporated in this exact period.
+  // Its linked legacy root quantity is not a separate packing plan quantity.
+  const scheduled=currentAssignments.length>0||(context.stage==='EMPAQUE'&&targets.length>0);
   const state=!valid?'POR_REVISAR':balance===0?'COMPLETADAS':balance<quantity?'ABIERTAS':scheduleInvalid?'POR_REVISAR':scheduled?'PROGRAMADAS':'OTRAS';
   const closing=closureFor(confirmedClosure,p.key,context);
   const observations=[...new Set([p.observacion,...currentAssignments.map(a=>a.observacion),...targets.map(r=>r.observacion)].map(text).filter(Boolean))];
@@ -84,7 +91,7 @@ export function assemblySheetRows(data,context,filters={}){
   const originDates=[...assignments.map(a=>a.fecha),...targets.flatMap(r=>[r.antiguedad_fecha,r.origen_fecha])].filter(date).sort();
   return {key:p.key,id:JSON.stringify([context.line,context.stage,p.key]),linea:context.line,etapa:context.stage,produccion:text(p.oficial.produccion)||text(targets[0]?.produccion)||p.key,oficial:{...p.oficial},
    assignments,currentAssignments,operationTargets:targets,first:targets[0]??null,state,week,balance,quantity,available:null,realized:closing?.quantity??null,realizedSource:closing,
-   excludedExport:p.oficial.excluida_export===true,scheduled,priority:Math.min(...currentAssignments.map(priority)),originDate:originDates[0]??null,observations,observation:observations.join(' · '),partial:Boolean(p.partial),reviewReason:!valid?'Cantidad o saldo Export pendiente de validar':scheduleInvalid?'Programación pendiente de validar':null};
+   excludedExport:p.oficial.excluida_export===true,scheduleUnavailable,scheduled,priority:Math.min(...(currentAssignments.length?currentAssignments:context.stage==='EMPAQUE'?targets:[]).map(priority)),originDate:originDates[0]??null,observations,observation:observations.join(' · '),partial:Boolean(p.partial),reviewReason:!valid?'Cantidad o saldo Export pendiente de validar':scheduleInvalid?'Programación pendiente de validar':null};
  });
  if(catalog&&[...operations.keys()].some(key=>!seen.has(key)))throw Error('El catálogo no contiene una producción del ámbito operativo');
  all.sort((a,b)=>groupRank(a.state)-groupRank(b.state)||compareReservation(a,b)||compareAge(a,b)||a.key.localeCompare(b.key,'es',{numeric:true}));

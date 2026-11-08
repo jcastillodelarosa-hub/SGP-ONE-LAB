@@ -24,5 +24,5 @@ test('new assembly close view cannot dispatch old manual commands or upload a fi
  assert.doesNotMatch(code,/\.rpc\(|data-bi-file|data-executed|send\(['"]CERRAR/);
  assert.match(code,/Cierre por Export pendiente de habilitación/);
  const integration=readFileSync(new URL('../src/modules/lp01-operation.js',import.meta.url),'utf8');
- assert.match(integration,/if\(context.stage==='ENSAMBLE'\)\{renderAssemblyClose/);
+ assert.match(integration,/if\(\['ENSAMBLE','EMPAQUE'\]\.includes\(context.stage\)\)\{renderAssemblyClose/);
 });
