@@ -52,7 +52,8 @@ try:
     db.sql("INSERT INTO public.sgp_prioridades(anio,semana,id_linea,key_produccion,prioridad) VALUES(2026,44,'PANELES_2','QA|PANELES_2',1),(2026,44,'PANELES_2','QA|PANELES_2',2)")
     page.locator('#productionPackingTab').click();page.wait_for_selector('[data-assembly-key]');page.locator('button[data-assembly-detail]').first.click();page.wait_for_selector('section[data-assembly-detail]')
     material=page.locator('.lp-assembly-materials');material.locator('summary').click()
-    assert 'PDT 3 REF' not in material.inner_text() and 'homónimas' in material.inner_text()
+    text=material.text_content()
+    assert 'PDT 3 REF' not in text and 'Sin fuente acreditada para esta producción' in text and 'no libera ventanas' in text,text
     assert before==db.unchanged() and not errors,errors
     assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
     results.append({'viewport':width,'stages':['ENSAMBLE','EMPAQUE'],'current_shared_material_detail':True,'homonymous_diagnostics_suppressed':True,'null_export_not_zero':True,'invalid_session_denied':True,'duplicate_sql_identity_uncredited':True,'production_plan_pdt_sale_audit_unchanged':True,'page_errors':errors});page.close()
