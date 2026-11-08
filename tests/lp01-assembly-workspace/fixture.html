@@ -27,4 +27,11 @@ document.querySelector('#closeGlassDetail').onclick=()=>{glassModal.hidden=true;
 window.workspace=mountAssemblyWorkspace({host,bridge,noteRows:{paintOrderNoteRows,retainOrderNoteRows},isCurrent:()=>true,onClose:()=>renderAssemblyClose({host,data,context,onBack:()=>workspace.update(data,context),onReports:()=>showReports()}),onReports:()=>showReports(),onGlass:showGlass});
 window.showReports=()=>{host.hidden=true;reports.hidden=false;renderAssemblyReports({host:reports,data,context});};window.refresh=()=>workspace.update(structuredClone(data),context);workspace.update(data,context);
 window.showPlanReport=async()=>{const f=await fetch('/tests/fixtures/lp01-closure-plan-v4-synthetic.json').then(r=>r.json());host.hidden=true;reports.hidden=false;renderAssemblyReports({host:reports,data:f.readback,context:f.context});};
+window.showPacking=()=>{
+ workspace.clear();host.hidden=false;reports.hidden=true;context.stage='EMPAQUE';data.catalog.stage='EMPAQUE';data.reports=[];data.history=[];data.turn={estado:'ABIERTO',revision:0};
+ for(const p of data.catalog.productions)p.oficial.saldo_empaque=p.key==='A|PANELES_2'?5:20;
+ const b=data.catalog.productions.find(p=>p.key==='B|PANELES_2');
+ data.orders=[{key:b.key,parte:'packing-root',oficial:b.oficial,linea:context.line,etapa:'EMPAQUE',fecha:context.date,turno:context.shift,prioridad:1,programada:999,ejecutado:999}];
+ workspace.update(data,context);
+};
 </script></body></html>

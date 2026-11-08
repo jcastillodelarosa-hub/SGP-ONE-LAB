@@ -72,6 +72,9 @@ try{
  assert.equal(sent,1);assert.equal(modalHost.querySelector('[data-incorporation-retry]').hidden,false);assert.equal(modalHost.querySelector('[data-incorporation-cancel]').disabled,true);assert.equal(form.elements.quantity.disabled,true);
  modalHost.querySelector('[data-incorporation-cancel]').click();assert.equal(modalHost.querySelectorAll('dialog').length,1);modalHost.querySelector('[data-incorporation-retry]').click();await tick();assert.equal(sent,1);assert.equal(retried,1);assert.equal(saved,1);assert.equal(modalHost.querySelectorAll('dialog').length,0);modalHost.remove();
  checks.push('Synthetic incorporation modal locks uncertain input/cancel and retries the same controller command');
+ workspace.update({...data,catalog:{...data.catalog,stage:'EMPAQUE'}},{...context,stage:'EMPAQUE'});assert.match(host.textContent,/Hoja de Empaque/);assert.equal(host.querySelectorAll('[data-assembly-glass]').length,0);
+ checks.push('Changing stage rebuilds the heading and removes glass actions');
+ workspace.clear();host.innerHTML='<button data-tracking-sentinel>Seguimiento</button>';const trackingSentinel=host.firstElementChild;workspace.clear();assert.equal(host.firstElementChild,trackingSentinel);checks.push('Clearing the inactive workspace preserves shared Seguimiento DOM for focus restoration');
  token='other-session';workspace.clear();host.replaceChildren();active=false;await tick();
  const result={status:'PASS',type:'Synthetic DOM, not visual browser QA',visibility:process.env.LP_TEST_VISIBILITY==='1'?'VISIBLE_ONLY':'NO_OBSERVER_FALLBACK',checks,reads:calls.length};
  await writeFile(new URL(process.env.LP_TEST_VISIBILITY==='1'?'./visible-dom-results.json':'./dom-results.json',import.meta.url),JSON.stringify(result,null,2)+'\n');console.log(JSON.stringify(result,null,2));

@@ -4,6 +4,10 @@ import json,http.server,threading,subprocess,os,hashlib,urllib.request,urllib.er
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 import sys
+from pathlib import Path
+sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'lp01-b12-b13'))
+from current_sheet import inspect_sheet
+import sys
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'lp01-b12-b13'))
 from navigation import open_assignment
 OUT=HERE/'evidence';OUT.mkdir(exist_ok=True);os.chdir(ROOT)
@@ -53,38 +57,14 @@ try:
      window.SGPPlannerBridge.getClient=async()=>({rpc:async(name,args)=>{window.calls.push({name,args});return(await fetch('/rpc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,args})})).json();}});
      document.querySelector('[data-op-date]').value='2026-10-31';document.querySelector('[data-op-stage]').value='EMPAQUE';
     }''',{'endpoint':endpoint})
-    page.locator('#productionPackingTab' if page.locator('[data-op-stage]').input_value()=='EMPAQUE' else '#productionAssemblyTab').click();page.wait_for_selector('[data-live-operate]',state='attached')
-    open_assignment(page,part1);page.wait_for_selector('[data-executed]')
-    page.locator('[data-executed]').fill('10');page.locator('[data-operation-note]').fill('QA acumulado de esta asignación');page.locator('[data-order-form] button[type=submit]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Guardado confirmado')")
-    page.locator('[data-bi-file]').set_input_files(str(HERE/'fixtures/ensamble.xlsx'));page.wait_for_function("document.querySelector('[data-close-status]').textContent.includes('otra etapa')")
-    page.locator('[data-bi-file]').set_input_files(str(HERE/'fixtures/empaque.xlsx'));page.wait_for_selector('[data-import]')
-    preview=page.locator('[data-bi-preview]').inner_text();assert 'Líder 27 · Power BI 31 · Diferencia 4' in preview
-    drop={'next':True}
-    def lose_reply(route):
-     if drop['next']:
-      response=route.fetch()
-      if response.status==200:drop['next']=False;route.abort()
-      else:route.fulfill(response=response)
-     else:route.continue_()
-    page.route('**/functions/v1/lp-powerbi',lose_reply)
-    page.locator('[data-import]').click();page.wait_for_function("document.querySelector('[data-save-status]').textContent.includes('fetch')")
-    assert db.sql("SELECT count(*) FROM sgp_lp_operacion.auditoria WHERE operacion='IMPORTAR_XLSX'")=='1'
-    page.locator('[data-operation-pending-retry]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Guardado confirmado')")
-    assert db.sql("SELECT count(*) FROM sgp_lp_operacion.auditoria WHERE operacion='IMPORTAR_XLSX'")=='1'
-
-    for field in page.locator('[data-close-reason]').all():field.fill('QA diferencia por producción contrastada')
-    page.locator('[data-close-note]').fill('QA cierre XLSX por producción');page.locator('#productionOperationPanel').screenshot(path=str(OUT/f'reconciliation-{width}.png'))
-    page.locator('[data-close]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Guardado confirmado')")
-    report=db.snapshot('EMPAQUE',date='2026-10-31')['reports'][0]['snapshot'];assert next(r for r in report['rows'] if r['key']==key)['ejecutado']==27
-    page.locator('[data-stage-reports]').click();page.wait_for_selector('[data-report]',state='attached');page.locator('#productionReportsPanel details summary').click()
-    with page.expect_download() as d:page.locator('[data-original]').click()
-    d.value.save_as(OUT/f'original-{width}.xlsx');assert (OUT/f'original-{width}.xlsx').read_bytes()==(HERE/'fixtures/empaque.xlsx').read_bytes()
-    page.locator('#productionReportsPanel').screenshot(path=str(OUT/f'report-{width}.png'))
-    # Reopening and versioning are tested in actual PostgreSQL; UI prevents leader reopening.
-    assert db.snapshot('ENSAMBLE',date='2026-10-31')['turn']['estado']=='ABIERTO'
+    audit=db.sql('SELECT count(*) FROM sgp_lp_operacion.auditoria')
+    page.locator('#productionPackingTab').click();inspect_sheet(page,detail=True)
+    assert db.sql('SELECT count(*) FROM sgp_lp_operacion.auditoria')==audit
+    assert db.snapshot('EMPAQUE',date='2026-10-31')['turn']['estado']=='ABIERTO'
     assert original_assignments==db.sql('SELECT jsonb_agg(to_jsonb(a) ORDER BY id) FROM public.sgp_linea_plan_asignaciones a')
-    assert page.evaluate('document.documentElement.scrollWidth<=innerWidth');assert not errors,errors
-    results.append({'viewport':width,'flow':'Browser→shared XLSX server parser→real PostgreSQL service RPC with SGP auth→grouped versioned closure','latest_sum':27,'stage':'EMPAQUE','power_bi':31,'difference':4,'assignments_preserved':True,'original_download_identical':True,'wrong_stage_rejected':True,'lost_reply_retried_once':True,'untrusted_origin_and_normalized_payload_rejected':'PASS' if width==1440 else 'NOT_REPEATED; server checks verified once at 1440','external_network':'blocked','page_errors':errors});page.close()
+    assert not errors,errors
+    page.screenshot(path=str(OUT/f'packing-contained-{width}.png'))
+    results.append({'viewport':width,'flow':'Current packing sheet; legacy import/close absent','read_only_audit':True,'assignments_preserved':True,'endpoint_admission_probes':'PASS' if width==1440 else 'verified at 1440','legacy_write_contract_coverage':'postgres.py and shared handler tests, not current UI','page_errors':errors});page.close()
    except Exception:
     (OUT/f'failure-{width}.json').write_text(json.dumps({'operation':page.locator('#productionOperationPanel').inner_text(),'status':page.locator('[data-op-status]').inner_text(),'errors':errors},indent=2));raise
    finally:db.close()

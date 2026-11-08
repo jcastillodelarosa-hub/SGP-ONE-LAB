@@ -2,6 +2,10 @@
 from pathlib import Path
 import sys,json,http.server,threading,os,importlib.util
 from playwright.sync_api import sync_playwright
+import sys
+from pathlib import Path
+sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'lp01-b12-b13'))
+from current_sheet import inspect_sheet
 HERE=Path(__file__).resolve().parent;ROOT=HERE.parents[1]
 spec=importlib.util.spec_from_file_location('continuity_checks',HERE/'postgres.py');checks=importlib.util.module_from_spec(spec);spec.loader.exec_module(checks)
 Database=checks.Database;lit=checks.lit
@@ -34,38 +38,17 @@ try:
      window.SGPPlannerBridge.getToken=()=> 'COORDINADOR';
      window.SGPPlannerBridge.getClient=async()=>({rpc:async(name,args)=>(await fetch('/rpc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,args})})).json()});
     }''')
-    page.locator('#productionPackingTab' if page.locator('[data-op-stage]').input_value()=='EMPAQUE' else '#productionAssemblyTab').click();page.wait_for_selector('[data-op-date]')
-    page.locator('[data-op-stage]').select_option('EMPAQUE');page.locator('[data-op-date]').fill('2026-11-01');page.locator('[data-op-date]').dispatch_event('change')
-    page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('NO_ABIERTO')")
-    page.locator('[data-turn-capacity]').fill('20');page.locator('[data-open]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Guardado confirmado')")
-    rows=db.snapshot('EMPAQUE')['orders'];assert next(r for r in rows if r['key']==key)['sale']==20 and all(r['sale'] is None for r in rows if r['key']==multi)
-    page.locator('[data-order-part="'+part+'"] > summary').click();page.locator('[data-live-operate="'+part+'"]').click();assert 'Inicializado desde saldo oficial elegible' in page.locator('[data-operation-detail]').inner_text()
-    page.locator('[data-executed]').fill('8');page.locator('[data-operation-note]').fill('QA ejecución del primer turno');page.locator('[data-order-form] button[type=submit]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Guardado confirmado')")
-    for x in parts:db.execute(db.cmd('SALE',stage='EMPAQUE',key=multi,part=x,quantity=0,observation='QA decisión explícita de aplazar'))
-    checks.close_turn(db,stage='EMPAQUE') # Actual SQL QA close, not XLSX adapter certification.
-    page.locator('#productionPackingTab' if page.locator('[data-op-stage]').input_value()=='EMPAQUE' else '#productionAssemblyTab').click();page.locator('[data-op-load]').click();page.wait_for_selector('[data-next-turn]')
-    page.locator('[data-next-turn]').click();page.wait_for_function("document.querySelector('[data-op-shift]').value==='2' && document.querySelector('[data-op-status]').textContent.includes('NO_ABIERTO')")
-    page.locator('[data-turn-capacity]').fill('20');page.locator('[data-open]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Guardado confirmado')")
-    row=next(r for r in db.snapshot('EMPAQUE',shift=2)['orders'] if r['parte']==part);assert row['sale']==12 and row['ejecutado']==0 and row['contexto_origen']['ejecutado']==8
-    page.locator('[data-order-part="'+part+'"] > summary').click();page.locator('[data-live-operate="'+part+'"]').click();assert 'Origen del arrastre 2026-11-01 / T1' in page.locator('[data-operation-detail]').inner_text()
-    page.locator('[data-operation-detail]').screenshot(path=str(OUT/f'packing-continuity-{width}.png'))
-    # Commit succeeds, writes become contained, response is lost: read receipt confirms it once.
-    lost={'done':False,'id':None}
-    def commit_then_lose(route):
-     body=route.request.post_data_json
-     if body['name']=='sgp_lp_operacion_comando' and body['args']['p_cmd']['op']=='NOTA' and not lost['done']:
-      lost['done']=True;lost['id']=body['args']['p_cmd']['id'];response=route.fetch();assert response.json()['data']['ok']
-      db.sql('UPDATE sgp_lp_operacion.config SET escrituras=false WHERE id;');route.abort()
-     else:route.continue_()
-    page.route('**/rpc',commit_then_lose)
-    page.locator('[data-operation-note]').fill('QA nota confirmable durante contención');page.locator('[data-note-save]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('No se confirmó')")
-    page.locator('[data-operation-pending-retry]').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('Guardado confirmado')")
-    assert db.sql('SELECT count(*) FROM sgp_lp_operacion.auditoria WHERE id='+lit(lost['id']))=='1'
-    assert not db.snapshot('EMPAQUE',shift=2)['writes'];assert page.locator('[data-order-form] button[type=submit]').is_disabled()
-    assert planning==db.sql('SELECT jsonb_agg(to_jsonb(a) ORDER BY id) FROM public.sgp_linea_plan_asignaciones a');assert official==db.sql('SELECT jsonb_agg(to_jsonb(a) ORDER BY key_produccion) FROM public.sgp_producciones a')
-    assert page.evaluate('document.documentElement.scrollWidth<=innerWidth') and not errors,errors
-    page.locator('[data-operation-detail]').screenshot(path=str(OUT/f'contained-receipt-{width}.png'))
-    results.append({'viewport':width,'actual_rpc_persistence':True,'single_sale_initialized':20,'ambiguous_split_pending':True,'next_operational_shift':2,'next_sale':12,'next_executed':0,'original_age_preserved':True,'lost_commit_receipt_while_contained':True,'planning_and_export_unchanged':True,'page_errors':errors,'network':'local only; external blocked'});page.close()
+    audit=db.sql('SELECT count(*) FROM sgp_lp_operacion.auditoria');turns=db.sql('SELECT count(*) FROM sgp_lp_operacion.turnos')
+    page.evaluate("document.querySelector('[data-op-date]').value='2026-11-01'")
+    page.locator('#productionPackingTab').click();inspect_sheet(page)
+    page.locator('[data-op-shift]').select_option('2');page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('NO_ABIERTO')")
+    inspect_sheet(page)
+    assert audit==db.sql('SELECT count(*) FROM sgp_lp_operacion.auditoria') and turns==db.sql('SELECT count(*) FROM sgp_lp_operacion.turnos')
+    assert planning==db.sql('SELECT jsonb_agg(to_jsonb(a) ORDER BY id) FROM public.sgp_linea_plan_asignaciones a')
+    assert official==db.sql('SELECT jsonb_agg(to_jsonb(a) ORDER BY key_produccion) FROM public.sgp_producciones a')
+    assert not errors,errors
+    page.screenshot(path=str(OUT/f'packing-contained-{width}.png'))
+    results.append({'viewport':width,'current_packing_navigation':True,'manual_actions_absent':True,'turns_and_audit_unchanged':True,'planning_and_export_unchanged':True,'legacy_write_contract_coverage':'postgres.py unchanged','page_errors':errors});page.close()
    finally:db.close()
   browser.close()
 finally:server.shutdown()

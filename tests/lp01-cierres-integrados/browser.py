@@ -2,6 +2,10 @@
 from pathlib import Path
 import sys,json,http.server,threading,subprocess,base64,hashlib
 from playwright.sync_api import sync_playwright
+import sys
+from pathlib import Path
+sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'lp01-b12-b13'))
+from current_sheet import inspect_sheet
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'lp01-b12-b13'))
 from navigation import open_assignment
 from isolated import ClosureDB,ROOT,lit
@@ -44,61 +48,15 @@ def run(page,db,stage,origin,endpoint,width):
  }''',{'stage':stage,'endpoint':endpoint})
  audit_before=db.sql('SELECT count(*) FROM sgp_lp_operacion.auditoria')
  page.locator('#productionPackingTab' if stage=='EMPAQUE' else '#productionAssemblyTab').click()
- if stage=='ENSAMBLE':
-  # Manual Ensamble closure was deliberately replaced, not silently re-enabled
-  # merely because the synthetic legacy SQL still supports its old command.
-  page.wait_for_selector('[data-assembly-key]');page.locator('button[data-assembly-detail]').first.click();page.wait_for_selector('section[data-assembly-detail]')
-  assert page.locator('[data-order-form],[data-executed],[data-close],[data-import],[data-open]').count()==0
-  assert db.sql('SELECT count(*) FROM sgp_lp_operacion.auditoria')==audit_before
-  assert before==db.sql('SELECT jsonb_agg(to_jsonb(p) ORDER BY key_produccion) FROM public.sgp_producciones p')
-  assert plan==db.sql('SELECT jsonb_agg(to_jsonb(a) ORDER BY id) FROM public.sgp_linea_plan_asignaciones a')
-  assert not errors,errors
-  page.screenshot(path=str(OUT/f'sql08-ensamble-contained-{width}.png'))
-  return {'stage':stage,'width':width,'status':'PASS_CONTAINED','manual_legacy_commands_absent':True,'no_new_audit':True,'export_and_programming_unchanged':True,'errors':errors}
- page.wait_for_selector('[data-live-operate]',state='attached')
- open_assignment(page,roots[0])
- page.locator('[data-executed]').fill(str(total//2));page.locator('[data-operation-note]').fill('QA acumulado corregido')
- page.locator('[data-order-form] button[type=submit]').click();confirmed(page)
- assert sum(x['ejecutado'] for x in db.snapshot(stage,date=ctx['date'])['orders'] if x['key']==target)==total-1
- # A revocation after the screen was loaded must be denied by PostgreSQL, not a disabled control.
- audit=db.sql('SELECT count(*) FROM sgp_lp_operacion.auditoria')
- db.sql("UPDATE sgp_lp_operacion.permisos SET revoked_at=clock_timestamp() WHERE usuario='LIDER' AND etapa="+lit(stage)+' AND key='+lit(target))
- page.locator('[data-operation-note]').fill('QA intento revocado');page.locator('[data-note-save]').click()
- page.wait_for_function("document.querySelector('[data-save-status]').textContent.includes('AMBITO')")
- assert audit==db.sql('SELECT count(*) FROM sgp_lp_operacion.auditoria')
- db.sql("UPDATE sgp_lp_operacion.permisos SET revoked_at=NULL WHERE usuario='LIDER' AND etapa="+lit(stage)+' AND key='+lit(target))
- page.locator('[data-bi-file]').set_input_files(str(SOURCES[other]));page.wait_for_function("document.querySelector('[data-close-status]').textContent.includes('otra etapa')")
- page.locator('[data-bi-file]').set_input_files(str(SOURCES[stage]));page.wait_for_selector('[data-import]')
- assert f'Líder {total-1} · Power BI {total} · Diferencia 1' in page.locator('[data-bi-preview]').inner_text()
- page.locator('[data-import]').click();confirmed(page)
- page.locator('[data-close-note]').fill('QA diferencia pendiente')
- page.locator('[data-close]').click();page.wait_for_function("document.querySelector('[data-save-status]').textContent.includes('DIFERENCIA_O_PENDIENTE')")
- for f in page.locator('[data-close-reason]').all():f.fill('QA diferencia documentada')
- page.locator('[data-close]').click();confirmed(page)
- snap=db.snapshot(stage,date=ctx['date']);assert len(snap['reports'])==1 and snap['turn']['estado']=='CERRADO'
- assert db.snapshot(other,date=ctx['date'])['turn']['estado']=='ABIERTO'
- page.locator('[data-stage-reports]').click();page.wait_for_selector('[data-report]',state='attached')
- page.locator('#productionReportsPanel details summary').click()
- with page.expect_download() as downloaded:page.locator('[data-original]').click()
- assert Path(downloaded.value.path()).read_bytes()==SOURCES[stage].read_bytes()
- page.locator('#productionReportsPanel').scroll_into_view_if_needed()
- page.screenshot(path=str(OUT/f'sql08-{stage.lower()}-{width}.png'))
- # Reopen from the actual coordinator UI and preserve the first immutable version.
- page.evaluate("window.qaRole='COORDINADOR'");page.locator('#productionPackingTab' if page.locator('[data-op-stage]').input_value()=='EMPAQUE' else '#productionAssemblyTab').click()
- page.wait_for_selector('[data-live-operate]',state='attached');open_assignment(page,roots[0])
- page.locator('[data-close-note]').fill('QA reapertura autorizada');page.locator('[data-reopen]').click();confirmed(page)
- assert len(db.snapshot(stage,date=ctx['date'])['reports'])==1
- # Previous XLSX remains immutable: reselect it; importing in review as coordinator reuses its content.
- page.locator('[data-bi-file]').set_input_files(str(SOURCES[stage]));page.wait_for_selector('[data-import]');page.locator('[data-import]').click();confirmed(page)
- for f in page.locator('[data-close-reason]').all():f.fill('QA recierre con diferencia explicada')
- page.locator('[data-close-note]').fill('QA segunda versión');page.locator('[data-close]').click();confirmed(page)
- reports=db.snapshot(stage,date=ctx['date'])['reports'];assert len(reports)==2 and reports[0]==snap['reports'][0]
- assert reports[1]['version']>reports[0]['version']
- assert db.snapshot(other,date=ctx['date'])['turn']['estado']=='ABIERTO'
+ inspect_sheet(page,stage,detail=True)
+ assert db.sql('SELECT count(*) FROM sgp_lp_operacion.auditoria')==audit_before
  assert before==db.sql('SELECT jsonb_agg(to_jsonb(p) ORDER BY key_produccion) FROM public.sgp_producciones p')
  assert plan==db.sql('SELECT jsonb_agg(to_jsonb(a) ORDER BY id) FROM public.sgp_linea_plan_asignaciones a')
- assert page.evaluate('document.documentElement.scrollWidth<=innerWidth') and not errors,errors
- return {'stage':stage,'width':width,'status':'PASS','temporal_revocation_denied':True,'difference_requires_reason':True,'versions':2,'opposite_stage_open':True,'original_identical':True,'export_and_programming_unchanged':True,'errors':errors}
+ assert db.snapshot(stage,date=ctx['date'])['turn']['estado']=='ABIERTO'
+ assert db.snapshot(other,date=ctx['date'])['turn']['estado']=='ABIERTO'
+ assert not errors,errors
+ page.screenshot(path=str(OUT/f'sql08-{stage.lower()}-contained-{width}.png'))
+ return {'stage':stage,'width':width,'status':'PASS_CONTAINED','manual_legacy_commands_absent':True,'no_new_audit':True,'both_stages_remain_open':True,'export_and_programming_unchanged':True,'legacy_write_contract_coverage':'isolated.py unchanged','errors':errors}
 if __name__=='__main__':
  server=http.server.ThreadingHTTPServer(('127.0.0.1',0),Broker);threading.Thread(target=server.serve_forever,daemon=True).start();origin=f'http://127.0.0.1:{server.server_port}'
  node=subprocess.Popen(['node',str(PBI/'server.mjs'),origin],cwd=ROOT,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)

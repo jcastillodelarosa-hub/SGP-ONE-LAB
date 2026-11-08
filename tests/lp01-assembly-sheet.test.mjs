@@ -63,8 +63,8 @@ test('unknown assignment source or malformed period stays for review without inv
 test('partial positive Export is open even when schedule fields need review',()=>{
  const [r]=all(data([production('A',{balance:4,assignments:[plan('A','a',{prioridad:null})]})]));assert.equal(r.state,'ABIERTAS');assert.match(r.reviewReason,/Programación/);
 });
-test('strict date, line and Ensamble-only context',()=>{
- for(const patch of [{stage:'EMPAQUE'},{line:'FOREIGN'},{date:'2026-02-30'},{shift:'1'},{shift:3}])assert.throws(()=>assemblySheetRows(data([]),{...context,...patch}),/Ámbito/);
+test('strict date, line and operation stage context',()=>{
+ for(const patch of [{stage:'FOREIGN'},{line:'FOREIGN'},{date:'2026-02-30'},{shift:'1'},{shift:3}])assert.throws(()=>assemblySheetRows(data([]),{...context,...patch}),/Ámbito/);
 });
 test('catalog scope, canonical key and duplicate production identity are rejected',()=>{
  for(const patch of [{stage:'EMPAQUE'},{line:'FRAMES_2'},{date:'2026-11-08'},{shift:2},{contract:'wrong'}]){const d=data([production('A')]);Object.assign(d.catalog,patch);assert.throws(()=>all(d),/Catálogo/);}
