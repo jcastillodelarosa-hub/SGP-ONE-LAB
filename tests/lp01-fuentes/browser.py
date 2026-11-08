@@ -38,8 +38,13 @@ try:
      page.locator('button[data-assembly-detail]').first.click();page.wait_for_selector('section[data-assembly-detail]')
      pane=page.locator('section[data-assembly-detail]')
      assert pane.locator('[data-assembly-balance]').inner_text()==('Pendiente' if stage=='ENSAMBLE' else '288')
-     pane.locator('.lp-assembly-materials summary').click();text=pane.locator('.lp-assembly-materials').inner_text()
-     assert 'PDT 3 REF' not in text and 'homónimas' in text and 'no libera ventanas' in text
+     if stage=='ENSAMBLE':
+      pane.locator('.lp-assembly-materials summary').click();text=pane.locator('.lp-assembly-materials').inner_text()
+      assert 'PDT 3 REF' not in text and 'homónimas' in text and 'no libera ventanas' in text
+     else:
+      # Global aluminum/machining sources have no Empaque attribution.
+      assert pane.locator('.lp-assembly-materials').count()==0
+      assert 'PDT 3 REF' not in pane.inner_text()
      assert page.locator(RETIRED).count()==0
      pane.screenshot(path=str(OUT/f'{stage.lower()}-{width}.png'))
     assert before==db.unchanged()
@@ -48,15 +53,15 @@ try:
     page.locator('#productionPackingTab').click();page.wait_for_function("document.querySelector('[data-op-status]').textContent.includes('SESION_NO_AUTORIZADA')")
     assert page.locator('section[data-assembly-detail]').count()==0
     db.sql("UPDATE public.sgp_sesiones_app SET expira_en=now()+interval '1 day' WHERE token_hash=encode(extensions.digest('COORDINADOR','sha256'),'hex')")
-    # Duplicate source identity must remain uncredited in the shared materials detail.
+    # Duplicate source identity remains uncredited where global materials are shown (Ensamble).
     db.sql("INSERT INTO public.sgp_prioridades(anio,semana,id_linea,key_produccion,prioridad) VALUES(2026,44,'PANELES_2','QA|PANELES_2',1),(2026,44,'PANELES_2','QA|PANELES_2',2)")
-    page.locator('#productionPackingTab').click();page.wait_for_selector('[data-assembly-key]');page.locator('button[data-assembly-detail]').first.click();page.wait_for_selector('section[data-assembly-detail]')
+    page.locator('#productionAssemblyTab').click();page.wait_for_selector('[data-assembly-key]');page.locator('button[data-assembly-detail]').first.click();page.wait_for_selector('section[data-assembly-detail]')
     material=page.locator('.lp-assembly-materials');material.locator('summary').click()
     text=material.text_content()
     assert 'PDT 3 REF' not in text and 'Sin fuente acreditada para esta producción' in text and 'no libera ventanas' in text,text
     assert before==db.unchanged() and not errors,errors
     assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
-    results.append({'viewport':width,'stages':['ENSAMBLE','EMPAQUE'],'current_shared_material_detail':True,'homonymous_diagnostics_suppressed':True,'null_export_not_zero':True,'invalid_session_denied':True,'duplicate_sql_identity_uncredited':True,'production_plan_pdt_sale_audit_unchanged':True,'page_errors':errors});page.close()
+    results.append({'viewport':width,'stages':['ENSAMBLE','EMPAQUE'],'ensamble_material_detail':True,'empaque_unscoped_materials_absent':True,'homonymous_diagnostics_suppressed':True,'null_export_not_zero':True,'invalid_session_denied':True,'duplicate_sql_identity_uncredited':True,'production_plan_pdt_sale_audit_unchanged':True,'page_errors':errors});page.close()
    finally:db.close()
   browser.close()
 finally:server.shutdown()

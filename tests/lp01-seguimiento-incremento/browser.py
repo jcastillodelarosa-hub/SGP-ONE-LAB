@@ -11,7 +11,7 @@ class Files(http.server.SimpleHTTPRequestHandler):
  def __init__(self,*a,**kw):super().__init__(*a,directory=str(ROOT),**kw)
  def log_message(self,*a):pass
 server=http.server.ThreadingHTTPServer(('127.0.0.1',0),Files);threading.Thread(target=server.serve_forever,daemon=True).start();origin=f'http://127.0.0.1:{server.server_port}'
-db=f.Database();results=[];calls=[]
+db=f.Database();results=[];calls=[];rpc_errors=[]
 try:
  key,parts=f.setup(db)
  for name,count in [('OLD',(5,)),('UNASSIGNED',()),('UNKNOWN',()),('ZERO-PENDING',(5,)),('ZERO-CLEAR',())]:db.seed(name+'|PANELES_2',parts=count,date='2025-01-01')
@@ -36,13 +36,20 @@ try:
     def intercept(route):
      name=route.request.url.split('/rpc/')[-1];calls.append(name)
      try:route.fulfill(status=200,content_type='application/json',body=json.dumps(rpc(name,route.request.post_data_json)))
-     except Exception as e:route.fulfill(status=400,content_type='application/json',body=json.dumps({'code':'QA_READ_DENIED','message':str(e)}))
+     except Exception as e:
+      rpc_errors.append({'rpc':name,'message':str(e)})
+      route.fulfill(status=400,content_type='application/json',body=json.dumps({'code':'QA_READ_DENIED','message':str(e)}))
     page.route('**/*',lambda r:r.continue_() if r.request.url.startswith(origin) else r.abort());page.route('**/rest/v1/rpc/*',intercept)
     page.goto(origin+'/');page.wait_for_function("document.querySelector('#authStatus').textContent.includes('COORDINADOR')" if token=='COORDINADOR' else "!document.querySelector('#loginModal') || document.querySelector('#authStatus').textContent.length>3")
     if page.locator('#mobileMenuToggle').is_visible():page.locator('#mobileMenuToggle').click()
     page.locator('.nav [data-view="ensamble"]').click()
     if token in ['COORDINADOR','QAADMIN']:
-     page.locator('#productionTrackingTab').click();page.wait_for_selector('.lp-tracking-table')
+     page.locator('#productionTrackingTab').click()
+     try:page.wait_for_selector('.lp-tracking-table')
+     except Exception:
+      # Fail with the underlying contract/module error, not an opaque selector timeout.
+      print(json.dumps({'trackingFailure':{'width':width,'role':token,'pageErrors':errors,'rpcErrors':rpc_errors,'calls':calls,'status':page.locator('[data-op-status]').all_text_contents(),'trackingSelected':page.locator('#productionTrackingTab').get_attribute('aria-selected'),'visibleText':page.locator('body').inner_text()[-6000:]}},ensure_ascii=False),flush=True)
+      raise
      for stage in ['ENSAMBLE','EMPAQUE']:
       page.locator('[data-tracking-stage="'+stage+'"]').click();page.wait_for_function("document.querySelector('[data-tracking-stage][aria-pressed=true]').dataset.trackingStage.includes("+json.dumps(stage)+") && !!document.querySelector('.lp-tracking-table')")
       rows=page.locator('.lp-tracking-table tbody tr');assert rows.count()==5,rows.all_inner_texts()
