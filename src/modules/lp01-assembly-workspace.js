@@ -44,7 +44,7 @@ export function mountAssemblyWorkspace({host,bridge,isCurrent,onClose,onReports,
   notice.textContent=rowPending||pendingNote||pendingShared||pendingSale?'Resuelve el guardado pendiente en este detalle antes de cambiar de orden o salir.':'Guarda o descarta el borrador de este detalle antes de cambiar de orden o salir.';
   return false;
  }
- function clear(){++generation;lastExternalSearch=undefined;visibility?.disconnect();observedSlots.clear();visibleKeys.clear();disposeDetail();data=null;rows=[];scope='';selected=null;state={};summaries.clear();summaryAt.clear();details.clear();provider=null;host.classList.remove('lp-assembly-workspace','has-assembly-detail');host.replaceChildren();}
+ function clear(){++generation;lastExternalSearch=undefined;visibility?.disconnect();observedSlots.clear();visibleKeys.clear();disposeDetail();data=null;rows=[];scope='';selected=null;state={};summaries.clear();summaryAt.clear();details.clear();provider=null;host.classList.remove('lp-assembly-workspace','has-assembly-detail');}
  function rememberDetails(key,value){const previous=details.get(key);if(previous?.note?.revision>value?.note?.revision)return previous;details.set(key,value);return value;}
  function paintNote(key){
   const body=host.querySelector('[data-assembly-body]'),value=details.get(key);if(!body)return;
@@ -54,7 +54,7 @@ export function mountAssemblyWorkspace({host,bridge,isCurrent,onClose,onReports,
  function summaryFor(row){if(!row)return null;const value=summaries.get(row.key);return value&&value.balance!==row.balance?{...value,total:null,available:null}:value;}
  function update(next,ctx,{search=''}={}){
   const nextScope=JSON.stringify([bridge.getToken(),ctx.line,ctx.stage,ctx.date,ctx.shift]);
-  if(scope!==nextScope){clear();scope=nextScope;token=bridge.getToken();context={...ctx};provider=key=>transport(key);noteRowsProvider=key=>noteProvider(key);}
+  if(scope!==nextScope){clear();host.replaceChildren();scope=nextScope;token=bridge.getToken();context={...ctx};provider=key=>transport(key);noteRowsProvider=key=>noteProvider(key);}
   data=next;rows=assemblySheetRows(data,context,{includeCompleted:true});if(search!==lastExternalSearch){state.search=search;lastExternalSearch=search;}
   const periodState=host.querySelector('[data-assembly-period-state]');if(periodState&&periodState.textContent!==periodLabel())periodState.textContent=periodLabel();const currentButton=host.querySelector('[data-assembly-current]');if(currentButton)currentButton.hidden=!canConsultCurrent();
   if(selected&&!rows.some(r=>r.key===selected)){selected=null;disposeDetail();}
