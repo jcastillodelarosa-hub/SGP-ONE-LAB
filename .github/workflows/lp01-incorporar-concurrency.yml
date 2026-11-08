@@ -4,7 +4,10 @@ on:
     paths:
       - 'docs/sql-proposals/lp01-incorporar/**'
       - 'docs/sql-proposals/lp01-incorporar-post-export/**'
+      - 'docs/sql-proposals/lp01-incorporar-post-v408/**'
       - 'tests/lp01-incorporar/**'
+      - 'docs/sql-proposals/lp01-turno-horario/**'
+      - 'tests/lp01-turno-horario/**'
       - 'tests/lp01-hoja/base-fixture.sql'
       - 'tests/lp01-hoja/production-readonly/**'
       - '.github/workflows/lp01-incorporar-concurrency.yml'
@@ -34,6 +37,8 @@ jobs:
         run: python tests/lp01-incorporar/concurrency/postgres17.py
       - name: Post-Export exclusion recheck and unchanged concurrency controls
         run: python tests/lp01-incorporar/concurrency/postgres17.py --post-export
+      - name: Current-shift materialization with real concurrent sessions
+        run: python -B tests/lp01-turno-horario/concurrency/postgres17.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -41,4 +46,5 @@ jobs:
           path: |
             tests/lp01-incorporar/concurrency/result-postgres17.json
             tests/lp01-incorporar/concurrency/result-post-export-postgres17.json
+            tests/lp01-turno-horario/concurrency/result-postgres17.json
           if-no-files-found: error
