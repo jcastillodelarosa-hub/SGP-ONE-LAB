@@ -1,3 +1,8 @@
+## Candidato v415 · Tecno exclusivo de Ensamble
+
+Cambio local, no publicado. Base main v414 4e41639; Hosting 5db74a4b5327b2fa.
+Empaque no muestra pestaña, formulario ni resumen Tecno. Transporte rechaza nueva causa TECNO antes de RPC. Históricos persistidos intactos; sin SQL ni cambios de permisos. Pruebas Node focales y verify:release PASS; 16 pins intactos. Publicación y comprobación visual pendientes.
+
 ## LAB v407 · paquete integrado sobre v406 · 07/11/2026
 
 **IMPLEMENTADO LOCAL / NO FUSIONADO / SQL NO APLICADO / NO PUBLICADO.** Base

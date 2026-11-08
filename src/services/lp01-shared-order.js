@@ -21,6 +21,7 @@ export function sharedOrderTransport({client,getToken,key,line,stage}){
    return packingSharedEvidence(d);
   },
   async command(cmd){
+   if(stage==='EMPAQUE'&&cmd?.cause==='TECNO')throw Error('TECNO_SOLO_ENSAMBLE');
    const d=await rpc('sgp_lp_shared_order_command_v1',{p_cmd:cmd});
    if(d?.contract!=='LP-SHARED-COMMAND-1'||d.key!==key||d.id!==cmd.id||d.revision!==cmd.revision+1||!d.reportId||typeof d.duplicate!=='boolean')throw Error('SHARED_ORDER_RESPONSE_UNCERTAIN');
    return d;
