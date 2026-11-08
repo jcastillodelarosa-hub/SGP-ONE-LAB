@@ -43,9 +43,9 @@
     "releaseMode": "LP-EXPORT-DUAL-1"
   },
   "compatible_runtime_sha256": {
-    "src/server/lp-powerbi-handler.js": "532d55c0a58ac96adf55946bb077bd3347d870a2912708475e916c387d159335",
+    "src/server/lp-powerbi-handler.js": "f88ffb70761b6c3918d0a93cf4f3e77e4b0f1901d367d62558aecd7191015b29",
     "supabase/functions/lp-powerbi/index.ts": "29e2197a308d848d0f62ca6dce91a8b2df7534cc8e56e883063989ccfaddd050",
-    "docs/sql-proposals/lp01-export-import-v2/manifest.json": "5d31ca5d68731016d98055829d5531b32752f33b385c37f67edf5d810448ab33",
+    "docs/sql-proposals/lp01-export-import-v2/manifest.json": "10c1a59418910077858c43de91f753963e907eae2d5d5af24819e054959f8e80",
     "src/server/lp-powerbi-release-config.js": "b6ec87984fb946586bec3364c2cf5f8678736406913ef356523b506afd40c4d4"
   }
 }

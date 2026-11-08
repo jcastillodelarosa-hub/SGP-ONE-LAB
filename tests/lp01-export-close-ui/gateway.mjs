@@ -4,9 +4,11 @@ import {powerBIReleaseMode} from '../../src/server/lp-powerbi-release-config.js'
 const {DOMParser}=await import(process.env.LP_XML_PACKAGE||'@xmldom/xmldom');
 const origin='https://qa.invalid',base64=(await readFile(new URL('../lp01-powerbi/fixtures/empaque.xlsx',import.meta.url))).toString('base64');
 const command={id:'00000000-0000-4000-8000-000000000001',stage:'EMPAQUE',line:'PANELES_2',date:'2026-10-31',shift:1,revision:3,authority:'EXPORT_PRODUCTION_V2'};
-let imports=0;const rpc=async(name,args)=>{if(name==='sgp_sesion_actual')return {data:{valida:true,rol:'SUPERVISOR EMPAQUE'}};imports++;assert.equal(name,'sgp_lp_operacion_importar_xlsx');assert.equal(args.p_documento.stage,'EMPAQUE');assert.equal(args.p_contexto.authority,command.authority);return {data:{ok:true,authority:command.authority,contract:'LP-EXPORT-IMPORT-3',writerScope:'LP-EXPORT-DUAL-1'}};};
+let imports=0,writerScope='LP-EXPORT-DUAL-1';const rpc=async(name,args)=>{if(name==='sgp_sesion_actual')return {data:{valida:true,rol:'SUPERVISOR EMPAQUE'}};imports++;assert.equal(name,'sgp_lp_operacion_importar_xlsx');assert.equal(args.p_documento.stage,'EMPAQUE');assert.equal(args.p_contexto.authority,command.authority);return {data:{ok:true,authority:command.authority,contract:'LP-EXPORT-IMPORT-3',writerScope}};};
 const request=()=>new Request(origin,{method:'POST',headers:{origin,'Content-Type':'application/json'},body:JSON.stringify({p_token:'synthetic',command,filename:'empaque.xlsx',base64})});
 for(const config of [{},{exportProductionV2:true},powerBIReleaseMode('LEGACY')])assert.equal((await createPowerBIHandler({rpc,DOMParser,allowedOrigins:[origin],...config})(request())).status,422);
 assert.equal(imports,0);
 assert.equal((await createPowerBIHandler({rpc,DOMParser,allowedOrigins:[origin],...powerBIReleaseMode(undefined)})(request())).status,200);assert.equal(imports,1);
 console.log('PASS gateway: packing original parsed server-side only in explicit dual mode; legacy/default contained');
+
+writerScope='LP-EXPORT-HISTORICAL-1';assert.equal((await createPowerBIHandler({rpc,DOMParser,allowedOrigins:[origin],...powerBIReleaseMode(undefined)})(request())).status,200);writerScope='UNKNOWN';assert.equal((await createPowerBIHandler({rpc,DOMParser,allowedOrigins:[origin],...powerBIReleaseMode(undefined)})(request())).status,422);

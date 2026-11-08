@@ -26,10 +26,20 @@ export function normalizePowerBI(grid){
   const exact=JSON.stringify(v),dimension=JSON.stringify(v.map((x,i)=>i===6?null:x));if(seen.has(exact))fail('Fila Power BI duplicada: '+source.row);if(dimensions.has(dimension))fail('Filas repetidas con cantidades incompatibles: '+source.row);seen.add(exact);dimensions.add(dimension);records.push(record);
  }
  if(!records.length||total===null||footer===null)fail('Faltan datos, total o filtros del informe');
- const filterLines=footer.split('\n').map(x=>x.trim()),lineMatch=/^linea_pda es (PANELES 2|FRAMES 2)$/.exec(filterLines[1]||''),dayMatch=/^Incluido \(1\) (enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre) \(mes\) \+ ([0-9]{1,2}) \(dia\)$/.exec(filterLines[2]||'');
- if(filterLines.length!==3||!lineMatch||!dayMatch)fail('Filtros del informe no corresponden al formato versionado');
+ const filterLines=footer.split('\n').map(x=>x.trim());let lineMatch=null,dayMatch=null,filterShift=null;
+ if(filterLines[0]!=='Filtros aplicados:'||![3,4].includes(filterLines.length))fail('Filtros del informe no corresponden al formato versionado');
+ for(const filter of filterLines.slice(1)){
+  const line=/^linea_pda es (PANELES 2|FRAMES 2)$/.exec(filter);
+  const day=/^Incluido \(1\) (enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre) \(mes\) \+ ([0-9]{1,2}) \(dia\)$/.exec(filter);
+  const shift=/^turno_trabajo_extra es ([12])\.\s+07:00 (am|pm)\s*-\s*07:00 (am|pm)$/.exec(filter);
+  if(line&&!lineMatch)lineMatch=line;
+  else if(day&&!dayMatch)dayMatch=day;
+  else if(shift&&filterShift===null&&shift[2]===(shift[1]==='1'?'am':'pm')&&shift[3]===(shift[1]==='1'?'pm':'am'))filterShift=Number(shift[1]);
+  else fail('Filtros del informe no corresponden al formato versionado');
+ }
+ if(!lineMatch||!dayMatch)fail('Filtros del informe no corresponden al formato versionado');
  const month=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'].indexOf(dayMatch[1])+1;
- if(records.some(r=>r.line!=={'PANELES 2':'PANELES_2','FRAMES 2':'FRAMES_2'}[lineMatch[1]]||Number(r.date.slice(5,7))!==month||Number(r.date.slice(8,10))!==Number(dayMatch[2])))fail('Filtros Power BI contradicen sus filas');
+ if(records.some(r=>(filterShift!==null&&r.shift!==filterShift)||r.line!=={'PANELES 2':'PANELES_2','FRAMES 2':'FRAMES_2'}[lineMatch[1]]||Number(r.date.slice(5,7))!==month||Number(r.date.slice(8,10))!==Number(dayMatch[2])))fail('Filtros Power BI contradicen sus filas');
  if(records.reduce((n,r)=>n+r.quantity,0)!==total)fail('El total Power BI no coincide con sus filas');
  const periods=[...new Set(records.map(r=>[r.line,r.date,r.shift].join('/')))];
  return {adapter:POWERBI_VERSION,stage,sheet:grid.sheet,headers:header,records,total,footer,periods};

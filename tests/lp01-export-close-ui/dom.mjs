@@ -12,3 +12,10 @@ state.receipt={ok:true,writerScope:'LP-EXPORT-DUAL-1',contract:'LP-EXPORT-IMPORT
 const reason=host.querySelector('[data-export-reason]');reason.value='Valor previo conservado';reason.oninput();const note=host.querySelector('[data-export-observation]');note.value='Cierre revisado';note.oninput();host.querySelector('[data-export-confirm]').click();await new Promise(r=>setTimeout(r,0));assert.equal(closes,1);assert.equal(command.import_id,'i');assert.equal(command.reasons['QA|PANELES_2'],'Valor previo conservado');assert(!('quantity'in command));editor.destroy();
 assert.equal(mountExportCloseEditor({host,data:{...data,exportClose:undefined},context,state,onImport(){},onClose(){}}),null);
 console.log('PASS close UI: explicit gate, partial receipt, reason, no quantities, uncertain retry and navigation lock');
+const {mountHistoricalTurn}=await import('../../src/modules/lp01-historical-turn.js');
+const historicalData={...data,role:'COORDINADOR',turn:{estado:'NO_ABIERTO'},historicalTurn:{...context,contract:'LP-TURNO-HISTORICO-1',enabled:true,canPrepare:true}};
+const historicalState={};let prepared=0;const box=mountHistoricalTurn({host,data:historicalData,context,state:historicalState,isCurrent:()=>true,onPrepare:async motive=>{prepared++;assert.equal(motive,'Carga histórica pendiente');throw Object.assign(Error('Sin confirmar'),{uncertain:true});},onRetry:async()=>{prepared++;}});
+assert(box.textContent.includes(context.date));assert(box.textContent.includes('No se importará el archivo'));
+box.querySelector('textarea').value='Carga histórica pendiente';await box.querySelector('[data-historical-prepare]').onclick();assert.equal(prepared,1);assert(box.querySelector('textarea').disabled);assert(!box.querySelector('[data-historical-retry]').hidden);await box.querySelector('[data-historical-retry]').onclick();assert.equal(prepared,2);assert(!box.querySelector('textarea').disabled);box.remove();
+assert.equal(mountHistoricalTurn({host,data,context,state:{},onPrepare(){},onRetry(){}}),null);
+console.log('PASS historical header: exact discovery, visible context and limitation, explicit action, uncertain retry');

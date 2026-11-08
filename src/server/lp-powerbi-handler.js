@@ -26,7 +26,7 @@ export function createPowerBIHandler({rpc,DOMParser,allowedOrigins,exportProduct
    const raw=Uint8Array.from(atob(b.base64),ch=>ch.charCodeAt(0)),parsed=await parsePowerBI(raw,{DOMParser});if(parsed.stage!==c.stage)throw Error('El archivo corresponde a otra etapa');
    // Client totals and normalized rows are never trusted; parse and hash the original again.
    const {data,error}=await rpc('sgp_lp_operacion_importar_xlsx',{p_token:b.p_token,p_contexto:c,p_nombre:b.filename,p_base64:b.base64,p_documento:parsed});if(error)return new Response(JSON.stringify({error:error.message||'Importación rechazada',code:error.code||'PBI_RPC_REJECTED'}),{status:422,headers});
-   if(data?.ok!==true||(v2&&(data.authority!=='EXPORT_PRODUCTION_V2'||data.contract!=='LP-EXPORT-IMPORT-3'||(exportWriterScope==='LP-EXPORT-DUAL-1'&&data.writerScope!=='LP-EXPORT-DUAL-1'))))throw Error('Respuesta de importación incompatible');return new Response(JSON.stringify({data,adapter:POWERBI_VERSION}),{status:200,headers});
+   if(data?.ok!==true||(v2&&(data.authority!=='EXPORT_PRODUCTION_V2'||data.contract!=='LP-EXPORT-IMPORT-3'||(exportWriterScope==='LP-EXPORT-DUAL-1'&&!['LP-EXPORT-DUAL-1','LP-EXPORT-HISTORICAL-1'].includes(data.writerScope)))))throw Error('Respuesta de importación incompatible');return new Response(JSON.stringify({data,adapter:POWERBI_VERSION}),{status:200,headers});
   }catch(error){return new Response(JSON.stringify({error:error.message||'No se pudo validar XLSX',code:'PBI_INPUT_INVALID'}),{status:422,headers});}
  };
 }

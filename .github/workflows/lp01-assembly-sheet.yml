@@ -4,6 +4,10 @@ on:
     paths:
       - 'src/modules/lp01-assembly*'
       - 'src/modules/lp01-export-close-editor.js'
+      - 'src/modules/lp01-historical-turn.js'
+      - 'src/services/lp01-historical-turn.js'
+      - 'tests/lp01-historical-turn.test.mjs'
+      - 'tests/lp01-historical-close.test.mjs'
       - 'src/modules/lp01-powerbi-client.js'
       - 'src/server/lp-powerbi*'
       - 'supabase/functions/lp-powerbi/index.ts'
@@ -49,7 +53,7 @@ jobs:
         run: |
           export LP_DOM_PACKAGE="file://$GITHUB_WORKSPACE/tests/lp01-assembly-workspace/node_modules/linkedom/esm/index.js"
           node tests/lp01-export-close-ui/dom.mjs
-          node --test tests/lp01-export-close-editor.test.mjs tests/lp01-packing-plan-close.test.mjs tests/lp01-powerbi-command.test.mjs
+          node --test tests/lp01-historical-close.test.mjs tests/lp01-historical-turn.test.mjs tests/lp01-export-close-editor.test.mjs tests/lp01-packing-plan-close.test.mjs tests/lp01-powerbi-command.test.mjs
           node tests/lp01-export-import-v2/guard.mjs
           node tests/lp01-export-close-v2/guard.mjs
           node tests/lp01-assembly-workspace/dom.mjs

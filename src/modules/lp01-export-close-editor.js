@@ -7,10 +7,10 @@ export function exportCloseEnabled(data,context){
  const cap=data?.exportClose;
  return data?.contract==='LP-OPERACION-1'&&data.writeContract==='LP-OPERACION-CAS-2'&&data.writes===true&&
   qty(data.turn?.revision)&&['ABIERTO','EN_REVISION'].includes(data.turn?.estado)&&['ENSAMBLE','EMPAQUE'].includes(context?.stage)&&
-  cap?.writerScope==='LP-EXPORT-DUAL-1'&&cap.contract==='LP-EXPORT-CLOSE-4'&&cap.authority==='EXPORT_PRODUCTION_V2'&&cap.enabled===true&&cap.canImport===true&&cap.canClose===true&&same(cap,context);
+  ['LP-EXPORT-DUAL-1','LP-EXPORT-HISTORICAL-1'].includes(cap?.writerScope)&&cap.contract==='LP-EXPORT-CLOSE-4'&&cap.authority==='EXPORT_PRODUCTION_V2'&&cap.enabled===true&&cap.canImport===true&&cap.canClose===true&&same(cap,context);
 }
 export function confirmedImport(receipt,data,context){
- if(!exportCloseEnabled(data,context)||receipt?.ok!==true||receipt.writerScope!=='LP-EXPORT-DUAL-1'||receipt.contract!=='LP-EXPORT-IMPORT-3'||receipt.authority!=='EXPORT_PRODUCTION_V2'||
+ if(!exportCloseEnabled(data,context)||receipt?.ok!==true||receipt.writerScope!==data.exportClose.writerScope||receipt.contract!=='LP-EXPORT-IMPORT-3'||receipt.authority!=='EXPORT_PRODUCTION_V2'||
   receipt.turnRevision!==data.turn.revision||!same(receipt.universe,context)||!hash(receipt.sha256)||!hash(receipt.universeRevision)||
   typeof receipt.fileId!=='string'||!receipt.fileId||typeof receipt.importId!=='string'||!receipt.importId||!Array.isArray(receipt.rows)||!receipt.rows.length)return null;
  const seen=new Set();

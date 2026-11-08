@@ -21,7 +21,7 @@
     "projection-declarations.sql": "00c37a69d8b57e118d31984fb14820e36e094e55081bb97470d43908b4e024d5"
   },
   "artifact_sha256": {
-    "src/server/lp-powerbi-handler.js": "532d55c0a58ac96adf55946bb077bd3347d870a2912708475e916c387d159335",
+    "src/server/lp-powerbi-handler.js": "f88ffb70761b6c3918d0a93cf4f3e77e4b0f1901d367d62558aecd7191015b29",
     "docs/sql-proposals/lp01-export-import-v2/README.md": "a2f44c84c5dfdeea511fa72488b19a0814a6b23874c1cf312acbc056a6c6c6dd",
     "docs/sql-proposals/lp01-export-import-v2/build-proposal.py": "1f8e339a7c64e606938d94bb977aeb2d52b44736467287b19dda652312b5e719",
     "tests/lp01-export-import-v2/adapter.mjs": "836bd23c3c0cd9f59210599f95c644a185b9eff7c23088232fe0f2765f8bb4f8",

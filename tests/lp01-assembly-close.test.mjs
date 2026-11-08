@@ -26,3 +26,16 @@ test('new assembly close view cannot dispatch old manual commands or upload a fi
  const integration=readFileSync(new URL('../src/modules/lp01-operation.js',import.meta.url),'utf8');
  assert.match(integration,/if\(\['ENSAMBLE','EMPAQUE'\]\.includes\(context.stage\)\)\{[\s\S]*?renderAssemblyClose/);
 });
+
+test('blocked close describes missing historical turn without claiming server is old',async()=>{
+ const {assemblyCloseBlockedMessage:reason}=await import('../src/modules/lp01-assembly-close.js');
+ const cap={...context,contract:'LP-EXPORT-CLOSE-4',writerScope:'LP-EXPORT-DUAL-1',authority:'EXPORT_PRODUCTION_V2',enabled:true,canImport:true,canClose:true};
+ const base={writes:true,turn:{estado:'ABIERTO'},exportClose:cap};
+ assert.match(reason({...base,turn:{estado:'NO_ABIERTO'}},context).message,/2026-11-07 \/ T1/);
+ assert.match(reason({...base,turn:{estado:'NO_ABIERTO'}},context).message,/histórico/);
+ assert.match(reason({...base,turn:{estado:'CERRADO'}},context).title,/cerrado/);
+ assert.match(reason({...base,writes:false},context).title,/configuración/);
+ assert.match(reason({...base,exportClose:{...cap,shift:2}},context).title,/desactualizada/);
+ assert.match(reason({...base,exportClose:{...cap,canClose:false}},context).title,/no autorizado/);
+ assert.match(reason({...base,exportClose:{...cap,enabled:false}},context).title,/no habilitado/);
+});

@@ -58,3 +58,26 @@ test('CSV del cierre consolidado conserva asignaciones, motivo por producción y
  const csv=reportCSV({stage:'ENSAMBLE',line:'PANELES_2',date:'2026-10-31',shift:1,version:2,file:{sha256:'sha'},observation:'QA',reasons:{'=K':'Motivo de producción'},rows:[{key:'=K',assignments:[{parte:'LP1'},{parte:'LP2'}],sale:50,ejecutado:40,power_bi:39,diferencia:-1,saldo_oficial:248}]});
  assert.equal(csv.split('\r\n').length,2);assert.ok(csv.includes('LP1, LP2'));assert.ok(csv.includes('Motivo de producción'));assert.ok(csv.includes('"-1"'));assert.ok(csv.includes("'=K"));
 });
+
+function shiftFilterGrid(stage='ENSAMBLE',shift=1,filter=`turno_trabajo_extra es ${shift}.  07:00 ${shift===1?'am':'pm'} -07:00 ${shift===1?'pm':'am'}`){
+ const header=['Semana','Tipo Orden','Proyecto','Produccion','Sistema','Cant. Procesada','Linea PDA'];
+ const values=[45,'QA','Proyecto sintético','ORDEN QA','Sistema QA',85,'PANELES 2'];
+ header.unshift(stage==='ENSAMBLE'?'Año  prog':'Año Prog');values.unshift(2026);
+ if(stage==='EMPAQUE'){header.push('Estación');values.push('Empaque');}
+ header.push('dia_trabajo','turno_trabajo_extra');values.push('2026-11-07',shift===1?'1. 07:00 am - 07:00 pm':'2. 07:00 pm - 07:00 am');
+ return {sheet:'Export',rows:[{row:1,values:header},{row:2,values},{row:3,values:['Total',null,null,null,null,null,85]},{row:4,values:[`Filtros aplicados: \n${filter}\nlinea_pda es PANELES 2\nIncluido (1) noviembre (mes) + 7 (dia)`]}]};
+}
+test('filtro opcional de turno reconoce horario coherente y espacios del Export en ambas etapas',()=>{
+ for(const stage of ['ENSAMBLE','EMPAQUE'])for(const shift of [1,2]){
+  const result=normalizePowerBI(shiftFilterGrid(stage,shift));assert.equal(result.total,85);assert.equal(result.stage,stage);assert.equal(result.records[0].shift,shift);assert.equal(result.records[0].date,'2026-11-07');
+ }
+});
+test('filtro de turno contradictorio, duplicado, desconocido o horario alterado se rechaza',()=>{
+ assert.throws(()=>normalizePowerBI(shiftFilterGrid('ENSAMBLE',1,'turno_trabajo_extra es 2. 07:00 pm - 07:00 am')),/contradicen/);
+ for(const filter of ['turno_trabajo_extra es 1. 08:00 am - 07:00 pm','turno_trabajo_extra es 1. 07:00 pm - 07:00 am','otro_filtro es 1','linea_pda es PANELES 2'])assert.throws(()=>normalizePowerBI(shiftFilterGrid('ENSAMBLE',1,filter)),/formato versionado/);
+ const duplicate=shiftFilterGrid();duplicate.rows.at(-1).values[0]+='\nturno_trabajo_extra es 1. 07:00 am - 07:00 pm';assert.throws(()=>normalizePowerBI(duplicate),/formato versionado/);
+});
+test('filtro adicional no relaja fecha, línea, total, identidad o estación',()=>{
+ for(const mutate of [g=>g.rows[1].values[8]='2026-11-06',g=>g.rows[1].values[7]='FRAMES 2',g=>g.rows[2].values[6]=84,g=>g.rows[1].values[4]='']){const g=shiftFilterGrid();mutate(g);assert.throws(()=>normalizePowerBI(g));}
+ const packing=shiftFilterGrid('EMPAQUE');packing.rows[1].values[8]='Ensamble';assert.throws(()=>normalizePowerBI(packing),/Estación incompatible/);
+});

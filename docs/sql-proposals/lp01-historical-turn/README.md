@@ -1,0 +1,9 @@
+# Historical factual header (review proposal)
+
+Apply 01 before historical Export backend, 02 after the v415 reader (exact body hash checked). Installer creates no operational turns and leaves `config.preparar_historico=false`. Activation is a separate reviewed action after backend and UI are installed.
+
+The new public RPC has EXECUTE for anon/authenticated only, but authenticates the application session, requires active coordinator/admin and CERRAR authority, and rechecks after the existing writer mutex. It supports only PANELES_2, ENSAMBLE/EMPAQUE, a completed shift on a past Bogotá date. Explicit motive + UUID are required. Same UUID/payload returns its immutable receipt; another request cannot alter an existing header. No orders, quantities, plans, prior turn closure, or carry are created. Existing activity is rejected. Deferred authorization revocation rolls back the transaction.
+
+Private receipt table has RLS, no browser grants, immutable update/delete trigger, and FK to the turn. Private deferred security-definer trigger only checks authorization. Reader metadata/OID/ACL is preserved; capability helper is private. Header discovery never manufactures historical planned quantities: historicalPlan is UNAVAILABLE. Factual import and close must use the separately reviewed historical backend; preparing alone is not a closure.
+
+Focused test: `node tests/lp01-historical-turn/prepare.mjs` (reuse existing PGlite test dependency). Optional `READER_SNAPSHOT=/path/to/local-readback.json` checks exact reader patch and metadata with local, read-only function snapshot; no snapshot is committed. Synthetic tests cover disabled flag, role, past period, idempotence/payload mismatch, existing turn, zero invented orders/files/plans, private table ACL, immutable receipt, deferred revoked-user rollback, discovery before/after creation, and reader pin.
