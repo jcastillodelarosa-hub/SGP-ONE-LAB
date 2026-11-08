@@ -44,7 +44,7 @@ export function mountAssemblyWorkspace({host,bridge,isCurrent,onClose,onReports,
   notice.textContent=rowPending||pendingNote||pendingShared||pendingSale?'Resuelve el guardado pendiente en este detalle antes de cambiar de orden o salir.':'Guarda o descarta el borrador de este detalle antes de cambiar de orden o salir.';
   return false;
  }
- function clear(){++generation;lastExternalSearch=undefined;visibility?.disconnect();observedSlots.clear();visibleKeys.clear();disposeDetail();data=null;rows=[];scope='';selected=null;state={};summaries.clear();summaryAt.clear();details.clear();provider=null;host.classList.remove('lp-assembly-workspace','has-assembly-detail');}
+ function clear(){++generation;lastExternalSearch=undefined;visibility?.disconnect();observedSlots.clear();visibleKeys.clear();disposeDetail();data=null;rows=[];scope='';selected=null;state={};summaries.clear();summaryAt.clear();details.clear();provider=null;host.classList.remove('lp-assembly-workspace','has-assembly-detail');host.replaceChildren();}
  function rememberDetails(key,value){const previous=details.get(key);if(previous?.note?.revision>value?.note?.revision)return previous;details.set(key,value);return value;}
  function paintNote(key){
   const body=host.querySelector('[data-assembly-body]'),value=details.get(key);if(!body)return;
