@@ -39,11 +39,13 @@
       "supabase/functions/lp-powerbi/index.ts": "defc3a654ce6d640c68079301b1bc2ebd82349317170aaeaa4d636f8e885505f",
       "docs/sql-proposals/lp01-export-import-v2/manifest.json": "8e385d2d2b83b4d7b3015d39d41e33191ecd221bd1549fc3bbe8730f3725d515"
     },
-    "note": "Historical SQL and source reader pins unchanged; changed runtime has exact current pins, not an unchanged-runtime claim."
+    "note": "Historical SQL and source reader pins unchanged; changed runtime has exact current pins, not an unchanged-runtime claim.",
+    "releaseMode": "LP-EXPORT-DUAL-1"
   },
   "compatible_runtime_sha256": {
     "src/server/lp-powerbi-handler.js": "532d55c0a58ac96adf55946bb077bd3347d870a2912708475e916c387d159335",
-    "supabase/functions/lp-powerbi/index.ts": "6f112e248ab0259e16e56a4ad3cef72e9a26922fe33539af305825ee8cd1debc",
-    "docs/sql-proposals/lp01-export-import-v2/manifest.json": "22ba1505e00fe26733e5d0d741e70c8d3635a859b327854f5555cdc020427463"
+    "supabase/functions/lp-powerbi/index.ts": "29e2197a308d848d0f62ca6dce91a8b2df7534cc8e56e883063989ccfaddd050",
+    "docs/sql-proposals/lp01-export-import-v2/manifest.json": "5d31ca5d68731016d98055829d5531b32752f33b385c37f67edf5d810448ab33",
+    "src/server/lp-powerbi-release-config.js": "b6ec87984fb946586bec3364c2cf5f8678736406913ef356523b506afd40c4d4"
   }
 }

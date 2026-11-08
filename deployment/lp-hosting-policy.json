@@ -19,7 +19,7 @@
     "scripts/lp-verify-downloaded-artifact.py": "aea3049966d633bcbc7c1163c470579d1be8dd2b4ef984576d92fc5403f3bde5",
     "src/modules/lp01-powerbi-client.js": "b5ed91824cf7803da690554b5bf74d67505c0a125c3d2e6475dcc56e17aaae9d",
     "src/server/lp-powerbi-handler.js": "532d55c0a58ac96adf55946bb077bd3347d870a2912708475e916c387d159335",
-    "supabase/functions/lp-powerbi/index.ts": "6f112e248ab0259e16e56a4ad3cef72e9a26922fe33539af305825ee8cd1debc",
+    "supabase/functions/lp-powerbi/index.ts": "29e2197a308d848d0f62ca6dce91a8b2df7534cc8e56e883063989ccfaddd050",
     "supabase/config.toml": "e125a7afc77c2131c1fe403010c072a41984aabd95be35df80e00c7fce154d0d",
     "scripts/lp-backend-readiness.py": "0347837ace3ecb08b52ac16b9fb82b1ca8b8462853a33e9d14a4f608bc92482e"
   },
