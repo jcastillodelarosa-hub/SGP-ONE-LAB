@@ -1,3 +1,13 @@
+## Cantidad procesada acreditada · candidata v412 · 08/11/2026
+
+Resumen de mecanizado: usa la cantidad real positiva de una ejecución PROCESADO
+cuando corresponde a una producción única, aunque difiera del plan histórico.
+Nunca infiere avance desde una actualización de la base. Rechaza ambigüedad
+y cantidades superiores a la base. Planes y snapshots se conservan intactos.
+29 pruebas focales PASS. Dato correctivo autorizado se aplica por separado con
+historial y precondiciones. Sin nuevas funciones, roles ni permisos.
+Pendiente CI/publicación controlada; no incluye el cierre Export del PR226.
+
 ## Estimación numérica NC AL y Producción NC Vidrio · candidata v401 · 06/11/2026
 
 Base publicada v400 37fa457. La estimación de aluminio suma una ventana por cada

@@ -43,3 +43,17 @@ test('aggregate parts use the canonical key even with a homonymous order in the 
  assert.equal(run(s).total.programmed,295);assert.equal(run(s).total.processed,90);assert.equal(run(s).total.pending,205);
  assert.throws(()=>run({...s,schedule:[{...s.schedule[0],key_produccion:null}]}),/identidad canónica/);
 });
+
+
+test('explicit corrected actual credits64 without changing the historical8 plan',()=>{
+ const s=snapshot({base:[production('K',64)],receipts:[receipt()],schedule:[assignment('A',{cantidad_programada:8})],executions:[{id_programacion:'A',estado:'PROCESADO',cantidad_procesada:64}]});
+ const r=run(s);assert.equal(r.total.processed,64);assert.equal(r.total.pending,0);assert.equal(s.schedule[0].cantidad_programada,8);
+ s.executions[0].cantidad_procesada=8;assert.equal(run(s).total.processed,8);
+ s.executions[0].cantidad_procesada=0;assert.equal(run(s).total.processed,8);
+});
+test('corrected actual cannot fabricate ambiguous reservation quantities or exceed base cumulatively',()=>{
+ const s=snapshot({base:[production('K',64)],receipts:[receipt()],schedule:[assignment('A',{cantidad_programada:8}),assignment('B',{cantidad_programada:8})],executions:[{id_programacion:'A',estado:'PROCESADO',cantidad_procesada:64},{id_programacion:'B',estado:'PROCESADO',cantidad_procesada:8}]});
+ assert.equal(run(s).total.processed,null);
+ s.schedule=[assignment('A',{produccion:null,cantidad_programada:8,prioridad_semanal:1})];s.coverage=[{key_produccion:'K',reserva:'R',prioridad_semanal:1,produccion:'PK',cantidad:8,estado_orden:'PROGRAMADA'}];
+ assert.equal(run(s).total.processed,null);
+});
