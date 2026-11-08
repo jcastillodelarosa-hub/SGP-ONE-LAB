@@ -124,18 +124,23 @@ export function basePhysicalProgress(input,{year,weeks,line='PANELES_2',system='
    if(outgoing.length&&partial>0)throw new Error('Avance parcial de origen trasladado sin distribución verificable');
    const allocated=allocations.reduce((a,x)=>a+x.q,0);
    if(!row.produccion&&partial>0&&allocated!==q)throw new Error('Avance agregado incluye producciones fuera del alcance, sin distribución verificable');
-   if(e?.estado==='PROCESADO'&&quantity(e.cantidad_procesada??0)>0&&quantity(e.cantidad_procesada)!==q)throw new Error('Estado PROCESADO y cantidad registrada no concilian');
+   const completedQuantity=e?.estado==='PROCESADO'?quantity(e.cantidad_procesada??0):0;
+   // A corrected actual quantity may differ from the historical plan. Never infer it
+   // from the current base, nor distribute a reservation total among multiple orders.
+   const correctedActual=completedQuantity>0&&completedQuantity!==q;
+   if(correctedActual&&(!row.produccion||allocations.length!==1||completedQuantity>allocations[0].p.programmed))throw new Error('Estado PROCESADO y cantidad registrada no concilian');
    if(partial>0&&allocations.length!==1)throw new Error('Avance agregado parcial sin distribución por producción');
    if(partial>allocated)throw new Error('Cantidad procesada supera su asignación: no se recorta');
    for(const {p,q:aq} of allocations){
     p.assigned+=aq;
     const complete=e?.estado==='PROCESADO'||oe.some(o=>o.produccion===p.produccion&&o.estado==='PROCESADO');
     if(complete&&partial>0&&partial!==aq)throw new Error('Ejecución agregada y por orden contradictorias');
-    p.processed+=complete?aq:partial;
+    p.processed+=complete?(correctedActual?completedQuantity:aq):partial;
    }
   }catch(error){fail(failureCandidates,error.message);}
  }
  for(const p of records.values()){
+  if(p.processed>p.programmed){p.allocationInvalid=true;warn(p.key,'Procesadas acumuladas superan la programación base: no se recortan');}
   if(p.assigned>p.programmed){p.allocationInvalid=true;warn(p.key,'Asignaciones acumuladas superan la programación base: no se recortan');}
   if(p.allocationInvalid)p.processed=null;
   if(p.processed!==null&&p.received!==null&&p.processed>p.received)warn(p.key,'Procesadas supera recibidas registradas; revisar origen, sin recorte silencioso');
