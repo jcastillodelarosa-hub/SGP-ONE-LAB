@@ -2,7 +2,7 @@
 No production access or writes. For the permitted isolated CI browser environment.
 """
 from pathlib import Path
-import http.server,threading,json
+import http.server,threading,json,os
 from playwright.sync_api import sync_playwright
 ROOT=Path(__file__).resolve().parents[2];OUT=Path(__file__).parent/'evidence';OUT.mkdir(exist_ok=True)
 class Files(http.server.SimpleHTTPRequestHandler):
@@ -11,7 +11,7 @@ class Files(http.server.SimpleHTTPRequestHandler):
 server=http.server.ThreadingHTTPServer(('127.0.0.1',0),Files);threading.Thread(target=server.serve_forever,daemon=True).start();origin=f'http://127.0.0.1:{server.server_port}';results=[]
 try:
  with sync_playwright() as p:
-  browser=p.chromium.launch()
+  browser=p.chromium.launch(**({"executable_path":os.environ["LP_CHROMIUM"]} if os.environ.get("LP_CHROMIUM") else {}))
   for width in [1440,390]:
    page=browser.new_page(viewport={'width':width,'height':900});errors=[];external=[];page.on('pageerror',lambda e:errors.append(str(e)))
    def route(r):
@@ -27,6 +27,29 @@ try:
    page.screenshot(path=str(OUT/f'sheet-{width}.png'),full_page=True)
    if width<=700:
     assert page.locator('[data-assembly-key]').first.evaluate("row=>{const w=row.querySelector('.lp-assembly-week').getBoundingClientRect(),p=row.querySelector('.lp-assembly-identity').getBoundingClientRect();return w.x<p.x&&Math.abs(w.y-p.y)<2;}"),'Week must be left of Production in mobile card'
+   # Same headers/menu vocabulary as Seguimiento, local-only filter and cancel/reset.
+   origin_selector='[data-column-origin="mobile"]' if width<=700 else '[data-assembly-group="ABIERTAS"] [data-column-origin="table"]'
+   page.locator(origin_selector+'[data-column-menu="week"]').click()
+   menu=page.locator('dialog.lp-column-menu');menu.wait_for(state='visible')
+   menu.locator('[data-menu-section="filter"] summary').click()
+   menu.locator('[data-column-none]').click()
+   menu.locator('[data-column-value]').first.check()
+   page.screenshot(path=str(OUT/f'column-filter-{width}.png'))
+   menu.locator('[data-column-apply]').click()
+   assert page.locator('[data-assembly-key]').count()>=1
+   page.locator('[data-columns-reset]').click()
+   assert page.locator('[data-assembly-key]').count()==3
+   page.locator(origin_selector+'[data-column-menu="reservation"]').click()
+   menu=page.locator('dialog.lp-column-menu');menu.locator('[data-menu-section="sort"] summary').click()
+   menu.locator('[data-column-order="desc"]').click()
+   assert page.locator('th[aria-sort="descending"]').count()==3
+   page.locator(origin_selector+'[data-column-menu="week"]').click()
+   menu=page.locator('dialog.lp-column-menu');menu.locator('[data-menu-section="filter"] summary').click()
+   menu.locator('[data-column-none]').click();menu.locator('[data-column-cancel]').click()
+   assert page.locator('[data-assembly-key]').count()==3
+   page.locator(origin_selector+'[data-column-menu="week"]').click();page.keyboard.press('Escape')
+   assert page.locator('dialog[open]').count()==0
+   page.locator('[data-columns-reset]').click()
    glass_button=page.locator('[data-assembly-key="A|PANELES_2"] [data-assembly-glass]');glass_button.click();glass=page.locator('#glassDetailModal');glass.wait_for(state='visible')
    assert 'OVES-QA-1' in glass.locator('#glassDetailTitle').inner_text() and 'LAMINADO' in glass.locator('#glassDetailMeta').inner_text()
    burro=glass.locator('details.glass-burro');assert burro.count()==1 and burro.get_attribute('open') is None

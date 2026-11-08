@@ -2,7 +2,7 @@ import test from 'node:test';
 import {closureV2Fixture,closurePartialReloadFixture} from './fixtures/lp01-closure-export-v2.mjs';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {assemblySheetRows,assemblyClosure,filterAssemblySheetRows} from '../src/domain/lp01-assembly-sheet.js';
+import {assemblySheetRows,assemblyClosure,filterAssemblySheetRows,assemblyValueKey} from '../src/domain/lp01-assembly-sheet.js';
 import {assemblySheetMarkup,renderAssemblySheet} from '../src/modules/lp01-assembly-sheet.js';
 
 const context={line:'PANELES_2',stage:'ENSAMBLE',date:'2026-11-07',shift:1};
@@ -169,7 +169,7 @@ test('beforeRender parks and reattaches the same editor on mount, search, state 
  const events=[],draft={text:'Borrador sin guardar',revision:4};let html='initial',search,filter;
  const host={note:draft,contains:()=>false,classList:{add(){}},
   querySelectorAll:selector=>selector==='[data-assembly-filter]'?[filter]:[],
-  querySelector:selector=>selector==='[data-assembly-search]'?search:null,
+  querySelector:selector=>selector==='[data-assembly-search]'?search:selector==='[data-columns-reset]'?{}:null,
   get innerHTML(){return html;},
   set innerHTML(value){events.push('replace');html=value;this.note=null;search={};filter={dataset:{assemblyFilter:'COMPLETADAS'}};}
  };
@@ -241,7 +241,7 @@ test('sheet never-reported row is unknown, not a missing close or explicit zero'
  ps[2].oficial.reserva_al='R2';
  assert.deepEqual(all(data(ps)).map(r=>r.produccion),['early','late','other']);
  const html=assemblySheetMarkup(all(data(ps)));
- assert.ok(html.indexOf('<th scope="col">Semana')<html.indexOf('<th scope="col">Producción'));
+ assert.ok(html.indexOf('data-column-menu="week"')<html.indexOf('data-column-menu="production"'));
  assert.match(html,/data-label="Prioridad"[^>]*>1.2/);
  assert.doesNotMatch(html,/data-label="Prioridad"[^>]*>9/);
  });
@@ -251,4 +251,25 @@ test('Otras and Por revisar share reservation ordering without changing their st
  ready.oficial.reserva_al='R10';pending.oficial.reserva_al='R1';
  const rows=all(data([ready,pending]));
  assert.deepEqual(rows.map(r=>[r.produccion,r.state]),[['pending','POR_REVISAR'],['ready','OTRAS']]);
+});
+
+test('sheet column filters compose, support an empty selection and never mutate data',()=>{
+ const rows=all(data([production('A',{week:44,balance:10}),production('B',{week:45,balance:2}),production('C',{week:45,balance:3})]));
+ const before=structuredClone(rows);
+ assert.deepEqual(filterAssemblySheetRows(rows,{columnFilters:{week:[assemblyValueKey('2026-W45')],balance:[assemblyValueKey(2)]}}).map(r=>r.produccion),['B']);
+ assert.equal(filterAssemblySheetRows(rows,{columnFilters:{week:[]}}).length,0);
+ assert.deepEqual(rows,before);
+});
+test('column sort is numeric, preserves groups, and keeps missing data last both ways',()=>{
+ const rows=all(data([production('A',{balance:10}),production('B',{balance:2}),production('C',{balance:20})]));
+ assert.deepEqual(filterAssemblySheetRows(rows,{sort:'balance',direction:'asc'}).map(r=>r.produccion),['B','A','C']);
+ assert.deepEqual(filterAssemblySheetRows(rows,{sort:'balance',direction:'desc'}).map(r=>r.produccion),['A','B','C']);
+ rows[0].realized=null;rows[1].realized=3;rows[2].realized=9;
+ for(const direction of ['asc','desc'])assert.equal(filterAssemblySheetRows(rows,{sort:'realized',direction})[1].realized,null);
+});
+test('sheet exposes Seguimiento-style sorting and checkbox filters without filtering unloaded editors',()=>{
+ const html=assemblySheetMarkup(all(data([production('A')])),{state:{column:'week',columnFilters:{week:[]}}});
+ for(const label of ['Ordenar columna','Filtrar columna','Seleccionar todos','Desmarcar todos','Aplicar','Cancelar'])assert.ok(html.includes(label));
+ assert.match(html,/data-column-menu="reservation"/);assert.match(html,/data-column-menu="part"/);
+ assert.doesNotMatch(html,/data-column-menu="(?:available|affectations|observation)"/);
 });

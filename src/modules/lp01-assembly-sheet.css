@@ -107,3 +107,9 @@
  .lp-assembly-table tbody tr>.lp-assembly-identity{grid-column:span 4}
  .lp-assembly-table tbody tr>.lp-assembly-reservation,.lp-assembly-table tbody tr>.lp-assembly-reservation-part,.lp-assembly-table tbody tr>.lp-assembly-system{grid-column:span 2}
 }
+
+/* Same column menus as Seguimiento; filters are local and preserve editors. */
+.lp-assembly-table th button{display:flex;align-items:center;justify-content:space-between;gap:4px;width:100%;min-height:36px;padding:4px 0;border:0;background:transparent;color:inherit;font:inherit;font-weight:600;text-align:left}
+.lp-assembly-table th button[aria-expanded=true],.lp-assembly-table th[aria-sort=ascending] button,.lp-assembly-table th[aria-sort=descending] button{color:#1264c8}
+.lp-assembly-sheet .lp-mobile-columns{display:none}
+@media(max-width:700px){.lp-assembly-sheet .lp-mobile-columns{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.lp-assembly-sheet .lp-mobile-columns button{min-height:44px;border:1px solid #cbd9ea;background:#f6f9fd;color:#103b73;border-radius:7px;padding:6px 10px}}
