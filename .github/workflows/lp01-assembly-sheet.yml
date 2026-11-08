@@ -81,6 +81,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - run: npm install --ignore-scripts --no-audit --no-fund
       - run: npm install --prefix tests/lp01-export-plan-v4 --ignore-scripts --no-audit --no-fund
       - name: Exact SQL install chain and real Empaque open/incorporate/import/close
         run: |
