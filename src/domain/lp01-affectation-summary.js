@@ -1,7 +1,9 @@
+import {packingNativeEvidence} from './lp01-packing-affectation-scope.js';
 export const CAUSE_LABELS={NC_AL:'Aluminio',NC_V:'Vidrio',TECNO:'Tecno',NOVEDAD:'Novedades'};
 const valid=n=>Number.isSafeInteger(n)&&n>=0;
 /** Recorded windows by cause; never derive windows from PDT pieces or sum the union. */
 export function affectationSummary(data){
+ data=packingNativeEvidence(data);
  const seen=new Set(),categories=Object.fromEntries(Object.keys(CAUSE_LABELS).map(k=>[k,null]));
  for(const r of data.reports||[]){
   if(!r.id||seen.has(r.id)||r.originStage!==data.stage||!Object.hasOwn(categories,r.cause)||!valid(r.quantity)||!valid(r.confirmed)||r.confirmed>r.quantity)throw Error('RESUMEN_AFECTACIONES_INVALIDO');

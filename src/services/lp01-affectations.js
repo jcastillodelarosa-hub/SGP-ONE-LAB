@@ -30,6 +30,7 @@ export function affectationsTransport({client,getToken,context,contractVersion=1
    return packingNativeEvidence(data);
   },
   async command(command){
+   if(scope.stage==='EMPAQUE'&&command?.cause==='TECNO')throw Error('TECNO_SOLO_ENSAMBLE');
    const {pieces,sourcePicking,ncReference,...cmd}=command;
    if(pieces&&sourcePicking)throw Error('ORIGEN_ALUMINIO_AMBIGUO');
    const data=await rpc(ncReference!==undefined?'sgp_lp_glass_nc_report_v1':sourcePicking?'sgp_lp_afectaciones_desde_picking_v1':pieces?'sgp_lp_afectaciones_aluminio_v1':'sgp_lp_afectaciones_comando_v1',{p_key:scope.key,p_stage:scope.stage,p_date:scope.date,p_shift:scope.shift,p_cmd:cmd,...(ncReference!==undefined?{p_nc:ncReference}:{}),...(pieces?{p_pieces:pieces}:{}),...(sourcePicking?{p_source:sourcePicking}:{})});

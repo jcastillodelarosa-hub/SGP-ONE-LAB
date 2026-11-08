@@ -17,9 +17,9 @@ test('shared detail and summary retain only explicit Empaque evidence, global re
  const summary=sharedOrderSummary(native,shared);assert.equal(summary.categories.NC_AL,null);assert.equal(summary.categories.NOVEDAD,2);assert.deepEqual(summary.estimates.map(r=>r.quantity),[1]);
  assert.equal(packingSharedEvidence({...shared,stage:'ENSAMBLE'}).reports.length,3);assert.equal(native.aluminumPending.rows.length,3);
 });
-test('packing never inherits global Tecno Export estimate; scoped own reports remain',()=>{
+test('packing never inherits global Tecno Export estimate; no Tecno category remains',()=>{
  const result=withExportGlassSummary({categories:{TECNO:2},exportGlass:{rounded:40}},null,{key:native.key,line:native.line,stage:'EMPAQUE'});
- assert.equal(result.exportGlass,undefined);assert.equal(result.categories.TECNO,2);
+ assert.equal(result.exportGlass,undefined);assert.equal(result.categories.TECNO,null);
 });
 test('packing compact markup has Estado Ensamble before Saldo Empaque and colored complete state',()=>{
  const row={key:'A|PANELES_2',id:'A',state:'ABIERTAS',produccion:'QA',oficial:o,balance:6,realized:null,week:{label:'45'},assignments:[],observations:[],observation:''};
@@ -31,4 +31,22 @@ test('shared transport validates full revision history then exposes scoped repor
  const fixture={...shared,contract:'LP-SHARED-ORDER-1',canReport:true,revision:2,reports:shared.reports.slice(0,2).map(r=>({...r,key:native.key,solved:0})),history:[{reportId:'a',revision:1},{reportId:'b',revision:2}]};
  const t=sharedOrderTransport({client:{rpc:async()=>({data:fixture,error:null})},getToken:()=> 'token',key:native.key,line:native.line,stage:'EMPAQUE'});
  const d=await t.read();assert.equal(d.revision,2);assert.deepEqual(d.reports.map(r=>r.id),['b']);assert.deepEqual(d.history.map(e=>e.reportId),['b']);assert.equal(d.legacyReports.length,0);
+});
+test('Empaque removes historical Tecno from display without mutating persisted input',()=>{
+ const data={...native,reports:[...native.reports,{id:'tecno',originStage:'EMPAQUE',cause:'TECNO',quantity:4,confirmed:0}],events:[{reportId:'tecno',stage:'EMPAQUE'}]};
+ const projected=packingNativeEvidence(data);assert.equal(projected.reports.some(r=>r.cause==='TECNO'),false);assert.equal(data.reports.length,2);
+ const old={...shared,legacyReports:[{id:'old',etapa:'EMPAQUE',causa:'TECNO',ventanas:4,confirmadas:0}]};assert.equal(packingSharedEvidence(old).legacyReports.length,0);assert.equal(old.legacyReports.length,1);
+});
+test('both Empaque transports reject new Tecno before any RPC',async()=>{
+ const {affectationsTransport}=await import('../src/services/lp01-affectations.js');const {sharedOrderTransport}=await import('../src/services/lp01-shared-order.js');let calls=0;const client={rpc:async()=>{calls++;throw Error('RPC_CALLED');}},getToken=()=> 'qa';
+ const context={key:native.key,line:native.line,stage:'EMPAQUE'};
+ for(const transport of [affectationsTransport({client,getToken,context}),sharedOrderTransport({client,getToken,...context})])await assert.rejects(transport.command({action:'CREATE',cause:'TECNO',quantity:1}),/TECNO_SOLO_ENSAMBLE/);
+ assert.equal(calls,0);
+ await assert.rejects(affectationsTransport({client,getToken,context:{...context,stage:'ENSAMBLE'}}).command({action:'CREATE',cause:'TECNO',quantity:1}),/RPC_CALLED/);assert.equal(calls,1);
+});
+
+test('Tecno tab exists only in Ensamble, never Empaque',async()=>{
+ const {affectationTabTypes}=await import('../src/modules/lp01-affectation-tabs.js');
+ assert.equal(affectationTabTypes('EMPAQUE').some(([key])=>key==='TECNO'),false);
+ assert.equal(affectationTabTypes('ENSAMBLE').some(([key])=>key==='TECNO'),true);
 });
