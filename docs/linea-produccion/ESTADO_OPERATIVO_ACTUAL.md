@@ -1747,3 +1747,6 @@ MD5 instalado `2e4eeacbfc331f2c6dcde32ee96701d7`. Proyección de excluida_export
  permisos intactos. Prueba local PGlite de compilación, predicados y conservación
  PASS; endpoint productivo no ejecutado. Instalar 01/02/03 conjuntamente después
  de integrar v405, no aplicar aislado. Sin SQL productivo ni publicación.
+
+## 2026-11-07 — Candidato v408 hoja/vidrio (no publicado)
+Diseño aprobado implementado en rama `feat/hoja-vidrio-acordeon`: Semana primero, Reserva/Prioridad (parte real), orden por reserva/parte y vidrio con OVES/Tipo V + acordeón cantidad/dimensiones/Marca. SQL aditivo preparado con guard, no aplicado. 43 tests focales PASS. Continuidad: `docs/linea-produccion/hoja-vidrio-v408/README.md`. Depende de integración v407 bloqueada en subida específica; no se reintentó ni evitó el control.

@@ -89,3 +89,21 @@
  .lp-assembly-observation>span{display:block;overflow:visible}
 }
 @media(prefers-reduced-motion:reduce){.lp-assembly-sheet *{scroll-behavior:auto;transition:none;animation:none}}
+/* Reservation-first layout keeps the approved state groups and existing editors. */
+.lp-assembly-table{min-width:1280px}
+.lp-assembly-col-week{width:6%}
+.lp-assembly-col-identity{width:18%}
+.lp-assembly-col-reservation{width:8%}
+.lp-assembly-col-reservation-part{width:6%}
+.lp-assembly-col-system{width:6%}
+.lp-assembly-col-number{width:7%}
+.lp-assembly-col-affects{width:14%}
+.lp-assembly-col-notes{width:13%}
+.lp-assembly-col-actions{width:8%}
+.lp-assembly-reservation,.lp-assembly-reservation-part{overflow-wrap:anywhere}
+@media(max-width:700px){
+ .lp-assembly-table{min-width:0}
+ .lp-assembly-table tbody tr>.lp-assembly-week{grid-column:span 2}
+ .lp-assembly-table tbody tr>.lp-assembly-identity{grid-column:span 4}
+ .lp-assembly-table tbody tr>.lp-assembly-reservation,.lp-assembly-table tbody tr>.lp-assembly-reservation-part,.lp-assembly-table tbody tr>.lp-assembly-system{grid-column:span 2}
+}

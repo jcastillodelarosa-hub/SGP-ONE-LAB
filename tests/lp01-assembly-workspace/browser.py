@@ -25,6 +25,21 @@ try:
    page.wait_for_function("document.querySelector('[data-note-order-key=\"A|PANELES_2\"] [data-order-note-preview]')?.textContent.startsWith('Observación compartida')")
    assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
    page.screenshot(path=str(OUT/f'sheet-{width}.png'),full_page=True)
+   if width<=700:
+    assert page.locator('[data-assembly-key]').first.evaluate("row=>{const w=row.querySelector('.lp-assembly-week').getBoundingClientRect(),p=row.querySelector('.lp-assembly-identity').getBoundingClientRect();return w.x<p.x&&Math.abs(w.y-p.y)<2;}"),'Week must be left of Production in mobile card'
+   glass_button=page.locator('[data-assembly-key="A|PANELES_2"] [data-assembly-glass]');glass_button.click();glass=page.locator('#glassDetailModal');glass.wait_for(state='visible')
+   assert 'OVES-QA-1' in glass.locator('#glassDetailTitle').inner_text() and 'LAMINADO' in glass.locator('#glassDetailMeta').inner_text()
+   burro=glass.locator('details.glass-burro');assert burro.count()==1 and burro.get_attribute('open') is None
+   burro.locator('summary').click();burro.locator('table').wait_for(state='visible')
+   assert burro.locator('tbody tr').count()==2 and '100 × 200' in burro.inner_text() and 'MARCA-QA-A' in burro.inner_text()
+   assert page.locator('.modal:not([hidden]),dialog[open]').count()==1,'Expanding a burro must not stack another modal'
+   assert burro.locator('table').evaluate("table=>{const wrap=table.parentElement,r=wrap.getBoundingClientRect();return wrap.scrollWidth<=wrap.clientWidth+1&&Array.from(table.querySelectorAll('th')).every(th=>{const b=th.getBoundingClientRect();return b.left>=r.left&&b.right<=r.right+1&&b.right<=innerWidth;});}"),'Cantidad, Dimensiones and Marca must fit without horizontal scrolling'
+   assert glass.locator('.modal-card').evaluate("card=>{const r=card.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth;}"),'Glass modal must remain inside the viewport'
+   assert page.evaluate('document.documentElement.scrollWidth<=innerWidth');glass.screenshot(path=str(OUT/f'glass-inline-{width}.png'))
+   burro.locator('summary').press('Enter');assert burro.get_attribute('open') is None
+   burro.locator('summary').press('Enter');burro.locator('table').wait_for(state='visible')
+   glass.locator('#closeGlassDetail').click();assert not glass.is_visible();glass_button.click();assert glass.is_visible() and glass.locator('details').get_attribute('open') is None;glass.locator('#closeGlassDetail').click()
+
    note=page.locator('[data-note-order-key="A|PANELES_2"]');note.locator('button').click();dialog=page.locator('dialog[open]');field=dialog.locator('[data-order-note]');page.wait_for_function("!document.querySelector('dialog textarea').disabled");field.fill('Borrador conservado en Ensamble');page.evaluate('window.refresh()')
    assert field.input_value()=='Borrador conservado en Ensamble';assert dialog.evaluate('(el)=>el.matches(":modal")');assert page.evaluate('document.documentElement.scrollWidth<=innerWidth');dialog.screenshot(path=str(OUT/f'note-{width}.png'))
    dialog.locator('[data-order-note-save]').click();page.wait_for_function("document.querySelector('dialog [data-order-note-status]').textContent.includes('guardada') && !document.querySelector('dialog [data-order-note-cancel]').disabled");dialog.locator('[data-order-note-cancel]').click();assert 'Borrador conservado' in note.inner_text();assert page.evaluate('window.noteWrites.length')==1
@@ -41,7 +56,7 @@ try:
    assert 'historia anterior desconocida' in page.locator('#reports').inner_text();assert 'Comparación incompleta' in page.locator('#reports').inner_text()
    assert '70 %' in page.locator('#reports').inner_text();assert page.locator('#reports [data-report]').count()==1
    assert page.evaluate('document.documentElement.scrollWidth<=innerWidth');page.screenshot(path=str(OUT/f'report-plan-v4-{width}.png'),full_page=True)
-   assert not errors,errors;assert not external,external;results.append({'width':width,'groups':3,'bodyOverflow':False,'noteDraftRefreshSave':True,'detail':True,'historicalReportOwnSources':True,'planV4FromSQL':True,'externalRequests':0,'productionCalls':0});page.close()
+   assert not errors,errors;assert not external,external;results.append({'width':width,'groups':3,'bodyOverflow':False,'noteDraftRefreshSave':True,'detail':True,'historicalReportOwnSources':True,'planV4FromSQL':True,'glassInlineExpandKeyboardReopen':True,'mobileWeekLeft':width<=700,'externalRequests':0,'productionCalls':0});page.close()
   browser.close()
 finally:server.shutdown()
 (OUT/'browser-results.json').write_text(json.dumps({'status':'PASS','type':'Isolated real browser with synthetic RPC, not plant verification','results':results},indent=2)+'\n')
