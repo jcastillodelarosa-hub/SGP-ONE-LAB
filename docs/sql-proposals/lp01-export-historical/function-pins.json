@@ -1,0 +1,26 @@
+{
+  "sgp_lp_operacion.export_dual_ordenes(text,text,date,integer)": {
+    "before": "e8c1d0983df31176e5ba0050d77fa667",
+    "after": "82026cbd3c7e66a7cde9b1427364df5c"
+  },
+  "sgp_lp_operacion.export_dual_universo(text,text,date,integer)": {
+    "before": "8c9bcd43fc1e1aee0e478e3cb2f3e71d",
+    "after": "e987deb8dadbf0bdbc6145df82eabbd5"
+  },
+  "sgp_lp_operacion.export_dual_comparar(text,text,date,integer,jsonb)": {
+    "before": "4072e656eabc69512ff47a6e56a3f7d2",
+    "after": "3ca39b841496a9928548a1d599e5f52a"
+  },
+  "public.sgp_lp_operacion_importar_xlsx(text,jsonb,text,text,jsonb)": {
+    "before": "9a17d2e401b556f0a0c118113248aaa6",
+    "after": "3b686b5a13a71ca4a297d0074e70b695"
+  },
+  "public.sgp_lp_operacion_comando(text,jsonb)": {
+    "before": "a8ca3d3886b48ff93a7f64de9e6033f6",
+    "after": "48ad61deb0200a0fbe4a4a817b645ffd"
+  },
+  "sgp_lp_operacion.export_v4_plan_visible(jsonb,text,text,text,date,integer)": {
+    "before": "108b5e1f0bc3c2c60ae48029aff79d0c",
+    "after": "2bf13d5ec345232ffa485b9f1ba09dcd"
+  }
+}

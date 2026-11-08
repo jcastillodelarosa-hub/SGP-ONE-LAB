@@ -43,8 +43,8 @@ function currentReport(data,context){
  return {status:'CURRENT',report};
 }
 
-function historicalReferences(row,context,assignmentIds,scheduledIds){
- if(context.stage==='EMPAQUE')return Array.isArray(row.assignmentRefs)&&row.assignmentRefs.length===0&&row.manualHistory?.authority==='HISTORICAL_ONLY'&&Array.isArray(row.manualHistory.assignments)&&row.manualHistory.assignments.length===0&&row.scheduledReference?.authority==='HISTORICAL_REFERENCE_ONLY'&&row.scheduledReference.quantity===null&&Array.isArray(row.scheduledReference.assignments)&&row.scheduledReference.assignments.length===0;
+function historicalReferences(row,context,assignmentIds,scheduledIds,historical=false){
+ if(historical||context.stage==='EMPAQUE')return Array.isArray(row.assignmentRefs)&&row.assignmentRefs.length===0&&row.manualHistory?.authority==='HISTORICAL_ONLY'&&Array.isArray(row.manualHistory.assignments)&&row.manualHistory.assignments.length===0&&row.scheduledReference?.authority==='HISTORICAL_REFERENCE_ONLY'&&row.scheduledReference.quantity===null&&Array.isArray(row.scheduledReference.assignments)&&row.scheduledReference.assignments.length===0;
  const refs=row.assignmentRefs,manual=row.manualHistory,scheduled=row.scheduledReference;
  if(!Array.isArray(refs)||!refs.length||refs.some(ref=>!id(ref))||new Set(refs).size!==refs.length||refs.some(ref=>assignmentIds.has(ref)))return false;
  if(!object(manual)||manual.authority!=='HISTORICAL_ONLY'||!Array.isArray(manual.assignments)||manual.assignments.length!==refs.length)return false;
@@ -93,16 +93,20 @@ function valueSource(row,s,context,files,imports,usedRows){
 }
 
 function projectV2(report,context,expectedContract=CONTRACT){
- const s=report.snapshot,withPlan=expectedContract===PLAN_CONTRACT,invalid=()=>pending('INCOMPATIBLE_CLOSE');
+ const s=report.snapshot,withPlan=expectedContract===PLAN_CONTRACT,historical=withPlan&&s?.writerScope==='LP-EXPORT-HISTORICAL-1',invalid=()=>pending('INCOMPATIBLE_CLOSE');
  // V2 writer's contained pilot. Supporting another stage/line needs its own
  // accredited writer contract; a matching label alone cannot extend the pilot.
- if(context.line!=='PANELES_2'||(context.stage==='EMPAQUE'&&(!withPlan||s.writerScope!=='LP-EXPORT-DUAL-1'))||(s.writerScope!==undefined&&s.writerScope!=='LP-EXPORT-DUAL-1'))return invalid();
+ if(context.line!=='PANELES_2'||(context.stage==='EMPAQUE'&&(!withPlan||!['LP-EXPORT-DUAL-1','LP-EXPORT-HISTORICAL-1'].includes(s.writerScope)))||(s.writerScope!==undefined&&!['LP-EXPORT-DUAL-1','LP-EXPORT-HISTORICAL-1'].includes(s.writerScope)))return invalid();
  if(!object(s)||s.contract!==expectedContract||s.authority!==AUTHORITY||s.ok!==true||!exact(s,context)||!id(s.id)||s.id!==report.id||s.version!==report.version||s.version<2||s.type!=='CON_ACTIVIDAD'||report.tipo!=='CON_ACTIVIDAD')return invalid();
  if(!id(s.importId)||!hash(s.universeRevision)||s.canContinue!==false||s.reconciliation!==RECONCILIATION)return invalid();
  let comparison=null;
  if(withPlan){
   if(s.operationalReady!==false||!object(s.initialReference)||s.initialReference.status!=='EXPORT_CUT_REFERENCE_REQUIRED'||s.initialReference.cut!==null||s.initialReference.includedClosureVersions!==null)return invalid();
-  try{comparison=(context.stage==='EMPAQUE'?packingPlanComparison:assemblyPlanComparison)({contract:context.stage==='EMPAQUE'?'LP-EMPAQUE-PLAN-COMPARISON-1':'LP-ENSAMBLE-PLAN-COMPARISON-1',planSnapshot:s.planSnapshot,planComparison:s.planComparison,comparisonComplete:s.comparisonComplete,rows:s.rows},context);}catch{return invalid();}
+  if(historical){
+   const p=s.planSnapshot;
+   if(!object(p)||p.contract!=='LP-HISTORICAL-UNAVAILABLE-1'||p.status!=='HISTORICAL_UNAVAILABLE'||!exact(p,context)||p.historyComplete!==false||!Array.isArray(p.sourceRows)||p.sourceRows.length||!Array.isArray(p.targets)||p.targets.length||['baseline','version','versionId','changes'].some(k=>own(p,k))||s.planComparison!=='HISTORICAL_UNAVAILABLE'||s.comparisonComplete!==false)return invalid();
+   comparison={planSnapshot:{...p,sourceRows:[],targets:[]},comparisonComplete:false};
+  }else try{comparison=(context.stage==='EMPAQUE'?packingPlanComparison:assemblyPlanComparison)({contract:context.stage==='EMPAQUE'?'LP-EMPAQUE-PLAN-COMPARISON-1':'LP-ENSAMBLE-PLAN-COMPARISON-1',planSnapshot:s.planSnapshot,planComparison:s.planComparison,comparisonComplete:s.comparisonComplete,rows:s.rows},context);}catch{return invalid();}
  }else if(s.comparisonComplete!==false||s.planComparison!==PLAN)return invalid();
  const file=s.file;
  if(!object(file)||!id(file.id)||!id(report.archivo)||file.id!==report.archivo||file.adapter!==POWERBI_VERSION||!hash(file.sha256)||typeof file.name!=='string'||!file.name.trim())return invalid();
@@ -112,6 +116,7 @@ function projectV2(report,context,expectedContract=CONTRACT){
   if(!object(row)||!keyInLine(row.key,context.line)||keys.has(row.key))return invalid();
   keys.add(row.key);
   if(['power_bi','ejecutado','sale','assignments','diferencia'].some(k=>own(row,k)))return invalid();
+  if(historical&&(row.plan!==null||row.planStatus!=='HISTORICAL_UNAVAILABLE'||row.difference!==null||row.pendingAgainstPlan!==null||!Array.isArray(row.assignmentRefs)||row.assignmentRefs.length||row.manualHistory?.assignments?.length!==0||row.scheduledReference?.assignments?.length!==0||row.scheduledReference?.quantity!==null))return invalid();
   if(!withPlan&&(row.plan!==null||row.planStatus!==PLAN||row.difference!==null||row.pendingAgainstPlan!==null))return invalid();
   if(!object(row.budget)||row.budget.status!==RECONCILIATION||row.budget.available!==null||!object(row.continuity)||row.continuity.status!==RECONCILIATION||row.continuity.quantity!==null||row.continuity.allocation!=='NONE')return invalid();
   if(!Array.isArray(row.sourceRows))return invalid();
@@ -128,7 +133,7 @@ function projectV2(report,context,expectedContract=CONTRACT){
   // PostgreSQL btrim(text) removes spaces, not newlines/tabs inside a recorded reason.
   const reason=rawReason===null?null:rawReason.replace(/^ +| +$/g,'')||null;
   if(row.reason!==reason||((row.coverage==='ABSENT'||(withPlan&&row.pendingAgainstPlan>0))&&!reason?.trim()))return invalid();
-  if(!historicalReferences(row,context,assignmentIds,scheduledIds))return invalid();
+  if(!historicalReferences(row,context,assignmentIds,scheduledIds,historical))return invalid();
   const identity=snapshotIdentity(row,context);if(identity===false)return invalid();
   rows.push({key:row.key,quantity:row.realized,coverage:row.coverage,preserve:row.preserve,reason,sourceRows:[...row.sourceRows],identity,valueStatus:row.valueStatus,valueSource:origin,
    source:'EXPORT_CIERRE_V2',closureId:report.id,version:report.version,fileId:origin?.file.id??null,sha256:origin?.file.sha256??null,importId:origin?.importId??null,universeRevision:origin?.universeRevision??null,
@@ -137,7 +142,7 @@ function projectV2(report,context,expectedContract=CONTRACT){
  if(Object.entries(s.reasons).some(([key,value])=>!keys.has(key)||typeof value!=='string'||value.length>2000))return invalid();
  return {contract:withPlan?'LP-REALIZADO-CIERRE-4':'LP-REALIZADO-CIERRE-3',status:'CONFIRMED',authority:AUTHORITY,closureId:report.id,version:report.version,
   importId:s.importId,universeRevision:s.universeRevision,file:{id:file.id,name:file.name,sha256:file.sha256,adapter:file.adapter},rows,
-  canContinue:false,comparisonComplete:withPlan?comparison.comparisonComplete:false,planComparison:withPlan?'ACCREDITED_CURRENT':PLAN,reconciliation:RECONCILIATION,
+  canContinue:false,comparisonComplete:withPlan?comparison.comparisonComplete:false,planComparison:historical?'HISTORICAL_UNAVAILABLE':withPlan?'ACCREDITED_CURRENT':PLAN,reconciliation:RECONCILIATION,
   ...(withPlan?{planSnapshot:comparison.planSnapshot,operationalReady:false,initialReference:{status:'EXPORT_CUT_REFERENCE_REQUIRED',cut:null,includedClosureVersions:null}}:{})};
 }
 

@@ -1,0 +1,32 @@
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import {bootstrap} from '../lp01-export-plan-v4/bootstrap.mjs';
+const db=await bootstrap({prepareHorario:true});
+await db.exec(await readFile(new URL('../../docs/sql-proposals/lp01-historical-turn/01_prepare_REVIEW.sql',import.meta.url),'utf8'));
+const discovery=await readFile(new URL('../../docs/sql-proposals/lp01-historical-turn/02_discovery_REVIEW.sql',import.meta.url),'utf8');
+await db.exec(discovery.split('DO $patch$')[0]+'COMMIT;');
+const call=async({id='10000000-0000-0000-0000-000000000001',user='coordinator',stage='ENSAMBLE',date='2026-11-05',shift=1,motive='Reconciliar export histórico'}={})=>(await db.query('SELECT public.sgp_lp_turno_historico_preparar($1,$2,$3,\'PANELES_2\',$4,$5,$6) r',[user,id,stage,date,shift,motive])).rows[0].r;
+await assert.rejects(call(),/HISTORICAL_DISABLED/);
+await db.exec('UPDATE sgp_lp_operacion.config SET preparar_historico=true');
+await assert.rejects(call({user:'leader'}),/HISTORICAL_ROLE_DENIED/);
+await assert.rejects(call({date:'2099-01-01'}),/HISTORICAL_PERIOD_NOT_PAST/);
+const before=(await db.query("SELECT (SELECT count(*) FROM sgp_lp_operacion.ordenes) orders,(SELECT count(*) FROM sgp_lp_operacion.archivos) files,(SELECT count(*) FROM public.sgp_linea_plan_asignaciones) plans")).rows;
+assert.equal((await db.query("SELECT sgp_lp_operacion.historico_discovery('coordinator','ENSAMBLE','PANELES_2','2026-11-05',1) r")).rows[0].r.canPrepare,true);
+const result=await call();
+assert.equal((await db.query("SELECT sgp_lp_operacion.historico_discovery('coordinator','ENSAMBLE','PANELES_2','2026-11-05',1) r")).rows[0].r.canPrepare,false);assert.equal(result.state,'PREPARED');assert.equal(result.historicalPlan,'UNAVAILABLE');assert.equal((await call()).duplicate,true);
+await assert.rejects(call({motive:'Otro'}),/HISTORICAL_REQUEST_REUSED/);
+await assert.rejects(call({id:'10000000-0000-0000-0000-000000000002'}),/HISTORICAL_TURN_ALREADY_EXISTS/);
+await db.exec("INSERT INTO public.sgp_rol_accesos VALUES('COORDINADOR','empaque',true);INSERT INTO public.sgp_usuario_accesos SELECT id_usuario,'empaque',true FROM public.sgp_usuarios WHERE usuario='coordinator'");
+assert.equal((await call({id:'10000000-0000-0000-0000-000000000004',stage:'EMPAQUE'})).stage,'EMPAQUE');
+assert.deepEqual((await db.query("SELECT (SELECT count(*) FROM sgp_lp_operacion.ordenes) orders,(SELECT count(*) FROM sgp_lp_operacion.archivos) files,(SELECT count(*) FROM public.sgp_linea_plan_asignaciones) plans")).rows,before);
+assert.equal((await db.query("SELECT has_table_privilege('anon','sgp_lp_operacion.preparaciones_historicas','SELECT') p")).rows[0].p,false);
+await assert.rejects(db.exec('UPDATE sgp_lp_operacion.preparaciones_historicas SET motivo=\'x\''),/HISTORICAL_IMMUTABLE/);
+await db.exec('BEGIN');await call({id:'10000000-0000-0000-0000-000000000003',date:'2026-11-04'});await db.exec("UPDATE public.sgp_usuarios SET activo=false WHERE usuario='coordinator'");await assert.rejects(db.exec('COMMIT'),/HISTORICAL_ROLE_REVOKED/);
+assert.equal((await db.query("SELECT count(*) n FROM sgp_lp_operacion.turnos WHERE fecha='2026-11-04'")).rows[0].n,0);
+if(process.env.READER_SNAPSHOT){
+ const snapshots=JSON.parse(await readFile(process.env.READER_SNAPSHOT,'utf8'));
+ await db.exec(snapshots.find(x=>x.proname==='sgp_lp_operacion_consultar').definition);
+ await db.exec('BEGIN;'+discovery.slice(discovery.indexOf('DO $patch$')));
+ assert.ok((await db.query("SELECT prosrc FROM pg_proc WHERE oid='public.sgp_lp_operacion_consultar(text,text,text,date,integer)'::regprocedure")).rows[0].prosrc.includes('historico_discovery'));
+}
+console.log('historical header: flag, role, period, retry, existing, immutable, no invented work, deferred revocation PASS');await db.close();
