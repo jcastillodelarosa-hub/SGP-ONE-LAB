@@ -57,6 +57,7 @@ jobs:
           node tests/lp01-export-import-v2/guard.mjs
           node tests/lp01-export-close-v2/guard.mjs
           node tests/lp01-assembly-workspace/dom.mjs
+          node tests/lp01-assembly-workspace/role-race-dom.mjs
           node tests/lp01-assembly-workspace/controller-dom.mjs
           node tests/lp01-assembly-workspace/packing-controller-dom.mjs
           node --test tests/lp01-packing-sheet.test.mjs

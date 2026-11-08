@@ -38,5 +38,5 @@ export function mountFollowup({tracking,operation,bridge}){
 
  return {load:operational.load,openOrder:operational.openOrder};
 }
-function boot(){window.SGPTrackingBridge=mountFollowup({tracking:document.getElementById('productionTrackingPanel'),operation:document.getElementById('productionOperationPanel'),bridge:{getToken:()=>window.SGPPlannerBridge?.getToken?.(),getClient:()=>window.SGPPlannerBridge.getClient(),openGlass:(...args)=>window.SGPPlannerBridge.openGlass(...args)}});}
+function boot(){window.SGPTrackingBridge=mountFollowup({tracking:document.getElementById('productionTrackingPanel'),operation:document.getElementById('productionOperationPanel'),bridge:{getRole:()=>window.SGPPlannerBridge?.getRole?.(),getToken:()=>window.SGPPlannerBridge?.getToken?.(),getClient:()=>window.SGPPlannerBridge.getClient(),openGlass:(...args)=>window.SGPPlannerBridge.openGlass(...args)}});}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();

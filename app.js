@@ -67,7 +67,7 @@ let queriedProductions = [];
 let assemblyRows = [];
 // Publicar únicamente un puente de consulta para el Planificador; no exponer credenciales.
 window.SGPPdtRegistration={open:async options=>openPdtRegistration({...options,client:await getSupabaseClient(),token:getAppToken()})};
-window.SGPPlannerBridge={getRows:()=>assemblyRows,getToken:()=>getAppToken(),getClient:()=>getSupabaseClient(),loadAssembly:()=>loadAssembly(),openGlass:(key,id,category)=>openGlassDetail(key,id,category)};
+window.SGPPlannerBridge={getRole:()=>currentAuthToken&&currentAuthToken===getAppToken()?currentAuth?.rol||null:null,getRows:()=>assemblyRows,getToken:()=>getAppToken(),getClient:()=>getSupabaseClient(),loadAssembly:()=>loadAssembly(),openGlass:(key,id,category)=>openGlassDetail(key,id,category)};
 let queriedSystemSummary = [];
 let detailSort = { key: null, dir: 1 };
 let currentPieceRows=[];let currentPieceView='summary';let currentPieceContext='order';let pieceDetailColumns=['perfil','marca','fabricacion','longitud','cantidad','descripcion'];
@@ -304,6 +304,7 @@ async function refreshAuthStatus() {
     }
     const client = await getSupabaseClient();
     const { data, error } = await client.rpc("sgp_sesion_actual", { p_token: token });
+    if(token!==getAppToken())return null;
     if (error) {
       console.warn("Error temporal validando sesión SGP:", error);
       els.authStatus.textContent = "Reintentando sesión…";
@@ -317,7 +318,7 @@ async function refreshAuthStatus() {
     }
     els.authStatus.textContent = `${data.nombre} · ${data.rol}`;
     els.authUser.hidden = true; els.authPassword.hidden = true; els.authLogin.hidden = true; els.authLogout.hidden = false;
-    await applyUserAccess(data);
+    await applyUserAccess(data,token);
     return data;
   } catch {
     els.authStatus.textContent = "Auth no disponible";
@@ -391,9 +392,10 @@ const SGP_ACCESS_TREE=[
 ];
 const SGP_WINDOWS=SGP_ACCESS_TREE.flatMap(x=>[[x.key,x.label],...(x.children||[])]);
 function accessTreeHtml(selected=[],mode='user'){return SGP_ACCESS_TREE.map(x=>{const kids=x.children||[],on=selected.includes(x.key),kidOn=kids.filter(k=>selected.includes(k[0])).length;if(!kids.length)return '<label class="access-leaf"><input type="checkbox" value="'+x.key+'" '+(on?'checked':'')+'><span><b>'+x.label+'</b></span></label>';return '<details class="access-module"><summary><span class="access-module-title">'+x.label+'</span><small>'+kidOn+'/'+kids.length+' ventanas</small></summary><div class="access-module-body"><label class="access-all"><input type="checkbox" value="'+x.key+'" '+(on?'checked':'')+'><span><b>Acceso completo al módulo</b><small>Permite todas las ventanas actuales del módulo</small></span></label>'+kids.map(k=>'<label><input type="checkbox" value="'+k[0]+'" '+(selected.includes(k[0])?'checked':'')+'><span><b>'+k[1]+'</b><small>Ventana interna</small></span></label>').join('')+'</div></details>'}).join('')}
-let currentAuth=null,userAdminRows=[],editingUserId=null,roleAccessRows=[];
-async function applyUserAccess(auth){
- currentAuth=auth||null;const token=sessionStorage.getItem(APP_SESSION_KEY),buttons=[...document.querySelectorAll('.nav [data-view]')];
+let currentAuth=null,currentAuthToken=null,userAdminRows=[],editingUserId=null,roleAccessRows=[];
+async function applyUserAccess(auth,validatedToken=null){
+ if(auth&&(!validatedToken||validatedToken!==getAppToken()))return;
+ currentAuthToken=auth?validatedToken:null;currentAuth=auth||null;const token=sessionStorage.getItem(APP_SESSION_KEY),buttons=[...document.querySelectorAll('.nav [data-view]')];
  // Presentation only: protected RPCs still validate current role and effective access.
  document.dispatchEvent(new CustomEvent('sgp:lp-role',{detail:auth?.rol||null}));
  if(!token){buttons.forEach(b=>b.hidden=false);return}

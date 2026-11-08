@@ -38,7 +38,7 @@ export function mountOperation({tracking,operation,bridge,legacyLoad,orderSaleEn
  let data=null,context=null,selected=null,seq=0,pending=null,busy=false,bi=null,fileId=null,session=null,loading=false,missing=false,dirty=false,fileSequence=0;
  let assemblyFollowCurrent=true,exportCloseState={};
  const exportNavigationAllowed=()=>!exportCloseState.busy&&!exportCloseState.uncertain;
- let viewPanel='planificador',trackingViewState={},globalData=null,globalContext=null,globalSession=null,trackingRole=null,globalRequest=null,globalQueued=false;
+ let viewPanel='planificador',trackingViewState={},globalData=null,globalContext=null,globalSession=null,trackingRole=bridge.getRole?.()??null,globalRequest=null,globalQueued=false;
  let operationRequest=null,enrichment=null,navigationGeneration=0,navigating=false,navigationFlight=null,revealing=false,temporaryTrackingState=null;
  let orderSaleScope=null,orderSaleProvider=null,orderNoteScope=null,orderNoteProvider=null;
  const trackingStates=new Map();
