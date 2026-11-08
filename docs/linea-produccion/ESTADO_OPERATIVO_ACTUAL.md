@@ -1763,3 +1763,19 @@ no se filtran datos aún no consultados. Sin SQL, permisos ni automatismos nuevo
 contenedor; recorrido PC/móvil incorporado al workflow UI existente, pendiente CI.
 No fusionado ni publicado. Siguiente: CI del commit, revisión de artefacto y
 publicación por controles vigentes. Baseline v408 y 16 pins conservados.
+
+## 2026-11-08 — Turno por horario e Incorporar v410 (en desarrollo)
+Base main9708cab / v409 publicada.
+Nuevo flujo autenticado calcula período con horario servidor y materializa solo
+cabecera actual vacía; no autocierra anterior, copia raíces ni infiere arrastre.
+No es job: sin usuario no genera filas. Repite petición sin duplicar turno/auditoría.
+En hoja se sigue horario actual, salvo selección histórica o borrador pendiente.
+INCORPORAR se rebasa al lector v408 con prioridad/reserva y exclusiones intactas.
+Escritor idéntico al acreditado PG17 run42421811138; ocho grupos focales sobre
+lector actual PASS. Apertura ocho grupos SQL sintéticos PASS, concurrencia nueva
+pendiente. Frontend contratos fail-closed y controlador DOM PASS.
+No SQL aplicado, no activación, no publicación todavía. No confundir el cierre
+Export4 preparado con operativo: faltan integración plan, UI/servicio y primera
+referencia para conciliación; ausentes del archivo parcial nunca se vuelven cero.
+Siguiente: prueba concurrente acotada, instalación conjunta+readback, activación
+autorizada, CI/artefacto y publicación protegida. No repetir auditorías generales.

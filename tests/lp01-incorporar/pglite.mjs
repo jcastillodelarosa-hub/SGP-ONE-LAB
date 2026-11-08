@@ -4,8 +4,9 @@ import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import {createHash,randomUUID} from 'node:crypto';
 const ROOT=new URL('../../',import.meta.url);
-const postExport=process.argv.includes('--post-export');
-const proposal='docs/sql-proposals/'+(postExport?'lp01-incorporar-post-export':'lp01-incorporar')+'/';
+const postV408=process.argv.includes('--post-v408');
+const postExport=postV408||process.argv.includes('--post-export');
+const proposal='docs/sql-proposals/'+(postV408?'lp01-incorporar-post-v408':postExport?'lp01-incorporar-post-export':'lp01-incorporar')+'/';
 const read=p=>readFile(new URL(p,ROOT),'utf8');
 const db=new PGlite({extensions:{pgcrypto}});await db.waitReady;
 const checks=[],sql=q=>db.exec(q),value=async q=>(await db.query(q)).rows[0]?.v;
@@ -73,8 +74,10 @@ DECLARE p jsonb;v bigint; BEGIN SELECT to_jsonb(x) INTO p FROM public.sgp_produc
  async function reject(cmd,expected,token='leader'){let e;try{await call(cmd,token)}catch(error){e=error}assert(e,'Expected rejection');assert.match(e.message,new RegExp(expected));await sql('ROLLBACK;RESET ROLE;');}
  async function receipt(id,token='leader'){await sql('SET ROLE anon;');try{return await value(`SELECT public.sgp_lp_operacion_resultado(${lit(token)},${lit(id)}) AS v`);}finally{await sql('RESET ROLE;');}}
  if(postExport)await sql('ALTER TABLE public.sgp_producciones ADD COLUMN excluida_export boolean NOT NULL DEFAULT false');
- const manifest=JSON.parse(await read(proposal+'manifest.json'));
- const install=await read(proposal+'01_incorporar_REVIEW.sql'),restore=await read(proposal+'02_restore_REVIEW.sql');
+ const writerProposal=postV408?'docs/sql-proposals/lp01-incorporar-post-export/':proposal;
+ const manifest=JSON.parse(await read(writerProposal+'manifest.json'));
+ if(postV408)manifest.discovery={before_source_md5:'0765f449e5f21f617ede8388a103e902',candidate_source_md5:'31a67d573c387f322a1737cda8181f13'};
+ const install=await read(writerProposal+'01_incorporar_REVIEW.sql'),restore=await read(writerProposal+'02_restore_REVIEW.sql');
  const metadata=async()=>value(`SELECT jsonb_agg(jsonb_build_object('oid',p.oid,'owner',p.proowner,'acl',p.proacl::text,'config',p.proconfig,'definer',p.prosecdef) ORDER BY p.oid) AS v FROM pg_proc p WHERE oid IN(${Object.keys(manifest.functions).map(s=>lit(s)+'::regprocedure').join(',')})`);
  const beforeMeta=await metadata();
  await deny(install.replace('COMMIT;','SELECT 1/0;COMMIT;'),'division by zero');
@@ -84,8 +87,11 @@ DECLARE p jsonb;v bigint; BEGIN SELECT to_jsonb(x) INTO p FROM public.sgp_produc
  assert.equal(await value('SELECT incorporar_ensamble AS v FROM sgp_lp_operacion.config WHERE id'),false);
  await sql(await read('docs/sql-proposals/lp01-hoja/01_catalog_REVIEW.sql'));
  if(postExport)await sql(await read('tests/lp01-incorporar/post-export/export-reader-candidate.sql'));
+ if(postV408){await sql('CREATE TABLE public.sgp_prioridades(key_produccion text,anio int,semana int,id_linea text,prioridad text)');await sql(await read('docs/linea-produccion/hoja-vidrio-v408/sql/prioridad-install.sql'));}
  const discovery=await read(proposal+'03_discovery_REVIEW.sql'),restoreDiscovery=await read(proposal+'04_restore_discovery_REVIEW.sql');
+ const readerBefore=await hash();
  await sql(discovery);
+ if(postV408){assert.equal(readerBefore,manifest.discovery.before_source_md5);assert.equal(await hash(),manifest.discovery.candidate_source_md5);assert.match(await value(`SELECT prosrc AS v FROM pg_proc WHERE oid=${lit(identity)}::regprocedure`),/prioridad_reserva/);}
  assert.deepEqual((await snapshot()).incorporation,{contract:'LP-INCORPORAR-1',enabled:false,canIncorporate:false,stage:'ENSAMBLE',line:'PANELES_2'});
  await reject(command(),'INCORPORAR_NO_HABILITADO');
  assert.equal(await value('SELECT count(*)::int AS v FROM sgp_lp_operacion.auditoria'),0);
@@ -149,11 +155,11 @@ DECLARE p jsonb;v bigint; BEGIN SELECT to_jsonb(x) INTO p FROM public.sgp_produc
  const note={op:'NOTA',id:randomUUID(),stage:'ENSAMBLE',line:'PANELES_2',date:'2026-11-07',shift:1,key:'OTHER|PANELES_2',part:created.part,revision:0,turn_revision:2,observation:'QA existing note'};assert.equal((await call(note)).ok,true);
  checks.push('Assembly supervisor enrollment and own scoped receipt work; other-user receipt denied; feature containment blocks writes but preserves receipts; preexisting NOTA unchanged');
  const stateBeforeRestore=await value('SELECT jsonb_agg(to_jsonb(a) ORDER BY id) AS v FROM sgp_lp_operacion.auditoria a');
- await sql(restoreDiscovery);assert.equal((await snapshot()).incorporation,undefined);
+ await sql(restoreDiscovery);if(postV408)assert.equal(await hash(),readerBefore);assert.equal((await snapshot()).incorporation,undefined);
  await sql(restore);assert.deepEqual(await metadata(),beforeMeta);assert.deepEqual(await value('SELECT jsonb_agg(to_jsonb(a) ORDER BY id) AS v FROM sgp_lp_operacion.auditoria a'),stateBeforeRestore);
  for(const [sig,pin]of Object.entries(manifest.functions))assert.equal(await value(`SELECT md5(prosrc) AS v FROM pg_proc WHERE oid=${lit(sig)}::regprocedure`),pin.before_source_md5);
  await reject(command({revision:3}),'COMANDO_INVALIDO');await deny(restore,'CUERPO_CAMBIO');
  checks.push('Contained rollback restores exact bodies/ACL and retains all planner/order/audit rows; stale rollback rejected');
  const report={status:'PASS',engine:await value('SELECT version() AS v'),groups:checks.length,results:checks,limits:['In-memory synthetic PostgreSQL WASM 18.6, not production17.11. No live writes or access activation.','Concurrent execution/locking has not been certified by this single-connection harness. SQL uses the existing lock order plus NOWAIT planner table lock; multi-session PG17 test required before activation.','Only ENSAMBLE/PANELES_2. No Empaque, automatic opening, authoritative close V2 or UI integration.']};
- await writeFile(new URL('tests/lp01-incorporar/'+(postExport?'post-export/':'')+'results.json',ROOT),JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));
+ if(!postV408)await writeFile(new URL('tests/lp01-incorporar/'+(postV408?'post-v408/':postExport?'post-export/':'')+'results.json',ROOT),JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));
 }finally{await db.close();}
