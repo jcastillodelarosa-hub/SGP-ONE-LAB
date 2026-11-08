@@ -17,6 +17,6 @@ export async function assemble(){
   }
   fragments.push(`\n-- FILE ${path}\n${source}\n`);
  }
- return `BEGIN;\nSET LOCAL lock_timeout='5s';\nSET LOCAL statement_timeout='30s';\nDO $contain$BEGIN\n PERFORM 1 FROM sgp_lp_operacion.config WHERE id FOR UPDATE;\n IF (SELECT incorporar_ensamble FROM sgp_lp_operacion.config WHERE id) IS DISTINCT FROM false THEN RAISE EXCEPTION 'EXPORT_DUAL_CONTAIN_INCORPORAR_FIRST';END IF;\nEND $contain$;\n${fragments.join('')}\nCOMMIT;\n`;
+ return `BEGIN;\nSET LOCAL lock_timeout='5s';\nSET LOCAL statement_timeout='30s';\nDO $contain$DECLARE previous boolean;BEGIN\n SELECT incorporar_ensamble INTO STRICT previous FROM sgp_lp_operacion.config WHERE id FOR UPDATE;\n IF previous IS NULL THEN RAISE EXCEPTION 'EXPORT_DUAL_CONFIG_INVALID';END IF;\n PERFORM set_config('sgp.export_dual_previous_incorporar',previous::text,true);\n UPDATE sgp_lp_operacion.config SET incorporar_ensamble=false WHERE id;\nEND $contain$;\n${fragments.join('')}\nUPDATE sgp_lp_operacion.config SET incorporar_ensamble=current_setting('sgp.export_dual_previous_incorporar')::boolean WHERE id;\nCOMMIT;\n`;
 }
 if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href)process.stdout.write(await assemble());

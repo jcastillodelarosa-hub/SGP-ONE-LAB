@@ -23,8 +23,17 @@ try{
  await sql(await read('docs/sql-proposals/lp01-export-dual/02_reader_REVIEW.sql'));
  }else{
  const metadata=()=>v("SELECT jsonb_agg(jsonb_build_object('oid',oid,'owner',proowner,'acl',proacl::text,'config',proconfig,'definer',prosecdef) ORDER BY oid) v FROM pg_proc WHERE oid IN('public.sgp_lp_operacion_comando(text,jsonb)'::regprocedure,'public.sgp_lp_operacion_consultar(text,text,text,date,integer)'::regprocedure,'public.sgp_lp_operacion_resultado(text,uuid)'::regprocedure,'public.sgp_lp_operacion_importar_xlsx(text,jsonb,text,text,jsonb)'::regprocedure)");const beforeMetadata=await metadata();
- assert.equal(await v('SELECT incorporar_ensamble v FROM sgp_lp_operacion.config WHERE id'),false);
- await sql(await assemble());
+ const previous=process.argv.includes('--prior-active');await sql(`UPDATE sgp_lp_operacion.config SET incorporar_ensamble=${previous}`);
+ const installer=await assemble();
+ // Fail after all DDL, before COMMIT: every schema/flag change must roll back.
+ await assert.rejects(()=>sql(installer.replace(/COMMIT;\n$/,()=>"DO $$BEGIN RAISE EXCEPTION 'SYNTHETIC_INSTALL_FAILURE';END $$;\nCOMMIT;\n")),/SYNTHETIC_INSTALL_FAILURE/);
+ await sql('ROLLBACK');
+ assert.equal(await v('SELECT incorporar_ensamble v FROM sgp_lp_operacion.config WHERE id'),previous);
+ assert.equal(await v("SELECT to_regclass('sgp_lp_operacion.inclusiones_empaque')::text v"),null);
+ assert.equal(await v("SELECT to_regclass('sgp_lp_operacion.plan_control')::text v"),null);
+ assert.deepEqual(await metadata(),beforeMetadata);
+ await sql(installer);
+ assert.equal(await v('SELECT incorporar_ensamble v FROM sgp_lp_operacion.config WHERE id'),previous);
  assert.deepEqual(await metadata(),beforeMetadata);
  const flags=await v('SELECT to_jsonb(c) v FROM sgp_lp_operacion.config c WHERE id');
  for(const name of ['turno_horario_empaque','incorporar_empaque','export_production_v2','export_close_v4'])assert.equal(flags[name],false);

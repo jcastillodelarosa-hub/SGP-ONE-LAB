@@ -4,7 +4,7 @@ Este paquete no activa flags, no crea endpoints públicos, no cambia saldos ofic
 
 ## Instalación coordinada
 
-1. Leer pins y ACL vivos antes de modificar. Contener Incorporar Ensamble, Incorporar Empaque/turnoHorario Empaque y planner si estuvieran activos; registrar valores previos para restablecer únicamente los autorizados. No activar Export por instalar frontend.
+1. Leer pins y ACL vivos antes de modificar. El ensamblado atómico contiene Incorporar Ensamble bajo bloqueo de config solo dentro de la transacción y restaura su valor previo antes de COMMIT; no requiere pausarlo previamente. Este paquete supone Empaque/planner nuevos y ausentes, según pins de instalación. No activar Export por instalar frontend.
 2. `lp01-ensamble-plan/01_plan_REVIEW.sql` (journal desactivado; no ejecutar si ya existe: revisar estado).
 3. `lp01-plan-writers/01_facades_REVIEW.sql` (sobrecargas con motivo/UUID y trigger privado SECURITY DEFINER; conservar firmas antiguas).
 4. `lp01-empaque-inclusion/01_inclusion_REVIEW.sql` y su script de turno horario según orden de ese paquete. No aplicar un lector alternativo: el paso 7 integra el fragmento final Empaque sobre v410.
@@ -44,8 +44,10 @@ Requieren dependencias ya declaradas en tests/lp01-export-plan-v4/package.json. 
 
 ### Integración completa
 
-`node docs/sql-proposals/lp01-export-dual/assemble.mjs > /tmp/lp-export-dual-install.sql` envuelve en una única transacción los artefactos listados en `install-order.json`, en el mismo orden usado por `node tests/lp01-export-dual/flow.mjs --full-chain`. Solo elimina el BEGIN y COMMIT exteriores exactamente reconocidos; preserva todos los cuerpos y SET LOCAL. El test ejecuta directamente el SQL producido por assemble(), no una instalación alternativa por archivos. Antes del primer DDL exige Incorporar Ensamble contenido (false), con bloqueo de config hasta COMMIT. No cambia ese flag automáticamente.
+`node docs/sql-proposals/lp01-export-dual/assemble.mjs > /tmp/lp-export-dual-install.sql` envuelve en una única transacción los artefactos listados en `install-order.json`, en el mismo orden usado por `node tests/lp01-export-dual/flow.mjs --full-chain`. Solo elimina el BEGIN y COMMIT exteriores exactamente reconocidos; preserva todos los cuerpos y SET LOCAL. El test ejecuta directamente el SQL producido por assemble(), no una instalación alternativa por archivos. Antes del primer DDL bloquea config, guarda el valor previo de Incorporar Ensamble en configuración LOCAL y lo pone en false dentro de la transacción. Antes de COMMIT restaura exactamente el valor previo. Un fallo revierte tanto DDL como flag; no hay pausa persistente mientras se espera autorización.
 
 El modo full-chain no sustituye la tabla de inclusiones: instala las propuestas de journal, facades, horario Empaque, inclusiones y cierre dual. Comprueba indicadores nuevos false, journal false y conservación de owner/ACL/search_path/SECURITY DEFINER de las cuatro funciones existentes. Luego habilita únicamente en la base sintética y llama los RPC reales de turno actual e incorporación como anon, importación como service_role y cierre como anon en ambas etapas. El reloj del RPC no se reemplaza: el libro sintético de Empaque usa fecha/turno devueltos por servidor. La configuración horaria de la fixture es continua también en domingo para evitar que la hora de CI cree un hueco de calendario. Las propuestas de despliegue se ejecutan sin modificaciones.
 
 Prerequisito fixture v410: instala horario Ensamble en su posición histórica antes del cambio posterior del guard `puede_operar`, manteniendo las comprobaciones de hashes originales; no altera los controles del instalador nuevo.
+
+Autocontención verificada con flag previo false y true (`--prior-active`): se inyecta un fallo después del último DDL antes de COMMIT, se comprueba rollback completo/flag previo y luego se ejecuta el ensamblado intacto con éxito. CI ejecuta ambos casos.

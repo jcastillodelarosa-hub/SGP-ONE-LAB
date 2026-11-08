@@ -87,3 +87,4 @@ jobs:
         run: |
           node docs/sql-proposals/lp01-export-dual/assemble.mjs > /tmp/lp-export-dual-install.sql
           node tests/lp01-export-dual/flow.mjs --full-chain
+          node tests/lp01-export-dual/flow.mjs --full-chain --prior-active
