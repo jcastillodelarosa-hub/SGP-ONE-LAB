@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import {mountExportCloseEditor} from '../../src/modules/lp01-export-close-editor.js';
+const {parseHTML}=await import(process.env.LP_DOM_PACKAGE||'linkedom');
+const {document}=parseHTML('<html><body><main></main></body></html>');globalThis.document=document;
+const context={stage:'EMPAQUE',line:'PANELES_2',date:'2026-11-08',shift:1},host=document.querySelector('main');
+const data={contract:'LP-OPERACION-1',writeContract:'LP-OPERACION-CAS-2',writes:true,turn:{estado:'ABIERTO',revision:2},exportClose:{...context,contract:'LP-EXPORT-CLOSE-4',writerScope:'LP-EXPORT-DUAL-1',authority:'EXPORT_PRODUCTION_V2',enabled:true,canImport:true,canClose:true}};
+const state={file:{filename:'qa.xlsx',base64:'AAAA'}};let imports=0,retries=0,closes=0,command;
+const mount=()=>mountExportCloseEditor({host,data,context,state,isCurrent:()=>true,onImport:async p=>{imports++;assert.equal(p.authority,'EXPORT_PRODUCTION_V2');throw Object.assign(Error('Respuesta perdida'),{uncertain:true});},onRetry:async()=>{retries++;state.uncertain=false;},onClose:async p=>{closes++;command=p;}});
+let editor=mount();await host.querySelector('[data-export-import]').onclick();assert.equal(imports,1);assert.equal(editor.canLeave(),false);assert(host.querySelector('[data-export-file]').disabled);assert.equal(host.querySelector('[data-export-retry]').hidden,false);
+await host.querySelector('[data-export-retry]').onclick();assert.equal(retries,1);assert.equal(imports,1);assert(editor.canLeave());editor.destroy();
+state.receipt={ok:true,writerScope:'LP-EXPORT-DUAL-1',contract:'LP-EXPORT-IMPORT-3',authority:'EXPORT_PRODUCTION_V2',turnRevision:2,universe:{...context},fileId:'f',importId:'i',sha256:'a'.repeat(64),universeRevision:'b'.repeat(64),rows:[{key:'QA|PANELES_2',coverage:'ABSENT',quantity:2,valueStatus:'PRESERVED',pendingAgainstPlan:1}]};editor=mount();
+const reason=host.querySelector('[data-export-reason]');reason.value='Valor previo conservado';reason.oninput();const note=host.querySelector('[data-export-observation]');note.value='Cierre revisado';note.oninput();host.querySelector('[data-export-confirm]').click();await new Promise(r=>setTimeout(r,0));assert.equal(closes,1);assert.equal(command.import_id,'i');assert.equal(command.reasons['QA|PANELES_2'],'Valor previo conservado');assert(!('quantity'in command));editor.destroy();
+assert.equal(mountExportCloseEditor({host,data:{...data,exportClose:undefined},context,state,onImport(){},onClose(){}}),null);
+console.log('PASS close UI: explicit gate, partial receipt, reason, no quantities, uncertain retry and navigation lock');

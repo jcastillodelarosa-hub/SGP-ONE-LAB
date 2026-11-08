@@ -56,7 +56,7 @@ test('duplicate closure IDs or versions invalidate every ambiguous record',()=>{
 });
 test('no cross-stage, line, date or shift report is shown',()=>{
  for(const [field,value] of [['etapa','EMPAQUE'],['linea','FRAMES_2'],['fecha','2026-11-06'],['turno',2]]){const data=payload();data.reports[0][field]=value;assert.deepEqual(assemblyReports(data,context).reports,[]);}
- assert.throws(()=>assemblyReports(payload(),{...context,stage:'EMPAQUE'}),/Ensamble/);assert.throws(()=>assemblyReports({...payload(),contract:'wrong'},context),/Contrato/);
+ assert.deepEqual(assemblyReports(payload(),{...context,stage:'EMPAQUE'}).reports,[]);assert.throws(()=>assemblyReports({...payload(),contract:'wrong'},context),/Contrato/);
 });
 test('system and production identities come only from agreeing immutable assignments',()=>{
  const data=payload();data.reports[0].snapshot.rows[0].assignments[1].oficial.sistema='OTHER';let r=model(data);assert.equal(r.rows[0].system,'Sistema por validar');assert.equal(r.rows[0].realized,6);assert.equal(r.systems.find(s=>s.name==='Sistema por validar').realized,6);assert.match(r.warning,/identidades/);

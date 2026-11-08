@@ -1,3 +1,4 @@
+import {mountExportCloseEditor} from './lp01-export-close-editor.js';
 import {assemblySheetRows} from '../domain/lp01-assembly-sheet.js';
 import {exportQuantity} from '../domain/lp01-sources.js';
 import {parsePowerBI} from '../domain/powerbi/adapter.js';
@@ -19,12 +20,14 @@ export function assemblyCloseSummary(data,context){
  }
  return {rows,systems:[...systems.values()],pending:rows.filter(r=>r.realized===null).length};
 }
-export function renderAssemblyClose({host,data,context,onBack,onReports,isCurrent=()=>true}){
+export function renderAssemblyClose({host,data,context,onBack,onReports,isCurrent=()=>true,exportEditor}){
  const summary=assemblyCloseSummary(data,context);
  host.classList.remove('lp-operation-detail-layout');
  host.innerHTML='<header class="lp-assembly-heading"><div><span class="eyebrow">Cierre de '+(context.stage==='EMPAQUE'?'Empaque':'Ensamble')+'</span><h3>'+esc(context.line)+' · '+esc(context.date)+' / T'+context.shift+'</h3><p>'+esc(data.turn?.estado)+'</p></div><button type="button" data-assembly-close-back>Volver a la hoja</button></header><section class="lp-assembly-close-summary"><h4>Resumen por sistema</h4>'+(summary.systems.length?summary.systems.map(system=>'<section><h5>'+esc(system.name)+'</h5><div class="lp-followup-summary"><div>Programadas<b>'+(system.planned===null?'Por validar':system.planned)+'</b></div><div>Subtotal realizado conocido<b>'+system.realized+'</b></div><div>Pendientes de fuente<b>'+system.pending+'</b></div></div><ul>'+system.rows.map(row=>'<li><b>'+esc(row.produccion)+'</b> · Realizado '+(row.realized===null?'pendiente de fuente':row.realized)+' · '+esc(row.week?.label??'Semana pendiente')+'</li>').join('')+'</ul></section>').join(''):'<p>No hay órdenes abiertas, programadas ni cierres devueltos en este contexto.</p>')+'<p>El subtotal realizado incluye valores conocidos del cierre, también los conservados de cargas anteriores. Nunca informado no equivale a cero.</p></section><aside class="lp-followup-blocked" role="status"><h4>Cierre por Export pendiente de habilitación</h4><p>El servidor actual concilia avances manuales por asignación. El flujo aprobado requiere cerrar por producción con el archivo Export, sin repartir cantidades automáticamente entre asignaciones.</p><p>La carga y confirmación del nuevo cierre están contenidas hasta que ese contrato y su arrastre estén disponibles. '+(data.turnoHorario?.enabled===true?'El turno actual se habilita según su horario; el anterior conserva su cierre pendiente.':'Consultar esta hoja no abre ni cierra el turno.')+'</p></aside><button type="button" data-assembly-close-reports>Ver cierres confirmados y descargar archivos</button>';
  host.querySelector('[data-assembly-close-back]').onclick=onBack;
  host.querySelector('[data-assembly-close-reports]').onclick=onReports;
+ const editor=exportEditor&&mountExportCloseEditor({host,data,context,isCurrent,...exportEditor});
+ if(editor){host.querySelector('.lp-followup-blocked').remove();summary.closeEditor=editor;return summary;}
  if(data.catalog?.contract==='LP-HOJA-1'){
   const preview=document.createElement('section');preview.className='lp-close';
   preview.innerHTML='<h4>Revisar archivo Export</h4><p>Lectura local del XLSX de '+(context.stage==='EMPAQUE'?'Empaque':'Ensamble')+'. No sube ni guarda el archivo y no confirma el cierre.</p><label>Archivo del turno<input type="file" accept=".xlsx" data-assembly-export-preview></label><div data-assembly-preview-result role="status"></div>';

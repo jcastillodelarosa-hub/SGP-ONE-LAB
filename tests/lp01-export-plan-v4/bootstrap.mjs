@@ -3,7 +3,7 @@ import {PGlite} from '@electric-sql/pglite';
 import {pgcrypto} from '@electric-sql/pglite/contrib/pgcrypto';
 import {readFile} from 'node:fs/promises';
 const ROOT=new URL('../../',import.meta.url),read=p=>readFile(new URL(p,ROOT),'utf8');
-export async function bootstrap(){
+export async function bootstrap({installPlan=true,prepareHorario=false}={}){
  const db=new PGlite({extensions:{pgcrypto}});await db.waitReady;
  const sql=q=>db.exec(q),identity='public.sgp_lp_operacion_consultar(text,text,text,date,integer)';
  await sql(`CREATE ROLE anon;CREATE ROLE authenticated;CREATE ROLE service_role;CREATE SCHEMA extensions;CREATE EXTENSION pgcrypto WITH SCHEMA extensions;
@@ -46,6 +46,7 @@ DECLARE p jsonb;v bigint; BEGIN SELECT to_jsonb(x) INTO p FROM public.sgp_produc
  IF (p->>CASE WHEN et='ENSAMBLE' THEN 'saldo_ensamble' ELSE 'saldo_empaque' END)::numeric <> trunc((p->>CASE WHEN et='ENSAMBLE' THEN 'saldo_ensamble' ELSE 'saldo_empaque' END)::numeric) THEN RAISE EXCEPTION 'SALDO_NO_ENTERO'; END IF;
  v:=(p->>CASE WHEN et='ENSAMBLE' THEN 'saldo_ensamble' ELSE 'saldo_empaque' END)::bigint;
  IF v IS NULL OR v<0 THEN RAISE EXCEPTION 'SALDO_OFICIAL_INVALIDO'; END IF; RETURN v; END $$;`);
+ if(prepareHorario)await sql(await read('docs/sql-proposals/lp01-turno-horario/01_turno_horario_REVIEW.sql'));
  for(const f of ['puede_operar','admitir','confirmar_ambito','auditar_rol','sgp_lp_operacion_comando','sgp_lp_operacion_resultado'])await sql(await read('tests/lp01-incorporar/production-readonly/'+f+'.sql'));
  await sql(`REVOKE ALL ON ALL FUNCTIONS IN SCHEMA sgp_lp_operacion FROM PUBLIC,anon,authenticated,service_role;
  REVOKE ALL ON FUNCTION public.sgp_lp_operacion_comando(text,jsonb),public.sgp_lp_operacion_resultado(text,uuid) FROM PUBLIC;
@@ -80,6 +81,6 @@ DECLARE p jsonb;v bigint; BEGIN SELECT to_jsonb(x) INTO p FROM public.sgp_produc
  await sql("ALTER TABLE public.sgp_linea_plan_asignaciones ALTER COLUMN id SET DEFAULT gen_random_uuid(),ALTER COLUMN estado SET DEFAULT 'PROGRAMADA',ADD COLUMN actualizado_en timestamptz DEFAULT now();CREATE TABLE public.sgp_linea_plan_ejecuciones(asignacion_id uuid,cantidad integer);");
  for(const f of ['sgp_validar_sesion_rol','sgp_linea_plan_programar','sgp_linea_plan_mover'])await sql(await read('tests/lp01-incorporar/concurrency/production-readonly/'+f+'.sql'));
  await sql("INSERT INTO public.sgp_linea_plan_asignaciones(id,key_produccion,fecha,turno,cantidad,prioridad,estado) VALUES('00000000-0000-0000-0000-000000000020','MISSING|PANELES_2','2026-11-07',1,1,9,'CANCELADA');");
- await sql(await read('docs/sql-proposals/lp01-ensamble-plan/01_plan_REVIEW.sql'));
+ if(installPlan)await sql(await read('docs/sql-proposals/lp01-ensamble-plan/01_plan_REVIEW.sql'));
  return db;
 }

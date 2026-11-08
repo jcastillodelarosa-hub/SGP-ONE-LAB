@@ -1786,3 +1786,19 @@ Abiertas/Programadas/Otras, observaciones y afectaciones. Sin vista de ubicacion
 ni detalle de vidrio. No copia objetivos del plan común sin etapa. Planificación
 nueva, incorporación y cierre por Export de Empaque siguen pendientes de conexión.
 Alcance: `docs/linea-produccion/EMPAQUE_V411.md`.
+
+## Siguiente entrega: cierre Export dual · integración local
+
+Rama `feat/export-close-v412`, base main8cb2293. UI conectada al controlador CAS:
+original XLSX, importación con autoridad explícita, recibo por producción, motivos,
+confirmación y reintento del mismo comando. Discovery `LP-EXPORT-DUAL-1` requerido;
+sin él conserva la revisión local. Carga parcial nunca inventa cero ni suma lotes.
+Gateway opt-in por `SGP_LP_EXPORT_MODE=LP-EXPORT-DUAL-1`, default LEGACY. Sin aplicar,
+desplegar ni activar. Lectura Empaque admite solo writer dual y plan propio inmutable;
+no hereda objetivos Ensamble. Informe/CSV conservan corte inicial desconocido y
+continuidad bloqueada. Callback inclusión Empaque depende de commit compañero d59b178.
+Pruebas focales de lectores, reportes, comandos y gate: PASS; DOM sintético cierre y
+controlador Empaque PASS. Falta paquete SQL dual rebasado y fixture de readback real,
+prueba conjunta backend/UI, pins y versión integrados por coordinador. No publicar
+este tramo aislado. Manifest/guard gateway antiguo necesita actualización explícita
+junto al nuevo backend, no relajación del pin.
