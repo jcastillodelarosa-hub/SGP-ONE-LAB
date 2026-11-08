@@ -2841,7 +2841,7 @@ table.glass-burro-table{width:100%;min-width:0;table-layout:fixed;border-collaps
 .glass-burro-table th{font-size:12px;background:#f5f8fc}
 table.glass-burro-table th:first-child{width:28%}
 table.glass-burro-table th:not(:first-child){width:36%}
-#glassDetailModal>.modal-card{width:min(1050px,100%);min-width:0}
+#glassDetailModal>.modal-card{width:min(1050px,100%)!important;min-width:0}
 #glassDetailModal .modal-head>div{min-width:0;overflow-wrap:anywhere}
 @media(max-width:650px){.glass-burro-table-wrap{padding:0 8px 12px}table.glass-burro-table th,table.glass-burro-table td{padding:9px 5px;font-size:11px}}
 .glass-burro-empty{margin:0;padding:14px;color:#68768b}
