@@ -34,7 +34,7 @@ export function adaptPendingListV2(payload) {
 const NEW_WRITES = new Set(['sgp_aluminio_pendiente_validar_detalles_v1',
   'sgp_aluminio_pendiente_registrar_avance_v1', 'sgp_aluminio_pendiente_revertir_avance_v1',
   'sgp_aluminio_pendiente_nc_vincular_v1','sgp_pdt_estado_v2','sgp_pdt_entrega_registrar_v2','sgp_pdt_entrega_validar_v2',
-  'sgp_pdt_asignar_v2','sgp_pdt_entrega_anular_v2','sgp_pdt_cerrar_v2']);
+  'sgp_pdt_asignar_v2','sgp_pdt_entrega_anular_v2','sgp_pdt_cerrar_v2','sgp_pdt_proceso_simple_v1']);
 const MANUAL_WRITES = new Set(['sgp_pdt_manual_entrega_registrar_v1','sgp_pdt_manual_entrega_validar_v1',
   'sgp_pdt_manual_asignar_v1','sgp_pdt_manual_entrega_anular_v1','sgp_pdt_manual_cerrar_v1']);
 
