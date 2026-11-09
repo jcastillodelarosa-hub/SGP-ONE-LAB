@@ -39,12 +39,12 @@ test('reopened turn has no current quantity, archive uses the captured plan rath
 test('B15 and CSV expose plan, reason/time and incomplete coverage without claiming operational activation',()=>{
  const f=fixture(),r=assemblyReports(f.readback,f.context).reports[0],html=assemblyReportMarkup(r),csv=assemblyReportCSV(r);
  assert.equal(r.sourceContract,'LP-EXPORT-CLOSE-4');assert.equal(r.totals.plan,17);assert.equal(r.totals.realized,null);assert.equal(r.totals.compliance,null);
- assert.equal(r.rows.find(x=>x.key==='PLAN|PANELES_2').compliance,70);assert.match(html,/Plan vigente al cierre/);assert.match(html,/historia anterior desconocida/);assert.match(html,/Comparación incompleta/);assert.match(html,/Cambio aprobado de programación/);
+ assert.equal(r.rows.find(x=>x.key==='PLAN|PANELES_2').compliance,null);assert.match(html,/Disponible coordinador/);assert.match(html,/excluidas del porcentaje/);assert.match(html,/Por validar/);
  assert.match(csv,/Diferencia vs plan/);assert.match(csv,/EXPORT_CUT_REFERENCE_REQUIRED/);assert.match(csv,/"-3";"3"/);assert.doesNotMatch(csv,/"'-3"/);
 });
 
 test('new plan metadata is escaped and CSV text formulas are not executable',()=>{
- const f=fixture(),s=source(f),attack='<img src=x onerror="bad()">';s.planSnapshot.changes[1].motive=attack;s.observation='=HYPERLINK("https://invalid.example")';
+ const f=fixture(),s=source(f),attack='<img src=x onerror="bad()">';s.planSnapshot.changes[1].motive=attack;s.rows[0].identity.production=attack;s.observation='=HYPERLINK("https://invalid.example")';
  const r=assemblyReports(f.readback,f.context).reports[0],html=assemblyReportMarkup(r),csv=assemblyReportCSV(r);
  assert.doesNotMatch(html,/<img/);assert.match(html,/&lt;img/);assert.match(csv,/"'=HYPERLINK/);
 });
@@ -53,6 +53,6 @@ const domModule=process.env.LP_DOM_PACKAGE?await import(process.env.LP_DOM_PACKA
 test('V4 DOM keeps exact download hooks and disables them on a changed invalid snapshot',{skip:!domModule},()=>{
  const {document}=domModule.parseHTML('<html><body><main></main></body></html>'),host=document.querySelector('main'),f=fixture(),calls=[];
  renderAssemblyReports({host,data:f.readback,context:f.context,onCSV:(id,model)=>calls.push([id,model.sourceContract])});
- assert.match(host.textContent,/Plan vigente al cierre/);host.querySelector('[data-report]').click();assert.deepEqual(calls,[[source(f).id,'LP-EXPORT-CLOSE-4']]);
+ assert.match(host.textContent,/Disponible coordinador/);host.querySelector('[data-report]').click();assert.deepEqual(calls,[[source(f).id,'LP-EXPORT-CLOSE-4']]);
  source(f).planSnapshot.targets[0].quantity++;renderAssemblyReports({host,data:f.readback,context:f.context});assert.equal(host.querySelectorAll('button').length,0);assert.match(host.textContent,/No se puede validar/);
 });
