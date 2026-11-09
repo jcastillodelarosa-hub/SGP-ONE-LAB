@@ -68,11 +68,12 @@ try:
    dialog.locator('[data-order-note-save]').click();page.wait_for_function("document.querySelector('dialog [data-order-note-status]').textContent.includes('guardada') && !document.querySelector('dialog [data-order-note-cancel]').disabled");dialog.locator('[data-order-note-cancel]').click();assert 'Borrador conservado' in note.inner_text();assert page.evaluate('window.noteWrites.length')==1
    page.locator('[data-assembly-key="A|PANELES_2"] [data-assembly-detail]').first.click();page.wait_for_selector('section[data-assembly-detail]');assert page.locator('[data-assembly-order-note], [data-order-note-section], [data-order-note]').count()>0
    assert page.evaluate('document.documentElement.scrollWidth<=innerWidth');page.screenshot(path=str(OUT/f'detail-{width}.png'),full_page=True)
-   page.locator('[data-assembly-back]').click();page.locator('[data-assembly-reports]').click();page.wait_for_selector('[data-assembly-report-content]');latest=page.locator('[data-assembly-report-index="0"]');assert 'valor anterior conservado' in latest.inner_text();assert 'Disponible o estado sin evidencia del turno: Por validar' in latest.inner_text();assert latest.locator('[data-original]').count()==2
-   latest.locator('[data-report-section=all] > summary').click()
-   assert 'valor anterior conservado' in latest.locator('[data-report-section=all]').inner_text()
+   page.locator('[data-assembly-back]').click();page.locator('[data-assembly-reports]').click();page.wait_for_selector('[data-assembly-report-content]');latest=page.locator('[data-assembly-report-index="0"]');assert 'valor anterior conservado' in latest.inner_text();assert 'Sin evidencia histórica' in latest.inner_text();assert latest.locator('[data-original]').count()==2
+   detail=latest.locator('[data-report-section=pending], [data-report-section=all]').first
+   if detail.get_attribute('open') is None:detail.locator(':scope > summary').click()
+   assert 'valor anterior conservado' in detail.inner_text()
    if width<=700:
-    assert latest.locator('[data-report-section=all] .lp-assembly-report-orders tbody tr').evaluate_all("rows=>rows.length>0&&rows.every(row=>row.getBoundingClientRect().width<=row.closest('.lp-assembly-report-table-wrap').clientWidth+1)"),'Mobile production cards must fit their container without hiding Realizado to the right'
+    assert detail.locator('.lp-assembly-report-orders tbody tr').evaluate_all("rows=>rows.length>0&&rows.every(row=>row.getBoundingClientRect().width<=row.closest('.lp-assembly-report-table-wrap').clientWidth+1)"),'Mobile production cards must fit their container without hiding Realizado to the right'
    assert page.evaluate('document.documentElement.scrollWidth<=innerWidth');page.screenshot(path=str(OUT/f'report-{width}.png'),full_page=True)
    page.evaluate('window.showPlanReport()');page.wait_for_function("document.querySelector('#reports').textContent.includes('Disponible coordinador')")
    plan_report=page.locator('#reports [data-assembly-report-index="0"]')
