@@ -68,16 +68,18 @@ try:
    dialog.locator('[data-order-note-save]').click();page.wait_for_function("document.querySelector('dialog [data-order-note-status]').textContent.includes('guardada') && !document.querySelector('dialog [data-order-note-cancel]').disabled");dialog.locator('[data-order-note-cancel]').click();assert 'Borrador conservado' in note.inner_text();assert page.evaluate('window.noteWrites.length')==1
    page.locator('[data-assembly-key="A|PANELES_2"] [data-assembly-detail]').first.click();page.wait_for_selector('section[data-assembly-detail]');assert page.locator('[data-assembly-order-note], [data-order-note-section], [data-order-note]').count()>0
    assert page.evaluate('document.documentElement.scrollWidth<=innerWidth');page.screenshot(path=str(OUT/f'detail-{width}.png'),full_page=True)
-   page.locator('[data-assembly-back]').click();page.locator('[data-assembly-reports]').click();page.wait_for_selector('[data-assembly-report-content]');latest=page.locator('[data-assembly-report-index="0"]');assert 'valor anterior conservado' in latest.inner_text();assert 'Plan y cumplimiento: Por validar' in latest.inner_text();assert latest.locator('[data-original]').count()==2
+   page.locator('[data-assembly-back]').click();page.locator('[data-assembly-reports]').click();page.wait_for_selector('[data-assembly-report-content]');latest=page.locator('[data-assembly-report-index="0"]');assert 'valor anterior conservado' in latest.inner_text();assert 'Disponible o estado sin evidencia del turno: Por validar' in latest.inner_text();assert latest.locator('[data-original]').count()==2
+   latest.locator('[data-report-section=all] > summary').click()
+   assert 'valor anterior conservado' in latest.locator('[data-report-section=all]').inner_text()
    if width<=700:
-    assert latest.locator('.lp-assembly-report-orders tbody tr').evaluate_all("rows=>rows.length>0&&rows.every(row=>row.getBoundingClientRect().width<=row.closest('.lp-assembly-report-table-wrap').clientWidth+1)"),'Mobile production cards must fit their container without hiding Realizado to the right'
+    assert latest.locator('[data-report-section=all] .lp-assembly-report-orders tbody tr').evaluate_all("rows=>rows.length>0&&rows.every(row=>row.getBoundingClientRect().width<=row.closest('.lp-assembly-report-table-wrap').clientWidth+1)"),'Mobile production cards must fit their container without hiding Realizado to the right'
    assert page.evaluate('document.documentElement.scrollWidth<=innerWidth');page.screenshot(path=str(OUT/f'report-{width}.png'),full_page=True)
-   page.evaluate('window.showPlanReport()');page.wait_for_function("document.querySelector('#reports').textContent.includes('Plan vigente al cierre')")
+   page.evaluate('window.showPlanReport()');page.wait_for_function("document.querySelector('#reports').textContent.includes('Disponible coordinador')")
    plan_report=page.locator('#reports [data-assembly-report-index="0"]')
    if plan_report.get_attribute('open') is None:plan_report.locator('summary').click()
    plan_report.locator('[data-assembly-report-content]').wait_for(state='visible')
-   assert 'historia anterior desconocida' in page.locator('#reports').inner_text();assert 'Comparación incompleta' in page.locator('#reports').inner_text()
-   assert '70 %' in page.locator('#reports').inner_text();assert page.locator('#reports [data-report]').count()==1
+   assert 'excluidas del porcentaje' in page.locator('#reports').inner_text();assert 'Por validar' in page.locator('#reports').inner_text()
+   assert '70 %' not in page.locator('#reports').inner_text();assert page.locator('#reports [data-report]').count()==1
    assert page.evaluate('document.documentElement.scrollWidth<=innerWidth');page.screenshot(path=str(OUT/f'report-plan-v4-{width}.png'),full_page=True)
    page.evaluate('window.showPacking()');page.wait_for_function("document.querySelector('#workspace').textContent.includes('Hoja de Empaque')")
    assert page.locator('[data-assembly-key]').count()==3 and page.locator('[data-assembly-group]').count()==3
