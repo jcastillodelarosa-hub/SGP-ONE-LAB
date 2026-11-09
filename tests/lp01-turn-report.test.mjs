@@ -18,6 +18,6 @@ test('historical closure still renders 85 realized and 9 worked with no availabl
  const html=turnReportMarkup({rows,systems:[...new Set(names)].map(name=>({name})),totals:turnReportTotals(rows)});
  assert.match(html,/<b>85<\/b><span>Ventanas realizadas/);assert.match(html,/<b>9<\/b><span>Producciones trabajadas/);
  for(const [system,total] of [['ES-SGD2020',30],['NC-300',29],['ES-EL400',18],['ES-MX4000',8]])assert(html.includes('<strong>'+system+'</strong><b>'+total+'</b>'));
- assert.match(html,/data-report-section="pending" open/);assert.match(html,/Sin evidencia histórica/);
+ assert.match(html,/data-report-section="pending" open/);assert.match(html,/Órdenes cerradas<\/strong><span>Sin clasificación/);assert.doesNotMatch(html,/Órdenes cerradas<\/strong><span>0 órdenes/);assert.match(html,/Sin evidencia histórica/);
  assert.equal(turnReportTotals(rows).compliance,null);assert.match(html,/<b>Por validar<\/b><span>Órdenes cerradas/);
 });
