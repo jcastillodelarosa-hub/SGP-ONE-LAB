@@ -22,7 +22,7 @@ function fixture(rows, {weekly=productions, error=null, explorerOpen=false}={}) 
  const calls=[],renders=[],explorerRenders=[];
  const context=vm.createContext({
   document:{querySelector:id=>nodes[id]},
-  glassEfficiencyRows:rows,glassWeekByProduction:new Map(),locationReportRequest:1,
+  glassEfficiencyRows:rows,glassWeekByProduction:new Map(),glassReportMetadata:new Map(),locationReportRequest:1,
   indexGlassProductionWeeks,weeksWithGlass,filterGlassRowsByWeek,
   renderGlassEfficiency:()=>renders.push([...context.visibleGlassEfficiencyRows()]),
   renderGlassExplorer:()=>explorerRenders.push([...context.visibleGlassEfficiencyRows()]),

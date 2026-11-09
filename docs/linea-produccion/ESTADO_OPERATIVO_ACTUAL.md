@@ -1,3 +1,17 @@
+## Candidata LAB v418 · Vidrio B19 · 09/11/2026
+
+IMPLEMENTADO LOCAL / NO PUBLICADO. Base main v417 `af82bbab087112db121e73756d56fab16fc7cd1c`, Hosting verificado `2737f06869b35a0d`.
+Se conserva Reporte de ubicaciones/explorador y jerarquía aprobada B19; se añade
+selector de expansión Reserva → Prioridad/parte → Producción → Burro, semana a la
+izquierda de producción, totales que siguen filtros y exportación CSV con filas
+desplegadas. Prioridad toma el dato semanal exacto disponible y no la concatenación
+histórica de la RPC de dispersión. Resumen auxiliar general conserva su alcance.
+Sin SQL ni permisos nuevos. B21 fechas de preparación sigue en desarrollo separado;
+no se declara implementado ni publicado. Guía original: referencias B19/B21.
+13 pruebas focales Node PASS, sintaxis/diff PASS. Chromium local bloqueado por socket
+por entorno; smoke focal PC/móvil preparado para CI oficial. No repetir SQL ajeno.
+Próximo: PR/CI, preparar artefacto exacto, verificar y publicar con pins existentes.
+
 ## Candidato v415 · Tecno exclusivo de Ensamble
 
 Cambio local, no publicado. Base main v414 4e41639; Hosting 5db74a4b5327b2fa.

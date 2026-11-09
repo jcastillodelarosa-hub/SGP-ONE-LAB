@@ -37,13 +37,13 @@ test('year is part of filter key and invalid mapping never fabricates weeks',()=
  assert.equal(glassWeekKey(2026,54),null);
  assert.equal(glassWeekKey(2026,1),'2026-1');
 });
-test('frontend keeps filter scoped to efficiency list and graph without changing global metrics',()=>{
+test('frontend keeps weekly filter in report and graph',()=>{
  const app=fs.readFileSync(new URL('../app.js',import.meta.url),'utf8');
  const html=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
  assert.match(html,/id="glassEfficiencyWeek"/);
  assert.ok(Number(html.match(/LAB v(\d+)/)?.[1])>=306,'la versión LAB visible debe ser 306 o posterior');
  assert.match(app,/function visibleGlassEfficiencyRows\(/);
- assert.match(app,/visibleGlassEfficiencyRows\(\)\.forEach\(r=>\{/);
+ assert.match(app,/visibleGlassEfficiencyRows\(\)\.forEach\(source=>\{/);
  assert.match(app,/sgp_consultar_programacion_semana/);
  assert.match(app,/sgp_picking_semanas/);
  assert.match(app,/async function loadLocationReport\(/);

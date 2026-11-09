@@ -2845,3 +2845,9 @@ table.glass-burro-table th:not(:first-child){width:36%}
 #glassDetailModal .modal-head>div{min-width:0;overflow-wrap:anywhere}
 @media(max-width:650px){.glass-burro-table-wrap{padding:0 8px 12px}table.glass-burro-table th,table.glass-burro-table td{padding:9px 5px;font-size:11px}}
 .glass-burro-empty{margin:0;padding:14px;color:#68768b}
+/* B19: the approved hierarchy remains inline on desktop and mobile. */
+.glass-explorer-toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.glass-explorer-toolbar label{display:flex;gap:6px;align-items:center}
+.glass-explorer-toolbar select{padding:8px;border:1px solid #cbdcf0;border-radius:8px;background:#fff;color:#163457}
+.glass-report-week{display:inline-block!important;margin-right:8px;padding:3px 6px;border-radius:5px;background:#e6efff;color:#24508a!important;white-space:nowrap}
+@media(max-width:680px){.glass-explorer-toolbar>*{flex:1 1 145px}.glass-explorer-toolbar label{flex:1 1 100%}.glass-explorer-toolbar select{flex:1}.glass-efficiency-order .table-wrap{overflow-x:auto}.glass-efficiency-order .table-wrap table{min-width:500px}}

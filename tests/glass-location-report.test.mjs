@@ -1,0 +1,6 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {glassLocationSummary,glassLocationReportCSV} from '../src/domain/glass-location-report.js';
+const rows=[{key_produccion:'A',reserva:'R1',parte:'2.1',produccion:'A',posicion:'B1',unidades:10,preparadas:4,novedad:2,traslado:1,ventanas:8},{key_produccion:'A',reserva:'R1',posicion:'B2',unidades:1,preparadas:1},{key_produccion:'B',reserva:'R2',posicion:'B1',unidades:3,preparadas:3}];
+test('B19 totals count racks and orders once; other never negative',()=>{assert.deepEqual(glassLocationSummary(rows),{prepared:8,novelty:2,transfer:1,other:3,racks:2,mixed:1,orders:2});assert.equal(glassLocationSummary([{unidades:1,preparadas:2}]).other,0);});
+test('B19 filtered week excludes unrelated totals',()=>{const t=glassLocationSummary(rows.filter(r=>r.key_produccion==='A'));assert.equal(t.orders,1);assert.equal(t.mixed,0);assert.equal(t.prepared,5);});
+test('B19 export always contains fully expanded source rows and literal cells',()=>{const csv=glassLocationReportCSV([...rows,{produccion:'=HYPERLINK("bad")'}],new Map([['A','2026-45']]));assert.equal(csv.split('\r\n').length,5);assert.match(csv,/2026-45/);assert.match(csv,/2.1/);assert.match(csv,/B1/);assert.match(csv,/B2/);assert.match(csv,/'=HYPERLINK/);});

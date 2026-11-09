@@ -1,3 +1,4 @@
+import {glassLocationSummary,glassLocationReportCSV} from './src/domain/glass-location-report.js';
 import {glassLocationDetailMarkup} from './src/modules/glass-location-detail.js';
 import {createExportReview} from './src/modules/export-review.js';
 import {openNcGlassTracking} from './src/modules/nc-glass-tracking.js';
@@ -835,6 +836,7 @@ els.closeGlassDetail?.addEventListener('click',()=>{glassDetailRequest++;glassDe
 // LAB v294: análisis de dispersión de vidrio, exclusivamente lectura.
 let glassEfficiencyRows=[];
 let glassWeekByProduction=new Map();
+let glassReportMetadata=new Map();
 // LAB v306: semana efectiva de la producción. Los datos operativos de vidrio no se alteran.
 function visibleGlassEfficiencyRows(){
  const week=document.querySelector('#glassEfficiencyWeek')?.value||'all';
@@ -868,6 +870,7 @@ async function loadGlassEfficiencyWeeks(client,token,request,previous='all'){
   const options=weeksWithGlass(glassEfficiencyRows,indexed);
   if(!options.length)throw new Error('No existen semanas identificadas para estas órdenes'+(missing.length?' ('+missing.length+' órdenes sin correspondencia semanal)':''));
   glassWeekByProduction=indexed;
+  glassReportMetadata=new Map(weekly.map(p=>[String(p.key_produccion),p]));
   picker.innerHTML='<option value="all">Todas las semanas</option>'+options.map(value=>{
    const [y,w]=value.split('-');
    return '<option value="'+value+'">Semana '+Number(w)+' · '+Number(y)+'</option>';
@@ -893,7 +896,9 @@ function renderGlassEfficiency(){
  const query=(document.querySelector('#glassEfficiencySearch')?.value||'').trim().toLowerCase();
  const filter=document.querySelector('#glassEfficiencyFilter')?.value||'all';
  const reservations=new Map();
- visibleGlassEfficiencyRows().forEach(r=>{
+ visibleGlassEfficiencyRows().forEach(source=>{
+  const meta=glassReportMetadata.get(String(source.key_produccion));
+  const r=meta?{...source,parte:meta.prioridad??meta.prioridad_programacion??'SIN PARTE'}:source;
   const key=String(r.key_produccion||''),res=String(r.reserva||'SIN RESERVA').split(',')[0].trim(),pos=String(r.posicion||'SIN UBICACIÓN'),part=String(r.parte||'SIN PARTE');
   if(!reservations.has(res))reservations.set(res,new Map());
   const orders=reservations.get(res);
@@ -903,10 +908,11 @@ function renderGlassEfficiency(){
  let totalOrders=0,multi=0,three=0;
  reservations.forEach(orders=>orders.forEach(o=>{const n=o.locations.filter(l=>l.prepared>0&&l.pos!=='SIN UBICACIÓN').length;totalOrders++;if(n>=2)multi++;if(n>=3)three++}));
  stats.innerHTML='<span><b>'+totalOrders+'</b> órdenes con ubicación</span><span><b>'+multi+'</b> órdenes en 2+ burros preparados</span><span><b>'+three+'</b> órdenes en 3+ burros preparados</span>';
- const html=[];
+ const html=[];const selectedKeys=new Set();
  [...reservations.entries()].sort((a,b)=>a[0].localeCompare(b[0],undefined,{numeric:true})).forEach(([res,orders])=>{
   const selected=[...orders.values()].map(o=>({...o,racks:o.locations.filter(l=>l.prepared>0&&l.pos!=='SIN UBICACIÓN').length,prepared:o.locations.reduce((n,l)=>n+l.prepared,0)})).filter(o=>(filter==='all'||o.racks>=(filter==='three'?3:2))&&(!query||[res,o.name,o.key,o.part,o.system,o.finish,o.source,...o.locations.map(l=>l.pos)].join(' ').toLowerCase().includes(query))).sort((a,b)=>a.part.localeCompare(b.part,undefined,{numeric:true})||b.racks-a.racks||a.name.localeCompare(b.name));
   if(!selected.length)return;
+  selected.forEach(o=>selectedKeys.add(o.key));
   const sum=selected.reduce((n,o)=>n+o.prepared,0),windows=selected.reduce((n,o)=>n+o.windows,0),reserveRacks=new Set(selected.flatMap(o=>o.locations.filter(l=>l.prepared>0).map(l=>l.pos))).size,parts=new Map();
   selected.forEach(o=>{if(!parts.has(o.part))parts.set(o.part,[]);parts.get(o.part).push(o)});
   const partsHtml=[...parts.entries()].map(([part,partOrders])=>{
@@ -914,9 +920,9 @@ function renderGlassEfficiency(){
    const ordersHtml=partOrders.map(o=>{
     const status=o.racks>=3?'high':o.racks===2?'medium':'low';
     const locs=o.locations.sort((a,b)=>b.prepared-a.prepared||a.pos.localeCompare(b.pos)).map(l=>'<tr><td><strong>'+escapeHtml(l.pos)+'</strong></td><td class="num">'+l.prepared.toLocaleString('es-CO')+'</td><td class="num">'+l.novelty.toLocaleString('es-CO')+'</td><td class="num">'+l.transfer.toLocaleString('es-CO')+'</td><td class="num">'+l.total.toLocaleString('es-CO')+'</td></tr>').join('');
-    return '<details class="glass-efficiency-order"><summary><span class="glass-efficiency-order-name">'+escapeHtml(o.name)+'<small>'+escapeHtml(o.system)+' · '+escapeHtml(o.finish)+' · '+escapeHtml(o.line)+(o.source!==res?' · Reservas de origen: '+escapeHtml(o.source):'')+'</small></span><span class="glass-efficiency-pill '+status+'">'+o.racks+' burro'+(o.racks===1?'':'s')+' preparado'+(o.racks===1?'':'s')+'</span><b>'+o.windows.toLocaleString('es-CO')+' ventanas · '+o.prepared.toLocaleString('es-CO')+' vidrios preparados</b></summary><div class="table-wrap"><table><thead><tr><th>Ubicación / burro</th><th>Preparados</th><th>Novedad</th><th>Traslado</th><th>Total</th></tr></thead><tbody>'+locs+'</tbody></table></div></details>';
+    return '<details class="glass-efficiency-order"><summary><span class="glass-efficiency-order-name">'+(glassWeekByProduction.has(o.key)?'<small class="glass-report-week">Semana '+escapeHtml(glassWeekByProduction.get(o.key).split('-')[1])+'</small>':'')+escapeHtml(o.name)+'<small>'+escapeHtml(o.system)+' · '+escapeHtml(o.finish)+' · '+escapeHtml(o.line)+(o.source!==res?' · Reservas de origen: '+escapeHtml(o.source):'')+'</small></span><span class="glass-efficiency-pill '+status+'">'+o.racks+' burro'+(o.racks===1?'':'s')+' preparado'+(o.racks===1?'':'s')+'</span><b>'+o.windows.toLocaleString('es-CO')+' ventanas · '+o.prepared.toLocaleString('es-CO')+' vidrios preparados</b></summary><div class="table-wrap"><table><thead><tr><th>Ubicación / burro</th><th>Preparados</th><th>Novedad</th><th>Traslado</th><th>Total</th></tr></thead><tbody>'+locs+'</tbody></table></div></details>';
    }).join('');
-   return '<details class="glass-efficiency-part" open><summary><strong>'+(part==='SIN PARTE'?'Sin parte asignada':'Parte '+escapeHtml(part))+'</strong><span>'+partOrders.length+' órdenes · '+partWindows+' ventanas · '+partRacks+' burros · '+partPrepared+' vidrios preparados</span></summary><div class="glass-efficiency-orders">'+ordersHtml+'</div></details>';
+   return '<details class="glass-efficiency-part"><summary><strong>'+(part==='SIN PARTE'?'Sin parte asignada':'Parte '+escapeHtml(part))+'</strong><span>'+partOrders.length+' órdenes · '+partWindows+' ventanas · '+partRacks+' burros · '+partPrepared+' vidrios preparados</span></summary><div class="glass-efficiency-orders">'+ordersHtml+'</div></details>';
   }).join('');
   const systems=[...new Set(selected.map(o=>o.system).filter(Boolean))];
   const finishes=[...new Set(selected.map(o=>o.finish).filter(Boolean))];
@@ -926,6 +932,12 @@ function renderGlassEfficiency(){
   html.push('<details class="glass-efficiency-reservation"><summary><span class="glass-efficiency-reservation-title"><strong>'+heading+'</strong><small>'+priorityLabel+'</small></span><span>'+selected.length+' órdenes · '+windows+' ventanas · '+reserveRacks+' burros · '+sum.toLocaleString('es-CO')+' vidrios preparados</span></summary><div class="glass-efficiency-parts">'+partsHtml+'</div></details>');
  });
  target.innerHTML=html.join('')||'<p class="empty">No hay órdenes para los filtros seleccionados.</p>';
+ const reportRows=visibleGlassEfficiencyRows().filter(r=>selectedKeys.has(String(r.key_produccion||''))).map(r=>{const meta=glassReportMetadata.get(String(r.key_produccion));return meta?{...r,parte:meta.prioridad??meta.prioridad_programacion??'SIN PARTE'}:r;});
+ const totals=glassLocationSummary(reportRows);
+ for(const [id,key] of [['lrPrepared','prepared'],['lrNovelty','novelty'],['lrTransfer','transfer'],['lrOther','other'],['lrRacks','racks'],['lrMixed','mixed']])if(els[id])els[id].textContent=totals[key].toLocaleString('es-CO');
+ const level=document.querySelector('#glassReportLevel')?.value||'reservations';
+ target.querySelectorAll('details').forEach(el=>{el.open=level==='racks'||(level==='productions'&&!el.classList.contains('glass-efficiency-order'))||(level==='parts'&&el.classList.contains('glass-efficiency-reservation'));});
+ const exportButton=document.querySelector('#glassReportExport');if(exportButton){exportButton.disabled=!reportRows.length;exportButton.onclick=()=>{const url=URL.createObjectURL(new Blob([glassLocationReportCSV(reportRows,glassWeekByProduction)],{type:'text/csv;charset=utf-8'})),a=document.createElement('a');a.href=url;a.download='SGP-ubicaciones-vidrio.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};}
  target.querySelectorAll('.glass-efficiency-reservation,.glass-efficiency-part,.glass-efficiency-order').forEach(el=>{
   const summary=el.querySelector(':scope > summary');if(!summary||summary.querySelector('.glass-open-relations'))return;
   const button=document.createElement('button');button.type='button';button.className='glass-open-relations';button.textContent='Ver relaciones';
@@ -1111,6 +1123,8 @@ document.addEventListener('keydown',e=>{
  if(!document.querySelector('#glassExplorerModal')?.hidden)closeGlassExplorer();
 });
 
+document.querySelector('#glassReportLevel')?.addEventListener('change',renderGlassEfficiency);
+document.querySelector('#glassReportRefresh')?.addEventListener('click',loadLocationReport);
 document.querySelector('#glassEfficiencySearch')?.addEventListener('input',renderGlassEfficiency);
 document.querySelector('#glassEfficiencyFilter')?.addEventListener('change',renderGlassEfficiency);
 document.querySelector('#glassEfficiencyWeek')?.addEventListener('change',()=>{renderGlassEfficiency();glassExplorer.selected=null;if(!document.querySelector('#glassExplorerModal')?.hidden)renderGlassExplorer();});
@@ -1140,7 +1154,7 @@ async function loadLocationReport(){
     els.lrPrepared.textContent=m.preparadas??0;els.lrNovelty.textContent=m.novedad??0;els.lrTransfer.textContent=m.traslado??0;els.lrOther.textContent=m.otros??0;els.lrRacks.textContent=m.burros??0;els.lrMixed.textContent=data?.burros_mixtos??0;
     els.locationByReservation.innerHTML=(data?.por_reserva||[]).map(r=>`<tr><td>${escapeHtml(String(r.reserva).split(',')[0].trim())}</td><td class="num"><strong>${r.burros}</strong></td><td class="num">${r.unidades}</td></tr>`).join("")||'<tr><td colspan="3" class="empty">Sin ubicaciones</td></tr>';
    }else if(i===1){els.locationMixedRacks.innerHTML=(data||[]).map(r=>`<tr><td><strong>${escapeHtml(r.posicion)}</strong></td><td><span class="rack-status rack-${escapeHtml(r.orden_estado)}">${escapeHtml(r.estado)}</span></td><td>${escapeHtml([...new Set(String(r.reservas||'').split(',').map(v=>v.trim()).filter(Boolean))].join(', '))}</td><td class="num">${r.cantidad_reservas}</td><td class="num"><strong>${r.unidades}</strong></td></tr>`).join("")||'<tr><td colspan="5" class="empty">Sin burros activos</td></tr>';
-   }else{const weekPicker=document.querySelector('#glassEfficiencyWeek'),priorWeek=weekPicker?.value||'all';glassEfficiencyRows=data||[];glassWeekByProduction=new Map();if(weekPicker){weekPicker.disabled=true;weekPicker.value='all';}renderGlassEfficiency();void loadGlassEfficiencyWeeks(client,token,request,priorWeek);}
+   }else{const weekPicker=document.querySelector('#glassEfficiencyWeek'),priorWeek=weekPicker?.value||'all';glassEfficiencyRows=data||[];glassWeekByProduction=new Map();glassReportMetadata=new Map();if(weekPicker){weekPicker.disabled=true;weekPicker.value='all';}renderGlassEfficiency();void loadGlassEfficiencyWeeks(client,token,request,priorWeek);}
   });
  }catch(e){if(request!==locationReportRequest)return;failures.push(errorLabel('Conexión',e))}
  if(request!==locationReportRequest)return;
