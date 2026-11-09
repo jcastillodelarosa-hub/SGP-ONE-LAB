@@ -29,12 +29,12 @@ try:
    form.locator('[name=quantity]').fill('5');form.locator('[name=sourceRef]').select_option('proposal:1');form.locator('button[type=submit]').click();page.wait_for_function("document.querySelector('[data-shared-status]').textContent==='Guardado.'")
    assert page.evaluate('qa.commands[0].quantity')==5 and page.evaluate("'sourceRef' in qa.commands[0]")==False
    page.evaluate("qaMount('NC_V')");form=page.locator('[data-shared-form]');form.locator('[name=ncReference]').fill('NC-1');assert form.locator('[name=quantity]').input_value()=='1'
-   form.locator('[name=quantity]').fill('3');form.locator('[name=ncReference]').fill('NC-2');assert form.locator('[name=quantity]').input_value()=='3'
-   form.locator('[name=observation]').fill('Una NC, tres ventanas confirmadas por responsable');form.locator('button[type=submit]').click();page.wait_for_function("document.querySelector('[data-shared-status]').textContent==='Guardado.'")
-   page.evaluate("qaMount('NC_V')");assert '3 ventanas reportadas' in page.locator('[data-shared-report]').inner_text();assert 'por verificar' in page.locator('[data-shared-report]').inner_text();assert page.evaluate('qa.commands.length')==2
+   assert form.locator('[name=quantity]').is_hidden();form.locator('[name=quantity]').evaluate("el=>el.value='3'");form.locator('[name=ncReference]').fill('NC-2');assert form.locator('[name=quantity]').input_value()=='1'
+   form.locator('[name=observation]').fill('Una NC corresponde a una ventana');form.locator('button[type=submit]').click();page.wait_for_function("document.querySelector('[data-shared-status]').textContent==='Guardado.'")
+   page.evaluate("qaMount('NC_V')");assert '1 ventanas reportadas' in page.locator('[data-shared-report]').inner_text();assert page.evaluate('qa.commands[1].quantity')==1;assert 'por verificar' in page.locator('[data-shared-report]').inner_text();assert page.evaluate('qa.commands.length')==2
    page.screenshot(path=f'/tmp/window-proposals-{width}.png',full_page=True)
    page.evaluate("qa.canReport=false;qaMount('NC_AL')");assert page.locator('[type=submit]').is_disabled();assert page.locator('[name=quantity]').is_disabled()
-   assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+1');results.append({'width':width,'formVisibleBeforePending':True,'tentativePerSourceEditable':True,'noAutomaticWritesOrSum':True,'manualCorrectionSurvivesSourceChanges':True,'legacyNoInventedLink':True,'ncOneProposedManualSavedAndReloaded':True,'permissionsPreserved':True});page.close()
+   assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+1');results.append({'width':width,'formVisibleBeforePending':True,'tentativePerSourceEditable':True,'noAutomaticWritesOrSum':True,'manualCorrectionSurvivesSourceChanges':True,'legacyNoInventedLink':True,'ncFixedOneSavedAndReloaded':True,'permissionsPreserved':True});page.close()
   browser.close()
  print(json.dumps(results));(Path(__file__).parent/'result.json').write_text(json.dumps(results,indent=2)+'\n')
 finally:server.shutdown()
