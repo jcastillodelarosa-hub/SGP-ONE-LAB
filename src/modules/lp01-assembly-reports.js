@@ -1,3 +1,4 @@
+import {reportLineGoal,availableNotDefined,goalCompliance} from '../domain/line-turn-goal.js';
 import {turnReportEvidence,turnReportTotals} from '../domain/lp01-turn-report.js';
 import {turnReportMarkup} from './lp01-turn-report.js';
 import {currentClosureExportRealized} from '../domain/lp01-closure-export-v2.js';
@@ -23,7 +24,7 @@ const sourceCopy=source=>source?{...source,context:{...source.context},file:{...
  * ejecutado. The shared validator checks each archive's exact version/file. Its
  * synthetic closed envelope is ONLY archive validation: current status is always
  * determined separately from the actual turn and complete report collection. */
-export function assemblyReports(data,context){
+export function assemblyReports(data,context,currentGoal){
  if(!['ENSAMBLE','EMPAQUE'].includes(context?.stage))throw Error('Etapa de informes incompatible.');
  if(data?.contract!=='LP-OPERACION-1'||!Array.isArray(data.reports))throw Error('Contrato de informes incompatible.');
  const current=currentClosureExportRealized(data,context);
@@ -60,7 +61,7 @@ export function assemblyReports(data,context){
    return {key:row.key,production:sameName?names[0]:row.key,system,sale,realized,compliance:compliance(sale,realized),
     observation:observations.join(' · ')||'Sin observación registrada.',identityPending:!matching||!sameSystem||!sameName};
   });
-  if(isV2)model.rows=turnReportEvidence(snapshot.reportEvidence,context,report.id,model.rows);
+  if(isV2){model.rows=turnReportEvidence(snapshot.reportEvidence,context,report.id,model.rows);model.lineGoal=reportLineGoal(snapshot.reportEvidence,context,report.id,currentGoal);model.availableNotDefined=availableNotDefined(snapshot.reportEvidence,context,report.id);if(model.availableNotDefined)model.rows=model.rows.map(r=>({...r,complianceState:'No aplica'}));}
   model.sourceFiles=isV2?[...new Map([model.file,...model.rows.map(row=>row.valueSource?.file).filter(Boolean)].map(file=>[file.id,{...file}])).values()]:model.file?[{...model.file}]:[];
   const systems=new Map();for(const row of model.rows){if(!systems.has(row.system))systems.set(row.system,[]);systems.get(row.system).push(row);}
   const summarize=isV2?rows=>({...v2Totals(rows),...turnReportTotals(rows)}):totals;
@@ -98,13 +99,14 @@ export function assemblyReportMarkup(report){
 const renderScopes=new WeakMap();
 /** data-report/data-original are retained for the operation controller's existing
  * CSV/XLSX download handlers. Callbacks are optional alternatives to those hooks. */
-export function renderAssemblyReports({host,data,context,onCSV,onOriginal,isCurrent=()=>true,exportReport=exportAssemblyReport}){
+export function renderAssemblyReports({host,data,context,onCSV,onOriginal,isCurrent=()=>true,exportReport=exportAssemblyReport,currentGoal,loadCurrentGoal}){
  const previousScope=renderScopes.get(host),scope={context:JSON.stringify(context)};renderScopes.set(host,scope);
  const hadReports=previousScope?.context===scope.context&&Boolean(host.querySelector('[data-assembly-report-index]'));
  const expanded=new Set([...host.querySelectorAll('details[data-report-id][open]')].map(el=>el.dataset.reportId));
  host.className='lp-followup lp-assembly-reports';
  if(!data){host.innerHTML='<h3>Reportes · cierres de producción</h3><p>Consulta un turno. Los informes aparecen después de guardar un cierre real.</p>';return {reports:[]};}
- let result;try{result=assemblyReports(data,context);}catch(error){host.innerHTML='<h3>Reportes · cierres de producción</h3><p role="status">'+esc(error.message)+'</p>';return {reports:[],error};}
+ let result;try{result=assemblyReports(data,context,currentGoal);}catch(error){host.innerHTML='<h3>Reportes · cierres de producción</h3><p role="status">'+esc(error.message)+'</p>';return {reports:[],error};}
+ if(loadCurrentGoal&&currentGoal===undefined)Promise.resolve().then(loadCurrentGoal).then(goal=>{if(isCurrent()&&renderScopes.get(host)===scope)renderAssemblyReports({host,data,context,onCSV,onOriginal,isCurrent,exportReport,currentGoal:goal??null});}).catch(()=>{});
  const openDefault=!hadReports&&expanded.size===0?result.reports.find(report=>report.current)?.id:null;
  host.innerHTML='<h3>Reportes · cierres de producción</h3><p>'+esc(context.line)+' · '+esc(context.date)+' / T'+esc(context.shift)+'</p>'+
   (data.turn?.estado==='EN_REVISION'?'<p class="lp-followup-blocked">Turno reabierto. Los cierres anteriores se conservan como históricos; no hay Realizado vigente hasta confirmar un nuevo cierre.</p>':'')+
@@ -155,8 +157,8 @@ export function assemblyReportCSV(report){
   header.push('Diferencia vs plan','Pendiente vs plan','Versión del plan','ID versión del plan','Huella del plan','Hora del plan','Historia antes de observación','Referencia inicial Export','Operación habilitada');
   rows.forEach((row,index)=>row.push(report.rows[index].difference,report.rows[index].pendingAgainstPlan,report.planSnapshot.version,report.planSnapshot.versionId,report.planSnapshot.fingerprint,report.planSnapshot.capturedAt,report.planComparison==='HISTORICAL_UNAVAILABLE'?'HISTORICAL_UNAVAILABLE':report.planSnapshot.baseline?.historyBefore??'NO_APLICA_LEDGER_INMUTABLE',report.initialReference.status,report.operationalReady));
  }
- header.push('Resultado Disponible','Clasificación acreditada','Cerrada','Abierta durante turno','Avanzada sin cerrar','Saldo inicial','Saldo final','Referencia Disponible','Evento Disponible');
- rows.forEach((row,index)=>{const r=report.rows[index];row.push(r.complianceState,r.classificationKnown,r.closed,r.opened,r.advanced,r.initialBalance,r.finalBalance,r.evidence?.available?.referenceId,r.evidence?.available?.sourceEventId);});
+ header.push('Meta línea','Tipo meta línea','Cumplimiento meta línea (%)','Resultado Disponible','Clasificación acreditada','Cerrada','Abierta durante turno','Avanzada sin cerrar','Saldo inicial','Saldo final','Referencia Disponible','Evento Disponible');
+ rows.forEach((row,index)=>{const r=report.rows[index];row.push(report.lineGoal?.quantity,report.lineGoal?.label,goalCompliance(report.rows,report.lineGoal),r.complianceState,r.classificationKnown,r.closed,r.opened,r.advanced,r.initialBalance,r.finalBalance,r.evidence?.available?.referenceId,r.evidence?.available?.sourceEventId);});
  return '\uFEFF'+[header,...rows].map(row=>row.map(cell).join(';')).join('\r\n');
 }
 export function assemblyReportFilename(report,extension){

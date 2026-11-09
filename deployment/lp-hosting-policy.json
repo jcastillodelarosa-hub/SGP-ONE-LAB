@@ -8,7 +8,7 @@
   "approved_lp_files": {
     "production-line-tabs.js": "7cb31492565f71b0b64d840012f58c572b7b7f93e4a5eb66277d7daf63ffbf84",
     "src/modules/lp01-followup.js": "41ec28cda58298468af5e48514988b39ec5cb1a40371a65c28be2686385cfa40",
-    "src/modules/lp01-operation.js": "07bdc2361ff44844bbd5084d818d3ccf90349c600472f5a8718245854c399da5",
+    "src/modules/lp01-operation.js": "20a456fac61a8c09e4ed0c9f39212cb6e4cade76f866b199a35d668a36797d5d",
     "src/domain/lp01-visual-bridge.js": "6d4694f08e2724a34cd23a10f15ac5dd13b5936ad161fd73f322526dc84917aa",
     "scripts/prepare-lp-main-visual.py": "942601e7986e36cff74f2475c9f8a9c638993c15e4b7b91e5ffde6cbd62da5c5",
     "tests/lp01-integration/fixtures/lp-synthetic.json": "ed5812201e96feff0ab8b7bf5b4bcb06567978a4ab52207ac91056a22251d81b",
@@ -25,8 +25,8 @@
   },
   "legacy_navigation_sha256": "4f0992b1c98f4933fe5a0daa98d95fd85b35fceaffbbbd904fef7d422f21f0af",
   "certification_reference": "docs/linea-produccion/PUBLICACION_CONTROLADA_2026_11_03.md",
-  "baseline_version": "sites/sgp-one-lab/versions/4434996523afb4a8",
-  "rollback_version": "sites/sgp-one-lab/versions/4434996523afb4a8",
+  "baseline_version": "sites/sgp-one-lab/versions/6709eabc5ae7f394",
+  "rollback_version": "sites/sgp-one-lab/versions/6709eabc5ae7f394",
   "artifact_kind": "runtime",
   "backend_contracts_verified": true,
   "backend_probe_required": true
