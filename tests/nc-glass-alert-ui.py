@@ -27,15 +27,15 @@ try:
    assert ref.input_value()=='' and stage.input_value()=='' and prepare.is_disabled()
    ref.select_option('0');stage.select_option('EMPAQUE');assert prepare.is_disabled();confirm.check();prepare.click()
    form=page.locator('[data-type-pane=NC_V] [data-shared-form]');page.wait_for_function("document.querySelector('[data-shared-form] [name=ncReference]')?.value==='NC-1001'")
-   assert 'EMPAQUE' in form.locator('[data-registration-stage]').inner_text();assert form.locator('[name=quantity]').input_value()=='';assert page.evaluate('alertState.commands.length')==0
-   form.locator('[name=quantity]').fill('1');form.locator('[name=observation]').fill('Validación sintética expresa de una ventana')
+   assert 'EMPAQUE' in form.locator('[data-registration-stage]').inner_text();assert form.locator('[name=quantity]').input_value()=='1';assert form.locator('[name=quantity]').is_hidden();assert page.evaluate('alertState.commands.length')==0
+   form.locator('[name=observation]').fill('Validación sintética expresa de una ventana')
    page.evaluate('controller.load({quiet:true})');page.wait_for_timeout(100);assert form.locator('[name=observation]').input_value()=='Validación sintética expresa de una ventana'
    page.screenshot(path=str(OUT/f'prepare-{width}.png'),full_page=True)
    form.get_by_role('button',name='Guardar afectación',exact=True).click();page.wait_for_function('alertState.commands.length===1')
    page.wait_for_function("document.querySelectorAll('[data-nc-review-order=\"QA3|PANELES_2\"]').length===0")
    saved=page.evaluate('alertState.commands[0]');assert saved['stage']=='EMPAQUE' and saved['key']=='QA3|PANELES_2';assert saved['cmd']['ncReference']=='NC-1001' and saved['cmd']['quantity']==1 and saved['cmd']['action']=='CREATE';assert page.evaluate('alertState.reports[0].nc_link') is None
    assert page.evaluate('qaSale.ids.length')==0;assert page.evaluate('document.documentElement.scrollWidth<=innerWidth');assert not errors,errors
-   results.append({'width':width,'compactNameWarning':True,'separateDetectedAndRecorded':True,'exportWindows':1,'explicitNcAndStage':True,'quantityNotInferred':True,'draftPreserved':True,'savedOriginStage':'EMPAQUE','verifiedLink':False,'syntheticWrites':1});page.close()
+   results.append({'width':width,'compactNameWarning':True,'separateDetectedAndRecorded':True,'exportWindows':1,'explicitNcAndStage':True,'quantityFixedOnePerNc':True,'draftPreserved':True,'savedOriginStage':'EMPAQUE','verifiedLink':False,'syntheticWrites':1});page.close()
   browser.close()
  (OUT/'result.json').write_text(json.dumps(results,indent=2)+'\n');print(json.dumps(results))
 finally:server.shutdown()
