@@ -16,7 +16,7 @@ export function turnReportEvidence(e,context,closureId,rows){
   const available=a?.status==='ACCREDITED_TURN'&&authority&&qty(a.quantity)&&text(a.sourceEventId)&&text(a.referenceId)&&Number.isSafeInteger(a.revision)&&a.revision>0&&text(a.sourceAuthor)&&at(a.capturedAt)&&cut(a.cut)&&a.cut.id===a.referenceId&&a.cut.at===a.capturedAt?a.quantity:null;
   const initial=i?.status==='ACCREDITED_CUT'&&text(i.evidenceId)&&qty(i.quantity)&&i.quantity>0&&qty(i.balance)&&i.balance<=i.quantity&&cut(i.cut)?i:null;
   const final=f?.status==='ACCREDITED_CUT'&&text(f.evidenceId)&&qty(f.balance)&&initial&&f.balance<=initial.quantity&&cut(f.cut)?f:null;
-  const known=initial&&final&&qty(row.realized),closed=Boolean(known&&initial.balance>0&&final.balance===0),opened=Boolean(known&&initial.balance===initial.quantity&&row.realized>0),advanced=Boolean(known&&!closed&&row.realized>0&&final.balance>0);
+  const known=initial&&final&&qty(row.realized),closed=Boolean(known&&initial.balance>0&&final.balance===0),opened=Boolean(known&&initial.balance===initial.quantity&&row.realized>0),advanced=Boolean(known&&initial.balance>0&&initial.balance<initial.quantity&&!closed&&row.realized>0&&final.balance>0);
   const comparable=available!==null&&available>0&&qty(row.realized),compliance=comparable?row.realized/available*100:null;
   return {...row,available,compliance,comparable,complianceState:comparable?(row.realized>=available?'Cumplido':'No cumplido'):available===0?'No aplica · Disponible 0':'Sin evidencia histórica',initialBalance:initial?.balance??null,finalBalance:final?.balance??null,classificationKnown:Boolean(known),closed,opened,advanced,evidence:e?structuredClone(e):null};
  });
