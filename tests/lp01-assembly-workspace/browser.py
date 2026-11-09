@@ -92,6 +92,11 @@ try:
    assert 'Saldo Empaque' in page.locator('[data-assembly-detail]').inner_text() and page.locator('[data-assembly-balance]').inner_text()=='5'
    assert page.locator('#workspace [data-assembly-glass],[data-assembly-incorporate]').count()==0
    page.screenshot(path=str(OUT/f'packing-detail-{width}.png'),full_page=True)
+   page.evaluate("async()=>{const f=await import('/tests/lp01-turn-reference-browser.mjs');await f.mount()}")
+   page.locator('[data-reference-load]').click();page.locator('[data-reference-select] option').nth(1).wait_for(state='attached')
+   page.locator('[data-reference-select]').select_option('aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee');page.locator('[data-export-confirm]').click()
+   assert page.evaluate('window.sent.report_reference_load_id')=='aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee'
+   assert page.evaluate('window.sent.observation')=='Synthetic'
    assert not errors,errors;assert not external,external;results.append({'width':width,'groups':3,'bodyOverflow':False,'noteDraftRefreshSave':True,'detail':True,'historicalReportOwnSources':True,'planV4FromSQL':True,'glassInlineExpandKeyboardReopen':True,'mobileWeekLeft':width<=700,'externalRequests':0,'productionCalls':0,'packingStageNoGlass':True});page.close()
   browser.close()
 finally:server.shutdown()

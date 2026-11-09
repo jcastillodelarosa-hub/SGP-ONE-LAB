@@ -63,12 +63,12 @@ export function assemblyReports(data,context,currentGoal,classifications={}){
     observation:observations.join(' · ')||'Sin observación registrada.',identityPending:!matching||!sameSystem||!sameName};
   });
   if(isV2){model.rows=turnReportEvidence(snapshot.reportEvidence,context,report.id,model.rows);model.lineGoal=reportLineGoal(snapshot.reportEvidence,context,report.id,currentGoal);model.availableNotDefined=availableNotDefined(snapshot.reportEvidence,context,report.id);if(model.availableNotDefined)model.rows=model.rows.map(r=>({...r,complianceState:'No aplica'}));}
-  if(isV2){const estimated=estimatedClassification(classifications?.[report.id],context,report.id,model.rows);if(estimated){model.rows=estimated.rows;model.classification={status:'ESTIMATED_REFERENCE',source:estimated.source};}}
+  if(isV2){const estimated=estimatedClassification(snapshot.reportEvidence?.classification??classifications?.[report.id],context,report.id,model.rows);if(estimated){model.rows=estimated.rows;model.classification={status:'ESTIMATED_REFERENCE',source:estimated.source};}else if(snapshot.reportEvidence?.classification?.status==='UNAVAILABLE'){model.warning='La referencia seleccionada no cubre todas las producciones o tiene saldos incompatibles. El cierre conserva sus cantidades; las órdenes quedan sin clasificación.';}}
   model.sourceFiles=isV2?[...new Map([model.file,...model.rows.map(row=>row.valueSource?.file).filter(Boolean)].map(file=>[file.id,{...file}])).values()]:model.file?[{...model.file}]:[];
   const systems=new Map();for(const row of model.rows){if(!systems.has(row.system))systems.set(row.system,[]);systems.get(row.system).push(row);}
   const summarize=isV2?rows=>({...v2Totals(rows),...turnReportTotals(rows)}):totals;
   model.systems=[...systems].map(([name,rows])=>({name,orders:rows.length,...summarize(rows)}));model.totals=summarize(model.rows);
-  if(model.rows.some(row=>row.identityPending))model.warning='Hay identidades de sistema o producción pendientes en el snapshot. No se reparten cantidades entre sistemas ni se completa con datos del turno actual.';
+  if(model.rows.some(row=>row.identityPending))model.warning=(model.warning?model.warning+' ':'')+'Hay identidades de sistema o producción pendientes en el snapshot. No se reparten cantidades entre sistemas ni se completa con datos del turno actual.';
   return model;
  }).sort((a,b)=>(quantity(b.version)??-1)-(quantity(a.version)??-1));
  return {reports,currentStatus:current.status};
