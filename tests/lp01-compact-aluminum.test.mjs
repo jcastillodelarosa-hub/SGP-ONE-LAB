@@ -25,7 +25,7 @@ test('missing quantity retains a single unresolved indicator, not zero',()=>{
 });
 test('other causes, report groups, glass estimate and validated total preserved',()=>{
  const html=compactSummaryMarkup(summary({reportedQuantities:{TECNO:[2,4]},ncEstimate:1,total:7,available:12}));
- for(const text of ['3 × NC V','2 × Tecno','1 × Novedad','Tecno · reportadas: 2 / 4 (sin sumar)','NC Vidrio · estimación 1 (1 por NC)','Total 7 · Disponibles 12'])assert.ok(html.includes(text),text);
+ for(const text of ['3 × NC V','2 × Tecno','1 × Novedad','Tecno · reportadas: 2 / 4 (sin sumar)','NC Vidrio · 1 (1 por NC)','Total 7 · Disponibles 12'])assert.ok(html.includes(text),text);
 });
 test('null/unavailable states and expanded markup retain contract',()=>{
  assert.match(compactSummaryMarkup(null),/Consultando/);

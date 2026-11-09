@@ -56,13 +56,13 @@ try:
    assert row.locator('[data-summary-cause="NC_AL"]').count()==1
    assert page.evaluate('qaSaved.length')==1
    page.locator('[data-order-type=NC_V]').click();form=page.locator('[data-type-pane=NC_V] [data-shared-form]')
-   form.locator('[name=ncReference]').fill('NC-ONE');assert form.locator('[name=quantity]').input_value()==''
-   assert not form.locator('[name=quantity]').evaluate('(el)=>el.checkValidity()');assert page.evaluate('qaSaved.length')==1
-   form.locator('[name=quantity]').fill('2');form.locator('[name=observation]').fill('Dos ventanas, una NC');form.locator('[type=submit]').click()
-   page.wait_for_function("document.querySelector('[data-order-summary]')?.textContent.includes('2 × NC V')")
-   assert 'estimación 1 (1 por NC)' in row.inner_text() and 'Total por validar' in row.inner_text()
+   form.locator('[name=ncReference]').fill('NC-ONE');assert form.locator('[name=quantity]').input_value()=='1'
+   assert form.locator('[name=quantity]').is_hidden();assert form.locator('[name=quantity]').evaluate('(el)=>el.checkValidity()');assert page.evaluate('qaSaved.length')==1
+   form.locator('[name=observation]').fill('Una ventana por NC');form.locator('[type=submit]').click()
+   page.wait_for_function("document.querySelector('[data-order-summary]')?.textContent.includes('1 × NC V')")
+   assert 'NC Vidrio · 1 (1 por NC)' in row.inner_text() and 'estimación 1 (1 por NC)' not in row.inner_text() and 'Total por validar' in row.inner_text()
    page.evaluate('controller.load()');page.wait_for_function("document.querySelector('[data-order-summary]')?.textContent.includes('3 × NC AL')")
-   assert '2 × NC V' in row.inner_text() and 'por definir' not in row.inner_text()
+   assert '1 × NC V' in row.inner_text() and 'por definir' not in row.inner_text()
    assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+1')
    page.screenshot(path=f'/tmp/saved-window-summary-{width}.png',full_page=True)
    page.reload();page.wait_for_function("document.querySelector('[data-order-summary]')?.textContent.includes('3 × NC V')")
