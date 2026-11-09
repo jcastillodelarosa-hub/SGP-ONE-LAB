@@ -44,11 +44,21 @@ export async function openPdtV2({row,client,token,role,capabilities,show,escape:
     picking=result.data;
     }catch(error){picking={entregas:[],lineas:[],error:error.message||'Consulta no disponible'};}
   }
-  const details=row.detalles||[];
+  let processError=null,processCounts=new Map();
+  if(validated && editable && machinist){
+    try{
+      const result=await client.rpc('sgp_pdt_proceso_simple_estado_v1',{p_token:token,p_id:row.id_pendiente});
+      if(result.error)throw result.error;
+      if(result.data?.ok!==true||!Array.isArray(result.data.detalles))throw new Error('Respuesta de proceso inválida');
+      processCounts=new Map(result.data.detalles.map(d=>[d.id_detalle,d.en_proceso]));
+      if((row.detalles||[]).some(d=>!Number.isSafeInteger(processCounts.get(d.id_detalle))||processCounts.get(d.id_detalle)<0||processCounts.get(d.id_detalle)>Number(d.saldo)))throw new Error('Cantidades en proceso no disponibles');
+    }catch(error){processError=error.message||'No se pudo consultar el proceso';}
+  }
+  const details=(row.detalles||[]).map(d=>({...d,en_proceso:processError?null:(processCounts.get(d.id_detalle)??0)}));
   const moves=(row.movimientos||[]).filter(m=>m.tipo==='AVANCE' && !(row.movimientos||[]).some(x=>x.id_movimiento_revertido===m.id_movimiento));
   let form='';
   if(needsValidation && editable && validator)form+=manual?renderManualDistribution(manualGroups,manualOriginal,sourceError,esc):renderSourceDistribution(sources,row.cantidad,sourceError,esc,row.perfil);
-  if(validated && editable && machinist)form+=advancesForm(details,moves,row,esc);
+  if(validated && editable && machinist)form+=advancesForm(details,moves,{...row,processError},esc);
   if(manual)form+='<section class="repo-modal-section" data-pdt-section="distribution"><h3>Reporte manual</h3><p>Programación vigente: '+esc(row.anio||'—')+' · semana '+esc(row.semana||'—')+' · Reserva '+esc(row.reserva||'—')+' · PANEL '+esc(row.perfil||'—')+'</p><p>Período original del reporte: '+esc(row.anio_original??row.anio??'—')+' · semana '+esc(row.semana_original??row.semana??'—')+'</p><p>Original: '+esc(row.fabricacion_original||'—')+' · '+esc(row.marca_original||'—')+' · '+esc(row.longitud_original||'—')+' · '+esc(row.cantidad_original??row.cantidad??'—')+'. Validado: '+esc(row.cantidad_validada??'Pendiente')+'. Procesado: '+esc(row.avance_neto??'—')+'. Saldo: '+esc(row.saldo_mecanizado??'—')+'.</p><p>NC: '+esc(row.nc||'Sin NC')+' · Observación: '+esc(row.observacion_general||'Sin observación')+'</p></section>';
   if(editable && ncEditor)form+='<section class="repo-modal-section"><h3>NC vinculadas</h3><p>'+esc((row.ncs||[]).map(n=>(n.referencia||n.consecutivo)+' · '+(n.estado||n.resolucion)).join(' / ')||row.nc||'Sin NC')+'</p><label>Añadir NC (sin reemplazar)<input data-ncs type="text" autocomplete="off"></label><button type="button" data-operation="nc">Añadir NC</button></section>';
   if(validated && editable && capabilities.picking_cuantitativo && (pickRegister||pickValidate) && !picking.error){
@@ -113,7 +123,7 @@ export async function openPdtV2({row,client,token,role,capabilities,show,escape:
   };
   updateDistribution();
 
-  const rpcByAction={validate:'sgp_aluminio_pendiente_validar_detalles_v1',advance:'sgp_aluminio_pendiente_registrar_avance_v1',reverse:'sgp_aluminio_pendiente_revertir_avance_v1',stage:'sgp_pdt_estado_v2',nc:'sgp_aluminio_pendiente_nc_vincular_v1',delivery:manual?'sgp_pdt_manual_entrega_registrar_v1':'sgp_pdt_entrega_registrar_v2',deliveryValidate:manual?'sgp_pdt_manual_entrega_validar_v1':'sgp_pdt_entrega_validar_v2',assign:manual?'sgp_pdt_manual_asignar_v1':'sgp_pdt_asignar_v2',annul:manual?'sgp_pdt_manual_entrega_anular_v1':'sgp_pdt_entrega_anular_v2',close:manual?'sgp_pdt_manual_cerrar_v1':'sgp_pdt_cerrar_v2'};
+  const rpcByAction={validate:'sgp_aluminio_pendiente_validar_detalles_v1',start:'sgp_pdt_proceso_simple_v1',advance:'sgp_pdt_proceso_simple_v1',reverse:'sgp_aluminio_pendiente_revertir_avance_v1',stage:'sgp_pdt_estado_v2',nc:'sgp_aluminio_pendiente_nc_vincular_v1',delivery:manual?'sgp_pdt_manual_entrega_registrar_v1':'sgp_pdt_entrega_registrar_v2',deliveryValidate:manual?'sgp_pdt_manual_entrega_validar_v1':'sgp_pdt_entrega_validar_v2',assign:manual?'sgp_pdt_manual_asignar_v1':'sgp_pdt_asignar_v2',annul:manual?'sgp_pdt_manual_entrega_anular_v1':'sgp_pdt_entrega_anular_v2',close:manual?'sgp_pdt_manual_cerrar_v1':'sgp_pdt_cerrar_v2'};
   modal.querySelectorAll('[data-operation]').forEach(button=>{if(!(manual&&['delivery','deliveryValidate','assign','annul','close'].includes(button.dataset.operation))&&!capabilities.operations?.includes(rpcByAction[button.dataset.operation])){button.disabled=true;button.dataset.unavailable='true';button.title='Operación no disponible en este backend';}});
   const lineInput=modal.querySelector('[data-pick-line]');
   const updateLineActions=()=>{const line=picking.lineas.find(l=>l.id_linea===lineInput?.value);for(const action of ['deliveryValidate','assign','annul']){const button=modal.querySelector('[data-operation="'+action+'"]');if(button)button.disabled=operationPending||button.dataset.unavailable==='true'||!line||line.estado==='ANULADA'||(action==='assign'&&(line.estado!=='VALIDADA'||line.asignada));}};
@@ -133,7 +143,7 @@ export async function openPdtV2({row,client,token,role,capabilities,show,escape:
     finally{session.busy=false;session.modal?.setAttribute('aria-busy','false');if(session.closed&&session.reloadOnFinish)notifyParent();}
   };
   modal.querySelector('[data-refresh-pdt]').onclick=()=>{if(!session.busy)refresh();};
-  const keys={advance:crypto.randomUUID(),reverse:crypto.randomUUID(),delivery:crypto.randomUUID(),assign:crypto.randomUUID(),close:crypto.randomUUID()};
+  const keys={start:crypto.randomUUID(),advance:crypto.randomUUID(),reverse:crypto.randomUUID(),delivery:crypto.randomUUID(),assign:crypto.randomUUID(),close:crypto.randomUUID()};
   modal.querySelectorAll('[data-operation]').forEach(button=>button.onclick=async()=>{
     if(operationPending||session.busy||session.needsRefresh||button.disabled)return;
     if(['reverse','annul','close'].includes(button.dataset.operation)&&!window.confirm({reverse:'¿Confirmas revertir este avance? Se conservará la trazabilidad.',stage:'¿Confirmas el cambio de etapa? El servidor validará sus condiciones.',annul:'¿Confirmas anular esta línea de entrega?',close:'¿Solicitar cierre del PDT con evidencia Picking?'}[button.dataset.operation]))return;
@@ -147,7 +157,8 @@ export async function openPdtV2({row,client,token,role,capabilities,show,escape:
           if(!state.valid)throw new Error(state.reason);
           operation='sgp_aluminio_pendiente_validar_detalles_v1';args={...args,p_detalles:state.details,p_reserva:row.reserva,p_observacion:val('[data-note]')||null};break;
         }
-        case 'advance':operation='sgp_aluminio_pendiente_registrar_avance_v1';args={...args,p_id_detalle:details[Number(button.dataset.detailIndex)]?.id_detalle,p_cantidad:Number(val('[data-advance-qty="'+button.dataset.detailIndex+'"]')),p_turno:val('[data-shift]'),p_fecha_operativa:val('[data-date]'),p_idempotency_key:keys.advance,p_observacion:val('[data-note]')||null};break;
+        case 'start':
+        case 'advance':operation='sgp_pdt_proceso_simple_v1';args={...args,p_accion:button.dataset.operation==='start'?'INICIAR':'PROCESAR',p_id_detalle:details[Number(button.dataset.detailIndex)]?.id_detalle,p_cantidad:Number(val('[data-advance-qty="'+button.dataset.detailIndex+'"]')),p_turno:val('[data-shift]'),p_fecha_operativa:val('[data-date]'),p_idempotency_key:keys[button.dataset.operation],p_observacion:val('[data-note]')||null};break;
         case 'reverse':operation='sgp_aluminio_pendiente_revertir_avance_v1';args={...args,p_movimiento:val('[data-movement]'),p_clave:keys.reverse,p_motivo:val('[data-note]')};break;
         case 'delivery':operation=rpcByAction.delivery;args={p_token:token,p_detalle:val('[data-pick-detail]'),p_entrega:val('[data-pick-event]'),p_cantidad:Number(val('[data-pick-qty]')),p_clave:keys.delivery};break;
         case 'deliveryValidate':operation=rpcByAction.deliveryValidate;args={p_token:token,p_linea:val('[data-pick-line]')};break;
@@ -155,16 +166,16 @@ export async function openPdtV2({row,client,token,role,capabilities,show,escape:
         case 'annul':operation=rpcByAction.annul;args={p_token:token,p_linea:val('[data-pick-line]'),p_motivo:val('[data-annul-note]')};break;
         case 'close':operation=rpcByAction.close;args={...args,p_clave:keys.close};break;
         case 'nc':operation='sgp_aluminio_pendiente_nc_vincular_v1';args={...args,p_ncs:normalizeNcNumbers(val('[data-ncs]'))};break;
-        case 'stage':{const selected=val('[data-stage]');if(!['CORTE','MECANIZADO','PROCESADO'].includes(selected))throw new Error('Selecciona un estado válido');if(selected===row.estado_repo){setFeedback('El PDT ya está en ese estado.');return;}operation='sgp_pdt_estado_v2';args={...args,p_estado:selected};break;}
+        case 'stage':{const selected=val('[data-stage]');if(!['CORTE','MECANIZADO','PROCESADO'].includes(selected))throw new Error('Selecciona un estado válido');if(selected===row.estado_repo)throw new Error('El PDT ya está en ese estado.');operation='sgp_pdt_estado_v2';args={...args,p_estado:selected};break;}
       }
-      if(button.dataset.operation==='advance'){const detail=details[Number(button.dataset.detailIndex)];if(!detail||!Number.isSafeInteger(args.p_cantidad)||args.p_cantidad<=0||args.p_cantidad>Number(detail.saldo))throw new Error('Cantidad de avance inválida o superior al saldo');if(!args.p_fecha_operativa)throw new Error('Selecciona la fecha operativa');}
+      if(['start','advance'].includes(button.dataset.operation)){const detail=details[Number(button.dataset.detailIndex)];const limit=Number(detail?.saldo)-(button.dataset.operation==='start'?Number(detail?.en_proceso):0);if(processError)throw new Error('Actualiza el PDT para consultar las cantidades en proceso');if(!detail||!Number.isSafeInteger(args.p_cantidad)||args.p_cantidad<=0||args.p_cantidad>limit)throw new Error('La cantidad debe ser un entero positivo y no superar '+limit+' piezas');if(!args.p_fecha_operativa)throw new Error('Selecciona la fecha operativa');}
       if(button.dataset.operation==='reverse'&&!args.p_motivo.trim())throw new Error('Indica el motivo del reverso');
       const view=capturePdtView(modal,details);
       setFeedback('Guardando operación…');writeStarted=true;const outcome=await (manual&&operation.startsWith('sgp_pdt_manual_')?executeManualPdt(client,operation,args):executePendingV2(client,capabilities,operation,args));
       session.dirty=true;session.pending=null;session.needsRefresh=true;
-      session.feedback=outcome.duplicado?'Operación ya registrada; estado actualizado.':({advance:'Avance guardado.',reverse:'Reverso guardado.',stage:'Etapa actualizada.',delivery:'Entrega registrada.',deliveryValidate:'Línea validada.',assign:'Acreditación guardada.',annul:'Línea anulada.',close:'Cierre confirmado.',nc:'NC vinculadas.',validate:'Distribución validada.'}[button.dataset.operation]);
-      session.clearAfterWrite={detail:button.dataset.operation==='advance'?args.p_id_detalle:null,delivery:button.dataset.operation==='delivery'};if(button.dataset.operation==='advance')view.focus={detail:args.p_id_detalle};
-      if(button.dataset.operation==='advance')delete view.quantities[args.p_id_detalle];
+      session.feedback=outcome.duplicado?'Operación ya registrada; estado actualizado.':({start:'Cantidad marcada En proceso.',advance:'Procesado guardado. Cantidad lista para entregar.',reverse:'Reverso guardado.',stage:'Etapa actualizada.',delivery:'Entrega registrada.',deliveryValidate:'Línea validada.',assign:'Acreditación guardada.',annul:'Línea anulada.',close:'Cierre confirmado.',nc:'NC vinculadas.',validate:'Distribución validada.'}[button.dataset.operation]);
+      session.clearAfterWrite={detail:['start','advance'].includes(button.dataset.operation)?args.p_id_detalle:null,delivery:button.dataset.operation==='delivery'};if(['start','advance'].includes(button.dataset.operation))view.focus={detail:args.p_id_detalle};
+      if(['start','advance'].includes(button.dataset.operation))delete view.quantities[args.p_id_detalle];
       if(button.dataset.operation==='delivery')view.values['data-pick-qty']='';
       await refresh(view);session.busy=false;session.modal?.setAttribute('aria-busy','false');if(session.closed&&session.reloadOnFinish)notifyParent();
     }catch(error){operationPending=false;session.busy=false;session.modal?.setAttribute('aria-busy','false');modal.querySelector('[data-refresh-pdt]').disabled=false;if(session.closed){if(session.reloadOnFinish)notifyParent();return;}setFeedback(error.message,true);
@@ -180,7 +191,8 @@ export async function openPdtV2({row,client,token,role,capabilities,show,escape:
     finally{session.busy=false;session.modal?.setAttribute('aria-busy','false');if(session.closed&&session.reloadOnFinish)notifyParent();}
   };
   function updateAdvanceInputs(){
-    modal.querySelectorAll('[data-operation=advance]').forEach(button=>{const quantity=Number(modal.querySelector('[data-advance-qty="'+button.dataset.detailIndex+'"]')?.value);const detail=details[Number(button.dataset.detailIndex)];button.disabled=session.needsRefresh||operationPending||button.dataset.unavailable==='true'||!Number.isSafeInteger(quantity)||quantity<=0||quantity>Number(detail?.saldo)||!modal.querySelector('[data-date]')?.value;});
+    modal.querySelectorAll('[data-operation=advance],[data-operation=start]').forEach(button=>{const quantity=Number(modal.querySelector('[data-advance-qty="'+button.dataset.detailIndex+'"]')?.value);const detail=details[Number(button.dataset.detailIndex)];const limit=Number(detail?.saldo)-(button.dataset.operation==='start'?Number(detail?.en_proceso):0);button.disabled=Boolean(processError)||session.needsRefresh||operationPending||button.dataset.unavailable==='true'||!Number.isSafeInteger(quantity)||quantity<=0||quantity>limit||!modal.querySelector('[data-date]')?.value;});
+    const help=modal.querySelector('[data-advance-help]');if(help){const input=document.activeElement?.matches?.('[data-advance-qty]')?document.activeElement:null;const detail=input&&details[Number(input.dataset.advanceQty)];help.textContent=processError?'No se pudo consultar el proceso: '+processError+'. Usa Actualizar PDT.':!modal.querySelector('[data-date]')?.value?'Indica la fecha operativa para guardar.':input&&input.value&&(!Number.isSafeInteger(Number(input.value))||Number(input.value)<=0||Number(input.value)>Number(detail?.saldo))?'Indica una cantidad entera entre 1 y '+detail.saldo+'.':'En proceso inicia piezas pendientes. Procesado registra piezas terminadas, incluso si no se marcó su inicio.';}
   }
   modal.querySelectorAll('[data-advance-qty],[data-date],[data-shift]').forEach(input=>input.addEventListener('input',()=>{updateAdvanceInputs();navigation.updatePrimary();}));
   await restorePdtView(modal,_restore,details);if(_restore)navigation.activate(_restore.section);updateAdvanceInputs();navigation.updatePrimary();if(!modal.contains(document.activeElement)||document.activeElement?.disabled)(modal.querySelector('[data-date]')||modal.querySelector('[data-refresh-pdt]')).focus({preventScroll:true});

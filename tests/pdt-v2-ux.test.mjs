@@ -8,7 +8,7 @@ const caps={contract_version:2,picking_cuantitativo:true};
 test('Issue95 REPO OK is independent of PDT state, validation and zero advancement',()=>{
  const copy=structuredClone(row),html=productionPdtStatus(row,'VALIDADO',esc);
  assert.match(html,/PROCESADO/);assert.match(html,/VALIDADO/);assert.match(html,/REPO OK/);
- const summary=pdtSummary(row,esc);assert.match(summary,/Disponible para sacar/);assert.match(summary,/no confirma inventario, entrega física ni avance/);assert.match(summary,/Avance neto<\/span><strong>0/);assert.match(summary,/Saldo<\/span><strong>9/);
+ const summary=pdtSummary(row,esc);assert.match(summary,/Disponible para sacar/);assert.match(summary,/no confirma inventario, entrega física ni avance/);assert.match(summary,/Procesadas<\/span><strong>0/);assert.match(summary,/Saldo<\/span><strong>9/);
  assert.deepEqual(row,copy);
 });
 test('partial/inactive/unknown NC never claim REPO OK',()=>{
