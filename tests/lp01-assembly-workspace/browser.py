@@ -93,10 +93,20 @@ try:
    assert page.locator('#workspace [data-assembly-glass],[data-assembly-incorporate]').count()==0
    page.screenshot(path=str(OUT/f'packing-detail-{width}.png'),full_page=True)
    page.evaluate("async()=>{const f=await import('/tests/lp01-turn-reference-browser.mjs');await f.mount()}")
+   assert 'no aparecerán órdenes cerradas' in page.locator('[data-reference-status]').inner_text()
+   assert page.locator('[data-export-confirm]').inner_text()=='Guardar cierre sin clasificación'
+   page.locator('[data-export-confirm]').click();assert not page.evaluate("'report_reference_load_id' in window.sent")
    page.locator('[data-reference-load]').click();page.locator('[data-reference-select] option').nth(1).wait_for(state='attached')
    page.locator('[data-reference-select]').select_option('aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee');page.locator('[data-export-confirm]').click()
    assert page.evaluate('window.sent.report_reference_load_id')=='aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee'
    assert page.evaluate('window.sent.observation')=='Synthetic'
+   page.locator('[data-reference-select]').select_option('');assert page.locator('[data-export-confirm]').inner_text()=='Guardar cierre sin clasificación'
+   page.evaluate("async()=>{const f=await import('/tests/lp01-partial-classification-browser.mjs');f.mount()}")
+   assert 'Clasificación parcial estimada' in page.locator('main').inner_text()
+   assert 'Al menos 1' in page.locator('main').inner_text()
+   assert 'Falta en el Export de contraste' in page.locator('[data-report-section=pending]').inner_text()
+   assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
+   page.screenshot(path=str(OUT/f'partial-classification-{width}.png'),full_page=True)
    assert not errors,errors;assert not external,external;results.append({'width':width,'groups':3,'bodyOverflow':False,'noteDraftRefreshSave':True,'detail':True,'historicalReportOwnSources':True,'planV4FromSQL':True,'glassInlineExpandKeyboardReopen':True,'mobileWeekLeft':width<=700,'externalRequests':0,'productionCalls':0,'packingStageNoGlass':True});page.close()
   browser.close()
 finally:server.shutdown()

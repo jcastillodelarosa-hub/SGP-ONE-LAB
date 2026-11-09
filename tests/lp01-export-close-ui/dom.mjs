@@ -24,3 +24,10 @@ state.uncertain=false;state.receipt.rows=[{key:'QA|PANELES_2',coverage:'PRESENT'
 data.catalog={contract:'LP-HOJA-1',...context,productions:[{key:'QA|PANELES_2',oficial:{key_produccion:'QA|PANELES_2',id_linea:context.line,produccion:'Orden <QA>',sistema:'ES-2020',acabado:'BRONZE'}}]};
 editor=mount();assert(host.textContent.includes('Orden: Orden <QA>'));assert(host.textContent.includes('Sistema: ES-2020 · Acabado: BRONZE'));assert(!host.textContent.includes('CURRENT_FILE'));assert(!host.textContent.includes('QA|PANELES_2'));assert.equal(host.querySelector('[data-export-reason]').dataset.exportReason,'QA|PANELES_2');assert.equal(host.querySelector('QA'),null);editor.destroy();
 console.log('PASS close row metadata: readable identity, no machine status, escaped fields, unchanged reason key');
+
+// Closing without a reference remains allowed, but cannot look classified.
+const assemblyContext={...context,stage:'ENSAMBLE'},assemblyData={...data,exportClose:{...data.exportClose,...assemblyContext}},assemblyState={...state,receipt:{...state.receipt,universe:assemblyContext}};
+let unclassifiedCommand;const assembly=mountExportCloseEditor({host,data:assemblyData,context:assemblyContext,state:assemblyState,isCurrent:()=>true,onImport:async()=>{},onClose:async command=>{unclassifiedCommand=command;},onRetry:async()=>{},onLoadReferences:async()=>{throw Error('not needed');}});
+assert(host.querySelector('[data-reference-status]').textContent.includes('no aparecerán órdenes cerradas'));assert.equal(host.querySelector('[data-export-confirm]').textContent,'Guardar cierre sin clasificación');
+host.querySelector('[data-export-confirm]').click();await new Promise(r=>setTimeout(r,0));assert(unclassifiedCommand);assert(!('report_reference_load_id' in unclassifiedCommand));assembly.destroy();
+console.log('PASS missing reference warning is immediate; explicitly unclassified close remains allowed');

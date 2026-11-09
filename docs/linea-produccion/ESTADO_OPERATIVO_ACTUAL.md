@@ -1847,3 +1847,16 @@ explícito, en transportes (detalle/selector/historial) y resumen. No deriva Tec
 Export global en Empaque. Afectaciones propias y observaciones globales conservadas;
 revisión CAS original intacta. Sin SQL ni permisos. 60 pruebas focales PASS; pendiente
 CI/publicación por flujo existente. No se declara cambio aplicado hasta esa entrega.
+
+## 2026-11-09 — Clasificación parcial de cierres · candidata v429
+
+Base main v428. El lector admite clasificación estimada parcial con fuente inicial,
+movimientos acreditados de cierres previos y contraste posterior. Conserva cantidades,
+observaciones y cierre original. Filas sin evidencia siguen por validar; ausencia no
+se considera cero. Reporte y CSV identifican fuentes y carácter estimado. El cierre
+sin referencia sigue permitido con aviso y botón explícitos.
+
+Compatibilidad V2 y evidencia complementaria APLICADAS EN SUPABASE, verificadas sin
+cambiar los snapshots originales, saldos, ACL o RLS. Frontend pendiente de CI y
+publicación protegida. 16 pruebas focales y DOM PASS; suite 948: 938 PASS/10 omitidas;
+verify:release PASS. PC/móvil añadidos al workflow existente, pendientes de CI.
