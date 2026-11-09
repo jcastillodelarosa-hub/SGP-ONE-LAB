@@ -19,7 +19,7 @@ const week=document.querySelector('#glassEfficiencyWeek');week.disabled=false;we
 for(const id of ['glassReportLevel','glassEfficiencyWeek','glassEfficiencyFilter'])document.getElementById(id).addEventListener('change',renderGlassEfficiency);
 document.getElementById('glassEfficiencySearch').addEventListener('input',renderGlassEfficiency);renderGlassEfficiency();
 """.replace('ROWS',json.dumps(rows)).replace('RENDER',render)
-html='<link rel="stylesheet" href="/styles.css"><main>'+region+'</main><script type="module">'+script+'</script>'
+html='<meta charset="utf-8"><link rel="stylesheet" href="/styles.css"><main>'+region+'</main><script type="module">'+script+'</script>'
 handler=functools.partial(http.server.SimpleHTTPRequestHandler,directory=str(root));server=http.server.ThreadingHTTPServer(('127.0.0.1',0),handler);threading.Thread(target=server.serve_forever,daemon=True).start()
 with sync_playwright() as p:
  browser=p.chromium.launch(headless=True,executable_path=None if os.environ.get('CI') else shutil.which('chromium') or None)
