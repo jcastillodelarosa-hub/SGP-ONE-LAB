@@ -1,3 +1,4 @@
+import {glassStateQuantity} from './glass-explorer-states.js';
 /**
  * LAB v306: modelo de relaciones para vidrio preparado y ubicación.
  * Conserva identidad de orden mediante key_produccion.
@@ -22,7 +23,7 @@ export function buildGlassRelationGraph(rows, mode='prepared') {
  for(const r of rows||[]) {
   const key=String(r.key_produccion||'').trim(),res=String(r.reserva||'SIN RESERVA').split(',')[0].trim()||'SIN RESERVA';
   const part=String(r.parte||'SIN PARTE'),pos=String(r.posicion||'SIN UBICACIÓN').trim()||'SIN UBICACIÓN';
-  const total=Number(r.unidades||0),prepared=Number(r.preparadas||0),qty=mode==='all'?total:prepared;
+  const qty=glassStateQuantity(r,mode);
   if(!key||!Number.isFinite(qty)||qty<=0)continue;
   const ri='r:'+res,pi='p:'+res+':'+part,oi='o:'+key,bi='b:'+pos;
   addNode(ri,'reserva','Reserva '+res);

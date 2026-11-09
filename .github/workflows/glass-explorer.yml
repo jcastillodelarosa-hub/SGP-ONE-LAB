@@ -1,0 +1,35 @@
+name: Vidrio explorer colors (isolated)
+on:
+  pull_request:
+    paths:
+      - 'src/domain/glass-explorer-states.js'
+      - 'src/domain/glass-relations-graph.js'
+      - 'src/domain/glass-explorer-insights.js'
+      - 'tests/glass-explorer-states*'
+      - 'tests/glass-explorer-states/**'
+      - '.github/workflows/glass-explorer.yml'
+permissions:
+  contents: read
+jobs:
+  explorer:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: node --test tests/glass-explorer-states.test.mjs tests/glass-relations-v306.test.mjs tests/glass-explorer-visual-v307.test.mjs
+      - run: pip install playwright==1.55.0
+      - run: python -m playwright install --with-deps chromium
+      - run: python tests/glass-explorer-states/browser.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: vidrio-colors-pc-mobile
+          path: /tmp/glass-states-*.png
