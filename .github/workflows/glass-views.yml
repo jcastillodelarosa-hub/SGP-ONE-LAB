@@ -7,6 +7,8 @@ on:
       - 'src/modules/glass-preparation*'
       - 'tests/glass-location-report/**'
       - 'tests/glass-preparation*'
+      - 'tests/glass-preparation/**'
+      - 'docs/sql-proposals/glass-preparation/**'
       - '.github/workflows/glass-views.yml'
 permissions:
   contents: read
@@ -25,11 +27,16 @@ jobs:
         with:
           python-version: '3.12'
       - run: node --test tests/glass-location-report.test.mjs tests/glass-week-filter-v306.test.mjs tests/glass-week-partial-mapping.test.mjs
+      - run: npm install --prefix tests/glass-preparation --ignore-scripts --no-audit --no-fund
+      - run: node --test tests/glass-preparation.test.mjs tests/glass-preparation-xlsx.test.mjs && node tests/glass-preparation/sql.mjs && node tests/glass-preparation/dom.mjs
       - run: pip install playwright==1.55.0
       - run: python -m playwright install --with-deps chromium
       - run: python tests/glass-location-report/browser.py
+      - run: python tests/glass-preparation/browser.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: vidrio-b19-ui
-          path: /tmp/b19-*.png
+          path: |
+            /tmp/b19-*.png
+            /tmp/b21-*.png

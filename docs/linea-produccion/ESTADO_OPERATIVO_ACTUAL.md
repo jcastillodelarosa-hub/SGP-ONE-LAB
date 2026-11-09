@@ -1,3 +1,19 @@
+## Candidata LAB v419 · Vidrio B21 · 09/11/2026
+
+IMPLEMENTADO LOCAL / BACKEND APLICADO / UI NO PUBLICADA. Base B19 v418 publicada: main `b8a740727698aea4e587ad401bfbeb2b195e55a0`, Hosting `31d22aab76c27b62`.
+El acceso existente Reporte de ubicaciones reúne su vista y Fechas de preparación B21.
+Una fila por reserva/prioridad original; fecha sin turno individual o múltiple,
+guardado autenticado admin/coordinador, selección semanal y filtro de fecha/búsqueda.
+Excel XLSX autocontenido sin CDN, con todas las producciones de cada fila filtrada,
+fecha heredada y lotes separados. Lote vidrio no tiene fuente actual: se muestra —,
+no se inventa ni se sustituye por OVES.
+SQL `glass_preparation_b21` aplicado una sola vez; dos tablas privadas con RLS,
+tres helpers privados, dos RPC con sesión/permisos existentes; readback cero fechas
+y cero eventos. No se insertaron datos de prueba en producción. No reaplicar.
+Evidencia focal: Node/modelo/XLSX, SQL aislado y DOM PASS; PC/móvil en CI oficial.
+Detalles y hash aplicado: `docs/sql-proposals/glass-preparation/README.md`.
+Siguiente: PR/CI y publicación protegida v419 contra baseline v418 verificado.
+
 ## Candidata LAB v418 · Vidrio B19 · 09/11/2026
 
 IMPLEMENTADO LOCAL / NO PUBLICADO. Base main v417 `af82bbab087112db121e73756d56fab16fc7cd1c`, Hosting verificado `2737f06869b35a0d`.

@@ -1,3 +1,4 @@
+import {mountGlassPreparation} from './src/modules/glass-preparation.js';
 import {glassLocationSummary,glassLocationReportCSV} from './src/domain/glass-location-report.js';
 import {glassLocationDetailMarkup} from './src/modules/glass-location-detail.js';
 import {createExportReview} from './src/modules/export-review.js';
@@ -1162,8 +1163,20 @@ async function loadLocationReport(){
  // No mostrar datos antiguos como si fueran actuales.
  if(failures.length)status.textContent+=' Pulsa Reporte de ubicaciones para reintentar.';
 }
+let glassView='locations';
+let glassPreparation=null;
+function loadGlassPreparation(){glassPreparation??=mountGlassPreparation(document.querySelector('#glassPreparationPanel'),{getClient:getSupabaseClient,getToken:getAppToken});return glassPreparation.load();}
+function selectGlassView(view){
+ glassView=view;
+ for(const [key,id,tab] of [['locations','glassLocationsContent','glassLocationsViewTab'],['preparation','glassPreparationPanel','glassPreparationViewTab']]){
+  const selected=view===key;document.getElementById(id).hidden=!selected;const button=document.getElementById(tab);button.classList.toggle('active',selected);button.setAttribute('aria-selected',String(selected));
+ }
+ if(view==='preparation')void loadGlassPreparation();
+}
+document.getElementById('glassLocationsViewTab')?.addEventListener('click',()=>selectGlassView('locations'));
+document.getElementById('glassPreparationViewTab')?.addEventListener('click',()=>selectGlassView('preparation'));
 function openAssemblyTab(tab){
- const report=tab==="report";els.assemblySheetPanel.hidden=report;els.assemblyLocationReportPanel.hidden=!report;els.assemblySheetTab.classList.toggle("active",!report);els.assemblyLocationReportTab.classList.toggle("active",report);if(report)loadLocationReport();
+ const report=tab==="report";els.assemblySheetPanel.hidden=report;els.assemblyLocationReportPanel.hidden=!report;els.assemblySheetTab.classList.toggle("active",!report);els.assemblyLocationReportTab.classList.toggle("active",report);if(report){if(glassView==='preparation')void loadGlassPreparation();else loadLocationReport();}
 }
 
 async function refreshAssemblyWeeks(selectLatest=false){
