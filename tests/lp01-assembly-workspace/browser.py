@@ -76,7 +76,7 @@ try:
    assert page.evaluate('document.documentElement.scrollWidth<=innerWidth');page.screenshot(path=str(OUT/f'report-{width}.png'),full_page=True)
    page.evaluate('window.showPlanReport()');page.wait_for_function("document.querySelector('#reports').textContent.includes('Disponible coordinador')")
    plan_report=page.locator('#reports [data-assembly-report-index="0"]')
-   if plan_report.get_attribute('open') is None:plan_report.locator('summary').click()
+   if plan_report.get_attribute('open') is None:plan_report.locator(':scope > summary').click()
    plan_report.locator('[data-assembly-report-content]').wait_for(state='visible')
    assert 'excluidas del porcentaje' in page.locator('#reports').inner_text();assert 'Por validar' in page.locator('#reports').inner_text()
    assert '70 %' not in page.locator('#reports').inner_text();assert page.locator('#reports [data-report]').count()==1
