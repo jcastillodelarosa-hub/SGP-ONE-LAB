@@ -1,4 +1,5 @@
 import {mountLineGoalsConfig} from './src/modules/line-turn-goals-config.js';
+import {mountGlassLocationAnalysis} from './src/modules/glass-location-analysis.js';
 import {glassStates,glassInsightQuantity,glassRackAppearance} from './src/domain/glass-explorer-states.js';
 import {mountGlassPreparation} from './src/modules/glass-preparation.js';
 import {glassLocationSummary,glassLocationReportCSV} from './src/domain/glass-location-report.js';
@@ -838,6 +839,7 @@ async function openGlassDetail(key,id,category=null){
 els.closeGlassDetail?.addEventListener('click',()=>{glassDetailRequest++;glassDetailReturnFocus?.focus?.();});
 // LAB v294: análisis de dispersión de vidrio, exclusivamente lectura.
 let glassEfficiencyRows=[];
+let glassRackTotals=null;
 let glassWeekByProduction=new Map();
 let glassReportMetadata=new Map();
 // LAB v306: semana efectiva de la producción. Los datos operativos de vidrio no se alteran.
@@ -893,7 +895,26 @@ async function loadGlassEfficiencyWeeks(client,token,request,previous='all'){
  }
 }
 
+let glassReportMode='table';
+let glassLocationAnalysis=null;
 function renderGlassEfficiency(){
+ renderGlassEfficiencyTree();
+ const table=document.getElementById('glassAnalysisPanel'),tree=document.getElementById('glassTreePanel');
+ if(!table||!tree)return;
+ table.hidden=glassReportMode!=='table';tree.hidden=glassReportMode!=='tree';document.querySelector('.glass-analysis-toolbar').hidden=glassReportMode!=='table';
+ for(const [id,mode] of [['glassTableTab','table'],['glassTreeTab','tree']]){const button=document.getElementById(id);button.classList.toggle('active',glassReportMode===mode);button.setAttribute('aria-selected',String(glassReportMode===mode));}
+ const legacyFilter=document.getElementById('glassEfficiencyFilter');if(legacyFilter)legacyFilter.hidden=glassReportMode!=='tree';
+ const state=document.getElementById('glassAnalysisState');if(state)state.parentElement.hidden=glassReportMode!=='table';
+ if(glassReportMode==='table'){
+  glassLocationAnalysis??=mountGlassLocationAnalysis({host:table,stats:document.getElementById('glassEfficiencyStats'),bindFilters:bindSheetFilters,exportButton:document.getElementById('glassAnalysisExport')});
+  glassLocationAnalysis.update({rows:glassEfficiencyRows,rackTotals:glassRackTotals,weekByProduction:glassWeekByProduction,metadata:glassReportMetadata,week:document.getElementById('glassEfficiencyWeek')?.value||'all',state:state?.value||'all',query:document.getElementById('glassEfficiencySearch')?.value||''});
+ }
+}
+document.getElementById('glassTableTab')?.addEventListener('click',()=>{glassReportMode='table';renderGlassEfficiency()});
+document.getElementById('glassTreeTab')?.addEventListener('click',()=>{glassReportMode='tree';renderGlassEfficiency()});
+document.getElementById('glassAnalysisState')?.addEventListener('change',renderGlassEfficiency);
+document.getElementById('glassAnalysisRefresh')?.addEventListener('click',()=>loadLocationReport());
+function renderGlassEfficiencyTree(){
  const target=document.querySelector('#glassEfficiencyList'),stats=document.querySelector('#glassEfficiencyStats');
  if(!target||!stats)return;
  const query=(document.querySelector('#glassEfficiencySearch')?.value||'').trim().toLowerCase();
@@ -1140,7 +1161,7 @@ async function loadLocationReport(){
  const status=els.locationReportStatus;
  if(!token){status.textContent="Inicia sesión para consultar.";return}
  status.textContent="Actualizando ubicaciones…";
- const failures=[];let success=0;
+ const failures=[];let success=0;glassRackTotals=null;
  const errorLabel=(name,e)=>{const message=String(e?.message||e||'Error desconocido');
   const offline=typeof navigator!=='undefined'&&navigator.onLine===false;
   return name+': '+(offline?'sin conexión a Internet':/failed to fetch|networkerror|fetch failed|load failed/i.test(message)?'falló la conexión con Supabase':message);
@@ -1158,7 +1179,7 @@ async function loadLocationReport(){
    if(i===0){const m=data?.metricas||{};
     els.lrPrepared.textContent=m.preparadas??0;els.lrNovelty.textContent=m.novedad??0;els.lrTransfer.textContent=m.traslado??0;els.lrOther.textContent=m.otros??0;els.lrRacks.textContent=m.burros??0;els.lrMixed.textContent=data?.burros_mixtos??0;
     els.locationByReservation.innerHTML=(data?.por_reserva||[]).map(r=>`<tr><td>${escapeHtml(String(r.reserva).split(',')[0].trim())}</td><td class="num"><strong>${r.burros}</strong></td><td class="num">${r.unidades}</td></tr>`).join("")||'<tr><td colspan="3" class="empty">Sin ubicaciones</td></tr>';
-   }else if(i===1){els.locationMixedRacks.innerHTML=(data||[]).map(r=>`<tr><td><strong>${escapeHtml(r.posicion)}</strong></td><td><span class="rack-status rack-${escapeHtml(r.orden_estado)}">${escapeHtml(r.estado)}</span></td><td>${escapeHtml([...new Set(String(r.reservas||'').split(',').map(v=>v.trim()).filter(Boolean))].join(', '))}</td><td class="num">${r.cantidad_reservas}</td><td class="num"><strong>${r.unidades}</strong></td></tr>`).join("")||'<tr><td colspan="5" class="empty">Sin burros activos</td></tr>';
+   }else if(i===1){glassRackTotals=Array.isArray(data)?data:null;els.locationMixedRacks.innerHTML=(data||[]).map(r=>`<tr><td><strong>${escapeHtml(r.posicion)}</strong></td><td><span class="rack-status rack-${escapeHtml(r.orden_estado)}">${escapeHtml(r.estado)}</span></td><td>${escapeHtml([...new Set(String(r.reservas||'').split(',').map(v=>v.trim()).filter(Boolean))].join(', '))}</td><td class="num">${r.cantidad_reservas}</td><td class="num"><strong>${r.unidades}</strong></td></tr>`).join("")||'<tr><td colspan="5" class="empty">Sin burros activos</td></tr>';
    }else{const weekPicker=document.querySelector('#glassEfficiencyWeek'),priorWeek=weekPicker?.value||'all';glassEfficiencyRows=data||[];glassWeekByProduction=new Map();glassReportMetadata=new Map();if(weekPicker){weekPicker.disabled=true;weekPicker.value='all';}renderGlassEfficiency();void loadGlassEfficiencyWeeks(client,token,request,priorWeek);}
   });
  }catch(e){if(request!==locationReportRequest)return;failures.push(errorLabel('Conexión',e))}
