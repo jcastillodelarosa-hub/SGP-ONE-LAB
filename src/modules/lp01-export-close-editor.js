@@ -79,8 +79,8 @@ export function mountExportCloseEditor({host,data,context,state,onImport,onClose
   get('[data-export-confirm]').before(box);
   const select=box.querySelector('select'),note=box.querySelector('[data-reference-status]');
   const fill=()=>{select.innerHTML='<option value="">Sin referencia · sin clasificación</option>'+(state.referenceOptions||[]).map(r=>'<option value="'+esc(r.loadId)+'">'+esc(referenceLabel(r))+'</option>').join('');select.value=state.referenceLoadId||'';};
-  const explain=()=>{note.textContent=select.value?'Se guardará esta referencia junto al cierre. Si falta alguna producción o el realizado supera el saldo, el informe completo quedará sin clasificación.':'Sin referencia, se guarda el cierre y el reporte queda sin clasificación de órdenes.';};
-  if(same(state.referenceContext,context))fill();
+  const explain=()=>{get('[data-export-confirm]').textContent=select.value?'Confirmar cierre del turno':'Guardar cierre sin clasificación';note.textContent=select.value?'Se guardará esta referencia junto al cierre. Si falta alguna producción o el realizado supera el saldo, el informe completo quedará sin clasificación.':'No hay referencia seleccionada: se guardarán las cantidades, pero no aparecerán órdenes cerradas, abiertas ni avanzadas. Puedes guardar el cierre sin clasificación.';};
+  if(same(state.referenceContext,context))fill();explain();
   select.onchange=()=>{state.referenceLoadId=select.value;explain();};
   box.querySelector('[data-reference-load]').onclick=()=>run(async()=>{const options=turnReferenceOptions(await onLoadReferences(),context);if(!alive())return;state.referenceOptions=options;state.referenceContext={...context};if(!options.some(r=>r.loadId===state.referenceLoadId))state.referenceLoadId='';fill();explain();});
  }

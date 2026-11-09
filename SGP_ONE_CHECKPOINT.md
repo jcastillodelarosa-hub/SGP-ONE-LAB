@@ -1798,3 +1798,12 @@ EN SUPABASE, NO FUSIONADO, NO PUBLICADO. Pendiente revisar/aplicar RPC con autor
 separada y verificar permisos/payload reales antes de cualquier publicación355.
 Siguiente paso único: revisión ChatGPT del mismo PR98 y del SQL. No crear otro PR,
 no tocar producción, main, Firebase, GOOGLE ni LAC. Conservar commits y cambios locales.
+
+## Cierre parcial estimado · candidata v429 · 09/11/2026
+
+Base main v428. Lector V2 parcial con procedencia, pendientes preservados y aviso
+explícito al guardar sin clasificación. Compatibilidad/evidencia complementaria
+aplicadas en Supabase; snapshots originales, saldos y permisos intactos.
+16 focales y DOM PASS; 938 PASS/10 skip en suite; verify:release PASS.
+CI PC/móvil y publicación frontend pendientes. Continuidad en
+`docs/linea-produccion/ESTADO_OPERATIVO_ACTUAL.md`.
