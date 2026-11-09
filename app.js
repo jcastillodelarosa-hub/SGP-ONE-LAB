@@ -1,3 +1,4 @@
+import {glassStates,glassInsightQuantity,glassRackAppearance} from './src/domain/glass-explorer-states.js';
 import {mountGlassPreparation} from './src/modules/glass-preparation.js';
 import {glassLocationSummary,glassLocationReportCSV} from './src/domain/glass-location-report.js';
 import {glassLocationDetailMarkup} from './src/modules/glass-location-detail.js';
@@ -951,7 +952,7 @@ function renderGlassEfficiency(){
 /* LAB v298: explorador de relaciones; sólo lectura, basado en la misma RPC autenticada. */
 const glassExplorer={selected:null,lastClickId:null,lastClickAt:0};
 function glassExplorerModel(){
- return buildGlassRelationGraph(visibleGlassEfficiencyRows(),document.querySelector('#glassExplorerStatus')?.value||'prepared');
+ return buildGlassRelationGraph(visibleGlassEfficiencyRows(),document.querySelector('#glassExplorerStatus')?.value||'all');
 }
 // LAB v307: pop-ups contextuales. Cálculos locales sobre la RPC de ubicaciones (sin nuevas solicitudes).
 function glassExplorerInsightHTML(node,insight,mode='prepared'){
@@ -961,12 +962,12 @@ function glassExplorerInsightHTML(node,insight,mode='prepared'){
  const row=(cls,title,qty)=>'<div class="glass-tooltip-row"><span class="glass-tooltip-dot '+cls+'"></span><span>'+title+'</span><b>'+Number(qty||0).toLocaleString('es-CO')+'</b></div>';
  if(node.type==='burro'){
   const reserv=glassRackBreakdown(insight,mode),shared=reserv.length>1;
-  const byReserve=reserv.map(r=>'<div class="glass-tooltip-reserve"><strong>'+esc(r.reserva)+'</strong><span>'+Number(mode==='all'?r.total:r.prepared).toLocaleString('es-CO')+' vidrios · '+r.orders+' órdenes</span></div>').join('');
+  const byReserve=reserv.map(r=>'<div class="glass-tooltip-reserve"><strong>'+esc(r.reserva)+'</strong><span>'+glassInsightQuantity(r,mode).toLocaleString('es-CO')+' vidrios · '+r.orders+' órdenes</span></div>').join('');
   return '<section class="glass-tooltip-inner">'+label+
    '<p class="glass-tooltip-subtitle">'+(shared?'<span class="glass-tooltip-warning">Compartido: '+reserv.length+' reservas principales</span>':reserv.length+' reserva principal')+'</p>'+
    '<div class="glass-tooltip-summary">'+row('prepared','Preparados',insight.prepared)+row('novelty','Novedad',insight.novelty)+row('transfer','Traslado',insight.transfer)+row('others','Otros',insight.others)+'</div>'+
    '<div class="glass-tooltip-total">Total en ubicación <b>'+Number(insight.total).toLocaleString('es-CO')+'</b></div>'+
-   '<div class="glass-tooltip-reserves"><span class="glass-tooltip-caption">Por reserva · '+(mode==='prepared'?'preparados':'todos los estados')+'</span>'+byReserve+'</div></section>';
+   '<div class="glass-tooltip-reserves"><span class="glass-tooltip-caption">Por reserva · '+(glassStates[mode]?.plural.toLowerCase()||'todos los estados')+'</span>'+byReserve+'</div></section>';
  }
  const coverage=glassCoverage(insight),percent=coverage.percentage;
  const completion=node.type==='orden'?(coverage.complete?'<span class="glass-tooltip-complete">✓ Completa por cantidad</span>':'<span class="glass-tooltip-partial">◔ Parcial por cantidad</span>'):'';
@@ -998,7 +999,7 @@ function renderGlassExplorer(){
  const model=glassExplorerModel(),query=(document.querySelector('#glassExplorerSearch')?.value||'').toLowerCase().trim();
  hideGlassExplorerTooltip();
  const insights=buildGlassNodeInsights(visibleGlassEfficiencyRows());
- const mode=document.querySelector('#glassExplorerStatus')?.value||'prepared';
+ const mode=document.querySelector('#glassExplorerStatus')?.value||'all';
  const matching=[...model.nodes.values()].filter(n=>!query||n.label.toLowerCase().includes(query));
  const selected=glassExplorer.selected;
  // LAB v299: recorrer la jerarquía completa desde la selección, no sólo un salto.
@@ -1028,24 +1029,26 @@ function renderGlassExplorer(){
   const opacity=!hasFocus||active?'.95':'.10';
   return '<path d="M'+p.x+' '+p.y+' C'+(p.x+120)+' '+p.y+','+(q.x-120)+' '+q.y+','+q.x+' '+q.y+'" stroke="'+stroke+'" stroke-width="'+thickness+'" fill="none" opacity="'+opacity+'"><title>'+qty+' vidrios</title></path>';
  }).join('');
- const palette={reserva:'#7756d6',parte:'#e89b35',orden:'#10a37f',burro:'#1674ed'};
+ const palette={reserva:'#7756d6',parte:'#dceaff',orden:'#1b4f9c'};
  const shapes=visible.filter(n=>coords.has(n.id)).map(n=>{
   const p=coords.get(n.id),metric=insights.get(n.id);
+  const appearance=n.type==='burro'?glassRackAppearance(metric,mode):{fill:palette[n.type],text:n.type==='parte'?'#194c84':'#ffffff',states:[]};
   const label=n.label.length>24?n.label.slice(0,23)+'…':n.label;
   const count=n.type==='burro'?n.glass+' vidrios':n.windows+' ventanas';
   const reservations=n.type==='burro'?glassRackBreakdown(metric,mode):[];
   const shared=n.type==='burro'&&reservations.length>1;
   const coverage=n.type==='orden'?glassCoverage(metric):null;
-  const badge=shared?'⚠ '+reservations.length+' reservas':coverage?(coverage.complete?'✓ Completa':'◔ Parcial'):'';
-  const badgeBg=shared?'#fee5dc':coverage?(coverage.complete?'#dcf9e9':'#ffedca'):'transparent';
-  const badgeFg=shared?'#9e2811':coverage?(coverage.complete?'#087552':'#83500b'):'white';
-  const focusStroke=selected===n.id?'#10264e':hasFocus&&related.has(n.id)?'#f97316':shared?'#d84432':'white';
+  const badge=n.type==='burro'?appearance.label+(shared?' · ⚠ '+reservations.length+' reservas':''):coverage?(coverage.complete?'✓ Completa':'◔ Parcial'):'';
+  const badgeBg=n.type==='burro'?'transparent':coverage?(coverage.complete?'#dcf9e9':'#ffedca'):'transparent';
+  const badgeFg=n.type==='burro'?appearance.text:coverage?(coverage.complete?'#087552':'#83500b'):'white';
+  const focusStroke=selected===n.id?'#10264e':hasFocus&&related.has(n.id)?'#f97316':shared?'#d84432':n.type==='parte'?'#367cce':'white';
   const focusWidth=selected===n.id?5:hasFocus&&related.has(n.id)?4:shared?3:1;
   const opacity=!hasFocus||related.has(n.id)?1:.3;
   return '<g data-node="'+esc(n.id)+'" role="button" tabindex="0" aria-label="'+esc(n.label+' · '+count+(badge?' · '+badge:'')+(n.type==='burro'?' · doble clic para detalle':''))+'" class="glass-explorer-node">'+
-   '<rect x="'+(p.x-106)+'" y="'+(p.y-30)+'" width="212" height="60" rx="12" fill="'+palette[n.type]+'" stroke="'+focusStroke+'" stroke-width="'+focusWidth+'" opacity="'+opacity+'"/>'+
-   '<text x="'+p.x+'" y="'+(p.y-14)+'" fill="white" text-anchor="middle" font-size="12" font-weight="700" opacity="'+opacity+'">'+esc(label)+'</text>'+
-   '<text x="'+p.x+'" y="'+(p.y+3)+'" fill="white" text-anchor="middle" font-size="11" font-weight="800" opacity="'+opacity+'">'+esc(count)+'</text>'+
+   '<rect x="'+(p.x-106)+'" y="'+(p.y-30)+'" width="212" height="60" rx="12" fill="'+appearance.fill+'" stroke="'+focusStroke+'" stroke-width="'+focusWidth+'" opacity="'+opacity+'"/>'+
+   (appearance.states.length>1?appearance.states.map((state,i)=>'<rect x="'+(p.x-100+i*200/appearance.states.length)+'" y="'+(p.y-29)+'" width="'+(200/appearance.states.length)+'" height="4" fill="'+glassStates[state].color+'" opacity="'+opacity+'"/>').join(''):'')+
+   '<text x="'+p.x+'" y="'+(p.y-14)+'" fill="'+appearance.text+'" text-anchor="middle" font-size="12" font-weight="700" opacity="'+opacity+'">'+esc(label)+'</text>'+
+   '<text x="'+p.x+'" y="'+(p.y+3)+'" fill="'+appearance.text+'" text-anchor="middle" font-size="11" font-weight="800" opacity="'+opacity+'">'+esc(count)+'</text>'+
    (badge?'<rect x="'+(p.x-77)+'" y="'+(p.y+7)+'" width="154" height="19" rx="9" fill="'+badgeBg+'" opacity="'+opacity+'"/><text x="'+p.x+'" y="'+(p.y+21)+'" fill="'+badgeFg+'" text-anchor="middle" font-size="11" font-weight="800" opacity="'+opacity+'">'+esc(badge)+'</text>':'')+
    '<title>'+esc(n.label)+' · '+esc(count)+(badge?' · '+esc(badge):'')+'</title></g>';
  }).join('');

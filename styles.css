@@ -1970,10 +1970,10 @@ button.active,[aria-pressed="true"]{border-color:#0865ed}
 .glass-tooltip-summary{display:grid;gap:6px;padding:7px 0;border-top:1px solid #dce7f5;border-bottom:1px solid #dce7f5}
 .glass-tooltip-row{display:grid;grid-template-columns:9px 1fr auto;align-items:center;gap:8px}
 .glass-tooltip-dot{width:9px;height:9px;border-radius:50%;background:#9aa8bb}
-.glass-tooltip-dot.prepared{background:#009b73}
-.glass-tooltip-dot.novelty{background:#ed9326}
-.glass-tooltip-dot.transfer{background:#2379e5}
-.glass-tooltip-dot.others{background:#9aa8bb}
+.glass-tooltip-dot.prepared{background:#14834f}
+.glass-tooltip-dot.novelty{background:#ffe276}
+.glass-tooltip-dot.transfer{background:#f89b32}
+.glass-tooltip-dot.others{background:#e84545}
 .glass-tooltip-row b,.glass-tooltip-total b{font-variant-numeric:tabular-nums}
 .glass-tooltip-total{display:flex;justify-content:space-between;font-weight:700}
 .glass-tooltip-progress{background:#e2eaf4;height:9px;overflow:hidden;border-radius:12px}
