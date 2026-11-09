@@ -1,3 +1,4 @@
+import {turnReferenceOptions,withTurnReference,referenceLabel} from '../domain/lp01-turn-reference.js';
 import {parsePowerBI,selectedPowerBI} from '../domain/powerbi/adapter.js';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const qty=v=>Number.isSafeInteger(v)&&v>=0;
@@ -66,14 +67,26 @@ export function exportCloseCommand(receipt,data,context,reasons,observation){
  return {close_authority:'EXPORT_PRODUCTION_V2',close_contract:'LP-EXPORT-CLOSE-4',file_id:valid.fileId,import_id:valid.importId,reasons:clean,observation:observation.trim()};
 }
 /** State belongs to controller/session/scope, never localStorage. Server validates original and freezes plan. */
-export function mountExportCloseEditor({host,data,context,state,onImport,onClose,onRetry,isCurrent}){
+export function mountExportCloseEditor({host,data,context,state,onImport,onClose,onRetry,isCurrent,onLoadReferences}){
  if(closeReadbackPending(state,context)||!exportCloseEnabled(data,context)||!onImport||!onClose)return null;
  const section=document.createElement('section');section.className='lp-close';section.dataset.exportCloseEditor='';host.append(section);
  const receipt=confirmedImport(state.receipt,data,context);
  section.innerHTML='<h4>Archivo Export del turno</h4><p>La carga parcial reemplaza solo lo informado. Lo ausente conserva el último valor acreditado; nunca informado no equivale a cero.</p><label>Archivo de '+esc(context.stage)+'<input type="file" accept=".xlsx" data-export-file></label><div data-export-local role="status"></div><button type="button" data-export-import>Validar y guardar archivo</button>'+(receipt?'<p>Archivo confirmado · '+esc(receipt.sha256)+'</p>'+receipt.rows.map(r=>confirmedRowMarkup(r,data,context,state.reasons)).join('')+'<label>Observación del cierre<textarea data-export-observation maxlength="4000">'+esc(state.observation)+'</textarea></label><button type="button" data-export-confirm>Confirmar cierre del turno</button>':'<p>Primero guarda el archivo para revisar el resultado acreditado por el servidor.</p>')+'<button type="button" data-export-retry>Reintentar la misma operación</button><p data-export-status role="status"></p>';
  const get=s=>section.querySelector(s),status=get('[data-export-status]');
+ if(receipt&&onLoadReferences&&context.stage==='ENSAMBLE'&&context.line==='PANELES_2'){
+  const box=document.createElement('div');box.dataset.turnReference='';
+  box.innerHTML='<h5>Referencia de saldos del turno</h5><p>Opcional: selecciona el Export diario que representa el inicio. Se indicará la hora declarada del archivo o la hora de importación, según la fuente. La clasificación se mostrará como estimada.</p><button type="button" data-reference-load>Consultar referencias</button><label>Export de referencia<select data-reference-select><option value="">Sin referencia · sin clasificación</option></select></label><p role="status" data-reference-status></p>';
+  get('[data-export-confirm]').before(box);
+  const select=box.querySelector('select'),note=box.querySelector('[data-reference-status]');
+  const fill=()=>{select.innerHTML='<option value="">Sin referencia · sin clasificación</option>'+(state.referenceOptions||[]).map(r=>'<option value="'+esc(r.loadId)+'">'+esc(referenceLabel(r))+'</option>').join('');select.value=state.referenceLoadId||'';};
+  const explain=()=>{note.textContent=select.value?'Se guardará esta referencia junto al cierre. Si falta alguna producción o el realizado supera el saldo, el informe completo quedará sin clasificación.':'Sin referencia, se guarda el cierre y el reporte queda sin clasificación de órdenes.';};
+  if(same(state.referenceContext,context))fill();
+  select.onchange=()=>{state.referenceLoadId=select.value;explain();};
+  box.querySelector('[data-reference-load]').onclick=()=>run(async()=>{const options=turnReferenceOptions(await onLoadReferences(),context);if(!alive())return;state.referenceOptions=options;state.referenceContext={...context};if(!options.some(r=>r.loadId===state.referenceLoadId))state.referenceLoadId='';fill();explain();});
+ }
+
  const alive=()=>section.isConnected&&isCurrent();
- const paint=()=>{section.querySelectorAll('input,textarea,button').forEach(el=>el.disabled=Boolean(state.busy||state.uncertain));get('[data-export-import]').disabled=Boolean(state.busy||state.uncertain||!state.file);get('[data-export-retry]').hidden=!state.uncertain;get('[data-export-retry]').disabled=Boolean(state.busy);};
+ const paint=()=>{section.querySelectorAll('input,textarea,button,select').forEach(el=>el.disabled=Boolean(state.busy||state.uncertain));get('[data-export-import]').disabled=Boolean(state.busy||state.uncertain||!state.file);get('[data-export-retry]').hidden=!state.uncertain;get('[data-export-retry]').disabled=Boolean(state.busy);};
  const run=async fn=>{if(!alive()||state.busy||closeReadbackPending(state,context))return;state.busy=true;paint();status.textContent='Procesando…';try{await fn();if(alive())status.textContent='Confirmado por el servidor.';}catch(e){state.uncertain=e.uncertain===true;if(alive())status.textContent=e.message;}finally{state.busy=false;if(alive())paint();}};
  get('[data-export-file]').onchange=async()=>{
   const file=get('[data-export-file]').files[0];state.file=null;state.busy=true;paint();
@@ -86,7 +99,7 @@ export function mountExportCloseEditor({host,data,context,state,onImport,onClose
  get('[data-export-import]').onclick=()=>run(()=>onImport({authority:'EXPORT_PRODUCTION_V2',...state.file}));
  section.querySelectorAll('[data-export-reason]').forEach(input=>input.oninput=()=>{state.reasons??={};state.reasons[input.dataset.exportReason]=input.value;});
  const observation=get('[data-export-observation]');if(observation)observation.oninput=()=>{state.observation=observation.value;};
- get('[data-export-confirm]')?.addEventListener('click',()=>run(()=>onClose(exportCloseCommand(state.receipt,data,context,state.reasons||{},state.observation||''))));
+ get('[data-export-confirm]')?.addEventListener('click',()=>run(()=>onClose(withTurnReference(exportCloseCommand(state.receipt,data,context,state.reasons||{},state.observation||''),state,context))));
  get('[data-export-retry]').onclick=()=>run(onRetry);paint();
  return {canLeave:()=>!state.busy&&!state.uncertain,destroy:()=>section.remove()};
 }
