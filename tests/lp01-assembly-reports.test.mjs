@@ -182,15 +182,15 @@ test('V2 malformed provenance, coverage, pending plan, continuity or historical 
 });
 test('V2 report and export markup explains plan, absent coverage and unreconciled continuity',()=>{
  const r=v2Model(closureV2Fixture()),markup=assemblyReportMarkup(r);
- for(const phrase of ['Plan y cumplimiento: Por validar','Disponible y continuidad: Por validar','Subtotal informado','Nunca informado · no equivale a cero','Importación actual ID:','Huella de universo actual:','LP-EXPORT-CLOSE-3','EXPORT_PRODUCTION_V2','no autoriza continuar'])assert(markup.includes(phrase),phrase);
- assert.doesNotMatch(markup,/Sale validado|No calculable|>999</);assert.match(markup,/Cumplimiento<b>Por validar/);assert.match(markup,/data-label="Plan del turno">Por validar/);
+ for(const phrase of ['Disponible coordinador','Disponible o estado sin evidencia del turno: Por validar','Subtotal informado','Nunca informado · no equivale a cero','Importación actual ID:','Huella de universo actual:','LP-EXPORT-CLOSE-3','EXPORT_PRODUCTION_V2','no autoriza arrastre'])assert(markup.includes(phrase),phrase);
+ assert.doesNotMatch(markup,/Sale validado|No calculable|>999</);assert.match(markup,/is-pending">Por validar/);assert.match(markup,/Disponible coordinador/);
 });
 test('V2 CSV preserves numeric null versus explicit zero and every provenance/status column',()=>{
  const fixture=withIdentity(closureV2Fixture()),source=v2Source(fixture);source.rows.find(row=>row.coverage==='PRESENT').realized=0;
  const r=v2Model(fixture),csv=assemblyReportCSV(r),[header,...records]=parseCSV(csv),read=(row,column)=>row[header.indexOf(column)];
  assert.equal(csv[0],'\uFEFF');assert.equal(records.length,r.rows.length);assert(records.every(row=>row.length===header.length));
  const absent=records.find(row=>read(row,'Cobertura archivo actual')==='ABSENT'),present=records.find(row=>read(row,'Cobertura archivo actual')==='PRESENT');assert.equal(read(absent,'Realizado'),'');assert.equal(read(absent,'Conservar'),'true');assert.equal(read(present,'Realizado'),'0');assert.equal(read(present,'Conservar'),'false');
- for(const record of records){assert.equal(read(record,'Plan del turno'),'');assert.equal(read(record,'Estado del plan'),'PLAN_SOURCE_REQUIRED');assert.equal(read(record,'Cumplimiento (%)'),'');assert.equal(read(record,'Comparación completa'),'false');assert.equal(read(record,'Disponible'),'');assert.equal(read(record,'Conciliación'),'RECONCILIATION_REQUIRED');assert.equal(read(record,'Continuidad'),'');assert.equal(read(record,'Puede continuar'),'false');assert.equal(read(record,'ID importación actual'),r.importId);assert.equal(read(record,'Huella de universo actual'),r.universeRevision);assert.equal(read(record,'SHA256 actual'),r.file.sha256);assert.equal(read(record,'ID cierre'),r.id);}
+ for(const record of records){assert.equal(read(record,'Plan del turno'),'');assert.equal(read(record,'Estado del plan'),'PLAN_SOURCE_REQUIRED');assert.equal(read(record,'Cumplimiento sobre Disponible (%)'),'');assert.equal(read(record,'Comparación completa'),'false');assert.equal(read(record,'Disponible coordinador del turno'),'');assert.equal(read(record,'Conciliación'),'RECONCILIATION_REQUIRED');assert.equal(read(record,'Continuidad'),'');assert.equal(read(record,'Puede continuar'),'false');assert.equal(read(record,'ID importación actual'),r.importId);assert.equal(read(record,'Huella de universo actual'),r.universeRevision);assert.equal(read(record,'SHA256 actual'),r.file.sha256);assert.equal(read(record,'ID cierre'),r.id);}
  assert(!header.includes('Sale'));assert(!header.includes('ejecutado'));assert(!header.includes('manualHistory'));
 });
 test('V2 CSV escapes formula cells, quotes, delimiters and newlines; invalid models cannot export',()=>{
@@ -200,11 +200,11 @@ test('V2 CSV escapes formula cells, quotes, delimiters and newlines; invalid mod
 });
 domTest('DOM V2: CSV callback receives exact validated model and no write controls',async()=>{
  const {host}=dom(),fixture=closureV2Fixture(),received=[];renderAssemblyReports({host,data:fixture.data,context:fixture.context,onCSV:(id,model)=>received.push({id,model,csv:assemblyReportCSV(model)})});
- host.querySelector('[data-report]').click();await flush();assert.equal(received.length,1);assert.equal(received[0].id,fixture.data.reports[0].id);assert.equal(received[0].model.contract,'LP-EXPORT-CLOSE-3');assert.match(received[0].csv,/ABSENT/);assert.match(received[0].csv,/PLAN_SOURCE_REQUIRED/);assert.equal(host.querySelectorAll('[data-close],[data-bi-file],input,textarea').length,0);assert.match(host.textContent,/Plan y cumplimiento: Por validar/);
+ host.querySelector('[data-report]').click();await flush();assert.equal(received.length,1);assert.equal(received[0].id,fixture.data.reports[0].id);assert.equal(received[0].model.contract,'LP-EXPORT-CLOSE-3');assert.match(received[0].csv,/ABSENT/);assert.match(received[0].csv,/PLAN_SOURCE_REQUIRED/);assert.equal(host.querySelectorAll('[data-close],[data-bi-file],input,textarea').length,0);assert.match(host.textContent,/Disponible coordinador/);
 });
 domTest('DOM V2: PNG/PDF capture input retains unknown plan, coverage and continuity instead of manual quantities',async t=>{
  const {document,window}=dom(),fixture=closureV2Fixture(),originalClick=window.HTMLElement.prototype.click;t.after(()=>{window.HTMLElement.prototype.click=originalClick;});let captures=0;window.HTMLElement.prototype.click=function(){};
- window.html2canvas=async sheet=>{captures++;assert.match(sheet.textContent,/Plan y cumplimiento: Por validar/);assert.match(sheet.textContent,/Nunca informado · no equivale a cero/);assert.match(sheet.textContent,/Disponible y continuidad: Por validar/);assert.doesNotMatch(sheet.textContent,/Sale validado|999/);return {width:2200,height:1000,toDataURL:()=> 'data:image/png;base64,AA=='};};
+ window.html2canvas=async sheet=>{captures++;assert([...sheet.querySelectorAll('details')].every(d=>d.open));assert.match(sheet.textContent,/Disponible coordinador/);assert.match(sheet.textContent,/Nunca informado · no equivale a cero/);assert.match(sheet.textContent,/Disponible o estado sin evidencia del turno: Por validar/);assert.doesNotMatch(sheet.textContent,/Sale validado|999/);return {width:2200,height:1000,toDataURL:()=> 'data:image/png;base64,AA=='};};
  const create=document.createElement.bind(document);document.createElement=name=>name==='canvas'?{getContext:()=>({drawImage(){}}),toDataURL:()=> 'data:image/jpeg;base64,AA=='}:create(name);
  const saved=[];window.jspdf={jsPDF:class{internal={pageSize:{getWidth:()=>210,getHeight:()=>297}};addPage(){}addImage(){}save(name){saved.push(name);}}};
  for(const format of ['png','pdf'])await exportAssemblyReport({report:v2Model(fixture),format,document,window,loadLibraries:async()=>{}});assert.equal(captures,2);assert.equal(saved.length,1);assert.equal(document.querySelector('.lp-assembly-report-export'),null);
@@ -214,7 +214,7 @@ domTest('DOM V2: PNG/PDF capture input retains unknown plan, coverage and contin
 test('partial reload B15 preserves A3/B5 as eight, while historic A7/B5 stays twelve',()=>{
  const fixture=closurePartialReloadFixture(),original=JSON.stringify(fixture),reports=assemblyReports(fixture.data,fixture.context).reports;
  const [current,historical]=reports;assert.equal(current.valid,true);assert.equal(historical.valid,true);assert.equal(current.current,true);assert.equal(historical.current,false);
- assert.deepEqual(current.totals,{plan:null,realized:8,compliance:null,present:1,absent:1,preserved:1,neverReported:0,reported:3,preservedReported:5,knownReported:8});
+ assert.deepEqual(current.totals,{plan:null,realized:8,compliance:null,present:1,absent:1,preserved:1,neverReported:0,reported:3,preservedReported:5,knownReported:8,available:null,comparableRealized:null,included:0,excluded:2,closed:0,opened:0,advanced:0,classificationPending:2});
  assert.equal(historical.totals.realized,12);assert.equal(current.rows.find(row=>row.key==='B|PANELES_2').valueSource.file.name,'earlier-full-export.xlsx');
  assert.equal(current.sourceFiles.length,2);assert.equal(current.file.name,'ensamble-export.xlsx');
  const markup=assemblyReportMarkup(current);for(const phrase of ['valor anterior conservado','Subtotal conocido: 8','earlier-full-export.xlsx','Fuente conservada','no se suman las recargas'])assert(markup.includes(phrase),phrase);

@@ -190,3 +190,12 @@
  .lp-tracking-table .lp-tracking-note-cell{width:220px;min-width:220px;max-width:220px}
  .lp-tracking-note-cell .lp-order-note-compact{width:200px;max-width:100%}
 }
+
+/* Result color is reinforced by explicit outcome text. */
+.lp-report-result{display:inline-block;padding:4px 8px;border-radius:8px;font-weight:700;white-space:normal}
+.lp-report-result.is-met{background:#dcfce7;color:#14532d}
+.lp-report-result.is-unmet{background:#ffedd5;color:#7c2d12}
+.lp-report-result.is-pending{background:#f1f5f9;color:#334155}
+.lp-assembly-report details[data-report-section]{margin:12px 0;border:1px solid #cbd5e1;border-radius:10px;padding:12px}
+.lp-assembly-report details[data-report-section]>summary{cursor:pointer;font-weight:700}
+.lp-assembly-report-export details[data-report-section]>summary{list-style:none}
