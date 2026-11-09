@@ -18,7 +18,7 @@ export function turnReportEvidence(e,context,closureId,rows){
   const final=f?.status==='ACCREDITED_CUT'&&text(f.evidenceId)&&qty(f.balance)&&initial&&f.balance<=initial.quantity&&cut(f.cut)?f:null;
   const known=initial&&final&&qty(row.realized),closed=Boolean(known&&initial.balance>0&&final.balance===0),opened=Boolean(known&&initial.balance===initial.quantity&&row.realized>0),advanced=Boolean(known&&!closed&&row.realized>0&&final.balance>0);
   const comparable=available!==null&&available>0&&qty(row.realized),compliance=comparable?row.realized/available*100:null;
-  return {...row,available,compliance,comparable,complianceState:comparable?(row.realized>=available?'Cumplido':'No cumplido'):available===0?'No calculable · Disponible 0':'Por validar',initialBalance:initial?.balance??null,finalBalance:final?.balance??null,classificationKnown:Boolean(known),closed,opened,advanced,evidence:e?structuredClone(e):null};
+  return {...row,available,compliance,comparable,complianceState:comparable?(row.realized>=available?'Cumplido':'No cumplido'):available===0?'No aplica · Disponible 0':'Sin evidencia histórica',initialBalance:initial?.balance??null,finalBalance:final?.balance??null,classificationKnown:Boolean(known),closed,opened,advanced,evidence:e?structuredClone(e):null};
  });
 }
 export function turnReportTotals(rows){
