@@ -3,6 +3,10 @@ on:
   pull_request:
     paths:
       - 'src/domain/glass-location-report.js'
+      - 'src/domain/glass-location-analysis.js'
+      - 'src/modules/glass-location-analysis.js'
+      - 'tests/glass-location-analysis*'
+      - 'tests/glass-location-analysis/**'
       - 'src/domain/glass-preparation*'
       - 'src/modules/glass-preparation*'
       - 'tests/glass-location-report/**'
@@ -26,11 +30,14 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: node --test tests/glass-location-report.test.mjs tests/glass-week-filter-v306.test.mjs tests/glass-week-partial-mapping.test.mjs
+      - run: node --test tests/glass-location-analysis.test.mjs tests/glass-location-report.test.mjs tests/glass-week-filter-v306.test.mjs tests/glass-week-partial-mapping.test.mjs
       - run: npm install --prefix tests/glass-preparation --ignore-scripts --no-audit --no-fund
       - run: node --test tests/glass-preparation.test.mjs tests/glass-preparation-xlsx.test.mjs && node tests/glass-preparation/sql.mjs && node tests/glass-preparation/dom.mjs
       - run: pip install playwright==1.55.0
       - run: python -m playwright install --with-deps chromium
+      - run: node --test tests/reception-scroll.test.mjs
+      - run: python tests/reception-ui/wheel.py
+      - run: python tests/glass-location-analysis/browser.py
       - run: python tests/glass-location-report/browser.py
       - run: python tests/glass-preparation/browser.py
       - uses: actions/upload-artifact@v4
@@ -38,5 +45,6 @@ jobs:
         with:
           name: vidrio-b19-ui
           path: |
+            /tmp/glass-analysis-*.png
             /tmp/b19-*.png
             /tmp/b21-*.png
