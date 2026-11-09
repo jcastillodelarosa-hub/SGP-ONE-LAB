@@ -3,6 +3,15 @@ const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const qty=v=>Number.isSafeInteger(v)&&v>=0;
 const same=(a,b)=>['stage','line','date','shift'].every(k=>a?.[k]===b?.[k]);
 const hash=v=>typeof v==='string'&&/^[a-f0-9]{64}$/i.test(v);
+/** A close receipt is authoritative even when the subsequent report read fails. */
+export function acceptCloseReceipt(state,result,context,commandId){
+ if(result?.ok!==true)throw Error('Cierre sin confirmación del servidor');
+ state.confirmedClose={context:{...context},commandId,result};state.busy=false;state.uncertain=false;
+ return state.confirmedClose;
+}
+export function closeReadbackPending(state,context){
+ return Boolean(state?.confirmedClose&&same(state.confirmedClose.context,context)||state?.closeCheckRequired&&same(state.closeCheckRequired,context));
+}
 export function exportCloseEnabled(data,context){
  const cap=data?.exportClose;
  return data?.contract==='LP-OPERACION-1'&&data.writeContract==='LP-OPERACION-CAS-2'&&data.writes===true&&
@@ -31,14 +40,14 @@ export function exportCloseCommand(receipt,data,context,reasons,observation){
 }
 /** State belongs to controller/session/scope, never localStorage. Server validates original and freezes plan. */
 export function mountExportCloseEditor({host,data,context,state,onImport,onClose,onRetry,isCurrent}){
- if(!exportCloseEnabled(data,context)||!onImport||!onClose)return null;
+ if(closeReadbackPending(state,context)||!exportCloseEnabled(data,context)||!onImport||!onClose)return null;
  const section=document.createElement('section');section.className='lp-close';section.dataset.exportCloseEditor='';host.append(section);
  const receipt=confirmedImport(state.receipt,data,context);
  section.innerHTML='<h4>Archivo Export del turno</h4><p>La carga parcial reemplaza solo lo informado. Lo ausente conserva el último valor acreditado; nunca informado no equivale a cero.</p><label>Archivo de '+esc(context.stage)+'<input type="file" accept=".xlsx" data-export-file></label><div data-export-local role="status"></div><button type="button" data-export-import>Validar y guardar archivo</button>'+(receipt?'<p>Archivo confirmado · '+esc(receipt.sha256)+'</p>'+receipt.rows.map(r=>'<label><b>'+esc(r.key)+'</b> · '+(r.quantity===null?'Nunca informado':r.quantity+' ventanas')+' · '+esc(r.valueStatus)+'<input data-export-reason="'+esc(r.key)+'" placeholder="Motivo'+(r.coverage==='ABSENT'||r.pendingAgainstPlan>0?' obligatorio':' / observación')+'" value="'+esc(state.reasons?.[r.key])+'"></label>').join('')+'<label>Observación del cierre<textarea data-export-observation maxlength="4000">'+esc(state.observation)+'</textarea></label><button type="button" data-export-confirm>Confirmar cierre del turno</button>':'<p>Primero guarda el archivo para revisar el resultado acreditado por el servidor.</p>')+'<button type="button" data-export-retry>Reintentar la misma operación</button><p data-export-status role="status"></p>';
  const get=s=>section.querySelector(s),status=get('[data-export-status]');
  const alive=()=>section.isConnected&&isCurrent();
  const paint=()=>{section.querySelectorAll('input,textarea,button').forEach(el=>el.disabled=Boolean(state.busy||state.uncertain));get('[data-export-import]').disabled=Boolean(state.busy||state.uncertain||!state.file);get('[data-export-retry]').hidden=!state.uncertain;get('[data-export-retry]').disabled=Boolean(state.busy);};
- const run=async fn=>{if(!alive()||state.busy)return;state.busy=true;paint();status.textContent='Procesando…';try{await fn();if(alive())status.textContent='Confirmado por el servidor.';}catch(e){state.uncertain=e.uncertain===true;if(alive())status.textContent=e.message;}finally{state.busy=false;if(alive())paint();}};
+ const run=async fn=>{if(!alive()||state.busy||closeReadbackPending(state,context))return;state.busy=true;paint();status.textContent='Procesando…';try{await fn();if(alive())status.textContent='Confirmado por el servidor.';}catch(e){state.uncertain=e.uncertain===true;if(alive())status.textContent=e.message;}finally{state.busy=false;if(alive())paint();}};
  get('[data-export-file]').onchange=async()=>{
   const file=get('[data-export-file]').files[0];state.file=null;state.busy=true;paint();
   try{if(!file||file.size>2097152||!/\.xlsx$/i.test(file.name))throw Error('Selecciona un XLSX de hasta 2 MiB.');
