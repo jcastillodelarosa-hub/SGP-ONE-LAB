@@ -49,9 +49,15 @@ test('same request replays exactly; same file new request creates history but ne
  const next=await h.import();assert.equal(next.totalReported,12);assert.equal(h.state.imports.length,2);
 });
 test('simultaneous different requests with same revision cannot both commit; same request safely replays',async()=>{
- const h=harness(), a=await h.command('IMPORTAR_XLSX',{filename:'Export.xlsx',bytes:xlsx()}), b={...a,id:id(999)};
- const results=await Promise.allSettled([h.service.execute(a),h.service.execute(b)]);assert.equal(results.filter(r=>r.status==='fulfilled').length,1);assert.match(results.find(r=>r.status==='rejected').reason.message,/CONFLICTO_REVISION/);assert.equal(h.state.imports.length,1);
- const again=await Promise.all([h.service.execute(a),h.service.execute(a)]);assert(again.every(r=>r.duplicate));assert.equal(h.state.imports.length,1);
+ for(const reverse of [false,true]){
+  const h=harness(),a=await h.command('IMPORTAR_XLSX',{filename:'Export.xlsx',bytes:xlsx()}),b={...a,id:id(999)},requests=reverse?[b,a]:[a,b];
+  const results=await Promise.allSettled(requests.map(request=>h.service.execute(request)));
+  assert.equal(results.filter(r=>r.status==='fulfilled').length,1);assert.match(results.find(r=>r.status==='rejected').reason.message,/CONFLICTO_REVISION/);assert.equal(h.state.imports.length,1);
+  // Parsing/hashing is asynchronous: either request can reach the transaction first.
+  const winner=requests[results.findIndex(r=>r.status==='fulfilled')],loser=requests.find(request=>request!==winner);
+  const again=await Promise.all([h.service.execute(winner),h.service.execute(winner)]);assert(again.every(r=>r.duplicate));assert.equal(h.state.imports.length,1);
+  await rejectedUnchanged(h,loser,/CONFLICTO_REVISION/);
+ }
 });
 test('plan comparison remains unavailable: SALE, manual execution and quantity changes do not fabricate a target',async()=>{
  const h=harness();await h.import([['A',11],['B',5]]);const close=await h.close({});
