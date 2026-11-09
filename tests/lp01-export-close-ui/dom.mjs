@@ -19,3 +19,8 @@ assert(box.textContent.includes(context.date));assert(box.textContent.includes('
 box.querySelector('textarea').value='Carga histórica pendiente';await box.querySelector('[data-historical-prepare]').onclick();assert.equal(prepared,1);assert(box.querySelector('textarea').disabled);assert(!box.querySelector('[data-historical-retry]').hidden);await box.querySelector('[data-historical-retry]').onclick();assert.equal(prepared,2);assert(!box.querySelector('textarea').disabled);box.remove();
 assert.equal(mountHistoricalTurn({host,data,context,state:{},onPrepare(){},onRetry(){}}),null);
 console.log('PASS historical header: exact discovery, visible context and limitation, explicit action, uncertain retry');
+// Confirmed file uses human metadata, while reason identity remains the exact key.
+state.uncertain=false;state.receipt.rows=[{key:'QA|PANELES_2',coverage:'PRESENT',quantity:2,valueStatus:'CURRENT_FILE'}];
+data.catalog={contract:'LP-HOJA-1',...context,productions:[{key:'QA|PANELES_2',oficial:{key_produccion:'QA|PANELES_2',id_linea:context.line,produccion:'Orden <QA>',sistema:'ES-2020',acabado:'BRONZE'}}]};
+editor=mount();assert(host.textContent.includes('Orden: Orden <QA>'));assert(host.textContent.includes('Sistema: ES-2020 · Acabado: BRONZE'));assert(!host.textContent.includes('CURRENT_FILE'));assert(!host.textContent.includes('QA|PANELES_2'));assert.equal(host.querySelector('[data-export-reason]').dataset.exportReason,'QA|PANELES_2');assert.equal(host.querySelector('QA'),null);editor.destroy();
+console.log('PASS close row metadata: readable identity, no machine status, escaped fields, unchanged reason key');

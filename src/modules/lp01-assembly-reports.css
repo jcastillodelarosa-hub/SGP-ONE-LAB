@@ -43,3 +43,25 @@
  .lp-assembly-report-orders tbody td:before{content:attr(data-label);display:block;font-size:10px;color:#526782;margin-bottom:3px}
  .lp-assembly-report-downloads button{flex:1 1 42%;font-size:12px}
 }
+
+/* Approved closure sketch: factual production remains visible without a target. */
+.lp-turn-overview{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:18px 0}
+.lp-turn-kpi{padding:18px;border:1px solid #c8d9ef;border-radius:10px;background:#fff;display:flex;flex-direction:column;gap:8px}
+.lp-turn-kpi b{font-size:30px;line-height:1.15;color:#1555ad}
+.lp-turn-kpi span{color:#526d91;font-size:14px}
+.lp-turn-kpi.is-closed b{color:#18744b}.lp-turn-kpi.is-opened b{color:#986000}
+.lp-turn-compliance>div{display:flex;gap:18px;justify-content:space-between;flex-wrap:wrap;font-size:17px}
+.lp-turn-compliance p{font-size:13px;color:#526d91;margin-bottom:0}
+.lp-turn-systems{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.lp-turn-system>div:first-child{display:flex;gap:10px;justify-content:space-between;font-size:17px}
+.lp-turn-system b{color:#1555ad}.lp-turn-system small{display:block;margin-top:5px;color:#526d91}
+.lp-turn-meter{height:9px;background:#e1ebfa;border-radius:6px;margin-top:10px;overflow:hidden}.lp-turn-meter span{display:block;height:100%;background:#195db8}
+.lp-turn-legend{display:flex;gap:18px;margin:14px 0}
+.lp-assembly-report details.lp-turn-section{padding:0;overflow:hidden}
+.lp-turn-section>summary{display:flex;gap:12px;justify-content:space-between;align-items:center;padding:14px;background:#f8fbff}
+.lp-turn-section>summary strong{flex:1}.lp-turn-section>summary span{font-size:13px}
+.lp-turn-section.is-closed>summary{color:#18744b}.lp-turn-section.is-opened>summary{color:#986000}.lp-turn-section.is-advanced>summary{color:#1555ad}
+.lp-turn-section>p{padding:0 14px}.lp-turn-section .lp-assembly-report-table thead th{background:#dce9ff;color:#173e74}
+@media(max-width:700px){.lp-turn-overview{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.lp-turn-kpi{padding:12px}.lp-turn-kpi b{font-size:23px}.lp-turn-systems{grid-template-columns:1fr}.lp-turn-section>summary{flex-wrap:wrap}.lp-turn-section>summary strong{flex-basis:100%}.lp-turn-compliance>div{font-size:15px}.lp-turn-legend{gap:6px;font-size:12px}}
+
+.lp-turn-heading{background:#193f75;color:#fff;border-radius:10px;padding:18px}.lp-turn-heading .lp-assembly-report-heading h3,.lp-turn-heading .lp-assembly-report-heading p{color:#fff}.lp-turn-heading .lp-assembly-report-provenance{color:#dce9ff;margin-bottom:0}.lp-turn-provenance{font-size:12px;color:#526d91;margin:16px 0}.lp-turn-provenance summary{cursor:pointer;font-weight:600}

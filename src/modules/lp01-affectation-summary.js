@@ -41,7 +41,7 @@ export function compactSummaryMarkup(summary){
  const labels={NC_V:'NC V',TECNO:summary.exportGlass?'Tecno · reportado':'Tecno',NOVEDAD:'Novedad'};
  const chips=Object.entries(labels).filter(([key])=>Number.isSafeInteger(summary.categories[key])&&summary.categories[key]>0).map(([key,label])=>'<button type="button" data-summary-cause="'+key+'" class="lp-tracking-chip chip-'+key+'" aria-label="'+summary.categories[key]+' ventanas reportadas · '+label+'">'+summary.categories[key]+' × '+label+'</button>').join('');
  const reportGroups=Object.entries(labels).filter(([key])=>summary.reportedQuantities?.[key]?.length>1).map(([key,label])=>'<button type="button" data-summary-cause="'+key+'" class="lp-tracking-chip chip-'+key+'">'+label+' · reportadas: '+summary.reportedQuantities[key].join(' / ')+' (sin sumar)</button>').join('');
- const estimates=summary.ncEstimate?'<button type="button" data-summary-cause="NC_V" class="lp-tracking-chip chip-NC_V">NC Vidrio · estimación '+summary.ncEstimate+' (1 por NC)</button>':'';
+ const estimates=summary.ncEstimate?'<button type="button" data-summary-cause="NC_V" class="lp-tracking-chip chip-NC_V">NC Vidrio · '+summary.ncEstimate+' (1 por NC)</button>':'';
  const aluminum=compactAluminumMarkup(summary);
  // A separate Export chip cannot establish availability of the aluminum source.
  const aluminumUnavailable=summary.aluminumCoverage!=='COMPLETE'&&!aluminum;

@@ -12,6 +12,33 @@ export function acceptCloseReceipt(state,result,context,commandId){
 export function closeReadbackPending(state,context){
  return Boolean(state?.confirmedClose&&same(state.confirmedClose.context,context)||state?.closeCheckRequired&&same(state.closeCheckRequired,context));
 }
+/** Human labels from the same authorized reader; never join by production name. */
+export function exportCloseRowDetails(row,data,context){
+ const key=row?.key;
+ const official=r=>r?.key===key&&r.oficial?.key_produccion===key&&r.oficial?.id_linea===context?.line?r.oficial:null;
+ const catalog=data?.catalog;
+ const sources=[];
+ if(catalog?.contract==='LP-HOJA-1'&&same(catalog,context)){
+  for(const r of catalog.productions||[]){const o=official(r);if(o)sources.push(o);}
+ }
+ for(const r of data?.orders||[]){
+  if(same({stage:r.etapa,line:r.linea,date:r.fecha,shift:r.turno},context)){const o=official(r);if(o)sources.push(o);}
+ }
+ const field=name=>{
+  const values=[...new Set(sources.map(o=>typeof o[name]==='string'?o[name].trim():'').filter(Boolean))];
+  return values.length===1?values[0]:'No informado';
+ };
+ return {production:field('produccion'),system:field('sistema'),finish:field('acabado'),
+  status:row?.valueStatus==='PRESERVED'?'Valor anterior conservado':row?.valueStatus==='NEVER_REPORTED'?'Sin reporte previo':''};
+}
+function confirmedRowMarkup(row,data,context,reasons){
+ const detail=exportCloseRowDetails(row,data,context);
+ return '<label><b>Orden: '+esc(detail.production)+'</b><span>Sistema: '+esc(detail.system)+' · Acabado: '+esc(detail.finish)+'</span><span>'+
+  (row.quantity===null?'Cantidad no informada':row.quantity+' ventanas')+(detail.status?' · '+esc(detail.status):'')+
+  '</span><input data-export-reason="'+esc(row.key)+'" placeholder="Motivo'+
+  (row.coverage==='ABSENT'||row.pendingAgainstPlan>0||row.reasonRequired===true?' obligatorio':' / observación')+
+  '" value="'+esc(reasons?.[row.key])+'"></label>';
+}
 export function exportCloseEnabled(data,context){
  const cap=data?.exportClose;
  return data?.contract==='LP-OPERACION-1'&&data.writeContract==='LP-OPERACION-CAS-2'&&data.writes===true&&
@@ -43,7 +70,7 @@ export function mountExportCloseEditor({host,data,context,state,onImport,onClose
  if(closeReadbackPending(state,context)||!exportCloseEnabled(data,context)||!onImport||!onClose)return null;
  const section=document.createElement('section');section.className='lp-close';section.dataset.exportCloseEditor='';host.append(section);
  const receipt=confirmedImport(state.receipt,data,context);
- section.innerHTML='<h4>Archivo Export del turno</h4><p>La carga parcial reemplaza solo lo informado. Lo ausente conserva el último valor acreditado; nunca informado no equivale a cero.</p><label>Archivo de '+esc(context.stage)+'<input type="file" accept=".xlsx" data-export-file></label><div data-export-local role="status"></div><button type="button" data-export-import>Validar y guardar archivo</button>'+(receipt?'<p>Archivo confirmado · '+esc(receipt.sha256)+'</p>'+receipt.rows.map(r=>'<label><b>'+esc(r.key)+'</b> · '+(r.quantity===null?'Nunca informado':r.quantity+' ventanas')+' · '+esc(r.valueStatus)+'<input data-export-reason="'+esc(r.key)+'" placeholder="Motivo'+(r.coverage==='ABSENT'||r.pendingAgainstPlan>0?' obligatorio':' / observación')+'" value="'+esc(state.reasons?.[r.key])+'"></label>').join('')+'<label>Observación del cierre<textarea data-export-observation maxlength="4000">'+esc(state.observation)+'</textarea></label><button type="button" data-export-confirm>Confirmar cierre del turno</button>':'<p>Primero guarda el archivo para revisar el resultado acreditado por el servidor.</p>')+'<button type="button" data-export-retry>Reintentar la misma operación</button><p data-export-status role="status"></p>';
+ section.innerHTML='<h4>Archivo Export del turno</h4><p>La carga parcial reemplaza solo lo informado. Lo ausente conserva el último valor acreditado; nunca informado no equivale a cero.</p><label>Archivo de '+esc(context.stage)+'<input type="file" accept=".xlsx" data-export-file></label><div data-export-local role="status"></div><button type="button" data-export-import>Validar y guardar archivo</button>'+(receipt?'<p>Archivo confirmado · '+esc(receipt.sha256)+'</p>'+receipt.rows.map(r=>confirmedRowMarkup(r,data,context,state.reasons)).join('')+'<label>Observación del cierre<textarea data-export-observation maxlength="4000">'+esc(state.observation)+'</textarea></label><button type="button" data-export-confirm>Confirmar cierre del turno</button>':'<p>Primero guarda el archivo para revisar el resultado acreditado por el servidor.</p>')+'<button type="button" data-export-retry>Reintentar la misma operación</button><p data-export-status role="status"></p>';
  const get=s=>section.querySelector(s),status=get('[data-export-status]');
  const alive=()=>section.isConnected&&isCurrent();
  const paint=()=>{section.querySelectorAll('input,textarea,button').forEach(el=>el.disabled=Boolean(state.busy||state.uncertain));get('[data-export-import]').disabled=Boolean(state.busy||state.uncertain||!state.file);get('[data-export-retry]').hidden=!state.uncertain;get('[data-export-retry]').disabled=Boolean(state.busy);};

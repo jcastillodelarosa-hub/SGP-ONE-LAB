@@ -166,7 +166,7 @@ export function mountNcGlassReview(host,{row,scope,readCandidates,onPrepare,isCu
    const choice=requireNcGlassReviewSelection({previous:selected,result,row,stage:selectedStage,confirmed:confirm.checked});
    if(!current()||request!==generation)return;
    preparing=true;await onPrepare(choice);if(!current()||request!==generation)return;
-   prepared=true;status.textContent='Formulario preparado. Indica las ventanas afectadas antes de guardar.';
+   prepared=true;status.textContent='Formulario preparado. Se registrará 1 unidad por esta NC al guardar.';
   }catch(error){
    if(current()&&request===generation){
     if(!preparing){candidates=[];renderCandidates();}

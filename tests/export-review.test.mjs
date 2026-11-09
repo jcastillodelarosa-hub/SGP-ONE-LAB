@@ -29,3 +29,12 @@ test('preparation is separate and apply submits only explicitly selected IDs',as
 test('archived order is visible but has no approval control',()=>{
  const html=renderChangeRows([{id:'archived',estado:'BLOQUEADA',tipo_cambio:['ARCHIVADA'],produccion:'Historical'}]);assert.match(html,/Revisar archivo/);assert.doesNotMatch(html,/data-export-approval/);
 });
+
+test('archived balance approval explains no reactivation and shows saldo comparison',()=>{
+ const row={id:'arch',produccion:'PROD14',estado:'PENDIENTE',tipo_cambio:['SALDOS_ARCHIVADA'],anterior:{cantidad:6,semana_actual:44,saldo_ensamble:2,saldo_empaque:0},propuesto:{cantidad:6,semana_actual:44,saldo_ensamble:0,saldo_empaque:0}};
+ assert.equal(changeLabel(row),'Actualizar saldos sin reactivar');
+ const html=renderChangeRows([row]);
+ assert.match(html,/data-export-approval/);
+ assert.match(html,/Saldo ensamble: 2/);
+ assert.match(html,/Saldo ensamble: 0/);
+});
