@@ -1,0 +1,50 @@
+name: Reception physical summary
+on:
+  pull_request:
+    paths:
+      - 'app.js'
+      - 'index.html'
+      - 'styles.css'
+      - 'src/domain/reception-*.js'
+      - 'src/modules/reception-columns.js'
+      - 'tests/reception-ui/**'
+      - 'tests/reception-quantity-summary.test.mjs'
+      - '.github/workflows/reception-summary.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'app.js'
+      - 'index.html'
+      - 'styles.css'
+      - 'src/domain/reception-*.js'
+      - 'src/modules/reception-columns.js'
+      - 'tests/reception-ui/**'
+      - 'tests/reception-quantity-summary.test.mjs'
+      - '.github/workflows/reception-summary.yml'
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - run: npm run build:vendor
+      - run: python3 -m pip install playwright==1.56.0
+      - name: PC and mobile Reception with synthetic transport only
+        env:
+          RECEPTION_CHROMIUM: /usr/bin/google-chrome
+          RECEPTION_QA_OUT: ${{ runner.temp }}/reception-summary
+        run: python3 tests/reception-ui/browser.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reception-summary-${{ github.sha }}
+          path: ${{ runner.temp }}/reception-summary
+          retention-days: 7

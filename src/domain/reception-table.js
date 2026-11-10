@@ -60,3 +60,34 @@ export function receptionAluminumSummary(rows,states){
  for(const card of Object.values(cards))if(card.unknownQuantities)card.windows=null;
  return {cards,unclassified,unidentified,reservations:groups.size};
 }
+
+// One quantity per reservation. Physical receipt, not legalisation or tracking,
+// partitions the weekly list. Unknown quantities never become partial totals.
+export function receptionQuantitySummary(rows,states){
+ const empty=()=>({reservations:0,windows:0,unknownQuantities:0});
+ const total=empty(),received=empty(),pending=empty(),groups=new Map(),pendingRows=[];
+ let unidentified=0,conflictingReception=0;
+ const add=(target,quantity)=>{target.reservations++;if(quantity===null)target.unknownQuantities++;else target.windows+=quantity;};
+ for(const row of rows){
+  const reservation=text(row.reserva);
+  if(!reservation){unidentified++;continue;}
+  if(!groups.has(reservation))groups.set(reservation,[]);
+  groups.get(reservation).push(row);
+ }
+ for(const group of groups.values()){
+  const quantities=new Set(group.map(row=>{const q=number(row.cantidad);return q!==null&&q>=0?q:null;}));
+  const quantity=quantities.size===1&&!quantities.has(null)?[...quantities][0]:null;
+  add(total,quantity);
+  const receiptStates=new Set(group.map(row=>row.estado==='RECIBIDA'));
+  if(receiptStates.size!==1){conflictingReception++;continue;}
+  if(receiptStates.has(true))add(received,quantity);
+  else{add(pending,quantity);pendingRows.push(...group);}
+ }
+ for(const metric of [total,received,pending])if(metric.unknownQuantities||unidentified)metric.windows=null;
+ if(conflictingReception){received.windows=null;pending.windows=null;}
+ const tracking=receptionAluminumSummary(pendingRows,states);
+ return {total,received,pending,warehouse:tracking.cards.PENDIENTE_BODEGA,
+  supply:tracking.cards.PENDIENTE_ABASTECIMIENTO,unclassifiedPending:tracking.unclassified,
+  deliveredWithoutReception:tracking.cards.ALUMINIO_ENTREGADO.reservations,
+  unidentified,conflictingReception};
+}

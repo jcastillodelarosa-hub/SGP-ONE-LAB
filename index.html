@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SGP ONE LAB</title>
   <link rel="icon" type="image/svg+xml" href="favicon-sgp.svg" />
-  <link rel="stylesheet" href="styles.css?v=431" />
+  <link rel="stylesheet" href="styles.css?v=433" />
   <link rel="stylesheet" href="navigation-preferences.css?v=4" />
   <link rel="stylesheet" href="design-center.css?v=2" />
   <link rel="stylesheet" href="src/modules/lp01-followup.css?v=407" />
@@ -68,7 +68,7 @@
           <input id="authPassword" type="password" placeholder="Contraseña" autocomplete="current-password" />
           <button id="authLogin">Ingresar</button>
           <button id="authLogout" hidden>Cerrar sesión</button>
-          <span class="status" id="releaseVersion" data-release-commit="19bc1f1176e37855f2113ceee0a6ff2f14b68237" title="Commit 19bc1f1176e37855f2113ceee0a6ff2f14b68237 · compilación 2026-11-09T21:36:38.819Z">LAB v431</span>
+          <span class="status" id="releaseVersion" data-release-commit="19bc1f1176e37855f2113ceee0a6ff2f14b68237" title="Commit 19bc1f1176e37855f2113ceee0a6ff2f14b68237 · compilación 2026-11-09T21:36:38.819Z">LAB v433</span>
         </div>
       </header>
 
@@ -160,10 +160,17 @@
 <section data-mach-panel="recepcion">
 <section class="rec-summary-card" aria-labelledby="recSummaryTitle">
 <div class="rec-summary-heading"><h3 id="recSummaryTitle">Resumen de recepción</h3><span id="recSummaryScope">Sin consulta</span></div>
+<p class="rec-summary-note">Estado según Seguimiento de aluminio · incluye reservas ya recibidas.</p>
 <div id="recAluminumCards" class="rec-aluminum-cards"></div>
-<section class="summary rec-summary-metrics"><div class="metric"><span>Pendientes por recibir</span><strong id="recPending">0</strong></div><div class="metric"><span>Recibidas</span><strong id="recReceived">0</strong></div><div class="metric"><span>Incompletas</span><strong id="recIncomplete">0</strong></div><div class="metric"><span>Sin legalizar</span><strong id="recUnlegalized">0</strong></div><div class="metric"><span>Faltantes abiertos</span><strong id="recMissing">0</strong></div></section>
+<section class="rec-aluminum-cards rec-physical-summary" aria-label="Ventanas del listado semanal y recepción registrada en SGP">
+<article class="rec-aluminum-card rec-card-delivered"><h4>Total programadas</h4><div class="rec-card-counts"><div><strong id="recTotalWindows">—</strong><span>ventanas del listado semanal</span></div></div><p class="rec-summary-note">Cantidad asignada a la semana, no avance de Mecanizado.</p></article>
+<article class="rec-aluminum-card rec-card-delivered"><h4>Recibidas en SGP</h4><div class="rec-card-counts"><div><strong id="recReceivedWindows">—</strong><span>ventanas según listado</span></div></div><p class="rec-summary-note">Incluye recibidas sin legalizar e incompletas.</p></article>
+<article class="rec-aluminum-card rec-card-warehouse"><h4>Pendientes por recibir</h4><div class="rec-card-counts"><div><strong id="recPendingWindows">—</strong><span>ventanas según listado</span></div></div><p id="recPendingWindowsBreakdown" class="rec-summary-note">Bodega + Abastecimiento</p></article>
+</section>
+<p id="recQuantityNotice" class="rec-summary-note" role="status" hidden></p>
+<section class="summary rec-summary-metrics"><div class="metric"><span>Reservas por recibir</span><strong id="recPending">0</strong></div><div class="metric"><span>Reservas recibidas</span><strong id="recReceived">0</strong></div><div class="metric"><span>Incompletas</span><strong id="recIncomplete">0</strong></div><div class="metric"><span>Sin legalizar</span><strong id="recUnlegalized">0</strong></div><div class="metric"><span>Faltantes abiertos</span><strong id="recMissing">0</strong></div></section>
 <p id="recSummaryUnknown" class="rec-summary-note" role="status" hidden></p>
-<details class="rec-quantity-source"><summary>Ventanas según listado · criterio de conteo</summary><p>Se cuenta cada reserva una sola vez. Cantidad del listado de Recepción: producciones activas PANELES_2 de la misma semana y año, atribuidas enteras a su reserva principal (la primera). Las reservas solo secundarias se excluyen según esa fuente; no se reparte cantidad entre reservas. Si no hay producción coincidente, el listado puede usar Seguimiento de aluminio. Ese respaldo histórico no garantiza ventanas físicas únicas. Una cantidad ausente o contradictoria se muestra como «Por confirmar».</p></details>
+<details class="rec-quantity-source"><summary>Ventanas según listado · criterio de conteo</summary><p>Se cuenta cada reserva una sola vez. Cantidad del listado de Recepción: producciones activas PANELES_2 de la misma semana y año, atribuidas enteras a su reserva principal (la primera). Las reservas solo secundarias se excluyen según esa fuente; no se reparte cantidad entre reservas. Si no hay producción coincidente, el listado puede usar Seguimiento de aluminio. Ese respaldo histórico no garantiza ventanas físicas únicas. Una cantidad ausente o contradictoria se muestra como «Por confirmar». Total programadas corresponde a este listado semanal, no a las programaciones de Mecanizado. Recibidas en SGP incluye toda reserva con recepción registrada, aunque esté incompleta o sin legalizar. Pendientes excluye esas reservas. Los faltantes se controlan por separado: no se convierten perfiles en ventanas ni se afirma que todas las ventanas recibidas estén completas.</p></details>
 </section>
 <section class="toolbar"><input id="recSearch" type="search" placeholder="Buscar reserva…"><input id="recWeek" type="number" min="1" max="53" placeholder="Semana"><button id="recRefresh">Actualizar</button><button id="recClearColumns" type="button">Limpiar filtros y orden</button></section>
 <p id="recTrackingStatus" class="rec-tracking-warning" role="status" hidden></p>
@@ -412,7 +419,7 @@
     </div>
   </div>
 
-  <script type="module" src="app.js?v=431-picking"></script>
+  <script type="module" src="app.js?v=433-reception"></script>
   <script defer src="navigation-preferences.js?v=4"></script>
   <script defer src="design-center.js?v=2"></script>
 <div id="userModal" class="modal-backdrop rec-overlay" hidden><div class="modal-card user-modal-card"><div class="modal-header"><div><strong id="userModalTitle">Nuevo usuario</strong><small>Cuenta y permisos de acceso</small></div><button id="userModalClose" class="modal-close">×</button></div><div class="user-form"><div class="rec-grid"><label>Usuario<input id="userName" autocomplete="off"></label><label>Nombre completo<input id="userFullName"></label><label>Rol<select id="userRole"><option>COORDINADOR</option><option>LIDER MECANIZADO</option><option>LIDER LINEA</option><option>SUPERVISOR ENSAMBLE</option><option>SUPERVISOR EMPAQUE</option><option>RECEPCION</option><option>PATINADOR</option><option>PICKING</option><option>SUPERVISOR DE PICKING</option><option>CONSULTA</option><option>ADMINISTRADOR</option></select></label><label>Contraseña<input id="userPassword" type="password" placeholder="Vacío = conservar contraseña"></label><div class="password-reset-wrap"><button id="resetPasswordBtn" type="button" hidden>↻ Restablecer contraseña</button><small>Asigna una nueva contraseña temporal al usuario.</small></div></div><label class="user-active"><input id="userActive" type="checkbox" checked> Usuario activo</label><div class="access-title"><b>Ventanas permitidas</b><span>El usuario solo verá las opciones seleccionadas.</span></div><div id="userAccessGrid" class="access-grid"></div></div><div class="modal-actions"><button id="userCancel">Cancelar</button><button id="userSave" class="primary">Guardar usuario</button></div></div></div>
