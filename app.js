@@ -7,7 +7,7 @@ import {glassLocationDetailMarkup} from './src/modules/glass-location-detail.js'
 import {createExportReview} from './src/modules/export-review.js';
 import {openNcGlassTracking} from './src/modules/nc-glass-tracking.js';
 import {openAudit} from './src/modules/picking-audit.js';
-import {filterReceptionRows as filterReceptionTableRows,receptionAluminumSummary} from './src/domain/reception-table.js';
+import {filterReceptionRows as filterReceptionTableRows,receptionAluminumSummary,receptionQuantitySummary} from './src/domain/reception-table.js';
 import {createReceptionColumns} from './src/modules/reception-columns.js';
 import {openPartialProgramming} from './src/modules/mecanizado-partes.js';
 import {coverageAmount,partDeliveryStatus} from './src/domain/mecanizado-partes.js';
@@ -2009,6 +2009,14 @@ function renderReception(){
   const card=summary.cards[key];
   return '<article class="rec-aluminum-card rec-card-'+color+'" data-rec-state="'+key+'"><h4><span aria-hidden="true"></span>'+label+'</h4><div class="rec-card-counts"><div><strong data-rec-reservations>'+format(card.reservations)+'</strong><span>reservas</span></div><div><strong data-rec-windows'+(card.windows===null?' class="rec-count-unknown"':'')+'>'+(card.windows===null?'Por confirmar':format(card.windows))+'</strong><span>ventanas según listado</span></div></div></article>';
  }).join('');
+ const quantities=receptionQuantitySummary(rows,recAluminumStateIndex);
+ for(const [id,metric] of [['recTotalWindows',quantities.total],['recReceivedWindows',quantities.received],['recPendingWindows',quantities.pending]]){
+  const target=document.getElementById(id);target.textContent=metric.windows===null?'Por confirmar':format(metric.windows);target.classList.toggle('rec-count-unknown',metric.windows===null);
+ }
+ const quantityText=card=>card.windows===null?'por confirmar':format(card.windows);
+ document.querySelector('#recPendingWindowsBreakdown').textContent=(quantities.unclassifiedPending||quantities.deliveredWithoutReception||quantities.conflictingReception||quantities.unidentified?'Desglose parcial: ':'')+'Bodega '+quantityText(quantities.warehouse)+' + Abastecimiento '+quantityText(quantities.supply);
+ const quantityIssues=[quantities.unclassifiedPending?quantities.unclassifiedPending+' reservas pendientes sin estado de aluminio inequívoco.':'',quantities.deliveredWithoutReception?quantities.deliveredWithoutReception+' reservas con aluminio entregado, pero sin recepción registrada.':'',quantities.conflictingReception?quantities.conflictingReception+' reservas con recepción contradictoria; totales por confirmar.':'',quantities.unidentified?quantities.unidentified+' filas sin identidad; totales por confirmar.':'',quantities.total.unknownQuantities?quantities.total.unknownQuantities+' reservas con cantidad por confirmar.':''];
+ const quantityNotice=document.querySelector('#recQuantityNotice');quantityNotice.textContent=quantityIssues.filter(Boolean).join(' ');quantityNotice.hidden=!quantityNotice.textContent;
  document.querySelector('#recSummaryScope').textContent=(recHasLoaded?(recLoadedWeek?'Semana '+recLoadedWeek:'Todas las semanas cargadas'):'Sin consulta')+' · '+(q||recColumns.active()?'Resultados filtrados':'Listado completo')+' · '+summary.reservations+' reservas';
  const unknown=document.querySelector('#recSummaryUnknown'),unknownQuantities=Object.values(summary.cards).reduce((sum,c)=>sum+c.unknownQuantities,0);
  unknown.hidden=!summary.unclassified&&!summary.unidentified&&!unknownQuantities;
