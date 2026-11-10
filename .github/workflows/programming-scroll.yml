@@ -1,0 +1,33 @@
+name: Programming modal scroll
+on:
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'styles.css'
+      - 'app.js'
+      - 'navigation-preferences.css'
+      - 'tests/programming-scroll/**'
+      - 'tests/programming-modal-scroll-*.test.mjs'
+      - '.github/workflows/programming-scroll.yml'
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - run: python3 -m pip install playwright==1.56.0
+      - name: Local assets only, desktop and mobile scroll
+        env:
+          SCROLL_CHROMIUM: /usr/bin/google-chrome
+          SCROLL_QA_OUT: ${{ runner.temp }}/programming-scroll
+        run: python3 tests/programming-scroll/browser.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: programming-scroll-${{ github.sha }}
+          path: ${{ runner.temp }}/programming-scroll
+          retention-days: 7
