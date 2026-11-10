@@ -39,7 +39,9 @@ try:
     r=command('docker','run','--detach','--rm','--name',name,'--network','none','-e','POSTGRES_PASSWORD=synthetic-local-only','postgres:17')
     if r.returncode: raise RuntimeError(r.stderr)
     for _ in range(120):
-        if command('docker','exec',name,'pg_isready','-U','postgres').returncode==0: break
+        # The entrypoint's temporary init server accepts Unix sockets, then stops.
+        # TCP becomes ready only for the final server that will run the tests.
+        if command('docker','exec',name,'pg_isready','-h','127.0.0.1','-U','postgres').returncode==0: break
         time.sleep(.25)
     else: raise RuntimeError('PostgreSQL did not become ready')
     file('tests/pdt-picking-simple/fixture.sql');file('docs/sql-proposals/pdt/picking-simple/install.sql');file('tests/pdt-picking-simple/assertions.sql')
