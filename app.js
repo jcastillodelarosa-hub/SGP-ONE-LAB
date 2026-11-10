@@ -21,7 +21,8 @@ import {readReprogramming} from './src/services/mecanizado-reprogramming.js';
 import {machiningCarry,enrichMoveSources,clearMoveSources} from './src/services/mecanizado-carry.js';
 import {operationalLoad,applyScheduleMoves,workloadTotals} from './src/domain/mecanizado-operational-load.js';
 import {renderWorkloadCalendar,openWorkloadDetail} from './src/modules/mecanizado-operational-calendar.js';
-import {productionPdtControls,productionPdtStatus} from './src/modules/pdt-production-actions.js';
+import {productionPdtControls,productionPdtStatus,productionPdtVisible,productionPdtGroup,productionPdtDeliveryStatus} from './src/modules/pdt-production-actions.js';
+import {loadProductionPdtDeliveries} from './src/services/pdt-production-deliveries.js';
 import {saveProductionNovelty} from './src/services/production-novelty-repository.js';
 import {attachNoveltyIdentity} from './src/modules/production-novelty-identity.js';
 import {pendingFlowGuidance} from './src/modules/pdt-flow-guidance.js';
@@ -2715,20 +2716,64 @@ function prodStateClass(s){return 'state-'+String(s||'SIN INICIAR').toLowerCase(
 
 let prodPendingWeekSort='asc';
 let prodPendingSearch='';
+let prodPendingRequestSeq=0;
 async function loadAluminumPending(){
- const host=document.querySelector('#prodAluminumPending');if(!host||!getAppToken())return;
+ const host=document.querySelector('#prodAluminumPending'),token=getAppToken();if(!host||!token)return;
+ const requestSeq=++prodPendingRequestSeq;
+ const current=()=>requestSeq===prodPendingRequestSeq&&token===getAppToken();
  try{
-  const db=await getSupabaseClient(),loaded=await loadPendingRows(db,getAppToken(),repoRole());repoV2Capabilities=loaded.capabilities;
-  const rows=loaded.rows.filter(r=>r.estado==='PENDIENTE' && !(r.contrato_pdt==='LEGACY' && r.estado_repo==='PICKING')).slice().sort((a,b)=>{const av=Number(a.semana)||999,bv=Number(b.semana)||999;return prodPendingWeekSort==='asc'?av-bv:bv-av});
+  const db=await getSupabaseClient(),loaded=await loadPendingRows(db,token,repoRole());
+  if(!current())return;repoV2Capabilities=loaded.capabilities;
+  const rows=loaded.rows.filter(productionPdtVisible).slice().sort((a,b)=>{
+   const av=Number(a.semana)||999,bv=Number(b.semana)||999;return prodPendingWeekSort==='asc'?av-bv:bv-av;
+  });
   const states=['PENDIENTE','REPO_OK','CORTE','MECANIZADO','PROCESADO','PICKING'];
-  host.innerHTML=rows.length?'<section class="al-pending-card"><div class="al-pending-head"><div><b>⚠ Pendientes de aluminio / reposiciones</b><span>Piezas pendientes detectadas en Producción, Picking o Línea</span></div><strong>'+rows.length+'</strong></div><p class="pdt-production-disclaimer">REPO OK indica reposición por NC finalizadas; no confirma inventario, avance de mecanizado ni entrega física.</p><div class="al-pending-sort"><label>Buscar pendientes<input type="search" data-pending-search placeholder="Producción, reserva, sistema, perfil…" value="'+escapeHtml(prodPendingSearch)+'"></label><button type="button" data-pending-week-sort>SEMANA '+(prodPendingWeekSort==='asc'?'↑':'↓')+'</button><span>Ordenado por semana de programación</span></div><div class="al-pending-list">'+rows.map(x=>{const validated=repoIsValidated(x),state=String(x.estado_repo||'PENDIENTE');return '<div class="al-pending-row repo-'+state.toLowerCase()+'" data-prod-pending-open="'+escapeHtml(x.id_pendiente)+'"><div class="al-pending-week"><b>SEM '+escapeHtml(x.semana||'—')+'</b></div><div><b>'+escapeHtml(x.produccion||x.reserva||'—')+'</b><span><strong>PDT '+escapeHtml(x.cantidad||0)+'</strong> · Reserva '+escapeHtml(x.reserva||'—')+' · Sistema '+escapeHtml(x.sistema||'—')+' · '+escapeHtml(x.perfil||'—')+(x.marca?' · '+escapeHtml(x.marca):'')+(x.fabricacion?' · '+escapeHtml(x.fabricacion):'')+(x.longitud?' · '+escapeHtml(String(x.longitud)):'')+(x.nc?' · NC '+escapeHtml(x.nc):'')+'</span><small>'+escapeHtml(x.observacion||'')+'</small></div><div>'+productionPdtStatus(x,repoValidationBadgeHtml(x,false),escapeHtml)+'</div><div class="repo-actions">'+(x.contrato_pdt==='V2'?productionPdtControls(x,repoRole(),loaded.capabilities,escapeHtml)||'<span class="repo-state-static">V2 · Consulta no disponible para este rol/estado</span>':validated?'<select data-repo-state="'+x.id_pendiente+'">'+states.map(st=>'<option value="'+st+'" '+(state===st?'selected':'')+'>'+(st==='REPO_OK'?'REPO OK':st)+'</option>').join('')+'</select>':'<span class="repo-mech-lock">🔒 BLOQUEADO PARA MECANIZADO</span>')+'</div></div>'}).join('')+'</div></section>':'<section class="al-pending-card empty"><b>✓ Sin pendientes de aluminio por resolver</b></section>';
-  const filterPending=()=>{const query=prodPendingSearch.trim().toLocaleLowerCase('es');host.querySelectorAll('[data-prod-pending-open]').forEach(node=>{const row=rows.find(r=>String(r.id_pendiente)===node.dataset.prodPendingOpen);const matches=!query||[row?.semana,row?.reserva,row?.produccion,row?.sistema,row?.perfil,row?.nc,row?.cantidad].some(value=>String(value??'').toLocaleLowerCase('es').includes(query));node.style.display=matches?'':'none';});};
+  const rowHtml=x=>{
+   const validated=repoIsValidated(x),state=String(x.estado_repo||'PENDIENTE');
+   const controls=x.contrato_pdt==='V2'?productionPdtControls(x,repoRole(),loaded.capabilities,escapeHtml)||'<span class="repo-state-static">V2 · Consulta no disponible para este rol/estado</span>':validated?'<select data-repo-state="'+escapeHtml(x.id_pendiente)+'">'+states.map(st=>'<option value="'+st+'" '+(state===st?'selected':'')+'>'+(st==='REPO_OK'?'REPO OK':st)+'</option>').join('')+'</select>':'<span class="repo-mech-lock">🔒 BLOQUEADO PARA MECANIZADO</span>';
+   return '<div class="al-pending-row repo-'+escapeHtml(state.toLowerCase())+'" data-prod-pending-open="'+escapeHtml(x.id_pendiente)+'"><div class="al-pending-week"><b>SEM '+escapeHtml(x.semana||'—')+'</b></div><div class="pdt-production-identity"><b>'+escapeHtml(x.produccion||x.reserva||'—')+'</b><span><strong>PDT '+escapeHtml(x.cantidad||0)+'</strong> · Reserva '+escapeHtml(x.reserva||'—')+' · Sistema '+escapeHtml(x.sistema||'—')+' · '+escapeHtml(x.perfil||'—')+(x.marca?' · '+escapeHtml(x.marca):'')+(x.fabricacion?' · '+escapeHtml(x.fabricacion):'')+(x.longitud?' · '+escapeHtml(String(x.longitud)):'')+(x.nc?' · NC '+escapeHtml(x.nc):'')+'</span><small>'+escapeHtml(x.observacion||x.observacion_general||'')+'</small></div><div class="pdt-production-process">'+productionPdtStatus(x,repoValidationBadgeHtml(x,false),escapeHtml)+'</div><div class="pdt-production-delivery" data-pdt-delivery="'+escapeHtml(x.id_pendiente)+'">'+productionPdtDeliveryStatus({status:'loading'},escapeHtml)+'</div><div class="repo-actions">'+controls+'</div></div>';
+  };
+  const groupHtml=(key,title,description)=>{
+   const items=rows.filter(row=>productionPdtGroup(row)===key);
+   return '<section class="pdt-production-group pdt-group-'+key+'" data-pdt-group="'+key+'" aria-label="'+escapeHtml(title)+'"><header><div><h3>'+title+'</h3><p>'+description+'</p></div><strong data-pdt-group-count>'+items.length+' PDT</strong></header><div class="al-pending-list">'+items.map(rowHtml).join('')+'</div></section>';
+  };
+  host.innerHTML=rows.length?'<section class="al-pending-card"><div class="al-pending-head"><div><b>Pendientes de aluminio / reposiciones</b><span>El PDT procesado permanece visible hasta completar su entrega a línea.</span></div><strong data-pending-total>'+rows.length+' PDT abiertos</strong></div><p class="pdt-production-disclaimer">REPO OK indica reposición por NC finalizadas; no confirma inventario, avance de mecanizado ni entrega física.</p><div class="al-pending-sort"><label>Buscar pendientes<input type="search" data-pending-search placeholder="Producción, reserva, sistema, perfil, estado…" value="'+escapeHtml(prodPendingSearch)+'"></label><button type="button" data-pending-clear>Limpiar</button><button type="button" data-pending-week-sort>SEMANA '+(prodPendingWeekSort==='asc'?'↑':'↓')+'</button><span>Orden por semana dentro de cada bloque</span></div>'+groupHtml('delivery','Procesados · por entregar a línea','Las entregas parciales permanecen aquí hasta completar la entrega.')+groupHtml('processing','Por validar / procesar','Conserva la validación, el avance parcial y la cantidad ya entregada.')+'<p class="pdt-production-no-match" data-pending-empty hidden>No hay PDT que coincidan con la búsqueda. Limpia el filtro para ver los abiertos.</p></section>':'<section class="al-pending-card empty"><b>✓ Sin pendientes de aluminio por resolver</b></section>';
+  const filterPending=()=>{
+   const query=prodPendingSearch.trim().toLocaleLowerCase('es');let visible=0;
+   host.querySelectorAll('[data-prod-pending-open]').forEach(node=>{
+    const row=rows.find(r=>String(r.id_pendiente)===node.dataset.prodPendingOpen);
+    const matches=!query||[row?.semana,row?.reserva,row?.produccion,row?.sistema,row?.perfil,row?.nc,row?.cantidad,node.textContent].some(value=>String(value??'').toLocaleLowerCase('es').includes(query));
+    node.hidden=!matches;if(matches)visible++;
+   });
+   host.querySelectorAll('[data-pdt-group]').forEach(group=>{const count=group.querySelectorAll('[data-prod-pending-open]:not([hidden])').length;group.hidden=!count;group.querySelector('[data-pdt-group-count]').textContent=count+' PDT';});
+   const total=host.querySelector('[data-pending-total]');if(total)total.textContent=query?visible+' de '+rows.length+' PDT':rows.length+' PDT abiertos';
+   const empty=host.querySelector('[data-pending-empty]');if(empty)empty.hidden=visible>0;
+  };
   host.querySelector('[data-pending-search]')?.addEventListener('input',event=>{prodPendingSearch=event.target.value;filterPending();});filterPending();
-  host.querySelector('[data-pending-week-sort]')?.addEventListener('click',()=>{prodPendingWeekSort=prodPendingWeekSort==='asc'?'desc':'asc';loadAluminumPending()});
-  host.querySelectorAll('[data-prod-pending-open]').forEach(row=>row.onclick=e=>{if(e.target.closest('select,button,details'))return;const x=rows.find(r=>String(r.id_pendiente)===String(row.dataset.prodPendingOpen));if(x?.contrato_pdt==='V2'&&loaded.capabilities)openPdtV2({row:x,client:db,token:getAppToken(),role:repoRole(),capabilities:loaded.capabilities,show:repoShowWorkModal,escape:escapeHtml,reload:loadAluminumPending,close:repoCloseWorkModal}).catch(e=>alert(e.message));else if(x)openRepoPendingDetail(x)});
-  host.querySelectorAll('[data-pdt-open]').forEach(button=>button.onclick=()=>{const x=rows.find(r=>String(r.id_pendiente)===button.dataset.pdtOpen);if(!x)return;button.closest('details')?.removeAttribute('open');openPdtV2({row:x,client:db,token:getAppToken(),role:repoRole(),capabilities:loaded.capabilities,initialSection:button.dataset.pdtTarget,show:repoShowWorkModal,escape:escapeHtml,reload:loadAluminumPending,close:repoCloseWorkModal}).catch(e=>alert(e.message));});
-  host.querySelectorAll('[data-repo-state]').forEach(sel=>sel.onchange=async()=>{const {error}=await db.rpc('sgp_aluminio_pendiente_estado',{p_token:getAppToken(),p_id:sel.dataset.repoState,p_estado:sel.value,p_observacion:null});if(error){alert(error.message);await loadAluminumPending();return}await loadAluminumPending()})
- }catch(e){console.error('Pendientes aluminio:',e);host.innerHTML='<section class="al-pending-card empty" role="alert"><b>No fue posible cargar los pendientes de aluminio</b><p>La consulta no se completó. Los PDT registrados no se han modificado.</p><button type="button" data-pending-retry>Reintentar consulta</button></section>';host.querySelector('[data-pending-retry]')?.addEventListener('click',()=>refreshProductionPending(true))}
+  host.querySelector('[data-pending-clear]')?.addEventListener('click',()=>{prodPendingSearch='';const input=host.querySelector('[data-pending-search]');input.value='';filterPending();input.focus();});
+  host.querySelector('[data-pending-week-sort]')?.addEventListener('click',()=>{prodPendingWeekSort=prodPendingWeekSort==='asc'?'desc':'asc';loadAluminumPending();});
+  host.querySelectorAll('[data-prod-pending-open]').forEach(node=>node.onclick=e=>{
+   if(e.target.closest('select,button,details'))return;const x=rows.find(r=>String(r.id_pendiente)===node.dataset.prodPendingOpen);
+   if(x?.contrato_pdt==='V2'&&loaded.capabilities)openPdtV2({row:x,client:db,token,role:repoRole(),capabilities:loaded.capabilities,show:repoShowWorkModal,escape:escapeHtml,reload:loadAluminumPending,close:repoCloseWorkModal}).catch(e=>alert(e.message));else if(x)openRepoPendingDetail(x);
+  });
+  host.querySelectorAll('[data-pdt-open]').forEach(button=>button.onclick=()=>{
+   const x=rows.find(r=>String(r.id_pendiente)===button.dataset.pdtOpen);if(!x)return;button.closest('details')?.removeAttribute('open');
+   openPdtV2({row:x,client:db,token,role:repoRole(),capabilities:loaded.capabilities,initialSection:button.dataset.pdtTarget,show:repoShowWorkModal,escape:escapeHtml,reload:loadAluminumPending,close:repoCloseWorkModal}).catch(e=>alert(e.message));
+  });
+  host.querySelectorAll('[data-repo-state]').forEach(sel=>sel.onchange=async()=>{
+   const {error}=await db.rpc('sgp_aluminio_pendiente_estado',{p_token:token,p_id:sel.dataset.repoState,p_estado:sel.value,p_observacion:null});
+   if(error)alert(error.message);await loadAluminumPending();
+  });
+  // Render the queue first. Secondary read failures must not hide an open PDT.
+  const summaries=await loadProductionPdtDeliveries(db,token,rows,loaded.capabilities);
+  if(!current())return;
+  host.querySelectorAll('[data-pdt-delivery]').forEach(cell=>{cell.innerHTML=productionPdtDeliveryStatus(summaries.get(cell.dataset.pdtDelivery),escapeHtml);});
+  filterPending();
+ }catch(e){
+  if(!current())return;console.error('Pendientes aluminio:',e);
+  host.innerHTML='<section class="al-pending-card empty" role="alert"><b>No fue posible cargar los pendientes de aluminio</b><p>La consulta no se completó. Los PDT registrados no se han modificado.</p><button type="button" data-pending-retry>Reintentar consulta</button></section>';
+  host.querySelector('[data-pending-retry]')?.addEventListener('click',()=>refreshProductionPending(true));
+ }
 }
 
 // Reporte de entrega de turno de mecanizado

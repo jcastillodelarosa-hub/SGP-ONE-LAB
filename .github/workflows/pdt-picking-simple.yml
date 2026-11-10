@@ -4,6 +4,10 @@ on:
     paths:
       - 'src/modules/pdt-*.js'
       - 'src/services/pdt-picking-simple.js'
+      - 'src/services/pdt-production-deliveries.js'
+      - 'app.js'
+      - 'styles.css'
+      - 'tests/pdt-production-queue-browser.py'
       - 'docs/sql-proposals/pdt/picking-simple/**'
       - 'tests/pdt-picking-simple*'
       - 'tests/pdt-picking-simple/**'
@@ -13,6 +17,10 @@ on:
     paths:
       - 'src/modules/pdt-*.js'
       - 'src/services/pdt-picking-simple.js'
+      - 'src/services/pdt-production-deliveries.js'
+      - 'app.js'
+      - 'styles.css'
+      - 'tests/pdt-production-queue-browser.py'
       - 'docs/sql-proposals/pdt/picking-simple/**'
       - 'tests/pdt-picking-simple*'
       - 'tests/pdt-picking-simple/**'
@@ -33,11 +41,18 @@ jobs:
           SGP_QA_CHROMIUM: /usr/bin/google-chrome
           SGP_QA_OUT: ${{ runner.temp }}/pdt-picking-simple-browser
         run: python3 tests/pdt-picking-simple-ui-browser.py
+      - name: Production PDT groups, partial deliveries and query failures, PC and mobile
+        env:
+          SGP_QA_CHROMIUM: /usr/bin/google-chrome
+          SGP_QA_OUT: ${{ runner.temp }}/pdt-production-queue-browser
+        run: python3 tests/pdt-production-queue-browser.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: pdt-picking-simple-browser-${{ github.sha }}
-          path: ${{ runner.temp }}/pdt-picking-simple-browser
+          path: |
+            ${{ runner.temp }}/pdt-picking-simple-browser
+            ${{ runner.temp }}/pdt-production-queue-browser
           retention-days: 7
   postgres:
     runs-on: ubuntu-latest

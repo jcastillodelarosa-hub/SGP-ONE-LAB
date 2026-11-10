@@ -2871,3 +2871,35 @@ table.glass-burro-table th:not(:first-child){width:36%}
 @media(max-width:600px){.glass-analysis-views button{flex:1 1 40%}#glassEfficiencyStats{display:grid;grid-template-columns:1fr 1fr}.glass-efficiency-controls{width:100%}}
 
 .export-review-selection{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:12px 0}.export-review-selection button{min-height:40px}.export-review-selection [data-export-selection-count]{font-size:14px;color:#5b6b85}
+
+/* LAB v434: approved PDT option 2. Delivery and machining remain independent. */
+#prodAluminumPending .pdt-production-group>header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:13px 16px;background:#e8f2fe;color:#1051a1;border-top:1px solid #c5d8ed}
+#prodAluminumPending .pdt-production-group h3{margin:0;font-size:16px;color:inherit}
+#prodAluminumPending .pdt-production-group header p{margin:4px 0 0;font-size:12px;line-height:1.5}
+#prodAluminumPending .pdt-production-group header>strong{white-space:nowrap;font-size:14px}
+#prodAluminumPending .pdt-group-delivery>header{background:#f6eafb;color:#782a8d;border-color:#e8cbee}
+#prodAluminumPending .pdt-group-delivery .al-pending-row{background:#fcf7fe}
+#prodAluminumPending .al-pending-row{grid-template-columns:76px minmax(180px,1.2fr) minmax(135px,.7fr) minmax(180px,1fr) minmax(86px,auto)!important}
+#prodAluminumPending .pdt-status-label{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#536b83}
+#prodAluminumPending .pdt-delivery-badge{width:fit-content;font-size:12px;padding:5px 8px;border-radius:6px}
+#prodAluminumPending .pdt-delivery-pending{background:#fff0d6;color:#875000}
+#prodAluminumPending .pdt-delivery-complete{background:#e6f5eb;color:#166437}
+#prodAluminumPending .pdt-delivery-unknown{background:#edf1f5;color:#485e74}
+#prodAluminumPending .pdt-production-no-match{padding:16px;color:#315877}
+#prodAluminumPending [hidden]{display:none!important}
+@media(max-width:1100px){
+ #prodAluminumPending .al-pending-row{grid-template-columns:70px minmax(170px,1fr) minmax(150px,.8fr)!important}
+ #prodAluminumPending .pdt-production-process{grid-column:2!important}
+ #prodAluminumPending .pdt-production-delivery{grid-column:3}
+ #prodAluminumPending .repo-actions{grid-column:2/-1!important}
+}
+@media(max-width:700px){
+ #prodAluminumPending .al-pending-row{grid-template-columns:65px minmax(0,1fr)!important}
+ #prodAluminumPending .pdt-production-identity{grid-column:2!important}
+ #prodAluminumPending .pdt-production-process,#prodAluminumPending .pdt-production-delivery,#prodAluminumPending .repo-actions{grid-column:2!important}
+ #prodAluminumPending .pdt-production-group>header{align-items:flex-start;padding:12px}
+ #prodAluminumPending .pdt-production-group h3{font-size:15px}
+ #prodAluminumPending .al-pending-sort input{width:min(100%,320px);min-width:0}
+ #prodAluminumPending .al-pending-head{gap:10px;align-items:flex-start}
+ #prodAluminumPending .al-pending-head>strong{font-size:12px;max-width:110px}
+}
