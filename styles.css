@@ -2918,3 +2918,13 @@ table.glass-burro-table th:not(:first-child){width:36%}
  #prodAluminumPending .al-pending-head{gap:10px;align-items:flex-start}
  #prodAluminumPending .al-pending-head>strong{font-size:12px;max-width:110px}
 }
+
+/* Existing weekly-part batch selection; the v435 viewport/scroll layout is retained. */
+#progModal .prog-part-choice input[type="checkbox"]+.part-radio-ui{border-radius:4px;flex:none}
+#progModal .prog-part-choice input:focus-visible+.part-radio-ui{outline:3px solid #103b73;outline-offset:3px}
+#progModal .prog-part-choice input:disabled+.part-radio-ui{opacity:.45}
+#progModal .prog-parts-selection{padding:10px 0}
+#progModal .prog-parts-selection p{margin:0 0 10px;font-size:13px;line-height:1.5}
+#progModal .prog-parts-selection>div{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+#progModal .prog-parts-selection button{min-height:40px}
+#progModal .prog-part-reason{display:block;flex-basis:100%;color:#68511b;font-size:12px}

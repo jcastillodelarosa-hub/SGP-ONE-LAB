@@ -38,6 +38,9 @@ with sync_playwright() as p:
         page.goto(ORIGIN)
         page.evaluate('''async source => {
           const {coverageAmount} = await import('/src/domain/mecanizado-partes.js');
+          const {programmingPartState,programmingPartsPlan,validateProgrammingDestination} = await import('/src/domain/programming-part-selection.js');
+          const {saveProgrammingParts} = await import('/src/services/programming-part-selection.js');
+          let progWriteBusy=false,progWriteControls=[];
           const escapeHtml = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
           const parts = Array.from({length: 8}, (_, i) => ({prioridad: '14.' + (i + 1), cantidad: 8, vidrio_pct: 75,
             ordenes: Array.from({length: 3}, (_, j) => ({produccion: 'ORDEN SINTÉTICA ' + i + '-' + j, key_produccion: 'QA|' + i + '-' + j, cantidad: j === 2 ? 2 : 3, tipo_vidrio: 'LAMINADO'}))}));
