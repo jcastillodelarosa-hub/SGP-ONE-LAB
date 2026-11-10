@@ -147,7 +147,7 @@ export async function openPdtV2({row,client,token,role,capabilities,show,escape:
     if(operationPending||session.busy||session.needsRefresh||button.disabled)return;
     if(button.dataset.operation==='annul'&&!window.confirm('¿Confirmas anular esta línea de entrega anterior?'))return;
     if(button.dataset.operation==='reverse'&&!window.confirm('¿Confirmas revertir este avance? Se conservará la trazabilidad.'))return;
-    const buttons=[...modal.querySelectorAll('[data-operation]')];const previous=buttons.map(b=>b.disabled);operationPending=true;session.busy=true;session.modal?.setAttribute('aria-busy','true');modal.querySelector('[data-refresh-pdt]').disabled=true;buttons.forEach(b=>b.disabled=true);if(retry)retry.disabled=true;
+    const buttons=[...modal.querySelectorAll('[data-operation]')];const previous=buttons.map(b=>b.disabled);operationPending=true;session.busy=true;session.modal?.setAttribute('aria-busy','true');modal.querySelector('[data-refresh-pdt]').disabled=true;buttons.forEach(b=>b.disabled=true);modal.querySelector('[data-dismiss]')?.focus({preventScroll:true});if(retry)retry.disabled=true;
     const val=s=>modal.querySelector(s)?.value||'';
     let writeStarted=false,operation,args={p_token:token,p_id:row.id_pendiente};
     try{
@@ -187,7 +187,7 @@ export async function openPdtV2({row,client,token,role,capabilities,show,escape:
     }
   });
   modal.querySelector('[data-repeat-pdt]').onclick=async()=>{
-    if(session.busy||!session.pending)return;session.busy=true;session.modal?.setAttribute('aria-busy','true');const repeat=modal.querySelector('[data-repeat-pdt]');repeat.disabled=true;modal.querySelector('[data-refresh-pdt]').disabled=true;
+    if(session.busy||!session.pending)return;session.busy=true;session.modal?.setAttribute('aria-busy','true');const repeat=modal.querySelector('[data-repeat-pdt]');repeat.disabled=true;modal.querySelector('[data-refresh-pdt]').disabled=true;modal.querySelector('[data-dismiss]')?.focus({preventScroll:true});
     try{const pending=session.pending;await executeOperation(pending.operation,pending.args);session.dirty=true;session.pending=null;session.feedback='Operación confirmada sin duplicar; datos actualizados.';session.clearAfterWrite={detail:pending.args.p_id_detalle,delivery:pending.operation===rpcByAction.delivery};const view=capturePdtView(modal,details);if(pending.args.p_id_detalle)delete view.quantities[pending.args.p_id_detalle];if(pending.operation===rpcByAction.delivery)view.values['data-pick-qty']='';await refresh(view);}
     catch(error){setFeedback('No se pudo confirmar la operación pendiente: '+error.message,true);repeat.disabled=false;modal.querySelector('[data-refresh-pdt]').disabled=false;}
     finally{session.busy=false;session.modal?.setAttribute('aria-busy','false');}
