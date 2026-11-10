@@ -2636,7 +2636,7 @@ async function openPickingAuditPieces(id){
  try{
   const db=await getSupabaseClient(),{data,error}=await db.rpc('sgp_picking_auditoria_contexto',{p_token:getAppToken(),p_id_entrega:id});if(error)throw error;
   if(!Array.isArray(data?.fuentes))throw Error('Contrato de fuentes de auditoría inválido');
-  currentPieceRows=data.fuentes.map(p=>({...p,codigo_sap:p.codigo_sap||p.perfil,perfil:p.perfil||p.codigo_sap}));
+  currentPieceRows=data.fuentes.map(p=>({...p,cantidad:p.cantidad_referencia??p.cantidad,codigo_sap:p.codigo_sap||p.perfil,perfil:p.perfil||p.codigo_sap}));
   currentPieceContext='order';currentPieceView='summary';els.pieceModalTitle.textContent='Orden '+target.produccion;
   els.pieceModalMeta.textContent='Auditoría · Reserva '+target.reserva+' · '+target.sistema+' · '+target.acabado;
   els.pieceModal.hidden=false;renderPieceModal();

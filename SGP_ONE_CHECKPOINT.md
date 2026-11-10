@@ -1846,3 +1846,15 @@ aplicadas en Supabase; snapshots originales, saldos y permisos intactos.
 16 focales y DOM PASS; 938 PASS/10 skip en suite; verify:release PASS.
 CI PC/móvil y publicación frontend pendientes. Continuidad en
 `docs/linea-produccion/ESTADO_OPERATIVO_ACTUAL.md`.
+
+## Recepción Picking v436 · reconstrucción 10/11/2026
+
+Base main v435 a76bafd. Se reconstruye la corrección pendiente al no existir el
+checkout anterior ni el commit 1054cdd en los objetos disponibles. Visor de piezas
+lee cantidad_referencia de las fuentes de auditoría. Reportar/modificar diferencia
+elige referencia y después fabricación con identidad de producción/reserva/pieza;
+cambiar referencia invalida la selección anterior. No cambia RPC, permisos ni datos.
+Pruebas: suite 972 PASS/10 skip antes de agregar regresión focal; 6 focales PASS,
+verify:release PASS. Browser local bloqueado al arrancar Chromium por socket EPERM;
+prueba sintética PC/móvil añadida a CI. No acredita validación productiva/SQL.
+Estado: implementado en rama; CI, integración y publicación pendientes.
