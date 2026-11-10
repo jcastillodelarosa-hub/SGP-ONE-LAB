@@ -1,3 +1,27 @@
+## Picking PDT · confirmación directa · candidata LAB v431
+
+Base main v430 `f4818ab`. Confirmar la cantidad físicamente entregada registra
+una entrega parcial o finaliza automáticamente al cubrir todos los detalles.
+El PDT completo queda RESUELTO/PICKING y sale de la tabla Pendientes de aluminio;
+se conserva en Entregados y su historial. No se inventan eventos de órdenes.
+La validación inicial de distribución y cantidades procesadas se conserva.
+La confirmación directa elimina los pasos adicionales validar/acreditar/cerrar.
+
+Ledger privado con idempotencia, locks por PDT, límites de cantidad y guards
+contra mezcla con el flujo anterior y reversos por debajo de lo entregado.
+Las entregas anteriores conservan sus contratos exactos: modo de compatibilidad
+explícito, nunca fallback tras un fallo de escritura ni suma de cobertura dudosa.
+Se preserva la cantidad original aun si el detalle manual fue corregido.
+Refresco del listado tras guardado, incluso con Escape durante write/read;
+respuesta incierta reusa UUID y requiere comprobar resultado antes de otra entrega.
+
+SQL y recuperación: `docs/sql-proposals/pdt/picking-simple/README.md`.
+Pruebas frontend Node y PL/pgSQL sintético PGlite PASS; browser PC/móvil y
+PostgreSQL17 multi-sesión preparados para CI (Chromium/Docker no disponibles
+localmente). No se probaron escrituras con datos reales. Estado IMPLEMENTADO
+EN RAMA; pendiente CI exacta, aplicación SQL autorizada y Hosting controlado.
+Los pins y la política de publicación permanecen intactos.
+
 # PR116 — corrección final de historial y contrato productivo reportado
 
 Fecha Colombia: 2026-10-27T05:15:13.387476-05:00.

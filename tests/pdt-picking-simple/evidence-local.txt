@@ -1,0 +1,5 @@
+PASS tests/pdt-picking-simple/fixture.sql
+PASS docs/sql-proposals/pdt/picking-simple/install.sql
+PASS tests/pdt-picking-simple/assertions.sql
+PASS used rollback refusal and containment
+PASS unused rollback restores exact original
