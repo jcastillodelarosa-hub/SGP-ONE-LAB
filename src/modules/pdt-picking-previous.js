@@ -1,0 +1,10 @@
+/** Compatibility only for pre-existing order delivery evidence. Never used after a direct-write error. */
+export function pdtPreviousPickingForm(picking, details, {register,validate,admin,close}, esc) {
+ let form='<section class="repo-modal-section" data-pdt-section="picking"><h3>Entregas Picking anteriores</h3><p>Este PDT conserva entregas registradas antes de la confirmación directa. Completa su registro original para no duplicar cantidades ni perder trazabilidad.</p>';
+ if(register)form+='<label>Entrega<select data-pick-event>'+picking.entregas.map((e,i)=>'<option value="'+esc(e.id_entrega)+'">Entrega '+(i+1)+' · '+esc(e.produccion)+' · '+esc(e.estado)+'</option>').join('')+'</select></label><label>Detalle<select data-pick-detail>'+details.map(d=>'<option value="'+esc(d.id_detalle)+'">'+esc(d.fabricacion)+' · '+esc(d.longitud)+' · '+esc(d.acabado)+'</option>').join('')+'</select></label><label>Cantidad entregada<input type="number" min="1" step="1" data-pick-qty></label><button type="button" data-operation="delivery" '+(!picking.entregas.length?'disabled':'')+'>Registrar cantidad en entrega anterior</button>';
+ form+='<label>Línea registrada<select data-pick-line>'+picking.lineas.filter(l=>l.estado!=='ANULADA').map(l=>'<option value="'+esc(l.id_linea)+'">'+esc(details.find(d=>d.id_detalle===l.id_detalle)?.fabricacion||'Detalle')+' · '+esc(l.cantidad)+' · '+esc(l.estado)+(l.asignada?' · acreditada':'')+'</option>').join('')+'</select></label>';
+ if(validate)form+='<button type="button" data-operation="deliveryValidate" '+(!picking.lineas.length?'disabled':'')+'>Validar línea anterior</button><button type="button" data-operation="assign" '+(!picking.lineas.length?'disabled':'')+'>Acreditar entrega anterior</button>';
+ if(admin)form+='<label>Motivo de anulación<textarea data-annul-note rows="2"></textarea></label><button type="button" data-operation="annul" '+(!picking.lineas.length?'disabled':'')+'>Anular línea anterior</button>';
+ if(register&&close)form+='<button type="button" data-operation="close">Finalizar con entregas anteriores</button>';
+ return form+'</section>';
+}
