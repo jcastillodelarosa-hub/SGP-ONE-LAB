@@ -6,7 +6,7 @@ const saveSource=app.slice(app.indexOf('async function saveProgramming()'),app.i
 function programming({produccion=null,orders=[{produccion:'PANEL-A',cantidad:8},{produccion:'PANEL-B',cantidad:57}],coverage=[],quantity=8}={}){
  const calls=[],alerts=[],reloads=[];let closed=0;
  const values={'#progQty':quantity,'#progDate':'2026-10-26','#progShift':'TURNO 1','#progPriority':1,'#progObs':'QA','#progOrderObs':''};
- const deps={progSelection:{reserva:'8707142',produccion,maxQty:65,part:{prioridad:1,ordenes:orders}},progOrderCoverage:coverage,getAppToken:()=> 'SYNTHETIC',document:{querySelector:s=>({value:values[s]}),querySelectorAll:()=>[]},alert:m=>alerts.push(m),getSupabaseClient:async()=>({rpc:async(name,args)=>{calls.push({name,args});return {error:null};}}),closeProgModal:()=>closed++,loadProgramming:async args=>reloads.push(args)};
+ const deps={progWriteBusy:false,progSelection:{reserva:'8707142',produccion,maxQty:65,part:{prioridad:1,ordenes:orders}},progOrderCoverage:coverage,getAppToken:()=> 'SYNTHETIC',document:{querySelector:s=>({value:values[s]}),querySelectorAll:()=>[]},alert:m=>alerts.push(m),getSupabaseClient:async()=>({rpc:async(name,args)=>{calls.push({name,args});return {error:null};}}),closeProgModal:()=>closed++,loadProgramming:async args=>reloads.push(args)};
  const save=new Function(...Object.keys(deps),saveSource+';return saveProgramming;')(...Object.values(deps));
  return {save,calls,alerts,reloads,closed:()=>closed};
 }

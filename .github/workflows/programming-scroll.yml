@@ -7,6 +7,10 @@ on:
       - 'app.js'
       - 'navigation-preferences.css'
       - 'tests/programming-scroll/**'
+      - 'tests/programming-parts/**'
+      - 'src/domain/programming-part-selection.js'
+      - 'src/services/programming-part-selection.js'
+      - 'tests/programming-part-selection.test.mjs'
       - 'tests/programming-modal-scroll-*.test.mjs'
       - '.github/workflows/programming-scroll.yml'
 permissions:
@@ -25,6 +29,11 @@ jobs:
           SCROLL_CHROMIUM: /usr/bin/google-chrome
           SCROLL_QA_OUT: ${{ runner.temp }}/programming-scroll
         run: python3 tests/programming-scroll/browser.py
+      - name: Weekly parts selection, save and interrupted flows
+        env:
+          SCROLL_CHROMIUM: /usr/bin/google-chrome
+          PARTS_QA_OUT: ${{ runner.temp }}/programming-scroll/parts
+        run: python3 tests/programming-parts/browser.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
