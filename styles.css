@@ -1782,6 +1782,7 @@ button.active,[aria-pressed="true"]{border-color:#0865ed}
 /* LAB v435 · El diálogo vive fuera de las vistas escaladas/animadas.
    Cabecera y acciones permanecen visibles; solo el formulario desplaza. */
 #progModal.rec-overlay{
+  z-index:12000!important;
   height:100vh!important;
   height:100dvh!important;
   min-height:0!important;

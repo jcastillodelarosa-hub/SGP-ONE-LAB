@@ -61,6 +61,11 @@ with sync_playwright() as p:
                 assert r and r['x'] >= -1 and r['y'] >= -1 and r['x'] + r['width'] <= width + 1 and r['y'] + r['height'] <= height + 1, (selector, r, width, height)
             assert form.evaluate('(e) => e.scrollHeight > e.clientHeight + 50')
             assert page.locator('#progModal').evaluate('(e) => !e.closest(".view") && !!e.closest(".workspace")')
+            assert page.evaluate('''() => {
+              const toggle=document.querySelector('#mobileMenuToggle');
+              const r=toggle.getBoundingClientRect();
+              return !r.width || !!document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)?.closest('#progModal');
+            }'''), 'Mobile menu must remain behind the modal'
 
         check_bounds()
         # Negative control: the former nesting under a transformed view clips the dialog.
