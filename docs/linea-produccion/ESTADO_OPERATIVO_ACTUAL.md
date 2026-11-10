@@ -1,3 +1,18 @@
+## Export · selección múltiple · candidata LAB v430
+
+«Seleccionar todos» y «Deseleccionar todos» sobre las filas aprobables de la
+revisión actual, con contador y ajuste individual. No aplican automáticamente:
+se conserva la confirmación y la RPC de aprobación. Filas bloqueadas no reciben
+casilla; saldos de archivadas siguen aprobables sin reactivar ni cambiar semana.
+No hay filtros propios en esta lista. Pendientes recuperados y nuevas revisiones
+inician sin selección. Sin SQL, permisos, datos productivos ni pins modificados.
+
+Base v429 `9b38470`. 11 pruebas focales PASS, suite completa 942 PASS/10 omitidas,
+`verify:release`, sintaxis y diff PASS. Chromium local no pudo abrir su socket;
+recorrido PC/móvil preparado para CI aislada con datos sintéticos. No confundirlo
+con aceptación de una sesión productiva. Próximo: CI exacta y publicación por
+el flujo protegido existente; versión/SHA y postcheck de Hosting por verificar.
+
 ## Candidata LAB v419 · Vidrio B21 · 09/11/2026
 
 IMPLEMENTADO LOCAL / BACKEND APLICADO / UI NO PUBLICADA. Base B19 v418 publicada: main `b8a740727698aea4e587ad401bfbeb2b195e55a0`, Hosting `31d22aab76c27b62`.

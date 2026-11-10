@@ -1,3 +1,18 @@
+## Export · selección múltiple · candidata LAB v430
+
+«Seleccionar todos» y «Deseleccionar todos» sobre las filas aprobables de la
+revisión actual, con contador y ajuste individual. No aplican automáticamente:
+se conserva la confirmación y la RPC de aprobación. Filas bloqueadas no reciben
+casilla; saldos de archivadas siguen aprobables sin reactivar ni cambiar semana.
+No hay filtros propios en esta lista. Pendientes recuperados y nuevas revisiones
+inician sin selección. Sin SQL, permisos, datos productivos ni pins modificados.
+
+Base v429 `9b38470`. 11 pruebas focales PASS, suite completa 942 PASS/10 omitidas,
+`verify:release`, sintaxis y diff PASS. Chromium local no pudo abrir su socket;
+recorrido PC/móvil preparado para CI aislada con datos sintéticos. No confundirlo
+con aceptación de una sesión productiva. Próximo: CI exacta y publicación por
+el flujo protegido existente; versión/SHA y postcheck de Hosting por verificar.
+
 ## Cantidad procesada acreditada · candidata v412 · 08/11/2026
 
 Resumen de mecanizado: usa la cantidad real positiva de una ejecución PROCESADO
