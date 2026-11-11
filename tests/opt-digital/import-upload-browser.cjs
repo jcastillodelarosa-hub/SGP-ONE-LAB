@@ -79,7 +79,8 @@ const indexText='OPT,Reserva,Sistema\nA,R-SYNTH,PANEL\nB,R-SYNTH,PANEL\nMISSING,
    // Repeating the explicit command preserves exact original payloads and yields a duplicate receipt.
    await host.locator('#optImportProcess').click();await page.waitForFunction(()=>document.querySelector('#optDigitalHost').shadowRoot.querySelector('#optImportResults').textContent.includes('Duplicado confirmado'));
    await page.waitForFunction(()=>!document.querySelector('#optDigitalHost').shadowRoot.querySelector('#optImportProcess').disabled);assert.equal(uploads.length,4);assert.deepEqual(uploads[0],uploads[2]);assert.deepEqual(uploads[1],uploads[3]);
-   await page.locator('#authLogout').click();assert.equal(await host.locator('#optImportProcess').count(),0);await first.context.close();
+   // logout awaits sgp_logout before clearing the native host; click alone does not await that handler.
+   await page.locator('#authLogout').click();await host.locator('#optImportProcess').waitFor({state:'detached'});assert.equal(await host.locator('#optImportProcess').count(),0);await first.context.close();
    // New browser storage + a different user sees the shared catalog without any original files.
    const second=await openSession('cutter-'+size);assert.equal(await second.host.locator('#library button').count(),0);assert.equal(uploads.length,4);
    await second.host.locator('#optWorkflowTab1').click();await second.host.locator('#optReservation').selectOption(JSON.stringify(['SERVIDOR','R-SYNTH','PANEL']));
