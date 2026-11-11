@@ -1,0 +1,23 @@
+{
+  "environment": "Synthetic jsdom, not browser or production",
+  "checks": [
+    "navigation and default week",
+    "week dates",
+    "rows names pending provenance",
+    "search updates all summaries",
+    "state plus search",
+    "server filter clears stale data",
+    "missing",
+    "denied",
+    "duplicate",
+    "obsolete request ignored",
+    "changed session ignored",
+    "direct report selects deliveries in modal",
+    "escape restores report and focus",
+    "delivery report preserved",
+    "delivery search affects summary and rows",
+    "delivery reservation search",
+    "unique IDs and read only calls"
+  ],
+  "passed": 17
+}

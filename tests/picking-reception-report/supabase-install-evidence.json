@@ -1,0 +1,223 @@
+{
+  "applied": true,
+  "migration": "picking_reception_report_v1",
+  "project": "SGP-ONE-LAB",
+  "body_md5": "e6627795b806b60cfda8cfd0b734c7e7",
+  "catalog": [
+    {
+      "proname": "sgp_picking_auditoria_guardar",
+      "owner": "postgres",
+      "prosecdef": true,
+      "provolatile": "v",
+      "proconfig": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "body_hash": "f3888d51b63bd37b99f7703e5b6bd831",
+      "arguments": "p_token text, p_id_entrega uuid, p_version text, p_solicitud uuid, p_fecha date, p_turno text, p_decisiones jsonb, p_diferencias jsonb, p_observacion text"
+    },
+    {
+      "proname": "sgp_picking_reporte_entregas_v1",
+      "owner": "postgres",
+      "prosecdef": true,
+      "provolatile": "v",
+      "proconfig": [
+        "search_path=public"
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres,anon=X/postgres,authenticated=X/postgres}",
+      "body_hash": "0c54bda7a380679b1086fabd631e9052",
+      "arguments": "p_token text, p_fecha_inicio date, p_fecha_fin date, p_turno text, p_sistema text, p_limit integer, p_offset integer"
+    },
+    {
+      "proname": "sgp_picking_reporte_recepciones_v1",
+      "owner": "postgres",
+      "prosecdef": true,
+      "provolatile": "s",
+      "proconfig": [
+        "search_path=\"\""
+      ],
+      "acl": "{postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "body_hash": "e6627795b806b60cfda8cfd0b734c7e7",
+      "arguments": "p_token text, p_fecha_inicio date, p_fecha_fin date, p_turno text, p_sistema text, p_limit integer, p_offset integer"
+    },
+    {
+      "proname": "sgp_validar_sesion_rol",
+      "owner": "postgres",
+      "prosecdef": true,
+      "provolatile": "v",
+      "proconfig": [
+        "search_path=public, extensions"
+      ],
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "body_hash": "c11c53edf00a3c90b9b124451e7cef92",
+      "arguments": "p_token text, p_roles text[]"
+    }
+  ],
+  "preflight": [
+    {
+      "preflight": {
+        "columns": [
+          {
+            "type": "uuid",
+            "table": "decisiones",
+            "column": "id_faltante",
+            "schema": "sgp_picking_audit"
+          },
+          {
+            "type": "uuid",
+            "table": "decisiones",
+            "column": "id_pendiente",
+            "schema": "sgp_picking_audit"
+          },
+          {
+            "type": "uuid",
+            "table": "decisiones",
+            "column": "id_entrega",
+            "schema": "sgp_picking_audit"
+          },
+          {
+            "type": "text",
+            "table": "decisiones",
+            "column": "accion",
+            "schema": "sgp_picking_audit"
+          },
+          {
+            "type": "text",
+            "table": "decisiones",
+            "column": "motivo",
+            "schema": "sgp_picking_audit"
+          },
+          {
+            "type": "jsonb",
+            "table": "decisiones",
+            "column": "anterior",
+            "schema": "sgp_picking_audit"
+          },
+          {
+            "type": "jsonb",
+            "table": "decisiones",
+            "column": "nuevo",
+            "schema": "sgp_picking_audit"
+          },
+          {
+            "type": "text",
+            "table": "decisiones",
+            "column": "usuario",
+            "schema": "sgp_picking_audit"
+          },
+          {
+            "type": "date",
+            "table": "decisiones",
+            "column": "fecha_recepcion",
+            "schema": "sgp_picking_audit"
+          },
+          {
+            "type": "text",
+            "table": "decisiones",
+            "column": "turno_recepcion",
+            "schema": "sgp_picking_audit"
+          },
+          {
+            "type": "timestamp with time zone",
+            "table": "decisiones",
+            "column": "ejecutado_en",
+            "schema": "sgp_picking_audit"
+          },
+          {
+            "type": "uuid",
+            "table": "eventos",
+            "column": "id_entrega",
+            "schema": "sgp_picking_audit"
+          },
+          {
+            "type": "uuid",
+            "table": "eventos",
+            "column": "solicitud",
+            "schema": "sgp_picking_audit"
+          },
+          {
+            "type": "jsonb",
+            "table": "eventos",
+            "column": "payload",
+            "schema": "sgp_picking_audit"
+          },
+          {
+            "type": "jsonb",
+            "table": "eventos",
+            "column": "respuesta",
+            "schema": "sgp_picking_audit"
+          },
+          {
+            "type": "text",
+            "table": "eventos",
+            "column": "usuario",
+            "schema": "sgp_picking_audit"
+          },
+          {
+            "type": "date",
+            "table": "eventos",
+            "column": "fecha_recepcion",
+            "schema": "sgp_picking_audit"
+          },
+          {
+            "type": "text",
+            "table": "eventos",
+            "column": "turno_recepcion",
+            "schema": "sgp_picking_audit"
+          },
+          {
+            "type": "timestamp with time zone",
+            "table": "eventos",
+            "column": "ejecutado_en",
+            "schema": "sgp_picking_audit"
+          }
+        ],
+        "functions": [
+          {
+            "acl": "{postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+            "hash": "f3888d51b63bd37b99f7703e5b6bd831",
+            "name": "sgp_picking_auditoria_guardar",
+            "owner": "postgres",
+            "config": [
+              "search_path=\"\""
+            ],
+            "security_definer": true
+          },
+          {
+            "acl": "{postgres=X/postgres,service_role=X/postgres,anon=X/postgres,authenticated=X/postgres}",
+            "hash": "0c54bda7a380679b1086fabd631e9052",
+            "name": "sgp_picking_reporte_entregas_v1",
+            "owner": "postgres",
+            "config": [
+              "search_path=public"
+            ],
+            "security_definer": true
+          },
+          {
+            "acl": "{postgres=X/postgres,service_role=X/postgres}",
+            "hash": "c11c53edf00a3c90b9b124451e7cef92",
+            "name": "sgp_validar_sesion_rol",
+            "owner": "postgres",
+            "config": [
+              "search_path=public, extensions"
+            ],
+            "security_definer": true
+          }
+        ],
+        "ledger_count": 1,
+        "new_function": null
+      }
+    }
+  ],
+  "negative_null_token": {
+    "result": "PERMISO_DENEGADO",
+    "authentication_helper_unchanged": true
+  },
+  "positive_authenticated_session": "Not run: requires ordinary authenticated user session. No tokens read, no test sessions created.",
+  "private_schema_access": {
+    "anon_usage": false,
+    "anon_select": false,
+    "authenticated_usage": false,
+    "authenticated_select": false
+  }
+}

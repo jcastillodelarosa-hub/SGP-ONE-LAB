@@ -1,3 +1,36 @@
+## Publicación conjunta autorizada · Reportes y pestañas PDT · LAB v441 · 11/11/2026
+
+El propietario autorizó subir código, crear consulta Supabase y publicar ambos
+cambios. Integración única sobre main53b4054: Reportes Recepción/Entregas y
+Por validar/Validados de Pendientes de aluminio. OPT y reserva agregada quedan
+fuera. Branch feat/picking-reception-reports-v441. SQL de recepción aplicada
+por la tarea backend; evidencia final en docs/sql-proposals/picking-reception-report/.
+1004 Node PASS/10 omitidas en integración local, sintaxis y release PASS;
+policy8/postcheck7 y AST de harness PDT PASS. Browser PC/móvil se ejecutará en CI
+antes de fusionar. Sin cambios de pins ni workflows de Hosting. Siguiente:
+revisar CI y capturas del SHA exacto, fusionar y verificar Hosting v441/SHA.
+
+## Picking · Reportes Entregas/Recepción · candidata LAB v441 · 11/11/2026
+
+IMPLEMENTADO LOCALMENTE en `feat/picking-reception-reports-v441`, base main
+`53b4054619e3be5a7282b816fd8ecd73401bc5bb` (v438). Sin commit, push, SQL aplicado,
+fusión ni publicación. Checkout aislado: no incorpora ni altera PDT v440/OPT v439.
+Reportes contiene Entregas/Recepción, búsqueda orden/reserva, semana operativa,
+rango/turno/estado/sistema, responsables separados, detalle de pendientes y CSV.
+Fecha operativa y registro real se distinguen. Se usa snapshot de auditoría,
+no entrega ni saldo actual. Ventanas recibidas sin fuente explícita: «Sin dato».
+46 legacy excluidos por falta de fecha operativa en la lectura global del 11/11;
+no son el conteo de un rango. El único evento ledger observado no acredita la
+recepción de todas las órdenes ni cobertura general de datos.
+RPC aditiva preparada, roles/ACL iguales a Entregas, sin cambios operativos:
+`docs/sql-proposals/picking-reception-report/README.md`.
+1000 pruebas Node PASS, 10 omitidas; 31 SQL sintéticas y 17 DOM PASS.
+Release/sintaxis/diff PASS. Browser PC/móvil preparado, NO EJECUTADO: se conserva
+la limitación ya documentada de Chromium socket EPERM del entorno compartido;
+no se reintentaron rutas alternativas. DOM no es verificación visual ni productiva.
+Siguiente: autorización específica para aplicar consulta y subir/integrar/publicar,
+con rebase/versiones y QA browser real previos; nunca inferirla de aprobar el boceto.
+
 ## Carga semanal · reprogramación de existentes · candidata LAB v438 · 11/11/2026
 
 Regla de Johan: una producción ya existente pasa a la semana que se carga.

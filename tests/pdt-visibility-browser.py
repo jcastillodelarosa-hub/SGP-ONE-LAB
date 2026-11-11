@@ -8,7 +8,7 @@ ROOT=pathlib.Path(__file__).resolve().parents[1]
 OUT=pathlib.Path('/tmp/sgp-pdt-visibility');OUT.mkdir(exist_ok=True)
 parser=argparse.ArgumentParser();parser.add_argument('--production-url');parser.add_argument('--expected-sha');args=parser.parse_args()
 if args.production_url and (args.production_url!='https://sgp-one-lab.web.app' or not re.fullmatch('[a-f0-9]{40}',args.expected_sha or '')):raise SystemExit('Expected fixed LAB HTTPS URL and full release SHA')
-NAMES=['repoRole','repoCanPatinadorEdit','repoCanSolution','repoCanValidate','repoCanState','repoIsActive','repoIsValidated','repoValidationBadgeHtml','repoEnsureWorkModal','repoShowWorkModal','repoCloseWorkModal','repoFlowNoticeHtml','repoBindFlowNotice','repoEncodePiece','repoPieceTableHtml','repoBindPieceRows','openRepoValidate','repoRunAction','repoCloseActionPortal','repoActionMenuHtml','repoActionItemsHtml','repoStateControlHtml','repoRowHtml','renderRepoPending']
+NAMES=['repoRole','repoCanPatinadorEdit','repoCanSolution','repoCanValidate','repoCanState','repoIsActive','repoIsValidated','repoValidationBadgeHtml','repoEnsureWorkModal','repoShowWorkModal','repoCloseWorkModal','repoFlowNoticeHtml','repoBindFlowNotice','repoEncodePiece','repoPieceTableHtml','repoBindPieceRows','openRepoValidate','repoRunAction','repoCloseActionPortal','repoActionMenuHtml','repoActionItemsHtml','repoStateControlHtml','repoRowHtml','repoDashboardGroups','repoSetTab','repoBindTabs','renderRepoPending']
 release_html=None
 if args.production_url:
  def deployed(name):
@@ -50,7 +50,7 @@ try:
     page.close();page=browser.new_page(viewport={'width':width,'height':height})
     page.on('pageerror',lambda e:errors.append(e.name));page.route('**/*',route_request)
    page.goto(url+'/styles.css')
-   page.set_content('<link rel="stylesheet" href="'+url+'/styles.css"><header style="padding:16px;background:#113f67;color:white"><b>SGP_ONE · LAB v360 · PDT v2 · VISTA PREVIA LOCAL</b><p style="margin:6px 0 0">Sin publicar · rol Coordinador · piezas de prueba simuladas · ninguna escritura</p></header><main style="padding:16px"><h2>Pendientes de aluminio</h2><div id="repoSummary"></div><div style="overflow:auto"><table><tbody id="repoBody"></tbody></table></div></main>')
+   page.set_content('<link rel="stylesheet" href="'+url+'/styles.css"><header style="padding:16px;background:#113f67;color:white"><b>SGP_ONE · LAB v360 · PDT v2 · VISTA PREVIA LOCAL</b><p style="margin:6px 0 0">Sin publicar · rol Coordinador · piezas de prueba simuladas · ninguna escritura</p></header><main style="padding:16px"><h2>Pendientes de aluminio</h2><div id="repoSummary"></div><div style="overflow:auto"><table><tbody id="repoBody"></tbody></table><table><tbody id="repoDeliveredBody"></tbody></table></div></main>')
    page.evaluate('''async source=>{
     const {pendingFlowGuidance}=await import(source.base+'/src/modules/pdt-flow-guidance.js');
     const {openPdtV2}=await import(source.base+'/src/modules/pdt-v2-controller.js');
@@ -88,8 +88,8 @@ try:
    page.evaluate('window.renderCase("LEGACY","COORDINADOR",true)')
    assert page.locator('#repoBody [data-repo-action="v2"]').count()==0
    page.evaluate('window.renderCase("V2","COORDINADOR",true)')
-   assert page.locator('#repoBody [data-repo-action="v2"]').inner_text()=='Abrir PDT v2'
-   page.locator('#repoBody .repo-row td').first.click()
+   assert page.locator('#repoDeliveredBody [data-repo-action="v2"]').inner_text()=='Abrir PDT v2'
+   page.locator('#repoDeliveredBody .repo-row td').first.click()
    page.locator('#repoWorkTitle').filter(has_text='PDT v2').wait_for()
    assert not page.evaluate('!!window.detailOpened')
    assert page.evaluate('window.writes')==0
