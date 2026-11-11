@@ -1,0 +1,15 @@
+{
+  "environment": "PGlite 0.5.16, synthetic fixtures, live-shaped schema",
+  "assertions": 58,
+  "hashes": {
+    "reader": "aa00d98bec9779c94fb2f1625e38526a",
+    "writer": "1a6faea29924aed3f0533f800a9b7832"
+  },
+  "status": "PASS",
+  "limitations": [
+    "No production writes",
+    "No PostgreSQL multi-session test",
+    "No browser QA",
+    "No real spreadsheet load"
+  ]
+}
