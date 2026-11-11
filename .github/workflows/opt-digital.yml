@@ -6,6 +6,12 @@ on:
       - 'src/domain/opt-*.js'
       - 'src/modules/opt-digital.js'
       - 'src/services/opt-shared-cuts.js'
+      - 'src/services/opt-shared-catalog.js'
+      - 'src/server/opt-*.js'
+      - 'src/services/opt-import.js'
+      - 'supabase/functions/opt-import/**'
+      - 'supabase/config.toml'
+      - 'functions/opt-import-manifest-*.mjs'
       - 'src/services/opt-programming-scope.js'
       - 'src/services/opt-cut-report.js'
       - 'docs/sql-proposals/opt-shared/**'
@@ -44,8 +50,37 @@ jobs:
           node tests/opt-digital/scope-panel-dom.cjs
           node tests/opt-digital/native-session-dom.cjs
           node tests/opt-digital/shared-workflow-dom.cjs
+          node tests/opt-digital/server-registration-dom.cjs
+          node tests/opt-digital/shared-catalog-dom.cjs
+          node tests/opt-digital/import-upload-dom.cjs
           node tests/opt-digital/cut-report-dom.cjs
           node docs/sql-proposals/opt-shared/test-synthetic.mjs
+          node tests/opt-digital/role-access.mjs
+          node tests/opt-digital/import-channel.mjs
+          node tests/opt-digital/import-endpoint-sql.mjs
+          node docs/sql-proposals/opt-shared/test-catalog.mjs
+          node tests/opt-digital/server-pdf-reader.mjs
+          node tests/opt-digital/server-pdf-limits.mjs
+  deno-import:
+    name: Deno import runtime (synthetic)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.2.12
+      - name: Install exact official dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Check complete Edge entry and process synthetic originals in Deno
+        run: |
+          deno check --no-config --node-modules-dir=manual supabase/functions/opt-import/index.ts
+          deno test --no-config --no-check --node-modules-dir=manual tests/opt-digital/import-handler-deno.test.ts tests/opt-digital/server-pdf-deno.test.ts
   isolated:
     runs-on: ubuntu-24.04
     timeout-minutes: 12
@@ -92,6 +127,7 @@ jobs:
           trap 'kill $!' EXIT
           for i in $(seq 1 20); do curl -fsS http://127.0.0.1:8765/opt-digital/index.html >/dev/null && break || sleep 1; done
           node tests/opt-digital/shared-workflow-browser.cjs
+          node tests/opt-digital/import-upload-browser.cjs
           node tests/opt-digital/workflow-browser.cjs
           node tests/opt-digital/cut-report-browser.cjs
       - uses: actions/upload-artifact@v4

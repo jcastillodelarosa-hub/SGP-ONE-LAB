@@ -168,7 +168,7 @@ BEGIN
  roles:=CASE WHEN p_write THEN cfg.write_roles ELSE cfg.read_roles END;
  IF p_token IS NULL OR btrim(p_token)='' OR cardinality(roles)=0 THEN RAISE EXCEPTION 'OPT_NO_AUTORIZADO'; END IF;
  actor:=public.sgp_pdt_validar_rol_real(p_token,roles);
- IF actor IS NULL OR btrim(actor)='' OR NOT EXISTS(SELECT 1 FROM public.sgp_mis_accesos(p_token) a WHERE a.ventana=cfg.access_window) THEN RAISE EXCEPTION 'OPT_NO_AUTORIZADO'; END IF;
+ IF actor IS NULL OR btrim(actor)='' OR NOT EXISTS(SELECT 1 FROM public.sgp_mis_accesos(p_token) a WHERE a.ventana IN ('mecanizado','mecanizado.proceso','mecanizado.produccion')) THEN RAISE EXCEPTION 'OPT_NO_AUTORIZADO'; END IF;
  RETURN actor;
 END $$;
 -- Caller must lock configuration before sampling its real registration clock.

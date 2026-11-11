@@ -182,5 +182,7 @@ export function extractCoordinatePlans(pages) {
       incomplete:own.some(p=>p.issues.length>0)||issues.some(i=>i.reference===reference),status:'PROVISIONAL',productionEnabled:false});
   }
   const individualCoverage=reconcileIndividuals({plans,projectRows,profileSummaries});
-  return {plans,issues,reconciliation,individualCoverage,sourceProjectRows:projectRows,pdfPages:pages.length,productionEnabled:false};
+  return {plans,issues,reconciliation,individualCoverage,sourceProjectRows:projectRows,
+    sourceMaterialRows:summaryRows,sourceProfileSummaries:profileSummaries,
+    pdfPages:pages.length,productionEnabled:false};
 }

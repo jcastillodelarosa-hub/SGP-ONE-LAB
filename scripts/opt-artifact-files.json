@@ -14,6 +14,7 @@
   "opt-digital/shared-cuts.js",
   "opt-digital/scope-panel.js",
   "src/modules/opt-digital.js",
+  "src/services/opt-shared-catalog.js",
   "src/services/opt-shared-cuts.js",
   "src/services/opt-programming-scope.js",
   "src/domain/opt-line-scope.js",
@@ -23,5 +24,8 @@
   "src/domain/powerbi/xlsx-reader.js",
   "opt-digital/cut-report.js",
   "src/services/opt-cut-report.js",
-  "src/domain/opt-cut-report.js"
+  "src/domain/opt-cut-report.js",
+  "src/services/opt-import.js",
+  "src/domain/opt-index-file.js",
+  "opt-digital/import-panel.js"
 ]

@@ -1,7 +1,9 @@
+import {createOptImport} from '../services/opt-import.js';
 import {createOptCutReport} from '../services/opt-cut-report.js';
 // Native Mecanizado tab. Document viewer remains local; shared cuts use a separate adapter.
 import {createOptProgrammingScope} from '../services/opt-programming-scope.js';
 import {createOptSharedCuts} from '../services/opt-shared-cuts.js';
+import {createOptSharedCatalog} from '../services/opt-shared-catalog.js';
 export function optAccessAllowed({valid,admin,access=[]}={}) {
   return valid===true && (admin===true || access.some(x=>['mecanizado','mecanizado.proceso','mecanizado.produccion'].includes(x)));
 }
@@ -38,13 +40,15 @@ export function createOptDigitalHost({button,panel,container,getClient,getToken,
       root.replaceChildren(...styles,hostStyle,shell);
       shell.querySelector('header .pill').textContent='REVISIÓN LOCAL · CORTES COMPARTIDOS';
       shell.querySelector('.summary button').textContent='Extracción local · no registra cortes';
-      shell.querySelector('.opt-library .note').textContent='Archivos locales de este usuario en este navegador. No se envían a SGP. Conserva una copia externa; revisado no significa cortado.';
+      shell.querySelector('.opt-library .note').textContent='Archivos locales de este usuario en este navegador. Los aún no importados permanecen locales hasta pulsar Procesar y guardar OPT en SGP. Conserva una copia externa; revisado no significa cortado.';
       instance=mountOptDigital(root,{storageScope});
-      const sharedApi=getClient&&getToken?createOptSharedCuts({rpc:async(name,args)=>(await getClient()).rpc(name,args)},()=>allowed&&operation===epoch?getToken():null):null;
+      const catalogApi=getClient&&getToken?createOptSharedCatalog({rpc:async(name,args)=>(await getClient()).rpc(name,args)},()=>allowed&&operation===epoch?getToken():null,{getContext:()=>({linea:root.querySelector('#optScopeLine')?.value,anio:Number(root.querySelector('#optScopeYear')?.value),semana:Number(root.querySelector('#optScopeWeek')?.value),modo:'BASE'})}):null;
+      const sharedApi=getClient&&getToken?createOptSharedCuts({rpc:async(name,args)=>(await getClient()).rpc(name,args)},()=>allowed&&operation===epoch?getToken():null,{catalog:catalogApi}):null;
       let storage;try{storage=window.localStorage;}catch{}
       const scopeApi=getClient&&getToken?createOptProgrammingScope({rpc:async(name,args)=>(await getClient()).rpc(name,args)},()=>allowed&&operation===epoch?getToken():null):null;
       const reportApi=getClient&&getToken?createOptCutReport({rpc:async(name,args)=>(await getClient()).rpc(name,args)},()=>allowed&&operation===epoch?getToken():null):null;
-      workflow=mountOptWorkflow(root,instance,{api:sharedApi,scopeApi,reportApi,defaultScope:getDefaultScope?.(),storage,storageScope});
+      const importApi=getClient&&getToken?createOptImport({invoke:async body=>{const client=await getClient(),jwt=window.SGP_CONFIG?.lpPowerBiGatewayJwt;if(!jwt)throw Object.assign(Error('OPT_GATEWAY_NO_CONFIGURADO'),{definitive:true});if(!allowed||operation!==epoch||body.p_token!==getToken())throw Error('OPT_IMPORTACION_OBSOLETA');return client.functions.invoke('opt-import',{body,headers:{Authorization:'Bearer '+jwt}});}},()=>allowed&&operation===epoch?getToken():null,{getContext:()=>({linea:root.querySelector('#optScopeLine')?.value,anio:Number(root.querySelector('#optScopeYear')?.value),semana:Number(root.querySelector('#optScopeWeek')?.value),modo:'BASE'}),storage,storageScope}):null;
+      workflow=mountOptWorkflow(root,instance,{api:sharedApi,importApi,scopeApi,catalogApi,reportApi,defaultScope:getDefaultScope?.(),storage,storageScope});
     } catch(e) {if(operation===epoch){message.textContent='No se pudo abrir OPT: '+e.message;root.replaceChildren(message);}}
     finally {if(operation===epoch)loading=false;}
   }

@@ -56,8 +56,15 @@ function state(data, reserva, scope) {
 function receipt(data, args) {
   if (!sameScope(data.scope,args.p_scope) || data.ok !== true || typeof data.duplicado !== 'boolean' || data.reserva !== args.p_reserva || data.id_registro?.toLowerCase() !== args.p_idempotency_key || !text(data.usuario) || !validOptPeriod(data.periodo,data.registrado_en) || data.cantidad_piezas !== args.p_piezas.length || !Array.isArray(data.piezas) || !data.piezas.every(uuid) || [...data.piezas].map(p => p.toLowerCase()).sort().join() !== [...args.p_piezas].sort().join()) invalid();
 }
-export function createOptSharedCuts(client, getToken, {timeoutMs=25000}={}) {
+export function createOptSharedCuts(client, getToken, {timeoutMs=25000,catalog=null}={}) {
   if (!Number.isSafeInteger(timeoutMs) || timeoutMs <= 0 || timeoutMs > 2147483647) throw new Error('OPT_ESPERA_INVALIDA');
+  // Documentary candidates never grant writes. Only the latest validated RPC
+  // response for the same session can supply the missing registration capability.
+  let stateGeneration = 0, authority = null;
+  const freeze = value => {
+    if (value && typeof value === 'object') { Object.values(value).forEach(freeze); Object.freeze(value); }
+    return value;
+  };
   async function rpc(name, args, validate) {
     const token = getToken();
     if (!token) throw new Error('OPT_SESION_REQUERIDA');
@@ -83,11 +90,30 @@ export function createOptSharedCuts(client, getToken, {timeoutMs=25000}={}) {
     return data;
   }
   return {
-    estado: (reserva,scope) => {
+    estado: async (reserva,scope) => {
+      const generation = ++stateGeneration;
+      authority = null;
       if (!text(reserva)) return Promise.reject(new Error('OPT_RESERVA_REQUERIDA'));
       if (!validScope(scope)) return Promise.reject(new Error('OPT_SCOPE_INVALIDO'));
-      const snapshot = {...scope};
-      return rpc('sgp_opt_cortes_estado_v2',{p_reserva:reserva,p_scope:snapshot}, data => state(data,reserva,snapshot));
+      const snapshot = {...scope}, token = getToken();
+      const data = freeze(structuredClone(await rpc('sgp_opt_cortes_estado_v2',{p_reserva:reserva,p_scope:snapshot}, data => state(data,reserva,snapshot))));
+      if (generation === stateGeneration && token === getToken()) authority = {data,token};
+      return data;
+    },
+    authorizesGroup: (group,data,documents=[]) => {
+      if (!authority || authority.data !== data || authority.token !== getToken()
+        || data.puede_registrar !== true || data.manifiesto_validado !== true
+        || !sameScope(group?.scope,data.scope) || group.reservation !== data.reserva
+        || !Array.isArray(documents)) return false;
+      return data.referencias.some(ref => ref.sistema === group.system
+        && (group.origin === 'SERVIDOR'
+          ? catalog?.ownsGroup?.(group)===true && catalog?.matchesReference?.(group,ref)===true
+          : documents.some(doc => doc.format === 'pdf' && doc.key === ref.sha256)
+            && (group.origin === 'INDIVIDUAL'
+          ? Array.isArray(group.documentHashes) && group.documentHashes.includes(ref.sha256)
+          : ['RETAIL','PROYECTO'].includes(group.origin) && Array.isArray(group.opts)
+            && ref.fuentes.some(source => source.origen === group.origin && group.opts.includes(source.consecutivo))))
+        && ref.piezas.some(piece => piece.registrable === true));
     },
     registrar: ({reserva,piezas,idempotencyKey,scope}) => {
       if (!validScope(scope)) throw new Error('OPT_SCOPE_INVALIDO');

@@ -2,10 +2,11 @@
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const validScope=s=>s&&typeof s.linea==='string'&&s.linea.trim()&&Number.isSafeInteger(s.anio)&&s.anio>=2020&&s.anio<=2100&&Number.isSafeInteger(s.semana)&&s.semana>=1&&s.semana<=53&&s.modo==='BASE';
 const sameScope=(a,b)=>validScope(a)&&validScope(b)&&a.linea===b.linea&&a.anio===b.anio&&a.semana===b.semana&&a.modo===b.modo;
-export function approvedReferences(state,group,documents=[]) {
+export function approvedReferences(state,group,documents=[],catalog=null) {
   if(!group||!sameScope(state?.scope,group.scope)||state?.reserva!==group.reservation||state?.habilitado!==true||state?.manifiesto_validado!==true)return [];
-  return state.referencias.filter(r=>r.sistema===group.system&&(group.origin==='INDIVIDUAL'?group.documentHashes?.includes(r.sha256):r.fuentes?.some(f=>f.origen===group.origin&&group.opts.includes(f.consecutivo))))
-    .map(r=>{const sources=r.fuentes.filter(f=>group.origin==='INDIVIDUAL'||f.origen===group.origin&&group.opts.includes(f.consecutivo));return {...r,consecutivo:[...new Set(sources.map(f=>f.consecutivo).filter(Boolean))].join(', ')||'Archivo individual',origen:group.origin,localPdf:documents.find(d=>d.format==='pdf'&&d.key===r.sha256)};});
+  const serverGroup=group.origin==='SERVIDOR'&&catalog?.ownsGroup?.(group)===true;
+  return state.referencias.filter(r=>r.sistema===group.system&&(group.origin==='SERVIDOR'?serverGroup&&catalog.matchesReference(group,r)===true:group.origin==='INDIVIDUAL'?group.documentHashes?.includes(r.sha256):r.fuentes?.some(f=>f.origen===group.origin&&group.opts.includes(f.consecutivo))))
+    .map(r=>{const sources=r.fuentes.filter(f=>serverGroup||group.origin==='INDIVIDUAL'||f.origen===group.origin&&group.opts.includes(f.consecutivo));return {...r,consecutivo:[...new Set(sources.map(f=>f.consecutivo).filter(Boolean))].join(', ')||'Archivo individual',origen:group.origin,serverVerified:serverGroup,localPdf:documents.find(d=>d.format==='pdf'&&d.key===r.sha256)};});
 }
 export function createCutJournal(storage,scope) {
   if(!/^[a-zA-Z0-9_-]{1,100}$/.test(scope||''))throw Error('Ámbito de cortes inválido');
@@ -15,7 +16,7 @@ export function createCutJournal(storage,scope) {
   // One key per UUID retains concurrent tabs' commands even if both prepare at once.
   return {read,save(command){if(!valid(command))throw Error('Comando de cortes inválido');if(read())throw Error('Hay una operación pendiente.');const key=prefix+command.idempotencyKey,raw=JSON.stringify(command);storage.setItem(key,raw);if(storage.getItem(key)!==raw)throw Error('No se pudo conservar el comando antes de enviarlo.');},clear(command){const key=prefix+command.idempotencyKey,raw=storage.getItem(key);if(raw===null)return;if(raw!==JSON.stringify(command))throw Error('El comando pendiente cambió.');storage.removeItem(key);if(storage.getItem(key)!==null)throw Error('No se pudo cerrar el comando pendiente.');}};
 }
-export function mountSharedCuts(container,{api,storage,storageScope,createId=()=>crypto.randomUUID(),openDocument=()=>{}}={}) {
+export function mountSharedCuts(container,{api,catalogApi=null,storage,storageScope,createId=()=>crypto.randomUUID(),openDocument=()=>{}}={}) {
   const make=(tag,text)=>{const n=container.ownerDocument.createElement(tag);if(text)n.textContent=text;return n;};
   const panel=make('section');panel.className='panel opt-shared';panel.id='optSharedCuts';
   const title=make('h2','Cortes realizados · estado compartido'),status=make('p');status.id='optSharedStatus';status.setAttribute('role','status');status.setAttribute('aria-live','polite');
@@ -29,12 +30,13 @@ export function mountSharedCuts(container,{api,storage,storageScope,createId=()=
   let group=null,documents=[],state=null,selected=new Set(),closed=false,epoch=0,busy=false,loading=false,journal,pending=null,journalError='',prepared=null;
   try{journal=createCutJournal(storage,storageScope);pending=journal.read();}catch(e){journalError=e.message;}
   const message=t=>{if(!closed)status.textContent=t;};
+  const registrationAllowed=()=>api?.authorizesGroup?.(group,state,documents)===true;
   function controls(){
-    const canWrite=group?.canRegister===true&&state?.puede_registrar===true&&!!api&&!busy&&!loading&&!pending&&!journalError;
+    const canWrite=registrationAllowed()&&state?.puede_registrar===true&&!!api&&!busy&&!loading&&!pending&&!journalError;
     register.disabled=!canWrite||selected.size===0;reload.disabled=!api||!group||busy||loading;
-    retry.hidden=!pending;retry.disabled=!api||busy||loading||group?.canRegister!==true||group.reservation!==pending?.reserva||pending?.version!==2||!sameScope(group.scope,pending?.scope)||!!journalError;
+    retry.hidden=!pending;retry.disabled=!api||busy||loading||!registrationAllowed()||group.reservation!==pending?.reserva||pending?.version!==2||!sameScope(group.scope,pending?.scope)||!!journalError;
     count.textContent=`${selected.size} piezas seleccionadas.`;
-    if(group&&group.canRegister!==true)count.textContent+=' Asignación física por pieza pendiente de validar. Los candidatos documentales no habilitan registros ni reintentos.';
+    if(group&&!registrationAllowed())count.textContent+=' Sin vínculo de piezas verificado por el servidor para este PDF. El índice por sí solo no habilita registros ni reintentos.';
     if(pending?.version===1)count.textContent+=' Hay una operación del contrato anterior sin confirmar. No se convierte automáticamente al contrato nuevo; requiere comprobar su recibo original.';
     else if(pending)count.textContent+=` Hay una operación pendiente de ${pending.piezas.length} piezas para reserva ${pending.reserva}. Conserva su identificador y reintenta la misma operación.`;
     if(journalError)count.textContent+=' Registro bloqueado: '+journalError;
@@ -42,15 +44,16 @@ export function mountSharedCuts(container,{api,storage,storageScope,createId=()=
   }
   function render(){
     rows.replaceChildren();selected.clear();confirm.hidden=true;prepared=null;
-    const references=approvedReferences(state,group,documents);
+    const references=approvedReferences(state,group,documents,catalogApi);
     for(const ref of references){
       const block=make('section');block.append(make('h3',`${ref.consecutivo} · ${ref.referencia}`));
       block.append(make('p',`Documento aprobado · SHA ${ref.sha256.slice(0,12)} · ${ref.origen} · ${ref.sistema}`));
       if(ref.localPdf){const view=make('button','Revisar PDF aprobado');view.type='button';view.onclick=()=>openDocument(ref.localPdf.key);block.append(view);}
+      else if(ref.serverVerified)block.append(make('p','Detalle validado en el servidor. Puedes consultar y registrar con tus permisos; el PDF local es opcional para revisar el original.'));
       else block.append(make('p','Carga el PDF original con el mismo SHA para habilitar la selección de sus piezas. El nombre por sí solo no acredita el documento.'));
       const wrap=make('div');wrap.className='table-wrap';const table=make('table'),head=make('thead'),headRow=make('tr');
       for(const text of ['Seleccionar','Ubicación en PDF','Longitud (mm)','Estado','Usuario','Día operativo','Turno','Hora de registro (Bogotá)'])headRow.append(make('th',text));head.append(headRow);table.append(head);const body=make('tbody');
-      for(const piece of ref.piezas){const tr=make('tr'),cell=make('td'),check=make('input');check.type='checkbox';check.dataset.piece=piece.id_pieza;check.dataset.selectable=String(piece.estado==='PENDIENTE'&&piece.registrable===true&&!!ref.localPdf);check.setAttribute('aria-label',`Seleccionar ${ref.referencia}, página ${piece.pagina}, patrón ${piece.patron}, barra ${piece.barra}, corte ${piece.corte}`);check.onchange=()=>{if(check.disabled){check.checked=selected.has(piece.id_pieza);return;}if(check.checked)selected.add(piece.id_pieza);else selected.delete(piece.id_pieza);confirm.hidden=true;prepared=null;controls();};cell.append(check);tr.append(cell,make('td',`Pág. ${piece.pagina} · patrón ${piece.patron} · barra ${piece.barra} · corte ${piece.corte}`),make('td',String(piece.longitud_mm)),make('td',piece.estado==='CORTADO'?'Cortado':'Pendiente'),make('td',piece.usuario||'—'),make('td',piece.periodo?.fecha||'—'),make('td',piece.periodo?String(piece.periodo.turno):'—'),make('td',piece.registrado_en?new Date(piece.registrado_en).toLocaleString('es-CO',{timeZone:'America/Bogota'}):'—'));body.append(tr);}
+      for(const piece of ref.piezas){const tr=make('tr'),cell=make('td'),check=make('input');check.type='checkbox';check.dataset.piece=piece.id_pieza;check.dataset.selectable=String(piece.estado==='PENDIENTE'&&piece.registrable===true&&(!!ref.localPdf||ref.serverVerified));check.setAttribute('aria-label',`Seleccionar ${ref.referencia}, página ${piece.pagina}, patrón ${piece.patron}, barra ${piece.barra}, corte ${piece.corte}`);check.onchange=()=>{if(check.disabled){check.checked=selected.has(piece.id_pieza);return;}if(check.checked)selected.add(piece.id_pieza);else selected.delete(piece.id_pieza);confirm.hidden=true;prepared=null;controls();};cell.append(check);tr.append(cell,make('td',`Pág. ${piece.pagina} · patrón ${piece.patron} · barra ${piece.barra} · corte ${piece.corte}`),make('td',String(piece.longitud_mm)),make('td',piece.estado==='CORTADO'?'Cortado':'Pendiente'),make('td',piece.usuario||'—'),make('td',piece.periodo?.fecha||'—'),make('td',piece.periodo?String(piece.periodo.turno):'—'),make('td',piece.registrado_en?new Date(piece.registrado_en).toLocaleString('es-CO',{timeZone:'America/Bogota'}):'—'));body.append(tr);}
       table.append(body);wrap.append(table);block.append(wrap);rows.append(block);
     }
     controls();return references;
