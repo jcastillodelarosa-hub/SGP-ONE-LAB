@@ -32,8 +32,13 @@ try:
    page.locator('#pickReportTab').click();page.locator('#pickReportReceptionTab').click();page.locator('#pickReceptionReportWeek').fill('2026-W46');page.locator('#pickReceptionReportWeek').dispatch_event('change');page.locator('#pickReceptionReportRun').click()
    page.locator('#pickReceptionReportRows tbody tr').first.wait_for();assert page.locator('#pickReceptionReportRows tbody tr').count()==6
    assert page.evaluate('document.documentElement.scrollWidth')<=width
-   page.screenshot(path=str(OUT/f'reception-{width}.png'),full_page=True)
-   page.locator('#pickReceptionReportRows summary').first.click();assert page.locator('#pickReceptionReportRows details').first.get_attribute('open') is not None
+   # A clipped ancestor can hide overflow from document.scrollWidth; check actual bounds.
+   for selector in ['#pickReportPanel','#pickReportReceptionPanel','#pickReceptionReportWeek','#pickReceptionReportFrom','#pickReceptionReportTo','#pickReceptionReportRun','#pickReceptionReportRows .table-wrap']:
+    bounds=page.locator(selector).bounding_box();assert bounds and bounds['x']>=0 and bounds['x']+bounds['width']<=width+1,(selector,bounds,width)
+   if width<720:
+    assert page.locator('#pickReceptionReportRows .table-wrap').evaluate('(el)=>el.scrollWidth>el.clientWidth')
+   page.screenshot(path=str(OUT/f'reception-{width}.png'),full_page=True,animations='disabled')
+   page.locator('#pickReceptionReportRows summary').first.click();page.screenshot(path=str(OUT/f'reception-detail-{width}.png'),full_page=True,animations='disabled');assert page.locator('#pickReceptionReportRows details').first.get_attribute('open') is not None
    page.locator('#pickReceptionReportSearch').fill('DEMO-002');assert page.locator('#pickReceptionReportRows tbody tr').count()==1
    page.locator('#pickReceptionReportState').select_option('completa');assert page.locator('#pickReceptionReportRows tbody tr').count()==0
    page.locator('#pickReportDeliveryTab').click();page.locator('#pickReportReceptionTab').click();assert page.locator('#pickReceptionReportSearch').input_value()=='DEMO-002'

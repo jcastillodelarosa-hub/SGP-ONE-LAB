@@ -2931,6 +2931,9 @@ table.glass-burro-table th:not(:first-child){width:36%}
 
 /* Picking reports v441: preserve existing SGP components and isolate report subpanels. */
 #pickReportDeliveryPanel,#pickReportReceptionPanel{display:grid;gap:14px;min-width:0}
+/* Constrain nested grid tracks so report tables scroll inside their own wrapper. */
+#pickReportPanel,#pickReportPanel #pickReportDeliveryPanel,#pickReportPanel #pickReportReceptionPanel{grid-template-columns:minmax(0,1fr);min-width:0}
+#pickReportPanel #pickReportDeliveryPanel>*,#pickReportPanel #pickReportReceptionPanel>*{min-width:0}
 #pickReportDeliveryPanel[hidden],#pickReportReceptionPanel[hidden]{display:none!important}
 #pickReportPanel .pick-report-tabs{display:flex;gap:8px;border-bottom:1px solid #c4d9f7;padding-bottom:0}
 #pickReportPanel .pick-report-tabs button{min-height:44px;padding:10px 24px;border:0;border-bottom:3px solid transparent;background:transparent;color:#526f96;border-radius:0;cursor:pointer;font-weight:700;font-size:15px}
@@ -2961,7 +2964,7 @@ table.glass-burro-table th:not(:first-child){width:36%}
 #pickReportPanel .pick-report-system-card>div{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:12px;color:#526f96}
 #pickReportPanel .pick-report-system-card strong{color:#103b73}
 #pickReportPanel .pick-report-system-card small{display:block;margin-top:8px;color:#875400;font-size:11px}
-#pickReportReceptionPanel .pick-report-kpi{padding:16px;border-left-width:1px;border-radius:12px}
+#pickReportPanel #pickReportReceptionPanel .pick-report-kpi{padding:16px;border-left-width:1px;border-radius:12px;flex-direction:column;align-items:flex-start}
 #pickReportReceptionPanel .pick-report-kpi-label{font-size:13px;color:#526f96}
 #pickReportReceptionPanel .pick-report-kpi strong{font-size:28px;margin:6px 0}
 #pickReportReceptionPanel .pick-report-kpi small{font-size:11px}

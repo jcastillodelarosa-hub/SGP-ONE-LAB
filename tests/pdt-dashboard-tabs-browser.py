@@ -20,7 +20,7 @@ try:
    page.on('pageerror',lambda e:errors.append(str(e)))
    page.route('**/*',lambda route:route.continue_() if route.request.method=='GET' and route.request.url.startswith(url+'/') else route.abort())
    page.goto(url+'/styles.css')
-   page.set_content('<link rel="stylesheet" href="'+url+'/styles.css"><header style="padding:12px">LAB v440 · Vista local aislada · datos sintéticos · sin escrituras</header><main style="padding:12px;min-width:0">'+markup+'</main>')
+   page.set_content('<link rel="stylesheet" href="'+url+'/styles.css"><header style="padding:12px">LAB v441 · Vista local aislada · datos sintéticos · sin escrituras</header><main style="padding:12px;min-width:0">'+markup+'</main>')
    page.evaluate('''async ({source,base})=>{
     const {pendingFlowGuidance}=await import(base+'/src/modules/pdt-flow-guidance.js');
     const {filterPdtRegistrations,ncAssignment}=await import(base+'/src/domain/pdt-registration.js');
@@ -41,10 +41,10 @@ try:
    assert page.locator('#repoBody .repo-row').count()==1;assert page.locator('#repoDeliveredBody .repo-row').count()==4
    assert 'HISTÓRICO' in page.locator('[data-repo-id="historical"].repo-row').inner_text()
    assert page.locator('[data-repo-id="partial"].repo-row [data-repo-action-toggle]').get_attribute('data-repo-resolved')=='0'
-   page.screenshot(path=str(OUT/f'validated-{width}.png'),full_page=True)
+   page.screenshot(path=str(OUT/f'validated-{width}.png'),full_page=True,animations='disabled')
    page.locator('[data-repo-group="processed"]').click();assert page.locator('#repoDeliveredBody .repo-row').count()==1
    page.locator('[data-repo-group="historical"]').click();assert page.locator('#repoDeliveredBody .repo-row').count()==1
-   page.locator('#repoTabPending').click();page.screenshot(path=str(OUT/f'pending-{width}.png'),full_page=True)
+   page.locator('#repoTabPending').click();assert page.locator('#repoTabPending').get_attribute('aria-selected')=='true';assert page.locator('#repoTabValidated').get_attribute('aria-selected')=='false';page.screenshot(path=str(OUT/f'pending-{width}.png'),full_page=True,animations='disabled')
    # Server response (not an optimistic click) moves the row.
    rows[0]['validacion_estado']='VALIDADO';page.evaluate('(rows)=>{window.rows(rows);window.render()}',rows)
    assert page.locator('#repoBody .repo-row').count()==0;assert page.locator('#repoValidatedCount').inner_text()=='4'
@@ -60,7 +60,7 @@ try:
  print(json.dumps(report))
 except Exception as error:
  (OUT/'report.json').write_text(json.dumps({'status':'FAIL','error':str(error),'writes':0},indent=2))
- try:page.screenshot(path=str(OUT/'failure.png'),full_page=True)
+ try:page.screenshot(path=str(OUT/'failure.png'),full_page=True,animations='disabled')
  except Exception:pass
  raise
 finally:server.shutdown()
