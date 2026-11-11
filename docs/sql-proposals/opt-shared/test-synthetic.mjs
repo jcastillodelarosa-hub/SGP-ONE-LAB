@@ -35,6 +35,11 @@ for (const [n,res,line,week,year] of [[1,'R,ASSOCIATED','PANELES_2',45,2026],[2,
  await db.query('INSERT INTO public.sgp_mecanizado_programacion_detalle VALUES($1,$2,$3,5)',[id(100+n),`KEY-${n}`,primary]);
 }
 await db.exec(readFileSync(new URL('./install_REVIEW.sql',import.meta.url),'utf8'));
+// Containment covers the complete reviewed installation, including the private
+// import RPCs. Install its real dependencies in order; do not stub or skip them.
+for(const file of ['catalog_REVIEW.sql','import_context_REVIEW.sql','import_channel_REVIEW.sql']) {
+ await db.exec(readFileSync(new URL(file,import.meta.url),'utf8'));
+}
 ok((await db.query('SELECT enabled,read_roles,write_roles FROM sgp_opt_shared.config')).rows[0],{enabled:false,read_roles:[],write_roles:[]});
 await reject(()=>estado(),/OPT_NO_HABILITADO/);
 await db.exec("UPDATE sgp_opt_shared.config SET enabled=true,access_window='mecanizado',read_roles=ARRAY['LIDER MECANIZADO'],write_roles=ARRAY['LIDER MECANIZADO']");
@@ -288,6 +293,11 @@ ok(await count('cuts'),5);ok((await db.query('SELECT count(*) n FROM sgp_opt_sha
 await db.query("INSERT INTO public.sgp_configuracion_general VALUES('HORARIOS_TURNOS',$1)",[continuous]);
 await db.exec("UPDATE public.fixture_users SET active=false WHERE actor='alice'");await reject(()=>aliceApi.registrar(command),/UNAUTHORIZED/);await reject(()=>reporte(['R'],'alice'),/UNAUTHORIZED/);
 await db.exec(readFileSync(new URL('./contain_REVIEW.sql',import.meta.url),'utf8'));ok(await count('cuts'),5);await reject(()=>reporte(),/OPT_NO_HABILITADO/);
+for(const role of ['anon','authenticated','service_role']) {
+ for(const signature of ['public.sgp_opt_catalogo_v2(text,jsonb)','public.sgp_opt_import_contexto_v1(text,jsonb,text[])','public.sgp_opt_importar_validado_v1(text,bytea,jsonb,jsonb,jsonb)']) {
+  ok((await db.query('SELECT has_function_privilege($1,$2,\'EXECUTE\') allowed',[role,signature])).rows[0].allowed,false);
+ }
+}
 // Execute the exact preflight under a read-only transaction against fixtures only.
 const preflight=readFileSync(new URL('./00_preflight_READONLY.sql',import.meta.url),'utf8');
 await db.exec('BEGIN READ ONLY');

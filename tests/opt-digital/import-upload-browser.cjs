@@ -15,7 +15,7 @@ const indexText='OPT,Reserva,Sistema\nA,R-SYNTH,PANEL\nB,R-SYNTH,PANEL\nMISSING,
  try{
   for(const [size,viewport] of [['desktop',{width:1440,height:1000}],['mobile',{width:390,height:844}]]){
    let receipt=null,catalogReads=0,inflight=0,maxInflight=0;const uploads=[],cutWrites=[],unexpected=[],errors=[];
-   const reference=()=>({id_documento:docId,sha256:receipt.document.sha256,referencia:'REF-SYNTH',sistema:'PANEL',fuentes:[{origen:'RETAIL',source_key:receipt.document.source_key,consecutivo:'A',modo_carga:'INDICE'}],piezas});
+   const reference=()=>({id_documento:docId,sha256:receipt.document.sha256,referencia:'REF-SYNTH',sistema:'PANEL',fuentes:[{origen:'RETAIL',source_key:receipt.document.source_key,consecutivo:'A',modo_carga:'INDICE'}],piezas:pieces});
    const catalog=()=>({contract_version:2,scope,grupos:receipt?[{reserva:'R-SYNTH',sistema:'PANEL',referencias:[reference()]}]:[],totales:{grupos:receipt?1:0,documentos:receipt?1:0,piezas:receipt?2:0}});
    async function openSession(name){
     const token='synthetic-upload-'+name,context=await browser.newContext({viewport});
