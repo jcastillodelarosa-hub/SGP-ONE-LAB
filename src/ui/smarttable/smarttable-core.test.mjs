@@ -1,0 +1,20 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {columnsOf,queryRows,escapeHtml,csv} from './smarttable-core.mjs';
+const rows=[{order:'B',qty:12,status:'PROCESADO'},{order:'A',qty:2,status:'CORTE'},{order:'C',qty:30,status:'PROCESADO'}],cols=columnsOf(rows,[{id:'order'},{id:'qty',type:'number'},{id:'status'}]);
+test('infer columns',()=>assert.deepEqual(columnsOf(rows).map(c=>c.id),['order','qty','status']));
+test('numeric sort',()=>assert.deepEqual(queryRows(rows,cols,{sorts:[{id:'qty',dir:'asc'}]}).rows.map(r=>r.qty),[2,12,30]));
+test('filter',()=>assert.equal(queryRows(rows,cols,{filters:{status:['CORTE']}}).total,1));
+test('search',()=>assert.equal(queryRows(rows,cols,{search:'procesado'}).total,2));
+test('pagination',()=>assert.equal(queryRows(rows,cols,{pageSize:10,page:99}).page,1));
+test('stable source',()=>{const before=JSON.stringify(rows);queryRows(rows,cols,{sorts:[{id:'qty',dir:'desc'}]});assert.equal(JSON.stringify(rows),before)});
+test('escape',()=>assert.equal(escapeHtml('<script>'),'&lt;script&gt;'));
+test('CSV formula safety',()=>assert.ok(csv([{order:'=1+1'}],cols).includes("'=1+1")));
+test('duplicate columns rejected',()=>assert.throws(()=>columnsOf(rows,[{id:'order'},{id:'order'}])));
+
+test('numeric ties use secondary sort',()=>{const data=[{qty:2,order:'Z'},{qty:2,order:'A'}];assert.deepEqual(queryRows(data,cols,{sorts:[{id:'qty',dir:'asc'},{id:'order',dir:'asc'}]}).rows.map(r=>r.order),['A','Z'])});
+test('hidden column excluded from search',()=>{const c=columnsOf(rows,[{id:'order'},{id:'status',visible:false}]);assert.equal(queryRows(rows,c,{search:'PROCESADO'}).total,0)});
+test('hidden column excluded from filter',()=>{const c=columnsOf(rows,[{id:'order'},{id:'status',visible:false}]);assert.equal(queryRows(rows,c,{filters:{status:['CORTE']}}).total,3)});
+test('hidden column excluded from sort',()=>{const c=columnsOf(rows,[{id:'order'},{id:'qty',visible:false}]);assert.deepEqual(queryRows(rows,c,{sorts:[{id:'qty',dir:'asc'}]}).rows.map(r=>r.order),['B','A','C'])});
+test('all page size is bounded',()=>{const data=Array.from({length:300},(_,i)=>({order:String(i)}));assert.equal(queryRows(data,cols,{pageSize:0}).rows.length,25)});
+test('invalid persisted columns removed',async()=>{const {restorePreferences}=await import('./smarttable-core.mjs');const c=columnsOf(rows,[{id:'order'},{id:'status',visible:false}]);const x=restorePreferences({filters:{status:['CORTE'],order:['A']},sorts:[{id:'status',dir:'asc'},{id:'order',dir:'asc'}],pageSize:0},c);assert.deepEqual(Object.keys(x.filters),['order']);assert.deepEqual(x.sorts,[{id:'order',dir:'asc'}]);assert.equal(x.pageSize,25)});
+test('empty configured columns means no columns',()=>assert.deepEqual(columnsOf(rows,[]),[]));
+test('CSV omits hidden fields',()=>{const c=columnsOf(rows,[{id:'order'},{id:'status',visible:false}]);assert.ok(!csv(rows,c).includes('PROCESADO'))});
