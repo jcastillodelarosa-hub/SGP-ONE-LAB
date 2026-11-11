@@ -70,9 +70,22 @@ on:
       - '.github/workflows/lp01-followup.yml'
 permissions:
   contents: read
+defaults:
+  run:
+    shell: bash
 jobs:
   ui:
     runs-on: ubuntu-24.04
+    # Version matches pip; no apt install or replacement browser in the runner.
+    container:
+      image: mcr.microsoft.com/playwright/python:v1.62.0-noble@sha256:aa81288e738725378becba5b3e06cb0f3a7f012a610e87e8d767a090ea3f740d
+      options: --shm-size=1g
+      volumes:
+        # Keep the existing ephemeral runner Docker used by network-none SQL fixtures.
+        # GitHub already mounts its Docker socket into job containers.
+        - /usr/bin/docker:/usr/bin/docker:ro
+    env:
+      PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
     # Keep the full SQL and PC/mobile acceptance within a bounded 45-minute job.
     timeout-minutes: 45
     steps:
@@ -87,6 +100,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Verify existing isolated Docker fixture runtime
+        run: |
+          test -S /var/run/docker.sock
+          docker --host=unix:///var/run/docker.sock version
       - run: npm install --no-package-lock --no-audit --no-fund
       - run: npm run build:vendor
       - run: npm run verify:release
@@ -134,7 +151,19 @@ jobs:
       - name: Real persistence PC and mobile acceptance
         run: |
           pip install playwright==1.62.0
-          python -m playwright install --with-deps chromium
+          python - <<'PYTHON'
+          from importlib.metadata import version
+          from pathlib import Path
+          from playwright.sync_api import sync_playwright
+          assert version('playwright') == '1.62.0'
+          assert not Path('/usr/bin/chromium').exists(), 'Unexpected system Chromium override'
+          with sync_playwright() as pw:
+              assert Path(pw.chromium.executable_path).resolve().is_relative_to('/ms-playwright')
+              assert Path(pw.chromium.executable_path).is_file()
+              browser = pw.chromium.launch()
+              print('Preinstalled Chromium:', browser.version)
+              browser.close()
+          PYTHON
           python tests/lp01-powerbi/browser.py
           python tests/lp01-cierres-integrados/browser.py
           python tests/lp01-roles/browser.py
@@ -179,6 +208,16 @@ jobs:
   tracking-global:
     name: Global tracking install, API permissions and UI (isolated)
     runs-on: ubuntu-24.04
+    # Version matches pip; no apt install or replacement browser in the runner.
+    container:
+      image: mcr.microsoft.com/playwright/python:v1.62.0-noble@sha256:aa81288e738725378becba5b3e06cb0f3a7f012a610e87e8d767a090ea3f740d
+      options: --shm-size=1g
+      volumes:
+        # Keep the existing ephemeral runner Docker used by network-none SQL fixtures.
+        # GitHub already mounts its Docker socket into job containers.
+        - /usr/bin/docker:/usr/bin/docker:ro
+    env:
+      PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
@@ -190,6 +229,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Verify existing isolated Docker fixture runtime
+        run: |
+          test -S /var/run/docker.sock
+          docker --host=unix:///var/run/docker.sock version
       - run: npm install --no-package-lock --no-audit --no-fund
       - run: npm run build:vendor
       - run: docker pull postgres:17.11
@@ -203,7 +246,19 @@ jobs:
       - name: Global UI with the candidate API permissions
         run: |
           pip install playwright==1.62.0
-          python -m playwright install --with-deps chromium
+          python - <<'PYTHON'
+          from importlib.metadata import version
+          from pathlib import Path
+          from playwright.sync_api import sync_playwright
+          assert version('playwright') == '1.62.0'
+          assert not Path('/usr/bin/chromium').exists(), 'Unexpected system Chromium override'
+          with sync_playwright() as pw:
+              assert Path(pw.chromium.executable_path).resolve().is_relative_to('/ms-playwright')
+              assert Path(pw.chromium.executable_path).is_file()
+              browser = pw.chromium.launch()
+              print('Preinstalled Chromium:', browser.version)
+              browser.close()
+          PYTHON
           python tests/lp01-seguimiento-incremento/browser.py
           python tests/lp01-tracking-ui/browser.py
           python tests/lp01-summary-ui/browser.py
@@ -228,6 +283,16 @@ jobs:
   affectations:
     name: Affectations native PDT, revocation and UI (isolated)
     runs-on: ubuntu-24.04
+    # Version matches pip; no apt install or replacement browser in the runner.
+    container:
+      image: mcr.microsoft.com/playwright/python:v1.62.0-noble@sha256:aa81288e738725378becba5b3e06cb0f3a7f012a610e87e8d767a090ea3f740d
+      options: --shm-size=1g
+      volumes:
+        # Keep the existing ephemeral runner Docker used by network-none SQL fixtures.
+        # GitHub already mounts its Docker socket into job containers.
+        - /usr/bin/docker:/usr/bin/docker:ro
+    env:
+      PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
@@ -239,6 +304,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Verify existing isolated Docker fixture runtime
+        run: |
+          test -S /var/run/docker.sock
+          docker --host=unix:///var/run/docker.sock version
       - run: npm install --no-package-lock --no-audit --no-fund
       - run: npm run build:vendor
       - run: docker pull postgres:17.11
@@ -263,7 +332,19 @@ jobs:
       - name: Synthetic native panel and existing app controllers
         run: |
           pip install playwright==1.62.0
-          python -m playwright install --with-deps chromium
+          python - <<'PYTHON'
+          from importlib.metadata import version
+          from pathlib import Path
+          from playwright.sync_api import sync_playwright
+          assert version('playwright') == '1.62.0'
+          assert not Path('/usr/bin/chromium').exists(), 'Unexpected system Chromium override'
+          with sync_playwright() as pw:
+              assert Path(pw.chromium.executable_path).resolve().is_relative_to('/ms-playwright')
+              assert Path(pw.chromium.executable_path).is_file()
+              browser = pw.chromium.launch()
+              print('Preinstalled Chromium:', browser.version)
+              browser.close()
+          PYTHON
           python tests/lp01-afectaciones-rpc/native-browser.py
           python tests/lp01-afectaciones-rpc/native-app.py
           python tests/lp01-afectaciones-rpc/unassigned-app.py
@@ -279,6 +360,16 @@ jobs:
   operation-b12-b13:
     name: B12 B13 assignment capture and disabled proposal (isolated)
     runs-on: ubuntu-24.04
+    # Version matches pip; no apt install or replacement browser in the runner.
+    container:
+      image: mcr.microsoft.com/playwright/python:v1.62.0-noble@sha256:aa81288e738725378becba5b3e06cb0f3a7f012a610e87e8d767a090ea3f740d
+      options: --shm-size=1g
+      volumes:
+        # Keep the existing ephemeral runner Docker used by network-none SQL fixtures.
+        # GitHub already mounts its Docker socket into job containers.
+        - /usr/bin/docker:/usr/bin/docker:ro
+    env:
+      PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
@@ -290,11 +381,29 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Verify existing isolated Docker fixture runtime
+        run: |
+          test -S /var/run/docker.sock
+          docker --host=unix:///var/run/docker.sock version
       - run: npm install --no-package-lock --no-audit --no-fund
       - run: npm run build:vendor
       - run: docker pull postgres:17.11
       - run: pip install playwright==1.62.0
-      - run: python -m playwright install --with-deps chromium
+      - name: Verify matching preinstalled Chromium
+        run: |
+          python - <<'PYTHON'
+          from importlib.metadata import version
+          from pathlib import Path
+          from playwright.sync_api import sync_playwright
+          assert version('playwright') == '1.62.0'
+          assert not Path('/usr/bin/chromium').exists(), 'Unexpected system Chromium override'
+          with sync_playwright() as pw:
+              assert Path(pw.chromium.executable_path).resolve().is_relative_to('/ms-playwright')
+              assert Path(pw.chromium.executable_path).is_file()
+              browser = pw.chromium.launch()
+              print('Preinstalled Chromium:', browser.version)
+              browser.close()
+          PYTHON
       - name: Remove previous synthetic results
         run: |
           python - <<'PYTHON'

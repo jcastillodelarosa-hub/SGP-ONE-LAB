@@ -14,8 +14,12 @@ on:
       - '.github/workflows/opt-digital.yml'
 permissions:
   contents: read
+defaults:
+  run:
+    shell: bash
 jobs:
-  isolated:
+  dom-sql:
+    name: DOM and synthetic SQL
     runs-on: ubuntu-24.04
     timeout-minutes: 12
     steps:
@@ -25,11 +29,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Install app and isolated QA dependencies
+      - name: Install app and isolated DOM/SQL dependencies
         run: |
           npm ci --no-audit --no-fund
-          npm install --prefix /tmp/opt-qa --no-audit --no-fund playwright@1.56.1 jsdom@26.1.0 @electric-sql/pglite@0.3.14
-          /tmp/opt-qa/node_modules/.bin/playwright install --with-deps chromium
+          npm install --prefix /tmp/opt-qa --no-audit --no-fund jsdom@26.1.0 @electric-sql/pglite@0.3.14
           npm run build:vendor
       - name: DOM and synthetic SQL
         env:
@@ -43,6 +46,44 @@ jobs:
           node tests/opt-digital/shared-workflow-dom.cjs
           node tests/opt-digital/cut-report-dom.cjs
           node docs/sql-proposals/opt-shared/test-synthetic.mjs
+  isolated:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    # Match the existing npm Playwright version; browsers and OS dependencies are baked in.
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble@sha256:f1e7e01021efd65dd1a2c56064be399f3e4de00fd021ac561325f2bfbb2b837a
+      options: --shm-size=1g
+    env:
+      PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install app and isolated browser client
+        run: |
+          npm ci --no-audit --no-fund
+          npm install --prefix /tmp/opt-qa --no-audit --no-fund playwright@1.56.1
+          npm run build:vendor
+      - name: Verify matching preinstalled Chromium
+        run: |
+          node <<'NODE'
+          const assert = require('node:assert/strict');
+          const fs = require('node:fs');
+          const { chromium } = require('/tmp/opt-qa/node_modules/playwright');
+          assert.equal(require('/tmp/opt-qa/node_modules/playwright/package.json').version, '1.56.1');
+          assert.ok(fs.realpathSync(chromium.executablePath()).startsWith('/ms-playwright/'));
+          (async () => {
+            const browser = await chromium.launch();
+            console.log('Preinstalled Chromium:', await browser.version());
+            await browser.close();
+          })().catch(error => { console.error(error); process.exitCode = 1; });
+          NODE
       - name: Isolated desktop and mobile browser
         env:
           PLAYWRIGHT_MODULE: /tmp/opt-qa/node_modules/playwright
