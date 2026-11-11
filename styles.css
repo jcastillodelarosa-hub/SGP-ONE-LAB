@@ -2928,3 +2928,51 @@ table.glass-burro-table th:not(:first-child){width:36%}
 #progModal .prog-parts-selection>div{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 #progModal .prog-parts-selection button{min-height:40px}
 #progModal .prog-part-reason{display:block;flex-basis:100%;color:#68511b;font-size:12px}
+
+/* Picking reports v441: preserve existing SGP components and isolate report subpanels. */
+#pickReportDeliveryPanel,#pickReportReceptionPanel{display:grid;gap:14px;min-width:0}
+#pickReportDeliveryPanel[hidden],#pickReportReceptionPanel[hidden]{display:none!important}
+#pickReportPanel .pick-report-tabs{display:flex;gap:8px;border-bottom:1px solid #c4d9f7;padding-bottom:0}
+#pickReportPanel .pick-report-tabs button{min-height:44px;padding:10px 24px;border:0;border-bottom:3px solid transparent;background:transparent;color:#526f96;border-radius:0;cursor:pointer;font-weight:700;font-size:15px}
+#pickReportPanel .pick-report-tabs button.active{border-color:#1264c8;color:#1264c8}
+#pickReportPanel .pick-report-tabs button:focus-visible,#pickReportPanel summary:focus-visible{outline:3px solid #1264c8;outline-offset:2px}
+#pickReportPanel #pickReportDeliveryPanel .pick-toolbar{grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
+#pickReportPanel #pickReportReceptionPanel .pick-reception-report-filters{grid-template-columns:repeat(auto-fit,minmax(145px,1fr))}
+#pickReportPanel button:disabled{opacity:.5;cursor:not-allowed}
+#pickReportPanel .pick-report-help{font-size:12px;line-height:1.5;color:#526f96;margin:0}
+#pickReceptionReportStatus{background:#eaf2fb;border:1px solid #cbdcf0;border-radius:8px;padding:12px;font-size:13px;line-height:1.5;margin:0}
+#pickReportPanel .pick-report-section-heading{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+#pickReportPanel h3{font-size:18px;color:#103b73;margin:6px 0 0}
+#pickReportPanel .pick-report-section-heading span{font-size:12px;color:#526f96}
+#pickReceptionReportRows table{min-width:1100px;font-size:13px}
+#pickReceptionReportRows th{background:#e8f0ff;color:#103b73;padding:14px 12px;font-size:11px}
+#pickReceptionReportRows td{padding:14px 12px;vertical-align:top;min-width:100px}
+#pickReceptionReportRows td:first-child{min-width:180px}
+#pickReceptionReportRows td:nth-child(3){min-width:190px}
+#pickReceptionReportRows td:last-child{min-width:210px}
+#pickReceptionReportRows td small{display:block;color:#526f96;font-size:11px;line-height:1.4;margin-top:6px}
+#pickReportPanel .pick-report-state.unknown{background:#edf0f5;color:#526276}
+#pickReportPanel .pick-report-pending summary,#pickReportPanel .pick-report-date-summary>summary{cursor:pointer;min-height:36px;padding:5px 0;font-weight:600;color:#103b73}
+#pickReportPanel .pick-report-pending ul{padding-left:16px;margin:8px 0;max-width:360px}
+#pickReportPanel .pick-report-pending li+li{margin-top:10px}
+#pickReportPanel .pick-report-system-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+#pickReportPanel .pick-report-system-card{padding:16px;background:#fff;border:1px solid #c4d9f7;border-radius:12px}
+#pickReportPanel .pick-report-system-card h4{margin:0 0 10px;color:#103b73;font-size:15px}
+#pickReportPanel .pick-report-system-card>div{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:12px;color:#526f96}
+#pickReportPanel .pick-report-system-card strong{color:#103b73}
+#pickReportPanel .pick-report-system-card small{display:block;margin-top:8px;color:#875400;font-size:11px}
+#pickReportReceptionPanel .pick-report-kpi{padding:16px;border-left-width:1px;border-radius:12px}
+#pickReportReceptionPanel .pick-report-kpi-label{font-size:13px;color:#526f96}
+#pickReportReceptionPanel .pick-report-kpi strong{font-size:28px;margin:6px 0}
+#pickReportReceptionPanel .pick-report-kpi small{font-size:11px}
+@media(max-width:720px){#pickReportPanel #pickReportReceptionPanel .pick-toolbar,#pickReportPanel #pickReportDeliveryPanel .pick-toolbar{grid-template-columns:repeat(2,minmax(0,1fr))}#pickReportPanel .pick-report-tabs button{padding:10px 20px}#pickReportPanel .pick-report-system-grid{grid-template-columns:1fr}#pickReportReceptionPanel .pick-report-kpi{padding:12px}#pickReportPanel .pick-report-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* PDT validation dashboard: tab panels retain table scroll and action portals. */
+.repo-validation-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:20px 0 12px;border-bottom:1px solid #cbd5e1;padding-bottom:10px}
+.repo-validation-tabs button{display:flex;align-items:center;gap:10px;min-height:44px;padding:10px 18px;border:1px solid #b8c8d9;border-radius:8px;background:#fff;color:#173e5e;font-weight:700}
+.repo-validation-tabs button[aria-selected="true"]{background:#173e5e;color:#fff;border-color:#173e5e}
+.repo-validation-tabs button:focus-visible{outline:3px solid #249ad1;outline-offset:3px}
+.repo-validation-tabs span{border-radius:12px;background:rgba(127,150,170,.2);padding:2px 8px}
+.repo-table .repo-group-heading th{background:#e8eff6;color:#173e5e;text-align:left;padding:12px;font-size:13px}
+#repoPanelPending[hidden],#repoPanelValidated[hidden]{display:none}
+.repo-validation-groups{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.repo-validation-groups button{min-height:40px}.repo-validation-groups button[aria-pressed="true"]{background:#173e5e;color:white}.repo-validation-groups button:disabled{opacity:.55;cursor:not-allowed}
