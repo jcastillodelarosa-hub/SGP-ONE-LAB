@@ -196,6 +196,27 @@ export function validateOptImportManifest({document, extraction}, server) {
       (index.id_programacion == null || index.id_programacion === binding.id_programacion)));
     // Individual PDFs need an explicit server-resolved documentary relation.
     if (document.mode === 'INDIVIDUAL' && !indexes.length) fail('INDIVIDUAL_DOCUMENT_RELATION_MISSING', {sourceRowId:row.sourceId});
+    // Exclusion needs an exact production identity and line, not an executable
+    // machining assignment. Do not turn an unknown/mixed identity into null.
+    if (candidates.some(candidate => !text(candidate.key_produccion) || !text(candidate.id_linea) || !text(candidate.sistema))) {
+      fail('SGP_PRODUCTION_IDENTITY_INVALID', {sourceRowId:row.sourceId}); continue;
+    }
+    const identities = new Map(candidates.map(candidate => [key(candidate.key_produccion, candidate.id_linea, candidate.sistema),
+      {documentProduction:production, key_produccion:candidate.key_produccion, id_linea:candidate.id_linea, sistema:candidate.sistema}]));
+    if (identities.size > 1) {
+      fail('SGP_BINDING_AMBIGUOUS', {sourceRowId:row.sourceId, documentProduction:production, candidates:[...identities.values()]}); continue;
+    }
+    const identity = [...identities.values()][0];
+    if (identity && identity.id_linea !== server.scope.linea) {
+      assignments.set(row.sourceId, null);
+      exclusions.set(row.sourceId, {code:'FUERA_ALCANCE', linea:identity.id_linea, resolvedIdentity:identity});
+      // Multiple/missing operational programs outside our line cannot affect a
+      // null assignment. Keep every documentary unit and its original length.
+      for (const index of applicable) if (candidates.some(candidate => index.reservation === candidate.reserva && index.system === candidate.sistema &&
+          (index.key_produccion == null || index.key_produccion === candidate.key_produccion) &&
+          (index.id_programacion == null || index.id_programacion === candidate.id_programacion))) indexUsed.add(index);
+      continue;
+    }
     const unique = new Map(candidates.map(binding => [assignmentKey(binding), binding]));
     if (unique.size !== 1) {
       fail(unique.size ? 'SGP_BINDING_AMBIGUOUS' : 'SGP_BINDING_MISSING', {sourceRowId:row.sourceId,
@@ -220,11 +241,8 @@ export function validateOptImportManifest({document, extraction}, server) {
     // Import the complete immutable document for the authorized line. Week is a
     // read/registration filter, not a reason to discard a valid original binding.
     // Otherwise opening this PDF in another week would require rewriting it.
-    const inLine = binding.id_linea === server.scope.linea;
     originalScopes.set(row.sourceId,{linea:binding.id_linea,anio:binding.anio,semana:binding.semana_base,modo:'BASE'});
-    assignments.set(row.sourceId, inLine ? assignmentOf(binding) : null);
-    if (!inLine) exclusions.set(row.sourceId, {code:'FUERA_ALCANCE', linea:binding.id_linea, anio:binding.anio,
-      semana_base:binding.semana_base, resolvedDestination:assignmentOf(binding)});
+    assignments.set(row.sourceId, assignmentOf(binding));
     for (const index of applicable) if (index.reservation === binding.reserva && index.system === binding.sistema &&
         (index.key_produccion == null || index.key_produccion === binding.key_produccion) &&
         (index.id_programacion == null || index.id_programacion === binding.id_programacion)) indexUsed.add(index);
@@ -241,7 +259,7 @@ export function validateOptImportManifest({document, extraction}, server) {
       provenance:{patternId:plan.id, sourcePage:cut.sourcePage, sourceColumn:cut.sourceColumn, sourceSlot:cut.sourceSlot, unitInstance:cut.unitInstance},
       length32:entry.length32, millimetersExact:mm.decimal, position,
       assignment:assignments.get(entry.sourceRowId) ? {...assignments.get(entry.sourceRowId)} : null,
-      originalScope:{...originalScopes.get(entry.sourceRowId)},
+      originalScope:originalScopes.has(entry.sourceRowId) ? {...originalScopes.get(entry.sourceRowId)} : null,
       scopeStatus:exclusions.has(entry.sourceRowId) ? 'FUERA_ALCANCE' :
         originalScopes.get(entry.sourceRowId).anio===server.scope.anio && originalScopes.get(entry.sourceRowId).semana===server.scope.semana ? 'IN_SCOPE' : 'OTHER_ORIGINAL_WEEK',
       exclusion:exclusions.has(entry.sourceRowId) ? structuredClone(exclusions.get(entry.sourceRowId)) : null,

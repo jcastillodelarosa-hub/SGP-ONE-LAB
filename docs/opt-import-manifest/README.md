@@ -116,12 +116,15 @@ const result = await prepare({pdfBytes, source});
 
 ### PDF mixto de toda la empresa
 
-Se concilia e incluye **todo el PDF**. Un destino inequívoco con programación
-válida, pero de otra línea, conserva sus unidades y medidas con
+Se concilia e incluye **todo el PDF**. Una identidad SGP inequívoca de otra
+línea conserva sus unidades y medidas con
 `asignacion:null` en `pieces`, `scopeStatus:'FUERA_ALCANCE'` y explicación del
 destino resuelto en `units`. Todas las unidades con vínculo válido de PANELES_2 conservan su asignación y semana original, aunque difiera de la semana visible. La semana es filtro de consulta/registro, no razón para perder el vínculo del documento inmutable.
-Ambigüedad, ausencia de vínculo o programación inválida se comprueban **antes**
-de excluir por ámbito, incluso fuera de línea. No se ocultan tras un `null`.
+La identidad y la línea deben ser inequívocas antes de excluir por ámbito.
+No se exige programa de mecanizado a una línea excluida y no se le crea ninguna
+asignación. Para PANELES_2 siguen siendo obligatorios el programa único vigente,
+la actividad, el estado exportable y todos los vínculos operativos. Una identidad
+SGP ausente, desconocida o contradictoria no se oculta tras un `null`.
 
 La propuesta SQL actual hace el manifiesto y las asignaciones inmutables. Volver a
 importar el mismo PDF para otra línea con asignaciones diferentes no es un
@@ -161,7 +164,7 @@ posteriormente por el flujo compartido con su usuario y periodo servidor.
 
 ## Evidencia y límites
 
-Pruebas nuevas: 26/26 PASS localmente, incluidas mezcla de líneas sin pérdida de
+Pruebas nuevas: 30/30 PASS localmente, incluidas mezcla de líneas sin pérdida de
 cantidades, ambigüedad, fuentes Retail/Proyecto/individual, referencias repetidas,
 aislamiento cliente y comprobación exhaustiva de las 125.984 longitudes legales.
 Regresiones del extractor, conciliación individual y resumen: 27/27 PASS. Se

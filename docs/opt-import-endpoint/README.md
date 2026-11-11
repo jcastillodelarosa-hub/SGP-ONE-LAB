@@ -44,7 +44,9 @@ No wildcard CORS or other LP configuration is changed.
 5. Build documentary links from original index rows, or for INDIVIDUAL from exact
    production IDs printed in the PDF joined to all SGP candidates. Multiple or
    missing reservations/programs return concrete diagnostics, not invented units
-   or a generic human-approval requirement.
+   or a generic human-approval requirement. Known other-line identities retain
+   every documentary unit without assignment and do not require a machining
+   program; PANELES_2 retains the complete operational validation.
 6. Run `functions/opt-import-manifest-core.mjs`, including exact 1/32-inch
    arithmetic, per-reference quantities, stock and final summaries. Rejection
    means no import RPC is invoked. Other original weeks remain assigned to their

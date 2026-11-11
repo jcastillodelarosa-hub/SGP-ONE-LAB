@@ -153,8 +153,8 @@ test('associated reserve uses actual membership and principal, not arbitrary mai
   server.bindings[0].programacion_reserva='ASSOCIATED';blocked(fixture(),server,'SGP_BINDING_OUTSIDE_VALID_PROGRAMMING');
 });
 
-test('cancelled programming and invalid binding fields fail closed, regardless of line',()=>{
-  for(const change of [b=>b.id_linea='',b=>b.anio=NaN,b=>b.semana_base=0,b=>b.activa='NO',b=>b.excluida_export=true,
+test('cancelled programming and invalid binding fields fail closed for PANELES_2',()=>{
+  for(const change of [b=>b.anio=NaN,b=>b.semana_base=0,b=>b.activa='NO',b=>b.excluida_export=true,
     b=>b.estado_programacion='CANCELADA',b=>b.cantidad_snapshot=0,b=>b.id_programacion='bad',b=>b.reserva_snapshot='OTHER']){
     const server=evidence();change(server.bindings[0]);blocked(fixture(),server,'SGP_BINDING_OUTSIDE_VALID_PROGRAMMING');
   }
@@ -196,16 +196,61 @@ test('mixed company PDF reconciles entirely and imports every piece while assign
   input.extraction.sourceProjectRows[1].quantity=3;blocked(input,server,'FINAL_REFERENCE_LENGTH_QUANTITY_MISMATCH');
 });
 
-test('outside-scope marker can never hide ambiguous, missing or invalid bindings',()=>{
+test('outside-scope marker can never hide ambiguous or missing production identity',()=>{
   for(const mutate of [
-    s=>s.bindings.push({...s.bindings[1],id_programacion:'00000000-0000-0000-0000-000000000003'}),
-    s=>s.bindings.pop(),
-    s=>s.bindings[1].estado_programacion='CANCELADA'
+    s=>s.bindings.push({...s.bindings[1],key_produccion:'OTHER-KEY'}),
+    s=>s.bindings.pop()
   ]){
     const {input,server}=mixedFixture();mutate(server);
     const out=run(input,server);assert.equal(out.importable,false);assert.equal(out.manifest,null);
   }
   const {input,server}=mixedFixture();server.bindings.push({...server.bindings[0],id_linea:'FRAMES_2',key_produccion:'123456|FRAMES_2'});
+  blocked(input,server,'SGP_BINDING_AMBIGUOUS');
+});
+
+test('known other line without machining program does not block PANELES_2 or discard documentary units',()=>{
+  const {input,server}=mixedFixture();
+  const before=run(input,server);const other=server.bindings[1];
+  for(const field of ['id_programacion','programacion_reserva','reserva_snapshot','estado_programacion','cantidad_snapshot',
+    'activa','excluida_export','anio','semana_base','reserva_principal'])delete other[field];
+  const after=run(input,server);assert.equal(after.importable,true,JSON.stringify(after.blockers));
+  assert.deepEqual(after.manifest.pieces,before.manifest.pieces);
+  assert.deepEqual(after.manifest.totals,{documentaryBars:2,documentaryCuts:4,cutLength32:1284});
+  assert.deepEqual(after.manifest.scopeTotals,{assigned:2,outsideScope:2});
+  assert.equal(new Set(after.manifest.units.map(unit=>unit.documentaryId)).size,4);
+  assert(after.manifest.units.every(unit=>unit.length32===321&&unit.millimetersExact==='254.79375'&&unit.status==='PENDIENTE'));
+  assert(after.manifest.units.filter(unit=>unit.assignment===null).every(unit=>unit.originalScope===null&&unit.exclusion.resolvedIdentity.id_linea==='FRAMES_2'));
+  input.extraction.sourceProjectRows[1].quantity++;
+  blocked(input,server,'FINAL_REFERENCE_LENGTH_QUANTITY_MISMATCH');
+});
+
+test('other-line operational flags and multiple programs do not turn exclusion into an assignment',()=>{
+  for(const change of [b=>b.activa='NO',b=>b.excluida_export=true,b=>b.estado_programacion='CANCELADA',b=>b.cantidad_snapshot=0,b=>b.id_programacion=null]){
+    const {input,server}=mixedFixture();change(server.bindings[1]);const out=run(input,server);
+    assert.equal(out.importable,true,JSON.stringify(out.blockers));assert.deepEqual(out.manifest.scopeTotals,{assigned:2,outsideScope:2});
+  }
+  const {input,server}=mixedFixture();const before=run(input,server);
+  server.bindings.push({...server.bindings[1],id_programacion:'00000000-0000-0000-0000-000000000003'});
+  const after=run(input,server);assert.equal(after.importable,true);assert.deepEqual(after.manifest.pieces,before.manifest.pieces);
+});
+
+test('missing or contradictory line/key identity cannot be hidden as outside scope',()=>{
+  for(const field of ['id_linea','key_produccion']){
+    for(const index of [0,1]){
+      const {input,server}=mixedFixture();delete server.bindings[index][field];blocked(input,server,'SGP_PRODUCTION_IDENTITY_INVALID');
+    }
+  }
+  for(const reverse of [false,true]){
+    const {input,server}=mixedFixture();server.bindings.push({...server.bindings[1],id_linea:'PANELES_2'});
+    if(reverse)server.bindings.reverse();blocked(input,server,'SGP_BINDING_AMBIGUOUS');
+  }
+});
+
+test('PANELES_2 still requires a unique valid machining program in a mixed PDF',()=>{
+  for(const field of ['id_programacion','programacion_reserva','reserva_snapshot','estado_programacion','cantidad_snapshot','activa','excluida_export']){
+    const {input,server}=mixedFixture();delete server.bindings[0][field];blocked(input,server,'SGP_BINDING_OUTSIDE_VALID_PROGRAMMING');
+  }
+  const {input,server}=mixedFixture();server.bindings.push({...server.bindings[0],id_programacion:'00000000-0000-0000-0000-000000000003'});
   blocked(input,server,'SGP_BINDING_AMBIGUOUS');
 });
 
