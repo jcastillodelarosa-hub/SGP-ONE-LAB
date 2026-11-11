@@ -94,6 +94,15 @@ jobs:
           # Compatibility evidence compares SQL10 with the pinned pre-review commit.
           fetch-depth: 0
           persist-credentials: false
+      - name: Verify exact container checkout
+        run: |
+          checkout="$(pwd -P)"
+          test "$checkout" = "$(realpath "$GITHUB_WORKSPACE")"
+          test -d "$checkout/.git"
+          # Trust this exact checked-out path only, for this job; no global config change.
+          export GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=safe.directory GIT_CONFIG_VALUE_0="$checkout"
+          git rev-parse --verify HEAD
+          printf '%s\n' "GIT_CONFIG_COUNT=1" "GIT_CONFIG_KEY_0=safe.directory" "GIT_CONFIG_VALUE_0=$checkout" >> "$GITHUB_ENV"
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -150,7 +159,7 @@ jobs:
           python tests/lp01-roles/xlsx.py
       - name: Real persistence PC and mobile acceptance
         run: |
-          pip install playwright==1.62.0
+          python -m pip install playwright==1.62.0
           python - <<'PYTHON'
           from importlib.metadata import version
           from pathlib import Path
@@ -223,6 +232,15 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+      - name: Verify exact container checkout
+        run: |
+          checkout="$(pwd -P)"
+          test "$checkout" = "$(realpath "$GITHUB_WORKSPACE")"
+          test -d "$checkout/.git"
+          # Trust this exact checked-out path only, for this job; no global config change.
+          export GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=safe.directory GIT_CONFIG_VALUE_0="$checkout"
+          git rev-parse --verify HEAD
+          printf '%s\n' "GIT_CONFIG_COUNT=1" "GIT_CONFIG_KEY_0=safe.directory" "GIT_CONFIG_VALUE_0=$checkout" >> "$GITHUB_ENV"
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -245,7 +263,7 @@ jobs:
           python tests/lp01-seguimiento-incremento/api.py
       - name: Global UI with the candidate API permissions
         run: |
-          pip install playwright==1.62.0
+          python -m pip install playwright==1.62.0
           python - <<'PYTHON'
           from importlib.metadata import version
           from pathlib import Path
@@ -298,6 +316,15 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+      - name: Verify exact container checkout
+        run: |
+          checkout="$(pwd -P)"
+          test "$checkout" = "$(realpath "$GITHUB_WORKSPACE")"
+          test -d "$checkout/.git"
+          # Trust this exact checked-out path only, for this job; no global config change.
+          export GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=safe.directory GIT_CONFIG_VALUE_0="$checkout"
+          git rev-parse --verify HEAD
+          printf '%s\n' "GIT_CONFIG_COUNT=1" "GIT_CONFIG_KEY_0=safe.directory" "GIT_CONFIG_VALUE_0=$checkout" >> "$GITHUB_ENV"
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -331,7 +358,7 @@ jobs:
           python tests/lp01-afectaciones-rpc/revocation.py
       - name: Synthetic native panel and existing app controllers
         run: |
-          pip install playwright==1.62.0
+          python -m pip install playwright==1.62.0
           python - <<'PYTHON'
           from importlib.metadata import version
           from pathlib import Path
@@ -375,6 +402,15 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+      - name: Verify exact container checkout
+        run: |
+          checkout="$(pwd -P)"
+          test "$checkout" = "$(realpath "$GITHUB_WORKSPACE")"
+          test -d "$checkout/.git"
+          # Trust this exact checked-out path only, for this job; no global config change.
+          export GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=safe.directory GIT_CONFIG_VALUE_0="$checkout"
+          git rev-parse --verify HEAD
+          printf '%s\n' "GIT_CONFIG_COUNT=1" "GIT_CONFIG_KEY_0=safe.directory" "GIT_CONFIG_VALUE_0=$checkout" >> "$GITHUB_ENV"
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -388,7 +424,7 @@ jobs:
       - run: npm install --no-package-lock --no-audit --no-fund
       - run: npm run build:vendor
       - run: docker pull postgres:17.11
-      - run: pip install playwright==1.62.0
+      - run: python -m pip install playwright==1.62.0
       - name: Verify matching preinstalled Chromium
         run: |
           python - <<'PYTHON'
