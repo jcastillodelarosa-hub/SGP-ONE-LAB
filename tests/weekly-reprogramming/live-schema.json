@@ -1,0 +1,1415 @@
+{
+  "columns": [
+    {
+      "udt": "text",
+      "name": "id_accesorio",
+      "type": "text",
+      "table": "sgp_accesorios",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "text",
+      "name": "id_carga",
+      "type": "text",
+      "table": "sgp_accesorios",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "int4",
+      "name": "fila_origen",
+      "type": "integer",
+      "table": "sgp_accesorios",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "text",
+      "name": "id",
+      "type": "text",
+      "table": "sgp_accesorios",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "key_produccion",
+      "type": "text",
+      "table": "sgp_accesorios",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "estado_relacion_produccion",
+      "type": "text",
+      "table": "sgp_accesorios",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "text",
+      "name": "codigo_sap",
+      "type": "text",
+      "table": "sgp_accesorios",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "text",
+      "name": "descripcion",
+      "type": "text",
+      "table": "sgp_accesorios",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "numeric",
+      "name": "cantidad",
+      "type": "numeric",
+      "table": "sgp_accesorios",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "unidad",
+      "type": "text",
+      "table": "sgp_accesorios",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "sistema",
+      "type": "text",
+      "table": "sgp_accesorios",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "text",
+      "name": "produccion",
+      "type": "text",
+      "table": "sgp_accesorios",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "text",
+      "name": "id_orden",
+      "type": "text",
+      "table": "sgp_accesorios",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "orden_co",
+      "type": "text",
+      "table": "sgp_accesorios",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "linea",
+      "type": "text",
+      "table": "sgp_accesorios",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "int4",
+      "name": "semana",
+      "type": "integer",
+      "table": "sgp_accesorios",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "int4",
+      "name": "anio",
+      "type": "integer",
+      "table": "sgp_accesorios",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "fuente",
+      "type": "text",
+      "table": "sgp_accesorios",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "timestamptz",
+      "name": "fecha_carga",
+      "type": "timestamp with time zone",
+      "table": "sgp_accesorios",
+      "default": "now()",
+      "nullable": "NO"
+    },
+    {
+      "udt": "text",
+      "name": "activo",
+      "type": "text",
+      "table": "sgp_accesorios",
+      "default": "'SI'::text",
+      "nullable": "NO"
+    },
+    {
+      "udt": "text",
+      "name": "id_pieza",
+      "type": "text",
+      "table": "sgp_aluminio",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "text",
+      "name": "id_carga",
+      "type": "text",
+      "table": "sgp_aluminio",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "int4",
+      "name": "fila_origen",
+      "type": "integer",
+      "table": "sgp_aluminio",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "text",
+      "name": "id",
+      "type": "text",
+      "table": "sgp_aluminio",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "key_produccion",
+      "type": "text",
+      "table": "sgp_aluminio",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "id_linea_origen",
+      "type": "text",
+      "table": "sgp_aluminio",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "id_linea_destino",
+      "type": "text",
+      "table": "sgp_aluminio",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "estado_relacion_produccion",
+      "type": "text",
+      "table": "sgp_aluminio",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "descripcion",
+      "type": "text",
+      "table": "sgp_aluminio",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "acabado",
+      "type": "text",
+      "table": "sgp_aluminio",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "numeric",
+      "name": "longitud",
+      "type": "numeric",
+      "table": "sgp_aluminio",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "marca",
+      "type": "text",
+      "table": "sgp_aluminio",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "fabricacion",
+      "type": "text",
+      "table": "sgp_aluminio",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "int4",
+      "name": "semana",
+      "type": "integer",
+      "table": "sgp_aluminio",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "int4",
+      "name": "anio",
+      "type": "integer",
+      "table": "sgp_aluminio",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "order_co",
+      "type": "text",
+      "table": "sgp_aluminio",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "produccion",
+      "type": "text",
+      "table": "sgp_aluminio",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "id_orden_produccion",
+      "type": "text",
+      "table": "sgp_aluminio",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "proyecto",
+      "type": "text",
+      "table": "sgp_aluminio",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "numeric",
+      "name": "cantidad",
+      "type": "numeric",
+      "table": "sgp_aluminio",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "codigo_sap",
+      "type": "text",
+      "table": "sgp_aluminio",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "sistema",
+      "type": "text",
+      "table": "sgp_aluminio",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "id_sistema",
+      "type": "text",
+      "table": "sgp_aluminio",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "numeric",
+      "name": "unidades",
+      "type": "numeric",
+      "table": "sgp_aluminio",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "uso",
+      "type": "text",
+      "table": "sgp_aluminio",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "tipo_pieza",
+      "type": "text",
+      "table": "sgp_aluminio",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "destino_productivo",
+      "type": "text",
+      "table": "sgp_aluminio",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "estado_clasificacion",
+      "type": "text",
+      "table": "sgp_aluminio",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "timestamptz",
+      "name": "fecha_carga",
+      "type": "timestamp with time zone",
+      "table": "sgp_aluminio",
+      "default": "now()",
+      "nullable": "NO"
+    },
+    {
+      "udt": "text",
+      "name": "activo",
+      "type": "text",
+      "table": "sgp_aluminio",
+      "default": "'SI'::text",
+      "nullable": "NO"
+    },
+    {
+      "udt": "text",
+      "name": "key_produccion",
+      "type": "text",
+      "table": "sgp_base_semana",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "int4",
+      "name": "anio",
+      "type": "integer",
+      "table": "sgp_base_semana",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "int4",
+      "name": "semana_base",
+      "type": "integer",
+      "table": "sgp_base_semana",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "text",
+      "name": "id_carga",
+      "type": "text",
+      "table": "sgp_base_semana",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "timestamptz",
+      "name": "fecha_carga",
+      "type": "timestamp with time zone",
+      "table": "sgp_base_semana",
+      "default": "now()",
+      "nullable": "NO"
+    },
+    {
+      "udt": "text",
+      "name": "id_carga",
+      "type": "text",
+      "table": "sgp_cargas",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "text",
+      "name": "id_lote_carga",
+      "type": "text",
+      "table": "sgp_cargas",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "id_sesion",
+      "type": "text",
+      "table": "sgp_cargas",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "timestamptz",
+      "name": "fecha_hora",
+      "type": "timestamp with time zone",
+      "table": "sgp_cargas",
+      "default": "now()",
+      "nullable": "NO"
+    },
+    {
+      "udt": "text",
+      "name": "usuario",
+      "type": "text",
+      "table": "sgp_cargas",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "tipo_carga",
+      "type": "text",
+      "table": "sgp_cargas",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "fuente",
+      "type": "text",
+      "table": "sgp_cargas",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "archivo",
+      "type": "text",
+      "table": "sgp_cargas",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "int4",
+      "name": "anio",
+      "type": "integer",
+      "table": "sgp_cargas",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "int4",
+      "name": "semana_base",
+      "type": "integer",
+      "table": "sgp_cargas",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "semanas_archivo",
+      "type": "text",
+      "table": "sgp_cargas",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "int4",
+      "name": "registros_recibidos",
+      "type": "integer",
+      "table": "sgp_cargas",
+      "default": "0",
+      "nullable": "YES"
+    },
+    {
+      "udt": "int4",
+      "name": "insertados",
+      "type": "integer",
+      "table": "sgp_cargas",
+      "default": "0",
+      "nullable": "YES"
+    },
+    {
+      "udt": "int4",
+      "name": "actualizados",
+      "type": "integer",
+      "table": "sgp_cargas",
+      "default": "0",
+      "nullable": "YES"
+    },
+    {
+      "udt": "int4",
+      "name": "inconsistencias",
+      "type": "integer",
+      "table": "sgp_cargas",
+      "default": "0",
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "resultado",
+      "type": "text",
+      "table": "sgp_cargas",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "detalle",
+      "type": "text",
+      "table": "sgp_cargas",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "id_lote_carga",
+      "type": "text",
+      "table": "sgp_lotes_carga",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "timestamptz",
+      "name": "fecha_hora",
+      "type": "timestamp with time zone",
+      "table": "sgp_lotes_carga",
+      "default": "now()",
+      "nullable": "NO"
+    },
+    {
+      "udt": "text",
+      "name": "usuario",
+      "type": "text",
+      "table": "sgp_lotes_carga",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "tipo_carga",
+      "type": "text",
+      "table": "sgp_lotes_carga",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "id_unidad_carga",
+      "type": "text",
+      "table": "sgp_lotes_carga",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "int4",
+      "name": "anio",
+      "type": "integer",
+      "table": "sgp_lotes_carga",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "int4",
+      "name": "semana_base",
+      "type": "integer",
+      "table": "sgp_lotes_carga",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "estado",
+      "type": "text",
+      "table": "sgp_lotes_carga",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "int4",
+      "name": "archivos_esperados",
+      "type": "integer",
+      "table": "sgp_lotes_carga",
+      "default": "0",
+      "nullable": "YES"
+    },
+    {
+      "udt": "int4",
+      "name": "archivos_recibidos",
+      "type": "integer",
+      "table": "sgp_lotes_carga",
+      "default": "0",
+      "nullable": "YES"
+    },
+    {
+      "udt": "int4",
+      "name": "archivos_validos",
+      "type": "integer",
+      "table": "sgp_lotes_carga",
+      "default": "0",
+      "nullable": "YES"
+    },
+    {
+      "udt": "int4",
+      "name": "registros_recibidos",
+      "type": "integer",
+      "table": "sgp_lotes_carga",
+      "default": "0",
+      "nullable": "YES"
+    },
+    {
+      "udt": "int4",
+      "name": "insertados",
+      "type": "integer",
+      "table": "sgp_lotes_carga",
+      "default": "0",
+      "nullable": "YES"
+    },
+    {
+      "udt": "int4",
+      "name": "actualizados",
+      "type": "integer",
+      "table": "sgp_lotes_carga",
+      "default": "0",
+      "nullable": "YES"
+    },
+    {
+      "udt": "int4",
+      "name": "inconsistencias",
+      "type": "integer",
+      "table": "sgp_lotes_carga",
+      "default": "0",
+      "nullable": "YES"
+    },
+    {
+      "udt": "timestamptz",
+      "name": "fecha_aplicacion",
+      "type": "timestamp with time zone",
+      "table": "sgp_lotes_carga",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "detalle",
+      "type": "text",
+      "table": "sgp_lotes_carga",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "key_produccion",
+      "type": "text",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "text",
+      "name": "id",
+      "type": "text",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "text",
+      "name": "id_linea",
+      "type": "text",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "text",
+      "name": "prioridad_programacion",
+      "type": "text",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "int4",
+      "name": "anio",
+      "type": "integer",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "int4",
+      "name": "semana_base",
+      "type": "integer",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "int4",
+      "name": "semana_actual",
+      "type": "integer",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "tipo",
+      "type": "text",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "mercado",
+      "type": "text",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "proyecto",
+      "type": "text",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "produccion",
+      "type": "text",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "sistema",
+      "type": "text",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "numeric",
+      "name": "cantidad",
+      "type": "numeric",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "cliente",
+      "type": "text",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "mercado_detalle",
+      "type": "text",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "numeric",
+      "name": "ensamblado",
+      "type": "numeric",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "numeric",
+      "name": "empacado",
+      "type": "numeric",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "numeric",
+      "name": "cantidad_pt",
+      "type": "numeric",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "numeric",
+      "name": "cargue",
+      "type": "numeric",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "numeric",
+      "name": "despacho",
+      "type": "numeric",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "numeric",
+      "name": "saldo_ensamble",
+      "type": "numeric",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "numeric",
+      "name": "saldo_empaque",
+      "type": "numeric",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "numeric",
+      "name": "saldo_cargue",
+      "type": "numeric",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "numeric",
+      "name": "saldo_despacho",
+      "type": "numeric",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "estado_produccion",
+      "type": "text",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "codigo_programacion_abierto",
+      "type": "text",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "estado_destino_fussion",
+      "type": "text",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "acabado",
+      "type": "text",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "reserva_al",
+      "type": "text",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "numeric",
+      "name": "porc_aluminio",
+      "type": "numeric",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "estado_reserva_al",
+      "type": "text",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "orden_oves",
+      "type": "text",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "numeric",
+      "name": "porc_vidrio",
+      "type": "numeric",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "grupo_vidrio",
+      "type": "text",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "reservas_accesorios",
+      "type": "text",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "obs_accesorios",
+      "type": "text",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "muntin",
+      "type": "text",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "numeric",
+      "name": "cantidad_muntin",
+      "type": "numeric",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "flush_frame",
+      "type": "text",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "numeric",
+      "name": "cantidad_flush_frame",
+      "type": "numeric",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "sistema_curvo",
+      "type": "text",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "screen_requiere_frame",
+      "type": "text",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "es_smi",
+      "type": "text",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "es_lmi",
+      "type": "text",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "es_two_tone",
+      "type": "text",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "id_op_fussion",
+      "type": "text",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "id_sistema_fk",
+      "type": "text",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "fecha_recibido",
+      "type": "text",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "pedido_sap",
+      "type": "text",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "orden_co",
+      "type": "text",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "es_service",
+      "type": "text",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "solo_panel_lleva_cover",
+      "type": "text",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "sistema_pvc",
+      "type": "text",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "tipo_sellado",
+      "type": "text",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "mecanizado",
+      "type": "text",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "es_sistema_modificado",
+      "type": "text",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "lotes",
+      "type": "text",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "activa",
+      "type": "text",
+      "table": "sgp_producciones",
+      "default": "'SI'::text",
+      "nullable": "NO"
+    },
+    {
+      "udt": "timestamptz",
+      "name": "fecha_actualizacion",
+      "type": "timestamp with time zone",
+      "table": "sgp_producciones",
+      "default": "now()",
+      "nullable": "NO"
+    },
+    {
+      "udt": "text",
+      "name": "fuente",
+      "type": "text",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "id_carga",
+      "type": "text",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "bool",
+      "name": "presente_ultimo_export",
+      "type": "boolean",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "timestamptz",
+      "name": "ultima_vez_export",
+      "type": "timestamp with time zone",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "uuid",
+      "name": "ultima_carga_diaria",
+      "type": "uuid",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "bool",
+      "name": "saldos_inicializados",
+      "type": "boolean",
+      "table": "sgp_producciones",
+      "default": "false",
+      "nullable": "NO"
+    },
+    {
+      "udt": "timestamptz",
+      "name": "fecha_inicializacion_saldos",
+      "type": "timestamp with time zone",
+      "table": "sgp_producciones",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "bool",
+      "name": "excluida_export",
+      "type": "boolean",
+      "table": "sgp_producciones",
+      "default": "false",
+      "nullable": "NO"
+    },
+    {
+      "udt": "text",
+      "name": "id_vidrio",
+      "type": "text",
+      "table": "sgp_vidrio",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "text",
+      "name": "id_carga",
+      "type": "text",
+      "table": "sgp_vidrio",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "int4",
+      "name": "fila_origen",
+      "type": "integer",
+      "table": "sgp_vidrio",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "text",
+      "name": "id_export",
+      "type": "text",
+      "table": "sgp_vidrio",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "text",
+      "name": "id",
+      "type": "text",
+      "table": "sgp_vidrio",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "key_produccion",
+      "type": "text",
+      "table": "sgp_vidrio",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "estado_relacion_produccion",
+      "type": "text",
+      "table": "sgp_vidrio",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "udt": "text",
+      "name": "produccion",
+      "type": "text",
+      "table": "sgp_vidrio",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "sistema",
+      "type": "text",
+      "table": "sgp_vidrio",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "text",
+      "name": "fuente",
+      "type": "text",
+      "table": "sgp_vidrio",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "jsonb",
+      "name": "datos_origen",
+      "type": "jsonb",
+      "table": "sgp_vidrio",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "udt": "timestamptz",
+      "name": "fecha_carga",
+      "type": "timestamp with time zone",
+      "table": "sgp_vidrio",
+      "default": "now()",
+      "nullable": "NO"
+    },
+    {
+      "udt": "text",
+      "name": "activo",
+      "type": "text",
+      "table": "sgp_vidrio",
+      "default": "'SI'::text",
+      "nullable": "NO"
+    }
+  ],
+  "constraints": [
+    {
+      "name": "sgp_base_semana_key_produccion_fkey",
+      "table": "sgp_base_semana",
+      "definition": "FOREIGN KEY (key_produccion) REFERENCES sgp_producciones(key_produccion)"
+    },
+    {
+      "name": "sgp_base_semana_pkey",
+      "table": "sgp_base_semana",
+      "definition": "PRIMARY KEY (key_produccion)"
+    },
+    {
+      "name": "sgp_lotes_carga_pkey",
+      "table": "sgp_lotes_carga",
+      "definition": "PRIMARY KEY (id_lote_carga)"
+    },
+    {
+      "name": "carga_scope",
+      "table": "sgp_cargas",
+      "definition": "CHECK ((NOT ((id_lote_carga IS NOT NULL) AND (id_sesion IS NOT NULL))))"
+    },
+    {
+      "name": "sgp_cargas_id_lote_carga_fkey",
+      "table": "sgp_cargas",
+      "definition": "FOREIGN KEY (id_lote_carga) REFERENCES sgp_lotes_carga(id_lote_carga)"
+    },
+    {
+      "name": "sgp_cargas_id_sesion_fkey",
+      "table": "sgp_cargas",
+      "definition": "FOREIGN KEY (id_sesion) REFERENCES sgp_sesiones_actualizacion(id_sesion)"
+    },
+    {
+      "name": "sgp_cargas_pkey",
+      "table": "sgp_cargas",
+      "definition": "PRIMARY KEY (id_carga)"
+    }
+  ],
+  "functions": [
+    {
+      "acl": "{postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "signature": "sgp_validar_paquete_semanal(integer,integer,jsonb,jsonb,jsonb,jsonb)",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_validar_paquete_semanal(p_anio integer, p_semana integer, p_programacion jsonb, p_piezas jsonb, p_accesorios jsonb, p_vidrio jsonb)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\ndeclare\n v_prog int;v_p int;v_a int;v_v int;\n e_prog_week int;e_dup int;e_key int;e_line int;e_piece_week int;e_piece_class int;\n e_piece_rel int;e_acc_week int;e_acc_rel int;e_glass_rel int;\nbegin\n if p_anio<2020 or p_anio>2100 or p_semana<1 or p_semana>53 then raise exception 'PERIODO_INVALIDO'; end if;\n if jsonb_typeof(p_programacion)<>'array' or jsonb_typeof(p_piezas)<>'array' or jsonb_typeof(p_accesorios)<>'array' or jsonb_typeof(p_vidrio)<>'array' then raise exception 'FUENTES_INVALIDAS'; end if;\n v_prog=jsonb_array_length(p_programacion);v_p=jsonb_array_length(p_piezas);v_a=jsonb_array_length(p_accesorios);v_v=jsonb_array_length(p_vidrio);\n if least(v_prog,v_p,v_a,v_v)=0 then raise exception 'FUENTE_VACIA'; end if;\n select count(*) into e_prog_week from jsonb_array_elements(p_programacion)x where coalesce((x->>'anio')::int,-1)<>p_anio or coalesce((x->>'semana_base')::int,-1)<>p_semana;\n select count(*)-count(distinct x->>'key_produccion') into e_dup from jsonb_array_elements(p_programacion)x;\n select count(*) into e_key from jsonb_array_elements(p_programacion)x where x->>'key_produccion' <> coalesce(x->>'id','')||'|'||coalesce(x->>'id_linea','');\n select count(*) into e_line from jsonb_array_elements(p_programacion)x where x->>'id_linea' not in ('PANELES_2','FRAMES_2');\n select count(*) into e_piece_week from jsonb_array_elements(p_piezas)x where coalesce((x->>'anio')::int,-1)<>p_anio or coalesce((x->>'semana')::int,-1)<>p_semana;\n select count(*) into e_piece_class from jsonb_array_elements(p_piezas)x where coalesce(x->>'estado_clasificacion','')<>'CLASIFICADO';\n select count(*) into e_piece_rel from jsonb_array_elements(p_piezas)x where coalesce(x->>'estado_relacion_produccion','') not in ('RELACIONADO','SIN_RELACION');\n select count(*) into e_acc_week from jsonb_array_elements(p_accesorios)x where coalesce((x->>'anio')::int,-1)<>p_anio or coalesce((x->>'semana')::int,-1)<>p_semana;\n select count(*) into e_acc_rel from jsonb_array_elements(p_accesorios)x where coalesce(x->>'estado_relacion_produccion','') not in ('RELACIONADO','SIN_RELACION');\n select count(*) into e_glass_rel from jsonb_array_elements(p_vidrio)x where coalesce(x->>'estado_relacion_produccion','') not in ('RELACIONADO','SIN_RELACION');\n return jsonb_build_object('valido',(e_prog_week+e_dup+e_key+e_line+e_piece_week+e_piece_class+e_piece_rel+e_acc_week+e_acc_rel+e_glass_rel)=0,'escritura_realizada',false,\n 'anio',p_anio,'semana',p_semana,'conteos',jsonb_build_object('programacion',v_prog,'piezas',v_p,'accesorios',v_a,'vidrio',v_v),\n 'errores',jsonb_build_object('programacion_fuera_semana',e_prog_week,'keys_duplicadas',e_dup,'keys_invalidas',e_key,'lineas_invalidas',e_line,'piezas_fuera_semana',e_piece_week,'piezas_sin_clasificar',e_piece_class,'relacion_piezas_invalida',e_piece_rel,'accesorios_fuera_semana',e_acc_week,'relacion_accesorios_invalida',e_acc_rel,'relacion_vidrio_invalida',e_glass_rel));\nend $function$\n"
+    },
+    {
+      "acl": "{postgres=X/postgres,service_role=X/postgres,anon=X/postgres,authenticated=X/postgres}",
+      "signature": "sgp_cargar_paquete_semanal(text,integer,integer,jsonb,jsonb,jsonb,jsonb)",
+      "definition": "CREATE OR REPLACE FUNCTION public.sgp_cargar_paquete_semanal(p_token text, p_anio integer, p_semana integer, p_programacion jsonb, p_piezas jsonb, p_accesorios jsonb, p_vidrio jsonb)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\n SET statement_timeout TO '55s'\nAS $function$\ndeclare\n v_usuario text;v_lote text:=extensions.gen_random_uuid()::text;v_total int;\n v_prog int:=jsonb_array_length(p_programacion);v_p int:=jsonb_array_length(p_piezas);\n v_a int:=jsonb_array_length(p_accesorios);v_v int:=jsonb_array_length(p_vidrio);v_validation jsonb;\nbegin\n v_usuario:=public.sgp_validar_sesion_rol(p_token,array['ADMINISTRADOR','COORDINADOR']);\n if not pg_try_advisory_xact_lock(hashtext('SGP_CARGA_SEMANAL'),p_anio*100+p_semana) then\n  raise exception 'CARGA_SEMANAL_EN_PROCESO: periodo %/%',p_semana,p_anio;\n end if;\n perform set_config('lock_timeout','5s',true);\n v_validation:=public.sgp_validar_paquete_semanal(p_anio,p_semana,p_programacion,p_piezas,p_accesorios,p_vidrio);\n if not coalesce((v_validation->>'valido')::boolean,false) then raise exception 'PAQUETE_INVALIDO: %',v_validation; end if;\n if exists(select 1 from sgp_base_semana where anio=p_anio and semana_base=p_semana)\n or exists(select 1 from sgp_lotes_carga where anio=p_anio and semana_base=p_semana and estado='APLICADO')\n then raise exception 'SEMANA_YA_CARGADA'; end if;\n v_total:=v_prog+v_p+v_a+v_v;\n insert into sgp_lotes_carga(id_lote_carga,usuario,tipo_carga,id_unidad_carga,anio,semana_base,estado,archivos_esperados,archivos_recibidos,archivos_validos,registros_recibidos,insertados,actualizados,inconsistencias,detalle)\n values(v_lote,v_usuario,'SEMANAL',p_anio||'-S'||lpad(p_semana::text,2,'0'),p_anio,p_semana,'APLICANDO',4,4,4,v_total,0,0,0,'Carga semanal transaccional');\n\n insert into sgp_producciones(\n key_produccion,id,id_linea,prioridad_programacion,anio,semana_base,semana_actual,tipo,mercado,proyecto,produccion,sistema,cantidad,cliente,mercado_detalle,\n ensamblado,empacado,cantidad_pt,cargue,despacho,saldo_ensamble,saldo_empaque,saldo_cargue,saldo_despacho,estado_produccion,codigo_programacion_abierto,\n estado_destino_fussion,acabado,reserva_al,porc_aluminio,estado_reserva_al,orden_oves,porc_vidrio,grupo_vidrio,reservas_accesorios,obs_accesorios,muntin,\n cantidad_muntin,flush_frame,cantidad_flush_frame,sistema_curvo,screen_requiere_frame,es_smi,es_lmi,es_two_tone,id_op_fussion,id_sistema_fk,fecha_recibido,\n pedido_sap,orden_co,es_service,solo_panel_lleva_cover,sistema_pvc,tipo_sellado,mecanizado,es_sistema_modificado,lotes,activa,fuente,id_carga)\n select x->>'key_produccion',x->>'id',x->>'id_linea',x->>'prioridad_programacion',(x->>'anio')::int,(x->>'semana_base')::int,(x->>'semana_actual')::int,\n x->>'tipo',x->>'mercado',x->>'proyecto',x->>'produccion',x->>'sistema',nullif(x->>'cantidad','')::numeric,x->>'cliente',x->>'mercado_detalle',\n nullif(x->>'ensamblado','')::numeric,nullif(x->>'empacado','')::numeric,nullif(x->>'cantidad_pt','')::numeric,nullif(x->>'cargue','')::numeric,\n nullif(x->>'despacho','')::numeric,nullif(x->>'saldo_ensamble','')::numeric,nullif(x->>'saldo_empaque','')::numeric,nullif(x->>'saldo_cargue','')::numeric,\n nullif(x->>'saldo_despacho','')::numeric,x->>'estado_produccion',x->>'codigo_programacion_abierto',x->>'estado_destino_fussion',x->>'acabado',x->>'reserva_al',\n nullif(x->>'porc_aluminio','')::numeric,x->>'estado_reserva_al',x->>'orden_oves',nullif(x->>'porc_vidrio','')::numeric,x->>'grupo_vidrio',x->>'reservas_accesorios',\n x->>'obs_accesorios',x->>'muntin',nullif(x->>'cantidad_muntin','')::numeric,x->>'flush_frame',nullif(x->>'cantidad_flush_frame','')::numeric,x->>'sistema_curvo',\n x->>'screen_requiere_frame',x->>'es_smi',x->>'es_lmi',x->>'es_two_tone',x->>'id_op_fussion',x->>'id_sistema_fk',x->>'fecha_recibido',x->>'pedido_sap',x->>'orden_co',\n x->>'es_service',x->>'solo_panel_lleva_cover',x->>'sistema_pvc',x->>'tipo_sellado',x->>'mecanizado',x->>'es_sistema_modificado',x->>'lotes',coalesce(x->>'activa','SI'),x->>'fuente',v_lote\n from jsonb_array_elements(p_programacion)x;\n\n insert into sgp_base_semana(key_produccion,anio,semana_base,id_carga)\n select x->>'key_produccion',p_anio,p_semana,v_lote from jsonb_array_elements(p_programacion)x;\n\n insert into sgp_aluminio(id_pieza,id_carga,fila_origen,id,key_produccion,id_linea_origen,id_linea_destino,estado_relacion_produccion,descripcion,acabado,longitud,marca,fabricacion,semana,anio,order_co,produccion,id_orden_produccion,proyecto,cantidad,codigo_sap,sistema,id_sistema,unidades,uso,tipo_pieza,destino_productivo,estado_clasificacion)\n select v_lote||':P:'||ord,v_lote,(x->>'fila_origen')::int,x->>'id',x->>'key_produccion',x->>'id_linea_origen',x->>'id_linea_destino',x->>'estado_relacion_produccion',\n x->>'descripcion',x->>'acabado',nullif(x->>'longitud','')::numeric,x->>'marca',x->>'fabricacion',(x->>'semana')::int,(x->>'anio')::int,x->>'order_co',x->>'produccion',\n x->>'id_orden_produccion',x->>'proyecto',nullif(x->>'cantidad','')::numeric,x->>'codigo_sap',x->>'sistema',x->>'id_sistema',nullif(x->>'unidades','')::numeric,x->>'uso',\n x->>'tipo_pieza',x->>'destino_productivo',x->>'estado_clasificacion'\n from jsonb_array_elements(p_piezas) with ordinality t(x,ord);\n\n insert into sgp_accesorios(id_accesorio,id_carga,fila_origen,id,key_produccion,estado_relacion_produccion,codigo_sap,descripcion,cantidad,unidad,sistema,produccion,id_orden,orden_co,linea,semana,anio,fuente)\n select v_lote||':A:'||ord,v_lote,(x->>'fila_origen')::int,x->>'id',x->>'key_produccion',x->>'estado_relacion_produccion',x->>'codigo_sap',x->>'descripcion',\n nullif(x->>'cantidad','')::numeric,x->>'unidad',x->>'sistema',x->>'produccion',x->>'id_orden',x->>'orden_co',x->>'linea',(x->>'semana')::int,(x->>'anio')::int,x->>'fuente'\n from jsonb_array_elements(p_accesorios) with ordinality t(x,ord);\n\n insert into sgp_vidrio(id_vidrio,id_carga,fila_origen,id_export,id,key_produccion,estado_relacion_produccion,produccion,sistema,fuente,datos_origen)\n select v_lote||':V:'||ord,v_lote,(x->>'fila_origen')::int,x->>'id_export',x->>'id',x->>'key_produccion',x->>'estado_relacion_produccion',x->>'produccion',x->>'sistema',x->>'fuente',x->'datos_origen'\n from jsonb_array_elements(p_vidrio) with ordinality t(x,ord);\n\n insert into sgp_cargas(id_carga,id_lote_carga,usuario,tipo_carga,fuente,anio,semana_base,registros_recibidos,insertados,resultado)\n values(v_lote||':PROGRAMACION',v_lote,v_usuario,'SEMANAL','PROGRAMACION',p_anio,p_semana,v_prog,v_prog,'OK'),\n (v_lote||':PIEZAS',v_lote,v_usuario,'SEMANAL','PIEZAS_ALUMINIO',p_anio,p_semana,v_p,v_p,'OK'),\n (v_lote||':ACCESORIOS',v_lote,v_usuario,'SEMANAL','ACCESORIOS',p_anio,p_semana,v_a,v_a,'OK'),\n (v_lote||':VIDRIO',v_lote,v_usuario,'SEMANAL','VIDRIO',p_anio,p_semana,v_v,v_v,'OK');\n update sgp_lotes_carga set estado='APLICADO',insertados=v_total,fecha_aplicacion=now() where id_lote_carga=v_lote;\n return jsonb_build_object('ok',true,'id_lote_carga',v_lote,'usuario',v_usuario,'anio',p_anio,'semana',p_semana,'insertados',jsonb_build_object('programacion',v_prog,'piezas',v_p,'accesorios',v_a,'vidrio',v_v,'total',v_total));\nend $function$\n"
+    },
+    {
+      "acl": "{postgres=X/postgres}",
+      "signature": "sgp_pdt_manual.auditar_programacion()",
+      "definition": "CREATE OR REPLACE FUNCTION sgp_pdt_manual.auditar_programacion()\n RETURNS trigger\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\nDECLARE before_week integer; after_week integer; current_year integer; item record; inserted uuid;\nBEGIN\n before_week:=coalesce(OLD.semana_actual,OLD.semana_base);\n -- Deferred execution observes the final row after Export updates week and year.\n SELECT p.anio,coalesce(p.semana_actual,p.semana_base) INTO STRICT current_year,after_week\n FROM public.sgp_producciones p WHERE p.key_produccion=NEW.key_produccion;\n IF ROW(OLD.anio,before_week) IS NOT DISTINCT FROM ROW(current_year,after_week) THEN RETURN NEW; END IF;\n IF OLD.anio NOT BETWEEN 2020 AND 2100 OR current_year NOT BETWEEN 2020 AND 2100\n OR before_week NOT BETWEEN 1 AND 53 OR after_week NOT BETWEEN 1 AND 53\n THEN RAISE EXCEPTION 'PDT_MANUAL_PERIODO_INVALIDO'; END IF;\n FOR item IN SELECT DISTINCT md.id_pendiente FROM sgp_pdt_manual.reportes r\n  JOIN sgp_pdt_manual.detalles md USING(id_reporte)\n  WHERE r.key_produccion=NEW.key_produccion LOOP\n  inserted:=NULL;\n  INSERT INTO sgp_pdt_manual.programacion_cambios\n   (id_pendiente,key_produccion,anio_anterior,semana_anterior,anio_nuevo,semana_nueva)\n  VALUES(item.id_pendiente,NEW.key_produccion,OLD.anio,before_week,current_year,after_week)\n  ON CONFLICT(id_pendiente,transaccion) DO NOTHING RETURNING id_cambio INTO inserted;\n  IF inserted IS NULL THEN CONTINUE; END IF;\n  INSERT INTO public.sgp_aluminio_pendientes_historial\n   (id_pendiente,usuario,tipo_evento,observacion,estado_anterior,estado_nuevo,datos_anteriores,datos_nuevos)\n  VALUES(item.id_pendiente,current_user,'REPROGRAMACION_PDT_MANUAL',\n   'Cambio de programación; el reporte original permanece inmutable',\n   (SELECT estado_repo FROM public.sgp_aluminio_pendientes WHERE id_pendiente=item.id_pendiente),\n   (SELECT estado_repo FROM public.sgp_aluminio_pendientes WHERE id_pendiente=item.id_pendiente),\n   jsonb_build_object('anio',OLD.anio,'semana',before_week,'key_produccion',OLD.key_produccion),\n   jsonb_build_object('anio',current_year,'semana',after_week,'key_produccion',NEW.key_produccion));\n END LOOP;\n RETURN NEW;\nEND $function$\n"
+    },
+    {
+      "acl": null,
+      "signature": "sgp_pdt_manual.proteger_anio_programacion()",
+      "definition": "CREATE OR REPLACE FUNCTION sgp_pdt_manual.proteger_anio_programacion()\n RETURNS trigger\n LANGUAGE plpgsql\n SET search_path TO ''\nAS $function$\nBEGIN\n IF OLD.anio IS DISTINCT FROM NEW.anio THEN\n  RAISE EXCEPTION 'PDT_PRODUCTION_YEAR_IMMUTABLE: %',OLD.key_produccion;\n END IF;\n RETURN NEW;\nEND $function$\n"
+    }
+  ]
+}

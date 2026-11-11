@@ -1,3 +1,21 @@
+## Carga semanal · reprogramación de existentes · candidata LAB v438 · 11/11/2026
+
+Regla de Johan: una producción ya existente pasa a la semana que se carga.
+Implementado sobre main dc1f89b. SQL aplicado con autorización de Johan;
+publicación pendiente y sin carga real. Se actualizan semanas de producción/base; se conservan cantidades,
+avances, identidades y eventos. Historial privado por lote y materiales
+reutilizados sin duplicar; diferencias ambiguas bloquean antes de escribir.
+La lectura semanal de aluminio sigue producción sin mutar snapshots PDT.
+
+58 aserciones SQL sintéticas y 989 Node PASS (10 omitidas); controles de release,
+sintaxis y diff. No PostgreSQL multisesión ni QA de navegador/planta.
+Migración `lab_v438_weekly_reprogram_existing` aplicada y postcheck confirmado:
+writer MD5 1a6faea29924aed3f0533f800a9b7832, reader aa00d98bec9779c94fb2f1625e38526a.
+ACL intactas, helpers privados, ledger RLS activo y vacío. Semana47 sin bases ni
+lotes; ejemplos permanecen en semana45 con cantidades conservadas.
+Publicación autorizada, pendiente de CI y verificación exacta de Hosting.
+Guía, código anterior y límites: `docs/sql-proposals/weekly-reprogramming/README.md`.
+
 ## Picking PDT · confirmación directa · candidata LAB v431
 
 Base main v430 `f4818ab`. Confirmar la cantidad físicamente entregada registra
