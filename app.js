@@ -35,6 +35,7 @@ import { initPickingDeliveryReport } from "./src/modules/picking-delivery-report
 import { trackingRows } from "./src/data/mock-data.js";
 import { createMecanizadoModule } from "./src/modules/mecanizado.js";
 import { readProgrammingWorkbook, summarizeProgramming } from "./src/domain/production-importer.js";
+import { weeklyLoadResult } from './src/domain/weekly-load-result.js';
 import { importProductions } from "./src/services/production-import-repository.js";
 import { readAluminumTrackingWorkbook, summarizeAluminumTracking } from "./src/domain/aluminum-tracking-importer.js";
 import { readAluminumPiecesWorkbook, summarizeAluminumPieces, classifyAluminumPieces, relateAluminumPieces, prepareAluminumPiecePayload } from "./src/domain/aluminum-pieces-importer.js";
@@ -1369,7 +1370,7 @@ async function commitProgramming() {
     els.importStatus.textContent = "CARGA RECHAZADA ✕ " + msg; window.alert(msg); return;
   }
 
-  const summary = `CONFIRMAR CARGA REAL\n\nSemana: ${week} / ${year}\nUsuario: ${user.nombre} (${user.rol})\nProgramación: ${validatedProductions.length}\nPiezas: ${piecesPayload.length}\nAccesorios: ${accessoriesPayload.length}\nVidrio: ${glassPayload.length}\nTOTAL: ${total} registros\n\n¿CONFIRMAR LA CARGA DE LA SEMANA ${week}?\n\nAceptar = SÍ   ·   Cancelar = NO`;
+  const summary = `CONFIRMAR CARGA REAL\n\nSemana: ${week} / ${year}\nUsuario: ${user.nombre} (${user.rol})\nProgramación: ${validatedProductions.length}\nPiezas: ${piecesPayload.length}\nAccesorios: ${accessoriesPayload.length}\nVidrio: ${glassPayload.length}\nTOTAL: ${total} registros\n\nLas producciones existentes se moverán a esta semana conservando cantidades, avances e historial. Los materiales repetidos se conservarán sin duplicarlos.\n\n¿CONFIRMAR LA CARGA DE LA SEMANA ${week}?\n\nAceptar = SÍ   ·   Cancelar = NO`;
   if (!window.confirm(summary)) {
     els.importStatus.textContent = `Carga de semana ${week} cancelada. No se realizó ninguna escritura.`;
     if (els.previewStatus) els.previewStatus.textContent = "Escritura realizada: NO · Usuario seleccionó NO.";
@@ -1413,11 +1414,11 @@ async function commitProgramming() {
       if (timings && typeof timings === "object") {
         console.info("[SGP carga semanal] tiempos por etapa (ms)", timings);
       }
-      const inserted = data?.insertados?.total ?? total;
-      els.importStatus.textContent = `CARGA COMPLETADA ✓ Semana ${week} · Lote ${data.id_lote_carga} · ${inserted} registros · ${Math.round(rpcMs / 1000)} s.`;
+      const result = weeklyLoadResult(data, total);
+      els.importStatus.textContent = `CARGA COMPLETADA ✓ Semana ${week} · Lote ${data.id_lote_carga} · ${result.text} · ${Math.round(rpcMs / 1000)} s.`;
       els.commit.textContent = "Semana cargada ✓";
-      if (els.previewStatus) els.previewStatus.textContent = `Escritura realizada: SÍ ✓ · Lote ${data.id_lote_carga} · Usuario ${data.usuario} · Total ${inserted}.`;
-      window.alert(`CARGA COMPLETADA ✓\n\nSemana ${week} / ${year}\nLote: ${data.id_lote_carga}\nRegistros insertados: ${inserted}`);
+      if (els.previewStatus) els.previewStatus.textContent = `Escritura realizada: SÍ ✓ · Lote ${data.id_lote_carga} · Usuario ${data.usuario} · ${result.text}.`;
+      window.alert(`CARGA COMPLETADA ✓\n\nSemana ${week} / ${year}\nLote: ${data.id_lote_carga}\n${result.text}`);
       completed = true;
       break;
     }
