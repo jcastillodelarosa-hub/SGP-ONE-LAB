@@ -11,12 +11,13 @@ const assert=require('node:assert/strict'),fs=require('node:fs');const {chromium
    document.body.replaceChildren();const host=document.createElement('main');document.body.append(host);
    const {mountOptCutReport}=await import('/opt-digital/cut-report.js'),{createOptCutReport}=await import('/src/services/opt-cut-report.js');
    const scope={linea:'PANELES_2',anio:2026,semana:45,modo:'BASE'},id=n=>`00000000-0000-4000-8000-${String(n).padStart(12,'0')}`;
-   window.reportTest={mode:'ok',token:'synthetic-user',calls:[],release:null};
+   window.reportTest={mode:'ok',token:'synthetic-user',calls:[],release:null,settled:0};
    const api=createOptCutReport({rpc:async(name,args)=>{
-    reportTest.calls.push({name,args});if(reportTest.mode==='hold')await new Promise(resolve=>reportTest.release=resolve);
+    reportTest.calls.push({name,args});try{if(reportTest.mode==='hold')await new Promise(resolve=>reportTest.release=resolve);
     if(reportTest.mode==='error')return {error:{message:'OPT_NO_AUTORIZADO'}};
-    const rows=(args.p_reservas||[]).filter(r=>r!=='ZERO').map((r,i)=>({id_pieza:id(i+1),id_documento:id(10),sha256:'a'.repeat(64),reserva:r,sistema:'PANEL',referencia:r==='R'?'=REFERENCE':'REF-2',longitud_mm:1200,pagina:1,patron:1,barra:1,corte:i+1,id_registro:id(i+20),usuario:r==='R'?'Cortador A':'Cortador B',registrado_en:'2026-11-10T07:00:00Z',periodo:{fecha:'2026-11-09',turno:2,inicio:'2026-11-09T23:00:00Z',fin:'2026-11-10T11:00:00Z',zona:'America/Bogota',horario_sha256:'b'.repeat(64)}}));
+    const rows=(args.p_reservas||[]).filter(r=>r!=='ZERO').map(r=>{const n=r==='R'?1:2;return {id_pieza:id(n),id_documento:id(10),sha256:'a'.repeat(64),reserva:r,sistema:'PANEL',referencia:r==='R'?'=REFERENCE':'REF-2',longitud_mm:1200,pagina:1,patron:1,barra:1,corte:n,id_registro:id(n+20),usuario:r==='R'?'Cortador A':'Cortador B',registrado_en:'2026-11-10T07:00:00Z',periodo:{fecha:'2026-11-09',turno:2,inicio:'2026-11-09T23:00:00Z',fin:'2026-11-10T11:00:00Z',zona:'America/Bogota',horario_sha256:'b'.repeat(64)}};});
     return {data:{contract_version:2,report_contract:'OPT-CUT-REPORT-1',scope:args.p_scope,semana_tipo:'ALCANCE_REGISTRADO',reservas:reportTest.mode==='empty'?[]:[{reserva:'R',cortadas:1},{reserva:'R2',cortadas:1},{reserva:'ZERO',cortadas:0}],seleccion:args.p_reservas,filas:rows,total_piezas:rows.length}};
+    }finally{reportTest.settled++;}
    }},()=>reportTest.token);
    window.reportPanel=mountOptCutReport(host,{api,defaultScope:scope});
   });
@@ -31,7 +32,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs');const {chromium
   await page.evaluate(()=>reportTest.token='new-session');await csv.click();assert(await csv.isDisabled());assert.equal(await page.locator('#optReportPreview').textContent(),'');
   await page.evaluate(()=>reportTest.mode='error');await load.click();await page.getByText(/No se pudo consultar el reporte:.*NO_AUTORIZADO/).waitFor();assert(await generate.isDisabled());
   await page.evaluate(()=>reportTest.mode='empty');await load.click();await page.getByText('No hay reservas en el alcance consultado.',{exact:true}).waitFor();assert(await page.locator('#optReportAll').isDisabled());
-  await page.evaluate(()=>reportTest.mode='hold');await load.click();await page.waitForFunction(()=>!!reportTest.release);await page.locator('#optReportWeek').fill('44');await page.evaluate(()=>{reportTest.mode='ok';reportTest.release();});assert.equal(await page.locator('#optReportReservations input').count(),0);
+  const settledBefore=await page.evaluate(()=>reportTest.settled);await page.evaluate(()=>reportTest.mode='hold');await load.click();await page.waitForFunction(()=>!!reportTest.release);await page.locator('#optReportWeek').fill('44');await page.evaluate(()=>{reportTest.mode='ok';reportTest.release();});await page.waitForFunction(expected=>reportTest.settled===expected,settledBefore+1);assert.equal(await page.locator('#optReportReservations input').count(),0);
   await page.evaluate(()=>reportPanel.destroy());assert.equal(await page.locator('#optCutReport').count(),0);assert(await page.evaluate(()=>reportTest.calls.every(c=>c.name==='sgp_opt_cortes_reporte_v2')));assert.deepEqual(errors,[]);await page.close();
  }
  await browser.close();console.log('PASS synthetic report browser PC/mobile: catalog, single/multiple/clear, CSV download, operational period, zero cuts, empty, permission error, context/session cancellation and layout. No production.');
