@@ -2,6 +2,8 @@
 from pathlib import Path,PurePosixPath
 import zipfile,hashlib,json,stat,sys,shutil,tempfile,argparse
 MAX=32*1024*1024
+OPT_FILES=set(json.loads((Path(__file__).parent/'opt-artifact-files.json').read_text()))
+OPT_MJS={p for p in OPT_FILES if p.endswith('.mjs')}
 DENY={'private','tests','docs','supabase','scripts','functions','.git','.github','.agents','node_modules'}
 def prepare(archive,expected,destination,kind="visual"):
  archive=Path(archive);dest=Path(destination)
@@ -12,7 +14,8 @@ def prepare(archive,expected,destination,kind="visual"):
   if len(names)!=len(set(names)) or sum(i.file_size for i in info)>MAX or len(info)>1000:raise ValueError('ZIP_LIMIT_OR_DUPLICATE')
   for i in info:
    p=PurePosixPath(i.filename)
-   if any(part.startswith('.') for part in p.parts) or (p.suffix not in {'.html','.js','.css','.svg','.png','.jpg','.webp','.woff','.woff2','.ico','.json'}) or (p.suffix=='.json' and i.filename not in {'manifest.json','lp-visual-synthetic.json','release-info.json'}) or i.is_dir() or not p.parts or p.is_absolute() or '..' in p.parts or '\\' in i.filename or p.as_posix()!=i.filename or p.parts[0] in DENY or i.filename.startswith('src/server/') or stat.S_ISLNK(i.external_attr>>16):raise ValueError('UNSAFE_PATH')
+   if (i.filename.startswith('opt-digital/') or i.filename.startswith('vendor/opt-pdf/')) and i.filename not in OPT_FILES:raise ValueError('UNSAFE_OPT_PATH')
+   if any(part.startswith('.') for part in p.parts) or (p.suffix not in {'.html','.js','.css','.svg','.png','.jpg','.webp','.woff','.woff2','.ico','.json'} and i.filename not in OPT_MJS) or (p.suffix=='.json' and i.filename not in {'manifest.json','lp-visual-synthetic.json','release-info.json'}) or i.is_dir() or not p.parts or p.is_absolute() or '..' in p.parts or '\\' in i.filename or p.as_posix()!=i.filename or p.parts[0] in DENY or i.filename.startswith('src/server/') or stat.S_ISLNK(i.external_attr>>16):raise ValueError('UNSAFE_PATH')
   manifest=json.loads(z.read('manifest.json'))
   if kind not in ['visual','runtime']:raise ValueError('ARTIFACT_KIND_INVALID')
   if manifest.get('mode')!=('FULL_SGP_RUNTIME_LP' if kind=='runtime' else 'FULL_SGP_FRONTEND_WITH_SCOPED_SYNTHETIC_LP') or manifest.get('production_deploy') is not (kind=='runtime'):raise ValueError('ARTIFACT_KIND_MISMATCH')
@@ -22,6 +25,7 @@ def prepare(archive,expected,destination,kind="visual"):
    if hashlib.sha256(z.read(p)).hexdigest()!=h:raise ValueError('FILE_DIGEST_MISMATCH')
   for required in ['index.html','app.js','config.js','src/modules/lp01-followup.js','src/modules/lp01-operation.js']:
    if required not in files:raise ValueError('FRONTEND_INCOMPLETE')
+  if 'src/modules/opt-digital.js' in files and not OPT_FILES.issubset(files):raise ValueError('OPT_FRONTEND_INCOMPLETE')
   bootstrap=z.read('src/modules/lp01-followup.js').decode();operation=z.read('src/modules/lp01-operation.js').decode()
   if kind=='visual':
    if 'lp-visual-synthetic.json' not in files or 'src/domain/lp01-visual-bridge.js' not in files or 'bridge:visualLPBridge(base,read)' not in bootstrap or "const importPowerBI=async()=>{throw Error(" not in operation:raise ValueError('VISUAL_GUARD_MISSING')

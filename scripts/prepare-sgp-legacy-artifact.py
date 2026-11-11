@@ -1,10 +1,10 @@
 """Ordinary releases after PR adoption retain pre-LP navigation; no network/deploy."""
 from pathlib import Path
-import subprocess,json,hashlib,shutil,re
+import subprocess,json,hashlib,shutil,re,os
 ROOT=Path(__file__).resolve().parents[1]
 # Reuse the reviewed positive-list frontend builder, then remove only LP activation.
 subprocess.run(['python',str(ROOT/'scripts/prepare-lp-main-visual.py')],cwd=ROOT,check=True)
-out=Path('/tmp/sgp-lp183-main-visual');policy=json.loads((ROOT/'deployment/lp-hosting-policy.json').read_text())
+out=Path(os.environ.get('SGP_OPT_REVIEW_OUTPUT','/tmp/sgp-lp183-main-visual'));policy=json.loads((ROOT/'deployment/lp-hosting-policy.json').read_text())
 legacy=(ROOT/'deployment/lp-legacy-navigation.js').read_bytes()
 if hashlib.sha256(legacy).hexdigest()!=policy['legacy_navigation_sha256']:raise ValueError('LEGACY_NAVIGATION_NOT_APPROVED')
 (out/'production-line-tabs.js').write_bytes(legacy)

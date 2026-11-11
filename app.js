@@ -1,3 +1,4 @@
+import {createOptDigitalHost} from './src/modules/opt-digital.js';
 import {mountLineGoalsConfig} from './src/modules/line-turn-goals-config.js';
 import {mountGlassLocationAnalysis} from './src/modules/glass-location-analysis.js';
 import {glassStates,glassInsightQuantity,glassRackAppearance} from './src/domain/glass-explorer-states.js';
@@ -299,7 +300,7 @@ function fmtShiftTime(v){if(!v)return'';let [h,m]=v.split(':').map(Number),ap=h>
 function shiftLabelForDate(date,turno){const s=shiftScheduleForDate(date,turno);return s?fmtShiftTime(s.inicio)+' a '+fmtShiftTime(s.fin):''}
 
 function saveAppToken(token){sessionStorage.setItem(APP_SESSION_KEY,token);localStorage.setItem(APP_PERSIST_SESSION_KEY,token)}
-function clearAppToken(){sessionStorage.removeItem(APP_SESSION_KEY);localStorage.removeItem(APP_PERSIST_SESSION_KEY)}
+function clearAppToken(){optDigitalHost.update();sessionStorage.removeItem(APP_SESSION_KEY);localStorage.removeItem(APP_PERSIST_SESSION_KEY)}
 
 async function refreshAuthStatus() {
   try {
@@ -314,7 +315,7 @@ async function refreshAuthStatus() {
     const { data, error } = await client.rpc("sgp_sesion_actual", { p_token: token });
     if(token!==getAppToken())return null;
     if (error) {
-      console.warn("Error temporal validando sesión SGP:", error);
+      optDigitalHost.update();console.warn("Error temporal validando sesión SGP:", error);
       els.authStatus.textContent = "Reintentando sesión…";
       return null;
     }
@@ -329,7 +330,7 @@ async function refreshAuthStatus() {
     await applyUserAccess(data,token);
     return data;
   } catch {
-    els.authStatus.textContent = "Auth no disponible";
+    optDigitalHost.update();els.authStatus.textContent = "Auth no disponible";
     return null;
   }
 }
@@ -363,6 +364,7 @@ async function logout() {
 function closeMobileMenu(){document.body.classList.remove('mobile-menu-open');const t=document.querySelector('#mobileMenuToggle'),sh=document.querySelector('#mobileMenuShade');if(t)t.setAttribute('aria-expanded','false');if(sh)sh.hidden=true}
 function toggleMobileMenu(){const open=!document.body.classList.contains('mobile-menu-open');document.body.classList.toggle('mobile-menu-open',open);const t=document.querySelector('#mobileMenuToggle'),sh=document.querySelector('#mobileMenuShade');if(t)t.setAttribute('aria-expanded',String(open));if(sh)sh.hidden=!open}
 document.querySelector('#mobileMenuToggle')?.addEventListener('click',toggleMobileMenu);document.querySelector('#mobileMenuShade')?.addEventListener('click',closeMobileMenu);document.querySelectorAll('.nav [data-view]').forEach(b=>b.addEventListener('click',()=>{if(window.innerWidth<=760)closeMobileMenu()}));window.addEventListener('resize',()=>{if(window.innerWidth>760)closeMobileMenu()});
+const optDigitalHost=createOptDigitalHost({button:document.querySelector('[data-mach-tab="opt-digital"]'),panel:document.querySelector('[data-mach-panel="opt-digital"]'),container:document.querySelector('#optDigitalHost'),getClient:getSupabaseClient,getToken:getAppToken,getDefaultScope:()=>({linea:document.querySelector('#queryLine')?.value||'',anio:Number(document.querySelector('#queryYear')?.value),semana:Number(document.querySelector('#queryWeek')?.value),modo:'BASE'})});
 const SGP_ACCESS_TREE=[
  {key:'inicio',label:'Inicio'},
  {key:'mecanizado',label:'Módulo de Mecanizado',children:[
@@ -403,17 +405,19 @@ function accessTreeHtml(selected=[],mode='user'){return SGP_ACCESS_TREE.map(x=>{
 let currentAuth=null,currentAuthToken=null,userAdminRows=[],editingUserId=null,roleAccessRows=[];
 async function applyUserAccess(auth,validatedToken=null){
  if(auth&&(!validatedToken||validatedToken!==getAppToken()))return;
- currentAuthToken=auth?validatedToken:null;currentAuth=auth||null;const token=sessionStorage.getItem(APP_SESSION_KEY),buttons=[...document.querySelectorAll('.nav [data-view]')];
+ currentAuthToken=auth?validatedToken:null;currentAuth=auth||null;const token=getAppToken(),buttons=[...document.querySelectorAll('.nav [data-view]')];
  // Presentation only: protected RPCs still validate current role and effective access.
  document.dispatchEvent(new CustomEvent('sgp:lp-role',{detail:auth?.rol||null}));
- if(!token){buttons.forEach(b=>b.hidden=false);return}
- if(String(auth?.rol||'').toUpperCase()==='ADMINISTRADOR'){buttons.forEach(b=>b.hidden=false);return}
+ if(!token){optDigitalHost.update();buttons.forEach(b=>b.hidden=false);return}
+ if(String(auth?.rol||'').toUpperCase()==='ADMINISTRADOR'){optDigitalHost.update({valid:auth?.valida===true,admin:true,username:auth?.usuario});buttons.forEach(b=>b.hidden=false);return}
  try{
    const c=await getSupabaseClient(),{data,error}=await c.rpc('sgp_mis_accesos',{p_token:token});
    if(error)throw error;
+   if(token!==getAppToken() || currentAuth!==auth)return;
    const access=(data||[]).map(x=>x.ventana);
+   optDigitalHost.update({valid:auth?.valida===true,username:auth?.usuario,access});
    buttons.forEach(b=>{const v=b.dataset.view;b.hidden=!(access.includes(v)||access.some(x=>x.startsWith(v+'.')))});
-   document.querySelectorAll('[data-mach-tab]').forEach(b=>{const key='mecanizado.'+b.dataset.machTab;const legacy=b.dataset.machTab==='proceso'&&access.includes('mecanizado.produccion');b.hidden=!(access.includes('mecanizado')||access.includes(key)||legacy)});
+   document.querySelectorAll('[data-mach-tab]').forEach(b=>{if(b.dataset.machTab==='opt-digital'){b.hidden=!optDigitalHost.canOpen();return;}const key='mecanizado.'+b.dataset.machTab;const legacy=b.dataset.machTab==='proceso'&&access.includes('mecanizado.produccion');b.hidden=!(access.includes('mecanizado')||access.includes(key)||legacy)});
    document.querySelectorAll('[data-daily-tab]').forEach(b=>{const key='actualizacion.'+b.dataset.dailyTab;b.hidden=!(access.includes('actualizacion')||access.includes(key))});
    const pickDelivery=document.querySelector('#pickDeliveryTab'),pickReception=document.querySelector('#pickReceptionTab');
    if(pickDelivery)pickDelivery.hidden=!(access.includes('picking')||access.includes('picking.entrega'));
@@ -423,7 +427,7 @@ async function applyUserAccess(auth,validatedToken=null){
    if(assemblyLocations)assemblyLocations.hidden=!(access.includes('ensamble')||access.includes('ensamble.ubicaciones'));
    const activeDaily=document.querySelector('[data-daily-tab].active');if(activeDaily?.hidden){document.querySelector('[data-daily-tab]:not([hidden])')?.click()}
    const active=document.querySelector('.nav [data-view].active');if(active?.hidden){const first=buttons.find(b=>!b.hidden);first?.click()}
- }catch(e){console.error('No se pudieron cargar permisos',e);buttons.forEach(b=>b.hidden=false)}
+ }catch(e){optDigitalHost.update();console.error('No se pudieron cargar permisos',e);buttons.forEach(b=>b.hidden=false)}
 }
 async function loadUserAdmin(){
  if(currentAuth?.rol!=='ADMINISTRADOR')return;const c=await getSupabaseClient(),{data,error}=await c.rpc('sgp_admin_usuarios_listar',{p_token:getAppToken()});if(error){alert(error.message);return}userAdminRows=data||[];
@@ -2555,7 +2559,7 @@ async function saveProgramming(){if(progWriteBusy||!progSelection)return;if(Arra
 const c=await getSupabaseClient();let {error}=await c.rpc('sgp_mecanizado_programar',args);if(error&&/schema cache|Could not find the function/i.test(error.message||'')){await new Promise(r=>setTimeout(r,700));({error}=await c.rpc('sgp_mecanizado_programar',args))}if(error){alert(error.message);return}closeProgModal();await loadProgramming({invalidateCarry:true})}
 document.querySelector('#progRefresh')?.addEventListener('click',()=>{deferredProgrammingLoad.cancel();loadProgramming({invalidateCarry:true})});document.querySelector('#progWeek')?.addEventListener('change',scheduleProgrammingLoad);document.querySelector('#progSearch')?.addEventListener('input',latestTask(()=>machiningMetrics.sync('programming-filter',()=>renderProgramming({skipCalendar:true})),40));document.querySelector('#progModalClose')?.addEventListener('click',closeProgModal);document.querySelector('#progCancel')?.addEventListener('click',closeProgModal);document.querySelector('#progSave')?.addEventListener('click',saveProgramming);
 
-document.querySelectorAll('[data-mach-tab]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-mach-tab]').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('[data-mach-panel]').forEach(x=>x.hidden=x.dataset.machPanel!==b.dataset.machTab);if(b.dataset.machTab==='recepcion')loadReception();if(b.dataset.machTab==='faltantes')loadMissing();if(b.dataset.machTab==='programacion')loadProgramming();if(b.dataset.machTab==='produccion')loadProductionBoard();if(b.dataset.machTab==='novedades')loadNovelties()});
+document.querySelectorAll('[data-mach-tab]').forEach(b=>b.onclick=()=>{if(b.dataset.machTab==='opt-digital'&&!optDigitalHost.canOpen())return;document.querySelectorAll('[data-mach-tab]').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('[data-mach-panel]').forEach(x=>x.hidden=x.dataset.machPanel!==b.dataset.machTab);if(b.dataset.machTab==='recepcion')loadReception();if(b.dataset.machTab==='faltantes')loadMissing();if(b.dataset.machTab==='programacion')loadProgramming();if(b.dataset.machTab==='produccion')loadProductionBoard();if(b.dataset.machTab==='novedades')loadNovelties();if(b.dataset.machTab==='opt-digital')optDigitalHost.open()});
 document.querySelectorAll('input[name="recCompleteChoice"]').forEach(x=>x.addEventListener('change',()=>{const incomplete=x.checked&&x.value==='NO';document.querySelector('#recMissingSection').hidden=!incomplete;if(incomplete&&recMissingDraft.length===0){recMissingDraft.push({perfil:'',cantidad:1,longitud:'',observacion:''});renderMissingEditor()}if(!incomplete){recMissingDraft=[];renderMissingEditor()}}));
 document.querySelector('#recRefresh')?.addEventListener('click',loadReception);document.querySelector('#recWeek')?.addEventListener('change',loadReception);document.querySelector('#recSearch')?.addEventListener('input',renderReception);document.querySelector('#addMissing')?.addEventListener('click',()=>{recMissingDraft.push({perfil:'',cantidad:1,longitud:'',observacion:''});const no=document.querySelector('input[name="recCompleteChoice"][value="NO"]');if(no)no.checked=true;document.querySelector('#recMissingSection').hidden=false;renderMissingEditor()});document.querySelector('#recClose')?.addEventListener('click',()=>document.querySelector('#recModal').hidden=true);document.querySelector('#recCancel')?.addEventListener('click',()=>document.querySelector('#recModal').hidden=true);document.querySelector('#recSave')?.addEventListener('click',saveReception);
 

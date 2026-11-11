@@ -15,7 +15,7 @@ if manifest.get('source_head')!=source:raise ValueError('ARTIFACT_SOURCE_MISMATC
 # The known visual transformations are reconstructed, not arbitrary artifact code.
 subprocess.run(['node',str(root/'scripts/stamp-lp-release.mjs')],cwd=root,check=True)
 subprocess.run(['python',str(root/('scripts/prepare-lp-runtime.py' if kind=='runtime' else 'scripts/prepare-lp-main-visual.py'))],cwd=root,check=True)
-reference=Path('/tmp/sgp-lp183-main-visual')
+reference=Path(os.environ.get('SGP_OPT_REVIEW_OUTPUT','/tmp/sgp-lp183-main-visual'))
 if set(manifest['files'])!=set(json.loads((reference/'manifest.json').read_text())['files']):raise ValueError('ARTIFACT_SOURCE_INVENTORY_DIFFERS')
 for rel in manifest['files']:
  if (review/'public'/rel).read_bytes()!=(reference/rel).read_bytes():raise ValueError('ARTIFACT_SOURCE_BYTES_DIFFER')
