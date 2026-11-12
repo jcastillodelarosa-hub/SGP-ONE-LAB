@@ -20,7 +20,7 @@
     "src/modules/lp01-powerbi-client.js": "b5ed91824cf7803da690554b5bf74d67505c0a125c3d2e6475dcc56e17aaae9d",
     "src/server/lp-powerbi-handler.js": "f88ffb70761b6c3918d0a93cf4f3e77e4b0f1901d367d62558aecd7191015b29",
     "supabase/functions/lp-powerbi/index.ts": "29e2197a308d848d0f62ca6dce91a8b2df7534cc8e56e883063989ccfaddd050",
-    "supabase/config.toml": "98633898d05476f6510dd760f077185c17059ee06bad092769c828feb0367240",
+    "supabase/config.toml": "3621399f98abeb1150699e16ffba7bc8d1fe92451cd893a1cdf5d71f0bfa6581",
     "scripts/lp-backend-readiness.py": "0347837ace3ecb08b52ac16b9fb82b1ca8b8462853a33e9d14a4f608bc92482e"
   },
   "legacy_navigation_sha256": "4f0992b1c98f4933fe5a0daa98d95fd85b35fceaffbbbd904fef7d422f21f0af",
