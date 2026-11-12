@@ -29,7 +29,20 @@ try:
     const client={rpc:async(name,args)=>{window.calls.push(name);if(name!=='sgp_picking_reporte_recepciones_v1')throw Error('Unexpected RPC');return {data:{ok:true,contract_version:1,rows,total_rows:rows.length,coverage:{recepciones_sin_fecha_operativa:0},warnings:['VENTANAS_RECIBIDAS_NO_CONSTAN']}};}};
     const options={getSupabaseClient:async()=>client,getAppToken:()=> 'synthetic-only'};initPickingDeliveryReport(options);initPickingReceptionReport(options);
    }''')
-   page.locator('#pickReportTab').click();page.locator('#pickReportReceptionTab').click();page.locator('#pickReceptionReportWeek').fill('2026-W46');page.locator('#pickReceptionReportWeek').dispatch_event('change');page.locator('#pickReceptionReportRun').click()
+   page.locator('#pickReportTab').click()
+   for tab,ids in [('#pickReportDeliveryTab',['pickReportFrom','pickReportTo']),('#pickReportReceptionTab',['pickReceptionReportFrom','pickReceptionReportTo'])]:
+    page.locator(tab).click()
+    for input_id in ids:
+     field=page.locator('#'+input_id);button=field.locator('xpath=following-sibling::button');wrapper=field.locator('..')
+     assert button.is_visible() and button.get_attribute('type')=='button'
+     a,b,c=field.bounding_box(),button.bounding_box(),wrapper.bounding_box()
+     assert a['x']+a['width']<=b['x']+1 and b['x']+b['width']<=c['x']+c['width']+1,(a,b,c)
+     assert c['x']>=0 and c['x']+c['width']<=width+1,(input_id,c,width)
+     field.fill('2026-11-12')
+     button.click();page.keyboard.press('Escape')
+     assert field.input_value()=='2026-11-12'
+    page.screenshot(path=str(OUT/f'calendar-{tab[1:]}-{width}.png'),full_page=True,animations='disabled')
+   page.locator('#pickReportReceptionTab').click();page.locator('#pickReceptionReportWeek').fill('2026-W46');page.locator('#pickReceptionReportWeek').dispatch_event('change');page.locator('#pickReceptionReportRun').click()
    page.locator('#pickReceptionReportRows tbody tr').first.wait_for();assert page.locator('#pickReceptionReportRows tbody tr').count()==6
    assert page.evaluate('document.documentElement.scrollWidth')<=width
    # A clipped ancestor can hide overflow from document.scrollWidth; check actual bounds.
