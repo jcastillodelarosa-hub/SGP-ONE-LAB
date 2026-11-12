@@ -1,3 +1,4 @@
+import {mountMatrixPanel} from './matrix-panel.js';
 // Server manifests are the only source of cut identities. Local review never credits a cut.
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const validScope=s=>s&&typeof s.linea==='string'&&s.linea.trim()&&Number.isSafeInteger(s.anio)&&s.anio>=2020&&s.anio<=2100&&Number.isSafeInteger(s.semana)&&s.semana>=1&&s.semana<=53&&s.modo==='BASE';
@@ -16,7 +17,7 @@ export function createCutJournal(storage,scope) {
   // One key per UUID retains concurrent tabs' commands even if both prepare at once.
   return {read,save(command){if(!valid(command))throw Error('Comando de cortes inválido');if(read())throw Error('Hay una operación pendiente.');const key=prefix+command.idempotencyKey,raw=JSON.stringify(command);storage.setItem(key,raw);if(storage.getItem(key)!==raw)throw Error('No se pudo conservar el comando antes de enviarlo.');},clear(command){const key=prefix+command.idempotencyKey,raw=storage.getItem(key);if(raw===null)return;if(raw!==JSON.stringify(command))throw Error('El comando pendiente cambió.');storage.removeItem(key);if(storage.getItem(key)!==null)throw Error('No se pudo cerrar el comando pendiente.');}};
 }
-export function mountSharedCuts(container,{api,catalogApi=null,storage,storageScope,createId=()=>crypto.randomUUID(),openDocument=()=>{}}={}) {
+export function mountSharedCuts(container,{api,catalogApi=null,matrixApi=null,storage,storageScope,createId=()=>crypto.randomUUID(),openDocument=()=>{}}={}) {
   const make=(tag,text)=>{const n=container.ownerDocument.createElement(tag);if(text)n.textContent=text;return n;};
   const panel=make('section');panel.className='panel opt-shared';panel.id='optSharedCuts';
   const title=make('h2','Cortes realizados · estado compartido'),status=make('p');status.id='optSharedStatus';status.setAttribute('role','status');status.setAttribute('aria-live','polite');
@@ -27,6 +28,7 @@ export function mountSharedCuts(container,{api,catalogApi=null,storage,storageSc
   const confirm=make('section');confirm.id='optSharedConfirmation';confirm.hidden=true;confirm.setAttribute('aria-label','Confirmar registro de cortes');
   const question=make('p'),yes=make('button','Confirmar cortes realizados'),no=make('button','Cancelar');yes.id='optSharedConfirm';no.id='optSharedCancel';yes.type=no.type='button';confirm.append(question,yes,no);
   panel.append(title,status,reload,rows,count,register,retry,confirm);container.append(panel);
+  const matrix=mountMatrixPanel(panel,{api:matrixApi});
   let group=null,documents=[],state=null,selected=new Set(),closed=false,epoch=0,busy=false,loading=false,journal,pending=null,journalError='',prepared=null;
   try{journal=createCutJournal(storage,storageScope);pending=journal.read();}catch(e){journalError=e.message;}
   const message=t=>{if(!closed)status.textContent=t;};
@@ -43,10 +45,11 @@ export function mountSharedCuts(container,{api,catalogApi=null,storage,storageSc
     for(const check of rows.querySelectorAll('input'))check.disabled=!canWrite||check.dataset.selectable!=='true';
   }
   function render(){
-    rows.replaceChildren();selected.clear();confirm.hidden=true;prepared=null;
+    matrix.select(null,null);rows.replaceChildren();selected.clear();confirm.hidden=true;prepared=null;
     const references=approvedReferences(state,group,documents,catalogApi);
     for(const ref of references){
       const block=make('section');block.append(make('h3',`${ref.consecutivo} · ${ref.referencia}`));
+      const viewMatrix=make('button','Ver matriz del perfil');viewMatrix.type='button';viewMatrix.onclick=()=>matrix.select(ref.sistema,ref.referencia);block.append(viewMatrix);
       block.append(make('p',`Documento aprobado · SHA ${ref.sha256.slice(0,12)} · ${ref.origen} · ${ref.sistema}`));
       if(ref.localPdf){const view=make('button','Revisar PDF aprobado');view.type='button';view.onclick=()=>openDocument(ref.localPdf.key);block.append(view);}
       else if(ref.serverVerified)block.append(make('p','Detalle validado en el servidor. Puedes consultar y registrar con tus permisos; el PDF local es opcional para revisar el original.'));
@@ -77,5 +80,5 @@ export function mountSharedCuts(container,{api,catalogApi=null,storage,storageSc
   yes.onclick=async()=>{if(!prepared||busy||register.disabled)return;const command=prepared;prepared=null;try{journal.save(command);pending=command;}catch(e){journalError=e.message;confirm.hidden=true;controls();message('No se envió el registro: '+e.message);return;}await submit(command);};
   retry.onclick=async()=>{if(retry.disabled)return;await submit(pending,true);};reload.onclick=refresh;
   controls();message('Selecciona una reserva para consultar el estado compartido.');
-  return {select(next,files=[]){if(closed)return;documents=files;const changed=JSON.stringify(group)!==JSON.stringify(next);group=next;if(changed){epoch++;state=null;selected.clear();confirm.hidden=true;prepared=null;return refresh();}if(!busy&&!loading)render();},refresh,destroy(){closed=true;epoch++;prepared=null;selected.clear();panel.remove();}};
+  return {select(next,files=[]){if(closed)return;documents=files;const changed=JSON.stringify(group)!==JSON.stringify(next);group=next;if(changed){epoch++;state=null;selected.clear();confirm.hidden=true;prepared=null;return refresh();}if(!busy&&!loading)render();},refresh,destroy(){matrix.destroy();closed=true;epoch++;prepared=null;selected.clear();panel.remove();}};
 }

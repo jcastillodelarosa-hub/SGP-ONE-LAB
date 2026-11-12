@@ -1,0 +1,15 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {webcrypto} from 'node:crypto';import {createOptMatrixLibrary} from '../src/services/opt-matrix-library.js';
+if(!globalThis.crypto)globalThis.crypto=webcrypto;const bytes=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aK1kAAAAASUVORK5CYII=','base64');const sha=Buffer.from(await crypto.subtle.digest('SHA-256',bytes)).toString('hex');const base={contract:'OPT-MATRIX-1',ok:true,status:'available',sistema:'TEST',referencia:'TEST-001',matrix:{id:'m',page:1,revision:'1',sourceSha256:'a'.repeat(64),imageSha256:sha,mimeType:'image/png',imageBase64:Buffer.from(bytes).toString('base64')}};const adapter=data=>createOptMatrixLibrary({invoke:async()=>({data})},()=> 'session');
+test('verifies PNG bytes and returns ephemeral blob',async()=>{const d=await adapter(base).load('TEST','TEST-001');assert.equal(d.matrix.blob.size,bytes.length);assert.equal(d.matrix.imageBase64,undefined);});
+test('unavailable/ambiguous cannot include image',async()=>{for(const status of ['unavailable','ambiguous']){assert.equal((await adapter({...base,status,matrix:null}).load('TEST','TEST-001')).status,status);await assert.rejects(adapter({...base,status}).load('TEST','TEST-001'));}});
+test('exact identity required',async()=>{for(const d of [{...base,sistema:'OTHER'},{...base,referencia:'001'}])await assert.rejects(adapter(d).load('TEST','TEST-001'));});
+test('invalid bytes, hash or type rejected',async()=>{for(const matrix of [{...base.matrix,imageBase64:'https://example.com/a.png'},{...base.matrix,imageSha256:'f'.repeat(64)},{...base.matrix,mimeType:'image/svg+xml'}])await assert.rejects(adapter({...base,matrix}).load('TEST','TEST-001'));});
+test('session change invalidates result',async()=>{let token='one';const api=createOptMatrixLibrary({invoke:async()=>{token='two';return {data:base};}},()=>token);await assert.rejects(api.load('TEST','TEST-001'),/sesión cambió/);});
+test('missing session fails before request',async()=>{let called=false;await assert.rejects(createOptMatrixLibrary({invoke:()=>{called=true;}},()=>null).load('TEST','TEST-001'));assert.equal(called,false);});
+
+test('adapter and backend agree end-to-end without exposing storage keys',async()=>{
+ const {createOptMatrixHandler}=await import('../src/server/opt-matrix-handler.js');
+ const h=createOptMatrixHandler({allowedOrigins:['https://example.test'],rpc:async()=>({data:{...base,matrix:{...base.matrix,id:'00000000-0000-4000-8000-000000000001',byteLength:bytes.length,bucket:'opt-matrices-private',objectPath:`images/${sha}.png`}}}),download:async()=>bytes});
+ const api=createOptMatrixLibrary({invoke:async(body)=>({data:await (await h(new Request('https://example.test',{method:'POST',headers:{'content-type':'application/json',origin:'https://example.test'},body:JSON.stringify(body)}))).json()})},()=> 'session');
+ const result=await api.load('TEST','TEST-001');assert.equal(result.matrix.blob.size,bytes.length);assert.equal('objectPath' in result.matrix,false);
+});

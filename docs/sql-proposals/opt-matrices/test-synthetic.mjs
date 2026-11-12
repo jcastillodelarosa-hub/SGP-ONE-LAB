@@ -1,0 +1,32 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+const {PGlite}=await import(process.env.PGLITE_MODULE||'@electric-sql/pglite');
+const db=new PGlite();let checks=0;
+const eq=(a,b)=>{assert.deepEqual(a,b);checks++;};
+const reject=async(fn,re)=>{await assert.rejects(fn,re);checks++;};
+await db.exec(`CREATE ROLE anon;CREATE ROLE authenticated;CREATE ROLE service_role;
+CREATE SCHEMA sgp_opt_shared;
+CREATE FUNCTION sgp_opt_shared.actor(token text,writing boolean) RETURNS text LANGUAGE plpgsql AS $$BEGIN IF token<>'synthetic-reader' OR writing THEN RAISE EXCEPTION 'OPT_NO_AUTORIZADO'; END IF; RETURN token; END$$;`);
+await db.exec(readFileSync(new URL('./install_REVIEW.sql',import.meta.url),'utf8'));
+const lookup=(ref='REF',system='SYSTEM',token='synthetic-reader')=>db.query('select public.sgp_opt_matriz_resolver_v1($1,$2,$3) result',[token,system,ref]).then(r=>r.rows[0].result);
+await reject(()=>lookup(),/MATRIX_NO_HABILITADO/);
+await db.exec('update sgp_opt_matrices.config set enabled=true');
+await reject(()=>lookup('REF','SYSTEM','bad'),/OPT_NO_AUTORIZADO/);
+eq((await lookup()).status,'unavailable');
+await db.exec(`INSERT INTO sgp_opt_matrices.documents VALUES('${'a'.repeat(64)}','private-source','fixture.pdf',2,now());
+INSERT INTO sgp_opt_matrices.entries(sistema,referencia,revision,source_sha256,source_page,image_sha256,image_bytes) VALUES('SYSTEM','REF','A','${'a'.repeat(64)}',1,'${'b'.repeat(64)}',100);`);
+eq((await lookup()).status,'unavailable');
+await reject(()=>db.exec("update sgp_opt_matrices.entries set status='APPROVED'"),/check constraint/);
+await db.exec("update sgp_opt_matrices.entries set status='APPROVED',review_evidence='synthetic check',reviewed_by='test',reviewed_at=now()");
+let result=await lookup();eq(result.status,'available');eq(result.matrix.objectPath,`images/${'b'.repeat(64)}.png`);
+eq((await lookup('REF','OTHER')).status,'unavailable');eq((await lookup('ref')).status,'unavailable');
+await db.exec(`INSERT INTO sgp_opt_matrices.entries(sistema,referencia,revision,source_sha256,source_page,image_sha256,image_bytes) VALUES('SYSTEM','REF','B','${'a'.repeat(64)}',2,'${'c'.repeat(64)}',100)`);
+result=await lookup();eq(result.status,'ambiguous');eq(result.matrix,null);
+await db.exec("update sgp_opt_matrices.entries set status='RETIRED' where revision='B'");eq((await lookup()).status,'available');
+await reject(()=>db.exec('update sgp_opt_matrices.entries set source_page=3'),/MATRIX_PAGE_INVALID/);
+for(const role of ['anon','authenticated']){
+ await db.exec('set role '+role);await reject(()=>lookup(),/permission denied/);await reject(()=>db.query('select * from sgp_opt_matrices.entries'),/permission denied/);await db.exec('reset role');
+}
+await db.exec('set role service_role');eq((await lookup()).status,'available');await reject(()=>db.query('select * from sgp_opt_matrices.entries'),/permission denied/);await db.exec('reset role');
+eq((await db.query("select count(*)::int n from pg_class c join pg_namespace n on c.relnamespace=n.oid where n.nspname='sgp_opt_matrices' and c.relkind='r' and c.relrowsecurity")).rows[0].n,3);
+console.log(JSON.stringify({ok:true,checks,synthetic:true,production:false}));await db.close();

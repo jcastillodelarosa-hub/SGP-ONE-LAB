@@ -59,7 +59,7 @@ export function createOptImportHandler({rpc,readPdf,DOMParser,allowedOrigins}){
   const reject=(status,code,error=code,extra={})=>send(status,{ok:false,code,error,definitive:true,...extra});
   if(origin&&!origins.has(origin))return reject(403,'OPT_ORIGIN_DENIED','Origen no permitido');
   if(origin)headers['Access-Control-Allow-Origin']=origin;
-  if(request.method==='OPTIONS'){headers['Access-Control-Allow-Methods']='POST, OPTIONS';headers['Access-Control-Allow-Headers']='content-type, apikey, authorization';return new Response(null,{status:204,headers});}
+  if(request.method==='OPTIONS'){headers['Access-Control-Allow-Methods']='POST, OPTIONS';headers['Access-Control-Allow-Headers']='content-type, apikey, authorization, x-client-info';return new Response(null,{status:204,headers});}
   if(request.method!=='POST')return reject(405,'OPT_METHOD_DENIED','Método no permitido');
   if(busy)return reject(429,'OPT_IMPORT_BUSY','Hay otra importación en curso. Reintenta este mismo documento.');
   busy=true;let writeAttempted=false;

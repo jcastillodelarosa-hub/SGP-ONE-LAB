@@ -9,6 +9,10 @@ on:
       - 'src/services/opt-shared-catalog.js'
       - 'src/server/opt-*.js'
       - 'src/services/opt-import.js'
+      - 'src/services/opt-matrix-library.js'
+      - 'supabase/functions/opt-matrix-read/**'
+      - 'docs/sql-proposals/opt-matrices/**'
+      - 'tests/opt-matrix-library/**'
       - 'supabase/functions/opt-import/**'
       - 'supabase/config.toml'
       - 'functions/opt-import-manifest-*.mjs'
@@ -42,10 +46,13 @@ jobs:
           npm run build:vendor
       - name: DOM and synthetic SQL
         env:
+          JSDOM_PACKAGE: /tmp/opt-qa/package.json
           JSDOM_MODULE: /tmp/opt-qa/node_modules/jsdom
           PGLITE_MODULE: /tmp/opt-qa/node_modules/@electric-sql/pglite/dist/index.js
         run: |
           node --test tests/opt-*.test.mjs
+          node tests/opt-matrix-library/dom.mjs
+          node docs/sql-proposals/opt-matrices/test-synthetic.mjs
           node tests/opt-digital/workflow-dom.cjs
           node tests/opt-digital/scope-panel-dom.cjs
           node tests/opt-digital/native-session-dom.cjs
@@ -80,6 +87,7 @@ jobs:
       - name: Check complete Edge entry and process synthetic originals in Deno
         run: |
           deno check --no-config --node-modules-dir=manual supabase/functions/opt-import/index.ts
+          deno check --no-config --node-modules-dir=manual supabase/functions/opt-matrix-read/index.ts
           deno test --no-config --no-check --node-modules-dir=manual tests/opt-digital/import-handler-deno.test.ts tests/opt-digital/server-pdf-deno.test.ts
   isolated:
     runs-on: ubuntu-24.04
@@ -131,6 +139,7 @@ jobs:
           node tests/opt-digital/workflow-browser.cjs
           node tests/opt-digital/cut-report-browser.cjs
           node tests/opt-digital/appearance-browser.cjs
+          node tests/opt-matrix-library/browser.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
