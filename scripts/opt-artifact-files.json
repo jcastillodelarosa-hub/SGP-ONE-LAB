@@ -1,6 +1,7 @@
 [
   "opt-digital/index.html",
   "opt-digital/app.js",
+  "opt-digital/document-materials.js",
   "opt-digital/library.js",
   "opt-digital/extraction.js",
   "opt-digital/geometric-extraction.js",
