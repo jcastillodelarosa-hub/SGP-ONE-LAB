@@ -36,8 +36,11 @@ export function createOptDigitalHost({button,panel,container,getClient,getToken,
       // Only static, same-origin application markup; document data uses textContent.
       for(const child of [...template.body.children])if(!['SCRIPT','ASIDE'].includes(child.tagName))shell.append(document.importNode(child,true));
       const styles=[...template.head.querySelectorAll('style,link[rel="stylesheet"]')].map(el=>{const copy=document.importNode(el,true);if(copy.tagName==='LINK')copy.href=new URL(copy.getAttribute('href'),templateUrl).href;return copy;});
+      const theme=document.createElement('link');theme.rel='stylesheet';theme.href=new URL('../../opt-digital/sgp-theme.css',import.meta.url).href;
       const hostStyle=document.createElement('style');hostStyle.textContent=':host{display:block;min-width:0;font:14px system-ui;color:#17263e;background:#f1f5fb}main{margin:0;padding:12px;max-width:none}.opt-refs-open{overflow:hidden}';
-      root.replaceChildren(...styles,hostStyle,shell);
+      root.replaceChildren(...styles,hostStyle,theme,shell);
+      shell.querySelector('header h1').textContent='OPT Digital';
+      shell.querySelector('header p').textContent='Carga de documentos y seguimiento de cortes por reserva';
       shell.querySelector('header .pill').textContent='REVISIÓN LOCAL · CORTES COMPARTIDOS';
       shell.querySelector('.summary button').textContent='Extracción local · no registra cortes';
       shell.querySelector('.opt-library .note').textContent='Archivos locales de este usuario en este navegador. Los aún no importados permanecen locales hasta pulsar Procesar y guardar OPT en SGP. Conserva una copia externa; revisado no significa cortado.';

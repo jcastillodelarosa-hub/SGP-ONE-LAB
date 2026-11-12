@@ -8,6 +8,7 @@
   "opt-digital/pdf-grid.js",
   "opt-digital/pdf-safe-view.js",
   "opt-digital/pilot.css",
+  "opt-digital/sgp-theme.css",
   "vendor/opt-pdf/pdf.min.mjs",
   "vendor/opt-pdf/pdf.worker.min.mjs",
   "opt-digital/workflow.js",
