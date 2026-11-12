@@ -25,8 +25,8 @@
   },
   "legacy_navigation_sha256": "4f0992b1c98f4933fe5a0daa98d95fd85b35fceaffbbbd904fef7d422f21f0af",
   "certification_reference": "docs/opt-publication/RELEASE_REVIEW_V439.md",
-  "baseline_version": "sites/sgp-one-lab/versions/54ba640d99bb8317",
-  "rollback_version": "sites/sgp-one-lab/versions/54ba640d99bb8317",
+  "baseline_version": "sites/sgp-one-lab/versions/afbba2ab69f61867",
+  "rollback_version": "sites/sgp-one-lab/versions/afbba2ab69f61867",
   "artifact_kind": "runtime",
   "backend_contracts_verified": true,
   "backend_probe_required": true
