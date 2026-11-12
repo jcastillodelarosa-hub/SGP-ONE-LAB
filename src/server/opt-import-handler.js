@@ -2,7 +2,7 @@ import {parseIndex,parseIndexWorkbook} from '../domain/opt-index-file.js';
 import {documentProduction} from '../../opt-digital/individual-reconciliation.js';
 import {validateOptImportManifest} from '../../functions/opt-import-manifest-core.mjs';
 
-export const OPT_IMPORT_LIMITS=Object.freeze({pdfBytes:1024*1024,indexBytes:1024*1024,requestBytes:3*1024*1024});
+export const OPT_IMPORT_LIMITS=Object.freeze({pdfBytes:1024*1024,indexBytes:3*1024*1024,requestBytes:6*1024*1024});
 const CONTRACT='OPT-IMPORT-1', WRITE_ROLES=['ADMINISTRADOR','COORDINADOR','LIDER MECANIZADO'];
 const ACCESS=['mecanizado','mecanizado.proceso','mecanizado.produccion'];
 const record=v=>v!==null&&typeof v==='object'&&!Array.isArray(v);
@@ -15,9 +15,9 @@ const sha256=async bytes=>hex(new Uint8Array(await crypto.subtle.digest('SHA-256
 const utf8=new TextDecoder('utf-8',{fatal:true});
 function scopeValid(scope){return exactKeys(scope,['linea','anio','semana','modo'])&&scope.linea==='PANELES_2'&&scope.modo==='BASE'&&Number.isSafeInteger(scope.anio)&&scope.anio>=2020&&scope.anio<=2100&&Number.isSafeInteger(scope.semana)&&scope.semana>=1&&scope.semana<=53;}
 async function bodyJSON(request){
- const length=request.headers.get('content-length');if(length&&(!/^\d+$/.test(length)||Number(length)>OPT_IMPORT_LIMITS.requestBytes))fail('OPT_REQUEST_LIMIT','Solicitud mayor a 3 MiB',413);
+ const length=request.headers.get('content-length');if(length&&(!/^\d+$/.test(length)||Number(length)>OPT_IMPORT_LIMITS.requestBytes))fail('OPT_REQUEST_LIMIT','Solicitud mayor a 6 MiB',413);
  const reader=request.body?.getReader();if(!reader)fail('OPT_REQUEST_INVALID','Solicitud vacía');
- let size=0;const parts=[];try{for(;;){const {done,value}=await reader.read();if(done)break;size+=value.length;if(size>OPT_IMPORT_LIMITS.requestBytes)fail('OPT_REQUEST_LIMIT','Solicitud mayor a 3 MiB',413);parts.push(value);}}finally{await reader.cancel().catch(()=>{});}
+ let size=0;const parts=[];try{for(;;){const {done,value}=await reader.read();if(done)break;size+=value.length;if(size>OPT_IMPORT_LIMITS.requestBytes)fail('OPT_REQUEST_LIMIT','Solicitud mayor a 6 MiB',413);parts.push(value);}}finally{await reader.cancel().catch(()=>{});}
  const bytes=new Uint8Array(size);let offset=0;for(const part of parts){bytes.set(part,offset);offset+=part.length;}
  try{return JSON.parse(utf8.decode(bytes));}catch{fail('OPT_REQUEST_INVALID','JSON inválido');}
 }

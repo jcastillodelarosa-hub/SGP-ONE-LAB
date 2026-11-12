@@ -21,7 +21,8 @@ export async function prepareOptImport({scope,source,pdf,index}){
  let indexHash=null;
  if(source.mode==='INDICE'){
   if(!index||!['xlsx','csv','json'].includes(index.format)||typeof index.sheet!=='string'||!index.sheet.trim())throw fault('OPT_INDICE_ORIGINAL_REQUERIDO',{definitive:true});
-  const data=await original(index.file,1024*1024);indexHash=data.hash;body.index={name:data.name,base64:data.base64,format:index.format,sheet:index.sheet};
+  if(index.file?.size>3*1024*1024)throw fault('Índice mayor a 3 MiB',{definitive:true});
+  const data=await original(index.file,3*1024*1024);indexHash=data.hash;body.index={name:data.name,base64:data.base64,format:index.format,sheet:index.sheet};
  }else if(index)throw fault('OPT_INDIVIDUAL_NO_ADMITE_INDICE',{definitive:true});
  const identity={scope:body.scope,source:body.source,pdf:{name:raw.name,sha256:raw.hash},index:body.index?{name:body.index.name,sha256:indexHash,format:body.index.format,sheet:body.index.sheet}:null};
  return {body,identity,requestHash:await hash(new TextEncoder().encode(JSON.stringify(identity)))};

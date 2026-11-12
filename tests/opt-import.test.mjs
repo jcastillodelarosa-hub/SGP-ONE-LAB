@@ -54,8 +54,17 @@ test('individual derives canonical OPT on server without a client association or
 
 test('bounded PDF/index limits reject before reading or invoking the server',async()=>{
  let calls=0;const api=createOptImport({invoke:async()=>calls++},()=> 't',{storage:storage(),storageScope:'bounded'});
- const tooBig=name=>({name,size:1048577,arrayBuffer:()=>assert.fail('oversized file must not be read')});
+ const tooBig=(name,size=1048577)=>({name,size,arrayBuffer:()=>assert.fail('oversized file must not be read')});
  await assert.rejects(api.process({...input(),pdf:tooBig('OPT-1.pdf')}),/1 MiB/);
- await assert.rejects(api.process({...input(),index:{...input().index,file:tooBig('index.csv')}}),/ORIGINAL_INVALIDO/);
+ await assert.rejects(api.process({...input(),index:{...input().index,file:tooBig('index.csv',3145729)}}),/3 MiB/);
  assert.equal(calls,0);
 });
+
+ test('indices larger than 1 MiB preserve original bytes and SHA up to 3 MiB',async()=>{
+  for(const size of [2656256,3145728]){
+   const bytes=Uint8Array.from({length:size},(_,i)=>i%251),request=input();request.index.file=new File([bytes],'index.xlsx');request.index.format='xlsx';
+   const prepared=await prepareOptImport(request);
+   assert.equal(prepared.body.index.base64,Buffer.from(bytes).toString('base64'));
+   const digest=Buffer.from(await crypto.subtle.digest('SHA-256',bytes)).toString('hex');assert.equal(prepared.identity.index.sha256,digest);
+  }
+ });

@@ -69,12 +69,12 @@ test('XLSX and JSON original index formats use shared server parser; unknown she
 });
 
 test('bounded Edge profile rejects oversized originals and streamed request before parsing/writing',async()=>{
- assert.deepEqual(OPT_IMPORT_LIMITS,{pdfBytes:1048576,indexBytes:1048576,requestBytes:3145728});
+ assert.deepEqual(OPT_IMPORT_LIMITS,{pdfBytes:1048576,indexBytes:3145728,requestBytes:6291456});
  for(const key of ['pdf','index']){
-  const s=setup(),b=body();b[key].base64=Buffer.alloc(1048577).toString('base64');
+  const s=setup(),b=body();b[key].base64=Buffer.alloc((key==='pdf'?1048576:3145728)+1).toString('base64');
   const response=await s.handler(request(b));assert.equal(response.status,422);assert.equal(s.reads(),0);assert.equal(s.writes.length,0);
  }
- const s=setup(),response=await s.handler(new Request('https://example.invalid',{method:'POST',headers:{origin,'content-type':'application/json'},body:new Uint8Array(3145729)}));
+ const s=setup(),response=await s.handler(new Request('https://example.invalid',{method:'POST',headers:{origin,'content-type':'application/json'},body:new Uint8Array(6291457)}));
  assert.equal(response.status,413);assert.equal(s.calls.length,0);
 });
 test('bounded base64 decoder preserves every byte at exact 1 MiB boundary',async()=>{
@@ -82,3 +82,13 @@ test('bounded base64 decoder preserves every byte at exact 1 MiB boundary',async
  const s=setup({readPdf:async actual=>{assert.deepEqual(actual,bytes);throw Error('BOUNDARY_VERIFIED');}}),b=body();b.pdf.base64=Buffer.from(bytes).toString('base64');
  const response=await s.handler(request(b)),out=await response.json();assert.equal(out.error,'BOUNDARY_VERIFIED');assert.equal(s.reads(),1);assert.equal(s.writes.length,0);
 });
+
+ test('3 MiB index bytes parse on server without truncation while PDF stays bounded',async()=>{
+  const {sizedIndexWorkbook}=await import('./opt-digital/import-fixtures.mjs');
+  const bytes=await sizedIndexWorkbook(3145728);assert.equal(bytes.length,3145728);
+  const s=setup(),b=body();b.index={name:'large.xlsx',format:'xlsx',sheet:'ARCHIVOS',base64:Buffer.from(bytes).toString('base64')};
+  const pdf=Buffer.alloc(1048576,32);Buffer.from(fullPdf()).copy(pdf);b.pdf.base64=pdf.toString('base64');
+  const res=await s.handler(request(b)),out=await res.json();assert.equal(res.status,200,JSON.stringify(out));assert.equal(s.writes.length,1);
+  const digest=Buffer.from(await crypto.subtle.digest('SHA-256',bytes)).toString('hex');assert.equal(s.writes[0].p_evidence.original_index.sha256,digest);
+  assert.equal(out.data.cantidad_piezas,4);assert.equal(out.physical_completion_verified,false);
+ });
