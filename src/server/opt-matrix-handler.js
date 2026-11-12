@@ -28,7 +28,7 @@ export function createOptMatrixHandler({rpc,download,allowedOrigins}){
   const reject=(status,code)=>send(status,{ok:false,code});
   if(origin&&!origins.has(origin))return reject(403,'MATRIX_ORIGIN_DENIED');
   if(origin)headers['Access-Control-Allow-Origin']=origin;
-  if(request.method==='OPTIONS'){headers['Access-Control-Allow-Methods']='POST, OPTIONS';headers['Access-Control-Allow-Headers']='content-type, apikey, authorization';return new Response(null,{status:204,headers});}
+  if(request.method==='OPTIONS'){headers['Access-Control-Allow-Methods']='POST, OPTIONS';headers['Access-Control-Allow-Headers']='content-type, apikey, authorization, x-client-info';return new Response(null,{status:204,headers});}
   if(request.method!=='POST')return reject(405,'MATRIX_METHOD_DENIED');
   try{
    if(!/^application\/json(?:;|$)/i.test(request.headers.get('content-type')||''))throw failure('MATRIX_JSON_REQUIRED',415);
