@@ -130,6 +130,7 @@ jobs:
           node tests/opt-digital/import-upload-browser.cjs
           node tests/opt-digital/workflow-browser.cjs
           node tests/opt-digital/cut-report-browser.cjs
+          node tests/opt-digital/appearance-browser.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:

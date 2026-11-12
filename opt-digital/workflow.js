@@ -8,7 +8,7 @@ export function reservationGroups(entries){const groups=new Map();for(const entr
 export function mountOptWorkflow(root,viewer,options={}){
  const $=id=>root.querySelector('#'+id),make=(tag,text)=>{const e=document.createElement(tag);if(text)e.textContent=text;return e;};
  const main=root.querySelector('main'),header=main.querySelector('header'),library=root.querySelector('.opt-library');
- const tabs=make('div');tabs.setAttribute('role','tablist');tabs.setAttribute('aria-label','OPT Digital');
+ const tabs=make('div');tabs.className='opt-workflow-tabs';tabs.setAttribute('role','tablist');tabs.setAttribute('aria-label','OPT Digital');
  const load=make('section'),cuts=make('section');load.id='optLoadPanel';cuts.id='optCutsPanel';
  const buttons=['Carga de OPT','Cortes por reserva'].map((label,i)=>{const b=make('button',label);b.id='optWorkflowTab'+i;b.type='button';b.setAttribute('role','tab');b.setAttribute('aria-controls',i?cuts.id:load.id);tabs.append(b);return b;});
  const show=i=>{load.hidden=i!==0;cuts.hidden=i!==1;buttons.forEach((b,n)=>{b.setAttribute('aria-selected',String(n===i));b.tabIndex=n===i?0:-1;});};
@@ -25,7 +25,7 @@ export function mountOptWorkflow(root,viewer,options={}){
  const folder=make('input');folder.id='optPdfFolder';folder.type='file';folder.multiple=true;folder.setAttribute('webkitdirectory','');folder.accept='.pdf';const folderLabel=make('label','Carpeta local de PDF ');folderLabel.append(folder);
  origin.onchange=()=>{const individual=origin.value==='INDIVIDUAL';input.disabled=individual;folder.disabled=individual;sheet.disabled=individual;importPanel?.invalidate();importPanel?.update();};
  const folderNote=make('p','Selecciona la carpeta desde este navegador. No se accede automáticamente a rutas del servidor. Los originales seleccionados solo se envían al pulsar Procesar y guardar OPT en SGP.');
- load.prepend(origin,sheet,label,indexStatus,folderLabel,folderNote);library.querySelector('label').firstChild.textContent='Cargar archivos individuales ';
+ const filesPanel=make('section');filesPanel.className='panel opt-source-panel';const fileControls=make('div');fileControls.className='opt-source-controls';for(const [field,text] of [[origin,'Tipo de carga'],[sheet,'Hoja del índice']]){const fieldLabel=make('label',text);fieldLabel.append(field);fileControls.append(fieldLabel);}fileControls.append(label,folderLabel);filesPanel.append(make('h2','Archivos de OPT'),fileControls,indexStatus,folderNote);load.prepend(filesPanel);library.querySelector('label').firstChild.textContent='Cargar archivos individuales ';
  library.querySelector('.note').textContent+=' Los individuales no heredan el último índice cargado. El servidor deriva sus asociaciones al procesarlos; la revisión local no las acredita.';
  const unassociated=make('details'),issueTitle=make('summary'),issueNote=make('p','Estas filas permanecen en el índice, pero no se asignan a una reserva por proximidad ni se excluyen como si no pertenecieran a la línea. Requieren asociación acreditada.'),issuePage=make('p'),issueRows=make('div'),issuePrevious=make('button','Anteriores'),issueNext=make('button','Siguientes');unassociated.id='optIndexUnassociated';issueRows.id='optIndexIssueRows';issuePrevious.type=issueNext.type='button';unassociated.append(issueTitle,issueNote,issuePage,issuePrevious,issueNext,issueRows);load.append(unassociated);
  let issueOffset=0,issues=[];

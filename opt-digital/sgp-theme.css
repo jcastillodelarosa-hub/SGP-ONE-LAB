@@ -1,0 +1,68 @@
+/* Native SGP host: carry the existing design system across its shadow boundary.
+   Presentation only. The standalone viewer and business state are unchanged. */
+:host{--opt-blue:#1264c8;--opt-ink:#103b73;--opt-line:#cbd9e8;--opt-soft:#eaf2fb;background:transparent!important}
+#optShell{font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#0b2442;font-size:14px;line-height:1.5}
+#optShell [hidden]{display:none!important}
+#optShell main{padding:18px 0;min-width:0}
+#optShell header{margin-bottom:18px;align-items:flex-start}
+#optShell h1{font-size:24px;line-height:1.25;color:var(--opt-ink)}
+#optShell header p{margin:6px 0 0;color:#526a87}
+#optShell h2{font-size:18px;line-height:1.35;margin:0 0 14px;color:var(--opt-ink)}
+#optShell h3{font-size:15px;color:var(--opt-ink)}
+#optShell p{overflow-wrap:anywhere}
+#optShell .panel,#optShell .opt-library{border:1px solid var(--opt-line);border-radius:12px;padding:18px;background:#fff;box-shadow:none;margin:16px 0;min-width:0}
+#optShell .layout>.panel{margin:0}
+#optShell button{appearance:none;min-height:42px;max-width:100%;padding:9px 14px;border:1px solid #b8cce0;border-radius:8px;background:#fff;color:var(--opt-ink);font:inherit;font-weight:650;line-height:1.3;white-space:normal;overflow-wrap:anywhere;cursor:pointer;vertical-align:middle}
+#optShell button:hover:not(:disabled){background:var(--opt-soft);border-color:var(--opt-blue)}
+#optShell :is(#optScopeLoad,#optImportProcess,#optSharedRegister,#optSharedConfirm,#optReportGenerate){background:var(--opt-blue);border-color:var(--opt-blue);color:#fff}
+#optShell :is(#optScopeLoad,#optImportProcess,#optSharedRegister,#optSharedConfirm,#optReportGenerate):hover:not(:disabled){background:#103b73;border-color:#103b73}
+#optShell button:disabled,#optShell :is(#optScopeLoad,#optImportProcess,#optSharedRegister,#optSharedConfirm,#optReportGenerate):disabled{cursor:not-allowed;opacity:1;background:#edf1f6;color:#65758a;border-color:#d6dfe9;box-shadow:none}
+#optShell :is(button,input,select,summary):focus-visible{outline:3px solid var(--opt-blue);outline-offset:3px}
+#optShell :is(input:not([type=checkbox]):not([type=radio]),select){min-height:42px;min-width:0;max-width:100%;padding:9px 12px;border:1px solid #b8cce0;border-radius:8px;background:#fff;color:#0b2442;font:inherit;line-height:1.3}
+#optShell :is(input,select):disabled{background:#edf1f6;color:#65758a}
+#optShell input[type=checkbox]{accent-color:var(--opt-blue)}
+#optShell input[type=file]{width:100%;font-size:13px;padding:5px}
+#optShell input[type=file]::file-selector-button{min-height:32px;border:0;border-radius:5px;padding:6px 12px;margin-right:10px;background:var(--opt-soft);color:var(--opt-ink);font:inherit;font-weight:650;cursor:pointer}
+#optShell .opt-workflow-tabs{display:flex;gap:4px;padding:5px;border:1px solid var(--opt-line);border-radius:10px;background:var(--opt-soft);width:fit-content;max-width:100%;margin:0 0 18px}
+#optShell .opt-workflow-tabs button{background:transparent;border-color:transparent;min-width:150px}
+#optShell .opt-workflow-tabs button[aria-selected=true]{background:var(--opt-ink);color:#fff;border-color:var(--opt-ink)}
+#optShell :is(.opt-scope-controls,.opt-source-controls){display:grid;gap:12px;align-items:end}
+#optShell .opt-scope-controls{grid-template-columns:130px 150px minmax(200px,1fr) auto}
+#optShell .opt-source-controls{grid-template-columns:repeat(2,minmax(0,1fr))}
+#optShell :is(.opt-scope-controls,.opt-source-controls) label{display:flex;flex-direction:column;gap:6px;min-width:0;font-size:13px;font-weight:650;color:#31546e}
+#optShell :is(.opt-scope-controls,.opt-source-controls) :is(input,select){width:100%;font-weight:400}
+#optShell :is(#optScopeStatus,#optCatalogStatus,#optImportStatus,#optReportStatus){border-left:3px solid #b8cce0;background:#f5f8fc;padding:10px 12px;border-radius:0 6px 6px 0;color:#31546e}
+#optShell #optScopeSummary{font-size:12px;color:#526a87;padding:10px 0;border-top:1px solid #e0e7f0}
+#optShell #optProgrammingScope>button{margin-right:8px}
+#optShell #optScopeFilter{width:min(100%,420px)}
+#optShell #optReservation{width:min(100%,520px);margin:0 0 8px 8px}
+#optShell .note{font-size:13px;line-height:1.5}
+#optShell details{margin-top:14px;padding:12px;border:1px solid var(--opt-line);border-radius:8px;background:#f8fafc}
+#optShell summary{cursor:pointer;color:var(--opt-ink);font-weight:650;min-height:24px}
+#optShell #optIndividualAssignment :is(select,button){margin:4px 8px 4px 0}
+#optShell :is(.table-wrap,#optSharedPieces,#optReportPreview){max-width:100%;min-width:0}
+#optShell table{font-size:13px}
+#optShell th{background:var(--opt-soft);color:var(--opt-ink);font-weight:700}
+#optShell td,#optShell th{padding:10px 12px}
+#optShell .notice{line-height:1.5}
+#optShell .pill{color:var(--opt-ink);background:var(--opt-soft);font-size:11px;white-space:normal}
+#optShell .summary button{flex-shrink:0}
+#optShell .side button.active{background:var(--opt-soft);border-color:var(--opt-blue)}
+@media(max-width:1000px){#optShell .opt-scope-controls{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){
+ #optShell main{padding:12px 0}
+ #optShell h1{font-size:22px}
+ #optShell .panel,#optShell .opt-library{padding:14px}
+ #optShell .opt-workflow-tabs{width:100%}
+ #optShell .opt-workflow-tabs button{min-width:0;flex:1;min-height:44px}
+ #optShell .opt-source-controls{grid-template-columns:minmax(0,1fr)}
+ #optShell .opt-library-tools{display:grid;grid-template-columns:1fr 1fr}
+ #optShell .opt-library-tools #search{grid-column:1/-1;width:100%}
+ #optShell .opt-library-tools select{width:100%}
+ #optShell :is(button,input:not([type=checkbox]):not([type=radio]),select){min-height:44px}
+ #optShell #optReservation{display:block;width:100%;margin:10px 0}
+ #optShell .summary button{margin-top:10px}
+ #optShell .opt-report-tools label{min-width:0}
+ #optShell .opt-report-tools>*{flex-basis:120px}
+}
+@media(prefers-reduced-motion:reduce){#optShell *{transition:none!important;scroll-behavior:auto!important}}
