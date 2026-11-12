@@ -1,3 +1,4 @@
+import { initReportDatePickers } from './report-date-picker.js';
 import { normalizeReportFilters, flattenDeliveryDetails, summarizeDeliveredWindows, reportQuantityGroups, summarizeDeliveryEvents } from '../domain/picking-delivery-report.js';
 
 import {matchesOrderSearch} from '../domain/picking-reception-report.js';
@@ -12,7 +13,7 @@ const summaryHeaders=['Sistema','Movimientos','Producciones','Cant. orden/parte'
 const detailHeaders=['Fecha','Turno','Reserva','Parte','Producción','Sistema','Entregado por','Estado','Cant. orden/parte','Cant. efectiva','Dif.'];
 const missingHeaders=['Reserva','Parte','Producción','Sistema','Perfil','Longitud','Fabricación','Marca','Cantidad','NC','Reserva solución'];
 export function initPickingDeliveryReport({getSupabaseClient,getAppToken}){
- const report=$('pickReportPanel');if(!report)return;const shiftSummary=document.createElement('div');shiftSummary.id='pickReportShiftSummary';shiftSummary.className='pick-report-shift-summary';const systems=$('pickReportSystems');if(systems){const section=systems.previousElementSibling;section?.parentNode?.insertBefore(shiftSummary,section)}
+ const report=$('pickReportPanel');if(!report)return;initReportDatePickers(report);const shiftSummary=document.createElement('div');shiftSummary.id='pickReportShiftSummary';shiftSummary.className='pick-report-shift-summary';const systems=$('pickReportSystems');if(systems){const section=systems.previousElementSibling;section?.parentNode?.insertBefore(shiftSummary,section)}
  let state=null,loadId=0;const exportButtons=()=>[$('pickReportPdf'),$('pickReportImage')].filter(Boolean);exportButtons().forEach(button=>button.disabled=true);const deliveryReport=$('pickReportDeliveryPanel')||report;
  const status=$('pickReportStatus');const brand=document.createElement('div');brand.className='pick-report-document-heading';brand.innerHTML='<img src="./favicon-sgp.svg" alt="Logotipo SGP ONE"><div><strong>SGP ONE · Reporte de Entregas de Producción</strong><small id="pickReportDocumentMeta"></small></div>';deliveryReport.prepend(brand);
  const selectTab=tab=>{for(const name of ['Delivery','Reception','Report']){const active=name===tab;const b=$('pick'+name+'Tab'),p=$('pick'+name+'Panel');if(b)b.classList.toggle('active',active);if(p)p.hidden=!active}const heading=document.querySelector('[data-view-panel="picking"] .page-heading h2');if(heading)heading.textContent=tab==='Report'?'Picking · Reportes':tab==='Reception'?'Picking · Recepción / Auditoría':'Picking · Entrega de Producciones';}
