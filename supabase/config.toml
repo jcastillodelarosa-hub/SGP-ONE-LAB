@@ -2,3 +2,7 @@
 # A public project anon JWT identifies the caller application, never an SGP user.
 [functions.lp-powerbi]
 verify_jwt = true
+
+# Public anon JWT identifies the application; handler + SQL verify real SGP access.
+[functions.opt-import]
+verify_jwt = true

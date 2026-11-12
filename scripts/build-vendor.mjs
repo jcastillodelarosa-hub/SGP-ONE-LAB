@@ -13,3 +13,6 @@ for(const [src,dst] of files){
  await access(dst);
  console.log("vendor:",dst);
 }
+
+// OPT pilot uses a local PDF reader; never fetch a runtime CDN.
+await import('./build-opt-vendor.mjs');

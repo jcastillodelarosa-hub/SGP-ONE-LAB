@@ -1,0 +1,171 @@
+name: OPT Digital isolated checks
+on:
+  pull_request:
+    paths:
+      - 'opt-digital/**'
+      - 'src/domain/opt-*.js'
+      - 'src/modules/opt-digital.js'
+      - 'src/services/opt-shared-cuts.js'
+      - 'src/services/opt-shared-catalog.js'
+      - 'src/server/opt-*.js'
+      - 'src/services/opt-import.js'
+      - 'supabase/functions/opt-import/**'
+      - 'supabase/config.toml'
+      - 'functions/opt-import-manifest-*.mjs'
+      - 'src/services/opt-programming-scope.js'
+      - 'src/services/opt-cut-report.js'
+      - 'docs/sql-proposals/opt-shared/**'
+      - 'tests/opt-*'
+      - 'tests/opt-digital/**'
+      - '.github/workflows/opt-digital.yml'
+permissions:
+  contents: read
+defaults:
+  run:
+    shell: bash
+jobs:
+  dom-sql:
+    name: DOM and synthetic SQL
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install app and isolated DOM/SQL dependencies
+        run: |
+          npm ci --no-audit --no-fund
+          npm install --prefix /tmp/opt-qa --no-audit --no-fund jsdom@26.1.0 @electric-sql/pglite@0.3.14
+          npm run build:vendor
+      - name: DOM and synthetic SQL
+        env:
+          JSDOM_MODULE: /tmp/opt-qa/node_modules/jsdom
+          PGLITE_MODULE: /tmp/opt-qa/node_modules/@electric-sql/pglite/dist/index.js
+        run: |
+          node --test tests/opt-*.test.mjs
+          node tests/opt-digital/workflow-dom.cjs
+          node tests/opt-digital/scope-panel-dom.cjs
+          node tests/opt-digital/native-session-dom.cjs
+          node tests/opt-digital/shared-workflow-dom.cjs
+          node tests/opt-digital/server-registration-dom.cjs
+          node tests/opt-digital/shared-catalog-dom.cjs
+          node tests/opt-digital/import-upload-dom.cjs
+          node tests/opt-digital/cut-report-dom.cjs
+          node docs/sql-proposals/opt-shared/test-synthetic.mjs
+          node tests/opt-digital/role-access.mjs
+          node tests/opt-digital/import-channel.mjs
+          node tests/opt-digital/import-endpoint-sql.mjs
+          node docs/sql-proposals/opt-shared/test-catalog.mjs
+          node tests/opt-digital/server-pdf-reader.mjs
+          node tests/opt-digital/server-pdf-limits.mjs
+  deno-import:
+    name: Deno import runtime (synthetic)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.2.12
+      - name: Install exact official dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Check complete Edge entry and process synthetic originals in Deno
+        run: |
+          deno check --no-config --node-modules-dir=manual supabase/functions/opt-import/index.ts
+          deno test --no-config --no-check --node-modules-dir=manual tests/opt-digital/import-handler-deno.test.ts tests/opt-digital/server-pdf-deno.test.ts
+  isolated:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    # Match the existing npm Playwright version; browsers and OS dependencies are baked in.
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble@sha256:f1e7e01021efd65dd1a2c56064be399f3e4de00fd021ac561325f2bfbb2b837a
+      options: --shm-size=1g
+    env:
+      PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install app and isolated browser client
+        run: |
+          npm ci --no-audit --no-fund
+          npm install --prefix /tmp/opt-qa --no-audit --no-fund playwright@1.56.1
+          npm run build:vendor
+      - name: Verify matching preinstalled Chromium
+        run: |
+          node <<'NODE'
+          const assert = require('node:assert/strict');
+          const fs = require('node:fs');
+          const { chromium } = require('/tmp/opt-qa/node_modules/playwright');
+          assert.equal(require('/tmp/opt-qa/node_modules/playwright/package.json').version, '1.56.1');
+          assert.ok(fs.realpathSync(chromium.executablePath()).startsWith('/ms-playwright/'));
+          (async () => {
+            const browser = await chromium.launch();
+            console.log('Preinstalled Chromium:', await browser.version());
+            await browser.close();
+          })().catch(error => { console.error(error); process.exitCode = 1; });
+          NODE
+      - name: Isolated desktop and mobile browser
+        env:
+          PLAYWRIGHT_MODULE: /tmp/opt-qa/node_modules/playwright
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/opt-http.log 2>&1 &
+          trap 'kill $!' EXIT
+          for i in $(seq 1 20); do curl -fsS http://127.0.0.1:8765/opt-digital/index.html >/dev/null && break || sleep 1; done
+          node tests/opt-digital/shared-workflow-browser.cjs
+          node tests/opt-digital/import-upload-browser.cjs
+          node tests/opt-digital/workflow-browser.cjs
+          node tests/opt-digital/cut-report-browser.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: opt-synthetic-browser
+          path: tests/opt-digital/evidence/
+  postgres-concurrency:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    services:
+      postgres:
+        image: postgres:17.11
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: opt_fixture_only
+          POSTGRES_DB: opt_concurrency_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d opt_concurrency_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install isolated PostgreSQL client
+        run: npm install --prefix /tmp/opt-pg-qa --no-audit --no-fund pg@8.16.3
+      - name: Real PostgreSQL sessions with synthetic fixtures only
+        env:
+          OPT_PG_DISPOSABLE: 'YES'
+          OPT_PG_URL: postgresql://postgres:opt_fixture_only@127.0.0.1:5432/opt_concurrency_test
+          PG_MODULE: /tmp/opt-pg-qa/node_modules/pg/lib/index.js
+        run: |
+          node docs/sql-proposals/opt-shared/test-concurrent.mjs --check
+          node docs/sql-proposals/opt-shared/test-concurrent.mjs

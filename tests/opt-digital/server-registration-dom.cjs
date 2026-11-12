@@ -1,0 +1,22 @@
+const assert=require('node:assert/strict');const {JSDOM}=require(process.env.JSDOM_MODULE||'jsdom');
+(async()=>{
+ const {createOptSharedCuts}=await import('../../src/services/opt-shared-cuts.js');
+ const {mountSharedCuts}=await import('../../opt-digital/shared-cuts.js');
+ const {buildOptProgrammingSnapshot,classifyOptLineScope}=await import('../../src/domain/opt-line-scope.js');
+ const scope={linea:'PANELES_2',anio:2026,semana:46,modo:'BASE'},sha='a'.repeat(64),pieceId='11234567-89ab-4cde-8fab-0123456789ab',commandId='21234567-89ab-4cde-8fab-0123456789ab';
+ const snapshot=buildOptProgrammingSnapshot({context:scope,productions:[{key_produccion:'SYNTH|PANELES_2',id_linea:'PANELES_2',sistema:'PANEL',reserva_principal:'R',anio:2026,semana_base:46}],shared:[]});
+ const plan=classifyOptLineScope({snapshot,entries:[{origin:'RETAIL',sourceKey:'RETAIL',opt:'OPT-1',reservation:'R',system:'PANEL'}],documents:[{origin:'RETAIL',sourceKey:'RETAIL',opt:'OPT-1',sha256:sha}]});
+ const group={...plan.groups[0],scope};assert.equal(group.canRegister,false);
+ const period={fecha:'2026-11-10',turno:2,inicio:'2026-11-10T19:00:00-05:00',fin:'2026-11-11T07:00:00-05:00',zona:'America/Bogota',horario_sha256:'b'.repeat(64)};
+ let committed=false,writes=0,readAllowed=true;
+ const state=()=>({contract_version:2,scope,habilitado:true,reserva:'R',manifiesto_validado:true,puede_registrar:readAllowed,totales:{piezas:1,cortadas:committed?1:0,pendientes:committed?0:1},referencias:[{id_documento:'01234567-89ab-4cde-8fab-0123456789ab',sha256:sha,fuentes:[{source_key:'RETAIL',origen:'RETAIL',consecutivo:'OPT-1',modo_carga:'INDICE'}],sistema:'PANEL',referencia:'REF',piezas:[{id_pieza:pieceId,registrable:true,pagina:1,patron:1,barra:1,corte:1,longitud_mm:500,estado:committed?'CORTADO':'PENDIENTE',usuario:committed?'synthetic-cutter':null,registrado_en:committed?'2026-11-11T01:00:00Z':null,id_registro:committed?commandId:null,periodo:committed?period:null}]}]});
+ const client={rpc:async(name,args)=>{if(name.includes('estado'))return {data:state()};writes++;committed=true;return {data:{contract_version:2,scope,reserva:'R',ok:true,duplicado:false,cantidad_piezas:1,piezas:[pieceId],usuario:'synthetic-cutter',id_registro:commandId,registrado_en:'2026-11-11T01:00:00Z',periodo:period}};}};
+ const dom=new JSDOM('<main></main>',{url:'https://synthetic.invalid'}),root=dom.window.document.querySelector('main');
+ const api=createOptSharedCuts(client,()=> 'synthetic-session'),mounted=mountSharedCuts(root,{api,storage:dom.window.localStorage,storageScope:'synthetic',createId:()=>commandId});
+ const $=id=>root.querySelector('#'+id);
+ await mounted.select(group,[{format:'pdf',key:'c'.repeat(64)}]);assert(root.querySelector('input').disabled);assert.equal(writes,0);
+ await mounted.select(group,[{format:'pdf',key:sha}]);const box=root.querySelector('input');assert.equal(box.disabled,false);box.checked=true;box.onchange();$('optSharedRegister').click();$('optSharedCancel').click();assert.equal(writes,0);
+ $('optSharedRegister').click();await $('optSharedConfirm').onclick();assert.equal(writes,1);assert.match($('optSharedPieces').textContent,/synthetic-cutter/,$('optSharedStatus').textContent);assert.equal(root.querySelector('input').disabled,true);assert.equal(group.canRegister,false);
+ mounted.destroy();const second=mountSharedCuts(root,{api:createOptSharedCuts(client,()=> 'second-synthetic-cutter'),storage:dom.window.localStorage,storageScope:'second'});await second.select(group,[{format:'pdf',key:sha}]);assert.match($('optSharedPieces').textContent,/Cortado/);assert.match($('optSharedPieces').textContent,/synthetic-cutter/);assert.equal(writes,1);second.destroy();
+ console.log('PASS: normal documentary group stays false; validated server identity + exact PDF enables confirmation; shared state visible to second synthetic cutter. No production writes.');
+})().catch(e=>{console.error(e);process.exit(1);});

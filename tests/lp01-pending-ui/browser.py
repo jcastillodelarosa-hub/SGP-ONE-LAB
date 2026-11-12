@@ -8,7 +8,7 @@ class Files(http.server.SimpleHTTPRequestHandler):
 server=http.server.ThreadingHTTPServer(('127.0.0.1',0),Files);threading.Thread(target=server.serve_forever,daemon=True).start();origin=f'http://127.0.0.1:{server.server_port}'
 try:
  with sync_playwright() as pw:
-  browser=pw.chromium.launch(executable_path='/usr/bin/chromium',args=['--no-sandbox'])
+  browser=pw.chromium.launch(executable_path='/usr/bin/chromium' if Path('/usr/bin/chromium').exists() else None,args=['--no-sandbox'])
   for width in (1440,390):
    page=browser.new_page(viewport={'width':width,'height':900});page.clock.install();errors=[];page.on('pageerror',lambda e:errors.append(str(e)));page.route('**/*',lambda r:r.continue_() if r.request.url.startswith(origin) else r.abort())
    page.goto(origin+'/tests/lp01-pending-ui/fixture.html');page.wait_for_selector('[data-order-summary="QA3|PANELES_2"] [data-summary-cause=NC_AL]')

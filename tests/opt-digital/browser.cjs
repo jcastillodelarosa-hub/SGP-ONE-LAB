@@ -1,0 +1,40 @@
+// Run against an isolated local HTTP server. Optional private PDF stays outside repository.
+const assert=require('node:assert/strict');
+const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
+(async()=>{
+ const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/usr/bin/chromium',headless:true,args:['--no-sandbox']});
+ const context=await browser.newContext();const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ const url=process.env.OPT_URL||'http://127.0.0.1:8765/opt-digital/';
+ const fixture=(name,ref,length)=>({name,mimeType:'application/json',buffer:Buffer.from(JSON.stringify({plans:[{id:'same-plan',ref,barqty:1,length:'120"',cuts:[{length,project:'<img src=x onerror="window.INJECTED=true">'}]},{id:'second',ref,barqty:1,cuts:[{length:'20"'}]}]}))});
+ await page.goto(url);await page.waitForFunction(()=>!document.querySelector('#files').disabled);
+ const a=fixture('same.json',"R'\"><svg onload=alert(1)>",'10"'),b=fixture('same.json','R-B','11"');
+ await page.locator('#files').setInputFiles([a,b]);await page.waitForFunction(()=>document.querySelectorAll('#library button').length===2);
+ await page.locator('#versions').selectOption('latest');assert.equal(await page.locator('#library button').count(),1);await page.locator('#versions').selectOption('all');assert.equal(await page.locator('#library button').count(),2);
+ await page.locator('#library button').last().click();await page.waitForFunction(()=>document.querySelector('#refTitle').textContent.startsWith("R'"));
+ await page.getByLabel('Revisado corte 1',{exact:true}).check();await page.waitForFunction(()=>!document.querySelector('#cuts input').disabled);
+ await page.locator('#library button').first().click();await page.waitForFunction(()=>document.querySelector('#refTitle').textContent==='R-B');assert.equal(await page.locator('#cuts input').isChecked(),false);
+ await page.locator('#next').click();await page.waitForFunction(async()=>{const request=indexedDB.open('sgp-opt-digital-library-v15',1);return new Promise(resolve=>{request.onsuccess=()=>{const db=request.result,tx=db.transaction('documents'),r=tx.objectStore('documents').getAll();r.onsuccess=()=>{resolve(r.result.some(x=>x.view?.index===1));db.close();};};});});
+ await page.reload();await page.waitForFunction(()=>document.querySelectorAll('#library button').length===2);
+ await page.locator('#library button').first().click();await page.waitForFunction(()=>document.querySelector('#position').textContent==='2 / 2');
+ await page.locator('#library button').last().click();await page.waitForFunction(()=>document.querySelector('#cuts input')?.checked);
+ assert.equal(await page.evaluate(()=>Boolean(window.INJECTED)),false);assert.equal(await page.locator('#cuts img, #refs svg').count(),0);
+ await page.locator('#files').setInputFiles({...a,name:'renamed.json'});await page.waitForFunction(()=>document.querySelector('#status').textContent.includes('ya guardado'));assert.equal(await page.locator('#library button').count(),2);
+ await page.locator('#files').setInputFiles([{name:'broken.json',mimeType:'application/json',buffer:Buffer.from('{')},fixture('third.json','R-C','12"')]);await page.waitForFunction(()=>document.querySelectorAll('#library button').length===3);
+ await page.setViewportSize({width:1440,height:1000});await page.screenshot({path:'/tmp/opt-v15-desktop.png',fullPage:true});
+ await page.setViewportSize({width:390,height:844});await page.locator('#openRefs').click();await page.locator('#refs button').first().click();assert.equal(await page.locator('body').evaluate(e=>e.classList.contains('opt-refs-open')),false);
+ await page.locator('#railRefs').click();assert.equal(await page.locator('body').evaluate(e=>e.classList.contains('opt-refs-rail')),true);
+ await page.locator('#openRefs').click();await page.keyboard.press('Escape');assert.equal(await page.locator('body').evaluate(e=>e.classList.contains('opt-refs-open')),false);
+ assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+ await page.screenshot({path:'/tmp/opt-v15-mobile.png',fullPage:true});
+ let extraction=null;
+ if(process.env.OPT_PRIVATE_PDF){await page.locator('#files').setInputFiles(process.env.OPT_PRIVATE_PDF);await page.waitForFunction(()=>document.querySelectorAll('#library button').length===4,{},{timeout:90000});extraction=await page.evaluate(()=>({summary:document.querySelector('#summary').textContent.replace(/SHA .*/,''),textCharacters:document.querySelector('#text').textContent.length,hasPdf:!document.querySelector('#pdfToggle').disabled,blocked:document.querySelector('.summary button').disabled}));await page.locator('#pdfToggle').click();assert.equal(await page.locator('#pdf').isVisible(),true);await page.waitForFunction(()=>document.querySelector('#pdfPosition').textContent.startsWith('Página 1 de'),{},{timeout:90000});assert(await page.locator('#pdfCanvas').evaluate(c=>c.width>0&&c.height>0));
+ await page.locator('#cuts input').first().check();await page.waitForFunction(()=>!document.querySelector('#cuts input').disabled);
+ await page.evaluate(()=>{document.querySelector('#reextract').click();const old=document.querySelector('#cuts input');old.checked=false;old.dispatchEvent(new Event('change'));});await page.waitForFunction(()=>!document.querySelector('#reextract').disabled,{},{timeout:90000});
+ await page.waitForFunction(()=>document.querySelector('#status').textContent.includes('La extracción cambió'));
+ const stored=await page.evaluate(()=>new Promise((resolve,reject)=>{const r=indexedDB.open('sgp-opt-digital-library-v15',1);r.onsuccess=()=>{const db=r.result,q=db.transaction('documents').objectStore('documents').getAll();q.onsuccess=()=>{resolve(q.result.find(d=>d.format==='pdf'));db.close();};q.onerror=()=>reject(q.error);};}));
+ assert.equal(stored.extractorVersion,21);assert.equal(stored.history.length,1);assert(Object.values(stored.history[0].review).some(Boolean));assert.deepEqual(stored.review,{});assert.equal(await page.locator('#library button').count(),4);
+ assert.equal(stored.individualCoverage.productionEnabled,false);assert.equal(await page.locator('.physical-bar').count(),stored.data.plans[0].barqty);assert.equal(await page.locator('.physical-track .segment').count(),stored.data.plans[0].cuts.length);assert.match(await page.locator('#individualCoverage').textContent(),/Ninguna producción SGP/);assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+ if(process.env.OPT_PRIVATE_OUTPUT)require('node:fs').writeFileSync(process.env.OPT_PRIVATE_OUTPUT,JSON.stringify({...stored.data,individualCoverage:stored.individualCoverage,sourceProjectRows:stored.sourceProjectRows}));
+ extraction={...extraction,extractorVersion:stored.extractorVersion,historyPreserved:true,reviewReset:true,staleReviewRejected:true,issueCount:stored.issues.length};}
+ assert.deepEqual(errors,[]);console.log(JSON.stringify({version:21,passed:true,checks:['multi-file import','same-name isolation','latest/all versions','content deduplication','review persistence','navigation persistence','failed import recovery','XSS inert','mobile drawer/rail/Escape','mobile no overflow'],extraction},null,2));await browser.close();
+})().catch(e=>{console.error(e);process.exit(1);});

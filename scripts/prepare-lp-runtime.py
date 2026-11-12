@@ -1,7 +1,8 @@
 """Positive-list real frontend, no data fixtures, no deployment or backend activation."""
 from pathlib import Path
-import subprocess,shutil,json,hashlib
-ROOT=Path(__file__).resolve().parents[1];OUT=Path('/tmp/sgp-lp183-main-visual')
+import subprocess,shutil,json,hashlib,os
+ROOT=Path(__file__).resolve().parents[1];OUT=Path(os.environ.get('SGP_OPT_REVIEW_OUTPUT','/tmp/sgp-lp183-main-visual'))
+if 'SGP_OPT_REVIEW_OUTPUT' in os.environ and (OUT.parent!=Path('/tmp') or not OUT.name.startswith('opt-artifact-')):raise SystemExit('Review output must be /tmp/opt-artifact-*')
 if OUT.exists():shutil.rmtree(OUT)
 OUT.mkdir()
 for rel in subprocess.check_output(['git','ls-files'],cwd=ROOT,text=True).splitlines():
@@ -13,6 +14,10 @@ for rel in subprocess.check_output(['git','ls-files'],cwd=ROOT,text=True).splitl
  dst=OUT/p;dst.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(ROOT/p,dst)
 (OUT/'vendor').mkdir(exist_ok=True)
 for n in ['supabase.js','html2canvas.min.js','jspdf.umd.min.js']:shutil.copyfile(ROOT/'vendor'/n,OUT/'vendor'/n)
+for rel in json.loads((ROOT/'scripts/opt-artifact-files.json').read_text()):
+ p=Path(rel)
+ if p.is_absolute() or '..' in p.parts or (p.parts[0] not in ['opt-digital','vendor'] and not (p.parts[0]=='src' and len(p.parts)>2 and p.parts[1] in ['modules','domain','services'] and p.suffix=='.js')):raise ValueError('Invalid OPT artifact entry')
+ dst=OUT/p;dst.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(ROOT/p,dst)
 if (ROOT/'release-info.json').exists():shutil.copyfile(ROOT/'release-info.json',OUT/'release-info.json')
 manifest={'mode':'FULL_SGP_RUNTIME_LP','production_deploy':True,'backend_activation':False,'source_head':subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),'files':{str(p.relative_to(OUT)):hashlib.sha256(p.read_bytes()).hexdigest() for p in OUT.rglob('*') if p.is_file()}}
 (OUT/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n');print('Prepared real RPC frontend, no synthetic data, no deployment')

@@ -1,0 +1,45 @@
+// New private import channel only. All identities and PDFs are synthetic.
+import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';
+const {PGlite}=await import(process.env.PGLITE_MODULE||'@electric-sql/pglite');const db=new PGlite();
+await db.exec(`CREATE ROLE anon;CREATE ROLE authenticated;CREATE ROLE service_role;
+CREATE TABLE public.sgp_producciones(key_produccion text PRIMARY KEY,id text,id_linea text,reserva_al text,sistema text,anio integer,semana_base integer,activa text,excluida_export boolean);
+CREATE TABLE public.sgp_mecanizado_programacion(id_programacion uuid PRIMARY KEY,reserva text,estado text);
+CREATE TABLE public.sgp_mecanizado_programacion_detalle(id_programacion uuid,key_produccion text,reserva_snapshot text,cantidad_snapshot numeric);
+CREATE VIEW public.sgp_produccion_reservas_v AS SELECT key_produccion,reserva_al AS reserva,reserva_al AS reserva_principal FROM public.sgp_producciones;
+CREATE FUNCTION public.sgp_pdt_validar_rol_real(token text,roles text[]) RETURNS text LANGUAGE plpgsql AS $$BEGIN IF token<>'synthetic-cutter' OR NOT 'LIDER MECANIZADO'=ANY(roles) THEN RAISE EXCEPTION 'SESSION_DENIED'; END IF; RETURN token;END$$;
+CREATE FUNCTION public.sgp_mis_accesos(token text) RETURNS TABLE(ventana text) LANGUAGE sql AS $$SELECT 'mecanizado.proceso'::text$$;
+INSERT INTO public.sgp_producciones VALUES('SYNTH|PANELES_2','700001','PANELES_2','SYNTH-R','PANEL',2026,46,'SI',false);
+INSERT INTO public.sgp_mecanizado_programacion VALUES('01234567-89ab-4cde-8fab-0123456789ab','SYNTH-R','SIN INICIAR');
+INSERT INTO public.sgp_mecanizado_programacion_detalle VALUES('01234567-89ab-4cde-8fab-0123456789ab','SYNTH|PANELES_2','SYNTH-R',1);`);
+await db.exec(readFileSync(new URL('../../docs/sql-proposals/opt-shared/install_REVIEW.sql',import.meta.url),'utf8'));
+await db.exec(readFileSync(new URL('../../docs/sql-proposals/opt-shared/import_context_REVIEW.sql',import.meta.url),'utf8'));
+await db.exec(readFileSync(new URL('../../docs/sql-proposals/opt-shared/import_channel_REVIEW.sql',import.meta.url),'utf8'));
+const bytes=new TextEncoder().encode('%PDF-synthetic-not-a-real-source');
+const hash=(await db.query("SELECT encode(sha256($1::bytea),'hex') AS hash",[bytes])).rows[0].hash;
+const evidence={contract:'OPT-SERVER-VALIDATION-1',algorithm:'opt-import-manifest-v1',pdf_sha256:hash,validation:'DOCUMENTARY_MANIFEST_READY',physical_completion_verified:false,sgp_binding:{source:'synthetic-test'}};
+const pieces=[{referencia:'SYNTH-REF',pagina:1,patron:1,barra:1,corte:1,longitud_mm:12.7,asignacion:{reserva:'SYNTH-R',sistema:'PANEL',key_produccion:'SYNTH|PANELES_2',id_programacion:'01234567-89ab-4cde-8fab-0123456789ab'}}];
+const sources=[{source_key:'SYNTH-SOURCE',origen:'RETAIL',consecutivo:'SYNTH-OPT',modo_carga:'INDICE'}];
+const invoke=(token='synthetic-cutter',proof=evidence,manifest=pieces)=>db.query('SELECT public.sgp_opt_importar_validado_v1($1,$2,$3,$4,$5) AS result',[token,bytes,JSON.stringify(manifest),JSON.stringify(sources),JSON.stringify(proof)]);
+await assert.rejects(invoke(),/OPT_NO_HABILITADO/);
+await db.exec("UPDATE sgp_opt_shared.config SET enabled=true,access_window='mecanizado',read_roles=ARRAY['LIDER MECANIZADO'],write_roles=ARRAY['LIDER MECANIZADO']");
+const scope={linea:'PANELES_2',anio:2026,semana:46,modo:'BASE'};
+const snapshot=(await db.query('SELECT public.sgp_opt_import_contexto_v1($1,$2,$3) AS data',['synthetic-cutter',JSON.stringify(scope),['700001']])).rows[0].data;
+evidence.sgp_binding={contract:snapshot.contract,scope,revision:snapshot.revision,producciones:['700001']};
+for(const role of ['anon','authenticated']){await db.exec('SET ROLE '+role);await assert.rejects(invoke(),/permission denied/);await db.exec('RESET ROLE');}
+for(const proof of [{...evidence,pdf_sha256:'a'.repeat(64)},{...evidence,physical_completion_verified:true},{...evidence,algorithm:'client-trust'},{...evidence,sgp_binding:null}])await assert.rejects(invoke('synthetic-cutter',proof),/SERVIDOR/);
+await assert.rejects(invoke('unknown'),/SESSION_DENIED/);
+const first=(await invoke()).rows[0].result;assert.equal(first.ok,true);assert.equal(first.duplicado,false);
+await db.exec('SET ROLE service_role');const again=(await invoke()).rows[0].result;assert.equal(again.duplicado,true);assert.equal(again.id_documento,first.id_documento);await db.exec('RESET ROLE');
+const before=(await db.query('SELECT count(*)::int AS n FROM sgp_opt_shared.approvals')).rows[0].n;
+await assert.rejects(invoke('synthetic-cutter',evidence,[{...pieces[0],longitud_mm:25.4}]),/RECONCILIACION/);
+assert.equal((await db.query('SELECT count(*)::int AS n FROM sgp_opt_shared.approvals')).rows[0].n,before);
+assert.deepEqual((await db.query('SELECT (SELECT count(*)::int FROM sgp_opt_shared.pieces) AS pieces,(SELECT count(*)::int FROM sgp_opt_shared.cuts) AS cuts,(SELECT count(*)::int FROM sgp_opt_shared.events) AS events')).rows[0],{pieces:1,cuts:0,events:0});
+
+const context=(token='synthetic-cutter',ids=['700001'])=>db.query('SELECT public.sgp_opt_import_contexto_v1($1,$2,$3) AS data',[token,JSON.stringify({linea:'PANELES_2',anio:2026,semana:46,modo:'BASE'}),ids]);
+const bindings=(await context()).rows[0].data.bindings;assert.equal(bindings.length,1);assert.equal(bindings[0].documentProduction,'700001');assert.equal(bindings[0].key_produccion,'SYNTH|PANELES_2');
+await assert.rejects(context('unknown'),/SESSION_DENIED/);await assert.rejects(context('synthetic-cutter',['bad-prefix']),/PRODUCCIONES/);
+await db.exec('SET ROLE anon');await assert.rejects(context(),/permission denied/);await db.exec('RESET ROLE');
+await db.exec("INSERT INTO public.sgp_mecanizado_programacion VALUES('11234567-89ab-4cde-8fab-0123456789ab','SYNTH-R','SIN INICIAR');INSERT INTO public.sgp_mecanizado_programacion_detalle VALUES('11234567-89ab-4cde-8fab-0123456789ab','SYNTH|PANELES_2','SYNTH-R',1)");
+assert.equal((await context()).rows[0].data.bindings.length,2);
+await db.exec("UPDATE public.sgp_mecanizado_programacion SET estado='CANCELADA'");assert.equal((await context()).rows[0].data.bindings[0].id_programacion,null);
+await db.close();console.log('PASS: private automatic import is closed by default, denies public clients, checks session and validator envelope, deduplicates and atomically rejects changed manifests; complete eligible context preserves ambiguity and missing programs; no cut events. Synthetic only.');

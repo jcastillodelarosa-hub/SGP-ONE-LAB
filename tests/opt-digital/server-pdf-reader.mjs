@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import {createRequire} from 'node:module';
+import {createOptPdfReader} from '../../src/server/opt-pdf-reader.js';
+const pdfjs=await import(process.env.PDFJS_MODULE||'pdfjs-dist/build/pdf.mjs');
+const require=createRequire(import.meta.url),pdf=require('./synthetic-pdf.cjs');
+const read=createOptPdfReader(pdfjs);
+assert.throws(()=>createOptPdfReader({...pdfjs,version:'different'}),/ENGINE/);
+for(const input of ['https://example.invalid/document.pdf',new Uint8Array([1,2]),new TextEncoder().encode('%NOT-a-pdf')])await assert.rejects(read(input),/BYTES/);
+const bytes=new Uint8Array(pdf()),before=bytes.slice();const result=await read(bytes);
+assert.equal(result.pdfPages,2);assert.deepEqual(bytes,before);assert.equal(result.productionEnabled,false);assert.equal(result.plans.length,0);
+console.log('PASS: pinned server PDF.js reads original synthetic bytes; no plans/approval invented, unsupported inputs rejected. Node compatibility only, Edge runtime unverified.');

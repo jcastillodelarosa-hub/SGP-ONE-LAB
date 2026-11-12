@@ -1,7 +1,8 @@
 """Offline frontend artifact, never deploys; positive allowlist excludes private/backend files."""
 from pathlib import Path
-import subprocess,shutil,json,hashlib,sys,re
-ROOT=Path(__file__).resolve().parents[1];OUT=Path('/tmp/sgp-lp183-main-visual')
+import subprocess,shutil,json,hashlib,sys,re,os
+ROOT=Path(__file__).resolve().parents[1];OUT=Path(os.environ.get('SGP_OPT_REVIEW_OUTPUT','/tmp/sgp-lp183-main-visual'))
+if 'SGP_OPT_REVIEW_OUTPUT' in os.environ and (OUT.parent!=Path('/tmp') or not OUT.name.startswith('opt-artifact-')):raise SystemExit('Review output must be /tmp/opt-artifact-*')
 if len(sys.argv)>2:raise SystemExit('At most one local synthetic input')
 source=Path(sys.argv[1]) if len(sys.argv)==2 else ROOT/'tests/lp01-integration/fixtures/lp-synthetic.json';snapshot=json.loads(source.read_text())
 if set(snapshot)!={'ENSAMBLE','EMPAQUE'} or any(r['key']!='QA-DEMO|PANELES_2' for s in snapshot.values() for r in s['orders']):raise SystemExit('Synthetic fixture required')
@@ -17,6 +18,11 @@ if (ROOT/'release-info.json').is_file():shutil.copyfile(ROOT/'release-info.json'
 # SDK is generated/untracked in this repository: use the existing local build, no credentials.
 (OUT/'vendor').mkdir(exist_ok=True)
 for name in ['supabase.js','html2canvas.min.js','jspdf.umd.min.js']:shutil.copyfile(ROOT/'vendor'/name,OUT/'vendor'/name)
+# Exact OPT allowlist, including generated PDF.js modules; never copy uploaded files.
+for rel in json.loads((ROOT/'scripts/opt-artifact-files.json').read_text()):
+ p=Path(rel)
+ if p.is_absolute() or '..' in p.parts or (p.parts[0] not in ['opt-digital','vendor'] and not (p.parts[0]=='src' and len(p.parts)>2 and p.parts[1] in ['modules','domain','services'] and p.suffix=='.js')):raise ValueError('Invalid OPT artifact entry')
+ dst=OUT/p;dst.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(ROOT/p,dst)
 for rel in ['src/domain/lp01-visual-bridge.js']:
  dst=OUT/rel;dst.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(ROOT/rel,dst)
 (OUT/'lp-visual-synthetic.json').write_text(json.dumps(snapshot))

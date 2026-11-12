@@ -6,7 +6,7 @@ subprocess.run(['node',str(ROOT/'scripts/stamp-lp-release.mjs')],cwd=ROOT,check=
 kind=json.loads((ROOT/'deployment/lp-hosting-policy.json').read_text()).get('artifact_kind','visual')
 if kind not in ['visual','runtime']:raise ValueError('ARTIFACT_KIND_INVALID')
 subprocess.run(['python',str(ROOT/('scripts/prepare-lp-runtime.py' if kind=='runtime' else 'scripts/prepare-lp-main-visual.py'))],cwd=ROOT,check=True)
-root=Path('/tmp/sgp-lp183-main-visual');target=Path(os.environ.get('RUNNER_TEMP','/tmp'))/'lp-visual.zip'
+root=Path(os.environ.get('SGP_OPT_REVIEW_OUTPUT','/tmp/sgp-lp183-main-visual'));target=Path(os.environ.get('RUNNER_TEMP','/tmp'))/'lp-visual.zip'
 with zipfile.ZipFile(target,'w',zipfile.ZIP_DEFLATED) as z:
  for p in sorted(root.rglob('*')):
   if p.is_file():z.write(p,str(p.relative_to(root)))

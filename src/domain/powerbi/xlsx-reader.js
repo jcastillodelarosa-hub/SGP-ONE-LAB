@@ -9,9 +9,10 @@ async function inflate(bytes,limit){
  try{for(;;){const {value,done}=await reader.read();if(done)break;size+=value.length;if(size>limit)fail('XLSX descomprimido excede el límite');parts.push(value);}}finally{await reader.cancel().catch(()=>{});}
  const out=new Uint8Array(size);let at=0;for(const p of parts){out.set(p,at);at+=p.length;}return out;
 }
-export async function unzipXlsx(input){
+export async function unzipXlsx(input,{maxFileBytes=MAX_FILE}={}){
+ if(!Number.isSafeInteger(maxFileBytes)||maxFileBytes<1||maxFileBytes>5*1024*1024)fail('Límite XLSX inválido');
  const bytes=input instanceof Uint8Array?input:new Uint8Array(input);
- if(bytes.length<22||bytes.length>MAX_FILE)fail('Archivo XLSX inválido o mayor de 2 MiB');
+ if(bytes.length<22||bytes.length>maxFileBytes)fail('Archivo XLSX inválido o mayor del límite permitido');
  const view=new DataView(bytes.buffer,bytes.byteOffset,bytes.byteLength),u16=p=>view.getUint16(p,true),u32=p=>view.getUint32(p,true);
  let end=-1;for(let p=bytes.length-22;p>=Math.max(0,bytes.length-65557);p--)if(u32(p)===0x06054b50&&p+22+u16(p+20)===bytes.length){end=p;break;}
  if(end<0||u16(end+4)||u16(end+6)||u16(end+8)!==u16(end+10))fail('ZIP incompatible, segmentado o corrupto');
@@ -23,7 +24,7 @@ export async function unzipXlsx(input){
   if(at+46+nameLength+extra+comment>end)fail('Entrada ZIP incompleta');
   const name=decode.decode(bytes.subarray(at+46,at+46+nameLength));
   if(!name||name.includes('..')||name.includes('\\')||name.startsWith('/')||name.includes('\0')||names.has(name)||flags&1||![0,8].includes(method))fail('Entrada ZIP duplicada, cifrada o incompatible');
-  names.add(name);total+=size;if(size>MAX_XML||total>MAX_XML||packed>MAX_FILE)fail('XLSX descomprimido excede el límite');
+  names.add(name);total+=size;if(size>MAX_XML||total>MAX_XML||packed>maxFileBytes)fail('XLSX descomprimido excede el límite');
   if(local+30>start||u32(local)!==0x04034b50||u16(local+6)!==flags||u16(local+8)!==method)fail('Cabecera ZIP inconsistente');
   const localName=u16(local+26),localExtra=u16(local+28),from=local+30+localName+localExtra;
   if(from+packed>start||decode.decode(bytes.subarray(local+30,local+30+localName))!==name)fail('Contenido ZIP incompleto');
@@ -46,12 +47,16 @@ const one=(node,name)=>{const nodes=children(node,name);if(nodes.length!==1)fail
 function textNodes(node){return Array.from(node.getElementsByTagNameNS(MAIN,'t')).map(x=>x.textContent).join('');}
 /** Reads the real Export worksheet, including sparse cells and shared strings. */
 export async function readExportGrid(input,{DOMParser=globalThis.DOMParser}={}){
- if(!DOMParser)fail('Parser XML no disponible');const zip=await unzipXlsx(input);
+ return readWorksheetGrid(input,{DOMParser,sheetName:'Export'});
+}
+// OPT uses an explicit sheet selector; Export keeps its original single-sheet policy.
+export async function readWorksheetGrid(input,{DOMParser=globalThis.DOMParser,sheetName='Export',allowOtherSheets=false,allowUnusedMacroDefault=false,allowStringCells=false,maxFileBytes=MAX_FILE}={}){
+ if(!DOMParser)fail('Parser XML no disponible');const zip=await unzipXlsx(input,{maxFileBytes});
  for(const name of zip.keys())if(/vbaProject|externalLinks|embeddings/i.test(name))fail('Contenido activo/externo no admitido');
- const types=xml(zip.get('[Content_Types].xml'),DOMParser);if(Array.from(types.getElementsByTagName('*')).some(n=>/macroEnabled/i.test(n.getAttribute?.('ContentType')||'')))fail('Macros no admitidas');
+ const types=xml(zip.get('[Content_Types].xml'),DOMParser);if(Array.from(types.getElementsByTagName('*')).some(n=>{if(!/macroEnabled/i.test(n.getAttribute?.('ContentType')||''))return false;const ext=n.getAttribute('Extension');return !(allowUnusedMacroDefault&&n.localName==='Default'&&ext&&!Array.from(zip.keys()).some(name=>name.toLowerCase().endsWith('.'+ext.toLowerCase())));}))fail('Macros no admitidas');
  const workbook=xml(zip.get('xl/workbook.xml'),DOMParser),root=workbook.documentElement;
  if(root.localName!=='workbook'||root.namespaceURI!==MAIN||children(root,'workbookPr').some(n=>n.getAttribute('date1904')==='1'))fail('Libro o calendario XLSX incompatible');
- const sheets=children(one(root,'sheets'),'sheet');if(sheets.length!==1||sheets[0].getAttribute('name')!=='Export'||['hidden','veryHidden'].includes(sheets[0].getAttribute('state')))fail('Se requiere una única hoja visible Export');
+ const allSheets=children(one(root,'sheets'),'sheet'),sheets=allSheets.filter(s=>s.getAttribute('name')===sheetName);if((!allowOtherSheets&&allSheets.length!==1)||sheets.length!==1||['hidden','veryHidden'].includes(sheets[0].getAttribute('state')))fail('Se requiere la hoja visible única '+sheetName);
  const rels=xml(zip.get('xl/_rels/workbook.xml.rels'),DOMParser),allRels=Array.from(rels.getElementsByTagName('*')).filter(n=>n.localName==='Relationship');
  if(allRels.some(n=>n.getAttribute('TargetMode')==='External'))fail('Relaciones externas no admitidas');
  const id=sheets[0].getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships','id');
@@ -70,6 +75,7 @@ export async function readExportGrid(input,{DOMParser=globalThis.DOMParser}={}){
    const type=cell.getAttribute('t')||'n',v=children(cell,'v'),is=children(cell,'is');if(v.length>1||is.length>1)fail('Celda ambigua');
    let value=null;
    if(type==='inlineStr'){if(v.length||is.length!==1)fail('Texto XLSX inválido');value=textNodes(is[0]);}
+   else if(type==='str'&&allowStringCells){if(is.length||v.length!==1)fail('Texto XLSX ambiguo');value=v[0].textContent;}
    else if(type==='s'){if(v.length!==1||!/^\d+$/.test(v[0].textContent)||Number(v[0].textContent)>=shared.length)fail('Índice de texto inválido');value=shared[Number(v[0].textContent)];}
    else if(type==='n'){if(is.length)fail('Celda numérica inválida');if(v.length&&v[0].textContent!==''){value=Number(v[0].textContent);if(!Number.isFinite(value))fail('Número XLSX inválido');}}
    else fail('Tipo de celda no admitido: '+type);
@@ -77,5 +83,5 @@ export async function readExportGrid(input,{DOMParser=globalThis.DOMParser}={}){
   }
   rows.push({row:rowNumber,values:Array.from({length:values.length},(_,i)=>values[i]??null)});
  }
- return {sheet:'Export',rows};
+ return {sheet:sheetName,rows};
 }
