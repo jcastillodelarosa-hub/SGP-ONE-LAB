@@ -16,7 +16,7 @@
 #optShell button:hover:not(:disabled){background:var(--opt-soft);border-color:var(--opt-blue)}
 #optShell :is(#optScopeLoad,#optImportProcess,#optSharedRegister,#optSharedConfirm,#optReportGenerate){background:var(--opt-blue);border-color:var(--opt-blue);color:#fff}
 #optShell :is(#optScopeLoad,#optImportProcess,#optSharedRegister,#optSharedConfirm,#optReportGenerate):hover:not(:disabled){background:#103b73;border-color:#103b73}
-#optShell button:disabled{cursor:not-allowed;opacity:1;background:#edf1f6;color:#65758a;border-color:#d6dfe9;box-shadow:none}
+#optShell button:disabled,#optShell :is(#optScopeLoad,#optImportProcess,#optSharedRegister,#optSharedConfirm,#optReportGenerate):disabled{cursor:not-allowed;opacity:1;background:#edf1f6;color:#65758a;border-color:#d6dfe9;box-shadow:none}
 #optShell :is(button,input,select,summary):focus-visible{outline:3px solid var(--opt-blue);outline-offset:3px}
 #optShell :is(input:not([type=checkbox]):not([type=radio]),select){min-height:42px;min-width:0;max-width:100%;padding:9px 12px;border:1px solid #b8cce0;border-radius:8px;background:#fff;color:#0b2442;font:inherit;line-height:1.3}
 #optShell :is(input,select):disabled{background:#edf1f6;color:#65758a}
@@ -56,6 +56,9 @@
  #optShell .opt-workflow-tabs{width:100%}
  #optShell .opt-workflow-tabs button{min-width:0;flex:1;min-height:44px}
  #optShell .opt-source-controls{grid-template-columns:minmax(0,1fr)}
+ #optShell .opt-library-tools{display:grid;grid-template-columns:1fr 1fr}
+ #optShell .opt-library-tools #search{grid-column:1/-1;width:100%}
+ #optShell .opt-library-tools select{width:100%}
  #optShell :is(button,input:not([type=checkbox]):not([type=radio]),select){min-height:44px}
  #optShell #optReservation{display:block;width:100%;margin:10px 0}
  #optShell .summary button{margin-top:10px}

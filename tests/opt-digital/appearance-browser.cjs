@@ -32,6 +32,8 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
  }
  await host.locator('#optWorkflowTab0').click();await host.locator('#optWorkflowTab0').focus();await page.keyboard.press('ArrowRight');assert.equal(await host.locator('#optWorkflowTab1').getAttribute('aria-selected'),'true');
  assert(await host.locator('#optSharedRegister').isDisabled());
+ assert.equal(await host.locator('#optSharedRegister').evaluate(e=>getComputedStyle(e).backgroundColor),'rgb(237, 241, 246)');
+ await host.locator('#optWorkflowTab0').click();assert((await host.locator('#search').boundingBox()).width>250);
  await page.evaluate(()=>window.fixture.destroy());assert.equal(await host.locator('#optShell').count(),0);
  await browser.close();console.log('PASS: native SGP style, desktop/mobile, tabs, disabled action, no horizontal control overflow, logout cleanup. Synthetic only.');
 })().catch(e=>{console.error(e);process.exitCode=1;});
