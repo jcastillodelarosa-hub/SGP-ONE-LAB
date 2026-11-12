@@ -17,7 +17,7 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
   window.fixture.update({valid:true,username:'synthetic-style',access:['mecanizado']});document.querySelector('#panel').hidden=false;await window.fixture.open();
  });
  const host=page.locator('#host');await host.locator('#optScopeLoad').waitFor();
- await page.waitForFunction(()=>getComputedStyle(document.querySelector('#host').shadowRoot.querySelector('#optScopeLoad')).backgroundColor==='rgb(18, 100, 200)');
+ await page.waitForFunction(()=>getComputedStyle(document.querySelector('#host').shadowRoot.querySelector('#optScopeLoad')).backgroundColor==='rgb(237, 241, 246)',null,{timeout:15000});
  fs.mkdirSync('tests/opt-digital/evidence',{recursive:true});
  for(const [name,width,height] of [['desktop',1440,1000],['mobile',390,844]]){
   await page.setViewportSize({width,height});
