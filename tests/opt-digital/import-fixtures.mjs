@@ -45,3 +45,13 @@ export async function indexWorkbook(){
   ['xl/worksheets/sheet1.xml',`<worksheet xmlns="${ns}"><sheetData><row r="1"><c r="A1" t="str"><v>OPT</v></c><c r="B1" t="str"><v>Reserva</v></c><c r="C1" t="str"><v>Sistema</v></c></row><row r="2"><c r="A2" t="str"><v>OPT-SYNTH</v></c><c r="B2" t="str"><v>SYNTH-R</v></c><c r="C2" t="str"><v>SYNTH-SYS</v></c></row></sheetData></worksheet>`]
  ]));
 }
+
+// Valid original workbook with an unused passive XML part. No user data.
+export async function sizedIndexWorkbook(size){
+ const {unzipXlsx}=await import('../../src/domain/powerbi/xlsx-reader.js');
+ const {storeZip}=await import('../lp01-powerbi/zip-fixture.mjs');
+ const parts=await unzipXlsx(await indexWorkbook());parts.set('docProps/custom.xml','');
+ const overhead=storeZip(parts).length;
+ if(size<overhead)throw Error('Synthetic workbook size too small');
+ parts.set('docProps/custom.xml',' '.repeat(size-overhead));return storeZip(parts);
+}
