@@ -8,7 +8,7 @@ const shell=root.querySelector('#optShell') || document.body;
 const lifecycle=new AbortController();let disposed=false;const readOnly=options.readOnly===true;
 const $ = id => root.querySelector('#'+id);
 const node = (tag, text, cls) => {const el=document.createElement(tag); if(text!==undefined)el.textContent=text; if(cls)el.className=cls; return el;};
-const documentListeners=new Set();
+const documentListeners=new Set(),referenceListeners=new Set();
 const queue=serialQueue(); let db, current, ref='', index=0, hasPdf=false, records=[], selectionEpoch=0;
 const status = message => {if(!disposed && $('status'))$('status').textContent=message;};
 const pdfView=createPdfView({canvas:$('pdfCanvas'),message:$('pdfStatus'),previous:$('pdfPrevious'),next:$('pdfNext'),position:$('pdfPosition')});
@@ -54,6 +54,7 @@ function saveView(){if(readOnly||!current)return; const key=current.key,expected
 function renderPlan(){
   const plans=current?.data.plans.filter(p=>p.ref===ref)||[];index=Math.max(0,Math.min(index,plans.length-1));const p=plans[index];
   $('refTitle').textContent=ref||'Sin patrones interpretables';
+  for(const listener of referenceListeners)listener(ref);
   $('individualCoverage').textContent='Sin conciliación individual calculada para esta extracción.';const coverage=current?.individualCoverage;if(coverage){const cuts=coverage.cuts.filter(c=>c.profile===ref),bars=coverage.bars.filter(b=>b.profile===ref);$('individualCoverage').textContent=`Cobertura documental de esta referencia: ${cuts.filter(c=>c.productionStatus==='DOCUMENT_ID_MATCH').length}/${cuts.length} cortes con número de producción presente en Project data; ${cuts.filter(c=>c.status==='UNIQUE_DOCUMENT_ROW').length} con fila documental única; ${cuts.filter(c=>c.status==='ROW_GROUP_MATCH').length} conciliados solo como grupo repetido. Barras representadas por patrón: ${bars.filter(b=>b.distributionStatus==='PDF_PATTERN_REPETITION').length}/${bars.length}. Remanentes: ${bars.filter(b=>b.remainderStatus==='ARITHMETIC_EQUALITY').length} con igualdad aritmética; ${bars.filter(b=>b.remainderStatus==='KERF_OR_ALLOWANCE_UNVERIFIED').length} con diferencia pendiente de justificar; ${bars.filter(b=>b.remainderStatus==='INCONSISTENT').length} inconsistentes. Comparación aritmética con espesor y extremos impresos: ${bars.filter(b=>b.arithmeticModels?.some(m=>m.delta32===0)).length}/${bars.length} coincide bajo una hipótesis de pasadas, no certificada. Ninguna producción SGP ni barra física enlazada. Repeticiones sin identidad individual quedan pendientes.`;}
   $('reconciliation').replaceChildren();for(const audit of current?.reconciliation?.filter(a=>a.reference===ref)||[]){const item=node('p');const match=v=>v===true?'coincide':v===false?'difiere':'sin fuente';item.textContent=`${audit.finish}: barras ${audit.bars} / ${audit.printedBars??'N/D'} PDF; cortes ${audit.cuts} / ${audit.printedCuts??'N/D'} PDF. Longitudes de barras: ${match(audit.barLengthsMatch)}; cortes: ${match(audit.cutLengthsMatch)}. Grupos de referencia: ${audit.referenceGroupsMatch===true?'coinciden':audit.referenceGroupsMatch===false?'difieren o están agrupados de otra manera; revisar identidad':'sin fuente'}. ${audit.incomplete?'Hay datos incompletos o incidencias.':'Sin incidencias sintácticas detectadas.'} Estado provisional; no acredita cada pieza.`;$('reconciliation').append(item);}
   for(const balance of current?.individualCoverage?.profileBalances?.filter(b=>b.ref===ref)||[]){
@@ -108,6 +109,7 @@ $('files').disabled=true;library.then(async lib=>{if(disposed){lib.close();retur
 const cleanup=()=>{disposed=true;closeDrawer();lifecycle.abort();pdfView.clear();db?.close();};
 window.addEventListener('pagehide',cleanup,{signal:lifecycle.signal});nav('hidden');
 return {destroy:cleanup,
+ onReference(listener){referenceListeners.add(listener);listener(ref);return ()=>referenceListeners.delete(listener);},
  onDocuments(listener){documentListeners.add(listener);listener(records);return ()=>documentListeners.delete(listener);},
  openDocument(key){const epoch=++selectionEpoch;return queue(async()=>{if(disposed)throw Error('Vista cerrada');const item=await db.get(key);if(epoch===selectionEpoch)activate(item);}).catch(e=>status(e.message));},
  importFiles(files,provenance=null){if(readOnly||disposed)return;const epoch=++selectionEpoch;for(const file of files)queue(async()=>{await library;return importFile(file,epoch,false,provenance);}).catch(e=>status(file.name+': '+e.message));}

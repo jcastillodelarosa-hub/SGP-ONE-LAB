@@ -1,3 +1,4 @@
+import {mountMatrixPanel} from './matrix-panel.js';
 import {mountOptCutReport} from './cut-report.js';
 import {mountOptScopePanel} from './scope-panel.js';
 import {mountSharedCuts} from './shared-cuts.js';
@@ -32,6 +33,10 @@ export function mountOptWorkflow(root,viewer,options={}){
  function renderIssues(){issues=entries.filter(e=>!e.reservation||!e.system);unassociated.hidden=!issues.length;issueTitle.textContent=`${issues.length} filas sin reserva o sistema · pendientes de asociación`;issueOffset=Math.min(issueOffset,Math.max(0,Math.floor((issues.length-1)/50)*50));issueRows.replaceChildren();for(const e of issues.slice(issueOffset,issueOffset+50))issueRows.append(make('p',`${e.origin} · fila ${e.sourceRow} · ${e.opt} · Reserva: ${e.reservation||'ausente'} · Sistema: ${e.system||'ausente'}`));issuePage.textContent=issues.length?`Filas ${issueOffset+1}–${Math.min(issueOffset+50,issues.length)} de ${issues.length}. Todas se conservan hasta cambiar el índice.`:'';issuePrevious.disabled=issueOffset===0;issueNext.disabled=issueOffset+50>=issues.length;}
  issuePrevious.onclick=()=>{issueOffset=Math.max(0,issueOffset-50);renderIssues();};issueNext.onclick=()=>{issueOffset+=50;renderIssues();};
  const reserve=make('select');reserve.id='optReservation';reserve.setAttribute('aria-label','Reserva y sistema del catálogo compartido o candidatos locales');const documents=make('div');documents.id='optReservationDocuments';const detail=make('p','Consulta el ámbito de programación para seleccionar una reserva compartida. No necesitas volver a cargar el índice o PDF.');detail.setAttribute('role','status');const catalogStatus=make('p','Consulta la línea, el año y la semana de origen para cargar el catálogo compartido.');catalogStatus.id='optCatalogStatus';catalogStatus.setAttribute('role','status');const catalogReload=make('button','Actualizar catálogo compartido');catalogReload.id='optCatalogRefresh';catalogReload.type='button';catalogReload.disabled=true;cuts.prepend(catalogStatus,catalogReload,reserve,detail,documents);
+ let matrixSystem='',matrixReference='';
+ const matrixSlot=make('div');$('refTitle').after(matrixSlot);
+ const matrix=mountMatrixPanel(matrixSlot,{api:options.matrixApi});
+ const unsubscribeReference=viewer.onReference?.(reference=>{matrixReference=reference;matrix.select(matrixSystem,matrixReference);})||(()=>{});
  const shared=mountSharedCuts(cuts,{...options,openDocument:key=>viewer.openDocument(key)});
  cuts.insertBefore(cuts.lastElementChild,documents.nextSibling);
  const report=mountOptCutReport(cuts,{api:options.reportApi,defaultScope:options.defaultScope});
@@ -69,6 +74,7 @@ export function mountOptWorkflow(root,viewer,options={}){
   if(groups.length&&!scopePanel.getScope()){scopePanel.invalidate();return;}
   const selected=groups.find(g=>g.key===reserve.value);
   if(selected?.origin==='SERVIDOR'&&!options.catalogApi?.ownsGroup(selected)){invalidateCatalog();renderScoped();return;}
+  matrixSystem=selected?.system||'';matrix.select(matrixSystem,matrixReference);
   documents.replaceChildren();shared.select(selected||null,records);
   if(!selected){detail.textContent='Selecciona una reserva compartida para consultar referencias, cortes realizados y pendientes. Los candidatos locales se muestran por separado.';return;}
   const g=selected;
@@ -87,5 +93,5 @@ export function mountOptWorkflow(root,viewer,options={}){
  const reportContextInputs=['optScopeYear','optScopeWeek','optScopeLine'].map($);
  for(const input of reportContextInputs)input.addEventListener('change',report.invalidate);
  const unsubscribe=viewer.onDocuments(items=>{records=items;clearTimeout(renderTimer);renderTimer=setTimeout(()=>{if(!closed)render();},75);});render();show(0);
- return {destroy(){closed=true;importPanel.destroy();individualFiles?.removeEventListener('change',captureIndividual,true);invalidateCatalog();clearTimeout(renderTimer);unsubscribe();for(const input of reportContextInputs)input.removeEventListener('change',report.invalidate);report.destroy();shared.destroy();scopePanel.destroy();}};
+ return {destroy(){closed=true;unsubscribeReference();matrix.destroy();importPanel.destroy();individualFiles?.removeEventListener('change',captureIndividual,true);invalidateCatalog();clearTimeout(renderTimer);unsubscribe();for(const input of reportContextInputs)input.removeEventListener('change',report.invalidate);report.destroy();shared.destroy();scopePanel.destroy();}};
 }

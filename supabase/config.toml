@@ -6,3 +6,7 @@ verify_jwt = true
 # Public anon JWT identifies the application; handler + SQL verify real SGP access.
 [functions.opt-import]
 verify_jwt = true
+
+# Private images require the live SGP/OPT session and service-only catalog lookup.
+[functions.opt-matrix-read]
+verify_jwt = true

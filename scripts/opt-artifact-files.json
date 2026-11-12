@@ -28,5 +28,8 @@
   "src/domain/opt-cut-report.js",
   "src/services/opt-import.js",
   "src/domain/opt-index-file.js",
-  "opt-digital/import-panel.js"
+  "opt-digital/import-panel.js",
+  "opt-digital/matrix-panel.js",
+  "opt-digital/matrix-panel.css",
+  "src/services/opt-matrix-library.js"
 ]

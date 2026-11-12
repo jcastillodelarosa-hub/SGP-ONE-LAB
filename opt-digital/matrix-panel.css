@@ -1,0 +1,6 @@
+/* Reference lock: existing SGP blue actions, white drawing canvas, contained dialog. */
+.opt-matrix-panel{border:1px solid #c8d9ed;border-radius:12px;background:#f7f9fc;padding:14px;margin:12px 0;min-width:0;color:#0b2442}
+.opt-matrix-panel h3{font-size:16px;margin:0 0 8px}.opt-matrix-panel p{margin:8px 0;font-size:13px}.opt-matrix-preview{display:block;max-width:100%;max-height:240px;object-fit:contain;background:white;border:1px solid #dae4ef;border-radius:8px}.opt-matrix-panel [hidden]{display:none!important}
+.opt-matrix-panel button{min-height:42px;padding:8px 14px;border:1px solid #1264c8;border-radius:8px;background:#1264c8;color:white;font:inherit;cursor:pointer}.opt-matrix-panel button:focus-visible{outline:3px solid #75b9ff;outline-offset:3px}
+.opt-matrix-dialog{width:min(1000px,90vw);max-height:90dvh;overflow:auto;border:1px solid #adc6e4;border-radius:12px;padding:16px;color:#0b2442;background:#fff}.opt-matrix-dialog::backdrop{background:#0b244299}.opt-matrix-dialog img{display:block;width:100%;height:auto;object-fit:contain}.opt-matrix-dialog h2{font-size:18px}.opt-matrix-dialog button{position:sticky;top:0;float:right}
+@media(max-width:600px){.opt-matrix-panel{padding:10px}.opt-matrix-dialog{width:calc(100vw - 24px);box-sizing:border-box;padding:10px}}
