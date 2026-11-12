@@ -51,3 +51,11 @@ test('individual derives canonical OPT on server without a client association or
  const value={scope,source:{origin:'DESCONOCIDO',opt:'loose',mode:'INDIVIDUAL'},pdf:file('loose.pdf','%PDF')};const api=createOptImport({invoke:async body=>{assert(!body.index);const r=await receipt(body);r.document.opt='CANONICAL';return {data:r};}},()=> 't',{storage:storage(),storageScope:'a'});assert.equal((await api.process(value)).document.opt,'CANONICAL');
  const prepared=await prepareOptImport(value);assert.deepEqual(Object.keys(prepared.body).sort(),['pdf','scope','source']);
 });
+
+test('bounded PDF/index limits reject before reading or invoking the server',async()=>{
+ let calls=0;const api=createOptImport({invoke:async()=>calls++},()=> 't',{storage:storage(),storageScope:'bounded'});
+ const tooBig=name=>({name,size:1048577,arrayBuffer:()=>assert.fail('oversized file must not be read')});
+ await assert.rejects(api.process({...input(),pdf:tooBig('OPT-1.pdf')}),/1 MiB/);
+ await assert.rejects(api.process({...input(),index:{...input().index,file:tooBig('index.csv')}}),/ORIGINAL_INVALIDO/);
+ assert.equal(calls,0);
+});

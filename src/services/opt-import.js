@@ -16,11 +16,12 @@ async function original(file,max){
 export async function prepareOptImport({scope,source,pdf,index}){
  if(!scopeValid(scope)||!exact(source,'origin,opt,mode')||typeof source.opt!=='string'||!source.opt.trim()||source.opt.length>200||!['INDICE','INDIVIDUAL'].includes(source.mode)||!['RETAIL','PROYECTO','DESCONOCIDO'].includes(source.origin)||source.mode==='INDIVIDUAL'&&source.origin!=='DESCONOCIDO'||source.mode==='INDICE'&&source.origin==='DESCONOCIDO')throw fault('OPT_IMPORTACION_PARAMETROS_INVALIDOS',{definitive:true});
  if(!/\.pdf$/i.test(pdf?.name||'')||pdf.name.replace(/\.pdf$/i,'')!==source.opt)throw fault('OPT_PDF_NOMBRE_EXACTO_REQUERIDO',{definitive:true});
- const raw=await original(pdf,16*1024*1024),body={scope:{...scope},source:{...source},pdf:{name:raw.name,base64:raw.base64}};
+ if(pdf.size>1024*1024)throw fault('PDF mayor a 1 MiB. Este perfil admite como máximo 100 páginas y no divide el documento.',{definitive:true});
+ const raw=await original(pdf,1024*1024),body={scope:{...scope},source:{...source},pdf:{name:raw.name,base64:raw.base64}};
  let indexHash=null;
  if(source.mode==='INDICE'){
   if(!index||!['xlsx','csv','json'].includes(index.format)||typeof index.sheet!=='string'||!index.sheet.trim())throw fault('OPT_INDICE_ORIGINAL_REQUERIDO',{definitive:true});
-  const data=await original(index.file,5*1024*1024);indexHash=data.hash;body.index={name:data.name,base64:data.base64,format:index.format,sheet:index.sheet};
+  const data=await original(index.file,1024*1024);indexHash=data.hash;body.index={name:data.name,base64:data.base64,format:index.format,sheet:index.sheet};
  }else if(index)throw fault('OPT_INDIVIDUAL_NO_ADMITE_INDICE',{definitive:true});
  const identity={scope:body.scope,source:body.source,pdf:{name:raw.name,sha256:raw.hash},index:body.index?{name:body.index.name,sha256:indexHash,format:body.index.format,sheet:body.index.sheet}:null};
  return {body,identity,requestHash:await hash(new TextEncoder().encode(JSON.stringify(identity)))};

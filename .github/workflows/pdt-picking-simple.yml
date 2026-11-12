@@ -5,6 +5,8 @@ on:
       - 'src/modules/pdt-*.js'
       - 'src/services/pdt-picking-simple.js'
       - 'src/services/pdt-production-deliveries.js'
+      - 'index.html'
+      - 'tests/pdt-dashboard-tabs*'
       - 'app.js'
       - 'styles.css'
       - 'tests/pdt-production-queue-browser.py'
@@ -18,6 +20,8 @@ on:
       - 'src/modules/pdt-*.js'
       - 'src/services/pdt-picking-simple.js'
       - 'src/services/pdt-production-deliveries.js'
+      - 'index.html'
+      - 'tests/pdt-dashboard-tabs*'
       - 'app.js'
       - 'styles.css'
       - 'tests/pdt-production-queue-browser.py'
@@ -28,6 +32,27 @@ on:
 permissions:
   contents: read
 jobs:
+  browser-dashboard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - run: python3 -m pip install playwright==1.56.0
+      - name: Check Python-decoded browser setup and real JavaScript bindings
+        run: python3 tests/pdt-dashboard-tabs-script-check.py
+      - name: Validation tabs, historical closure and loading failures, PC and mobile
+        env:
+          SGP_QA_CHROMIUM: /usr/bin/google-chrome
+          SGP_QA_OUT: ${{ runner.temp }}/pdt-dashboard-tabs-browser
+        run: python3 tests/pdt-dashboard-tabs-browser.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pdt-dashboard-tabs-browser-${{ github.sha }}
+          path: ${{ runner.temp }}/pdt-dashboard-tabs-browser
+          retention-days: 7
   browser:
     runs-on: ubuntu-latest
     timeout-minutes: 5

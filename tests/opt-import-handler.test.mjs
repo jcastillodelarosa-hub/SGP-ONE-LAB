@@ -67,3 +67,18 @@ test('XLSX and JSON original index formats use shared server parser; unknown she
  }
  const s=setup(),b=body();b.index={name:'index.xlsx',format:'xlsx',sheet:'Wrong',base64:base64(xlsx)};assert.equal((await s.handler(request(b))).status,422);assert.equal(s.writes.length,0);
 });
+
+test('bounded Edge profile rejects oversized originals and streamed request before parsing/writing',async()=>{
+ assert.deepEqual(OPT_IMPORT_LIMITS,{pdfBytes:1048576,indexBytes:1048576,requestBytes:3145728});
+ for(const key of ['pdf','index']){
+  const s=setup(),b=body();b[key].base64=Buffer.alloc(1048577).toString('base64');
+  const response=await s.handler(request(b));assert.equal(response.status,422);assert.equal(s.reads(),0);assert.equal(s.writes.length,0);
+ }
+ const s=setup(),response=await s.handler(new Request('https://example.invalid',{method:'POST',headers:{origin,'content-type':'application/json'},body:new Uint8Array(3145729)}));
+ assert.equal(response.status,413);assert.equal(s.calls.length,0);
+});
+test('bounded base64 decoder preserves every byte at exact 1 MiB boundary',async()=>{
+ const bytes=Uint8Array.from({length:1048576},(_,i)=>i%256);bytes.set(new TextEncoder().encode('%PDF-'));
+ const s=setup({readPdf:async actual=>{assert.deepEqual(actual,bytes);throw Error('BOUNDARY_VERIFIED');}}),b=body();b.pdf.base64=Buffer.from(bytes).toString('base64');
+ const response=await s.handler(request(b)),out=await response.json();assert.equal(out.error,'BOUNDARY_VERIFIED');assert.equal(s.reads(),1);assert.equal(s.writes.length,0);
+});
