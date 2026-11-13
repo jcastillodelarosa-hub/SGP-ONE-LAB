@@ -23,6 +23,10 @@ const indexText='OPT,Reserva,Sistema\nA,R-SYNTH,PANEL\nB,R-SYNTH,PANEL\nMISSING,
     await context.route('**/*',async route=>{
      const request=route.request(),url=new URL(request.url());
      if(url.origin==='http://127.0.0.1:8765')return route.continue();
+     if(url.pathname==='/functions/v1/opt-matrix-read'){
+      const body=request.postDataJSON();assert.equal(body.p_token,token);assert.equal(body.sistema,'PANEL');assert.equal(body.referencia,'REF-SYNTH');
+      return route.fulfill({json:{contract:'OPT-MATRIX-1',ok:true,sistema:body.sistema,referencia:body.referencia,status:'unavailable',matrix:null}});
+     }
      if(url.pathname==='/functions/v1/opt-import'){
       const body=request.postDataJSON();uploads.push(structuredClone(body));inflight++;maxInflight=Math.max(maxInflight,inflight);
       try{
@@ -46,6 +50,8 @@ const indexText='OPT,Reserva,Sistema\nA,R-SYNTH,PANEL\nB,R-SYNTH,PANEL\nMISSING,
       if(rpc==='sgp_consultar_programacion_semana')return route.fulfill({json:{producciones:[{id_linea:'PANELES_2',key_produccion:'SYNTH|PANELES_2',sistema:'PANEL',reserva_principal:'R-SYNTH',anio:2026,semana_base:46}]}});
       if(rpc==='sgp_reservas_asociadas_listar')return route.fulfill({json:[]});
       if(rpc==='sgp_opt_catalogo_v2'){catalogReads++;return route.fulfill({json:catalog()});}
+      if(rpc==='sgp_opt_referencias_documentales_v1')return route.fulfill({json:{contract:'OPT-DOCUMENT-REFERENCES-1',scope,reservation:'R-SYNTH',system:'PANEL',references:receipt?[{id_documento:docId,sha256:receipt.document.sha256,referencia:'REF-SYNTH',sistema:'PANEL',piezas_documento:2},{id_documento:docId,sha256:receipt.document.sha256,referencia:'UNASSIGNED-SYNTH',sistema:null,piezas_documento:1}]:[]}});
+      if(rpc==='sgp_opt_esquema_documental_v2'){const body=request.postDataJSON();return route.fulfill({json:{contract:'OPT-DOCUMENT-PLANS-2',scope,reservation:'R-SYNTH',system:'PANEL',id_documento:docId,sha256:receipt.document.sha256,reference:body.p_referencia,status:'NOT_PERSISTED',plans:[]}});}
       if(rpc==='sgp_opt_cortes_estado_v2')return route.fulfill({json:{contract_version:2,scope,habilitado:true,reserva:'R-SYNTH',manifiesto_validado:!!receipt,puede_registrar:true,totales:{piezas:receipt?2:0,cortadas:0,pendientes:receipt?2:0},referencias:receipt?[{...reference(),piezas:pieces.map(piece=>({...piece,registrable:true,estado:'PENDIENTE',usuario:null,registrado_en:null,id_registro:null,periodo:null}))}]:[]}});
       if(/guardar|registrar|actualizar|eliminar/.test(rpc))cutWrites.push(rpc);
       // Bootstrap reads are harmless synthetic empty lists, never passed to the network.
@@ -86,6 +92,7 @@ const indexText='OPT,Reserva,Sistema\nA,R-SYNTH,PANEL\nB,R-SYNTH,PANEL\nMISSING,
    await second.host.locator('#optWorkflowTab1').click();await second.host.locator('#optReservation').selectOption(JSON.stringify(['SERVIDOR','R-SYNTH','PANEL']));
    await second.page.waitForFunction(()=>document.querySelector('#optDigitalHost').shadowRoot.querySelector('#optSharedPieces').textContent.includes('REF-SYNTH'));
    assert.match(await second.host.locator('#optReservationDocuments').textContent(),/PDF original es opcional/);assert.match(await second.host.locator('#optSharedPieces').textContent(),/Pendiente/);assert.equal(await second.host.locator('#optSharedPieces tbody tr').count(),2);assert.equal(await second.host.locator('#library button').count(),0);
+   assert.equal(await second.host.locator('.opt-shared-references button').count(),2);await second.host.locator('.opt-shared-profile-header').filter({hasText:'Matriz no disponible'}).waitFor();
    await second.page.screenshot({path:`tests/opt-digital/evidence/import-upload-second-cutter-${size}.png`,fullPage:true});
    assert.deepEqual(cutWrites,[]);assert.deepEqual(unexpected,[]);assert.deepEqual(errors,[]);await second.context.close();
   }
