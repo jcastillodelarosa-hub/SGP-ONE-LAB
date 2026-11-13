@@ -1,7 +1,13 @@
 # Consulta documental completa · candidata LAB v451
 
 IMPLEMENTADO EN RAMA, NO APLICADO EN SUPABASE, NO FUSIONADO, NO PUBLICADO.
-Base: LAB v450, merge de PR #263. Solo código, contrato SQL y fixtures sintéticos.
+Base: LAB v450, merge de PR #263. PR #264 abierto; solo código, contrato SQL y fixtures sintéticos.
+
+Publicación autorizada por el propietario; aplicación SQL detenida por revisión
+automática: requiere autorización específica para crear los dos lectores SECURITY
+DEFINER y conceder EXECUTE a anon/authenticated. La operación fue rechazada antes
+de ejecutarse y la consulta posterior confirma que ambas funciones siguen ausentes.
+No se ha fusionado ni desplegado; no se modificaron datos ni permisos.
 
 ## Contrato
 
@@ -30,14 +36,15 @@ con todo el ancho de la columna inferior. En móvil se apilan. Matriz automátic
 por sistema/referencia exactos usando la biblioteca existente; ausencia, ambigüedad
 y error explícitos. Resumen conserva sus dos tablas apiladas. Blanco/azul SGP.
 
-## Aplicación futura (requiere autorización separada)
+## Aplicación pendiente (bloqueo de aprobación automática)
 
 1. Revisar `document_read_REVIEW.sql` y las dependencias privadas en el destino.
 2. Aplicar instalación aditiva; por defecto revoca EXECUTE de ambos lectores.
 3. Revisar/aplicar `document_read_access_REVIEW.sql` solo si el catálogo mantiene
    sus grants. No concede roles SGP ni acceso directo a tablas.
 4. Verificar con sesión autorizada documentos completos y registro fuera de scope
-   rechazado; preparar artefacto v451 y obtener autorización para publicar.
+   rechazado; publicar mediante el flujo protegido ya autorizado cuando el bloqueo
+   SQL esté resuelto. No crear ni reutilizar sesiones de usuarios para pruebas.
 
 Contención: revocar EXECUTE de los dos lectores nuevos; el frontend indica que la
 consulta completa no está disponible y mantiene el ámbito de corte anterior.
@@ -47,6 +54,9 @@ No alterar el writer v2 ni sus ACL. No se requieren cambios de datos/importacion
 ## Evidencia local
 
 - Node: 1273 PASS, 10 omitidas; sin afirmación de verificación productiva.
+- GitHub Actions: siete workflows verdes sobre código `0006fbee`, incluido el
+  ajuste de conservación de advertencias. OPT run `43495628855`: navegador PC/móvil,
+  DOM/SQL, concurrencia PostgreSQL real y runtime Deno sintético PASS.
 - Nuevo lector: 4 pruebas Node, membresía exacta, sustituciones, caducidad y ruta v2.
 - Writer original: 308 comprobaciones SQL sintéticas PASS; matriz DOM PASS.
 - DOM documental: sistema ambiguo conserva cortes autorizados, fallo del ledger no

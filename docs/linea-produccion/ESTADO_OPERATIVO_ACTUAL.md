@@ -4,7 +4,10 @@ Rama `feat/opt-document-reader-v451`, base v450/PR #263. Solo lector documental
 separado y presentación OPT: no modifica LP, reservas, asignaciones ni registro.
 Pruebas sintéticas PC/móvil y SQL local; sin aplicación Supabase ni publicación.
 Bloqueo de contraste con boceto: imágenes Library inaccesibles por red HTTP 403.
-Próximo: revisión del contrato y entrega; cualquier aplicación requiere autorización.
+PR #264 abierto; publicación autorizada. SQL rechazado por aprobación automática:
+requiere autorización específica para los dos lectores SECURITY DEFINER y EXECUTE
+a anon/authenticated. Confirmadas funciones ausentes; no merge ni deploy. Próximo:
+resolver aprobación SQL, aplicar contrato y verificar antes de publicar.
 Detalles: [contrato OPT](../sql-proposals/opt-shared/DOCUMENT_READ_REVIEW.md).
 
 ## Export · selección múltiple · candidata LAB v430

@@ -8,8 +8,11 @@ Resumen mantiene dos tablas. Pruebas locales Node, SQL aislado y PC/móvil sint�
 Las imágenes originales de Library no pudieron descargarse (red HTTP 403); no se
 acredita comparación visual con el boceto ni verificación productiva.
 Detalle y pasos: `docs/sql-proposals/opt-shared/DOCUMENT_READ_REVIEW.md`.
-Siguiente: revisar draft/código y contrato SQL; aplicación/publicación requieren
-su autorización separada. No ejecutar importaciones ni alterar reservas/cortes.
+PR #264 abierto y publicación autorizada. Aplicación SQL rechazada por revisión
+automática: falta aprobación específica de los dos lectores SECURITY DEFINER y
+sus grants EXECUTE a anon/authenticated. Confirmada ausencia de ambas funciones.
+Siguiente: resolver esa aprobación, aplicar solo el contrato aditivo y verificar
+antes de fusionar/publicar. No ejecutar importaciones ni alterar reservas/cortes.
 
 ## Publicación conjunta autorizada · Reportes y pestañas PDT · LAB v441 · 11/11/2026
 
