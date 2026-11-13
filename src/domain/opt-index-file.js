@@ -13,8 +13,8 @@ export function parseIndex(text,format,origin){
  if(!Array.isArray(rows)||rows.length>20000||!validateOptColumns(rows,origin).valid)throw Error('Índice inválido: requiere OPT, Reserva y Sistema');
  return normalizeOptRows(rows,origin);
 }
-export async function parseIndexWorkbook(bytes,origin,{sheetName=origin==='PROYECTO'?'Optimizaciones':'ARCHIVOS',DOMParser=globalThis.DOMParser}={}){
- const grid=await readWorksheetGrid(bytes,{sheetName,DOMParser,allowOtherSheets:true,allowUnusedMacroDefault:true,allowStringCells:true,maxFileBytes:5*1024*1024});
+export async function parseIndexWorkbook(bytes,origin,{sheetName=origin==='PROYECTO'?'Optimizaciones':'ARCHIVOS',DOMParser=globalThis.DOMParser,readWorksheetXML}={}){
+ const grid=await readWorksheetGrid(bytes,{sheetName,DOMParser,readWorksheetXML,allowOtherSheets:true,allowUnusedMacroDefault:true,allowStringCells:true,maxFileBytes:5*1024*1024});
  const [header,...data]=grid.rows;if(!header)throw Error('Índice vacío');
  const keys=header.values.map(v=>String(v??'').trim());if(keys.some(k=>!k)||new Set(keys).size!==keys.length)throw Error('Cabecera vacía o duplicada');
  const rows=data.map(row=>Object.fromEntries(keys.map((key,i)=>[key,row.values[i]??''])));

@@ -1,3 +1,6 @@
+import {SaxesParser} from 'npm:saxes@6.0.0';
+import {createWorksheetXMLReader} from '../../src/server/opt-worksheet-stream.js';
+const readWorksheetXML=createWorksheetXMLReader(SaxesParser);
 // Real Deno PDF and HTTP handler; RPC boundary is synthetic, not hosted Supabase.
 import {readOptPdf} from '../../supabase/functions/opt-import/pdf-runtime.ts';
 import {DOMParser} from 'npm:@xmldom/xmldom@0.9.12';
@@ -13,7 +16,7 @@ Deno.test('Deno original PDF/CSV -> exact manifest and private RPC boundary',asy
   if(name==='sgp_opt_importar_validado_v1'){write=args;return {data:{contract_version:2,id_documento:'11111111-1111-4111-8111-111111111111',duplicado:false,cantidad_piezas:args.p_manifest.length,sin_asignacion:0,import_contract:'OPT-IMPORT-1',ok:true,physical_completion_verified:false}};}
   throw Error('Unexpected RPC');
  };
- const handler=createOptImportHandler({rpc,readPdf:readOptPdf,DOMParser,allowedOrigins:['https://sgp-one-lab.web.app']});
+ const handler=createOptImportHandler({rpc,readPdf:readOptPdf,DOMParser,readWorksheetXML,allowedOrigins:['https://sgp-one-lab.web.app']});
  const originalFetch=globalThis.fetch;globalThis.fetch=(()=>{throw Error('Runtime must not fetch');}) as typeof fetch;
  try{
   const response=await handler(new Request('https://example.invalid',{method:'POST',headers:{origin:'https://sgp-one-lab.web.app','content-type':'application/json'},body:JSON.stringify(body())}));

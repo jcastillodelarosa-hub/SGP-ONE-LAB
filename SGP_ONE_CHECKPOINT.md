@@ -1,3 +1,7 @@
+## 2026-11-13 — CPU index candidate, not published
+
+Isolated fix/opt-index-cpu on published v454 ab102489. Selected worksheet uses server-only event parser with shared row checks and complete-document validation; ZIP/metadata/ACL/import writer unchanged. Synthetic equivalent7692 entries, lower local CPU/heap; Deno check/tests pass. New XML depth/row-node caps explicit. Original-file differential profile pending in parent executor. See docs/opt-import-endpoint/CPU_INDEX_REVIEW.md. No production imports, deploy or retry of uncertain uploads.
+
 ## OPT documental v451 · backend aplicado · 13/11/2026
 
 PR #264; publicación autorizada, pendiente de fusión y verificación Hosting.

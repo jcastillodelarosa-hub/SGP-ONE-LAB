@@ -4,6 +4,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
+import {SaxesParser} from 'saxes';
+import {createWorksheetXMLReader} from '../src/server/opt-worksheet-stream.js';
 const source=fs.readFileSync(new URL('../supabase/functions/opt-import/index.ts',import.meta.url),'utf8');
 function boot(env={SUPABASE_URL:'https://synthetic.invalid',SUPABASE_SERVICE_ROLE_KEY:'synthetic-private-key',SGP_OPT_ALLOWED_ORIGINS:'https://synthetic.example'}){
  const calls=[];let dependencies,clientConfig,served,originInput;
@@ -11,7 +13,7 @@ function boot(env={SUPABASE_URL:'https://synthetic.invalid',SUPABASE_SERVICE_ROL
   constructor(url,options){clientConfig={url,options};}
   rpc(name,args){calls.push({name,args});return {data:'synthetic-result'};}
  }
- const context={PostgrestClient,DOMParser:{},readOptPdf:()=>{},
+ const context={PostgrestClient,SaxesParser,createWorksheetXMLReader,DOMParser:{},readOptPdf:()=>{},
   powerBIOrigins:value=>{originInput=value;return ['https://synthetic.example'];},
   createOptImportHandler:deps=>{dependencies=deps;return 'synthetic-handler';},
   Deno:{env:{get:name=>env[name]},serve:handler=>{served=handler;}}};
@@ -36,6 +38,7 @@ test('wrapper retains private service authentication and configured origins',()=
  assert.equal(clientConfig.options.headers.apikey,'synthetic-private-key');
  assert.equal(clientConfig.options.headers.Authorization,'Bearer synthetic-private-key');
  assert.equal(originInput,'https://synthetic.example');
+ assert.equal(typeof dependencies.readWorksheetXML,'function');
  assert.deepEqual(dependencies.allowedOrigins,['https://synthetic.example']);
  assert.throws(()=>boot({SUPABASE_URL:'https://synthetic.invalid'}),/Configuración servidor OPT incompleta/);
 });

@@ -52,7 +52,7 @@ function receiptValid(receipt,manifest){return record(receipt)&&receipt.ok===tru
 
 /** Only server bootstrap supplies dependencies. Neither extraction nor SGP facts
  * are ever accepted from the caller. SQL remains the final authorization gate. */
-export function createOptImportHandler({rpc,readPdf,DOMParser,allowedOrigins}){
+export function createOptImportHandler({rpc,readPdf,DOMParser,readWorksheetXML,allowedOrigins}){
  if(typeof rpc!=='function'||typeof readPdf!=='function'||!Array.isArray(allowedOrigins)||!allowedOrigins.length)throw Error('OPT_SERVER_DEPENDENCIES_REQUIRED');
  const origins=new Set(allowedOrigins);let busy=false;
  return async request=>{
@@ -79,7 +79,7 @@ export function createOptImportHandler({rpc,readPdf,DOMParser,allowedOrigins}){
    let indexEntries=[],indexHash=null,indexSheet=null;
    if(body.index){
     const raw=decodeFile(body.index,'INDEX');indexHash=await sha256(raw);
-    if(body.index.format==='xlsx'){const parsed=await parseIndexWorkbook(raw,body.source.origin,{sheetName:body.index.sheet,DOMParser});indexEntries=parsed.entries;indexSheet=parsed.sheet;}
+    if(body.index.format==='xlsx'){const parsed=await parseIndexWorkbook(raw,body.source.origin,{sheetName:body.index.sheet,DOMParser,readWorksheetXML});indexEntries=parsed.entries;indexSheet=parsed.sheet;}
     else indexEntries=parseIndex(utf8.decode(raw),body.index.format,body.source.origin);
    }
    const extraction=await readPdf(bytes);

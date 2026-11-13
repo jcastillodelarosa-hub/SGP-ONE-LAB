@@ -1,3 +1,5 @@
+import {SaxesParser} from 'saxes';
+import {createWorksheetXMLReader} from '../src/server/opt-worksheet-stream.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as pdfjs from 'pdfjs-dist/build/pdf.mjs';
@@ -15,7 +17,7 @@ function setup(overrides={}){
   if(name==='sgp_opt_import_contexto_v1')return {data:{contract:'OPT-IMPORT-CONTEXT-1',scope:args.p_scope,revision:'a'.repeat(32),bindings:[structuredClone(binding)]}};
   if(name==='sgp_opt_importar_validado_v1'){writes.push(args);return {data:{contract_version:2,id_documento:'11111111-1111-4111-8111-111111111111',duplicado:false,cantidad_piezas:args.p_manifest.length,sin_asignacion:args.p_manifest.filter(p=>p.asignacion===null).length,import_contract:'OPT-IMPORT-1',ok:true,physical_completion_verified:false}};}
   throw Error('Unexpected RPC');};
- return {calls,writes,reads:()=>reads,handler:createOptImportHandler({rpc,readPdf:async bytes=>{reads++;return overrides.readPdf?overrides.readPdf(bytes):readPdf(bytes);},DOMParser,allowedOrigins:[origin]})};
+ return {calls,writes,reads:()=>reads,handler:createOptImportHandler({rpc,readPdf:async bytes=>{reads++;return overrides.readPdf?overrides.readPdf(bytes):readPdf(bytes);},DOMParser,readWorksheetXML:createWorksheetXMLReader(SaxesParser),allowedOrigins:[origin]})};
 }
 test('original complete PDF and CSV pass real parser+core, only private RPC writes exact pending units',async()=>{
  const s=setup(),res=await s.handler(request()),out=await res.json();assert.equal(res.status,200,JSON.stringify(out));assert.equal(out.contract,'OPT-IMPORT-1');assert.equal(out.data.cantidad_piezas,4);assert.equal(out.physical_completion_verified,false);assert.equal(out.totals.cutLength32,1284);
