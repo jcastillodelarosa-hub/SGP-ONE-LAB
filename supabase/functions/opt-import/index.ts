@@ -9,7 +9,7 @@ const serverKey=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 if(!url||!serverKey)throw Error('Configuración servidor OPT incompleta');
 const allowedOrigins=powerBIOrigins(Deno.env.get('SGP_OPT_ALLOWED_ORIGINS'));
 const client=new PostgrestClient(url.replace(/\/$/,'')+'/rest/v1',{schema:'public',headers:{apikey:serverKey,Authorization:`Bearer ${serverKey}`}});
-const allowedRPC=new Set(['sgp_sesion_actual','sgp_mis_accesos','sgp_opt_import_contexto_v1','sgp_opt_importar_validado_v1']);
+const allowedRPC=new Set(['sgp_sesion_actual','sgp_mis_accesos','sgp_opt_import_contexto_v1','sgp_opt_importar_validado_v1','sgp_opt_import_contexto_proyecto_v2','sgp_opt_importar_proyecto_validado_v2']);
 Deno.serve(createOptImportHandler({DOMParser,readPdf:readOptPdf,allowedOrigins,rpc:(name:string,args:object)=>{
  if(!allowedRPC.has(name))throw Error('RPC servidor OPT no permitida');
  return client.rpc(name,args);

@@ -25,3 +25,21 @@ Rollback SQL proposals are provided. Backend additions should precede frontend u
 
 ## Tests and privacy
 Only synthetic fixtures are committed. Original PDFs/workbooks, read-only operational snapshots, real payloads and private findings remain outside this repository. Unit, DOM, browser-isolated and PostgreSQL/WASM tests run without production credentials or external writes. SQL harness stubs preexisting actor/scope/base import to test proposed functions; it does not certify intersession concurrency or production E2E.
+
+## LAB v448 release preparation (2026-11-13)
+Version candidate increments v447 to v448, with matching HTML app/CSS cache bust and
+build-release label. The final source SHA must be stamped by the existing workflow,
+not a guessed release commit. Base main verified at f1897786f55df8c473a6b2d04d189ffaf3356d62.
+All existing Hosting protected-file pins match; policy/workflow and gates unchanged.
+SQL application and Edge deployment are tracked separately and must precede frontend publication.
+No operational OPT import is authorized by this preparation.
+
+Hosting workflow `firebase-hosting.yml`: main pushes with unchanged certified runtime
+policy take the existing auto-publication route. Do not merge before backend readiness
+and exact source checks are complete. Explicit `prepare` only seals an artifact;
+`inspect` only reads live identity. Explicit `publish` requires full source SHA,
+reviewed prepare run ID and ZIP SHA256, release reason, and freshly inspected
+`expected_live_version`. The existing workflow admits only main and its designated
+LP branch; this feature branch is not an admitted dispatch target. Never modify pins
+or disable a gate to publish. Verify artifact and public HTML LAB v448 plus exact
+`data-release-commit` and postcheck before marking PUBLISHED/VERIFIED.
