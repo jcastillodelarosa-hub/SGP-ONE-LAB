@@ -25,7 +25,21 @@ export function mountSharedCuts(container,{api,catalogApi=null,documentApi=null,
   const reload=make('button','Actualizar estado compartido');reload.id='optSharedRefresh';reload.type='button';
   const layout=make('div');layout.className='opt-shared-layout';
   const navigation=make('nav');navigation.className='opt-shared-references';navigation.setAttribute('aria-label','Referencias de la reserva');
-  const rows=make('div');rows.id='optSharedPieces';layout.append(navigation,rows);const count=make('p');count.id='optSharedSelection';
+  navigation.id='optSharedReferences';
+  const railTools=make('div');railTools.className='opt-reference-tools';
+  const toggle=make('button');toggle.id='optReferencesToggle';toggle.type='button';toggle.setAttribute('aria-controls',navigation.id);
+  const railLabel=make('span','Referencias del documento');railTools.append(toggle,railLabel);
+  const shade=make('button');shade.type='button';shade.className='opt-reference-shade';shade.setAttribute('aria-label','Cerrar referencias');shade.tabIndex=-1;
+  const rows=make('div');rows.id='optSharedPieces';rows.tabIndex=0;rows.setAttribute('aria-label','Esquemas y detalle de la referencia');
+  layout.append(railTools,shade,navigation,rows);const count=make('p');count.id='optSharedSelection';
+  const mobileQuery=container.ownerDocument.defaultView?.matchMedia?.('(max-width:760px)');
+  const mobile=()=>mobileQuery?.matches===true;
+  let railClosed=mobile();
+  function setRail(closed,{focus=false}={}){railClosed=closed;layout.classList.toggle('opt-rail-closed',closed);navigation.hidden=closed;shade.hidden=closed||!mobile();toggle.textContent=closed?'Mostrar referencias':'Ocultar referencias';toggle.setAttribute('aria-expanded',String(!closed));if(focus)toggle.focus({preventScroll:true});}
+  toggle.onclick=()=>setRail(!railClosed);shade.onclick=()=>setRail(true,{focus:true});
+  layout.addEventListener('keydown',event=>{if(event.key==='Escape'&&!railClosed){event.preventDefault();setRail(true,{focus:true});}});
+  const resizeRail=()=>setRail(railClosed);mobileQuery?.addEventListener?.('change',resizeRail);
+  setRail(railClosed);
   const register=make('button','Registrar cortes seleccionados');register.id='optSharedRegister';register.type='button';
   const retry=make('button','Reintentar la misma operación');retry.id='optSharedRetry';retry.type='button';
   const confirm=make('section');confirm.id='optSharedConfirmation';confirm.hidden=true;confirm.setAttribute('aria-label','Confirmar registro de cortes');
@@ -51,6 +65,7 @@ export function mountSharedCuts(container,{api,catalogApi=null,documentApi=null,
     for(const check of rows.querySelectorAll('input'))check.disabled=!canWrite||check.dataset.selectable!=='true';
   }
   function render(resetSelection=true){
+    const navigationScroll=navigation.scrollTop;
     rows.replaceChildren();navigation.replaceChildren();if(resetSelection)selected.clear();confirm.hidden=true;prepared=null;
     const scoped=approvedReferences(state,group,documents,catalogApi);
     const references=documentReferences.filter(ref=>documentApi?.ownsReference(group,ref)).map(ref=>{
@@ -62,8 +77,8 @@ export function mountSharedCuts(container,{api,catalogApi=null,documentApi=null,
     if(!references.some(ref=>referenceKey(ref)===activeReference))activeReference=references.length?referenceKey(references[0]):null;
     for(const ref of references){
       const key=referenceKey(ref),button=make('button');button.type='button';button.dataset.reference=key;button.setAttribute('aria-pressed',String(key===activeReference));button.setAttribute('aria-controls','optSharedPieces');
-      button.append(make('strong',ref.referencia),make('span',ref.consecutivo),make('span',ref.documentReference?`${ref.piezas_documento} piezas en documento · ${ref.piezas.length} en ámbito de corte`:`${ref.piezas.filter(p=>p.estado==='CORTADO').length} / ${ref.piezas.length} cortadas`));
-      button.onclick=()=>{if(key===activeReference)return;activeReference=key;render(false);};navigation.append(button);
+      button.append(make('strong',ref.referencia),make('span',ref.documentReference?`${ref.piezas_documento} piezas en documento · ${ref.piezas.length} en ámbito de corte`:`${ref.piezas.filter(p=>p.estado==='CORTADO').length} / ${ref.piezas.length} cortadas`));
+      button.onclick=()=>{if(key!==activeReference){activeReference=key;rows.scrollTop=0;render(false);}if(mobile())setRail(true,{focus:true});};navigation.append(button);
     }
     for(const ref of references.filter(ref=>referenceKey(ref)===activeReference)){
       const block=make('section');referenceHeading.replaceChildren(make('p',ref.consecutivo),make('h3',ref.referencia),make('p',ref.documentReference?'Documento completo · el registro conserva su ámbito autorizado':'Referencias del ámbito de corte'));
@@ -84,7 +99,7 @@ export function mountSharedCuts(container,{api,catalogApi=null,documentApi=null,
       table.append(body);wrap.append(table);piecesDetails.append(wrap);block.append(piecesDetails);rows.append(block);onReference(ref,schemeSlot);
     }
     if(!references.length){matrix.select(null,null);onReference(null,null);}
-    controls();return references;
+    navigation.scrollTop=navigationScroll;controls();return references;
   }
   async function refresh(){
     if(closed||busy)return;const request=++epoch;try{pending=journal.read()||pending;journalError='';}catch(e){journalError=e.message;}state=null;documentReferences=[];documentError='';documentApi?.invalidate();loading=true;render();
@@ -105,5 +120,5 @@ export function mountSharedCuts(container,{api,catalogApi=null,documentApi=null,
   yes.onclick=async()=>{if(!prepared||busy||register.disabled)return;const command=prepared;prepared=null;try{journal.save(command);pending=command;}catch(e){journalError=e.message;confirm.hidden=true;controls();message('No se envió el registro: '+e.message);return;}await submit(command);};
   retry.onclick=async()=>{if(retry.disabled)return;await submit(pending,true);};reload.onclick=refresh;
   controls();message('Selecciona una reserva para consultar el estado compartido.');
-  return {select(next,files=[]){if(closed)return;documents=files;const changed=JSON.stringify(group)!==JSON.stringify(next);group=next;if(changed){activeReference=null;epoch++;state=null;selected.clear();confirm.hidden=true;prepared=null;return refresh();}if(!busy&&!loading)render(false);},refresh,destroy(){documentApi?.invalidate();onReference(null,null);matrix.destroy();closed=true;epoch++;prepared=null;selected.clear();panel.remove();}};
+  return {select(next,files=[]){if(closed)return;documents=files;const changed=JSON.stringify(group)!==JSON.stringify(next);group=next;if(changed){activeReference=null;epoch++;state=null;selected.clear();confirm.hidden=true;prepared=null;return refresh();}if(!busy&&!loading)render(false);},refresh,destroy(){mobileQuery?.removeEventListener?.('change',resizeRail);documentApi?.invalidate();onReference(null,null);matrix.destroy();closed=true;epoch++;prepared=null;selected.clear();panel.remove();}};
 }

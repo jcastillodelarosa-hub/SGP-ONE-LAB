@@ -48,6 +48,26 @@ await db.query("INSERT INTO sgp_opt_shared.pieces(id_pieza,id_documento,referenc
 const geometry={plans:[{id:'qa',ref:'REF',finish:'QA',length:'100',page:1,barqty:1,bars:[{cuts:[1,2,5,8].map(n=>({id_pieza:id(n),length:'10',profileInstance:1,project:'PRIVATE-'+n,corte:n,longitud_mm:254}))}]},{id:'qa2',ref:'UNASSIGNED',finish:'QA',length:'100',page:2,barqty:1,bars:[{cuts:[{id_pieza:id(90),length:'10',profileInstance:1,project:'PRIVATE'}]}]}]};
 await db.query("INSERT INTO sgp_opt_shared.document_plans SELECT d.id_documento,d.sha256,d.id_aprobacion,d.manifest_sha256,encode(sha256(convert_to(a.evidencia::text,'UTF8')),'hex'),$1 FROM sgp_opt_shared.documents d JOIN sgp_opt_shared.approvals a USING(id_aprobacion)",[geometry]);
 ok((await refs()).references.length,2);ok((await refs()).references[1].sistema,null);
+// v452: authoritative library metadata can resolve an unassigned documentary reference.
+await db.exec(`CREATE SCHEMA sgp_opt_matrices; CREATE TABLE sgp_opt_matrices.entries(sistema text,referencia text,status text);
+GRANT EXECUTE ON FUNCTION public.sgp_opt_referencias_documentales_v1(text,jsonb,text,text) TO anon;`);
+const aclBefore=(await db.query("SELECT proacl::text acl FROM pg_proc WHERE oid='public.sgp_opt_referencias_documentales_v1(text,jsonb,text,text)'::regprocedure")).rows[0].acl;
+await db.exec(readFileSync(new URL('./document_matrix_link_REVIEW.sql',import.meta.url),'utf8'));
+ok((await db.query("SELECT proacl::text acl FROM pg_proc WHERE oid='public.sgp_opt_referencias_documentales_v1(text,jsonb,text,text)'::regprocedure")).rows[0].acl,aclBefore);
+const unassigned=async()=>(await refs()).references.find(r=>r.referencia==='UNASSIGNED');
+ok((await unassigned()).sistema,null);
+await db.exec("INSERT INTO sgp_opt_matrices.entries VALUES('FRAME-QA','UNASSIGNED','APPROVED')");
+ok((await unassigned()).sistema,'FRAME-QA');ok((await unassigned()).piezas_documento,1);
+await db.exec("INSERT INTO sgp_opt_matrices.entries VALUES('OTHER','UNASSIGNED','PENDING')");
+ok((await unassigned()).sistema,null);
+await db.exec("UPDATE sgp_opt_matrices.entries SET status='RETIRED' WHERE sistema='OTHER'");
+ok((await unassigned()).sistema,'FRAME-QA');
+await db.exec("UPDATE sgp_opt_matrices.entries SET status='PENDING' WHERE sistema='FRAME-QA'");
+ok((await unassigned()).sistema,null);
+await db.exec("UPDATE sgp_opt_matrices.entries SET status='APPROVED' WHERE sistema='FRAME-QA'; INSERT INTO sgp_opt_matrices.entries VALUES('FRAME-QA','UNASSIGNED','APPROVED'),('FRAME-QA','REF','APPROVED')");
+ok((await unassigned()).sistema,null); // even same-system conflicting versions block
+ok((await refs()).references.find(r=>r.referencia==='REF').sistema,null); // conflicting assignments never overridden
+await db.exec("REVOKE EXECUTE ON FUNCTION public.sgp_opt_referencias_documentales_v1(text,jsonb,text,text) FROM anon");
 const readPlan=await plans();ok(readPlan.plans[0].cuts.map(c=>c.id_pieza),[id(1),null,null,null]);
 ok(readPlan.plans[0].cuts.slice(1).every(c=>c.project===''&&!c.selectedReservation),true);
 ok((await plans('UNASSIGNED')).plans[0].cuts[0].id_pieza,null);
