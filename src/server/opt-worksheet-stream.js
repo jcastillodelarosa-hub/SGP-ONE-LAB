@@ -4,9 +4,10 @@ const decode=new TextDecoder('utf-8',{fatal:true});
 const fail=message=>{throw Error(message);};
 // Only a single row's elements are retained. No entities, resource loads or XML recovery.
 class RowNode {
- constructor(tag){this.nodeType=1;this.localName=tag.local;this.namespaceURI=tag.uri;this.attributes=tag.attributes;this.childNodes=[];this.textContent='';}
+ constructor(tag){this.nodeType=1;this.localName=tag.local;this.namespaceURI=tag.uri;this.attributes=tag.attributes;this.childNodes=[];}
+ get textContent(){const parts=[],pending=[...this.childNodes].reverse();while(pending.length){const node=pending.pop();if(node.nodeType===3)parts.push(node.textContent);else for(let i=node.childNodes.length-1;i>=0;i--)pending.push(node.childNodes[i]);}return parts.join('');}
  getAttribute(name){return this.attributes[name]?.value??'';}
- getElementsByTagNameNS(ns,name){const out=[];for(const child of this.childNodes){if(child.namespaceURI===ns&&child.localName===name)out.push(child);out.push(...child.getElementsByTagNameNS(ns,name));}return out;}
+ getElementsByTagNameNS(ns,name){const out=[];for(const child of this.childNodes){if(child.nodeType!==1)continue;if(child.namespaceURI===ns&&child.localName===name)out.push(child);out.push(...child.getElementsByTagNameNS(ns,name));}return out;}
 }
 export function createWorksheetXMLReader(SaxesParser){
  if(typeof SaxesParser!=='function')throw Error('OPT_XML_PARSER_REQUIRED');
@@ -25,7 +26,7 @@ export function createWorksheetXMLReader(SaxesParser){
    if(startsRow){rowNodes=0;nodes.push(new RowNode(tag));}
    else if(nodes.length){if(++rowNodes>8192)fail('Fila XML excesiva');const node=new RowNode(tag);nodes.at(-1).childNodes.push(node);nodes.push(node);}
   });
-  const text=value=>{for(const node of nodes)node.textContent+=value;};
+  const text=value=>{if(nodes.length)nodes.at(-1).childNodes.push({nodeType:3,textContent:value});};
   parser.on('text',text);parser.on('cdata',text);
   parser.on('closetag',()=>{
    if(nodes.length){const node=nodes.pop();if(!nodes.length){const row=readWorksheetRow(node,last,{shared,allowStringCells});rows.push(row);last=row.row;}}

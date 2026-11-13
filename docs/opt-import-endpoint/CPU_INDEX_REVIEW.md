@@ -13,3 +13,6 @@ Parent applied the SHA-verified code patch to exact base ab102489, installed the
 
 ## Offline Deno request profile handoff
 scripts/profile-opt-request-deno.ts uses real handler/PDF runtime and synthetic auth with fetch disabled. Without optional context snapshot it records the exact context request and stops after input/index/PDF parsing. With a separately obtained read-only context snapshot it executes reconciliation and records manifest SHA/counts, then throws before any writer call. Synthetic smoke verified both paths, writes0; Deno2.2.12 typecheck passes. This tool does not prove real-session authorization, real SQL duration or hosted limits. Original execution pending in parent; do not interpret handler's simulated unknown-result text as a live import or recommendation to retry.
+
+## Final text-retention hardening
+After original equivalence of52e5a43, RowNode was hardened to retain leaf text once and compute textContent iteratively, avoiding amplification by nested XML depth. DOM differential checks cover nested mixed text/comments/PI and large chunked text; independent review found no semantic regression. Relevant22 tests and Deno recheck pass. Original-file profile should be repeated on the final cumulative patch; earlier original performance numbers remain attributed to52e5a43, not this later revision.

@@ -16,7 +16,7 @@ function zip(xml,mutate=()=>{}){const parts=new Map([
 const grid=(bytes,fast)=>readWorksheetGrid(bytes,{DOMParser,sheetName:'ARCHIVOS',allowStringCells:true,maxFileBytes:5*1024*1024,...(fast?{readWorksheetXML}:{})});
 const base=sheet(row(1,['Consecutivo','# Reserva','Sistema'])+row(2,['OPT-SYNTH','R','PANEL']));
 test('complete worksheet values match DOM, including sparse, shared, rich, entities, CDATA and namespaces',async()=>{
- const variants=[base,sheet('<row><c t="s"><v>0</v></c><c r="C1" t="n"><v>1.25</v></c><c t="inlineStr"><is><r><t>A&amp;</t></r><r><t><![CDATA[B<C]]></t></r></is></c></row>'),base.replace('<v>R</v>','<v> R&#13;\n&amp;\t </v>'),base.replace('<sheetData>','<sheetData><!--ignored-->').replace('</sheetData>','</sheetData><ext xmlns="urn:foreign"><f>not a spreadsheet formula</f></ext>'),base.replace(/<v>/g,'<s:v xmlns:s="'+ns+'">').replace(/<\/v>/g,'</s:v>')];
+ const variants=[base,base.replace('<v>R</v>','<v><x>one<x>two</x>three</x><!--not text--><?ignored x?>four</v>'),sheet('<row><c t="s"><v>0</v></c><c r="C1" t="n"><v>1.25</v></c><c t="inlineStr"><is><r><t>A&amp;</t></r><r><t><![CDATA[B<C]]></t></r></is></c></row>'),base.replace('<v>R</v>','<v> R&#13;\n&amp;\t </v>'),base.replace('<sheetData>','<sheetData><!--ignored-->').replace('</sheetData>','</sheetData><ext xmlns="urn:foreign"><f>not a spreadsheet formula</f></ext>'),base.replace(/<v>/g,'<s:v xmlns:s="'+ns+'">').replace(/<\/v>/g,'</s:v>')];
  for(const xml of variants)assert.deepEqual(await grid(zip(xml),true),await grid(zip(xml),false));
 });
 test('all row and cell rejection rules remain fail closed',async()=>{
