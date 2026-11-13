@@ -155,6 +155,7 @@ jobs:
           node tests/opt-digital/shared-workflow-browser.cjs
           node tests/opt-digital/import-upload-browser.cjs
           node tests/opt-digital/rounding-warning-browser.cjs
+          node tests/opt-digital/local-review-browser.cjs
           node tests/opt-digital/workflow-browser.cjs
           node tests/opt-digital/cut-report-browser.cjs
           node tests/opt-digital/appearance-browser.cjs

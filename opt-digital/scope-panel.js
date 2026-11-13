@@ -2,7 +2,7 @@ import {classifyOptLineScope} from '../src/domain/opt-line-scope.js';
 const names={IN_SCOPE:'Coincide con la semana de origen',MIXED:'Mixta: coincidencias y partes pendientes',OUT_OF_SCOPE:'Fuera de un alcance operativo comprobado',UNRESOLVED_SCOPE:'Sin coincidencia en la semana de origen',UNASSOCIATED:'Por asociar',AMBIGUOUS:'Ambigua: requiere revisión',UNAVAILABLE:'Sin alcance comprobado'};
 export function mountOptScopePanel(container,{api,defaultScope={},queryContainer=null,onChange=()=>{},openDocument=()=>{}}={}){
  const make=(tag,text)=>{const e=container.ownerDocument.createElement(tag);if(text)e.textContent=text;return e;};
- const section=make('section');section.id='optProgrammingScope';section.className='panel';
+ const section=make(queryContainer?'details':'section');section.id='optProgrammingScope';section.className='panel';
  const query=queryContainer?make('section'):section;if(queryContainer){query.id='optReservationScope';query.className='panel';queryContainer.append(query);}
  const year=make('input'),week=make('input'),line=make('select'),load=make('button',queryContainer?'Consultar reservas':'Consultar programación');year.id='optScopeYear';week.id='optScopeWeek';line.id='optScopeLine';load.id='optScopeLoad';load.type='button';
  for(const [input,min,max,label] of [[year,2020,2100,'Año de origen'],[week,1,53,'Semana de origen de la reserva']]){input.type='number';input.min=min;input.max=max;input.setAttribute('aria-label',label);}
@@ -11,7 +11,8 @@ export function mountOptScopePanel(container,{api,defaultScope={},queryContainer
  const status=make('p','Consulta la línea, el año y la semana de origen de la reserva. Cortar en otra semana no cambia su pertenencia.');status.id='optScopeStatus';status.setAttribute('role','status');
  const controls=make('div');controls.className='opt-scope-controls';for(const [field,text] of [[year,'Año de origen'],[week,'Semana de origen'],[line,'Línea']]){const label=make('label',text);label.append(field);controls.append(label);}controls.append(load);
  query.append(make('h2',queryContainer?'Consultar reservas por semana':'Alcance de programación'),controls,status);
- if(queryContainer){query.append(make('p','Elige año, semana de origen y línea. Consulta las OPT guardadas en SGP sin volver a cargar archivos.'));section.append(make('h2','Revisión documental local'));}
+ const localCount=make('span','0 documentos');localCount.id='optLocalReviewCount';
+ if(queryContainer){query.append(make('p','Elige año, semana de origen y línea. Consulta las OPT guardadas en SGP sin volver a cargar archivos.'));const disclosure=make('summary');disclosure.id='optLocalReviewToggle';disclosure.append(make('span','Revisión documental local'),localCount);section.append(disclosure);}
  section.append(make('p','La reserva permanece en su semana de origen, aunque se corte después. La fecha y el turno reales se guardan por separado. Una coincidencia documental no acredita la asignación de cada pieza: el registro sigue bloqueado hasta validarla.'));
  const filter=make('select');filter.id='optScopeFilter';filter.setAttribute('aria-label','Estado documental');for(const [value,label] of [['ALL','Todos los estados'],...Object.entries(names)]){const o=make('option',label);o.value=value;filter.append(o);}
  const summary=make('p'),table=make('div'),page=make('p'),previous=make('button','Anteriores'),next=make('button','Siguientes');summary.id='optScopeSummary';table.id='optScopeDocuments';previous.type=next.type='button';section.append(summary,filter,page,previous,next,table);
@@ -25,6 +26,7 @@ export function mountOptScopePanel(container,{api,defaultScope={},queryContainer
  function renderDocuments(){
   const docs=plan.documents.filter(d=>filter.value==='ALL'||d.status===filter.value);offset=Math.min(offset,Math.max(0,Math.floor((docs.length-1)/50)*50));table.replaceChildren();
   for(const d of docs.slice(offset,offset+50)){const block=make('section');block.append(make('strong',[...new Set(d.sources.map(s=>`${s.origin||'Origen pendiente'} · ${s.opt||'Sin consecutivo'}`))].join(' / ')),make('p',`${names[d.status]}${d.pdfStatus==='MISSING'?' · Falta PDF':''}. ${d.associations.length} filas conservadas.`));if(d.sha256){const b=make('button','Abrir PDF original');b.type='button';b.onclick=()=>openDocument(d.sha256);block.append(b);}table.append(block);}
+  localCount.textContent=`${plan.documents.length} documentos${docs.length!==plan.documents.length?' · '+docs.length+' en filtro':''}`;
   page.textContent=docs.length?`Documentos ${offset+1}–${Math.min(offset+50,docs.length)} de ${docs.length}.`:'Sin documentos en este filtro.';previous.disabled=offset===0;next.disabled=offset+50>=docs.length;
  }
  function renderIndividual(){
