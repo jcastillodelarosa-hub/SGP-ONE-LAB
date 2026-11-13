@@ -1,3 +1,4 @@
+import {selectProgrammedFiles} from './import-selection.js';
 import {fileIdentity} from './library.js';
 export function importRoundingWarning(result){
  return Array.isArray(result?.validationWarnings)&&result.validationWarnings.some(w=>w?.code==='OPT_PRINTED_ROUNDING_COMPATIBLE')
@@ -15,9 +16,9 @@ export function mountOptImportPanel(container,{api,getScope,getProgrammingSnapsh
  const originals=new Map(),indexes=new Map();let closed=false,busy=false,epoch=0,capturing=0,lastScope='';
  const scopeKey=()=>{const s=getScope();return s?JSON.stringify([s.linea,s.anio,s.semana,s.modo]):'';};
  function programming(){const current=getScope(),snapshot=getProgrammingSnapshot();return current?.linea==='PANELES_2'&&snapshot?.status==='READY'&&Array.isArray(snapshot.relations)&&['linea','anio','semana','modo'].every(key=>snapshot.scope?.[key]===current[key])?snapshot:null;}
- function availability(){const pending=api?.pending?.();pendingNotice.textContent=pending===null?'No se pudo leer el registro de cargas anteriores. No se enviarán archivos hasta que esté disponible.':pending?.length?'Cargas anteriores sin confirmar. Reintenta con los mismos originales y ámbito: '+pending.map(p=>`${p.pdf?.name} · ${p.source?.origin} · ${p.scope?.semana}/${p.scope?.anio} · índice ${p.index?.name||'no corresponde'}`).join('; ')+'. Pueden haberse guardado en SGP.':'';button.disabled=closed||busy||capturing>0||!api||getScope()?.linea!=='PANELES_2'||!['RETAIL','PROYECTO','INDIVIDUAL'].includes(getOrigin())||getOrigin()!=='INDIVIDUAL'&&!programming();if(!busy&&!status.textContent)status.textContent=!api?'La carga compartida no está disponible. Puedes conservar y revisar los archivos localmente.':'Consulta PANELES_2 y selecciona Retail, Proyecto o individual. Los originales no se envían hasta pulsar el botón.';}
+ function availability(){const pending=api?.pending?.();pendingNotice.textContent=pending===null?'No se pudo leer el registro de cargas anteriores. No se enviarán archivos hasta que esté disponible.':pending?.length?'Cargas anteriores sin confirmar. Verifica su estado antes de reintentar; conserva los originales y ámbito: '+pending.map(p=>`${p.pdf?.name} · ${p.source?.origin} · ${p.scope?.semana}/${p.scope?.anio} · índice ${p.index?.name||'no corresponde'}`).join('; ')+'. Pueden haberse guardado en SGP.':'';button.disabled=closed||busy||capturing>0||!api||getScope()?.linea!=='PANELES_2'||!['RETAIL','PROYECTO','INDIVIDUAL'].includes(getOrigin())||getOrigin()!=='INDIVIDUAL'&&!programming();if(!busy&&!status.textContent)status.textContent=!api?'La carga compartida no está disponible. Puedes conservar y revisar los archivos localmente.':'Consulta PANELES_2 y selecciona Retail, Proyecto o individual. Los originales no se envían hasta pulsar el botón.';}
  function invalidate(message='Selección cambiada. Revisa el origen y los archivos antes de procesar.'){
-  epoch++;api?.invalidate();results.replaceChildren();status.textContent=busy?'Cambió el contexto durante la carga. Una petición ya enviada puede haberse guardado. Consulta su catálogo o reintenta exactamente el mismo PDF, índice, origen y ámbito para confirmar.':message;availability();
+  epoch++;api?.invalidate();results.replaceChildren();status.textContent=busy?'Cambió el contexto durante la carga. Una petición ya enviada puede haberse guardado. Consulta su estado antes de reintentar y conserva exactamente el mismo PDF, índice, origen y ámbito.':message;availability();
  }
  async function captureFiles(files,origin){
   capturing++;availability();
@@ -60,6 +61,8 @@ export function mountOptImportPanel(container,{api,getScope,getProgrammingSnapsh
    if(!jobs.length){status.textContent=origin==='INDIVIDUAL'?'No hay PDF originales para este origen. Selecciona su carpeta o los archivos individuales.':'No hay OPT candidatas para la programación consultada. No se enviaron archivos.'+omittedText;return;}
    for(let i=0;i<jobs.length;i++){
     if(closed||operation!==epoch)return;const job=jobs[i],row=make('p');row.dataset.file=job.name;results.append(row);
+    const pending=api?.pending?.();
+    if(pending===null||pending?.some(p=>p.pdf?.name===job.name||p.source?.opt===job.opt)){row.textContent=job.name+' · Bloqueado: resultado anterior incierto; verifica su estado antes de reintentar.';rejected++;continue;}
     if(job.error){row.textContent=job.name+' · Bloqueado: '+job.error;rejected++;continue;}
     row.textContent=job.name+' · Enviando original '+(i+1)+' de '+jobs.length+'…';status.textContent='Procesando secuencialmente. Cada archivo tiene su propio resultado.';
     try{
@@ -71,12 +74,13 @@ export function mountOptImportPanel(container,{api,getScope,getProgrammingSnapsh
      if(closed||operation!==epoch)return;
      const unknown=error.uncertain===true;unknown?uncertain++:rejected++;
      const blockers=Array.isArray(error.blockers)?error.blockers.slice(0,12).map(value=>typeof value==='string'?value:JSON.stringify(value)).join(' · '):'';
-     row.textContent=job.name+' · '+(unknown?'Resultado incierto. Puede haberse guardado; reintenta con exactamente el mismo PDF, índice, origen y ámbito. ':'No guardado en este intento: ')+error.message+(blockers?' · '+blockers:'');
+     const resourceLimit=error.message==='OPT_IMPORTACION_LIMITE_RECURSOS';
+     row.textContent=job.name+' · '+(resourceLimit?'Resultado incierto. El servidor interrumpió el procesamiento por límite de recursos. Conserva los originales y verifica el estado antes de reintentar. ':unknown?'Resultado incierto. Puede haberse guardado; verifica su estado y conserva exactamente el mismo PDF, índice, origen y ámbito. ':'No guardado en este intento: ')+error.message+(blockers?' · '+blockers:'');
     }
    }
    if(!closed&&operation===epoch){status.textContent=`${succeeded} confirmados · ${rejected} rechazados o bloqueados · ${uncertain} inciertos.${withWarning?` ${withWarning} confirmados con advertencia de redondeo.`:''} Los fallos no acreditan otros archivos.`+omittedText;if(confirmed.length)onImported(confirmed);}
   }finally{busy=false;availability();}
  };
  availability();
- return {captureFiles,dropIndex(origin){indexes.delete(origin);invalidate('Leyendo índice nuevo. El índice anterior ya no se usa para enviar.');},setIndex(origin,index){indexes.set(origin,index);invalidate('Índice original conservado para el envío explícito. La revisión local no crea OPT en SGP.');},invalidate,update(){const next=scopeKey();if(next!==lastScope){lastScope=next;invalidate();}availability();},destroy(){closed=true;epoch++;api?.invalidate();originals.clear();indexes.clear();panel.remove();}};
+ return {selectFiles(files,origin){return selectProgrammedFiles({files,origin,scope:getScope(),snapshot:programming(),entries:getEntries(),indexReady:indexes.has(origin),pending:api?.pending?.()??null});},captureFiles,dropIndex(origin){indexes.delete(origin);invalidate('Leyendo índice nuevo. El índice anterior ya no se usa para enviar.');},setIndex(origin,index){indexes.set(origin,index);invalidate('Índice original conservado para el envío explícito. La revisión local no crea OPT en SGP.');},invalidate,update(){const next=scopeKey();if(next!==lastScope){lastScope=next;invalidate();}availability();},destroy(){closed=true;epoch++;api?.invalidate();originals.clear();indexes.clear();panel.remove();}};
 }

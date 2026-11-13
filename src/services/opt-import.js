@@ -72,6 +72,8 @@ export function createOptImport(client,getToken,{getContext,storage,storageScope
     assertCurrent();
    }
    if(payload?.contract==='OPT-IMPORT-1'&&payload.ok===false&&typeof payload.code==='string')throw fault(payload.code,{definitive:payload.definitive===true,uncertain:payload.definitive!==true,blockers:payload.blockers});
+   // A platform termination has no application receipt; it cannot prove rollback.
+   if(result?.error?.context?.status===546)throw fault('OPT_IMPORTACION_LIMITE_RECURSOS',{uncertain:true});
    if(result?.error)throw fault('OPT_IMPORTACION_TRANSPORTE',{uncertain:true});
    const receipt=validateReceipt(payload,prepared);assertCurrent();
    // Retain identity only, never original bytes or tokens, for an identical idempotent replay.

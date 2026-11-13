@@ -68,3 +68,19 @@ test('bounded PDF/index limits reject before reading or invoking the server',asy
    const digest=Buffer.from(await crypto.subtle.digest('SHA-256',bytes)).toString('hex');assert.equal(prepared.identity.index.sha256,digest);
   }
  });
+
+ test('platform resource termination remains uncertain, preserves identity and never retries automatically',async()=>{
+  let calls=0;const store=storage();
+  const api=createOptImport({invoke:async()=>{calls++;return {error:{context:new Response(JSON.stringify({code:'WORKER_RESOURCE_LIMIT'}),{status:546})}};}},()=> 'synthetic',{storage:store,storageScope:'resource'});
+  await assert.rejects(api.process(input()),e=>e.message==='OPT_IMPORTACION_LIMITE_RECURSOS'&&e.uncertain===true&&e.definitive===false);
+  assert.equal(calls,1);assert.equal(api.pending().length,1);
+  assert.equal(JSON.parse(store.getItem(store.key(0))).state,'pending');
+  await assert.rejects(api.process({...input(),scope:{...scope,semana:45}}),/REINTENTO_IDENTICO/);
+  assert.equal(calls,1);
+ });
+ test('unreadable platform resource response stays uncertain; other HTTP errors retain generic transport',async()=>{
+  for(const status of [546,502]){
+   const api=createOptImport({invoke:async()=>({error:{context:new Response('not JSON',{status})}})},()=> 'synthetic',{storage:storage(),storageScope:'status'});
+   await assert.rejects(api.process(input()),e=>e.uncertain===true&&e.message===(status===546?'OPT_IMPORTACION_LIMITE_RECURSOS':'OPT_IMPORTACION_TRANSPORTE'));
+  }
+ });
