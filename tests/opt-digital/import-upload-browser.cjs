@@ -6,7 +6,7 @@ const baseURL=process.env.OPT_TEST_URL||'http://127.0.0.1:8765';
 const scope={linea:'PANELES_2',anio:2026,semana:46,modo:'BASE'};
 const docId='01234567-89ab-4cde-8fab-0123456789ab';
 const pieces=[1,2].map(n=>({id_pieza:`${n}1234567-89ab-4cde-8fab-0123456789ab`,pagina:1,patron:1,barra:1,corte:n,longitud_mm:500}));
-const indexText='OPT,Reserva,Sistema\nA,R-SYNTH,PANEL\nB,R-SYNTH,PANEL\nMISSING,R-SYNTH,PANEL\nFOREIGN,F-SYNTH,FRAME\nWRONG,R-SYNTH,FRAME\n';
+const indexText='OPT,Reserva,Sistema,Acabado\nA,R-SYNTH,PANEL,White\nB,R-SYNTH,PANEL,Black\nMISSING,R-SYNTH,PANEL\nFOREIGN,F-SYNTH,FRAME\nWRONG,R-SYNTH,FRAME\n';
 (async()=>{
  const temporary=fs.mkdtempSync(path.join(os.tmpdir(),'opt-upload-browser-'));
  const folder=path.join(temporary,'retail');fs.mkdirSync(folder);
@@ -49,7 +49,7 @@ const indexText='OPT,Reserva,Sistema\nA,R-SYNTH,PANEL\nB,R-SYNTH,PANEL\nMISSING,
       const rpc=url.pathname.split('/').at(-1);
       if(rpc==='sgp_sesion_actual')return route.fulfill({json:{valida:true,usuario:name,nombre:'Synthetic '+name,rol:'LIDER MECANIZADO'}});
       if(rpc==='sgp_mis_accesos')return route.fulfill({json:[{ventana:'mecanizado.proceso'}]});
-      if(rpc==='sgp_consultar_programacion_semana')return route.fulfill({json:{producciones:[{id_linea:'PANELES_2',key_produccion:'SYNTH|PANELES_2',sistema:'PANEL',reserva_principal:'R-SYNTH',anio:2026,semana_base:46}]}});
+      if(rpc==='sgp_consultar_programacion_semana')return route.fulfill({json:{producciones:[{id_linea:'PANELES_2',key_produccion:'SYNTH|PANELES_2',sistema:'PANEL',reserva_principal:'R-SYNTH',reservas_compartidas:[{reserva:'R-SYNTH',tipo:'PRINCIPAL',acabado:'Blue'}],anio:2026,semana_base:46}]}});
       if(rpc==='sgp_reservas_asociadas_listar')return route.fulfill({json:[]});
       if(rpc==='sgp_opt_catalogo_v2'){catalogReads++;return route.fulfill({json:catalog()});}
       if(rpc==='sgp_opt_referencias_documentales_v1')return route.fulfill({json:{contract:'OPT-DOCUMENT-REFERENCES-1',scope,reservation:'R-SYNTH',system:'PANEL',references:receipt?[{id_documento:docId,sha256:receipt.document.sha256,referencia:'REF-SYNTH',sistema:'PANEL',piezas_documento:2},{id_documento:docId,sha256:receipt.document.sha256,referencia:'UNASSIGNED-SYNTH',sistema:null,piezas_documento:1}]:[]}});
@@ -72,6 +72,7 @@ const indexText='OPT,Reserva,Sistema\nA,R-SYNTH,PANEL\nB,R-SYNTH,PANEL\nMISSING,
    const first=await openSession('loader-'+size),{page,host}=first;
    assert.equal(uploads.length,0);assert.equal(catalogReads,1);
    await host.locator('#optIndexOrigin').selectOption('RETAIL');await host.locator('#optIndexFile').setInputFiles({name:'index.csv',mimeType:'text/csv',buffer:Buffer.from(indexText)});
+   assert.match(await host.locator('#optReservation option').last().textContent(),/Acabado: Black \/ White \/ no disponible · Retail · Candidato local/);
    await host.locator('#optPdfFolder').setInputFiles(folder);
    await page.waitForFunction(()=>!document.querySelector('#optDigitalHost').shadowRoot.querySelector('#optImportProcess').disabled);
    await host.locator('summary').filter({hasText:'Resultado de selección por archivo'}).click();
@@ -96,6 +97,21 @@ const indexText='OPT,Reserva,Sistema\nA,R-SYNTH,PANEL\nB,R-SYNTH,PANEL\nMISSING,
    const second=await openSession('cutter-'+size);assert.equal(await second.host.locator('#library button').count(),0);assert.equal(uploads.length,4);
    await second.host.locator('#optWorkflowTab1').click();await second.host.locator('#optReservation').selectOption(JSON.stringify(['SERVIDOR','R-SYNTH','PANEL']));
    await second.page.waitForFunction(()=>document.querySelector('#optDigitalHost').shadowRoot.querySelector('#optSharedPieces').textContent.includes('REF-SYNTH'));
+   const chosen=JSON.stringify(['SERVIDOR','R-SYNTH','PANEL']);
+   assert.equal(await second.host.locator('#optReservationMetadata').textContent(),'R-SYNTH · PANEL · Acabado: Blue · Retail · Compartida');
+   await second.host.locator('#optCatalogRefresh').click();
+   await second.page.waitForFunction(()=>document.querySelector('#optDigitalHost').shadowRoot.querySelector('#optReservation').options.length===2);
+   await second.host.locator('#optReservation').selectOption(chosen);
+   await second.host.locator('#optWorkflowTab0').click();
+   await second.host.locator('#optIndexOrigin').selectOption('RETAIL');
+   await second.host.locator('#optIndexFile').setInputFiles({name:'index.csv',mimeType:'text/csv',buffer:Buffer.from(indexText)});
+   await second.page.waitForFunction(()=>document.querySelector('#optDigitalHost').shadowRoot.querySelector('#optReservation').options.length===3);
+   assert.equal(await second.host.locator('#optReservation').inputValue(),chosen);
+   await second.host.locator('#optWorkflowTab1').click();
+   await second.host.locator('#optReservation').selectOption('');assert(await second.host.locator('#optReservationMetadata').isHidden());
+   await second.host.locator('#optReservation').selectOption(chosen);
+   const metadata=await second.host.locator('#optReservationMetadata').boundingBox();assert(metadata&&metadata.width>0&&metadata.x>=0&&metadata.x+metadata.width<=viewport.width+2);
+   assert.equal(await second.host.locator('#optReservationMetadata').textContent(),'R-SYNTH · PANEL · Acabado: Blue · Retail · Compartida');
    assert.match(await second.host.locator('#optReservationDocuments').textContent(),/PDF original es opcional/);assert.match(await second.host.locator('#optSharedPieces').textContent(),/Pendiente/);assert.equal(await second.host.locator('#optSharedPieces tbody tr').count(),2);assert.equal(await second.host.locator('#library button').count(),0);
    assert.equal(await second.host.locator('.opt-shared-references button').count(),2);await second.host.locator('.opt-shared-profile-header').filter({hasText:'Matriz no disponible'}).waitFor();
    await second.page.screenshot({path:`tests/opt-digital/evidence/import-upload-second-cutter-${size}.png`,fullPage:true});

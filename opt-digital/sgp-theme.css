@@ -121,3 +121,5 @@
 #optShell #optLocalReviewToggle{color:var(--opt-ink);font-weight:650;min-height:44px;padding:8px 0;box-sizing:border-box}
 #optShell #optLocalReviewCount{display:inline-block;margin-left:12px;font-size:12px;font-weight:400;color:#526a87}
 #optShell #optProgrammingScope:not([open]){background:#fff}
+/* Native selects may truncate long labels on mobile; repeat selected metadata. */
+#optShell #optReservationMetadata{overflow-wrap:anywhere;line-height:1.5;color:#31546e;margin:4px 0 10px}

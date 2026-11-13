@@ -1,3 +1,11 @@
+## Selector OPT: acabado y origen · candidato local · 13/11/2026
+
+Preparado sobre v454 (ab102489), sin publicación ni cambios de datos. Etiquetas
+Reserva · Sistema · Acabado · Retail/Proyecto con estado compartido/local
+independiente; fuentes existentes verificadas en lectura, sin nueva RPC.
+275 pruebas OPT y flujos DOM/PC/móvil sintéticos PASS. Falta autorización de
+publicación y asignar versión al integrar. Detalle: docs/OPT_RESERVATION_LABELS_REVIEW.md.
+
 ## OPT documental v451 · backend aplicado · 13/11/2026
 
 PR #264; publicación autorizada, pendiente de fusión y verificación Hosting.
