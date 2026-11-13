@@ -50,3 +50,6 @@ control nativo para que el móvil pueda leerla completa.
 
 Pendiente: autorización de publicación e integración con número de versión;
 validación visual final del lector con sesión autorizada tras publicar.
+
+## Preparación independiente v455
+Main comprobado por GitHub: ab102489 (v454), sin cambios posteriores. Candidata v455 preparada con sello/cache-bust coherentes; módulo opt-reservation-label incluido explícitamente en lista de publicación. Verificación de release y42 archivos OPT contra artefacto construido PASS. Browser import y workflow PC/móvil PASS sobre el artefacto completo, sin red productiva. La prueba espera ahora la finalización del lector de índice antes de inspeccionar opciones. Hosting actual no se pudo reconsultar: HTTP403 y herramienta web inaccesible; no se afirma nueva aceptación productiva. Requiere autorización independiente para push/PR/merge/publicación. No incluye CPU, Retail v3 ni SQL.

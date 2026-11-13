@@ -72,6 +72,7 @@ const indexText='OPT,Reserva,Sistema,Acabado\nA,R-SYNTH,PANEL,White\nB,R-SYNTH,P
    const first=await openSession('loader-'+size),{page,host}=first;
    assert.equal(uploads.length,0);assert.equal(catalogReads,1);
    await host.locator('#optIndexOrigin').selectOption('RETAIL');await host.locator('#optIndexFile').setInputFiles({name:'index.csv',mimeType:'text/csv',buffer:Buffer.from(indexText)});
+   await host.locator('#optReservation option').filter({hasText:'Candidato local'}).first().waitFor({state:'attached'});
    assert.match(await host.locator('#optReservation option').last().textContent(),/Acabado: Black \/ White \/ no disponible · Retail · Candidato local/);
    await host.locator('#optPdfFolder').setInputFiles(folder);
    await page.waitForFunction(()=>!document.querySelector('#optDigitalHost').shadowRoot.querySelector('#optImportProcess').disabled);

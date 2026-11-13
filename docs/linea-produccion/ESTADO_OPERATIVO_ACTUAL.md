@@ -1,3 +1,7 @@
+## 2026-11-13 — Etiquetas listas como candidata independiente LAB v455
+
+Base main ab102489 verificada. Acabado/origen exactos, módulo añadido al artefacto positivo y versión/cache-bust coherentes. Release y42 archivos contra artefacto PASS; pruebas nativas PC/móvil sobre artefacto PASS. Sin SQL/CPU/Retail v3 ni publicación. Hosting no revalidable por403 desde este entorno. Pendiente autorización push/PR/merge/deploy. Detalle docs/OPT_RESERVATION_LABELS_REVIEW.md.
+
 ## Selector OPT: acabado y origen · candidato local · 13/11/2026
 
 Preparado sobre v454 (ab102489), sin publicación ni cambios de datos. Etiquetas
