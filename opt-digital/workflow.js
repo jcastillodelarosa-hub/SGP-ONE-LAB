@@ -1,3 +1,4 @@
+import {mountSharedScheme} from './shared-scheme.js';
 import {mountReservationSummary} from './reservation-summary.js';
 import {mountMatrixPanel} from './matrix-panel.js';
 import {mountOptCutReport} from './cut-report.js';
@@ -23,7 +24,8 @@ export function mountOptWorkflow(root,viewer,options={}){
  const show=i=>{load.hidden=i!==0;cuts.hidden=i!==1;summaryPanel?.show(i===1&&!summaryView.hidden);buttons.forEach((b,n)=>{b.setAttribute('aria-selected',String(n===i));b.tabIndex=n===i?0:-1;});};
  buttons.forEach((b,i)=>{b.onclick=()=>show(i);b.onkeydown=e=>{if(['ArrowLeft','ArrowRight','Home','End'].includes(e.key)){e.preventDefault();const next=e.key==='Home'?0:e.key==='End'?1:1-i;show(next);buttons[next].focus();}};});
  for(const [panel,i] of [[load,0],[cuts,1]]){panel.setAttribute('role','tabpanel');panel.setAttribute('aria-labelledby',buttons[i].id);}
- for(const child of [...main.children])if(child!==header&&child!==library)referenceView.append(child);
+ const localViewerNodes=[...main.children].filter(child=>child!==header&&child!==library);
+ for(const child of localViewerNodes)referenceView.append(child);
  cuts.append(viewTabs,referenceView,summaryView);
  // One shared scope selector stays visible in either tab. Both use the same authenticated snapshot.
  const scopeSlot=make('div');scopeSlot.id='optScopeSlot';
@@ -48,7 +50,9 @@ export function mountOptWorkflow(root,viewer,options={}){
  const matrixSlot=make('div');$('refTitle').after(matrixSlot);
  const matrix=mountMatrixPanel(matrixSlot,{api:options.matrixApi});
  const unsubscribeReference=viewer.onReference?.(reference=>{matrixReference=reference;matrix.select(matrixSystem,matrixReference);})||(()=>{});
- const shared=mountSharedCuts(referenceView,{...options,openDocument:key=>viewer.openDocument(key)});
+ let scheme=null,selectedGroup=null;
+ const syncSchemeSelection=()=>scheme?.refreshSelection();referenceView.addEventListener('change',syncSchemeSelection);
+ const shared=mountSharedCuts(referenceView,{...options,openDocument:key=>viewer.openDocument(key),onReference:(ref,slot)=>{scheme?.destroy();scheme=null;options.plansApi?.invalidate?.();if(ref&&slot&&selectedGroup?.origin==='SERVIDOR'){const pieceState=id=>{const check=[...referenceView.querySelectorAll('input[data-piece]')].find(c=>c.dataset.piece===id),piece=ref.piezas.find(p=>p.id_pieza===id);return check&&piece?{selected:check.checked,disabled:check.disabled,done:piece.estado==='CORTADO'}:null;};scheme=mountSharedScheme(slot,{api:options.plansApi,getPieceState:pieceState,togglePiece:id=>{const check=[...referenceView.querySelectorAll('input[data-piece]')].find(c=>c.dataset.piece===id);if(!check||check.disabled)return null;check.checked=!check.checked;check.onchange();return pieceState(id);}});scheme.select(selectedGroup,ref);}}});
  referenceView.prepend(referenceView.lastElementChild);
  summaryPanel=mountReservationSummary(summaryView,{api:options.summaryApi});showView(0);
  const report=mountOptCutReport(referenceView,{api:options.reportApi,defaultScope:options.defaultScope});
@@ -86,14 +90,15 @@ export function mountOptWorkflow(root,viewer,options={}){
   if(groups.length&&!scopePanel.getScope()){scopePanel.invalidate();return;}
   const selected=groups.find(g=>g.key===reserve.value);
   if(selected?.origin==='SERVIDOR'&&!options.catalogApi?.ownsGroup(selected)){invalidateCatalog();renderScoped();return;}
+  for(const child of localViewerNodes)if(child.id!=='refDock'&&child.id!=='shade'&&child.id!=='refDrawer')child.hidden=!selected||selected.origin==='SERVIDOR';
   matrixSystem=selected?.system||'';matrix.select(matrixSystem,matrixReference);
-  documents.replaceChildren();shared.select(selected||null,records);summaryPanel.select(selected||null);
+  selectedGroup=selected||null;documents.replaceChildren();shared.select(selected||null,records);summaryPanel.select(selected||null);
   if(!selected){detail.textContent='Selecciona una reserva compartida para consultar referencias, cortes realizados y pendientes. Los candidatos locales se muestran por separado.';return;}
   const g=selected;
   if(g.origin==='SERVIDOR'){
    detail.textContent=`OPT del servidor: ${g.opts.join(', ')}. El estado compartido verifica las referencias y los cortes vigentes. No necesitas cargar un índice ni un PDF en este navegador.`;
    documents.append(make('p','El PDF original es opcional para revisión documental. Los cortes, sus usuarios y el saldo se muestran desde el servidor debajo.'));
-   const warned=new Set();for(const ref of g.references||[]){const warning=importRoundingWarning(ref);if(warning&&!warned.has(ref.id_documento)){warned.add(ref.id_documento);const notice=make('p',`${ref.fuentes.map(f=>f.consecutivo).join(', ')} · ${warning}`);notice.className='opt-rounding-warning';notice.dataset.warning='OPT_PRINTED_ROUNDING_COMPATIBLE';documents.append(notice);}}
+   const warned=new Set();for(const ref of g.references||[]){const warning=importRoundingWarning(ref);if(warning&&!warned.has(ref.id_documento)){warned.add(ref.id_documento);const notice=make('p',`${ref.fuentes.map(f=>f.consecutivo).join(', ')} · ${warning}`);notice.className='opt-rounding-warning';notice.dataset.warning='OPT_PRINTED_ROUNDING_COMPATIBLE';const technicalNotice=make('details');technicalNotice.append(make('summary','Validación documental de '+ref.fuentes.map(f=>f.consecutivo).join(', ')),notice);documents.append(technicalNotice);}}
    return;
   }
   detail.textContent=`OPT declaradas: ${g.opts.join(', ')}. Candidato local separado del catálogo compartido; selecciona el PDF para revisión documental. Ninguna marca local equivale a cortado.`;
@@ -106,5 +111,5 @@ export function mountOptWorkflow(root,viewer,options={}){
  const reportContextInputs=['optScopeYear','optScopeWeek','optScopeLine'].map($);
  for(const input of reportContextInputs)input.addEventListener('change',report.invalidate);
  const unsubscribe=viewer.onDocuments(items=>{records=items;clearTimeout(renderTimer);renderTimer=setTimeout(()=>{if(!closed)render();},75);});render();show(0);
- return {destroy(){closed=true;unsubscribeReference();matrix.destroy();importPanel.destroy();individualFiles?.removeEventListener('change',captureIndividual,true);invalidateCatalog();clearTimeout(renderTimer);unsubscribe();for(const input of reportContextInputs)input.removeEventListener('change',report.invalidate);report.destroy();shared.destroy();summaryPanel.destroy();scopePanel.destroy();scopeSlot.remove();}};
+ return {destroy(){closed=true;unsubscribeReference();matrix.destroy();importPanel.destroy();individualFiles?.removeEventListener('change',captureIndividual,true);invalidateCatalog();clearTimeout(renderTimer);unsubscribe();for(const input of reportContextInputs)input.removeEventListener('change',report.invalidate);report.destroy();referenceView.removeEventListener('change',syncSchemeSelection);scheme?.destroy();options.plansApi?.invalidate?.();shared.destroy();summaryPanel.destroy();scopePanel.destroy();scopeSlot.remove();}};
 }

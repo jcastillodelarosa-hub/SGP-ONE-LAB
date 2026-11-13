@@ -18,19 +18,22 @@ export function createCutJournal(storage,scope) {
   // One key per UUID retains concurrent tabs' commands even if both prepare at once.
   return {read,save(command){if(!valid(command))throw Error('Comando de cortes inválido');if(read())throw Error('Hay una operación pendiente.');const key=prefix+command.idempotencyKey,raw=JSON.stringify(command);storage.setItem(key,raw);if(storage.getItem(key)!==raw)throw Error('No se pudo conservar el comando antes de enviarlo.');},clear(command){const key=prefix+command.idempotencyKey,raw=storage.getItem(key);if(raw===null)return;if(raw!==JSON.stringify(command))throw Error('El comando pendiente cambió.');storage.removeItem(key);if(storage.getItem(key)!==null)throw Error('No se pudo cerrar el comando pendiente.');}};
 }
-export function mountSharedCuts(container,{api,catalogApi=null,matrixApi=null,storage,storageScope,createId=()=>crypto.randomUUID(),openDocument=()=>{}}={}) {
+export function mountSharedCuts(container,{api,catalogApi=null,matrixApi=null,storage,storageScope,createId=()=>crypto.randomUUID(),openDocument=()=>{},onReference=()=>{}}={}) {
   const make=(tag,text)=>{const n=container.ownerDocument.createElement(tag);if(text)n.textContent=text;return n;};
   const panel=make('section');panel.className='panel opt-shared';panel.id='optSharedCuts';
   const title=make('h2','Cortes realizados · estado compartido'),status=make('p');status.id='optSharedStatus';status.setAttribute('role','status');status.setAttribute('aria-live','polite');
   const reload=make('button','Actualizar estado compartido');reload.id='optSharedRefresh';reload.type='button';
-  const rows=make('div');rows.id='optSharedPieces';const count=make('p');count.id='optSharedSelection';
+  const layout=make('div');layout.className='opt-shared-layout';
+  const navigation=make('nav');navigation.className='opt-shared-references';navigation.setAttribute('aria-label','Referencias de la reserva');
+  const rows=make('div');rows.id='optSharedPieces';layout.append(navigation,rows);const count=make('p');count.id='optSharedSelection';
   const register=make('button','Registrar cortes seleccionados');register.id='optSharedRegister';register.type='button';
   const retry=make('button','Reintentar la misma operación');retry.id='optSharedRetry';retry.type='button';
   const confirm=make('section');confirm.id='optSharedConfirmation';confirm.hidden=true;confirm.setAttribute('aria-label','Confirmar registro de cortes');
   const question=make('p'),yes=make('button','Confirmar cortes realizados'),no=make('button','Cancelar');yes.id='optSharedConfirm';no.id='optSharedCancel';yes.type=no.type='button';confirm.append(question,yes,no);
-  panel.append(title,status,reload,rows,count,register,retry,confirm);container.append(panel);
+  panel.append(title,status,reload,layout,count,register,retry,confirm);container.append(panel);
   const matrix=mountMatrixPanel(panel,{api:matrixApi});
-  let group=null,documents=[],state=null,selected=new Set(),closed=false,epoch=0,busy=false,loading=false,journal,pending=null,journalError='',prepared=null;
+  let group=null,documents=[],state=null,selected=new Set(),closed=false,epoch=0,busy=false,loading=false,journal,pending=null,journalError='',prepared=null,activeReference=null;
+  const referenceKey=ref=>JSON.stringify([ref.id_documento||ref.sha256,ref.sistema,ref.referencia]);
   try{journal=createCutJournal(storage,storageScope);pending=journal.read();}catch(e){journalError=e.message;}
   const message=t=>{if(!closed)status.textContent=t;};
   const registrationAllowed=()=>api?.authorizesGroup?.(group,state,documents)===true;
@@ -45,22 +48,33 @@ export function mountSharedCuts(container,{api,catalogApi=null,matrixApi=null,st
     if(journalError)count.textContent+=' Registro bloqueado: '+journalError;
     for(const check of rows.querySelectorAll('input'))check.disabled=!canWrite||check.dataset.selectable!=='true';
   }
-  function render(){
-    matrix.select(null,null);rows.replaceChildren();selected.clear();confirm.hidden=true;prepared=null;
+  function render(resetSelection=true){
+    matrix.select(null,null);rows.replaceChildren();navigation.replaceChildren();if(resetSelection)selected.clear();confirm.hidden=true;prepared=null;
     const references=approvedReferences(state,group,documents,catalogApi);
+    if(!references.some(ref=>referenceKey(ref)===activeReference))activeReference=references.length?referenceKey(references[0]):null;
     for(const ref of references){
+      const key=referenceKey(ref),button=make('button');button.type='button';button.dataset.reference=key;button.setAttribute('aria-pressed',String(key===activeReference));button.setAttribute('aria-controls','optSharedPieces');
+      button.append(make('strong',ref.referencia),make('span',ref.consecutivo),make('span',`${ref.piezas.filter(p=>p.estado==='CORTADO').length} / ${ref.piezas.length} cortadas`));
+      button.onclick=()=>{if(key===activeReference)return;activeReference=key;render(false);};navigation.append(button);
+    }
+    for(const ref of references.filter(ref=>referenceKey(ref)===activeReference)){
       const block=make('section');block.append(make('h3',`${ref.consecutivo} · ${ref.referencia}`));
       const viewMatrix=make('button','Ver matriz del perfil');viewMatrix.type='button';viewMatrix.onclick=()=>matrix.select(ref.sistema,ref.referencia);block.append(viewMatrix);
-      block.append(make('p',`Documento aprobado · SHA ${ref.sha256.slice(0,12)} · ${ref.origen} · ${ref.sistema}`));
-      const warning=importRoundingWarning(ref);if(warning){const notice=make('p',warning);notice.className='opt-rounding-warning';notice.dataset.warning='OPT_PRINTED_ROUNDING_COMPATIBLE';block.append(notice);}
-      if(ref.localPdf){const view=make('button','Revisar PDF aprobado');view.type='button';view.onclick=()=>openDocument(ref.localPdf.key);block.append(view);}
-      else if(ref.serverVerified)block.append(make('p','Detalle validado en el servidor. Puedes consultar y registrar con tus permisos; el PDF local es opcional para revisar el original.'));
-      else block.append(make('p','Carga el PDF original con el mismo SHA para habilitar la selección de sus piezas. El nombre por sí solo no acredita el documento.'));
+      const schemeSlot=make('section');schemeSlot.id='optSharedScheme';schemeSlot.setAttribute('aria-label','Esquema de la referencia');block.append(schemeSlot);
+      const technical=make('details');technical.className='opt-shared-technical';technical.append(make('summary','Detalle técnico del documento'));
+      technical.append(make('p',`Documento aprobado · SHA ${ref.sha256.slice(0,12)} · ${ref.origen} · ${ref.sistema}`));
+      const warning=importRoundingWarning(ref);if(warning){const notice=make('p',warning);notice.className='opt-rounding-warning';notice.dataset.warning='OPT_PRINTED_ROUNDING_COMPATIBLE';technical.append(notice);}
+      if(ref.localPdf){const view=make('button','Revisar PDF aprobado');view.type='button';view.onclick=()=>openDocument(ref.localPdf.key);technical.append(view);}
+      else if(ref.serverVerified)technical.append(make('p','Detalle validado en el servidor. Puedes consultar y registrar con tus permisos; el PDF local es opcional para revisar el original.'));
+      else technical.append(make('p','Carga el PDF original con el mismo SHA para habilitar la selección de sus piezas. El nombre por sí solo no acredita el documento.'));
+      block.append(technical);
+      const piecesDetails=make('details');piecesDetails.className='opt-shared-piece-details';piecesDetails.append(make('summary',`Piezas y registro de cortes (${ref.piezas.length})`));
       const wrap=make('div');wrap.className='table-wrap';const table=make('table'),head=make('thead'),headRow=make('tr');
       for(const text of ['Seleccionar','Ubicación en PDF','Longitud (mm)','Estado','Usuario','Día operativo','Turno','Hora de registro (Bogotá)'])headRow.append(make('th',text));head.append(headRow);table.append(head);const body=make('tbody');
-      for(const piece of ref.piezas){const tr=make('tr'),cell=make('td'),check=make('input');check.type='checkbox';check.dataset.piece=piece.id_pieza;check.dataset.selectable=String(piece.estado==='PENDIENTE'&&piece.registrable===true&&(!!ref.localPdf||ref.serverVerified));check.setAttribute('aria-label',`Seleccionar ${ref.referencia}, página ${piece.pagina}, patrón ${piece.patron}, barra ${piece.barra}, corte ${piece.corte}`);check.onchange=()=>{if(check.disabled){check.checked=selected.has(piece.id_pieza);return;}if(check.checked)selected.add(piece.id_pieza);else selected.delete(piece.id_pieza);confirm.hidden=true;prepared=null;controls();};cell.append(check);tr.append(cell,make('td',`Pág. ${piece.pagina} · patrón ${piece.patron} · barra ${piece.barra} · corte ${piece.corte}`),make('td',String(piece.longitud_mm)),make('td',piece.estado==='CORTADO'?'Cortado':'Pendiente'),make('td',piece.usuario||'—'),make('td',piece.periodo?.fecha||'—'),make('td',piece.periodo?String(piece.periodo.turno):'—'),make('td',piece.registrado_en?new Date(piece.registrado_en).toLocaleString('es-CO',{timeZone:'America/Bogota'}):'—'));body.append(tr);}
-      table.append(body);wrap.append(table);block.append(wrap);rows.append(block);
+      for(const piece of ref.piezas){const tr=make('tr'),cell=make('td'),check=make('input');check.type='checkbox';check.checked=selected.has(piece.id_pieza);check.dataset.piece=piece.id_pieza;check.dataset.selectable=String(piece.estado==='PENDIENTE'&&piece.registrable===true&&(!!ref.localPdf||ref.serverVerified));check.setAttribute('aria-label',`Seleccionar ${ref.referencia}, página ${piece.pagina}, patrón ${piece.patron}, barra ${piece.barra}, corte ${piece.corte}`);check.onchange=()=>{if(check.disabled){check.checked=selected.has(piece.id_pieza);return;}if(check.checked)selected.add(piece.id_pieza);else selected.delete(piece.id_pieza);confirm.hidden=true;prepared=null;controls();};cell.append(check);tr.append(cell,make('td',`Pág. ${piece.pagina} · patrón ${piece.patron} · barra ${piece.barra} · corte ${piece.corte}`),make('td',String(piece.longitud_mm)),make('td',piece.estado==='CORTADO'?'Cortado':'Pendiente'),make('td',piece.usuario||'—'),make('td',piece.periodo?.fecha||'—'),make('td',piece.periodo?String(piece.periodo.turno):'—'),make('td',piece.registrado_en?new Date(piece.registrado_en).toLocaleString('es-CO',{timeZone:'America/Bogota'}):'—'));body.append(tr);}
+      table.append(body);wrap.append(table);piecesDetails.append(wrap);block.append(piecesDetails);rows.append(block);onReference(ref,schemeSlot);
     }
+    if(!references.length)onReference(null,null);
     controls();return references;
   }
   async function refresh(){
@@ -82,5 +96,5 @@ export function mountSharedCuts(container,{api,catalogApi=null,matrixApi=null,st
   yes.onclick=async()=>{if(!prepared||busy||register.disabled)return;const command=prepared;prepared=null;try{journal.save(command);pending=command;}catch(e){journalError=e.message;confirm.hidden=true;controls();message('No se envió el registro: '+e.message);return;}await submit(command);};
   retry.onclick=async()=>{if(retry.disabled)return;await submit(pending,true);};reload.onclick=refresh;
   controls();message('Selecciona una reserva para consultar el estado compartido.');
-  return {select(next,files=[]){if(closed)return;documents=files;const changed=JSON.stringify(group)!==JSON.stringify(next);group=next;if(changed){epoch++;state=null;selected.clear();confirm.hidden=true;prepared=null;return refresh();}if(!busy&&!loading)render();},refresh,destroy(){matrix.destroy();closed=true;epoch++;prepared=null;selected.clear();panel.remove();}};
+  return {select(next,files=[]){if(closed)return;documents=files;const changed=JSON.stringify(group)!==JSON.stringify(next);group=next;if(changed){activeReference=null;epoch++;state=null;selected.clear();confirm.hidden=true;prepared=null;return refresh();}if(!busy&&!loading)render(false);},refresh,destroy(){onReference(null,null);matrix.destroy();closed=true;epoch++;prepared=null;selected.clear();panel.remove();}};
 }

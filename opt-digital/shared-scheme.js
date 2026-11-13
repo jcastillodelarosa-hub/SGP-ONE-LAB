@@ -1,0 +1,26 @@
+// Documentary plans only. Cut registration remains exclusively in the shared ledger.
+export function mountSharedScheme(container,{api,getPieceState=()=>null,togglePiece=()=>false}={}) {
+ const make=(tag,text)=>{const n=container.ownerDocument.createElement(tag);if(text!==undefined)n.textContent=String(text);return n;};
+ let epoch=0,closed=false,target=null,group=null;
+ function render(data){
+  container.replaceChildren();
+  container.append(make('h3','Esquema de corte'));
+  if(data.status!=='AVAILABLE'){container.append(make('p','El esquema original aún no está disponible en el servidor. No se reconstruye con longitudes parciales. Los cortes guardados no se modifican.'));return;}
+  const plans=data.plans||[];
+  container.append(make('p','Distribución documental del PDF original, no a escala. El estado realizado se confirma únicamente en el registro de cortes.'));
+  const navigation=make('div');navigation.className='toolbar';const previous=make('button','Anterior'),position=make('span'),next=make('button','Siguiente');previous.type=next.type='button';navigation.append(previous,position,next);const content=make('section');container.append(navigation,content);let index=0;
+  function paint(){
+   content.replaceChildren();const p=plans[index];previous.disabled=index===0;next.disabled=index>=plans.length-1;position.textContent=`${index+1} / ${plans.length}`;
+   if(!p){position.textContent='0 / 0';content.append(make('p','Sin patrones documentales disponibles.'));return;}
+   content.append(make('p',`${p.finish||'Acabado no informado'} · Barra ${p.length||'No informada'} · Página ${p.page} · ${p.barqty} repeticiones`));
+   const tracks=new Map();for(const cut of p.cuts||[]){const instance=cut.profileInstance;let track=tracks.get(instance);if(!track){const bar=make('section');bar.className='physical-bar';bar.append(make('h4',`Repetición ${instance}`));track=make('div');track.className='physical-track';bar.append(track);content.append(bar);tracks.set(instance,track);}const state=cut.id_pieza?getPieceState(cut.id_pieza):null;const segment=make(state?'button':'span',cut.length);segment.className='segment';if(state){segment.type='button';segment.dataset.piece=cut.id_pieza;segment.disabled=state.disabled;segment.dataset.state=state.done?'CORTADO':'PENDIENTE';segment.setAttribute('aria-pressed',String(state.selected));segment.onclick=()=>{const next=togglePiece(cut.id_pieza);if(next)segment.setAttribute('aria-pressed',String(next.selected));};}segment.title=cut.selectedReservation?(cut.project||'Reserva seleccionada'):'Segmento fuera de la reserva seleccionada';segment.dataset.reservation=String(cut.selectedReservation);segment.setAttribute('aria-label',`${cut.length} · ${segment.title}`);track.append(segment);}
+   for(const track of tracks.values()){const rest=make('span',`Remanente impreso: ${p.rest||'No informado'}`);rest.className='rest document-remainder';track.append(rest);}
+   const details=make('details'),label=make('summary','Datos documentales del patrón');details.append(label,make('p',`Código: ${p.code||'No informado'} · Ubicación: ${p.location||'No informada'} · Destino impreso: ${p.restDisposition||'No informado'}`));
+   if(p.sourceSettings)details.append(make('p',`Sierra impresa: ${p.sourceSettings.kerf||'No informada'} · Extremo inicial: ${p.sourceSettings.leftTrim||'No informado'} · Extremo final: ${p.sourceSettings.rightTrim||'No informado'}`));
+   const table=make('table'),head=make('thead'),row=make('tr');for(const text of ['Repetición','Longitud impresa','Referencia original'])row.append(make('th',text));head.append(row);table.append(head);const body=make('tbody');for(const cut of p.cuts||[]){const row=make('tr');row.append(make('td',cut.profileInstance),make('td',cut.length),make('td',cut.selectedReservation?(cut.project||'Reserva seleccionada'):'Fuera de la reserva seleccionada'));body.append(row);}table.append(body);const wrap=make('div');wrap.className='table-wrap';wrap.append(table);details.append(wrap);content.append(details);
+  }
+  previous.onclick=()=>{if(index>0){index--;paint();}};next.onclick=()=>{if(index<plans.length-1){index++;paint();}};paint();
+ }
+ async function load(){const operation=++epoch,ref=target,scope=group;container.replaceChildren();if(!ref||!scope)return;const status=make('p','Consultando esquema original…');status.setAttribute('role','status');container.append(status);if(!api){status.textContent='Esquema compartido no disponible en esta conexión.';return;}try{const result=await api.load(scope,ref);if(closed||operation!==epoch)return;render(result);}catch(error){if(closed||operation!==epoch)return;status.textContent='No se pudo consultar el esquema. Los cortes guardados no se modificaron.';const retry=make('button','Reintentar esquema');retry.type='button';retry.onclick=load;container.append(retry);}}
+ return {refreshSelection(){for(const segment of container.querySelectorAll('button[data-piece]')){const state=getPieceState(segment.dataset.piece);segment.disabled=!state||state.disabled;segment.setAttribute('aria-pressed',String(!!state?.selected));}},select(nextGroup,nextReference){group=nextGroup;target=nextReference;return load();},destroy(){closed=true;epoch++;container.replaceChildren();}};
+}

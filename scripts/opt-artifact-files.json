@@ -35,5 +35,7 @@
   "opt-digital/matrix-panel.css",
   "src/services/opt-matrix-library.js",
   "src/domain/opt-document-summary.js",
-  "src/services/opt-document-summary.js"
+  "src/services/opt-document-summary.js",
+  "opt-digital/shared-scheme.js",
+  "src/services/opt-document-plans.js"
 ]
