@@ -49,7 +49,7 @@ export function extractCoordinatePlans(pages) {
       // PDF line wrapping drops the separator whitespace at the next baseline.
       // Compare only that known metadata suffix; never discard arbitrary text.
       const suffix=canonicalDocumentId.slice(h[1].trim().length).trim(),next=rows[index+1];
-      if(suffix&&next&&next.text===suffix&&next.items.length===1&&r.items.length===1&&
+      if(suffix&&next&&next.text===suffix&&next.items.length===1&&
          r.y-next.y>0&&r.y-next.y<=25&&Math.abs(next.items[0].x-r.items[0].x)<2)headerContinuations.add(next);
     }
     for(const [rowIndex,row] of rows.entries()){
@@ -69,7 +69,28 @@ export function extractCoordinatePlans(pages) {
         const match=text.match(new RegExp(label+':\\s*(\\d+(?:\\s+\\d+/\\d+)?")'));if(match){sourceSettings[key]=match[1];sourceSettings[key+'Page']=page.page;}
       }
       const totals=text.match(/Longitud de los cortes:\s*([^,]+),\s*Longitud de los perfiles usados:\s*([^,]+),\s*Length of reused stubs:\s*([^,]+),\s*Longitud del desperdicio:\s*(.+)$/);
-      if(totals&&ref)profileSummaries.push({ref,finish,page:page.page,cutLength:totals[1],stockLength:totals[2],reusedLength:totals[3],wasteLength:totals[4]});
+      if(totals&&ref)profileSummaries.push({ref,finish,page:page.page,cutLength:totals[1],stockLength:totals[2],reusedLength:totals[3],wasteLength:totals[4],
+        bars:null,pieces:null,plans:null,scrapPercentagePrinted:null,countsPage:null,countsSourceText:null});
+      // Counts are printed documentary facts, never reconstructed from patterns.
+      // Bind only the immediately adjacent summary line in the same profile/page.
+      const printedCounts=text.match(/^Yield:\s*\d+(?:\.\d+)?%,\s*Reused:\s*\d+(?:\.\d+)?%,\s*Waste:\s*(\d+(?:\.\d+)?%)\s+Número de items cortados:\s*(\d+),\s*Número de perfiles usados:\s*(\d+),\s*Número planos de corte:\s*(\d+)$/);
+      if(printedCounts){
+        const summary=profileSummaries.at(-1),previous=rows[rowIndex-1];
+        const quantities=printedCounts.slice(2).map(Number);
+        const samePage=summary?.page===page.page&&previous&&/^Longitud de los cortes:/.test(previous.text)&&previous.y-row.y>0&&previous.y-row.y<=25;
+        const isFurniture=r=>r.y<20||/^(?:Optimizador de corte|Creado\b|Actualizado\b|\(c\) \d{4})/.test(r.text);
+        const previousContent=previousPage?coordinateRows(previousPage.items).filter(r=>!isFurniture(r)):[];
+        const lastContent=previousContent.at(-1);
+        const continuedPage=summary?.page===page.page-1&&previousPage?.page===page.page-1&&
+          previousPage.width===page.width&&previousPage.height===page.height&&canonicalDocumentId&&documentId===canonicalDocumentId&&
+          lastContent&&/^Longitud de los cortes:/.test(lastContent.text)&&lastContent.y<60&&row.y>page.height-80&&
+          rows.slice(0,rowIndex).every(r=>isFurniture(r)||headerContinuations.has(r));
+        if(summary&&summary.ref===ref&&summary.finish===finish&&(samePage||continuedPage)&&summary.countsPage===null&&
+           quantities.every(n=>Number.isSafeInteger(n)&&n>=0)&&Number(printedCounts[1].slice(0,-1))<=100){
+          Object.assign(summary,{pieces:quantities[0],bars:quantities[1],plans:quantities[2],
+            scrapPercentagePrinted:printedCounts[1],countsPage:page.page,countsSourceText:text});
+        }
+      }
       const bar=text.match(/Longitud del perfil:\s*([^,]+),\s*Perfiles usados:\s*(\d+)/i);
       if(bar){block={length:bar[1].trim(),declared:Number(bar[2]),location:text.match(/UBICACION:\s*(\S+)/i)?.[1]||'',code:text.match(/CODIGO:\s*(\S+)/i)?.[1]||''};mode='';current=null;continue;}
       if(row.items.some(i=>i.text==='#perf')){
@@ -132,7 +153,7 @@ export function extractCoordinatePlans(pages) {
       }
       if(mode==='summary'){
         const c=cellsFor(row,summaryCenters);
-        if(/^\d+$/.test(c[0])&&c[1]&&inch.test(c[3])&&/^\d+$/.test(c[4]))summaryRows.push({ref:c[1],finish:c[2],length:c[3],quantity:Number(c[4]),code:c[6],page:page.page});
+        if(/^\d+$/.test(c[0])&&c[1]&&inch.test(c[3])&&/^\d+$/.test(c[4]))summaryRows.push({ref:c[1],finish:c[2],length:c[3],quantity:Number(c[4]),location:c[5],code:c[6],observation:c[7],page:page.page});
         else if(/^\d+$/.test(c[0]))issues.push({code:'INCOMPLETE_SUMMARY_ROW',page:page.page,reference:c[1]});
         continue;
       }

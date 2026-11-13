@@ -13,6 +13,7 @@
   "vendor/opt-pdf/pdf.min.mjs",
   "vendor/opt-pdf/pdf.worker.min.mjs",
   "opt-digital/workflow.js",
+  "opt-digital/reservation-summary.js",
   "opt-digital/shared-cuts.js",
   "opt-digital/scope-panel.js",
   "src/modules/opt-digital.js",
@@ -32,5 +33,7 @@
   "opt-digital/import-panel.js",
   "opt-digital/matrix-panel.js",
   "opt-digital/matrix-panel.css",
-  "src/services/opt-matrix-library.js"
+  "src/services/opt-matrix-library.js",
+  "src/domain/opt-document-summary.js",
+  "src/services/opt-document-summary.js"
 ]

@@ -25,6 +25,12 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
    await host.locator('#optWorkflowTab'+tab).click();
    assert.equal(await host.locator('#optWorkflowTab'+tab).getAttribute('aria-selected'),'true');
    assert.equal(await host.locator(tab?'#optLoadPanel':'#optCutsPanel').isVisible(),false);
+   assert(await host.locator('#optReservationScope').isVisible());
+   assert(await host.locator('#optScopeYear').isVisible());
+   assert(await host.locator('#optScopeWeek').isVisible());
+   assert(await host.locator('#optScopeLine').isVisible());
+   assert(await host.locator('#optScopeLoad').isVisible());
+   assert.equal(await host.locator('#optScopeLoad').count(),1);
    const result=await host.evaluate((h)=>{const r=h.shadowRoot,visible=e=>e.getClientRects().length>0;return [...r.querySelectorAll('button,input:not([type=checkbox]),select')].filter(visible).map(e=>({id:e.id,height:e.getBoundingClientRect().height,right:e.getBoundingClientRect().right}));});
    for(const c of result){assert(c.height>=40,`${name}: undersized ${c.id}`);assert(c.right<=width+1,`${name}: overflow ${c.id}`);}
    await page.screenshot({path:`tests/opt-digital/evidence/appearance-${name}-${tab?'cuts':'load'}.png`,fullPage:true});

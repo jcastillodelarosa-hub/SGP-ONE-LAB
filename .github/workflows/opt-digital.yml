@@ -7,6 +7,7 @@ on:
       - 'src/modules/opt-digital.js'
       - 'src/services/opt-shared-cuts.js'
       - 'src/services/opt-shared-catalog.js'
+      - 'src/services/opt-document-summary.js'
       - 'src/server/opt-*.js'
       - 'src/services/opt-import.js'
       - 'src/services/opt-matrix-library.js'
@@ -61,6 +62,7 @@ jobs:
           node tests/opt-digital/shared-workflow-dom.cjs
           node tests/opt-digital/server-registration-dom.cjs
           node tests/opt-digital/shared-catalog-dom.cjs
+          node tests/opt-digital/reservation-summary-dom.cjs
           node tests/opt-digital/import-upload-dom.cjs
           node tests/opt-digital/rounding-warning-fixture-dom.cjs
           node tests/opt-digital/cut-report-dom.cjs
@@ -69,6 +71,8 @@ jobs:
           node tests/opt-digital/import-channel.mjs
           node tests/opt-digital/import-endpoint-sql.mjs
           node docs/sql-proposals/opt-shared/test-catalog.mjs
+          OPT_PGLITE_MODULE="$PGLITE_MODULE" node docs/sql-proposals/opt-shared/test-document-summary-pglite.mjs
+          OPT_PGLITE_MODULE="$PGLITE_MODULE" node docs/sql-proposals/opt-shared/test-summary-backfill-pglite.mjs
           node tests/opt-digital/server-pdf-reader.mjs
           node tests/opt-digital/server-pdf-limits.mjs
       - name: Project identity and rounding contracts (isolated PostgreSQL/WASM)
@@ -147,6 +151,7 @@ jobs:
           node tests/opt-digital/workflow-browser.cjs
           node tests/opt-digital/cut-report-browser.cjs
           node tests/opt-digital/appearance-browser.cjs
+          node tests/opt-digital/reservation-summary-browser.cjs
           node tests/opt-matrix-library/browser.cjs
       - uses: actions/upload-artifact@v4
         if: always()

@@ -74,7 +74,7 @@ BEGIN
  VALUES(pdf_hash,manifest_hash,p_sources,
   jsonb_build_object('sgp_binding',p_evidence->'sgp_binding','contract','OPT-SERVER-VALIDATION-1',
    'algorithm','opt-import-manifest-v1','validation','DOCUMENTARY_MANIFEST_READY',
-   'physical_completion_verified',false,'validated_for_actor',actor,'original_index',p_evidence->'original_index'),actor)
+   'physical_completion_verified',false,'validated_for_actor',actor,'documentary_summary',p_evidence->'documentary_summary','original_index',p_evidence->'original_index'),actor)
  RETURNING id_aprobacion INTO approval;
  receipt:=sgp_opt_shared.import_manifest(approval,p_pdf,p_manifest);
  RETURN receipt||jsonb_build_object('import_contract','OPT-IMPORT-1','ok',true,'physical_completion_verified',false);

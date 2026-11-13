@@ -1,0 +1,20 @@
+const assert=require('node:assert/strict');const {JSDOM}=require(process.env.JSDOM_MODULE||'jsdom');
+(async()=>{
+ const {mountReservationSummary}=await import('../../opt-digital/reservation-summary.js');
+ const dom=new JSDOM('<main></main>'),root=dom.window.document.querySelector('main'),$=id=>root.querySelector('#'+id);
+ const a={origin:'SERVIDOR',reservation:'A',system:'PANEL'},b={origin:'SERVIDOR',reservation:'B',system:'PANEL'};
+ const data={documents:[{opt:'SYNTH <img src=x>',scope:'DOCUMENTO',cutRows:[{reference:'REF',finish:null,bars:0,pieces:2,plans:1,scrapPrinted:'0"',scrapPercentagePrinted:'0%'}],materialRows:[{reference:'REF',finish:'ACABADO QA',length:'40 1/2"',quantity:3,location:'QA-01',code:'001',observation:'<script>not markup</script>'}]}]};
+ let calls=[],invalidations=0,pending=[];
+ const api={invalidate(){invalidations++;},load(group){calls.push(group);return new Promise((resolve,reject)=>pending.push({resolve,reject}));}};
+ const view=mountReservationSummary(root,{api}),tick=()=>new Promise(resolve=>setTimeout(resolve,0));
+ view.select(a);assert.equal(calls.length,0);view.show(true);assert.equal(calls.length,1);assert($('optReservationSummaryRefresh').disabled);pending.shift().resolve(data);await tick();
+ assert.equal(root.querySelectorAll('table').length,2);assert.equal(root.querySelector('tbody tr').children[5].textContent,'0%');assert.equal(root.querySelectorAll('img,script').length,0);assert.match(root.textContent,/no se atribuyen íntegramente/);assert.match(root.textContent,/No informado/);assert.equal(root.querySelector('tbody tr').children[2].textContent,'0');assert.equal(root.querySelectorAll('[role=region][tabindex="0"]').length,2);
+ view.show(false);view.show(true);assert.equal(calls.length,1);view.select(a);assert.equal(calls.length,1);
+ $('optReservationSummaryRefresh').click();assert.equal(calls.length,2);view.select(b);assert.equal(calls.length,3);assert.equal(root.querySelectorAll('table').length,0);pending.shift().resolve(data);await tick();assert.equal(root.querySelectorAll('table').length,0);
+ pending.shift().reject(Error('denied'));await tick();assert.match($('optReservationSummaryStatus').textContent,/No se pudo consultar/);assert(!$('optReservationSummaryRefresh').disabled);
+ $('optReservationSummaryRefresh').click();pending.shift().resolve({documents:[]});await tick();assert.match(root.textContent,/No significa que no existan OPT/);
+ view.select({origin:'RETAIL',reservation:'A'});assert($('optReservationSummaryRefresh').disabled);assert.equal(root.querySelectorAll('table').length,0);assert.match(root.textContent,/Candidato local/);
+ view.select(a);view.destroy();pending.shift().resolve(data);await tick();assert.equal(root.children.length,0);assert(invalidations>=4);
+ const unavailable=mountReservationSummary(root);unavailable.select(a);unavailable.show(true);assert.match(root.textContent,/no disponible en esta conexión/);unavailable.destroy();
+ console.log('PASS: documentary stacked tables, exact values, zero distinct from absent, text-only rendering, deferred reads, stale reservation/destroy responses rejected, retry/errors, local candidate block. Synthetic DOM only.');
+})().catch(e=>{console.error(e);process.exit(1);});
