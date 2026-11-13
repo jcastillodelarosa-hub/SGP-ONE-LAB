@@ -1,3 +1,7 @@
+## 2026-11-13 — Original XLSX CPU equivalence confirmed, not deployed
+
+Parent independently applied CPU patch on exact v454 base and verified full parsed-result equality in six cold processes using original ARCHIVOS/RETAIL:7692 entries,3794 missing relations. Median CPU2714→1083ms, post-parse heap197.5→32.6MB. Private evidence /workspace/sgp-opt-cpu-original-evidence.json. Server candidate52e5a43 remains local; no production writes/reimports/deployment. Whole-request CPU and publication authorization remain outstanding; do not claim Edge budget guaranteed.
+
 ## 2026-11-13 — CPU index candidate, not published
 
 Isolated fix/opt-index-cpu on published v454 ab102489. Selected worksheet uses server-only event parser with shared row checks and complete-document validation; ZIP/metadata/ACL/import writer unchanged. Synthetic equivalent7692 entries, lower local CPU/heap; Deno check/tests pass. New XML depth/row-node caps explicit. Original-file differential profile pending in parent executor. See docs/opt-import-endpoint/CPU_INDEX_REVIEW.md. No production imports, deploy or retry of uncertain uploads.
