@@ -1,0 +1,27 @@
+const assert=require('node:assert/strict');const {JSDOM}=require(process.env.JSDOM_MODULE||'jsdom');
+(async()=>{
+ const {mountSharedCuts}=await import('../../opt-digital/shared-cuts.js');
+ const dom=new JSDOM('<main></main>',{url:'https://synthetic.test'}),root=dom.window.document.querySelector('main');
+ const id=n=>`00000000-0000-4000-8000-${String(n).padStart(12,'0')}`,sha='a'.repeat(64),scope={linea:'SYNTHETIC',anio:2026,semana:46,modo:'BASE'};
+ const group={scope,reservation:'SYNTHETIC',origin:'RETAIL',system:'SYS',opts:['OPT-SYNTHETIC']},docs=[{format:'pdf',key:sha}];
+ const ref=n=>({id_documento:id(99),sha256:sha,sistema:'SYS',referencia:'REF-'+n,fuentes:[{origen:'RETAIL',consecutivo:'OPT-SYNTHETIC'}],piezas:[{id_pieza:id(n),estado:'PENDIENTE',registrable:true,pagina:n,patron:n,barra:1,corte:1,longitud_mm:100}]});
+ let writable=true,calls=[],events=[];
+ const api={authorizesGroup:group=>!!group,estado:async()=>({scope,reserva:'SYNTHETIC',habilitado:true,manifiesto_validado:true,puede_registrar:writable,referencias:[ref(1),ref(2)]}),registrar:async command=>{calls.push(command);}};
+ const component=mountSharedCuts(root,{api,storage:dom.window.localStorage,storageScope:'synthetic',createId:()=>id(88),onReference:(reference,slot)=>{events.push(reference?.referencia||null);if(reference){assert.equal(slot.id,'optSharedScheme');slot.textContent='Synthetic scheme '+reference.referencia;}}});
+ await component.select(group,docs);
+ const nav=()=>[...root.querySelectorAll('.opt-shared-references button')],check=()=>root.querySelector('input[type=checkbox]'),select=()=>{check().checked=true;check().onchange();};
+ assert.equal(nav().length,2);assert.equal(root.querySelectorAll('table').length,1);
+ assert.equal(root.querySelectorAll('#optSharedScheme').length,1);
+ assert.equal(root.querySelector('.opt-shared-technical').open,false);assert.equal(root.querySelector('.opt-shared-piece-details').open,false);
+ assert.equal(root.querySelector('#optSharedScheme').nextElementSibling.className,'opt-shared-technical');
+ select();nav()[1].click();assert.equal(check().dataset.piece,id(2));assert.equal(check().checked,false);select();
+ nav()[0].click();assert.equal(check().checked,true);assert.equal(nav()[0].getAttribute('aria-pressed'),'true');
+ assert.match(root.querySelector('#optSharedSelection').textContent,/2 piezas seleccionadas/);
+ await component.select(group,docs);assert.equal(check().checked,true);
+ root.querySelector('#optSharedRegister').click();root.querySelector('#optSharedCancel').click();assert.equal(calls.length,0);
+ root.querySelector('#optSharedRegister').click();await root.querySelector('#optSharedConfirm').onclick();assert.equal(calls.length,1);assert.deepEqual(calls[0].piezas,[id(1),id(2)]);assert.equal(dom.window.localStorage.length,0);
+ writable=false;await component.refresh();nav()[1].click();assert.equal(check().disabled,true);assert.equal(root.querySelector('#optSharedRegister').disabled,true);
+ await component.select(null);assert.equal(root.querySelector('#optSharedScheme'),null);assert.equal(events.at(-1),null);
+ component.destroy();assert.equal(root.children.length,0);
+ console.log('PASS: synthetic reference navigation; one scheme/table; collapsed technical/pieces; multi-reference selection, exact registration, cancel, permissions, callback cleanup.');
+})().catch(e=>{console.error(e);process.exitCode=1;});
