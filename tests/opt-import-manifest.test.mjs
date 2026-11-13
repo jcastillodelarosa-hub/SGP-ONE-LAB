@@ -541,3 +541,15 @@ test('rounding policy is unavailable to legacy retail/individual and does not by
   project.input.extraction.sourceProjectRows[0].quantity++;
   blocked(project.input,project.server,'FINAL_REFERENCE_LENGTH_QUANTITY_MISMATCH');
 });
+
+
+test('strict printed-total rejection carries original operands, page and exact signed differences without altering input',()=>{
+ const input=fixture();input.extraction.sourceProfileSummaries[0].cutLength='40 5/32"';
+ const before=JSON.stringify(input);const out=blocked(input,evidence(),'FINAL_PROFILE_TOTALS_MISMATCH');
+ const b=out.blockers.find(x=>x.code==='FINAL_PROFILE_TOTALS_MISMATCH');
+ assert.equal(b.page,2);assert.equal(b.comparison.printed.cuts,'40 5/32"');
+ assert.deepEqual(b.comparison.printed32,{stock:1920,cuts:1285,reused:576,waste:60});
+ assert.deepEqual(b.comparison.delta32,{stock:0,cuts:-1,conservation:-1});
+ assert.equal(b.comparison.unit,'1/32 inch');assert.equal(b.comparison.roundingCauseVerified,false);
+ assert.equal(b.comparison.acceptance,'BLOCKED_EXACT_TOTALS_REQUIRED');assert.equal(JSON.stringify(input),before);
+});

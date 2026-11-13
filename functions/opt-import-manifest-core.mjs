@@ -192,7 +192,12 @@ export function validateOptImportManifest({document, extraction}, server) {
       if(structureInvalid||!['PRINTED_EQUALITY','ROUNDING_COMPATIBLE'].includes(diagnostic.status))
         fail('FINAL_PROFILE_TOTALS_MISMATCH',{profile:balance.ref,finish:balance.finish,roundingStatus:diagnostic.status,reasons:diagnostic.reasons});
     }else if(structureInvalid||!exactTotals)
-      fail('FINAL_PROFILE_TOTALS_MISMATCH', {profile:balance.ref, finish:balance.finish});
+      fail('FINAL_PROFILE_TOTALS_MISMATCH', {profile:balance.ref, finish:balance.finish, page:balance.page,
+        comparison:{unit:'1/32 inch',
+          printed:{stock:balance.stockLength,cuts:balance.cutLength,reused:balance.reusedLength,waste:balance.wasteLength},
+          printed32:{stock:balance.stock32,cuts:balance.cut32,reused:balance.reused32,waste:balance.waste32},
+          delta32:{stock:balance.patternStockDelta32,cuts:balance.patternCutsDelta32,conservation:balance.summaryBalanceDelta32},
+          acceptance:'BLOCKED_EXACT_TOTALS_REQUIRED',roundingCauseVerified:false}});
     summaryKeys.add(id);
   }
   if (summaryKeys.size !== profileKeys.size || [...profileKeys].some(id => !summaryKeys.has(id))) fail('FINAL_PROFILE_SUMMARY_MISSING');

@@ -1,3 +1,7 @@
+## 2026-11-13 — Retail blocked diagnostics, no tolerance change
+
+Prepared detailed strict-total errors with page, original operands and signed integer1/32 differences.286 OPT tests PASS; original215 remains422/four blockers/zero writes. Searches did not establish optimizer precision or source workbooks. No policy/measurements/permissions/deploy changes. Native same-job evidence or explicit uncertainty-policy decision remains necessary. Labels v455 remain independent ad8addc.
+
 ## 2026-11-13 — Retail exact contract v3 prepared, disabled
 
 Isolated feat/opt-retail-contract-v3 on CPU febd571. Exact original label/reservation/system identity separates document number from internal ID; approved profile destination separates Panel/Frame, Frame assignments forbidden. Private SQL proposals, rollback, synthetic SQL persistence/denials/context changes and 283 OPT tests pass. Originals available locally and hashes verified: identities resolve, but strict printed-total reconciliation blocks both originals; rounding compatibility is diagnostic only. No writes/deployment/reimports. See docs/opt-import-endpoint/RETAIL_V3_REVIEW.md. Labels remain independent 275e6df. Next: explicit Retail rounding policy, successful-path CPU verification, then authorization for SQL and server routing.
