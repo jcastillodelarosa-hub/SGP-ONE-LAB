@@ -1,3 +1,16 @@
+## OPT documental v451 · backend aplicado · 13/11/2026
+
+PR #264; publicación autorizada, pendiente de fusión y verificación Hosting.
+Migración `lab_v451_opt_document_reader` aplicada tras autorización específica.
+Dos lectores con sesión/ámbito; rechazo real sin token comprobado. Definiciones y
+ACL de registro, estado, catálogo y helpers intactas; tablas privadas conservan RLS.
+Sin cambios de datos, reservas ni asignaciones. CI del código y PR: siete workflows
+PASS; PC/móvil, SQL sintético, concurrencia y Deno. Matriz automática y documento
+completo separados de autorización para cortar. Library bloqueada por HTTP 403;
+no se acredita comparación de píxeles ni aceptación positiva con sesión real.
+Siguiente: merge autorizado y verificar versión/SHA y postcheck del flujo Hosting.
+Detalle: docs/sql-proposals/opt-shared/DOCUMENT_READ_REVIEW.md.
+
 ## Publicación conjunta autorizada · Reportes y pestañas PDT · LAB v441 · 11/11/2026
 
 El propietario autorizó subir código, crear consulta Supabase y publicar ambos

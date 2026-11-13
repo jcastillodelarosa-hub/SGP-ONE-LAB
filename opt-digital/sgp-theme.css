@@ -102,3 +102,9 @@
 
 /* Shared documentary segments use the existing ledger checkbox authority. */
 #optSharedScheme .segment[aria-pressed="true"]{outline:3px solid var(--sgp-primary,#1769aa);background:#dbeafe}#optSharedScheme .segment[data-state="CORTADO"]{background:#dcfce7;color:#166534}#optSharedScheme .segment[data-reservation="false"]{background:#e5e7eb;color:#4b5563}#optSharedScheme .physical-track{display:flex;gap:4px;overflow-x:auto;padding:5px}#optSharedScheme .segment{padding:12px;white-space:nowrap;flex:0 0 auto}#optSharedScheme .physical-bar{margin:12px 0}
+
+/* Option 1: profile header and matrix share the top row; scheme keeps full width. */
+#optShell .opt-shared-profile-header{display:grid;grid-template-columns:minmax(0,1fr) minmax(240px,360px);gap:16px;align-items:start}
+#optShell .opt-shared-profile-header .opt-matrix-panel{margin:0}
+#optShell .opt-shared-profile-header p{overflow-wrap:anywhere}
+@media(max-width:1000px){#optShell .opt-shared-profile-header{grid-template-columns:minmax(0,1fr)}}

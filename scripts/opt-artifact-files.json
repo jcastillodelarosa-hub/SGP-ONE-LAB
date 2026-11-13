@@ -37,5 +37,6 @@
   "src/domain/opt-document-summary.js",
   "src/services/opt-document-summary.js",
   "opt-digital/shared-scheme.js",
-  "src/services/opt-document-plans.js"
+  "src/services/opt-document-plans.js",
+  "src/services/opt-document-references.js"
 ]
