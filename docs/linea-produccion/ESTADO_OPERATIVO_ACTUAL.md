@@ -1,14 +1,15 @@
-## OPT documental · candidata v451 · 13/11/2026
+## OPT documental v451 · backend aplicado · 13/11/2026
 
-Rama `feat/opt-document-reader-v451`, base v450/PR #263. Solo lector documental
-separado y presentación OPT: no modifica LP, reservas, asignaciones ni registro.
-Pruebas sintéticas PC/móvil y SQL local; sin aplicación Supabase ni publicación.
-Bloqueo de contraste con boceto: imágenes Library inaccesibles por red HTTP 403.
-PR #264 abierto; publicación autorizada. SQL rechazado por aprobación automática:
-requiere autorización específica para los dos lectores SECURITY DEFINER y EXECUTE
-a anon/authenticated. Confirmadas funciones ausentes; no merge ni deploy. Próximo:
-resolver aprobación SQL, aplicar contrato y verificar antes de publicar.
-Detalles: [contrato OPT](../sql-proposals/opt-shared/DOCUMENT_READ_REVIEW.md).
+PR #264; publicación autorizada, pendiente de fusión y verificación Hosting.
+Migración `lab_v451_opt_document_reader` aplicada tras autorización específica.
+Dos lectores con sesión/ámbito; rechazo real sin token comprobado. Definiciones y
+ACL de registro, estado, catálogo y helpers intactas; tablas privadas conservan RLS.
+Sin cambios de datos, reservas ni asignaciones. CI del código y PR: siete workflows
+PASS; PC/móvil, SQL sintético, concurrencia y Deno. Matriz automática y documento
+completo separados de autorización para cortar. Library bloqueada por HTTP 403;
+no se acredita comparación de píxeles ni aceptación positiva con sesión real.
+Siguiente: merge autorizado y verificar versión/SHA y postcheck del flujo Hosting.
+Detalle: docs/sql-proposals/opt-shared/DOCUMENT_READ_REVIEW.md.
 
 ## Export · selección múltiple · candidata LAB v430
 

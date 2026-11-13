@@ -1,18 +1,15 @@
-## OPT · consulta documental completa · candidata LAB v451 · 13/11/2026
+## OPT documental v451 · backend aplicado · 13/11/2026
 
-IMPLEMENTADO EN RAMA / NO FUSIONADO / SQL NO APLICADO / NO PUBLICADO.
-Base v450, PR #263; rama `feat/opt-document-reader-v451`. Nuevo contrato separado
-para todas las referencias del documento autorizado, sin ampliar permisos de
-registro. Matriz automática arriba a la derecha; esquema debajo con ancho completo;
-Resumen mantiene dos tablas. Pruebas locales Node, SQL aislado y PC/móvil sintéticas.
-Las imágenes originales de Library no pudieron descargarse (red HTTP 403); no se
-acredita comparación visual con el boceto ni verificación productiva.
-Detalle y pasos: `docs/sql-proposals/opt-shared/DOCUMENT_READ_REVIEW.md`.
-PR #264 abierto y publicación autorizada. Aplicación SQL rechazada por revisión
-automática: falta aprobación específica de los dos lectores SECURITY DEFINER y
-sus grants EXECUTE a anon/authenticated. Confirmada ausencia de ambas funciones.
-Siguiente: resolver esa aprobación, aplicar solo el contrato aditivo y verificar
-antes de fusionar/publicar. No ejecutar importaciones ni alterar reservas/cortes.
+PR #264; publicación autorizada, pendiente de fusión y verificación Hosting.
+Migración `lab_v451_opt_document_reader` aplicada tras autorización específica.
+Dos lectores con sesión/ámbito; rechazo real sin token comprobado. Definiciones y
+ACL de registro, estado, catálogo y helpers intactas; tablas privadas conservan RLS.
+Sin cambios de datos, reservas ni asignaciones. CI del código y PR: siete workflows
+PASS; PC/móvil, SQL sintético, concurrencia y Deno. Matriz automática y documento
+completo separados de autorización para cortar. Library bloqueada por HTTP 403;
+no se acredita comparación de píxeles ni aceptación positiva con sesión real.
+Siguiente: merge autorizado y verificar versión/SHA y postcheck del flujo Hosting.
+Detalle: docs/sql-proposals/opt-shared/DOCUMENT_READ_REVIEW.md.
 
 ## Publicación conjunta autorizada · Reportes y pestañas PDT · LAB v441 · 11/11/2026
 

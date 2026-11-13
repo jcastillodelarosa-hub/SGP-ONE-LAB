@@ -1,13 +1,18 @@
 # Consulta documental completa · candidata LAB v451
 
-IMPLEMENTADO EN RAMA, NO APLICADO EN SUPABASE, NO FUSIONADO, NO PUBLICADO.
-Base: LAB v450, merge de PR #263. PR #264 abierto; solo código, contrato SQL y fixtures sintéticos.
+BACKEND APLICADO / FRONTEND EN PR #264 / PUBLICACIÓN AUTORIZADA PENDIENTE.
+Base: LAB v450, PR #263. Tras autorización específica del propietario se aplicó
+`lab_v451_opt_document_reader` el 13/11/2026. Dos lectores SECURITY DEFINER,
+search_path vacío y EXECUTE solo postgres/anon/authenticated, sin PUBLIC/service_role.
+Verificación real: ambos rechazan token nulo con OPT_NO_AUTORIZADO. Las definiciones
+MD5 y ACL del catálogo, estado, registro y cinco helpers de autorización coinciden
+con la captura anterior. Las cinco tablas privadas mantienen RLS y ACL postgres.
+No se modificaron datos, reservas, asignaciones ni permisos de registro.
 
-Publicación autorizada por el propietario; aplicación SQL detenida por revisión
-automática: requiere autorización específica para crear los dos lectores SECURITY
-DEFINER y conceder EXECUTE a anon/authenticated. La operación fue rechazada antes
-de ejecutarse y la consulta posterior confirma que ambas funciones siguen ausentes.
-No se ha fusionado ni desplegado; no se modificaron datos ni permisos.
+El asesor de seguridad señala la exposición SECURITY DEFINER a anon/authenticated
+esperada y autorizada; los lectores conservan el control de sesión y ámbito interno.
+No detecta search_path mutable en estos lectores. No se amplió esta entrega a
+remediar avisos preexistentes del proyecto.
 
 ## Contrato
 
@@ -36,7 +41,7 @@ con todo el ancho de la columna inferior. En móvil se apilan. Matriz automátic
 por sistema/referencia exactos usando la biblioteca existente; ausencia, ambigüedad
 y error explícitos. Resumen conserva sus dos tablas apiladas. Blanco/azul SGP.
 
-## Aplicación pendiente (bloqueo de aprobación automática)
+## Secuencia aplicada y publicación pendiente
 
 1. Revisar `document_read_REVIEW.sql` y las dependencias privadas en el destino.
 2. Aplicar instalación aditiva; por defecto revoca EXECUTE de ambos lectores.
@@ -74,5 +79,5 @@ No alterar el writer v2 ni sus ACL. No se requieren cambios de datos/importacion
 Límite: las dos referencias visuales de Library se resolvieron, pero la transferencia
 fue bloqueada por la política de red del entorno (HTTP CONNECT 403). No se afirma
 comparación de píxeles con el boceto. La prueba visual inspecciona la implementación
-sintética según la disposición textual aprobada. SQL productivo y aceptación con
-sesión real quedan pendientes; no se tocaron datos ni se desplegó.
+sintética según la disposición textual aprobada. SQL aplicado y comprobado estructuralmente; aceptación positiva con sesión real
+queda pendiente. No se tocaron datos; Hosting se verificará tras el merge autorizado.
