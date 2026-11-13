@@ -18,7 +18,9 @@ export function normalizeOptRows(rows, origin) {
     const opt = asText(pick(row, ['Consecutivo', 'Consecutivo OPT', 'consecutive', 'ID Optimización', 'Id Optimizacion', 'OPT']));
     return {
       origin, sourceRow: index + 2, opt,
-      reservation: primaryReservation(pick(row, ['# Reserva', 'N. Reserva', 'No Reserva', 'Reserva', 'Numero reserva'])),
+      // PROYECTO cells are documentary selectors, not SGP primary-reservation lists.
+      // Preserve all text so a multi-reservation cell cannot silently choose one.
+      reservation: (origin === 'PROYECTO' ? asText : primaryReservation)(pick(row, ['# Reserva', 'N. Reserva', 'No Reserva', 'Reserva', 'Numero reserva'])),
       system: asText(pick(row, ['Sistema', 'sistemas'])),
       production: asText(pick(row, ['Producción', 'Produccion', 'Descripción', 'Descripcion', 'Nombre Produccion'])),
       project: asText(pick(row, ['Proyecto'])),

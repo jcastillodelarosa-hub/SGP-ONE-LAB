@@ -7,7 +7,11 @@ export function documentProduction(reference) {
   const ids=[...new Set([...text.matchAll(/\b(\d{5,})\s*-\s*\S/g)].map(m=>m[1]))];
   return first && ids.length===1 && first[1]===ids[0] ? first[1] : null;
 }
-export function reconcileIndividuals({plans=[],projectRows=[],profileSummaries=[]}) {
+export function reconcileIndividuals({plans=[],projectRows=[],profileSummaries=[],referenceMode='DOCUMENT_PRODUCTION'}) {
+  // Exact printed-reference coverage is independent of an SGP production ID.
+  // Only the trusted import manifest opts into this mode for indexed projects.
+  if (!['DOCUMENT_PRODUCTION','EXACT_PRINTED_REFERENCE'].includes(referenceMode)) throw new TypeError('OPT_REFERENCE_MODE_INVALID');
+  const printedReference=referenceMode==='EXACT_PRINTED_REFERENCE';
   const source=projectRows.map((r,i)=>({...r,sourceId:r.sourceId||null,index:i,length32:length(r.length),production:documentProduction(r.reference)}));
   const entries=[],bars=[],unresolved=[];
   for(const p of plans){
@@ -15,14 +19,19 @@ export function reconcileIndividuals({plans=[],projectRows=[],profileSummaries=[
     for(const [index,c] of p.cuts.entries()){
       const cutId=JSON.stringify([p.id,c.profileInstance,c.sourceColumn,c.sourceSlot,c.unitInstance]);
       const production=documentProduction(c.project),cutLength=length(c.length);
-      const candidates=source.filter(r=>(!r.grouping||r.grouping==='PRINTED_CELL')&&r.ref===p.ref&&r.finish===p.finish&&r.length32!==null&&r.length32===cutLength&&r.production===production&&production!==null);
+      const candidates=source.filter(r=>(!r.grouping||r.grouping==='PRINTED_CELL')&&r.ref===p.ref&&r.finish===p.finish&&r.length32!==null&&r.length32===cutLength&&(printedReference||(r.production===production&&production!==null)));
       const exact=candidates.filter(r=>norm(r.reference)===norm(c.project));
       const entry={cutId,patternId:p.id,index,profile:p.ref,finish:p.finish,length32:cutLength,documentProduction:production,
         productionStatus:production&&candidates.length?'DOCUMENT_ID_MATCH':'UNRESOLVED',sgpProductionId:null,
-        candidateSourceRows:exact.map(r=>r.sourceId),sourceRowId:null,status:'UNRESOLVED_REFERENCE',reason:!production?'MISSING_OR_AMBIGUOUS_DOCUMENT_PRODUCTION':!candidates.length?'NO_SAME_PRODUCTION_LENGTH_ROW':'REFERENCE_GROUP_DIFFERS'};
+        candidateSourceRows:exact.map(r=>r.sourceId),sourceRowId:null,status:'UNRESOLVED_REFERENCE',reason:!printedReference&&!production?'MISSING_OR_AMBIGUOUS_DOCUMENT_PRODUCTION':!candidates.length?'NO_SAME_PRODUCTION_LENGTH_ROW':'REFERENCE_GROUP_DIFFERS'};
       if(exact.length===1&&exact[0].sourceId){entry.sourceRowId=exact[0].sourceId;entry.status='CANDIDATE_ROW';}
-      else if(exact.length>1){entry.reason='MULTIPLE_SOURCE_ROWS';}
-      if(c.uncertain||(p.issues||[]).length){entry.productionStatus='UNRESOLVED';entry.status='UNRESOLVED_REFERENCE';entry.sourceRowId=null;entry.reason='INCOMPLETE_EXTRACTION';}
+      else if(exact.length>1){
+        entry.reason='MULTIPLE_SOURCE_ROWS';
+        if(printedReference&&exact.every(r=>r.sourceId)&&new Set(exact.map(r=>r.sourceId)).size===exact.length){
+          entry.sourceRowIds=exact.map(r=>r.sourceId).sort();entry.status='CANDIDATE_ROW_GROUP';
+        }
+      }
+      if(c.uncertain||(p.issues||[]).length){entry.productionStatus='UNRESOLVED';entry.status='UNRESOLVED_REFERENCE';entry.sourceRowId=null;delete entry.sourceRowIds;entry.reason='INCOMPLETE_EXTRACTION';}
       entries.push(entry);
       const barNumber=c.profileInstance;
       if(!Number.isSafeInteger(barNumber)||barNumber<1||barNumber>p.barqty||!Number.isSafeInteger(c.sourceColumn)||!Number.isSafeInteger(c.sourceSlot)||!Number.isSafeInteger(c.unitInstance)){
@@ -51,10 +60,30 @@ export function reconcileIndividuals({plans=[],projectRows=[],profileSummaries=[
       else {e.status='ROW_GROUP_MATCH';e.reason='REPEATED_UNITS_NOT_INDIVIDUALLY_IDENTIFIED';}
     }
   }
+  // A repeated printed row is not an individually identifiable unit. Preserve
+  // all source IDs and verify the exact combined quantity, never pick a row.
+  const rowGroups=new Map();
+  for(const e of entries)if(e.status==='CANDIDATE_ROW_GROUP'){
+    const key=JSON.stringify(e.sourceRowIds);if(!rowGroups.has(key))rowGroups.set(key,[]);rowGroups.get(key).push(e);
+  }
+  const sourceGroups=[];
+  for(const [groupId,group] of rowGroups){
+    const ids=group[0].sourceRowIds, members=source.filter(r=>ids.includes(r.sourceId));
+    const quantity=members.reduce((n,r)=>n+r.quantity,0);
+    const valid=members.length===ids.length&&members.every(r=>Number.isSafeInteger(r.quantity)&&r.quantity>0)&&Number.isSafeInteger(quantity)&&quantity===group.length;
+    for(const e of group){e.status=valid?'DOCUMENT_ROW_GROUP_MATCH':'UNRESOLVED_QUANTITY';e.reason=valid?'IDENTICAL_PRINTED_ROWS_NOT_INDIVIDUALLY_ALLOCATED':'SOURCE_GROUP_QUANTITY_DIFFERS';}
+    sourceGroups.push({groupId,sourceRowIds:[...ids],sourceRows:members.map(r=>({sourceId:r.sourceId,quantity:r.quantity,page:r.page,sourceCell:r.sourceCell??null})).sort((a,b)=>a.sourceId.localeCompare(b.sourceId)),quantity,matchedOccurrences:group.length,status:valid?'GROUP_QUANTITY_MATCH':'UNRESOLVED'});
+  }
   const idCounts=new Map();for(const e of entries)idCounts.set(e.cutId,(idCounts.get(e.cutId)||0)+1);for(const e of entries){if(idCounts.get(e.cutId)>1){e.status='UNRESOLVED_REFERENCE';e.sourceRowId=null;e.reason='DUPLICATE_CUT_PROVENANCE';}}
   const validAssigned=new Map();for(const e of entries)if(['UNIQUE_DOCUMENT_ROW','ROW_GROUP_MATCH'].includes(e.status))validAssigned.set(e.sourceRowId,(validAssigned.get(e.sourceRowId)||0)+1);
-  const sourceCoverage=source.map(r=>({sourceId:r.sourceId,profile:r.ref,quantity:r.quantity,matchedOccurrences:validAssigned.get(r.sourceId)||0,
-    status:validAssigned.get(r.sourceId)===r.quantity?'ROW_QUANTITY_MATCH':'UNRESOLVED'}));
+  const sourceCoverage=source.map(r=>{
+    const group=sourceGroups.find(g=>g.sourceRowIds.includes(r.sourceId)&&g.status==='GROUP_QUANTITY_MATCH'&&
+      entries.filter(e=>JSON.stringify(e.sourceRowIds)===g.groupId&&e.status==='DOCUMENT_ROW_GROUP_MATCH').length===g.quantity);
+    return {sourceId:r.sourceId,profile:r.ref,quantity:r.quantity,
+      matchedOccurrences:group?null:validAssigned.get(r.sourceId)||0,
+      ...(group?{sourceGroupId:group.groupId,sourceRowIds:[...group.sourceRowIds],groupQuantity:group.quantity,groupMatchedOccurrences:group.matchedOccurrences}:{}),
+      status:group?'ROW_GROUP_QUANTITY_MATCH':validAssigned.get(r.sourceId)===r.quantity?'ROW_QUANTITY_MATCH':'UNRESOLVED'};
+  });
   const profileBalances=profileSummaries.map(summary=>{
     const selected=plans.filter(p=>p.ref===summary.ref&&p.finish===summary.finish),ownBars=bars.filter(b=>selected.some(p=>p.id===b.patternId));
     const sum=key=>ownBars.length&&ownBars.every(b=>b[key]!==null)?ownBars.reduce((v,b)=>v+b[key],0):null;
@@ -71,12 +100,12 @@ export function reconcileIndividuals({plans=[],projectRows=[],profileSummaries=[
   return {schema:'sgp.opt.individual-coverage.v1',status:'PROVISIONAL',productionEnabled:false,
     totals:{cuts:entries.length,bars:bars.length,documentProductionMatched:entries.filter(e=>e.productionStatus==='DOCUMENT_ID_MATCH').length,
       uniqueDocumentRows:entries.filter(e=>e.status==='UNIQUE_DOCUMENT_ROW').length,rowGroupMatched:entries.filter(e=>e.status==='ROW_GROUP_MATCH').length,
-      unresolvedReferenceOrQuantity:entries.filter(e=>!['UNIQUE_DOCUMENT_ROW','ROW_GROUP_MATCH'].includes(e.status)).length,
+      unresolvedReferenceOrQuantity:entries.filter(e=>!['UNIQUE_DOCUMENT_ROW','ROW_GROUP_MATCH','DOCUMENT_ROW_GROUP_MATCH'].includes(e.status)).length,
       individualUnitUnresolved:entries.filter(e=>e.status!=='UNIQUE_DOCUMENT_ROW').length,sgpPieceLinked:0,sgpProductionLinked:0,physicalBarIdentified:0,patternBarsRepresented:bars.filter(b=>b.distributionStatus==='PDF_PATTERN_REPETITION').length,
       barsWithPrintedCutSettings:bars.filter(b=>b.arithmeticModels.length>0).length,
       barsMatchingAnUncertifiedModel:bars.filter(b=>b.arithmeticModels.some(m=>m.delta32===0)).length,
       remainderArithmeticEqual:bars.filter(b=>b.remainderStatus==='ARITHMETIC_EQUALITY').length,
       remainderUnverified:bars.filter(b=>b.remainderStatus==='KERF_OR_ALLOWANCE_UNVERIFIED').length,
       remainderInconsistent:bars.filter(b=>b.remainderStatus==='INCONSISTENT').length,
-      remainderUnresolved:bars.filter(b=>b.remainderStatus==='UNRESOLVED').length},cuts:entries,bars,sourceCoverage,profileBalances,unresolved};
+      remainderUnresolved:bars.filter(b=>b.remainderStatus==='UNRESOLVED').length},cuts:entries,bars,sourceCoverage,sourceGroups,profileBalances,unresolved};
 }

@@ -21,6 +21,8 @@ on:
       - 'docs/sql-proposals/opt-shared/**'
       - 'tests/opt-*'
       - 'tests/opt-digital/**'
+      - 'scripts/test-opt-project-sql.mjs'
+      - 'scripts/opt-printed-rounding-audit.mjs'
       - '.github/workflows/opt-digital.yml'
 permissions:
   contents: read
@@ -68,6 +70,10 @@ jobs:
           node docs/sql-proposals/opt-shared/test-catalog.mjs
           node tests/opt-digital/server-pdf-reader.mjs
           node tests/opt-digital/server-pdf-limits.mjs
+      - name: Project identity and rounding contracts (isolated PostgreSQL/WASM)
+        run: |
+          node --test docs/sql-proposals/opt-shared/test-project-contract.mjs
+          node scripts/test-opt-project-sql.mjs
   deno-import:
     name: Deno import runtime (synthetic)
     runs-on: ubuntu-24.04
@@ -136,6 +142,7 @@ jobs:
           for i in $(seq 1 20); do curl -fsS http://127.0.0.1:8765/opt-digital/index.html >/dev/null && break || sleep 1; done
           node tests/opt-digital/shared-workflow-browser.cjs
           node tests/opt-digital/import-upload-browser.cjs
+          node tests/opt-digital/rounding-warning-browser.cjs
           node tests/opt-digital/workflow-browser.cjs
           node tests/opt-digital/cut-report-browser.cjs
           node tests/opt-digital/appearance-browser.cjs

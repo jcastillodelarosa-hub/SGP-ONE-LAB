@@ -23,11 +23,12 @@ const validScope = s => s && typeof s === 'object' && !Array.isArray(s) && Objec
 const sameScope = (a,b) => validScope(a) && validScope(b) && ['linea','anio','semana','modo'].every(k => a[k] === b[k]);
 const invalid = () => { throw new Error('OPT_CONTRATO_NO_COMPATIBLE'); };
 const rejected = new Set(['OPT_NO_HABILITADO','OPT_NO_AUTORIZADO','OPT_SCOPE_INVALIDO','OPT_UNIDAD_FUERA_AMBITO','OPT_PARAMETROS_INVALIDOS','OPT_PIEZAS_DUPLICADAS','OPT_CLAVE_REUTILIZADA','OPT_PIEZA_RESERVA_NO_VALIDADA','OPT_CORTE_YA_REGISTRADO','OPT_HORARIO_NO_CONFIGURADO','OPT_HORARIO_SIN_TURNO','OPT_HORARIO_SUPERPUESTO','HORARIO_OPERATIVO_NO_CONFIGURADO','HORARIO_OPERATIVO_AMBIGUO']);
+const validWarnings=ref=>!Object.hasOwn(ref,'validationWarnings')||Array.isArray(ref.validationWarnings)&&ref.validationWarnings.length<=1&&ref.validationWarnings.every(w=>w&&typeof w==='object'&&!Array.isArray(w)&&Object.keys(w).every(k=>['code','message'].includes(k))&&w.code==='OPT_PRINTED_ROUNDING_COMPATIBLE'&&(!Object.hasOwn(w,'message')||typeof w.message==='string'&&w.message.length<=1000));
 function state(data, reserva, scope) {
   if (!sameScope(data.scope,scope) || data.habilitado !== true || data.reserva !== reserva || typeof data.manifiesto_validado !== 'boolean' || typeof data.puede_registrar !== 'boolean' || !Array.isArray(data.referencias)) invalid();
   const ids = new Set(); const groups = new Set(); const documents = new Map(); const hashes = new Map(); const sourceDocuments = new Map(); const positions = new Set(); let done = 0;
   for (const ref of data.referencias) {
-    if (!uuid(ref.id_documento) || !/^[a-f0-9]{64}$/.test(ref.sha256) || !['referencia','sistema'].every(key => text(ref[key])) || !Array.isArray(ref.fuentes) || !ref.fuentes.length || !Array.isArray(ref.piezas) || !ref.piezas.length) invalid();
+    if (!validWarnings(ref) || !uuid(ref.id_documento) || !/^[a-f0-9]{64}$/.test(ref.sha256) || !['referencia','sistema'].every(key => text(ref[key])) || !Array.isArray(ref.fuentes) || !ref.fuentes.length || !Array.isArray(ref.piezas) || !ref.piezas.length) invalid();
     const documentId = ref.id_documento.toLowerCase();
     if (hashes.has(ref.sha256) && hashes.get(ref.sha256) !== documentId) invalid();
     hashes.set(ref.sha256,documentId);
@@ -38,7 +39,7 @@ function state(data, reserva, scope) {
       if (sourceDocuments.has(key) && sourceDocuments.get(key) !== documentId) invalid();
       sourceDocuments.set(key,documentId);
     }
-    const meta = JSON.stringify([ref.sha256,ref.fuentes.map(f=>JSON.stringify([f.origen,f.source_key,f.consecutivo,f.modo_carga])).sort()]);
+    const meta = JSON.stringify([ref.sha256,ref.fuentes.map(f=>JSON.stringify([f.origen,f.source_key,f.consecutivo,f.modo_carga])).sort(),(ref.validationWarnings||[]).map(w=>w.code)]);
     if (documents.has(documentId) && documents.get(documentId) !== meta) invalid();
     documents.set(documentId,meta);
     const group = JSON.stringify([documentId,ref.sistema,ref.referencia]); if (groups.has(group)) invalid(); groups.add(group);

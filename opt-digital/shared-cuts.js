@@ -1,3 +1,4 @@
+import {importRoundingWarning} from './import-panel.js';
 import {mountMatrixPanel} from './matrix-panel.js';
 // Server manifests are the only source of cut identities. Local review never credits a cut.
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -51,6 +52,7 @@ export function mountSharedCuts(container,{api,catalogApi=null,matrixApi=null,st
       const block=make('section');block.append(make('h3',`${ref.consecutivo} · ${ref.referencia}`));
       const viewMatrix=make('button','Ver matriz del perfil');viewMatrix.type='button';viewMatrix.onclick=()=>matrix.select(ref.sistema,ref.referencia);block.append(viewMatrix);
       block.append(make('p',`Documento aprobado · SHA ${ref.sha256.slice(0,12)} · ${ref.origen} · ${ref.sistema}`));
+      const warning=importRoundingWarning(ref);if(warning){const notice=make('p',warning);notice.className='opt-rounding-warning';notice.dataset.warning='OPT_PRINTED_ROUNDING_COMPATIBLE';block.append(notice);}
       if(ref.localPdf){const view=make('button','Revisar PDF aprobado');view.type='button';view.onclick=()=>openDocument(ref.localPdf.key);block.append(view);}
       else if(ref.serverVerified)block.append(make('p','Detalle validado en el servidor. Puedes consultar y registrar con tus permisos; el PDF local es opcional para revisar el original.'));
       else block.append(make('p','Carga el PDF original con el mismo SHA para habilitar la selección de sus piezas. El nombre por sí solo no acredita el documento.'));
