@@ -1,3 +1,4 @@
+import {mountReservationSummary} from './reservation-summary.js';
 import {mountMatrixPanel} from './matrix-panel.js';
 import {mountOptCutReport} from './cut-report.js';
 import {mountOptScopePanel} from './scope-panel.js';
@@ -11,12 +12,22 @@ export function mountOptWorkflow(root,viewer,options={}){
  const main=root.querySelector('main'),header=main.querySelector('header'),library=root.querySelector('.opt-library');
  const tabs=make('div');tabs.className='opt-workflow-tabs';tabs.setAttribute('role','tablist');tabs.setAttribute('aria-label','OPT Digital');
  const load=make('section'),cuts=make('section');load.id='optLoadPanel';cuts.id='optCutsPanel';
+ const referenceView=make('section'),summaryView=make('section');referenceView.id='optReferencesView';summaryView.id='optSummaryView';
+ const viewTabs=make('div');viewTabs.className='opt-workflow-tabs opt-reservation-tabs';viewTabs.setAttribute('role','tablist');viewTabs.setAttribute('aria-label','Vista de la reserva');
+ const viewButtons=['Referencias y esquema','Resumen'].map((label,i)=>{const b=make('button',label);b.id='optReservationTab'+i;b.type='button';b.setAttribute('role','tab');b.setAttribute('aria-controls',i?summaryView.id:referenceView.id);viewTabs.append(b);return b;});
+ for(const [panel,i] of [[referenceView,0],[summaryView,1]]){panel.setAttribute('role','tabpanel');panel.setAttribute('aria-labelledby',viewButtons[i].id);}
+ let summaryPanel=null;
+ const showView=i=>{referenceView.hidden=i!==0;summaryView.hidden=i!==1;viewButtons.forEach((b,n)=>{b.setAttribute('aria-selected',String(n===i));b.tabIndex=n===i?0:-1;});summaryPanel?.show(i===1&&!cuts.hidden);};
+ viewButtons.forEach((b,i)=>{b.onclick=()=>showView(i);b.onkeydown=e=>{if(['ArrowLeft','ArrowRight','Home','End'].includes(e.key)){e.preventDefault();const next=e.key==='Home'?0:e.key==='End'?1:1-i;showView(next);viewButtons[next].focus();}};});
  const buttons=['Carga de OPT','Cortes por reserva'].map((label,i)=>{const b=make('button',label);b.id='optWorkflowTab'+i;b.type='button';b.setAttribute('role','tab');b.setAttribute('aria-controls',i?cuts.id:load.id);tabs.append(b);return b;});
- const show=i=>{load.hidden=i!==0;cuts.hidden=i!==1;buttons.forEach((b,n)=>{b.setAttribute('aria-selected',String(n===i));b.tabIndex=n===i?0:-1;});};
+ const show=i=>{load.hidden=i!==0;cuts.hidden=i!==1;summaryPanel?.show(i===1&&!summaryView.hidden);buttons.forEach((b,n)=>{b.setAttribute('aria-selected',String(n===i));b.tabIndex=n===i?0:-1;});};
  buttons.forEach((b,i)=>{b.onclick=()=>show(i);b.onkeydown=e=>{if(['ArrowLeft','ArrowRight','Home','End'].includes(e.key)){e.preventDefault();const next=e.key==='Home'?0:e.key==='End'?1:1-i;show(next);buttons[next].focus();}};});
  for(const [panel,i] of [[load,0],[cuts,1]]){panel.setAttribute('role','tabpanel');panel.setAttribute('aria-labelledby',buttons[i].id);}
- for(const child of [...main.children])if(child!==header&&child!==library)cuts.append(child);
- load.append(library);header.after(tabs,load,cuts);
+ for(const child of [...main.children])if(child!==header&&child!==library)referenceView.append(child);
+ cuts.append(viewTabs,referenceView,summaryView);
+ // One shared scope selector stays visible in either tab. Both use the same authenticated snapshot.
+ const scopeSlot=make('div');scopeSlot.id='optScopeSlot';
+ load.append(library);header.after(tabs,scopeSlot,load,cuts);
  const notice=make('p','La carga local prepara y revisa los originales. Usa Procesar y guardar OPT en SGP para enviarlos a validación del servidor y crear las OPT compartidas. Solo un recibo válido confirma la importación; revisar un PDF no registra cortes.');notice.className='notice';load.prepend(notice);
  const origin=make('select');origin.id='optIndexOrigin';origin.setAttribute('aria-label','Origen del índice');const originPlaceholder=make('option','Selecciona carga: Retail, Proyecto o individual');originPlaceholder.value='';origin.append(originPlaceholder);for(const value of ['RETAIL','PROYECTO','INDIVIDUAL']){const o=make('option',value);o.value=value;origin.append(o);}
  const input=make('input');input.id='optIndexFile';input.type='file';input.accept='.xlsx,.csv,.json';const label=make('label','Índice de OPT (XLSX, CSV o JSON) ');label.append(input);
@@ -32,16 +43,17 @@ export function mountOptWorkflow(root,viewer,options={}){
  let issueOffset=0,issues=[];
  function renderIssues(){issues=entries.filter(e=>!e.reservation||!e.system);unassociated.hidden=!issues.length;issueTitle.textContent=`${issues.length} filas sin reserva o sistema · pendientes de asociación`;issueOffset=Math.min(issueOffset,Math.max(0,Math.floor((issues.length-1)/50)*50));issueRows.replaceChildren();for(const e of issues.slice(issueOffset,issueOffset+50))issueRows.append(make('p',`${e.origin} · fila ${e.sourceRow} · ${e.opt} · Reserva: ${e.reservation||'ausente'} · Sistema: ${e.system||'ausente'}`));issuePage.textContent=issues.length?`Filas ${issueOffset+1}–${Math.min(issueOffset+50,issues.length)} de ${issues.length}. Todas se conservan hasta cambiar el índice.`:'';issuePrevious.disabled=issueOffset===0;issueNext.disabled=issueOffset+50>=issues.length;}
  issuePrevious.onclick=()=>{issueOffset=Math.max(0,issueOffset-50);renderIssues();};issueNext.onclick=()=>{issueOffset+=50;renderIssues();};
- const reserve=make('select');reserve.id='optReservation';reserve.setAttribute('aria-label','Reserva y sistema del catálogo compartido o candidatos locales');const documents=make('div');documents.id='optReservationDocuments';const detail=make('p','Consulta el ámbito de programación para seleccionar una reserva compartida. No necesitas volver a cargar el índice o PDF.');detail.setAttribute('role','status');const catalogStatus=make('p','Consulta la línea, el año y la semana de origen para cargar el catálogo compartido.');catalogStatus.id='optCatalogStatus';catalogStatus.setAttribute('role','status');const catalogReload=make('button','Actualizar catálogo compartido');catalogReload.id='optCatalogRefresh';catalogReload.type='button';catalogReload.disabled=true;cuts.prepend(catalogStatus,catalogReload,reserve,detail,documents);
+ const reserve=make('select');reserve.id='optReservation';reserve.setAttribute('aria-label','Reserva y sistema del catálogo compartido o candidatos locales');const documents=make('div');documents.id='optReservationDocuments';const detail=make('p','Consulta el ámbito de programación para seleccionar una reserva compartida. No necesitas volver a cargar el índice o PDF.');detail.setAttribute('role','status');const catalogStatus=make('p','Consulta la línea, el año y la semana de origen para cargar el catálogo compartido.');catalogStatus.id='optCatalogStatus';catalogStatus.setAttribute('role','status');const catalogReload=make('button','Actualizar catálogo compartido');catalogReload.id='optCatalogRefresh';catalogReload.type='button';catalogReload.disabled=true;const reserveLabel=make('label','Reserva y sistema');reserveLabel.className='opt-reservation-select';reserveLabel.append(reserve);cuts.prepend(catalogStatus,catalogReload,reserveLabel,detail,documents);
  let matrixSystem='',matrixReference='';
  const matrixSlot=make('div');$('refTitle').after(matrixSlot);
  const matrix=mountMatrixPanel(matrixSlot,{api:options.matrixApi});
  const unsubscribeReference=viewer.onReference?.(reference=>{matrixReference=reference;matrix.select(matrixSystem,matrixReference);})||(()=>{});
- const shared=mountSharedCuts(cuts,{...options,openDocument:key=>viewer.openDocument(key)});
- cuts.insertBefore(cuts.lastElementChild,documents.nextSibling);
- const report=mountOptCutReport(cuts,{api:options.reportApi,defaultScope:options.defaultScope});
+ const shared=mountSharedCuts(referenceView,{...options,openDocument:key=>viewer.openDocument(key)});
+ referenceView.prepend(referenceView.lastElementChild);
+ summaryPanel=mountReservationSummary(summaryView,{api:options.summaryApi});showView(0);
+ const report=mountOptCutReport(referenceView,{api:options.reportApi,defaultScope:options.defaultScope});
  let importPanel=null,pendingImportScope='',pendingImportedHashes=[],entries=[],records=[],groups=[],localGroups=[],catalogSnapshot=null,catalogKey='',catalogEpoch=0,closed=false,renderTimer=null,indexOperation=0;const indexGenerations=new Map();
- const scopePanel=mountOptScopePanel(load,{api:options.scopeApi,defaultScope:options.defaultScope,openDocument:key=>viewer.openDocument(key),onChange:plan=>{localGroups=plan.groups;syncCatalog();renderScoped();importPanel?.update();}});
+ const scopePanel=mountOptScopePanel(load,{queryContainer:scopeSlot,api:options.scopeApi,defaultScope:options.defaultScope,openDocument:key=>viewer.openDocument(key),onChange:plan=>{localGroups=plan.groups;syncCatalog();renderScoped();importPanel?.update();}});
  importPanel=mountOptImportPanel(load,{api:options.importApi,getScope:()=>scopePanel.getScope(),getProgrammingSnapshot:()=>scopePanel.getProgrammingSnapshot(),getOrigin:()=>origin.value,getEntries:()=>entries,getRecords:()=>records,onImported:receipts=>{pendingImportScope=scopeKey(scopePanel.getScope());pendingImportedHashes=receipts.map(r=>r.document.sha256);invalidateCatalog();syncCatalog();renderScoped();}});
  const individualFiles=$('files');const captureIndividual=event=>{importPanel.invalidate('PDF individuales seleccionados para revisión local. El envío requiere el botón Procesar y guardar OPT en SGP.');importPanel.captureFiles([...event.target.files],'INDIVIDUAL');};individualFiles?.addEventListener('change',captureIndividual,true);
  function render(){renderIssues();scopePanel.update(entries,records);}
@@ -75,7 +87,7 @@ export function mountOptWorkflow(root,viewer,options={}){
   const selected=groups.find(g=>g.key===reserve.value);
   if(selected?.origin==='SERVIDOR'&&!options.catalogApi?.ownsGroup(selected)){invalidateCatalog();renderScoped();return;}
   matrixSystem=selected?.system||'';matrix.select(matrixSystem,matrixReference);
-  documents.replaceChildren();shared.select(selected||null,records);
+  documents.replaceChildren();shared.select(selected||null,records);summaryPanel.select(selected||null);
   if(!selected){detail.textContent='Selecciona una reserva compartida para consultar referencias, cortes realizados y pendientes. Los candidatos locales se muestran por separado.';return;}
   const g=selected;
   if(g.origin==='SERVIDOR'){
@@ -94,5 +106,5 @@ export function mountOptWorkflow(root,viewer,options={}){
  const reportContextInputs=['optScopeYear','optScopeWeek','optScopeLine'].map($);
  for(const input of reportContextInputs)input.addEventListener('change',report.invalidate);
  const unsubscribe=viewer.onDocuments(items=>{records=items;clearTimeout(renderTimer);renderTimer=setTimeout(()=>{if(!closed)render();},75);});render();show(0);
- return {destroy(){closed=true;unsubscribeReference();matrix.destroy();importPanel.destroy();individualFiles?.removeEventListener('change',captureIndividual,true);invalidateCatalog();clearTimeout(renderTimer);unsubscribe();for(const input of reportContextInputs)input.removeEventListener('change',report.invalidate);report.destroy();shared.destroy();scopePanel.destroy();}};
+ return {destroy(){closed=true;unsubscribeReference();matrix.destroy();importPanel.destroy();individualFiles?.removeEventListener('change',captureIndividual,true);invalidateCatalog();clearTimeout(renderTimer);unsubscribe();for(const input of reportContextInputs)input.removeEventListener('change',report.invalidate);report.destroy();shared.destroy();summaryPanel.destroy();scopePanel.destroy();scopeSlot.remove();}};
 }

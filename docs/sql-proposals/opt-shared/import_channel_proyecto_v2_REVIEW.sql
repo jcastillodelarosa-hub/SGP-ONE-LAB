@@ -132,7 +132,7 @@ BEGIN
  VALUES(pdf_hash,manifest_hash,p_sources,
   jsonb_build_object('sgp_binding',p_evidence->'sgp_binding','contract','OPT-SERVER-VALIDATION-PROYECTO-2',
    'algorithm','opt-import-manifest-project-v2','validation','DOCUMENTARY_MANIFEST_READY',
-   'physical_completion_verified',false,'validated_for_actor',actor,'original_index',p_evidence->'original_index',
+   'physical_completion_verified',false,'validated_for_actor',actor,'documentary_summary',p_evidence->'documentary_summary','original_index',p_evidence->'original_index',
    'documentary_source_groups',p_evidence->'documentary_source_groups',
    'original_document_title',p_evidence->'original_document_title',
    'profile_destinations',current_context->'profileDestinations',

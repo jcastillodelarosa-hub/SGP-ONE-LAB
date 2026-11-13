@@ -131,3 +131,17 @@ test('word-wrapped header matching preserves exact suffix content and geometry',
   const out=extractCoordinatePlans([first,second]);assert(out.issues.length>0);assert.equal(out.plans[0].cuts[0].uncertain,true);
  }
 });
+
+test('metadata-backed justified header may span several PDF text objects',()=>{
+ const prefix='OPT-TEST_SITE_Block',suffix='V2_SITE_Block V2_SYSTEM';
+ const first=page([item('Nombre del proyecto: '+prefix+' '+suffix,16,530),...start(),...row(['1','10"','A','1'],440)]);
+ const header=[item('Optimizador',16,580),item('de',110,580),item('corte',140,580),item('-',190,580),item(prefix,210,580)];
+ const second=page([...header,item(suffix,16,563),row(['','','continued'],540)[0]],2);
+ const out=extractCoordinatePlans([first,second]);
+ assert.deepEqual(out.issues,[]);assert.deepEqual(out.plans[0].unresolvedCells,[]);
+ assert.equal(out.plans[0].cuts[0].project,'A continued');assert.equal(out.plans[0].cuts[0].uncertain,false);
+ for(const [content,x,y] of [[suffix+' changed',16,563],[suffix,30,563],[suffix,16,530]]){
+  const bad=extractCoordinatePlans([first,page([...header,item(content,x,y)],2)]);
+  assert(bad.issues.length>0);assert.equal(bad.plans[0].cuts[0].uncertain,true);
+ }
+});

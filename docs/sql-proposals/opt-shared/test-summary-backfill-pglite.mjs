@@ -1,0 +1,23 @@
+import {readFileSync} from 'node:fs';
+import assert from 'node:assert/strict';
+const {PGlite}=await import(process.env.OPT_PGLITE_MODULE||'@electric-sql/pglite');
+const db=new PGlite();
+await db.exec(`CREATE ROLE anon;CREATE ROLE authenticated;CREATE ROLE service_role;CREATE SCHEMA sgp_opt_shared;
+CREATE TABLE sgp_opt_shared.documents(id_documento uuid,sha256 text,id_aprobacion uuid,manifest_sha256 text);
+CREATE TABLE sgp_opt_shared.approvals(id_aprobacion uuid,sha256 text,evidencia jsonb);
+INSERT INTO sgp_opt_shared.documents SELECT ('00000000-0000-4000-8000-'||lpad(i::text,12,'0'))::uuid,repeat(i::text,64),('11111111-1111-4111-8111-'||lpad(i::text,12,'0'))::uuid,repeat('a',64) FROM generate_series(1,9)i;
+INSERT INTO sgp_opt_shared.approvals SELECT id_aprobacion,sha256,'{"sgp_binding":{}}'::jsonb FROM sgp_opt_shared.documents;`);
+await db.exec(readFileSync(new URL('document_summary_backfill_REVIEW.sql',import.meta.url),'utf8'));
+const snapshot=async()=> (await db.query("SELECT jsonb_agg(to_jsonb(a) ORDER BY id_aprobacion) data FROM sgp_opt_shared.approvals a")).rows[0].data;
+const before=await snapshot();
+const batch=(await db.query("SELECT d.*,encode(sha256(convert_to(a.evidencia::text,'UTF8')),'hex') expected_evidence_sha256 FROM sgp_opt_shared.documents d JOIN sgp_opt_shared.approvals a USING(id_aprobacion) ORDER BY d.id_documento")).rows.map(r=>({...r,summary:{contract:'OPT-DOCUMENT-SUMMARY-1',scope:'DOCUMENTO',cutRows:[],materialRows:[]}}));
+const run=b=>db.query('SELECT sgp_opt_shared.backfill_document_summaries_reviewed($1) n',[b]);
+await assert.rejects(run(batch.slice(0,8)),/EXPECT_NINE/);
+await assert.rejects(run([...batch.slice(0,8),batch[0]]),/DUPLICATE/);
+const stale=structuredClone(batch);stale[8].expected_evidence_sha256='stale';
+await assert.rejects(run(stale),/EVIDENCE_CHANGED/);assert.deepEqual(await snapshot(),before);
+assert.equal((await run(batch)).rows[0].n,9);
+const after=await snapshot();for(let i=0;i<9;i++){delete after[i].evidencia.documentary_summary;assert.deepEqual(after[i],before[i]);}
+await assert.rejects(run(batch),/EVIDENCE_CHANGED/);
+for(const role of ['anon','authenticated','service_role'])assert.equal((await db.query("select has_function_privilege($1,'sgp_opt_shared.backfill_document_summaries_reviewed(jsonb)','EXECUTE') granted",[role])).rows[0].granted,false);
+await db.close();console.log('Backfill synthetic: nine exact, duplicates, stale snapshot atomic rollback, evidence preservation, replay denial and ACL PASS');

@@ -66,3 +66,19 @@
  #optShell .opt-report-tools>*{flex-basis:120px}
 }
 @media(prefers-reduced-motion:reduce){#optShell *{transition:none!important;scroll-behavior:auto!important}}
+/* Approved option 1: stacked full-width documentary tables; existing reference layout untouched. */
+#optShell .opt-reservation-tabs{margin-top:18px}
+#optShell .opt-reservation-summary{min-width:0}
+#optShell .opt-summary-document+.opt-summary-document{border-top:1px solid var(--opt-line);margin-top:28px;padding-top:24px}
+#optShell .opt-summary-table-section{margin-top:26px;min-width:0}
+#optShell .opt-summary-scroll{overflow-x:auto;max-width:100%;border:1px solid var(--opt-line);border-radius:8px}
+#optShell .opt-documentary-table{border-collapse:separate;border-spacing:0;width:100%;min-width:760px}
+#optShell .opt-material-summary-table{min-width:900px}
+#optShell .opt-documentary-table :is(th,td){text-align:left;border-bottom:1px solid var(--opt-line)}
+#optShell .opt-documentary-table :is(th,td):first-child{position:sticky;left:0;background:#fff;z-index:1;min-width:150px}
+#optShell .opt-documentary-table th:first-child{background:var(--opt-soft);z-index:2}
+#optShell .opt-documentary-table tr:last-child td{border-bottom:0}
+#optShell .opt-reservation-select{display:block;margin:12px 0 8px;font-weight:650;color:#31546e}
+#optShell .opt-reservation-select #optReservation{display:block;margin:6px 0 0}
+#optShell .opt-summary-scroll-hint{display:none;font-size:12px;color:#526a87}
+@media(max-width:760px){#optShell .opt-summary-scroll-hint{display:block}}

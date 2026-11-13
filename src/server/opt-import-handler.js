@@ -1,3 +1,4 @@
+import {buildOptDocumentSummary} from '../domain/opt-document-summary.js';
 import {parseIndex,parseIndexWorkbook} from '../domain/opt-index-file.js';
 import {indexedDocumentIdentity} from '../domain/opt-document-identity.js';
 import {documentProduction} from '../../opt-digital/individual-reconciliation.js';
@@ -121,6 +122,7 @@ export function createOptImportHandler({rpc,readPdf,DOMParser,allowedOrigins}){
    const evidence={contract:projectIndex?'OPT-SERVER-VALIDATION-PROYECTO-2':'OPT-SERVER-VALIDATION-1',algorithm:projectIndex?'opt-import-manifest-project-v2':'opt-import-manifest-v1',pdf_sha256:hash,validation:'DOCUMENTARY_MANIFEST_READY',physical_completion_verified:false,
     sgp_binding:{contract:context.contract,scope:body.scope,revision:context.revision,...(projectIndex?{opt,selectores:selectors,referencias:references}:{producciones:productions})},
     original_document_title:identity.title,
+    documentary_summary:buildOptDocumentSummary(extraction),
     ...(projectIndex?{documentary_source_groups:manifest.sourceGroups||[],rounding_policy:manifest.roundingPolicy,rounding_evidence:manifest.roundingEvidence,validation_warnings:manifest.validationWarnings}:{}),
     original_index:body.index?{sha256:indexHash,name:body.index.name,format:body.index.format,sheet:indexSheet}:null};
    // PostgreSQL bytea hex notation is used only inside the private server call.
