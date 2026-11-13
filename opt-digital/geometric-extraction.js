@@ -46,7 +46,9 @@ export function extractCoordinatePlans(pages) {
     for(const [index,r] of rows.entries()){
       const h=r.text.match(/^Optimizador de corte\s*-\s*(.+)$/);
       if(!h||!canonicalDocumentId.startsWith(h[1].trim()))continue;
-      const suffix=canonicalDocumentId.slice(h[1].trim().length),next=rows[index+1];
+      // PDF line wrapping drops the separator whitespace at the next baseline.
+      // Compare only that known metadata suffix; never discard arbitrary text.
+      const suffix=canonicalDocumentId.slice(h[1].trim().length).trim(),next=rows[index+1];
       if(suffix&&next&&next.text===suffix&&next.items.length===1&&r.items.length===1&&
          r.y-next.y>0&&r.y-next.y<=25&&Math.abs(next.items[0].x-r.items[0].x)<2)headerContinuations.add(next);
     }

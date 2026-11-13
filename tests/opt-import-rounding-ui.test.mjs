@@ -1,0 +1,4 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {importRoundingWarning} from '../opt-digital/import-panel.js';
+test('only server warning code yields canonical non-physical disclaimer',()=>{const text=importRoundingWarning({validationWarnings:[{code:'OPT_PRINTED_ROUNDING_COMPATIBLE',message:'<script>forged wording</script>'}]});assert.match(text,/compatibles con redondeo de 1\/32/);assert.match(text,/Se conservan las medidas impresas/);assert.match(text,/no se acredita la precisión original/);assert.match(text,/No confirma cortes realizados/);assert(!text.includes('script'));});
+test('absence or unrelated metadata never implies rounding acceptance',()=>{for(const x of [null,{}, {validationWarnings:null},{validationWarnings:'OPT_PRINTED_ROUNDING_COMPATIBLE'},{validationWarnings:[{code:'OTHER'}]},{roundingEvidence:{status:'ROUNDING_COMPATIBLE'}}])assert.equal(importRoundingWarning(x),'');});

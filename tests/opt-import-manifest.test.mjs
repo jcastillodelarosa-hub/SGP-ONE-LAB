@@ -341,3 +341,203 @@ test('original weeks remain assigned without changing immutable manifest when th
  const changed=structuredClone(server);changed.scope.anio=2025;changed.scope.semana=45;const later=run(fixture(),changed);assert.equal(later.importable,true);
  assert.deepEqual(first.manifest.pieces,later.manifest.pieces);assert(later.manifest.units.every(u=>u.scopeStatus==='IN_SCOPE'));
 });
+
+// Indexed projects identify the document by OPT and its reservation/system,
+// not by a numeric production prefix in each printed piece reference.
+function indexedProjectFixture() {
+  const input=fixture(), server=evidence();
+  input.document.origin='PROYECTO';
+  server.bindingMode='OPT_INDEX_RESERVATION'; server.indexRows[0].origin='PROYECTO';
+  server.profileDestinations=[{referencia:'R1',destino_productivo:'PANEL',tipo_pieza:'PANEL',activa:'SI'}];
+  const reference='SYNTHETIC SITE UNIT-L';
+  for(const row of input.extraction.sourceProjectRows) row.reference=reference;
+  for(const plan of input.extraction.plans) for(const cut of plan.cuts) cut.project=reference;
+  return {input,server};
+}
+
+test('indexed project uses exact reservation/system without inventing a PDF production number',()=>{
+  const {input,server}=indexedProjectFixture(),out=run(input,server);
+  assert.equal(out.importable,true,JSON.stringify(out.blockers));
+  assert(out.manifest.units.every(unit=>unit.documentProduction===null));
+  assert(out.manifest.units.every(unit=>unit.assignment.reserva==='RES-SYNTH'));
+  assert.equal(out.manifest.physicalCompletionVerified,false);
+  assert.deepEqual(out.manifest.totals,run().manifest.totals);
+  // The legacy/individual path still requires documentary production identity.
+  delete server.bindingMode;
+  blocked(input,server,'DOCUMENTARY_REFERENCE_UNRESOLVED');
+});
+
+test('project mode cannot be enabled for retail or individual documents',()=>{
+  for(const mutate of [x=>x.document.origin='RETAIL',x=>x.document.mode='INDIVIDUAL']){
+    const {input,server}=indexedProjectFixture();mutate(input);
+    blocked(input,server,'SERVER_BINDING_MODE_INVALID');
+  }
+  const {input,server}=indexedProjectFixture();server.bindingMode='TRUST_CLIENT';
+  blocked(input,server,'SERVER_BINDING_MODE_INVALID');
+});
+
+test('project multiple reservation/system pairs block even if only one matches current SGP',()=>{
+  for(const additional of [{reservation:'SECOND'},{system:'OTHER-SYSTEM'}]) {
+    const {input,server}=indexedProjectFixture();
+    server.indexRows.push({...server.indexRows[0],rowId:'index-3',...additional});
+    blocked(input,server,'INDEX_RESERVATION_AMBIGUOUS');
+  }
+  // Repeated finishes on Maestro are not a second reservation/system.
+  const {input,server}=indexedProjectFixture();
+  server.indexRows.push({...server.indexRows[0],rowId:'index-3'});
+  assert.equal(run(input,server).importable,true);
+});
+
+test('project server ambiguity, cancellation, wrong system or reservation cannot be narrowed heuristically',()=>{
+  const mutations=[
+    [s=>s.bindings.push({...binding(),key_produccion:'OTHER|PANELES_2'}),'SGP_BINDING_AMBIGUOUS'],
+    [s=>s.bindings.push({...binding(),id_programacion:'00000000-0000-0000-0000-000000000002'}),'SGP_BINDING_AMBIGUOUS'],
+    [s=>s.bindings[0].estado_programacion='CANCELADA','SGP_BINDING_OUTSIDE_VALID_PROGRAMMING'],
+    [s=>s.bindings[0].reserva='OTHER','SGP_BINDING_MISSING'],
+    [s=>s.bindings[0].sistema='OTHER','SGP_BINDING_MISSING'],
+    [s=>s.bindings[0].cantidad_snapshot=0,'SGP_BINDING_OUTSIDE_VALID_PROGRAMMING'],
+    [s=>s.bindings[0].reserva_snapshot='OTHER','SGP_BINDING_OUTSIDE_VALID_PROGRAMMING']
+  ];
+  for(const [mutate,code] of mutations){const {input,server}=indexedProjectFixture();mutate(server);blocked(input,server,code);}
+});
+
+test('project matching still rejects reference, quantity, length, duplicate IDs and hash substitution',()=>{
+  const mutations=[
+    [x=>x.extraction.sourceProjectRows[0].reference+=' other','FINAL_REFERENCE_LENGTH_QUANTITY_MISMATCH'],
+    [x=>x.extraction.sourceProjectRows[0].quantity++,'FINAL_REFERENCE_LENGTH_QUANTITY_MISMATCH'],
+    [x=>x.extraction.sourceProjectRows[0].length='10 1/16"','FINAL_REFERENCE_LENGTH_QUANTITY_MISMATCH'],
+    [x=>x.document.sha256='b'.repeat(64),'SERVER_EVIDENCE_INVALID']
+  ];
+  for(const [mutate,code] of mutations){const {input,server}=indexedProjectFixture();mutate(input);blocked(input,server,code);}
+  const {input,server}=indexedProjectFixture();
+  input.extraction.sourceProjectRows[0].quantity=2;
+  input.extraction.sourceProjectRows.push({...input.extraction.sourceProjectRows[0],sourceId:input.extraction.sourceProjectRows[0].sourceId});
+  blocked(input,server,'FINAL_DETAIL_ROW_INVALID');
+});
+
+test('project exact row selectors can resolve multiple pairs, never input order',()=>{
+  const {input,server}=indexedProjectFixture();
+  const first=input.extraction.sourceProjectRows[0];first.quantity=2;
+  const second={...first,sourceId:'project-p1-item2',reference:'SYNTHETIC SITE UNIT-R'};
+  input.extraction.sourceProjectRows.push(second);
+  input.extraction.plans[0].cuts.filter(cut=>cut.unitInstance===2).forEach(cut=>cut.project=second.reference);
+  server.indexRows[0].sourceRowId=first.sourceId;
+  server.indexRows.push({...server.indexRows[0],rowId:'index-3',sourceRowId:second.sourceId,reservation:'RES-SECOND'});
+  server.bindings.push({...binding(),reserva:'RES-SECOND',key_produccion:'SECOND|PANELES_2',reserva_principal:'RES-SECOND',programacion_reserva:'RES-SECOND',reserva_snapshot:'RES-SECOND'});
+  const out=run(input,server);assert.equal(out.importable,true,JSON.stringify(out.blockers));
+  assert.equal(out.manifest.units.filter(unit=>unit.assignment.reserva==='RES-SECOND').length,2);
+  input.extraction.sourceProjectRows.reverse();server.bindings.reverse();server.indexRows.reverse();
+  assert.deepEqual(run(input,server).manifest.units,out.manifest.units);
+});
+
+function identicalPrintedRows(){
+  const {input,server}=indexedProjectFixture(),first=input.extraction.sourceProjectRows[0];
+  first.quantity=2;
+  input.extraction.sourceProjectRows.push({...first,sourceId:'project-p1-item2'});
+  return {input,server};
+}
+test('equivalent printed rows retain all IDs and exact group quantity, never allocate to a row',()=>{
+  const {input,server}=identicalPrintedRows(),out=run(input,server);
+  assert.equal(out.importable,true,JSON.stringify(out.blockers));
+  assert.equal(out.manifest.units.length,4);
+  assert.deepEqual(out.manifest.sourceGroups[0].sourceRows.map(r=>[r.sourceId,r.quantity]),[['project-p1-item1',2],['project-p1-item2',2]]);
+  for(const unit of out.manifest.units){
+    assert.equal(unit.sourceRowId,null);
+    assert.deepEqual(unit.sourceRowIds,['project-p1-item1','project-p1-item2']);
+    assert.equal(unit.sourceGroupQuantity,4);
+  }
+  input.extraction.sourceProjectRows.reverse();
+  assert.deepEqual(run(input,server).manifest.units,out.manifest.units);
+  input.extraction.sourceProjectRows[0].quantity++;
+  blocked(input,server,'FINAL_REFERENCE_LENGTH_QUANTITY_MISMATCH');
+});
+test('equivalent rows cannot hide different reservation or original destination',()=>{
+  const {input,server}=identicalPrintedRows();
+  server.indexRows[0].sourceRowId='project-p1-item1';
+  server.indexRows.push({...server.indexRows[0],rowId:'index-3',sourceRowId:'project-p1-item2',reservation:'RES-SECOND'});
+  server.bindings.push({...binding(),reserva:'RES-SECOND',reserva_principal:'RES-SECOND',programacion_reserva:'RES-SECOND',reserva_snapshot:'RES-SECOND',key_produccion:'SECOND|PANELES_2'});
+  blocked(input,server,'DOCUMENT_ROW_GROUP_DESTINATION_AMBIGUOUS');
+  input.extraction.sourceProjectRows.reverse();server.indexRows.reverse();server.bindings.reverse();
+  blocked(input,server,'DOCUMENT_ROW_GROUP_DESTINATION_AMBIGUOUS');
+});
+
+test('project exact active profile destination separates panel from frame without hiding same-line ambiguity',()=>{
+  const {input,server}=indexedProjectFixture();
+  const frame={...binding(),key_produccion:'123456|FRAMES_2',id_linea:'FRAMES_2',id_programacion:null};
+  server.bindings.push(frame);
+  assert.equal(run(input,server).importable,true);
+  server.profileDestinations[0]={referencia:'R1',destino_productivo:'FRAME',tipo_pieza:'COVER',activa:'SI'};
+  const out=run(input,server);
+  assert.equal(out.importable,true,JSON.stringify(out.blockers));
+  assert(out.manifest.units.every(unit=>unit.assignment===null&&unit.scopeStatus==='FUERA_ALCANCE'));
+  assert(out.manifest.units.every(unit=>unit.exclusion.resolvedIdentity.id_linea==='FRAMES_2'));
+  // Line comes exclusively from canonical productive destination, not this hint.
+  server.profileDestinations[0].lineas_aplicables=['PANELES_2'];
+  assert.deepEqual(run(input,server).manifest.units,out.manifest.units);
+});
+test('project absent inactive inconsistent or conflicting master entries fail closed',()=>{
+  const mutations=[
+    [s=>delete s.profileDestinations,'PROFILE_DESTINATIONS_INVALID'],
+    [s=>s.profileDestinations=[],'PROFILE_DESTINATION_MISSING'],
+    [s=>s.profileDestinations[0].referencia='R1-APPROX','PROFILE_DESTINATION_MISSING'],
+    [s=>s.profileDestinations[0].activa='NO','PROFILE_DESTINATION_INVALID'],
+    [s=>s.profileDestinations[0].activa=true,'PROFILE_DESTINATION_INVALID'],
+    [s=>s.profileDestinations[0].destino_productivo='OTRO','PROFILE_DESTINATION_INVALID'],
+    [s=>s.profileDestinations[0].tipo_pieza='FRAME','PROFILE_DESTINATION_INVALID'],
+    [s=>s.profileDestinations.push({referencia:'R1',destino_productivo:'FRAME',tipo_pieza:'FRAME',activa:'SI'}),'PROFILE_DESTINATION_CONFLICTING']
+  ];
+  for(const [mutate,code] of mutations){const {input,server}=indexedProjectFixture();mutate(server);blocked(input,server,code);}
+});
+test('project PANEL still needs programming and FRAME needs a real exact reservation/system identity',()=>{
+  const {input,server}=indexedProjectFixture();
+  server.bindings[0].id_programacion=null;
+  server.bindings.push({...binding(),id_linea:'FRAMES_2',key_produccion:'123456|FRAMES_2',id_programacion:null});
+  blocked(input,server,'SGP_BINDING_OUTSIDE_VALID_PROGRAMMING');
+  server.profileDestinations[0]={referencia:'R1',destino_productivo:'FRAME',tipo_pieza:'REFUERZO',activa:'SI'};
+  assert.equal(run(input,server).importable,true);
+  server.bindings[1].reserva='WRONG';
+  blocked(input,server,'SGP_BINDING_MISSING');
+});
+
+test('project compatible rounding imports with versioned warning and preserves every printed value',()=>{
+  const {input,server}=indexedProjectFixture();
+  input.extraction.sourceProfileSummaries[0].stockLength='60 1/32"';
+  const before=structuredClone(input),out=run(input,server);
+  assert.equal(out.importable,true,JSON.stringify(out.blockers));
+  const evidence=out.manifest.roundingEvidence;
+  assert.equal(out.manifest.roundingPolicy.version,'OPT-PRINTED-ROUNDING-1');
+  assert.equal(out.manifest.validationWarnings[0].code,'OPT_PRINTED_ROUNDING_COMPATIBLE');
+  assert.match(out.manifest.validationWarnings[0].message,/precisión original no verificada/);
+  assert.equal(out.manifest.roundingPolicy.originalPrecisionVerified,false);assert.equal(out.manifest.roundingPolicy.originalsPreserved,true);
+  assert.equal(evidence[0].printedSummary.stockLength,'60 1/32"');
+  assert.equal(evidence[0].diagnostic.status,'ROUNDING_COMPATIBLE');
+  assert.equal(evidence[0].diagnostic.authorizesImport,false);
+  assert.equal(evidence[0].diagnostic.exactEquality,false);
+  assert.equal(out.manifest.physicalCompletionVerified,false);
+  assert(out.manifest.units.every(unit=>unit.length32===321&&unit.millimetersExact==='254.79375'));
+  assert.deepEqual(input,before);
+});
+test('project printed equality remains distinct from rounding warning',()=>{
+  const {input,server}=indexedProjectFixture(),out=run(input,server);
+  assert.equal(out.importable,true);
+  assert.deepEqual(out.manifest.validationWarnings,[]);
+  assert(out.manifest.roundingEvidence.every(p=>p.diagnostic.exactEquality));
+});
+test('incompatible and unsupported project rounding cannot authorize import',()=>{
+  for(const [field,value] of [['stockLength','70"'],['cutLength','50"'],['wasteLength','20"']]){
+    const {input,server}=indexedProjectFixture();input.extraction.sourceProfileSummaries[0][field]=value;
+    const out=blocked(input,server,'FINAL_PROFILE_TOTALS_MISMATCH');
+    assert(out.blockers.some(b=>b.roundingStatus==='INCOMPATIBLE'));
+  }
+  for(const value of ['60 1/64"','60.03125"','unknown']){
+    const {input,server}=indexedProjectFixture();input.extraction.sourceProfileSummaries[0].stockLength=value;
+    blocked(input,server,'EXACT_LENGTH_INVALID');
+  }
+});
+test('rounding policy is unavailable to legacy retail/individual and does not bypass exact piece counts',()=>{
+  const input=fixture();input.extraction.sourceProfileSummaries[0].stockLength='60 1/32"';
+  blocked(input,evidence(),'FINAL_PROFILE_TOTALS_MISMATCH');
+  const project=indexedProjectFixture();project.input.extraction.sourceProfileSummaries[0].stockLength='60 1/32"';
+  project.input.extraction.sourceProjectRows[0].quantity++;
+  blocked(project.input,project.server,'FINAL_REFERENCE_LENGTH_QUANTITY_MISMATCH');
+});

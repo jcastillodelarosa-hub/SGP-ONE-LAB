@@ -36,3 +36,11 @@ test('reload, changed user, changed filters and timeout cannot revive late catal
  const filtersChange=catalog.load(scope);await Promise.resolve();context={...scope,semana:46};pending[3]({data:payload()});await assert.rejects(filtersChange,/OBSOLETO/);
  let release;const timed=createOptSharedCatalog({rpc:()=>new Promise(resolve=>release=resolve)},()=> 'alice',{timeoutMs:5});await assert.rejects(timed.load(scope),/TIMEOUT/);release({data:payload()});await Promise.resolve();assert(!timed.ownsGroup(secondSnapshot.groups[0]));
 });
+
+test('optional persisted warning is validated and cannot disappear between catalog and cut state',async()=>{
+ const data=payload(),warning={code:'OPT_PRINTED_ROUNDING_COMPATIBLE'};data.grupos[0].referencias[0].validationWarnings=[warning];
+ const catalog=createOptSharedCatalog({rpc:async()=>({data})},()=> 't');const snapshot=await catalog.load(scope),group=snapshot.groups[0];
+ assert.deepEqual(group.references[0].validationWarnings,[warning]);assert(!catalog.matchesReference(group,state().referencias[0]));
+ const ref={...state().referencias[0],validationWarnings:[warning]};assert(catalog.matchesReference(group,ref));
+ for(const value of [null,{},[{code:'OTHER'}],[warning,warning],[{...warning,approved:true}]]){const invalid=payload();invalid.grupos[0].referencias[0].validationWarnings=value;await assert.rejects(createOptSharedCatalog({rpc:async()=>({data:invalid})},()=> 't').load(scope),/CONTRATO/);}
+});

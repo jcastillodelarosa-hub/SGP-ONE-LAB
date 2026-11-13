@@ -116,3 +116,9 @@ test('timely response and synchronous RPC error release their timeout timers',as
  const api=createOptSharedCuts({rpc:(_,args)=>({data:receipt(args)})},()=> 't',{timeoutMs:1000});assert.equal((await api.registrar(command())).ok,true);
  await assert.rejects(createOptSharedCuts({rpc:()=>{throw Error('sync transport failure');}},()=> 't',{timeoutMs:1000}).registrar(command()),/sync transport failure/);
 });
+
+test('optional persisted precision warning survives state without changing permissions or lengths',async()=>{
+ const data=state();data.referencias[0].validationWarnings=[{code:'OPT_PRINTED_ROUNDING_COMPATIBLE'}];
+ const out=await createOptSharedCuts({rpc:async()=>({data})},()=> 't').estado('R',scope);assert.deepEqual(out.referencias[0].validationWarnings,data.referencias[0].validationWarnings);assert.equal(out.referencias[0].piezas[0].longitud_mm,data.referencias[0].piezas[0].longitud_mm);
+ for(const value of [null,{},[{code:'OTHER'}],[{code:'OPT_PRINTED_ROUNDING_COMPATIBLE',permitir_corte:true}]]){const invalid=state();invalid.referencias[0].validationWarnings=value;await assert.rejects(createOptSharedCuts({rpc:async()=>({data:invalid})},()=> 't').estado('R',scope),/CONTRATO/);}
+});

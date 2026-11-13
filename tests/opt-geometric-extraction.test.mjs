@@ -112,3 +112,22 @@ test('split project Reference cell joins only adjacent documented grid continuat
   assert.equal(out.productionEnabled,false);
  }
 });
+
+test('metadata-backed header wrap at a word separator is not a cut or project row',()=>{
+ const prefix='OPT-TEST_SITE_Block',suffix='V2_SITE_Block V2_SYSTEM';
+ const first=page([item('Nombre del proyecto: '+prefix+' '+suffix,16,530),...start(),...row(['1','10"','A','1'],440)]);
+ const second=page([item('Optimizador de corte - '+prefix,16,580),item(suffix,16,563),row(['','', 'continued'],540)[0]],2);
+ const out=extractCoordinatePlans([first,second]);
+ assert.deepEqual(out.issues,[]);assert.deepEqual(out.plans[0].unresolvedCells,[]);
+ assert.equal(out.plans[0].cuts[0].project,'A continued');
+ assert.equal(out.plans[0].cuts[0].uncertain,false);
+ assert.deepEqual(out.plans[0].sourcePages,[1,2]);
+});
+test('word-wrapped header matching preserves exact suffix content and geometry',()=>{
+ const prefix='OPT-TEST_SITE_Block',suffix='V2_SITE_Block V2_SYSTEM';
+ for(const [content,x,y] of [[suffix+' changed',16,563],[suffix,30,563],[suffix,16,530],['V2_SITE_BlockV2_SYSTEM',16,563]]){
+  const first=page([item('Nombre del proyecto: '+prefix+' '+suffix,16,530),...start(),...row(['1','10"','A','1'],440)]);
+  const second=page([item('Optimizador de corte - '+prefix,16,580),item(content,x,y)],2);
+  const out=extractCoordinatePlans([first,second]);assert(out.issues.length>0);assert.equal(out.plans[0].cuts[0].uncertain,true);
+ }
+});

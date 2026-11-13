@@ -1,4 +1,8 @@
 import {fileIdentity} from './library.js';
+export function importRoundingWarning(result){
+ return Array.isArray(result?.validationWarnings)&&result.validationWarnings.some(w=>w?.code==='OPT_PRINTED_ROUNDING_COMPATIBLE')
+  ?'Advertencia: totales compatibles con redondeo de 1/32 de pulgada. Se conservan las medidas impresas; no se acredita la precisión original del programa. No confirma cortes realizados.':'';
+}
 // Originals are retained in memory/the existing PDF library, never inferred from extraction.
 export function mountOptImportPanel(container,{api,getScope,getProgrammingSnapshot=()=>null,getOrigin,getEntries,getRecords,onImported=()=>{}}){
  const make=(tag,text)=>{const element=container.ownerDocument.createElement(tag);if(text)element.textContent=text;return element;};
@@ -50,7 +54,7 @@ export function mountOptImportPanel(container,{api,getScope,getProgrammingSnapsh
  }
  button.onclick=async()=>{
   if(button.disabled||busy)return;const scope=getScope(),origin=getOrigin(),batch=jobsFor(origin),{jobs,omitted}=batch,operation=++epoch;busy=true;results.replaceChildren();availability();
-  let succeeded=0,rejected=0,uncertain=0;const confirmed=[];const omittedText=origin==='INDIVIDUAL'?'':` ${omitted} OPT del índice omitidas por no corresponder a la programación confirmada de PANELES_2, semana ${scope?.semana}/${scope?.anio}.`;
+  let succeeded=0,rejected=0,uncertain=0,withWarning=0;const confirmed=[];const omittedText=origin==='INDIVIDUAL'?'':` ${omitted} OPT del índice omitidas por no corresponder a la programación confirmada de PANELES_2, semana ${scope?.semana}/${scope?.anio}.`;
   try{
    if(batch.unavailable){status.textContent='Consulta la programación vigente de PANELES_2 antes de seleccionar el lote. No se enviaron archivos.';return;}
    if(!jobs.length){status.textContent=origin==='INDIVIDUAL'?'No hay PDF originales para este origen. Selecciona su carpeta o los archivos individuales.':'No hay OPT candidatas para la programación consultada. No se enviaron archivos.'+omittedText;return;}
@@ -62,6 +66,7 @@ export function mountOptImportPanel(container,{api,getScope,getProgrammingSnapsh
      const result=await api.process({scope:{...scope},source:{origin:origin==='INDIVIDUAL'?'DESCONOCIDO':origin,opt:job.opt,mode:origin==='INDIVIDUAL'?'INDIVIDUAL':'INDICE'},pdf:job.file,...(job.index?{index:job.index}:{})});
      if(closed||operation!==epoch)return;
      succeeded++;confirmed.push(result);row.textContent=job.name+' · '+(result.data.duplicado?'Duplicado confirmado, sin crear otra OPT':'Guardado en SGP')+` · ${result.data.cantidad_piezas} piezas documentales; ${result.scopeTotals.assigned} asignadas a PANELES_2 según su semana de origen; ${result.scopeTotals.outsideScope} sin asignación a PANELES_2 y no disponibles para cortar. Documento ${result.data.id_documento}. No acredita cortes realizados.`;
+     const warning=importRoundingWarning(result);if(warning){withWarning++;const notice=make('span',warning);notice.className='opt-rounding-warning';notice.dataset.warning='OPT_PRINTED_ROUNDING_COMPATIBLE';row.append(notice);}
     }catch(error){
      if(closed||operation!==epoch)return;
      const unknown=error.uncertain===true;unknown?uncertain++:rejected++;
@@ -69,7 +74,7 @@ export function mountOptImportPanel(container,{api,getScope,getProgrammingSnapsh
      row.textContent=job.name+' · '+(unknown?'Resultado incierto. Puede haberse guardado; reintenta con exactamente el mismo PDF, índice, origen y ámbito. ':'No guardado en este intento: ')+error.message+(blockers?' · '+blockers:'');
     }
    }
-   if(!closed&&operation===epoch){status.textContent=`${succeeded} confirmados · ${rejected} rechazados o bloqueados · ${uncertain} inciertos. Los fallos no acreditan otros archivos.`+omittedText;if(confirmed.length)onImported(confirmed);}
+   if(!closed&&operation===epoch){status.textContent=`${succeeded} confirmados · ${rejected} rechazados o bloqueados · ${uncertain} inciertos.${withWarning?` ${withWarning} confirmados con advertencia de redondeo.`:''} Los fallos no acreditan otros archivos.`+omittedText;if(confirmed.length)onImported(confirmed);}
   }finally{busy=false;availability();}
  };
  availability();

@@ -2,7 +2,7 @@ import {mountMatrixPanel} from './matrix-panel.js';
 import {mountOptCutReport} from './cut-report.js';
 import {mountOptScopePanel} from './scope-panel.js';
 import {mountSharedCuts} from './shared-cuts.js';
-import {mountOptImportPanel} from './import-panel.js';
+import {mountOptImportPanel,importRoundingWarning} from './import-panel.js';
 import {parseIndex,parseIndexWorkbook} from '../src/domain/opt-index-file.js';
 export {parseIndex,parseIndexWorkbook} from '../src/domain/opt-index-file.js';
 export function reservationGroups(entries){const groups=new Map();for(const entry of entries){if(!entry.reservation||!entry.system)continue;const key=JSON.stringify([entry.origin,entry.reservation,entry.system]);if(!groups.has(key))groups.set(key,{key,origin:entry.origin,reservation:entry.reservation,system:entry.system,opts:[]});const g=groups.get(key);if(!g.opts.includes(entry.opt))g.opts.push(entry.opt);}return [...groups.values()];}
@@ -81,6 +81,7 @@ export function mountOptWorkflow(root,viewer,options={}){
   if(g.origin==='SERVIDOR'){
    detail.textContent=`OPT del servidor: ${g.opts.join(', ')}. El estado compartido verifica las referencias y los cortes vigentes. No necesitas cargar un índice ni un PDF en este navegador.`;
    documents.append(make('p','El PDF original es opcional para revisión documental. Los cortes, sus usuarios y el saldo se muestran desde el servidor debajo.'));
+   const warned=new Set();for(const ref of g.references||[]){const warning=importRoundingWarning(ref);if(warning&&!warned.has(ref.id_documento)){warned.add(ref.id_documento);const notice=make('p',`${ref.fuentes.map(f=>f.consecutivo).join(', ')} · ${warning}`);notice.className='opt-rounding-warning';notice.dataset.warning='OPT_PRINTED_ROUNDING_COMPATIBLE';documents.append(notice);}}
    return;
   }
   detail.textContent=`OPT declaradas: ${g.opts.join(', ')}. Candidato local separado del catálogo compartido; selecciona el PDF para revisión documental. Ninguna marca local equivale a cortado.`;

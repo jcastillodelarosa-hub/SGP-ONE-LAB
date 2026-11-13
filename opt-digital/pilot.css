@@ -65,3 +65,6 @@
 
 /* Documentary material values are not operational scrap events. */
 .document-materials{border:1px solid #d7e3f2;border-radius:10px;padding:12px;margin:12px 0;background:#f7faff}.document-materials h3{font-size:15px;margin:0 0 8px}.document-materials-row{padding:6px 0;border-top:1px solid #d7e3f2}.document-materials-row p{margin:5px 0}.document-scrap{font-weight:700;color:#344b6c}.physical-track .document-remainder{min-width:100px;max-width:160px;white-space:normal;text-align:center;flex-shrink:0;border:1px dashed #718096}
+
+/* Visible non-error caveat retained alongside each confirmed import result. */
+.opt-rounding-warning{display:block;margin-top:8px;padding:10px 12px;border-left:4px solid #a56a00;background:#fff6dc;color:#654600;line-height:1.5;overflow-wrap:anywhere}

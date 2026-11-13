@@ -24,3 +24,8 @@ test('rejects invalid structure and unknown source', () => {
   assert.equal(validateOptColumns([{ foo: 1 }], 'RETAIL').valid, false);
   assert.throws(() => normalizeOptRows([], 'OTHER'), /Origen no admitido/);
 });
+
+test('PROYECTO never silently takes first reservation from comma-separated cell',()=>{
+ const [row]=normalizeOptRows([{OPT:'OPT2099-44-4-PINI-22',Reserva:'9000001,9999999',Sistema:'ES-EL400'}],'PROYECTO');
+ assert.equal(row.reservation,'9000001,9999999');
+});

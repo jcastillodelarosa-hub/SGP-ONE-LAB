@@ -1,4 +1,5 @@
 import {parseIndex,parseIndexWorkbook} from '../domain/opt-index-file.js';
+import {indexedDocumentIdentity} from '../domain/opt-document-identity.js';
 import {documentProduction} from '../../opt-digital/individual-reconciliation.js';
 import {validateOptImportManifest} from '../../functions/opt-import-manifest-core.mjs';
 
@@ -85,15 +86,23 @@ export function createOptImportHandler({rpc,readPdf,DOMParser,allowedOrigins}){
    if(!Array.isArray(rows)||!rows.length)fail('FINAL_DETAIL_OR_EXTRACTION_MISSING','El PDF no contiene el detalle final completo');
    const ids=[...new Set(rows.map(row=>row?.sourceDocumentId))];
    if(ids.length!==1||!text(ids[0]))fail('OPT_DOCUMENT_ID_UNRESOLVED','El encabezado OPT del PDF está ausente o es ambiguo');
-   const opt=ids[0];
-   if(body.source.mode==='INDICE'&&opt!==body.source.opt)fail('OPT_DOCUMENT_ID_MISMATCH','El encabezado del PDF no coincide con la OPT del índice');
+   const identity=body.source.mode==='INDICE'?indexedDocumentIdentity(ids,body.source.opt):{opt:ids[0],title:ids[0]};
+   if(!identity)fail('OPT_DOCUMENT_ID_MISMATCH','El consecutivo del encabezado PDF no coincide con la OPT del índice');
+   const {opt}=identity;
+   const projectIndex=body.source.mode==='INDICE'&&body.source.origin==='PROYECTO';
+   const selectedIndex=indexEntries.filter(row=>row.opt===opt);
+   if(body.source.mode==='INDICE'&&(!selectedIndex.length||selectedIndex.some(row=>!text(row.reservation)||!text(row.system))))fail('OPT_INDEX_LINK_INVALID','La OPT requiere reserva y sistema exactos en el índice');
+   if(projectIndex&&selectedIndex.some(row=>row.reservation.includes(',')))fail('OPT_INDEX_RESERVATION_AMBIGUOUS','La celda del índice contiene varias reservas; no se elige la primera');
+   const selectors=[...new Map(selectedIndex.map(row=>[JSON.stringify([row.reservation,row.system]),{reserva:row.reservation,sistema:row.system}])).values()].sort((a,b)=>a.reserva.localeCompare(b.reserva)||a.sistema.localeCompare(b.sistema));
    const document={sha256:hash,sourceKey:body.source.mode==='INDICE'?`OPT:${encodeURIComponent(opt)}`:`SHA256:${hash}`,origin:body.source.origin,opt,mode:body.source.mode};
+   const references=[...new Set(rows.map(row=>row.ref))].sort();
+   if(projectIndex&&(!references.length||references.length>1000||references.some(ref=>!text(ref))))fail('OPT_PROFILE_REFERENCES_INVALID');
    const productions=[...new Set(rows.map(row=>documentProduction(row.reference)))];
-   if(productions.some(id=>typeof id!=='string'||!/^\d{1,30}$/.test(id))||productions.length>1000)fail('OPT_DOCUMENT_PRODUCTION_UNRESOLVED','Referencias documentales sin una producción única');
-   const contextResult=await rpc('sgp_opt_import_contexto_v1',{p_token:body.p_token,p_scope:body.scope,p_producciones:productions});
+   if(!projectIndex&&(productions.some(id=>typeof id!=='string'||!/^\d{1,30}$/.test(id))||productions.length>1000))fail('OPT_DOCUMENT_PRODUCTION_UNRESOLVED','Referencias documentales sin una producción única');
+   const contextResult=projectIndex?await rpc('sgp_opt_import_contexto_proyecto_v2',{p_token:body.p_token,p_scope:body.scope,p_opt:opt,p_selectores:selectors,p_referencias:references}):await rpc('sgp_opt_import_contexto_v1',{p_token:body.p_token,p_scope:body.scope,p_producciones:productions});
    if(contextResult.error){const error=sqlError(contextResult.error);return reject(error.status,error.code,error.error);}
    const context=contextResult.data;
-   if(context?.contract!=='OPT-IMPORT-CONTEXT-1'||!text(context.revision,128)||!scopeEqual(context.scope,body.scope)||!Array.isArray(context.bindings)||context.bindings.length>20000||!context.bindings.every(record))fail('OPT_CONTEXT_INVALID','Respuesta de contexto SGP incompatible',503);
+   if(context?.contract!==(projectIndex?'OPT-IMPORT-CONTEXT-PROYECTO-2':'OPT-IMPORT-CONTEXT-1')||(projectIndex&&(context.opt!==opt||!Array.isArray(context.profileDestinations)||!context.profileDestinations.every(record)||!Array.isArray(context.referencias)||JSON.stringify([...context.referencias].sort())!==JSON.stringify(references)||!Array.isArray(context.selectores)||!context.selectores.every(row=>exactKeys(row,['reserva','sistema'])&&text(row.reserva)&&text(row.sistema))||JSON.stringify(context.selectores.map(row=>[row.reserva,row.sistema]).sort())!==JSON.stringify(selectors.map(row=>[row.reserva,row.sistema]).sort())))||!text(context.revision,128)||!scopeEqual(context.scope,body.scope)||!Array.isArray(context.bindings)||context.bindings.length>20000||!context.bindings.every(record))fail('OPT_CONTEXT_INVALID','Respuesta de contexto SGP incompatible',503);
    if(rows.length*context.bindings.length>2000000)fail('OPT_CONTEXT_COMPLEXITY_LIMIT','El cruce documental excede el límite de procesamiento');
    let indexRows;
    const common={pdfSha256:hash,sourceKey:document.sourceKey,origin:document.origin,opt};
@@ -105,24 +114,26 @@ export function createOptImportHandler({rpc,readPdf,DOMParser,allowedOrigins}){
     indexRows=rows.flatMap(row=>context.bindings.filter(binding=>binding.documentProduction===documentProduction(row.reference)).map((binding,i)=>({...common,rowId:`individual-${row.sourceId}-${i}`,sourceRowId:row.sourceId,reference:row.reference,documentProduction:binding.documentProduction,reservation:binding.reserva,system:binding.sistema})));
    }
    if(rows.length*indexRows.length>2000000)fail('OPT_INDEX_COMPLEXITY_LIMIT','El índice seleccionado excede el límite de procesamiento');
-   const server={schema:'sgp.opt.server-evidence.v1',revision:context.revision,scope:body.scope,pdfSha256:hash,bindings:context.bindings,indexRows};
+   const server={...(projectIndex?{bindingMode:'OPT_INDEX_RESERVATION',profileDestinations:context.profileDestinations}:{}),schema:'sgp.opt.server-evidence.v1',revision:context.revision,scope:body.scope,pdfSha256:hash,bindings:context.bindings,indexRows};
    const result=validateOptImportManifest({document,extraction},server);
    if(!result.importable)return reject(422,'OPT_DOCUMENT_BLOCKED','El documento no supera la conciliación completa',{blockers:result.blockers.slice(0,100).map(blocker=>({...blocker,...(Array.isArray(blocker.candidates)?{candidates:blocker.candidates.slice(0,20),candidate_count:blocker.candidates.length}:{}),...(Array.isArray(blocker.issues)?{issues:blocker.issues.slice(0,100),issue_count:blocker.issues.length}:{})})),blocker_count:result.blockers.length});
    const manifest=result.manifest;
-   const evidence={contract:'OPT-SERVER-VALIDATION-1',algorithm:'opt-import-manifest-v1',pdf_sha256:hash,validation:'DOCUMENTARY_MANIFEST_READY',physical_completion_verified:false,
-    sgp_binding:{contract:context.contract,scope:body.scope,revision:context.revision,producciones:productions},
+   const evidence={contract:projectIndex?'OPT-SERVER-VALIDATION-PROYECTO-2':'OPT-SERVER-VALIDATION-1',algorithm:projectIndex?'opt-import-manifest-project-v2':'opt-import-manifest-v1',pdf_sha256:hash,validation:'DOCUMENTARY_MANIFEST_READY',physical_completion_verified:false,
+    sgp_binding:{contract:context.contract,scope:body.scope,revision:context.revision,...(projectIndex?{opt,selectores:selectors,referencias:references}:{producciones:productions})},
+    original_document_title:identity.title,
+    ...(projectIndex?{documentary_source_groups:manifest.sourceGroups||[],rounding_policy:manifest.roundingPolicy,rounding_evidence:manifest.roundingEvidence,validation_warnings:manifest.validationWarnings}:{}),
     original_index:body.index?{sha256:indexHash,name:body.index.name,format:body.index.format,sheet:indexSheet}:null};
    // PostgreSQL bytea hex notation is used only inside the private server call.
    // It is never put in a browser config or returned to the client.
    const args={p_token:body.p_token,p_pdf:'\\x'+hex(bytes),p_manifest:manifest.pieces,p_sources:[manifest.source],p_evidence:evidence};
    writeAttempted=true;
-   const imported=await rpc('sgp_opt_importar_validado_v1',args);
+   const imported=await rpc(projectIndex?'sgp_opt_importar_proyecto_validado_v2':'sgp_opt_importar_validado_v1',args);
    if(imported.error){
     if(imported.error.code==='P0001'){const error=sqlError(imported.error);return reject(error.status,error.code,error.error);}
     return reject(503,'OPT_IMPORT_OUTCOME_UNKNOWN','No se pudo confirmar el resultado. Reintenta el mismo PDF y el mismo índice.',{definitive:false});
    }
    if(!receiptValid(imported.data,manifest))return reject(503,'OPT_IMPORT_OUTCOME_UNKNOWN','Respuesta de registro incompatible. Conserva y reintenta los mismos archivos.',{definitive:false});
-   return send(200,{ok:true,data:imported.data,document:{sha256:hash,source_key:document.sourceKey,origin:document.origin,opt,mode:document.mode},scope:body.scope,totals:manifest.totals,scopeTotals:manifest.scopeTotals,physical_completion_verified:false});
+   return send(200,{ok:true,data:imported.data,document:{sha256:hash,source_key:document.sourceKey,origin:document.origin,opt,mode:document.mode},scope:body.scope,totals:manifest.totals,scopeTotals:manifest.scopeTotals,...(projectIndex?{roundingPolicy:manifest.roundingPolicy,roundingEvidence:manifest.roundingEvidence,validationWarnings:manifest.validationWarnings}:{}),physical_completion_verified:false});
   }catch(error){
    if(writeAttempted)return reject(503,'OPT_IMPORT_OUTCOME_UNKNOWN','No se pudo confirmar el resultado. Reintenta los mismos archivos.',{definitive:false});
    return reject(error.status||422,error.code||'OPT_INPUT_INVALID',String(error.message||'No se pudo validar el documento').slice(0,500));

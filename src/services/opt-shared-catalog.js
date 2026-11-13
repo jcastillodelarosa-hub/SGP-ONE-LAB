@@ -7,6 +7,8 @@ const scopeValid=value=>keys(value,'linea,anio,semana,modo')&&value.linea==='PAN
 const sameScope=(a,b)=>scopeValid(a)&&scopeValid(b)&&['linea','anio','semana','modo'].every(key=>a[key]===b[key]);
 const invalid=()=>{throw Error('OPT_CATALOGO_CONTRATO_INVALIDO');};
 const freeze=value=>{if(value&&typeof value==='object'){Object.values(value).forEach(freeze);Object.freeze(value);}return value;};
+const warningKey=ref=>JSON.stringify((ref.validationWarnings||[]).map(w=>w.code));
+const validWarnings=ref=>!Object.hasOwn(ref,'validationWarnings')||Array.isArray(ref.validationWarnings)&&ref.validationWarnings.length<=1&&ref.validationWarnings.every(w=>object(w)&&Object.keys(w).every(k=>['code','message'].includes(k))&&w.code==='OPT_PRINTED_ROUNDING_COMPATIBLE'&&(!Object.hasOwn(w,'message')||typeof w.message==='string'&&w.message.length<=1000));
 const sourcesKey=sources=>JSON.stringify(sources.map(s=>[s.origen,s.source_key,s.consecutivo,s.modo_carga]).sort((a,b)=>JSON.stringify(a).localeCompare(JSON.stringify(b))));
 const piecesKey=pieces=>JSON.stringify(pieces.map(p=>[p.id_pieza.toLowerCase(),p.pagina,p.patron,p.barra,p.corte,p.longitud_mm]).sort((a,b)=>a[0].localeCompare(b[0])));
 function validate(data,scope){
@@ -16,14 +18,14 @@ function validate(data,scope){
   if(!keys(group,'reserva,sistema,referencias')||!text(group.reserva)||!text(group.sistema)||!Array.isArray(group.referencias)||!group.referencias.length)invalid();
   const key=JSON.stringify([group.reserva,group.sistema]);if(groups.has(key))invalid();groups.add(key);const refs=new Set();
   for(const ref of group.referencias){
-   if(!keys(ref,'id_documento,sha256,referencia,sistema,fuentes,piezas')||!uuid(ref.id_documento)||typeof ref.sha256!=='string'||!/^[a-f0-9]{64}$/.test(ref.sha256)||!text(ref.referencia)||ref.sistema!==group.sistema||!Array.isArray(ref.fuentes)||!ref.fuentes.length||!Array.isArray(ref.piezas)||!ref.piezas.length)invalid();
+   if(!keys(ref,'id_documento,sha256,referencia,sistema,fuentes,piezas'+(Object.hasOwn(ref||{},'validationWarnings')?',validationWarnings':''))||!validWarnings(ref)||!uuid(ref.id_documento)||typeof ref.sha256!=='string'||!/^[a-f0-9]{64}$/.test(ref.sha256)||!text(ref.referencia)||ref.sistema!==group.sistema||!Array.isArray(ref.fuentes)||!ref.fuentes.length||!Array.isArray(ref.piezas)||!ref.piezas.length)invalid();
    const doc=ref.id_documento.toLowerCase(),refKey=JSON.stringify([doc,ref.referencia]);if(refs.has(refKey))invalid();refs.add(refKey);
    if(hashes.has(ref.sha256)&&hashes.get(ref.sha256)!==doc)invalid();hashes.set(ref.sha256,doc);const sourceIds=new Set();
    for(const source of ref.fuentes){
     if(!keys(source,'origen,source_key,consecutivo,modo_carga')||!['RETAIL','PROYECTO','DESCONOCIDO'].includes(source.origen)||!['INDICE','INDIVIDUAL'].includes(source.modo_carga)||!text(source.source_key)||!text(source.consecutivo))invalid();
     const id=JSON.stringify([source.origen,source.source_key]);if(sourceIds.has(id)||sources.has(id)&&sources.get(id)!==doc)invalid();sourceIds.add(id);sources.set(id,doc);
    }
-   const meta=JSON.stringify([ref.sha256,sourcesKey(ref.fuentes)]);if(documents.has(doc)&&documents.get(doc)!==meta)invalid();documents.set(doc,meta);
+   const meta=JSON.stringify([ref.sha256,sourcesKey(ref.fuentes),warningKey(ref)]);if(documents.has(doc)&&documents.get(doc)!==meta)invalid();documents.set(doc,meta);
    for(const piece of ref.piezas){
     if(!keys(piece,'id_pieza,pagina,patron,barra,corte,longitud_mm')||!uuid(piece.id_pieza)||!['pagina','patron','barra','corte'].every(k=>Number.isSafeInteger(piece[k])&&piece[k]>0)||typeof piece.longitud_mm!=='number'||!(piece.longitud_mm>0&&piece.longitud_mm<100000))invalid();
     const id=piece.id_pieza.toLowerCase(),position=JSON.stringify([doc,piece.pagina,piece.patron,piece.barra,piece.corte]);if(pieces.has(id)||positions.has(position))invalid();pieces.add(id);positions.add(position);
@@ -44,7 +46,7 @@ export function createOptSharedCatalog(client,getToken,{getContext,timeoutMs=250
  const ownsGroup=group=>Boolean(object(group)&&isCurrent(current)&&owners.get(group)===current);
  const matchesReference=(group,ref)=>{
   if(!ownsGroup(group)||!object(ref)||ref.sistema!==group.system||!uuid(ref.id_documento)||!Array.isArray(ref.fuentes)||!Array.isArray(ref.piezas))return false;
-  try{return group.references.some(known=>known.id_documento.toLowerCase()===ref.id_documento.toLowerCase()&&known.sha256===ref.sha256&&known.referencia===ref.referencia&&sourcesKey(known.fuentes)===sourcesKey(ref.fuentes)&&piecesKey(known.piezas)===piecesKey(ref.piezas));}catch{return false;}
+  try{return group.references.some(known=>known.id_documento.toLowerCase()===ref.id_documento.toLowerCase()&&known.sha256===ref.sha256&&known.referencia===ref.referencia&&sourcesKey(known.fuentes)===sourcesKey(ref.fuentes)&&validWarnings(ref)&&warningKey(known)===warningKey(ref)&&piecesKey(known.piezas)===piecesKey(ref.piezas));}catch{return false;}
  };
  async function load(scope){
   invalidate();const operation=generation;
