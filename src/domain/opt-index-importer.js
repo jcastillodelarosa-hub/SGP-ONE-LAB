@@ -11,7 +11,7 @@ const pick = (row, aliases) => {
 };
 const asText = value => String(value ?? '').trim();
 
-export function normalizeOptRows(rows, origin) {
+export function normalizeOptRows(rows, origin, {exactReservations=false}={}) {
   if (!Array.isArray(rows)) throw new TypeError('Las filas deben ser un arreglo');
   if (!['RETAIL', 'PROYECTO'].includes(origin)) throw new Error('Origen no admitido');
   return rows.map((row, index) => {
@@ -20,7 +20,7 @@ export function normalizeOptRows(rows, origin) {
       origin, sourceRow: index + 2, opt,
       // PROYECTO cells are documentary selectors, not SGP primary-reservation lists.
       // Preserve all text so a multi-reservation cell cannot silently choose one.
-      reservation: (origin === 'PROYECTO' ? asText : primaryReservation)(pick(row, ['# Reserva', 'N. Reserva', 'No Reserva', 'Reserva', 'Numero reserva'])),
+      reservation: (origin === 'PROYECTO' || exactReservations ? asText : primaryReservation)(pick(row, ['# Reserva', 'N. Reserva', 'No Reserva', 'Reserva', 'Numero reserva'])),
       system: asText(pick(row, ['Sistema', 'sistemas'])),
       production: asText(pick(row, ['Producción', 'Produccion', 'Descripción', 'Descripcion', 'Nombre Produccion'])),
       project: asText(pick(row, ['Proyecto'])),

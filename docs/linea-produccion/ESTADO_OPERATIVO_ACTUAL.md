@@ -1,3 +1,7 @@
+## 2026-11-13 — Retail exact contract v3 prepared, disabled
+
+Isolated feat/opt-retail-contract-v3 on CPU febd571. Exact original label/reservation/system identity separates document number from internal ID; approved profile destination separates Panel/Frame, Frame assignments forbidden. Private SQL proposals, rollback, synthetic SQL persistence/denials/context changes and 283 OPT tests pass. Originals available locally and hashes verified: identities resolve, but strict printed-total reconciliation blocks both originals; rounding compatibility is diagnostic only. No writes/deployment/reimports. See docs/opt-import-endpoint/RETAIL_V3_REVIEW.md. Labels remain independent 275e6df. Next: explicit Retail rounding policy, successful-path CPU verification, then authorization for SQL and server routing.
+
 ## 2026-11-13 — Original XLSX CPU equivalence confirmed, not deployed
 
 Parent independently applied CPU patch on exact v454 base and verified full parsed-result equality in six cold processes using original ARCHIVOS/RETAIL:7692 entries,3794 missing relations. Median CPU2714→1083ms, post-parse heap197.5→32.6MB. Private evidence /workspace/sgp-opt-cpu-original-evidence.json. Server candidate52e5a43 remains local; no production writes/reimports/deployment. Whole-request CPU and publication authorization remain outstanding; do not claim Edge budget guaranteed.

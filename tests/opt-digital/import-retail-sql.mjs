@@ -1,0 +1,63 @@
+// Real PDF parser + manifest validator + in-memory PostgreSQL. No product data/network.
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import * as pdfjs from 'pdfjs-dist/build/pdf.mjs';
+import {DOMParser} from '@xmldom/xmldom';
+import {createOptImportHandler} from '../../src/server/opt-import-handler.js';
+import {createOptPdfReader} from '../../src/server/opt-pdf-reader.js';
+import {body as fixtureBody,program,scope,fullPdf,base64} from './import-fixtures.mjs';
+const {PGlite}=await import(process.env.PGLITE_MODULE||'@electric-sql/pglite');
+const db=new PGlite();
+// Numeric synthetic reservation satisfies the private PROYECTO selector contract.
+const body=()=>{const b=fixtureBody();b.index.base64=base64(new TextEncoder().encode(atob(b.index.base64).replaceAll('SYNTH-R','9000001')));return b;};
+await db.exec(`CREATE ROLE anon;CREATE ROLE authenticated;CREATE ROLE service_role;
+CREATE TABLE public.sgp_maestro_piezas(codigo_sap text PRIMARY KEY,tipo_pieza text,destino_productivo text,activo text);
+INSERT INTO public.sgp_maestro_piezas VALUES('R1','PANEL','PANEL','SI');
+CREATE TABLE public.sgp_producciones(key_produccion text PRIMARY KEY,id text,id_linea text,reserva_al text,sistema text,anio integer,semana_base integer,activa text,excluida_export boolean);
+CREATE TABLE public.sgp_mecanizado_programacion(id_programacion uuid PRIMARY KEY,reserva text,estado text);
+CREATE TABLE public.sgp_mecanizado_programacion_detalle(id_programacion uuid,key_produccion text,reserva_snapshot text,cantidad_snapshot numeric);
+CREATE VIEW public.sgp_produccion_reservas_v AS SELECT key_produccion,trim(r) reserva,split_part(reserva_al,',',1) reserva_principal FROM public.sgp_producciones CROSS JOIN LATERAL unnest(string_to_array(reserva_al,',')) r;
+CREATE TABLE fixture_users(token text,role_name text,active boolean,access text[]);
+INSERT INTO fixture_users VALUES('synthetic-token','LIDER MECANIZADO',true,ARRAY['mecanizado.proceso']);
+CREATE FUNCTION public.sgp_sesion_actual(p_token text) RETURNS jsonb LANGUAGE sql AS $$SELECT jsonb_build_object('valida',active,'rol',role_name) FROM public.fixture_users WHERE token=p_token$$;
+CREATE FUNCTION public.sgp_pdt_validar_rol_real(token text,roles text[]) RETURNS text LANGUAGE plpgsql AS $$BEGIN IF NOT EXISTS(SELECT 1 FROM public.fixture_users u WHERE u.token=$1 AND active AND role_name=ANY(roles)) THEN RAISE EXCEPTION 'OPT_NO_AUTORIZADO'; END IF;RETURN token;END$$;
+CREATE FUNCTION public.sgp_mis_accesos(p_token text) RETURNS TABLE(ventana text) LANGUAGE sql AS $$SELECT unnest(access) FROM public.fixture_users WHERE token=p_token AND active$$;
+INSERT INTO public.sgp_producciones VALUES('123456|PANELES_2','123456','PANELES_2','9000001','SYNTH-SYS',2026,46,'SI',false);
+INSERT INTO public.sgp_mecanizado_programacion VALUES('${program}','9000001','SIN INICIAR');
+INSERT INTO public.sgp_mecanizado_programacion_detalle VALUES('${program}','123456|PANELES_2','9000001',1);`);
+
+await db.exec("ALTER TABLE public.sgp_producciones ADD COLUMN produccion text; UPDATE public.sgp_producciones SET id='700000',produccion='123456 - Synthetic'; INSERT INTO public.sgp_producciones SELECT '700000|FRAMES_2',id,'FRAMES_2',reserva_al,sistema,anio,semana_base,activa,excluida_export,produccion FROM public.sgp_producciones;");
+for(const file of ['install_REVIEW.sql','import_context_retail_v3_REVIEW.sql','import_channel_retail_v3_REVIEW.sql'])await db.exec(readFileSync(new URL('../../docs/sql-proposals/opt-shared/'+file,import.meta.url),'utf8'));
+await db.exec("UPDATE sgp_opt_shared.config SET enabled=true,access_window='mecanizado',read_roles=ARRAY['LIDER MECANIZADO'],write_roles=ARRAY['LIDER MECANIZADO']");
+let writes=0,lastWrite=null,beforeWrite=null;
+const rpc=async(name,a)=>{try{
+ if(name==='sgp_sesion_actual')return {data:(await db.query('SELECT public.sgp_sesion_actual($1) AS data',[a.p_token])).rows[0].data};
+ if(name==='sgp_mis_accesos')return {data:(await db.query('SELECT * FROM public.sgp_mis_accesos($1)',[a.p_token])).rows};
+ if(name==='sgp_opt_import_contexto_retail_v3')return {data:(await db.query('SELECT public.sgp_opt_import_contexto_retail_v3($1,$2,$3,$4,$5) AS data',[a.p_token,JSON.stringify(a.p_scope),a.p_opt,JSON.stringify(a.p_selectores),a.p_referencias])).rows[0].data};
+ if(name==='sgp_opt_importar_retail_validado_v3'){writes++;lastWrite=structuredClone(a);if(beforeWrite)await beforeWrite();return {data:(await db.query('SELECT public.sgp_opt_importar_retail_validado_v3($1,$2::text::bytea,$3,$4,$5) AS data',[a.p_token,a.p_pdf,JSON.stringify(a.p_manifest),JSON.stringify(a.p_sources),JSON.stringify(a.p_evidence)])).rows[0].data};}
+ throw Error('UNEXPECTED_RPC');
+}catch(error){return {error:{code:error.code,message:error.message}};}};
+const handler=createOptImportHandler({rpc,readPdf:createOptPdfReader(pdfjs),DOMParser,retailV3:true,allowedOrigins:['https://offline.invalid']});
+let fixtureOpt='OPT2099-46-5-TEST-3';
+function input(){const b=body(),opt=fixtureOpt;b.source.opt=opt;b.pdf.base64=base64(new TextEncoder().encode(atob(b.pdf.base64).replaceAll('OPT-SYNTH',opt)));b.index.base64=base64(new TextEncoder().encode(`OPT,Reserva,Sistema,Proyecto,Acabado\n${opt},9000001,SYNTH-SYS,123456 - Synthetic,FINISH\n`));return b;}
+const run=async()=>{const response=await handler(new Request('https://offline.invalid',{method:'POST',headers:{origin:'https://offline.invalid','content-type':'application/json'},body:JSON.stringify(input())}));return {status:response.status,...await response.json()};};
+const first=await run();assert.equal(first.status,200,JSON.stringify(first));assert.equal(first.data.cantidad_piezas,4);assert.equal(first.data.sin_asignacion,0);
+const forged=structuredClone(lastWrite);for(const piece of forged.p_manifest)piece.asignacion.key_produccion='700000|FRAMES_2';assert.match((await rpc('sgp_opt_importar_retail_validado_v3',forged)).error.message,/OPT_RETAIL_ASIGNACION_FUERA_AMBITO/);
+const repeat=await run();assert.equal(repeat.data.duplicado,true);assert.equal(first.data.id_documento,repeat.data.id_documento);
+const count=async()=> (await db.query('SELECT count(*)::int n FROM sgp_opt_shared.approvals')).rows[0].n;
+for(const sql of ["UPDATE public.sgp_producciones SET activa='NO' WHERE id_linea='PANELES_2'","UPDATE public.sgp_maestro_piezas SET destino_productivo='FRAME'","UPDATE public.sgp_producciones SET produccion='123456 - Other'","UPDATE public.sgp_mecanizado_programacion SET estado='CANCELADA'"]){
+ const n=await count();beforeWrite=()=>db.exec(sql);const out=await run();assert.equal(out.code,'OPT_CONTEXTO_CAMBIO_REINTENTAR',JSON.stringify(out));assert.equal(await count(),n);
+ beforeWrite=null;await db.exec("UPDATE public.sgp_producciones SET activa='SI',produccion='123456 - Synthetic'; UPDATE public.sgp_maestro_piezas SET destino_productivo='PANEL'; UPDATE public.sgp_mecanizado_programacion SET estado='SIN INICIAR'");
+}
+// New competing destination committed before final observation invalidates revision.
+const n=await count();beforeWrite=()=>db.exec("INSERT INTO public.sgp_producciones SELECT 'competing',id,id_linea,reserva_al,sistema,anio,semana_base,activa,excluida_export,produccion FROM public.sgp_producciones WHERE id_linea='PANELES_2'");
+assert.equal((await run()).code,'OPT_CONTEXTO_CAMBIO_REINTENTAR');assert.equal(await count(),n);beforeWrite=null;
+await db.exec("DELETE FROM public.sgp_producciones WHERE key_produccion='competing'");
+beforeWrite=()=>db.exec('UPDATE fixture_users SET active=false');assert.equal((await run()).code,'OPT_NO_AUTORIZADO');beforeWrite=null;await db.exec('UPDATE fixture_users SET active=true');
+for(const role of ['anon','authenticated']){await db.exec('SET ROLE '+role);assert((await rpc('sgp_opt_importar_retail_validado_v3',lastWrite)).error);assert((await rpc('sgp_opt_import_contexto_retail_v3',{p_token:'synthetic-token',p_scope:scope,p_opt:input().source.opt,p_selectores:lastWrite.p_evidence.sgp_binding.selectores,p_referencias:['R1']})).error);await db.exec('RESET ROLE');}
+// Classification as Frame remains documentary-only, with no cut assignment.
+await db.exec("UPDATE public.sgp_maestro_piezas SET tipo_pieza='FRAME',destino_productivo='FRAME'");
+assert.equal((await run()).code,'OPT_DOCUMENTO_REQUIERE_RECONCILIACION');
+fixtureOpt='OPT2099-46-5-TEST-4';const frames=await run();assert.equal(frames.status,200,JSON.stringify(frames));assert(lastWrite.p_manifest.every(p=>p.asignacion===null));
+assert.deepEqual((await db.query('SELECT (SELECT count(*)::int FROM sgp_opt_shared.cuts) cuts,(SELECT count(*)::int FROM sgp_opt_shared.events) events')).rows[0],{cuts:0,events:0});
+await db.close();console.log('PASS Retail v3 real parser -> SQL context -> private writer; exact identity, idempotency, stale observations, revoked session, role denial, Frame unassigned, zero cut events. Synthetic local only.');
