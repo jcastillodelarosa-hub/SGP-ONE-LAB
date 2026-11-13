@@ -56,7 +56,7 @@ export function mountSharedCuts(container,{api,catalogApi=null,documentApi=null,
     const references=documentReferences.filter(ref=>documentApi?.ownsReference(group,ref)).map(ref=>{
       const matched=scoped.find(r=>r.id_documento===ref.id_documento&&r.sha256===ref.sha256&&r.referencia===ref.referencia);
       const source=group.references.find(r=>r.id_documento===ref.id_documento);
-      return {...ref,documentReference:ref,piezas:matched?.piezas||[],serverVerified:!!matched?.serverVerified,fuentes:source?.fuentes||[],consecutivo:[...new Set((source?.fuentes||[]).map(f=>f.consecutivo))].join(', '),origen:'SERVIDOR',localPdf:matched?.localPdf};
+      return {...ref,documentReference:ref,piezas:matched?.piezas||[],serverVerified:!!matched?.serverVerified,fuentes:source?.fuentes||[],consecutivo:[...new Set((source?.fuentes||[]).map(f=>f.consecutivo))].join(', '),origen:'SERVIDOR',localPdf:matched?.localPdf,validationWarnings:matched?.validationWarnings||source?.validationWarnings||[]};
     });
     if(!references.length)references.push(...scoped);
     if(!references.some(ref=>referenceKey(ref)===activeReference))activeReference=references.length?referenceKey(references[0]):null;
