@@ -14,7 +14,8 @@ const assert=require('node:assert/strict'),fs=require('node:fs');const {JSDOM}=r
  const panel=mountOptImportPanel(dom.window.document.querySelector('main'),{api,getScope:()=>activeScope,getProgrammingSnapshot:()=>({status:'READY',scope:activeScope,relations:[{reservation:'R',system:'PANEL'}]}),getOrigin:()=>origin,getEntries:()=>entries,getRecords:()=>[],onImported:r=>receipts.push(...r)}),$=id=>dom.window.document.getElementById(id);
  panel.update();panel.setIndex('RETAIL',index);await panel.captureFiles([file('A.pdf'),file('B.pdf'),file('C.pdf'),file('MISSING-near.pdf')],'RETAIL');assert.equal(calls.length,0);
  const pending=$('optImportProcess').onclick();assert($('optImportProcess').disabled);await $('optImportProcess').onclick();await pending;assert.equal(calls.length,3);assert.equal(maxInflight,1);assert.equal(receipts.length,1);assert.match($('optImportResults').textContent,/A.pdf · Guardado/);assert.match($('optImportResults').textContent,/B.pdf · Resultado incierto/);assert.match($('optImportResults').textContent,/C.pdf · No guardado.*OPT_AMBIGUA/);assert.match($('optImportResults').textContent,/MISSING.pdf · Bloqueado: Falta PDF con nombre exacto/);assert.match($('optImportResults').textContent,/MISSING-near.pdf · Bloqueado/);
- uncertain=false;await $('optImportProcess').onclick();assert.deepEqual(calls[1],calls[4]);assert.match($('optImportResults').textContent,/A.pdf · Duplicado confirmado/);assert.match($('optImportResults').textContent,/B.pdf · Duplicado confirmado/);
+ // Existing identical replay coverage simulates a separately resolved journal.
+ api.pending=()=>[];uncertain=false;await $('optImportProcess').onclick();assert.deepEqual(calls[1],calls[4]);assert.match($('optImportResults').textContent,/A.pdf · Duplicado confirmado/);assert.match($('optImportResults').textContent,/B.pdf · Duplicado confirmado/);
  // Same exact filename with distinct bytes is ambiguous, never choose the last selected copy.
  await panel.captureFiles([file('A.pdf','different')],'RETAIL');const before=calls.length;await $('optImportProcess').onclick();assert.equal(calls.length,before+2);assert.match($('optImportResults').textContent,/A.pdf · Bloqueado: Hay varios PDF/);
  origin='PROYECTO';panel.invalidate();await panel.captureFiles([file('PROJECT.pdf')],'PROYECTO');panel.update();await $('optImportProcess').onclick();assert.match($('optImportResults').textContent,/Falta el índice original de PROYECTO/);assert.equal(calls.length,before+2);
@@ -23,6 +24,19 @@ const assert=require('node:assert/strict'),fs=require('node:fs');const {JSDOM}=r
  for(const close of [false,true]){
   let finish;const store=new JSDOM('<main></main>',{url:'https://synthetic.invalid'}),records=[];origin='INDIVIDUAL';activeScope={...scope};const slow=createOptImport({invoke:body=>new Promise(resolve=>finish=async()=>resolve({data:await result(body)}))},()=> 't',{storage:store.window.localStorage,storageScope:'late',getContext:()=>activeScope});let imported=0;
   const m=mountOptImportPanel(store.window.document.querySelector('main'),{api:slow,getScope:()=>activeScope,getOrigin:()=>origin,getEntries:()=>[],getRecords:()=>records,onImported:()=>imported++});m.update();await m.captureFiles([file('X.pdf'),file('Y.pdf')],'INDIVIDUAL');const b=store.window.document.getElementById('optImportProcess'),request=b.onclick();while(!finish)await wait();if(close)m.destroy();else{activeScope={...scope,semana:45};m.update();assert.match(store.window.document.getElementById('optImportStatus').textContent,/puede haberse guardado/);}await finish();await request;assert.equal(imported,0);assert.equal(store.window.localStorage.length,1);assert.equal(JSON.parse(store.window.localStorage.getItem(store.window.localStorage.key(0))).state,'pending');if(!close){assert.equal(store.window.document.getElementById('optImportResults').children.length,0);m.destroy();}
+ }
+ // Resource termination gives actionable text without claiming rollback or auto-retrying.
+ {
+  const d=new JSDOM('<main></main>',{url:'https://synthetic.invalid'});let sent=0;
+  const m=mountOptImportPanel(d.window.document.querySelector('main'),{api:{pending:()=>[],invalidate(){},process:async()=>{sent++;throw Object.assign(Error('OPT_IMPORTACION_LIMITE_RECURSOS'),{uncertain:true});}},getScope:()=>scope,getOrigin:()=> 'INDIVIDUAL',getEntries:()=>[],getRecords:()=>[]});
+  await m.captureFiles([file('SYNTH.pdf')],'INDIVIDUAL');await d.window.document.getElementById('optImportProcess').onclick();
+  const message=d.window.document.getElementById('optImportResults').textContent;
+  assert.match(message,/límite de recursos/);assert.match(message,/verifica el estado antes de reintentar/);assert.doesNotMatch(message,/No guardado/);assert.equal(sent,1);m.destroy();
+ }
+ {
+  const d=new JSDOM('<main></main>',{url:'https://synthetic.invalid'});let sent=0;
+  const m=mountOptImportPanel(d.window.document.querySelector('main'),{api:{pending:()=>[{source:{opt:'PENDING'},pdf:{name:'PENDING.pdf'}}],invalidate(){},process:async()=>{sent++;}},getScope:()=>scope,getOrigin:()=> 'INDIVIDUAL',getEntries:()=>[],getRecords:()=>[]});
+  await m.captureFiles([file('PENDING.pdf')],'INDIVIDUAL');await d.window.document.getElementById('optImportProcess').onclick();assert.equal(sent,0);assert.match(d.window.document.getElementById('optImportResults').textContent,/resultado anterior incierto/);m.destroy();
  }
  // Full workflow refreshes shared catalog and selects the sole matching server reservation.
  const full=new JSDOM(fs.readFileSync('opt-digital/index.html','utf8'),{url:'https://synthetic.invalid'});global.document=full.window.document;let imported=null,catalogReads=0;
@@ -41,7 +55,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs');const {JSDOM}=r
    ]:[]}};
    if(name==='sgp_reservas_asociadas_listar')return {data:[]};throw Error(name);
   }};
-  const selectedWorkflow=mountOptWorkflow(document.body,{onDocuments:l=>{l([]);return()=>{};},importFiles(){},openDocument(){}},{defaultScope:scope,scopeApi:createOptProgrammingScope(selectedClient,()=>token),importApi:createOptImport({invoke:async body=>{sent.push(structuredClone(body));return {data:await result(body)};}},()=>token,{storage:selected.window.localStorage,storageScope:sourceOrigin})});
+  const localReads=[];const selectedWorkflow=mountOptWorkflow(document.body,{onDocuments:l=>{l([]);return()=>{};},importFiles(files){localReads.push(...files.map(f=>f.name));},openDocument(){}},{defaultScope:scope,scopeApi:createOptProgrammingScope(selectedClient,()=>token),importApi:createOptImport({invoke:async body=>{sent.push(structuredClone(body));return {data:await result(body)};}},()=>token,{storage:selected.window.localStorage,storageScope:sourceOrigin})});
   const select=id=>selected.window.document.getElementById(id);
   select('optIndexOrigin').value=sourceOrigin;select('optIndexOrigin').onchange();
   const rawIndex='OPT,Reserva,Sistema\nMIX,R,PANEL\nMIX,F,FRAME\nFOREIGN,F,FRAME\nWRONG_SYSTEM,R,FRAME\nOTHER_WEEK,E,PANEL\n';
@@ -49,7 +63,8 @@ const assert=require('node:assert/strict'),fs=require('node:fs');const {JSDOM}=r
   Object.defineProperty(select('optIndexFile'),'files',{value:[file('scope-index.csv',rawIndex)],configurable:true});await select('optIndexFile').onchange();
   Object.defineProperty(select('optPdfFolder'),'files',{value:[file('MIX.pdf',mixedBytes),file('FOREIGN.pdf'),file('WRONG_SYSTEM.pdf')],configurable:true});select('optPdfFolder').onchange();await wait();
   assert(select('optImportProcess').disabled);await select('optImportProcess').onclick();assert.equal(sent.length,0);
-  await select('optScopeLoad').onclick();await select('optImportProcess').onclick();
+  assert.deepEqual(localReads,[]);
+  await select('optScopeLoad').onclick();select('optPdfFolder').onchange();await wait();assert.deepEqual(localReads,['MIX.pdf']);await select('optImportProcess').onclick();
   assert.equal(sent.length,1);assert.equal(sent[0].source.origin,sourceOrigin);assert.equal(sent[0].source.opt,'MIX');assert.equal(atob(sent[0].pdf.base64),mixedBytes);assert.equal(atob(sent[0].index.base64),rawIndex);
   assert.match(select('optImportStatus').textContent,/3 OPT del índice omitidas/);assert.match(select('optImportStatus').textContent,/0 rechazados o bloqueados/);
   assert.equal(select('optImportResults').querySelectorAll('[data-file]').length,1);

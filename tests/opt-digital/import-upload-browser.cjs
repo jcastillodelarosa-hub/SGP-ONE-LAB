@@ -2,14 +2,16 @@
 // All remote traffic is intercepted. No real session, upload, SQL, or cut is performed.
 const assert=require('node:assert/strict'),fs=require('node:fs'),os=require('node:os'),path=require('node:path'),crypto=require('node:crypto');
 const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
+const baseURL=process.env.OPT_TEST_URL||'http://127.0.0.1:8765';
 const scope={linea:'PANELES_2',anio:2026,semana:46,modo:'BASE'};
 const docId='01234567-89ab-4cde-8fab-0123456789ab';
 const pieces=[1,2].map(n=>({id_pieza:`${n}1234567-89ab-4cde-8fab-0123456789ab`,pagina:1,patron:1,barra:1,corte:n,longitud_mm:500}));
-const indexText='OPT,Reserva,Sistema\nA,R-SYNTH,PANEL\nB,R-SYNTH,PANEL\nMISSING,R-SYNTH,PANEL\n';
+const indexText='OPT,Reserva,Sistema\nA,R-SYNTH,PANEL\nB,R-SYNTH,PANEL\nMISSING,R-SYNTH,PANEL\nFOREIGN,F-SYNTH,FRAME\nWRONG,R-SYNTH,FRAME\n';
 (async()=>{
  const temporary=fs.mkdtempSync(path.join(os.tmpdir(),'opt-upload-browser-'));
  const folder=path.join(temporary,'retail');fs.mkdirSync(folder);
  const pdf=require('./synthetic-pdf.cjs')();fs.writeFileSync(path.join(folder,'A.pdf'),pdf);fs.writeFileSync(path.join(folder,'B.pdf'),Buffer.concat([pdf,Buffer.from('\n \n')]));
+ for(const name of ['FOREIGN.pdf','WRONG.pdf','A-near.pdf'])fs.writeFileSync(path.join(folder,name),'not a PDF; must never be read');
  const browser=await chromium.launch({...(process.env.OPT_CHROMIUM?{executablePath:process.env.OPT_CHROMIUM}:{}),headless:true,args:['--no-sandbox']});
  fs.mkdirSync('tests/opt-digital/evidence',{recursive:true});
  try{
@@ -22,7 +24,7 @@ const indexText='OPT,Reserva,Sistema\nA,R-SYNTH,PANEL\nB,R-SYNTH,PANEL\nMISSING,
     await context.addInitScript(value=>sessionStorage.setItem('sgp_one_session',value),token);
     await context.route('**/*',async route=>{
      const request=route.request(),url=new URL(request.url());
-     if(url.origin==='http://127.0.0.1:8765')return route.continue();
+     if(url.origin===baseURL)return route.continue();
      if(url.pathname==='/functions/v1/opt-matrix-read'){
       const body=request.postDataJSON();assert.equal(body.p_token,token);assert.equal(body.sistema,'PANEL');assert.equal(body.referencia,'REF-SYNTH');
       return route.fulfill({json:{contract:'OPT-MATRIX-1',ok:true,sistema:body.sistema,referencia:body.referencia,status:'unavailable',matrix:null}});
@@ -60,7 +62,7 @@ const indexText='OPT,Reserva,Sistema\nA,R-SYNTH,PANEL\nB,R-SYNTH,PANEL\nMISSING,
      unexpected.push(url.origin+url.pathname);return route.abort();
     });
     const page=await context.newPage();page.on('pageerror',error=>errors.push(error.message));
-    await page.goto('http://127.0.0.1:8765/');
+    await page.goto(baseURL+'/');
     const tab=page.locator('[data-mach-tab="opt-digital"]');await tab.waitFor({state:'visible'});await tab.click();
     const host=page.locator('#optDigitalHost');await host.locator('#optImportProcess').waitFor();
     await host.locator('#optScopeYear').fill('2026');await host.locator('#optScopeWeek').fill('46');await host.locator('#optScopeLine').selectOption('PANELES_2');await host.locator('#optScopeLoad').click();
@@ -72,6 +74,9 @@ const indexText='OPT,Reserva,Sistema\nA,R-SYNTH,PANEL\nB,R-SYNTH,PANEL\nMISSING,
    await host.locator('#optIndexOrigin').selectOption('RETAIL');await host.locator('#optIndexFile').setInputFiles({name:'index.csv',mimeType:'text/csv',buffer:Buffer.from(indexText)});
    await host.locator('#optPdfFolder').setInputFiles(folder);
    await page.waitForFunction(()=>!document.querySelector('#optDigitalHost').shadowRoot.querySelector('#optImportProcess').disabled);
+   await host.locator('summary').filter({hasText:'Resultado de selección por archivo'}).click();
+   assert.match(await host.locator('#optLoadPanel').textContent(),/Sin reserva\/sistema en la programación/);
+   assert.match(await host.locator('#optLoadPanel').textContent(),/Nombre exacto ausente del índice/);
    // Loading/selecting originals is not consent to transmit them.
    assert.equal(uploads.length,0);assert.match(await host.locator('#optImportPanel').textContent(),/se envían el PDF original y su índice a Supabase/);
    await host.locator('#optImportProcess').click();
