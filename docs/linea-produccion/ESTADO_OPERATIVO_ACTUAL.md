@@ -1,3 +1,12 @@
+## OPT documental · candidata v451 · 13/11/2026
+
+Rama `feat/opt-document-reader-v451`, base v450/PR #263. Solo lector documental
+separado y presentación OPT: no modifica LP, reservas, asignaciones ni registro.
+Pruebas sintéticas PC/móvil y SQL local; sin aplicación Supabase ni publicación.
+Bloqueo de contraste con boceto: imágenes Library inaccesibles por red HTTP 403.
+Próximo: revisión del contrato y entrega; cualquier aplicación requiere autorización.
+Detalles: [contrato OPT](../sql-proposals/opt-shared/DOCUMENT_READ_REVIEW.md).
+
 ## Export · selección múltiple · candidata LAB v430
 
 «Seleccionar todos» y «Deseleccionar todos» sobre las filas aprobables de la

@@ -8,6 +8,8 @@ on:
       - 'src/services/opt-shared-cuts.js'
       - 'src/services/opt-shared-catalog.js'
       - 'src/services/opt-document-summary.js'
+      - 'src/services/opt-document-plans.js'
+      - 'src/services/opt-document-references.js'
       - 'src/server/opt-*.js'
       - 'src/services/opt-import.js'
       - 'src/services/opt-matrix-library.js'
@@ -61,6 +63,7 @@ jobs:
           node tests/opt-digital/native-session-dom.cjs
           node tests/opt-digital/shared-workflow-dom.cjs
           node tests/opt-digital/shared-reference-navigation-dom.cjs
+          node tests/opt-digital/document-read-dom.cjs
           node tests/opt-digital/shared-scheme-dom.cjs
           node tests/opt-digital/shared-scheme-workflow-dom.cjs
           node tests/opt-digital/server-registration-dom.cjs
@@ -74,6 +77,7 @@ jobs:
           node tests/opt-digital/import-channel.mjs
           node tests/opt-digital/import-endpoint-sql.mjs
           node docs/sql-proposals/opt-shared/test-catalog.mjs
+          node docs/sql-proposals/opt-shared/test-document-read.mjs
           OPT_PGLITE_MODULE="$PGLITE_MODULE" node docs/sql-proposals/opt-shared/test-document-summary-pglite.mjs
           OPT_PGLITE_MODULE="$PGLITE_MODULE" node docs/sql-proposals/opt-shared/test-summary-backfill-pglite.mjs
           node tests/opt-digital/server-pdf-reader.mjs

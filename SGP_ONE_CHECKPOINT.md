@@ -1,3 +1,16 @@
+## OPT · consulta documental completa · candidata LAB v451 · 13/11/2026
+
+IMPLEMENTADO EN RAMA / NO FUSIONADO / SQL NO APLICADO / NO PUBLICADO.
+Base v450, PR #263; rama `feat/opt-document-reader-v451`. Nuevo contrato separado
+para todas las referencias del documento autorizado, sin ampliar permisos de
+registro. Matriz automática arriba a la derecha; esquema debajo con ancho completo;
+Resumen mantiene dos tablas. Pruebas locales Node, SQL aislado y PC/móvil sintéticas.
+Las imágenes originales de Library no pudieron descargarse (red HTTP 403); no se
+acredita comparación visual con el boceto ni verificación productiva.
+Detalle y pasos: `docs/sql-proposals/opt-shared/DOCUMENT_READ_REVIEW.md`.
+Siguiente: revisar draft/código y contrato SQL; aplicación/publicación requieren
+su autorización separada. No ejecutar importaciones ni alterar reservas/cortes.
+
 ## Publicación conjunta autorizada · Reportes y pestañas PDT · LAB v441 · 11/11/2026
 
 El propietario autorizó subir código, crear consulta Supabase y publicar ambos
