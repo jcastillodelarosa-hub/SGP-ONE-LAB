@@ -121,3 +121,16 @@
 #optShell #optLocalReviewToggle{color:var(--opt-ink);font-weight:650;min-height:44px;padding:8px 0;box-sizing:border-box}
 #optShell #optLocalReviewCount{display:inline-block;margin-left:12px;font-size:12px;font-weight:400;color:#526a87}
 #optShell #optProgrammingScope:not([open]){background:#fff}
+
+/* Project data mirrors the printed six-column source without truncation. */
+#optShell .opt-project-data-table{min-width:1050px}
+#optShell .opt-project-data-table :is(th,td):first-child{min-width:50px;width:50px}
+#optShell .opt-project-data-table :is(th,td):nth-child(2){min-width:170px}
+#optShell .opt-project-data-table :is(th,td):nth-child(3){min-width:160px;white-space:pre-wrap}
+#optShell .opt-project-data-table :is(th,td):nth-child(4){min-width:110px;white-space:nowrap}
+#optShell .opt-project-data-table :is(th,td):nth-child(5){min-width:420px;white-space:pre-wrap;overflow-wrap:anywhere}
+#optShell .opt-project-data-table :is(th,td):last-child{text-align:right;min-width:80px}
+#optShell .opt-project-data-controls{display:flex;flex-wrap:wrap;gap:12px;align-items:end;margin-top:16px}
+#optShell .opt-project-data-controls label{display:flex;flex-direction:column;gap:6px;min-width:180px;flex:1}
+#optShell .opt-project-data-controls :is(input,select,button){min-height:44px;box-sizing:border-box;max-width:100%}
+@media(max-width:600px){#optShell .opt-project-data-controls label{min-width:100%}}

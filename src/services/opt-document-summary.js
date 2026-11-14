@@ -21,7 +21,7 @@ export function createOptDocumentSummary(client,getToken,{catalog,timeoutMs=2500
    if(d.summary&&d.status!==(d.summary.cutRows?.length&&d.summary.materialRows?.length?'AVAILABLE':'PARTIAL'))invalid();
    if(d.status!=='NOT_PERSISTED'?!validOptDocumentSummary(d.summary):d.summary!==null)invalid();
    return {id_documento:d.id_documento,sha256:d.sha256,opt:d.opt,scope:'DOCUMENTO',status:d.status,
-    cutRows:d.summary?.cutRows||[],materialRows:d.summary?.materialRows||[],notices:[d.status!=='NOT_PERSISTED'?'Totales impresos del documento completo; no son totales exclusivos de esta reserva.':'Este documento no tiene resumen persistido. No se han inferido valores de las piezas.']};
+    projectData:d.summary?.projectData||null,cutRows:d.summary?.cutRows||[],materialRows:d.summary?.materialRows||[],notices:[d.status!=='NOT_PERSISTED'?'Totales impresos del documento completo; no son totales exclusivos de esta reserva.':'Este documento no tiene resumen persistido. No se han inferido valores de las piezas.']};
   });
   if(seen.size!==expected.size)invalid();
   return {documents};
