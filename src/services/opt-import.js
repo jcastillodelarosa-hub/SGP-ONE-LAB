@@ -1,3 +1,4 @@
+import {sameOptImportIdentity} from './opt-import-observation.js';
 // Only original bytes cross this boundary. Client extraction and associations are not authority.
 const object=value=>value&&typeof value==='object'&&!Array.isArray(value);
 const exact=(value,fields)=>object(value)&&Object.keys(value).sort().join()===fields.split(',').sort().join();
@@ -36,7 +37,7 @@ function validateReceipt(value,prepared){
  if(!exact(value.totals,'documentaryBars,documentaryCuts,cutLength32')||!Object.values(value.totals).every(n=>Number.isSafeInteger(n)&&n>0)||value.totals.documentaryCuts!==receipt.cantidad_piezas||!exact(value.scopeTotals,'assigned,outsideScope')||!Object.values(value.scopeTotals).every(n=>Number.isSafeInteger(n)&&n>=0)||value.scopeTotals.assigned+value.scopeTotals.outsideScope!==receipt.cantidad_piezas||value.scopeTotals.outsideScope!==receipt.sin_asignacion)fail();
  return structuredClone(value);
 }
-export function createOptImport(client,getToken,{getContext,storage,storageScope,timeoutMs=120000}={}){
+export function createOptImport(client,getToken,{getContext,storage,storageScope,timeoutMs=120000,observationApi=null}={}){
  if(!Number.isSafeInteger(timeoutMs)||timeoutMs<=0)throw Error('OPT_ESPERA_INVALIDA');
  let epoch=0,busy=false;const prefix='sgp-opt-import-v1:'+storageScope+':';
  const current=scope=>{try{return !getContext||scopeKey(getContext())===scopeKey(scope);}catch{return false;}};
@@ -91,5 +92,26 @@ export function createOptImport(client,getToken,{getContext,storage,storageScope
   try{for(let n=0;n<storage.length;n++){const name=storage.key(n);if(!name?.startsWith(prefix))continue;const saved=JSON.parse(storage.getItem(name));if(saved?.version===1&&saved.state==='pending')items.push(structuredClone(saved.identity));}}catch{return null;}
   return items;
  }
- return {process,invalidate,pending};
+ async function reconcilePending(identity){
+  if(busy)throw fault('OPT_IMPORTACION_EN_CURSO',{definitive:true});
+  if(!observationApi||!storage||!storageScope)throw fault('OPT_OBSERVACION_NO_DISPONIBLE');
+  const token=getToken(),operation=epoch;if(!token||!current(identity?.scope))throw fault('OPT_SESION_REQUERIDA');
+  busy=true;
+  try{
+   const requestHash=await hash(new TextEncoder().encode(JSON.stringify(identity))),key=prefix+requestHash,raw=storage.getItem(key),saved=JSON.parse(raw||'null');
+   if(saved?.version!==1||saved.state!=='pending'||saved.requestHash!==requestHash||JSON.stringify(saved.identity)!==JSON.stringify(identity))throw fault('OPT_DIARIO_IDENTIDAD_NO_COINCIDE');
+   const observation=await observationApi.observe(structuredClone(saved.identity));
+   if(operation!==epoch||getToken()!==token||!current(identity.scope))throw fault('OPT_OBSERVACION_OBSOLETA');
+   if(storage.getItem(key)!==raw)throw fault('OPT_DIARIO_CAMBIO');
+   if(observation?.contract!=='OPT-IMPORT-OBSERVATION-1'||!sameOptImportIdentity(observation.identity,saved.identity)||observation.retryAuthorized!==false||observation.pdfArchived!==false||!['COMMITTED_MATCH','NOT_OBSERVED','EVIDENCE_MISMATCH'].includes(observation.status))throw fault('OPT_OBSERVACION_CONTRATO_INVALIDO');
+   // Only a positive exact observation settles this entry. Absence does not
+   // prove that an old request cannot still commit and never permits a resend.
+   if(observation.status==='COMMITTED_MATCH'){
+    const next={...saved,state:'confirmed',reconciliation:{previousState:saved.state,checkedAt:new Date().toISOString(),observation}};
+    storage.setItem(key,JSON.stringify(next));if(storage.getItem(key)!==JSON.stringify(next))throw fault('OPT_DIARIO_NO_DISPONIBLE');
+   }
+   return structuredClone(observation);
+  }finally{busy=false;}
+ }
+ return {process,invalidate,pending,reconcilePending};
 }
