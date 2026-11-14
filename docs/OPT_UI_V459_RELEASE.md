@@ -32,3 +32,7 @@ Lectura actual: 0 fuentes Retail, 0 consecutivos terminados 213/215; no importac
 QA previa de UI 2f3ebf0 reutilizada: 9 Node, 10 suites DOM, SQL sintético y Chromium PC/móvil con tráfico solo localhost. Cambio posterior solo versión/documentación; verify:release v459 y diff pasan. CI/merge/Hosting deben quedar registrados en entrega, no se afirman por este documento previo al push.
 
 Rollback frontend: restaurar artefacto anterior verificado v457 mediante flujo autorizado. Contención RPC: revocar EXECUTE anon/authenticated o retirar solo función después de revisar dependencias; nunca borrar pendientes, piezas, asignaciones, cortes o metadata. No cambios Edge v6/Retail ni medidas. La migración no añade permisos de tabla ni roles de aplicación.
+
+## Corrección dirigida CI
+
+El primer CI de PR271 detectó harness nativo obsoleto: mock interceptaba opt-import aunque Retail usa opt-retail-import-v3 desde v457, y esperaba contador combinado anterior. Se corrigieron solo esas dos expectativas. Recorrido import-upload local PC/móvil PASS: dos envíos sintéticos secuenciales, rechazo definitivo separado, bloqueo local, duplicado, logout y segundo usuario sin PDF; cero escrituras reales.
