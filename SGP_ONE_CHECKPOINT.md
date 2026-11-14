@@ -1977,3 +1977,5 @@ Focused lock follow-up: unchanged broad guard, no safe Retail-only per-reservati
 
 
 Retail bounded preparation: 1s statement_timeout (PostgREST hoisted) and250ms lock_timeout on new v3 RPC only; SHARE NOWAIT preserved. Real local PostgREST12.2.12+PG17.11 timeout after manifest persistence rolls back all rows and releases locks; normal HTTP200 and lock timeout tested; settings unchanged in other session. Explicit SQL57014/55P03 definitive; transport/prior uncertainty preserved, no auto retry/fallback. Selective route implemented, legacy default; v6 unchanged. Current release plan RETAIL_BOUNDED_RELEASE.md. Hosted hoisting verification, final version/artifact, cleanup capability and deployment approval remain. Resumen pending separate coordination, untouched.
+
+Retail candidate stamped v455, not published (coordinate independent labels v455 before merge). Summary UI not started: mandatory Library pixel access failed on initial transfer and one bounded retry. Source gap documented in SUMMARY_UI_PENDING.md; no summary/backend changes.
