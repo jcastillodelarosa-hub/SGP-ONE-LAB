@@ -1527,3 +1527,7 @@ Preparado sobre ab102489, v456 provisional: filtro sobre referencia completa, or
 
 ## 2026-11-14 — integración LOCAL v456, no publicada
 Retail2b35890 + SQL a0e4691 + UI10a6394 + etiquetasad8addc reunidos en review/opt-v456-integration, ramas fuente intactas. Versión456 provisional; código conservado, pruebas focalizadas y release PASS. Contención de Project data probada, sin escrituras alojadas. Library siguev1 por fallo tools/list previo a transferencia. Plan vigente: docs/opt-import-endpoint/release-review/V456_INTEGRATION_PREPARATION.md.
+
+
+## 2026-11-14 — ejecución parcial autorizada v456
+APLICADO EN SUPABASE: almacén privado Project data y lector documental aprobado; fingerprint/ACL/RLS/sesión nula verificados, hashes de tablas operativas intactos. Recuperación metadata=0. Retail v6 sin cambios; v3 y UI sin publicar. Bloqueos: timeout efectivo PostgREST y transferencia hash-exacta de los nueve originales registrados. Estado detallado en V456_INTEGRATION_PREPARATION.md; no confundir preparación con publicación.
