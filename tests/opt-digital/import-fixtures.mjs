@@ -22,8 +22,8 @@ export function pages(){
  const rules=[{x1:10,y1:570,x2:800,y2:570},{x1:10,y1:550,x2:800,y2:550},{x1:350,y1:550,x2:350,y2:570},{x1:700,y1:550,x2:700,y2:570}];
  return source.map((items,index)=>({page:index+1,width:842,height:595,rotation:0,items,rules:index===0?rules:[]}));
 }
-export function fullPdf(){
- const source=pages(),objects=['<< /Type /Catalog /Pages 2 0 R >>','<< /Type /Pages /Kids [4 0 R 6 0 R 8 0 R] /Count 3 >>','<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>'];
+export function fullPdf(source=pages()){
+ const objects=['<< /Type /Catalog /Pages 2 0 R >>',`<< /Type /Pages /Kids [${source.map((_,i)=>`${4+i*2} 0 R`).join(' ')}] /Count ${source.length} >>`,'<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>'];
  for(let i=0;i<source.length;i++){
   const p=source[i],content=p.items.map(t=>`BT /F1 2 Tf 1 0 0 1 ${t.transform[4]} ${t.transform[5]} Tm (${t.str.replace(/[\\()]/g,'\\$&')}) Tj ET`).join('\n')+'\n'+p.rules.map(r=>`${r.x1} ${r.y1} m ${r.x2} ${r.y2} l S`).join('\n')+'\n';
   objects.push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 842 595] /Resources << /Font << /F1 3 0 R >> >> /Contents ${5+i*2} 0 R >>`);

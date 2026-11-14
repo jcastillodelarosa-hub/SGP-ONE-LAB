@@ -66,11 +66,13 @@ export function validateOptImportManifest({document, extraction}, server) {
     fail('SERVER_EVIDENCE_INVALID'); return result();
   }
   const indexedProject = server.bindingMode === 'OPT_INDEX_RESERVATION';
-  if ((server.bindingMode != null && !['DOCUMENT_PRODUCTION','OPT_INDEX_RESERVATION'].includes(server.bindingMode)) ||
-      (indexedProject && (document.origin !== 'PROYECTO' || document.mode !== 'INDICE'))) {
+  const indexedRetail = server.bindingMode === 'OPT_RETAIL_EXACT_3';
+  if ((server.bindingMode != null && !['DOCUMENT_PRODUCTION','OPT_INDEX_RESERVATION','OPT_RETAIL_EXACT_3'].includes(server.bindingMode)) ||
+      (indexedProject && (document.origin !== 'PROYECTO' || document.mode !== 'INDICE')) ||
+      (indexedRetail && (document.origin !== 'RETAIL' || document.mode !== 'INDICE'))) {
     fail('SERVER_BINDING_MODE_INVALID'); return result();
   }
-  if (indexedProject && (!Array.isArray(server.profileDestinations) || !server.profileDestinations.every(record))) {
+  if ((indexedProject || indexedRetail) && (!Array.isArray(server.profileDestinations) || !server.profileDestinations.every(record))) {
     fail('PROFILE_DESTINATIONS_INVALID'); return result();
   }
   const plans = extraction?.plans, rows = extraction?.sourceProjectRows,
@@ -177,7 +179,7 @@ export function validateOptImportManifest({document, extraction}, server) {
     const structureInvalid=summaryKeys.has(id) || !profileKeys.has(id) || !positive(balance.page) || balance.page > extraction.pdfPages ||
       [balance.stock32,balance.cut32,balance.reused32,balance.waste32].some(value => !Number.isSafeInteger(value) || value < 0);
     const exactTotals=balance.summaryBalanceDelta32===0&&balance.patternStockDelta32===0&&balance.patternCutsDelta32===0;
-    if(indexedProject){
+    if(indexedProject || indexedRetail){
       const ownPlans=plans.filter(plan=>plan.ref===balance.ref&&plan.finish===balance.finish);
       const diagnostic=profileRoundingCompatibility({
         stockTerms:ownPlans.map(plan=>({length:plan.length,quantity:plan.barqty})),
@@ -190,7 +192,12 @@ export function validateOptImportManifest({document, extraction}, server) {
       if(structureInvalid||!['PRINTED_EQUALITY','ROUNDING_COMPATIBLE'].includes(diagnostic.status))
         fail('FINAL_PROFILE_TOTALS_MISMATCH',{profile:balance.ref,finish:balance.finish,roundingStatus:diagnostic.status,reasons:diagnostic.reasons});
     }else if(structureInvalid||!exactTotals)
-      fail('FINAL_PROFILE_TOTALS_MISMATCH', {profile:balance.ref, finish:balance.finish});
+      fail('FINAL_PROFILE_TOTALS_MISMATCH', {profile:balance.ref, finish:balance.finish, page:balance.page,
+        comparison:{unit:'1/32 inch',
+          printed:{stock:balance.stockLength,cuts:balance.cutLength,reused:balance.reusedLength,waste:balance.wasteLength},
+          printed32:{stock:balance.stock32,cuts:balance.cut32,reused:balance.reused32,waste:balance.waste32},
+          delta32:{stock:balance.patternStockDelta32,cuts:balance.patternCutsDelta32,conservation:balance.summaryBalanceDelta32},
+          acceptance:'BLOCKED_EXACT_TOTALS_REQUIRED',roundingCauseVerified:false}});
     summaryKeys.add(id);
   }
   if (summaryKeys.size !== profileKeys.size || [...profileKeys].some(id => !summaryKeys.has(id))) fail('FINAL_PROFILE_SUMMARY_MISSING');
@@ -211,7 +218,7 @@ export function validateOptImportManifest({document, extraction}, server) {
   for (const row of rows) {
     const production = documentProduction(row.reference);
     let profileLine=null;
-    if(indexedProject){
+    if(indexedProject || indexedRetail){
       const matches=server.profileDestinations.filter(profile=>profile.referencia===row.ref);
       if(!matches.length){fail('PROFILE_DESTINATION_MISSING',{profile:row.ref});continue;}
       if(matches.some(profile=>profile.activa!=='SI' ||
@@ -227,14 +234,15 @@ export function validateOptImportManifest({document, extraction}, server) {
     }
     const applicable = indexes.filter(index => (index.sourceRowId == null || index.sourceRowId === row.sourceId) &&
       (index.documentProduction == null || index.documentProduction === production) &&
+      (!indexedRetail || (index.documentProduction === production && index.finish === row.finish)) &&
       (index.reference == null || norm(index.reference) === norm(row.reference)));
     // Never assign a mixed-reservation PDF by row order, approximate names, or
     // whichever binding happens to remain eligible. Each source row needs one
     // exact documentary reservation/system selector before looking at SGP.
-    if (indexedProject && new Set(applicable.map(index => key(index.reservation,index.system))).size > 1) {
+    if ((indexedProject || indexedRetail) && new Set(applicable.map(index => key(index.reservation,index.system))).size > 1) {
       fail('INDEX_RESERVATION_AMBIGUOUS', {sourceRowId:row.sourceId}); continue;
     }
-    const candidates = server.bindings.filter(binding => (indexedProject ? binding.id_linea===profileLine : binding.documentProduction === production) && applicable.some(index =>
+    const candidates = server.bindings.filter(binding => (indexedProject ? binding.id_linea===profileLine : binding.documentProduction === production) && (!indexedRetail || binding.id_linea===profileLine) && applicable.some(index =>
       index.reservation === binding.reserva && index.system === binding.sistema &&
       (index.key_produccion == null || index.key_produccion === binding.key_produccion) &&
       (index.id_programacion == null || index.id_programacion === binding.id_programacion)));
@@ -325,7 +333,7 @@ export function validateOptImportManifest({document, extraction}, server) {
   return result({pdfSha256:document.sha256, source:{source_key:document.sourceKey, origen:document.origin, consecutivo:document.opt, modo_carga:document.mode},
     serverRevision:server.revision, scope:{...server.scope}, units, pieces,
     sourceGroups:structuredClone(coverage.sourceGroups),
-    ...(indexedProject?{
+    ...((indexedProject || indexedRetail)?{
       roundingPolicy:{version:'OPT-PRINTED-ROUNDING-1',model:'INDEPENDENT_NEAREST_1_32_CLOSED_ENVELOPE',originalPrecisionVerified:false,originalsPreserved:true},
       roundingEvidence:roundingProfiles,
       validationWarnings:roundingProfiles.some(profile=>profile.diagnostic.status==='ROUNDING_COMPATIBLE')?

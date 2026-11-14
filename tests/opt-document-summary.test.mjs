@@ -13,3 +13,15 @@ test('rejects omission, duplication, hash substitution, invented totals and scop
 test('invalidated pending response cannot populate UI',async()=>{let done;const api=service(()=>new Promise(resolve=>done=resolve));const pending=api.load(group);api.invalidate();done(response());await assert.rejects(pending,/OBSOLETO/);});
 test('missing documentary table is explicitly partial, never rejected or invented',async()=>{const r=structuredClone(response());r.data.documents[0].summary.materialRows=[];r.data.documents[0].status='PARTIAL';assert.ok(validOptDocumentSummary(r.data.documents[0].summary));assert.equal((await service(async()=>r).load(group)).documents[0].status,'PARTIAL');r.data.documents[0].status='AVAILABLE';await assert.rejects(service(async()=>r).load(group),/CONTRATO/);});
 test('printed counts and percentage require page/text provenance, zero is preserved',()=>{const e={sourceProfileSummaries:[{ref:'SYNTHETIC',finish:'TEST',page:2,cutLength:'8"',stockLength:'10"',reusedLength:'2"',wasteLength:'0"',bars:1,pieces:2,plans:1,scrapPercentagePrinted:'0%',countsPage:2,countsSourceText:'Waste 0% Items 2 Bars 1 Plans 1'}],sourceMaterialRows:[]};const s=buildOptDocumentSummary(e);assert.ok(validOptDocumentSummary(s));assert.equal(s.cutRows[0].scrapPercentagePrinted,'0%');s.cutRows[0].countsPage=null;assert.equal(validOptDocumentSummary(s),false);});
+test('optional Project data reaches service intact without changing existing summaries',async()=>{
+ const {buildOptProjectData}=await import('../src/domain/opt-project-data.js');
+ const projectData=buildOptProjectData([{sourceId:'project-p1-item1',page:1,ref:'TEST',finish:'A/ B',length:'10 1/4"',reference:'ORDER FINAL LOCATION',quantity:2}]);
+ const r=structuredClone(response());r.data.documents[0].summary.projectData=projectData;
+ const d=(await service(async()=>r).load(group)).documents[0];assert.deepEqual(d.projectData,projectData);assert.deepEqual(d.cutRows,summary.cutRows);
+ r.data.documents[0].summary.projectData.totalQuantity=99;await assert.rejects(service(async()=>r).load(group),/CONTRATO/);
+ assert.equal((await service(async()=>response()).load(group)).documents[0].projectData,null);
+});
+test('session change rejects pending Project data response',async()=>{
+ let token='a',done;const api=createOptDocumentSummary({rpc:()=>new Promise(r=>done=r)},()=>token,{catalog:{ownsGroup:g=>g===group}});
+ const pending=api.load(group);token='b';done(response());await assert.rejects(pending,/OBSOLETO/);
+});

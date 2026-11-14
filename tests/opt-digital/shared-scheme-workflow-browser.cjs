@@ -62,8 +62,10 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
  assert(rightScroll>0);assert(navScroll>0);
  await toggle.click();assert.equal(await nav.isVisible(),false);assert.equal(await rows.evaluate(el=>el.scrollTop),rightScroll);
  if(width>760)assert((await rows.boundingBox()).width>expandedWidth+150);
- await toggle.click();assert.equal(await nav.evaluate(el=>el.scrollTop),navScroll);assert.equal((await nav.boundingBox()).y,navY);assert.equal((await toggle.boundingBox()).y,toggleY);
- await rows.evaluate(el=>el.scrollTop=320);assert.equal((await nav.boundingBox()).y,navY);assert.equal(await nav.evaluate(el=>el.scrollTop),navScroll);
+ await toggle.click();assert.equal(await nav.evaluate(el=>el.scrollTop),navScroll);// Playwright may scroll the page to reach the toggle. Compare their relative position.
+ assert.equal((await nav.boundingBox()).y-(await toggle.boundingBox()).y,navY-toggleY);
+ const reopenedNavY=(await nav.boundingBox()).y;
+ await rows.evaluate(el=>el.scrollTop=320);assert.equal((await nav.boundingBox()).y,reopenedNavY);assert.equal(await nav.evaluate(el=>el.scrollTop),navScroll);
  await page.keyboard.press('Escape');assert.equal(await nav.isVisible(),false);assert.equal(await toggle.getAttribute('aria-expanded'),'false');
  await rows.evaluate(el=>{el.querySelector('[data-scroll-fixture]').remove();el.scrollTop=0;});
  await choose(4);await host.locator('.opt-shared-profile-header').filter({hasText:'Hay varias matrices posibles'}).waitFor();

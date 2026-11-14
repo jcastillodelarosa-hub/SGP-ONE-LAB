@@ -1,3 +1,4 @@
+import {retailSelectors,validateRetailContext} from './opt-retail-contract.js';
 import {buildOptDocumentSummary} from '../domain/opt-document-summary.js';
 import {parseIndex,parseIndexWorkbook} from '../domain/opt-index-file.js';
 import {indexedDocumentIdentity} from '../domain/opt-document-identity.js';
@@ -52,7 +53,7 @@ function receiptValid(receipt,manifest){return record(receipt)&&receipt.ok===tru
 
 /** Only server bootstrap supplies dependencies. Neither extraction nor SGP facts
  * are ever accepted from the caller. SQL remains the final authorization gate. */
-export function createOptImportHandler({rpc,readPdf,DOMParser,allowedOrigins}){
+export function createOptImportHandler({rpc,readPdf,DOMParser,readWorksheetXML,allowedOrigins,retailV3=false,retailOnly=false,serializeRetailPlans=undefined}){
  if(typeof rpc!=='function'||typeof readPdf!=='function'||!Array.isArray(allowedOrigins)||!allowedOrigins.length)throw Error('OPT_SERVER_DEPENDENCIES_REQUIRED');
  const origins=new Set(allowedOrigins);let busy=false;
  return async request=>{
@@ -68,6 +69,8 @@ export function createOptImportHandler({rpc,readPdf,DOMParser,allowedOrigins}){
   try{
    if(!/^application\/json(?:;|$)/i.test(request.headers.get('content-type')||''))fail('OPT_JSON_REQUIRED','Se requiere JSON',415);
    const body=await bodyJSON(request);checkRequest(body);
+   if(retailOnly&&(body.source.origin!=='RETAIL'||body.source.mode!=='INDICE'))fail('OPT_RETAIL_ONLY');
+   const retailIndex=retailV3===true&&body.source.origin==='RETAIL'&&body.source.mode==='INDICE';
    const auth=await rpc('sgp_sesion_actual',{p_token:body.p_token});
    if(auth.error)return reject(503,'SGP_SESSION_UNAVAILABLE','No se pudo comprobar la sesión SGP');
    if(auth.data?.valida!==true)return reject(401,'SGP_SESSION_INVALID','Sesión SGP inválida');
@@ -79,8 +82,8 @@ export function createOptImportHandler({rpc,readPdf,DOMParser,allowedOrigins}){
    let indexEntries=[],indexHash=null,indexSheet=null;
    if(body.index){
     const raw=decodeFile(body.index,'INDEX');indexHash=await sha256(raw);
-    if(body.index.format==='xlsx'){const parsed=await parseIndexWorkbook(raw,body.source.origin,{sheetName:body.index.sheet,DOMParser});indexEntries=parsed.entries;indexSheet=parsed.sheet;}
-    else indexEntries=parseIndex(utf8.decode(raw),body.index.format,body.source.origin);
+    if(body.index.format==='xlsx'){const parsed=await parseIndexWorkbook(raw,body.source.origin,{sheetName:body.index.sheet,DOMParser,readWorksheetXML,exactReservations:retailIndex});indexEntries=parsed.entries;indexSheet=parsed.sheet;}
+    else indexEntries=parseIndex(utf8.decode(raw),body.index.format,body.source.origin,{exactReservations:retailIndex});
    }
    const extraction=await readPdf(bytes);
    const rows=extraction?.sourceProjectRows;
@@ -100,42 +103,47 @@ export function createOptImportHandler({rpc,readPdf,DOMParser,allowedOrigins}){
    if(projectIndex&&(!references.length||references.length>1000||references.some(ref=>!text(ref))))fail('OPT_PROFILE_REFERENCES_INVALID');
    const productions=[...new Set(rows.map(row=>documentProduction(row.reference)))];
    if(!projectIndex&&(productions.some(id=>typeof id!=='string'||!/^\d{1,30}$/.test(id))||productions.length>1000))fail('OPT_DOCUMENT_PRODUCTION_UNRESOLVED','Referencias documentales sin una producción única');
-   const contextResult=projectIndex?await rpc('sgp_opt_import_contexto_proyecto_v2',{p_token:body.p_token,p_scope:body.scope,p_opt:opt,p_selectores:selectors,p_referencias:references}):await rpc('sgp_opt_import_contexto_v1',{p_token:body.p_token,p_scope:body.scope,p_producciones:productions});
+   const retailSelection=retailIndex?retailSelectors(selectedIndex,rows):null;
+   const contextResult=retailIndex?await rpc('sgp_opt_import_contexto_retail_v3',{p_token:body.p_token,p_scope:body.scope,p_opt:opt,p_selectores:retailSelection,p_referencias:references}):projectIndex?await rpc('sgp_opt_import_contexto_proyecto_v2',{p_token:body.p_token,p_scope:body.scope,p_opt:opt,p_selectores:selectors,p_referencias:references}):await rpc('sgp_opt_import_contexto_v1',{p_token:body.p_token,p_scope:body.scope,p_producciones:productions});
    if(contextResult.error){const error=sqlError(contextResult.error);return reject(error.status,error.code,error.error);}
    const context=contextResult.data;
-   if(context?.contract!==(projectIndex?'OPT-IMPORT-CONTEXT-PROYECTO-2':'OPT-IMPORT-CONTEXT-1')||(projectIndex&&(context.opt!==opt||!Array.isArray(context.profileDestinations)||!context.profileDestinations.every(record)||!Array.isArray(context.referencias)||JSON.stringify([...context.referencias].sort())!==JSON.stringify(references)||!Array.isArray(context.selectores)||!context.selectores.every(row=>exactKeys(row,['reserva','sistema'])&&text(row.reserva)&&text(row.sistema))||JSON.stringify(context.selectores.map(row=>[row.reserva,row.sistema]).sort())!==JSON.stringify(selectors.map(row=>[row.reserva,row.sistema]).sort())))||!text(context.revision,128)||!scopeEqual(context.scope,body.scope)||!Array.isArray(context.bindings)||context.bindings.length>20000||!context.bindings.every(record))fail('OPT_CONTEXT_INVALID','Respuesta de contexto SGP incompatible',503);
+   if(retailIndex)validateRetailContext(context,{scope:body.scope,opt,selectors:retailSelection,references});
+   if(!retailIndex&&(context?.contract!==(projectIndex?'OPT-IMPORT-CONTEXT-PROYECTO-2':'OPT-IMPORT-CONTEXT-1')||(projectIndex&&(context.opt!==opt||!Array.isArray(context.profileDestinations)||!context.profileDestinations.every(record)||!Array.isArray(context.referencias)||JSON.stringify([...context.referencias].sort())!==JSON.stringify(references)||!Array.isArray(context.selectores)||!context.selectores.every(row=>exactKeys(row,['reserva','sistema'])&&text(row.reserva)&&text(row.sistema))||JSON.stringify(context.selectores.map(row=>[row.reserva,row.sistema]).sort())!==JSON.stringify(selectors.map(row=>[row.reserva,row.sistema]).sort())))||!text(context.revision,128)||!scopeEqual(context.scope,body.scope)||!Array.isArray(context.bindings)||context.bindings.length>20000||!context.bindings.every(record)))fail('OPT_CONTEXT_INVALID','Respuesta de contexto SGP incompatible',503);
    if(rows.length*context.bindings.length>2000000)fail('OPT_CONTEXT_COMPLEXITY_LIMIT','El cruce documental excede el límite de procesamiento');
    let indexRows;
    const common={pdfSha256:hash,sourceKey:document.sourceKey,origin:document.origin,opt};
    if(document.mode==='INDICE'){
-    indexRows=indexEntries.filter(row=>row.opt===opt).map(row=>({...common,rowId:`index-${row.sourceRow}`,reservation:row.reservation,system:row.system}));
+    indexRows=indexEntries.filter(row=>row.opt===opt).map(row=>({...common,rowId:`index-${row.sourceRow}`,reservation:row.reservation,system:row.system,...(retailIndex?{documentProduction:documentProduction(row.project),finish:row.finish}:{} )}));
    }else{
     // Documentary production IDs join to ALL real SGP destinations. Preserve
     // competing reservations/programs for the validator instead of choosing one.
     indexRows=rows.flatMap(row=>context.bindings.filter(binding=>binding.documentProduction===documentProduction(row.reference)).map((binding,i)=>({...common,rowId:`individual-${row.sourceId}-${i}`,sourceRowId:row.sourceId,reference:row.reference,documentProduction:binding.documentProduction,reservation:binding.reserva,system:binding.sistema})));
    }
    if(rows.length*indexRows.length>2000000)fail('OPT_INDEX_COMPLEXITY_LIMIT','El índice seleccionado excede el límite de procesamiento');
-   const server={...(projectIndex?{bindingMode:'OPT_INDEX_RESERVATION',profileDestinations:context.profileDestinations}:{}),schema:'sgp.opt.server-evidence.v1',revision:context.revision,scope:body.scope,pdfSha256:hash,bindings:context.bindings,indexRows};
+   const server={...(retailIndex?{bindingMode:'OPT_RETAIL_EXACT_3',profileDestinations:context.profileDestinations}:{}),...(projectIndex?{bindingMode:'OPT_INDEX_RESERVATION',profileDestinations:context.profileDestinations}:{}),schema:'sgp.opt.server-evidence.v1',revision:context.revision,scope:body.scope,pdfSha256:hash,bindings:context.bindings,indexRows};
    const result=validateOptImportManifest({document,extraction},server);
    if(!result.importable)return reject(422,'OPT_DOCUMENT_BLOCKED','El documento no supera la conciliación completa',{blockers:result.blockers.slice(0,100).map(blocker=>({...blocker,...(Array.isArray(blocker.candidates)?{candidates:blocker.candidates.slice(0,20),candidate_count:blocker.candidates.length}:{}),...(Array.isArray(blocker.issues)?{issues:blocker.issues.slice(0,100),issue_count:blocker.issues.length}:{})})),blocker_count:result.blockers.length});
    const manifest=result.manifest;
-   const evidence={contract:projectIndex?'OPT-SERVER-VALIDATION-PROYECTO-2':'OPT-SERVER-VALIDATION-1',algorithm:projectIndex?'opt-import-manifest-project-v2':'opt-import-manifest-v1',pdf_sha256:hash,validation:'DOCUMENTARY_MANIFEST_READY',physical_completion_verified:false,
-    sgp_binding:{contract:context.contract,scope:body.scope,revision:context.revision,...(projectIndex?{opt,selectores:selectors,referencias:references}:{producciones:productions})},
+   const geometry=retailIndex&&serializeRetailPlans?serializeRetailPlans(extraction,manifest):{};
+   const evidence={...geometry,contract:retailIndex?'OPT-SERVER-VALIDATION-RETAIL-3':projectIndex?'OPT-SERVER-VALIDATION-PROYECTO-2':'OPT-SERVER-VALIDATION-1',algorithm:retailIndex?'opt-import-manifest-retail-v3':projectIndex?'opt-import-manifest-project-v2':'opt-import-manifest-v1',pdf_sha256:hash,validation:'DOCUMENTARY_MANIFEST_READY',physical_completion_verified:false,
+    sgp_binding:{contract:context.contract,scope:body.scope,revision:context.revision,...(retailIndex?{opt,selectores:retailSelection,referencias:references}:projectIndex?{opt,selectores:selectors,referencias:references}:{producciones:productions})},
     original_document_title:identity.title,
     documentary_summary:buildOptDocumentSummary(extraction),
-    ...(projectIndex?{documentary_source_groups:manifest.sourceGroups||[],rounding_policy:manifest.roundingPolicy,rounding_evidence:manifest.roundingEvidence,validation_warnings:manifest.validationWarnings}:{}),
+    ...((projectIndex || retailIndex)?{documentary_source_groups:manifest.sourceGroups||[],rounding_policy:manifest.roundingPolicy,rounding_evidence:manifest.roundingEvidence,validation_warnings:manifest.validationWarnings}:{}),
     original_index:body.index?{sha256:indexHash,name:body.index.name,format:body.index.format,sheet:indexSheet}:null};
    // PostgreSQL bytea hex notation is used only inside the private server call.
    // It is never put in a browser config or returned to the client.
    const args={p_token:body.p_token,p_pdf:'\\x'+hex(bytes),p_manifest:manifest.pieces,p_sources:[manifest.source],p_evidence:evidence};
    writeAttempted=true;
-   const imported=await rpc(projectIndex?'sgp_opt_importar_proyecto_validado_v2':'sgp_opt_importar_validado_v1',args);
+   const imported=await rpc(retailIndex?'sgp_opt_importar_retail_validado_v3':projectIndex?'sgp_opt_importar_proyecto_validado_v2':'sgp_opt_importar_validado_v1',args);
    if(imported.error){
+    // Only a returned PostgreSQL cancellation/lock error proves this transaction failed.
+    if(retailIndex&&['57014','55P03'].includes(imported.error.code))return reject(409,'OPT_RETAIL_TIEMPO_AGOTADO','La operación Retail superó el tiempo permitido y fue cancelada. No se guardaron cambios en este intento.');
     if(imported.error.code==='P0001'){const error=sqlError(imported.error);return reject(error.status,error.code,error.error);}
     return reject(503,'OPT_IMPORT_OUTCOME_UNKNOWN','No se pudo confirmar el resultado. Reintenta el mismo PDF y el mismo índice.',{definitive:false});
    }
    if(!receiptValid(imported.data,manifest))return reject(503,'OPT_IMPORT_OUTCOME_UNKNOWN','Respuesta de registro incompatible. Conserva y reintenta los mismos archivos.',{definitive:false});
-   return send(200,{ok:true,data:imported.data,document:{sha256:hash,source_key:document.sourceKey,origin:document.origin,opt,mode:document.mode},scope:body.scope,totals:manifest.totals,scopeTotals:manifest.scopeTotals,...(projectIndex?{roundingPolicy:manifest.roundingPolicy,roundingEvidence:manifest.roundingEvidence,validationWarnings:manifest.validationWarnings}:{}),physical_completion_verified:false});
+   return send(200,{ok:true,data:imported.data,document:{sha256:hash,source_key:document.sourceKey,origin:document.origin,opt,mode:document.mode},scope:body.scope,totals:manifest.totals,scopeTotals:manifest.scopeTotals,...((projectIndex || retailIndex)?{roundingPolicy:manifest.roundingPolicy,roundingEvidence:manifest.roundingEvidence,validationWarnings:manifest.validationWarnings}:{}),physical_completion_verified:false});
   }catch(error){
    if(writeAttempted)return reject(503,'OPT_IMPORT_OUTCOME_UNKNOWN','No se pudo confirmar el resultado. Reintenta los mismos archivos.',{definitive:false});
    return reject(error.status||422,error.code||'OPT_INPUT_INVALID',String(error.message||'No se pudo validar el documento').slice(0,500));

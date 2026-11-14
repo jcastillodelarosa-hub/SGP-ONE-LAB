@@ -1,3 +1,31 @@
+## 2026-11-13 — Retail blocked diagnostics, no tolerance change
+
+Prepared detailed strict-total errors with page, original operands and signed integer1/32 differences.286 OPT tests PASS; original215 remains422/four blockers/zero writes. Searches did not establish optimizer precision or source workbooks. No policy/measurements/permissions/deploy changes. Native same-job evidence or explicit uncertainty-policy decision remains necessary. Labels v455 remain independent ad8addc.
+
+## 2026-11-13 — Retail exact contract v3 prepared, disabled
+
+Isolated feat/opt-retail-contract-v3 on CPU febd571. Exact original label/reservation/system identity separates document number from internal ID; approved profile destination separates Panel/Frame, Frame assignments forbidden. Private SQL proposals, rollback, synthetic SQL persistence/denials/context changes and 283 OPT tests pass. Originals available locally and hashes verified: identities resolve, but strict printed-total reconciliation blocks both originals; rounding compatibility is diagnostic only. No writes/deployment/reimports. See docs/opt-import-endpoint/RETAIL_V3_REVIEW.md. Labels remain independent 275e6df. Next: explicit Retail rounding policy, successful-path CPU verification, then authorization for SQL and server routing.
+
+## 2026-11-13 — Original XLSX CPU equivalence confirmed, not deployed
+
+Parent independently applied CPU patch on exact v454 base and verified full parsed-result equality in six cold processes using original ARCHIVOS/RETAIL:7692 entries,3794 missing relations. Median CPU2714→1083ms, post-parse heap197.5→32.6MB. Private evidence /workspace/sgp-opt-cpu-original-evidence.json. Server candidate52e5a43 remains local; no production writes/reimports/deployment. Whole-request CPU and publication authorization remain outstanding; do not claim Edge budget guaranteed.
+
+## 2026-11-13 — CPU index candidate, not published
+
+Isolated fix/opt-index-cpu on published v454 ab102489. Selected worksheet uses server-only event parser with shared row checks and complete-document validation; ZIP/metadata/ACL/import writer unchanged. Synthetic equivalent7692 entries, lower local CPU/heap; Deno check/tests pass. New XML depth/row-node caps explicit. Original-file differential profile pending in parent executor. See docs/opt-import-endpoint/CPU_INDEX_REVIEW.md. No production imports, deploy or retry of uncertain uploads.
+
+## 2026-11-13 — Etiquetas listas como candidata independiente LAB v455
+
+Base main ab102489 verificada. Acabado/origen exactos, módulo añadido al artefacto positivo y versión/cache-bust coherentes. Release y42 archivos contra artefacto PASS; pruebas nativas PC/móvil sobre artefacto PASS. Sin SQL/CPU/Retail v3 ni publicación. Hosting no revalidable por403 desde este entorno. Pendiente autorización push/PR/merge/deploy. Detalle docs/OPT_RESERVATION_LABELS_REVIEW.md.
+
+## Selector OPT: acabado y origen · candidato local · 13/11/2026
+
+Preparado sobre v454 (ab102489), sin publicación ni cambios de datos. Etiquetas
+Reserva · Sistema · Acabado · Retail/Proyecto con estado compartido/local
+independiente; fuentes existentes verificadas en lectura, sin nueva RPC.
+275 pruebas OPT y flujos DOM/PC/móvil sintéticos PASS. Falta autorización de
+publicación y asignar versión al integrar. Detalle: docs/OPT_RESERVATION_LABELS_REVIEW.md.
+
 ## OPT documental v451 · backend aplicado · 13/11/2026
 
 PR #264; publicación autorizada, pendiente de fusión y verificación Hosting.
@@ -1888,3 +1916,50 @@ Compatibilidad V2 y evidencia complementaria APLICADAS EN SUPABASE, verificadas 
 cambiar los snapshots originales, saldos, ACL o RLS. Frontend pendiente de CI y
 publicación protegida. 16 pruebas focales y DOM PASS; suite 948: 938 PASS/10 omitidas;
 verify:release PASS. PC/móvil añadidos al workflow existente, pendientes de CI.
+
+## Política Retail aprobada — preparación local, sin despliegue
+Johan autorizó aplicar también a Retail el modelo existente OPT-PRINTED-ROUNDING-1: ±1/64 de pulgada por número impreso acumulado, intersección de intervalos y conservación conjunta. Esta decisión sustituye los bloqueos por falta de aprobación descritos en los antecedentes de esta rama; no prueba el algoritmo del optimizador. La implementación conserva medidas originales y evidencia originalPrecisionVerified=false, advierte explícitamente y rechaza valores fuera del modelo.
+
+Validación: 287 pruebas Node OPT; PostgreSQL local sintético con parser PDF real, persistencia y lectura de advertencia, idempotencia, observaciones concurrentes, sesión revocada, roles y Frames sin asignación; Chromium PC/móvil para Retail y regresión Proyecto, incluida recarga de catálogo. Los dos originales privados llegan a la frontera de escritura, con manifiestos estables y todas las longitudes impresas conservadas. No se llamó al escritor real ni se registraron cortes. El profiler detiene intencionalmente esa frontera y su respuesta simulada de incertidumbre no es un resultado productivo.
+
+Tres procesos fríos Deno2.2.12 STREAM por original: medianas CPU 1416/1319 ms, máximo1833 ms. No demuestra presupuesto de Edge alojado ni incluye escritura SQL remota. Sigue pendiente validación en entorno Edge aislado autorizado y aprobación de publicación/SQL. retailV3 continúa desactivado por defecto; ninguna migración aplicada, ningún despliegue ni reimportación de inciertos. Etiquetas v455 permanece paquete independiente. Los documentos originales y snapshots privados no forman parte del parche público.
+
+Preparación Edge aislada: encontrado OPT-SANDBOX por lectura; revisión y rollback en docs/opt-import-endpoint/EDGE_RETAIL_PROBE_REVIEW.md. Nuevo probe local con JWT previsto más secreto independiente, sin DB/storage/RPC remoto, parada anterior a escritura. Dos pruebas adapter y typecheck Deno pasan; ambos originales completan localmente con advertencia y writes0. Regresión Deno existente PDF/CSV/XLSX incluido índice3MiB pasa. Sin despliegue; pendiente autorización limitada de función temporal, secreto, procesamiento privado y limpieza. Obtener código de función sandbox existente falló UNAVAILABLE; no fue invocada.
+
+## Local Edge Runtime alternative completed
+No sign-in or credentials needed. Official supabase/edge-runtime:v1.70.5 (digest recorded in tests/opt-digital/edge-local/result.json) executed the reviewed probe bundle in six new user workers with oneshot policy, network disabled, CPU hard2000ms/soft1900ms and memory256MB. Every original run validated and stopped before writing with expected rounding warning. CPU A1013/978/1038ms; B983/1052/1002ms. Shutdown memory40.6–43.5MB (not peak). Deliberate infinite CPU control was cancelled by supervisor at2011ms, verifying enforcement. All task containers, downloaded image and temporary payload/source copies were removed; private evidence logs and original source files retained intentionally.
+
+This is stronger runtime evidence than standalone Deno, but not identical to hosted Edge: local CPU hardware/version, module cache enabled, synthetic auth/snapshots, no gateway/JWT/live SQL latency. It does not authorize deployment or prove hosted service headroom. Six fresh workers do not mean six cold module-cache boots. No project change, external upload, migration, import or uncertain retry occurred. Official architecture reference: https://github.com/supabase/edge-runtime/blob/v1.70.5/README.md . The supplied main.ts/events.ts are local-only reproduction harnesses, never application entrypoints. Build dependencies locally with verified package versions; TLS verification was not disabled when container registry access failed.
+
+Paquete de despliegue preparado, no ejecutado: docs/opt-import-endpoint/release-review/DEPLOYMENT_REVIEW.md, parche de activación separado y SQL postcheck solo lectura. Orden SQL→Edge→UI; permisos service_role exclusivos, no registro Frames; rollback conserva datos. main sigue ab102489(v454), funciones Retail v3 ausentes y lector de advertencias presente según consulta actual. Conciliación privada actual sin coincidencias para ambos originales; no autoriza reintento. Pendientes revisión independiente, respaldo desplegable verificado de Edge v6, build final y autorización productiva.
+
+## Independent-review follow-up — publication remains blocked
+Current live SQL inspection confirms v1 and Proyecto v2 use pg_advisory_xact_lock(hashtextextended(consecutivo,440)), as proposed Retail v3 does. No dedicated OPT reconciliation RPC was found. The programming reconciliation RPC sgp_mecanizado_reconciliar_programacion_legacy has no such lock; it is a different writer. Private import_manifest has a PDF-hash lock(seed439), and service_role cannot execute it directly. Do not claim every privileged/manual reconciliation path shares the consecutive lock.
+
+Two real PostgreSQL17.11 sessions reproduced post-final-reread insert races for production and programming/header-detail. Proposed Retail writer now acquires SHARE table locks on master profiles, productions, programming headers and details through commit. NOWAIT returns OPT_CONTEXTO_OCUPADO before approval when another DML writer holds a conflicting lock. This closes the tested absent-row window for v3 without requiring other writers to cooperate, but briefly blocks unrelated DML on these four tables: independent performance/operational review is required. Existing v1/v2 functions have NOT been modified. After commit, new inserts remain possible; stale revision retries reject. This is not global serializability or an eternal validity guarantee.
+
+Mixed-week regression fixed: Retail accepts an assignment using its original binding year/week instead of requiring every piece to belong to the currently selected week. Synthetic PDF with eight units split across weeks46/47 imports all eight; assert_units rejects week47 units in week46 and allows their original week47. Frames remains unassigned. This preserves inherited complete-document semantics without granting cross-week registration.
+
+CRITICAL newly confirmed baseline gap: live v1/v2 call sgp_opt_shared.persist_document_plans(receipt document, evidence.documentary_plans, evidence.extractor_sha256). The local source baseline handler currently supplies neither field and proposed v3 lacks the call. Deploying this tree as-is would regress existing imports/readable schemes. Obtain and integrate the exact deployed v6 serializer/extension contract, then test full geometry persistence/replay and repeat relevant CPU validation. Function source retrieval again returned UNAVAILABLE/ProtocolError; live SQL definition was readable. This is a publication blocker, not a reason to fabricate geometry or omit the extension. No backend activation is authorized by the prepared activation patch. The independent reviewer should review this gap before approving final bundle.
+
+Recuperación v6 ampliada: buscados historial/ramas GitHub, artefacto CI (solo browser), Library, Storage metadata y archivos locales; fuente Edge exacta aún no encontrada y get_edge_function falla UNAVAILABLE. Snapshot privado de v1/v2/persist_document_plans preservado por lectura, no equivale a bundle Edge. Integración y publicación siguen bloqueadas; no se fabricó serializador. Opciones e impacto de locks en docs/opt-import-endpoint/release-review/V6_RECOVERY_AND_LOCK_OPTIONS.md; guardas por selector requieren protocolo de todos los escritores, no basta v3.
+
+Alternativa separada preparada: opt-retail-import-v3 exclusivo RETAIL/INDICE, v6 intacta. Serializador NUEVO contra contrato SQL observado; 291 Node PASS, SQL persistencia/replay/rollback total y lector actual/redacción PASS, PostgreSQL dos sesiones PASS con persistencia. Originales59/57 planos conservados, sin writes. Ruta UI candidata en parche separado; rollback pausa Retail sin fallback para inciertos. Pipeline de huella fuente reproducible, no se atribuye a v6. CPU completa nueva pendiente de aceptación: corrida Deno local llegó2310.656ms; no extrapolar anteriores pruebas Edge. Plan vigente SEPARATE_RETAIL_OPTION.md; propuesta anterior de reemplazo retirada. No despliegues ni datos productivos modificados.
+
+
+## Complete-path optimization and lock evidence (local only)
+Index normalizer now canonicalizes column names once per row; preserves alias/order semantics and original result hash (7692 rows). Official Edge v1.70.5 complete path including geometry and PostgREST codec: six workers 557–718 ms CPU under 2000 ms; controlled old-normalizer median 982/904 → 674/601 ms. SQL private originals persisted locally in 60–109 ms initially, 40–70 ms replay, zero cuts. Separate SQL and synthetic Edge RPC receipts are not hosted validation. Unrelated-reservation programming insert explicitly blocked by table SHARE guard. Publication remains blocked on representative operational contention/lock decision and production approval. v6 unchanged. Evidence: tests/opt-digital/retail-complete-performance-result.json; current plan: docs/opt-import-endpoint/release-review/SEPARATE_RETAIL_OPTION.md.
+
+
+Focused lock follow-up: unchanged broad guard, no safe Retail-only per-reservation replacement. Live read-only writer/trigger inventory confirms incomplete/mismatched advisory protocols. Cardinality-matched local PostgreSQL plus 10x sensitivity, 18 natural import trials with persistent concurrent writers: imports36–109ms, unrelated DML30–73ms versus0.3–1.6ms control; 8-writer burst up to100ms. Pre-existing unrelated DML rejects22ms, atomic/no cuts. No hosted load guarantee; operational acceptance/bounded transaction policy or complete per-key writer protocol still required before activation. Evidence and limitations in V6_RECOVERY_AND_LOCK_OPTIONS.md and tests/opt-digital/retail-lock-load-result.json. v6, product data and measures unchanged; no reimports.
+
+
+Retail bounded preparation: 1s statement_timeout (PostgREST hoisted) and250ms lock_timeout on new v3 RPC only; SHARE NOWAIT preserved. Real local PostgREST12.2.12+PG17.11 timeout after manifest persistence rolls back all rows and releases locks; normal HTTP200 and lock timeout tested; settings unchanged in other session. Explicit SQL57014/55P03 definitive; transport/prior uncertainty preserved, no auto retry/fallback. Selective route implemented, legacy default; v6 unchanged. Current release plan RETAIL_BOUNDED_RELEASE.md. Hosted hoisting verification, final version/artifact, cleanup capability and deployment approval remain. Resumen pending separate coordination, untouched.
+
+Retail candidate stamped v455, not published (coordinate independent labels v455 before merge). Summary UI not started: mandatory Library pixel access failed on initial transfer and one bounded retry. Source gap documented in SUMMARY_UI_PENDING.md; no summary/backend changes.
+
+Read-only publication follow-up: PostgREST14.18 present; effective hoisting not proven by mgmt-api settings. v6 active unchanged, Retail RPC/endpoint absent. Prepared no-RPC/no-body retirement artifact as alternative to physical deletion; not deployed. Labels ad8addc integration simulated only; conflicts limited to continuity docs, both v455. See READ_ONLY_PUBLICATION_GATES.md. Resumen untouched.
+
+Project data storage isolated branch: append-only owner-only recovery SQL and ungranted read adapter pass synthetic SQL hash/idempotence/rollback/ACL/scope/operational invariants. Adapter deliberately omits full references until authoritative row visibility exists; no guessing by strings. Version1 UI patch inspected via Library text and applied only to isolated QA baseline; PC/mobile browser passed with installed Chromium harness override. No UI/production/Retail changes. See docs/sql-proposals/opt-shared/PROJECT_DATA_STORE_REVIEW.md.
+
+Visibility investigation: no complete authoritative source-item/all-orders relation found; document access differs from redacted order labels. Old granted summary RPC can expose inline/sidecar projectData. Prepared exact-definition guard strips only that field, preserves response/ACL/owner and refuses changed baseline; synthetic direct-RPC bypass test PASS. Production untouched; owner decision required for complete-reference disclosure. See PROJECT_DATA_VISIBILITY_FINDINGS.md. UIv456 remains separate.

@@ -1,0 +1,55 @@
+{
+  "engine": "PostgreSQL17.11",
+  "synthetic": true,
+  "productionWrites": 0,
+  "results": [
+    {
+      "mode": "baseline",
+      "target": "production",
+      "sharedConsecutiveLock": true,
+      "insertAfterFinalRead": "committed",
+      "counts_document_competitor_cuts": "1|1|0"
+    },
+    {
+      "mode": "baseline",
+      "target": "program",
+      "sharedConsecutiveLock": true,
+      "insertAfterFinalRead": "committed",
+      "counts_document_competitor_cuts": "1|0|0"
+    },
+    {
+      "mode": "baseline",
+      "target": "unrelated_program",
+      "sharedConsecutiveLock": true,
+      "insertAfterFinalRead": "committed",
+      "counts_document_competitor_cuts": "1|0|0"
+    },
+    {
+      "mode": "hardened",
+      "target": "production",
+      "sharedConsecutiveLock": true,
+      "insertAfterFinalRead": "blocked_until_import_commit",
+      "counts_document_competitor_cuts": "1|0|0",
+      "stale_retry": "rejected_after_postcommit_insert"
+    },
+    {
+      "mode": "hardened",
+      "target": "program",
+      "sharedConsecutiveLock": true,
+      "insertAfterFinalRead": "blocked_until_import_commit",
+      "counts_document_competitor_cuts": "1|0|0"
+    },
+    {
+      "mode": "hardened",
+      "target": "unrelated_program",
+      "sharedConsecutiveLock": true,
+      "insertAfterFinalRead": "blocked_until_import_commit",
+      "counts_document_competitor_cuts": "1|0|0"
+    },
+    {
+      "activeContextWriter": "OPT_CONTEXTO_OCUPADO",
+      "waitPolicy": "NOWAIT",
+      "newDocuments": 0
+    }
+  ]
+}

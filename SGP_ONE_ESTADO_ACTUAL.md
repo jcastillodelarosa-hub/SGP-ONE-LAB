@@ -1,3 +1,13 @@
+## 2026-11-14 — Project data OPT · candidata local LAB v456, no publicada
+
+Tabla de seis columnas preparada con metadatos documentales opcionales. Lector
+separado verificado contra PDF original: 114 ítems / 502 piezas, acabados multilínea
+y referencias completas. 279 pruebas OPT, dos suites DOM y release PASS.
+Sin cambios Retail, registros operativos, SQL o recuperación productiva.
+Faltan lector/almacén privado de metadata con revisión ACL y QA visual PC/móvil
+(Chromium bloqueado por socket EPERM). No confundir vista preparada con publicación.
+Detalle: docs/opt-import-endpoint/release-review/PROJECT_DATA_METADATA_PLAN.md.
+
 ## Picking PDT · confirmación directa · candidata LAB v431
 
 Base main v430 `f4818ab`. Confirmar la cantidad físicamente entregada registra
@@ -1506,3 +1516,18 @@ se incrementan de354 a355. Caso8+57=65 y controles de Issue97 conservados;259 pr
 34 aserciones SQL aisladas y PC/móvil aprobados. Ver checkpoint y tests/issue97/README.md.
 No fusionado/desplegado; publicación y aplicación productiva requieren autorización
 posterior. Este hito no sustituye la versión actualmente publicada.
+
+
+## Project data — preparación autorizada de lectura completa
+Decisión de Johan implementada en propuesta aislada: lectores legítimos del documento ven metadata completa verificada; sesión/ámbito/admisión preservados. Pruebas SQL sintéticas PASS, tablas operativas intactas. Ver docs/sql-proposals/opt-shared/PROJECT_DATA_STORE_REVIEW.md. Retail 2b35890 intacto; no producción/despliegue/reimportación.
+
+## Project data — filtro y orden aprobados
+Preparado sobre ab102489, v456 provisional: filtro sobre referencia completa, orden ascendente/descendente y original, contador visible/total sin alterar filas ni fracciones. Dos pruebas de dominio, DOM y Chromium PC 1440x1000/móvil 390x844 PASS con fixtures locales; capturas inspeccionadas. SQL privado/lector se entrega separado sobre 2b35890; no despliegue, producción ni reimportación. Retail y etiquetas intactos.
+
+
+## 2026-11-14 — integración LOCAL v456, no publicada
+Retail2b35890 + SQL a0e4691 + UI10a6394 + etiquetasad8addc reunidos en review/opt-v456-integration, ramas fuente intactas. Versión456 provisional; código conservado, pruebas focalizadas y release PASS. Contención de Project data probada, sin escrituras alojadas. Library siguev1 por fallo tools/list previo a transferencia. Plan vigente: docs/opt-import-endpoint/release-review/V456_INTEGRATION_PREPARATION.md.
+
+
+## 2026-11-14 — ejecución parcial autorizada v456
+APLICADO EN SUPABASE: almacén privado Project data y lector documental aprobado; fingerprint/ACL/RLS/sesión nula verificados, hashes de tablas operativas intactos. Recuperación metadata=0. Retail v6 sin cambios; v3 y UI sin publicar. Bloqueos: timeout efectivo PostgREST y transferencia hash-exacta de los nueve originales registrados. Estado detallado en V456_INTEGRATION_PREPARATION.md; no confundir preparación con publicación.

@@ -1,0 +1,24 @@
+--- a/src/modules/opt-digital.js
++++ b/src/modules/opt-digital.js
+@@ -1,3 +1,4 @@
++import {optImportEndpoint} from '../domain/opt-import-endpoint.js';
+ import {createOptDocumentReferences} from '../services/opt-document-references.js';
+ import {createOptDocumentPlans} from '../services/opt-document-plans.js';
+ import {createOptDocumentSummary} from '../services/opt-document-summary.js';
+@@ -57,7 +58,7 @@
+       let storage;try{storage=window.localStorage;}catch{}
+       const scopeApi=getClient&&getToken?createOptProgrammingScope({rpc:async(name,args)=>(await getClient()).rpc(name,args)},()=>allowed&&operation===epoch?getToken():null):null;
+       const reportApi=getClient&&getToken?createOptCutReport({rpc:async(name,args)=>(await getClient()).rpc(name,args)},()=>allowed&&operation===epoch?getToken():null):null;
+-      const importApi=getClient&&getToken?createOptImport({invoke:async body=>{const client=await getClient(),jwt=window.SGP_CONFIG?.lpPowerBiGatewayJwt;if(!jwt)throw Object.assign(Error('OPT_GATEWAY_NO_CONFIGURADO'),{definitive:true});if(!allowed||operation!==epoch||body.p_token!==getToken())throw Error('OPT_IMPORTACION_OBSOLETA');return client.functions.invoke('opt-import',{body,headers:{Authorization:'Bearer '+jwt}});}},()=>allowed&&operation===epoch?getToken():null,{getContext:()=>({linea:root.querySelector('#optScopeLine')?.value,anio:Number(root.querySelector('#optScopeYear')?.value),semana:Number(root.querySelector('#optScopeWeek')?.value),modo:'BASE'}),storage,storageScope}):null;
++      const importApi=getClient&&getToken?createOptImport({invoke:async body=>{const client=await getClient(),jwt=window.SGP_CONFIG?.lpPowerBiGatewayJwt;if(!jwt)throw Object.assign(Error('OPT_GATEWAY_NO_CONFIGURADO'),{definitive:true});if(!allowed||operation!==epoch||body.p_token!==getToken())throw Error('OPT_IMPORTACION_OBSOLETA');const endpoint=optImportEndpoint(body.source,{retailMode:window.SGP_CONFIG?.optRetailMode||'legacy'});if(!endpoint)throw Object.assign(Error('OPT_RETAIL_PAUSADO'),{definitive:true});return client.functions.invoke(endpoint,{body,headers:{Authorization:'Bearer '+jwt}});}},()=>allowed&&operation===epoch?getToken():null,{getContext:()=>({linea:root.querySelector('#optScopeLine')?.value,anio:Number(root.querySelector('#optScopeYear')?.value),semana:Number(root.querySelector('#optScopeWeek')?.value),modo:'BASE'}),storage,storageScope}):null;
+       const matrixApi=getClient&&getToken?createOptMatrixLibrary({invoke:async body=>{const client=await getClient(),jwt=window.SGP_CONFIG?.lpPowerBiGatewayJwt;if(!jwt||!allowed||operation!==epoch||body.p_token!==getToken())throw Error('OPT_MATRIZ_SESION_INVALIDA');return client.functions.invoke('opt-matrix-read',{body,headers:{Authorization:'Bearer '+jwt}});}},()=>allowed&&operation===epoch?getToken():null):null;
+       workflow=mountOptWorkflow(root,instance,{api:sharedApi,documentApi,plansApi,summaryApi,matrixApi,importApi,scopeApi,catalogApi,reportApi,defaultScope:getDefaultScope?.(),storage,storageScope});
+     } catch(e) {if(operation===epoch){message.textContent='No se pudo abrir OPT: '+e.message;root.replaceChildren(message);}}
+--- a/scripts/opt-artifact-files.json
++++ b/scripts/opt-artifact-files.json
+@@ -1,4 +1,5 @@
+ [
++  "src/domain/opt-import-endpoint.js",
+   "opt-digital/index.html",
+   "opt-digital/app.js",
+   "opt-digital/document-materials.js",

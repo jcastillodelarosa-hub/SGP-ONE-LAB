@@ -1,4 +1,5 @@
 [
+  "src/domain/opt-import-endpoint.js",
   "opt-digital/index.html",
   "opt-digital/app.js",
   "opt-digital/document-materials.js",
@@ -39,5 +40,8 @@
   "src/services/opt-document-summary.js",
   "opt-digital/shared-scheme.js",
   "src/services/opt-document-plans.js",
-  "src/services/opt-document-references.js"
+  "src/services/opt-document-references.js",
+  "src/domain/opt-project-data.js",
+  "opt-digital/project-data-extraction.js",
+  "src/domain/opt-reservation-label.js"
 ]

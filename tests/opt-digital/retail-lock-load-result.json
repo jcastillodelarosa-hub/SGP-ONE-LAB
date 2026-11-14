@@ -1,0 +1,510 @@
+{
+  "engine": "PostgreSQL17.11",
+  "productionWrites": 0,
+  "baseCardinalities": {
+    "productions": 1386,
+    "programs": 178,
+    "details": 448,
+    "profiles": 236
+  },
+  "scaleFactors": [
+    1,
+    10
+  ],
+  "payloadPieces": 255,
+  "payloadPlans": 59,
+  "naturalImportNoInjectedDelay": true,
+  "results": [
+    {
+      "scale": 1,
+      "target": "related",
+      "trial": 0,
+      "importShareObserved": true,
+      "dmlLockWaitObserved": true,
+      "import": {
+        "ok": true,
+        "sqlMs": 95.044
+      },
+      "dml": [
+        {
+          "ok": true,
+          "sqlMs": 72.955
+        }
+      ]
+    },
+    {
+      "scale": 1,
+      "target": "related",
+      "trial": 1,
+      "importShareObserved": true,
+      "dmlLockWaitObserved": true,
+      "import": {
+        "ok": true,
+        "sqlMs": 50.524
+      },
+      "dml": [
+        {
+          "ok": true,
+          "sqlMs": 40.387
+        }
+      ]
+    },
+    {
+      "scale": 1,
+      "target": "related",
+      "trial": 2,
+      "importShareObserved": true,
+      "dmlLockWaitObserved": true,
+      "import": {
+        "ok": true,
+        "sqlMs": 49.134
+      },
+      "dml": [
+        {
+          "ok": true,
+          "sqlMs": 36.711
+        }
+      ]
+    },
+    {
+      "scale": 1,
+      "target": "unrelated",
+      "trial": 0,
+      "importShareObserved": true,
+      "dmlLockWaitObserved": false,
+      "import": {
+        "ok": true,
+        "sqlMs": 43.71
+      },
+      "dml": [
+        {
+          "ok": true,
+          "sqlMs": 34.256
+        }
+      ]
+    },
+    {
+      "scale": 1,
+      "target": "unrelated",
+      "trial": 1,
+      "importShareObserved": true,
+      "dmlLockWaitObserved": false,
+      "import": {
+        "ok": true,
+        "sqlMs": 44.474
+      },
+      "dml": [
+        {
+          "ok": true,
+          "sqlMs": 31.656
+        }
+      ]
+    },
+    {
+      "scale": 1,
+      "target": "unrelated",
+      "trial": 2,
+      "importShareObserved": true,
+      "dmlLockWaitObserved": false,
+      "import": {
+        "ok": true,
+        "sqlMs": 37.177
+      },
+      "dml": [
+        {
+          "ok": true,
+          "sqlMs": 30.42
+        }
+      ]
+    },
+    {
+      "scale": 1,
+      "target": "burst_8",
+      "trial": 0,
+      "importShareObserved": true,
+      "dmlLockWaitObserved": true,
+      "import": {
+        "ok": true,
+        "sqlMs": 37.107
+      },
+      "dml": [
+        {
+          "ok": true,
+          "sqlMs": 31.636
+        },
+        {
+          "ok": true,
+          "sqlMs": 31.193
+        },
+        {
+          "ok": true,
+          "sqlMs": 31.324
+        },
+        {
+          "ok": true,
+          "sqlMs": 31.091
+        },
+        {
+          "ok": true,
+          "sqlMs": 31.476
+        },
+        {
+          "ok": true,
+          "sqlMs": 32.012
+        },
+        {
+          "ok": true,
+          "sqlMs": 31.116
+        },
+        {
+          "ok": true,
+          "sqlMs": 31.289
+        }
+      ]
+    },
+    {
+      "scale": 1,
+      "target": "burst_8",
+      "trial": 1,
+      "importShareObserved": true,
+      "dmlLockWaitObserved": true,
+      "import": {
+        "ok": true,
+        "sqlMs": 36.936
+      },
+      "dml": [
+        {
+          "ok": true,
+          "sqlMs": 31.232
+        },
+        {
+          "ok": true,
+          "sqlMs": 30.812
+        },
+        {
+          "ok": true,
+          "sqlMs": 31.2
+        },
+        {
+          "ok": true,
+          "sqlMs": 30.685
+        },
+        {
+          "ok": true,
+          "sqlMs": 31.119
+        },
+        {
+          "ok": true,
+          "sqlMs": 31.237
+        },
+        {
+          "ok": true,
+          "sqlMs": 31.106
+        },
+        {
+          "ok": true,
+          "sqlMs": 30.57
+        }
+      ]
+    },
+    {
+      "scale": 1,
+      "target": "burst_8",
+      "trial": 2,
+      "importShareObserved": true,
+      "dmlLockWaitObserved": true,
+      "import": {
+        "ok": true,
+        "sqlMs": 36.099
+      },
+      "dml": [
+        {
+          "ok": true,
+          "sqlMs": 29.481
+        },
+        {
+          "ok": true,
+          "sqlMs": 29.784
+        },
+        {
+          "ok": true,
+          "sqlMs": 30.535
+        },
+        {
+          "ok": true,
+          "sqlMs": 29.773
+        },
+        {
+          "ok": true,
+          "sqlMs": 30.431
+        },
+        {
+          "ok": true,
+          "sqlMs": 30.64
+        },
+        {
+          "ok": true,
+          "sqlMs": 30.434
+        },
+        {
+          "ok": true,
+          "sqlMs": 29.411
+        }
+      ]
+    },
+    {
+      "scale": 10,
+      "target": "related",
+      "trial": 0,
+      "importShareObserved": true,
+      "dmlLockWaitObserved": true,
+      "import": {
+        "ok": true,
+        "sqlMs": 85.593
+      },
+      "dml": [
+        {
+          "ok": true,
+          "sqlMs": 75.475
+        }
+      ]
+    },
+    {
+      "scale": 10,
+      "target": "related",
+      "trial": 1,
+      "importShareObserved": true,
+      "dmlLockWaitObserved": true,
+      "import": {
+        "ok": true,
+        "sqlMs": 81.276
+      },
+      "dml": [
+        {
+          "ok": true,
+          "sqlMs": 71.461
+        }
+      ]
+    },
+    {
+      "scale": 10,
+      "target": "related",
+      "trial": 2,
+      "importShareObserved": true,
+      "dmlLockWaitObserved": true,
+      "import": {
+        "ok": true,
+        "sqlMs": 80.382
+      },
+      "dml": [
+        {
+          "ok": true,
+          "sqlMs": 70.892
+        }
+      ]
+    },
+    {
+      "scale": 10,
+      "target": "unrelated",
+      "trial": 0,
+      "importShareObserved": true,
+      "dmlLockWaitObserved": true,
+      "import": {
+        "ok": true,
+        "sqlMs": 79.169
+      },
+      "dml": [
+        {
+          "ok": true,
+          "sqlMs": 70.727
+        }
+      ]
+    },
+    {
+      "scale": 10,
+      "target": "unrelated",
+      "trial": 1,
+      "importShareObserved": true,
+      "dmlLockWaitObserved": true,
+      "import": {
+        "ok": true,
+        "sqlMs": 79.862
+      },
+      "dml": [
+        {
+          "ok": true,
+          "sqlMs": 71.217
+        }
+      ]
+    },
+    {
+      "scale": 10,
+      "target": "unrelated",
+      "trial": 2,
+      "importShareObserved": true,
+      "dmlLockWaitObserved": false,
+      "import": {
+        "ok": true,
+        "sqlMs": 82.376
+      },
+      "dml": [
+        {
+          "ok": true,
+          "sqlMs": 73.333
+        }
+      ]
+    },
+    {
+      "scale": 10,
+      "target": "burst_8",
+      "trial": 0,
+      "importShareObserved": true,
+      "dmlLockWaitObserved": true,
+      "import": {
+        "ok": true,
+        "sqlMs": 88.515
+      },
+      "dml": [
+        {
+          "ok": true,
+          "sqlMs": 80.223
+        },
+        {
+          "ok": true,
+          "sqlMs": 79.67
+        },
+        {
+          "ok": true,
+          "sqlMs": 79.47
+        },
+        {
+          "ok": true,
+          "sqlMs": 81.037
+        },
+        {
+          "ok": true,
+          "sqlMs": 80.206
+        },
+        {
+          "ok": true,
+          "sqlMs": 80.251
+        },
+        {
+          "ok": true,
+          "sqlMs": 79.357
+        },
+        {
+          "ok": true,
+          "sqlMs": 79.652
+        }
+      ]
+    },
+    {
+      "scale": 10,
+      "target": "burst_8",
+      "trial": 1,
+      "importShareObserved": true,
+      "dmlLockWaitObserved": true,
+      "import": {
+        "ok": true,
+        "sqlMs": 108.806
+      },
+      "dml": [
+        {
+          "ok": true,
+          "sqlMs": 99.523
+        },
+        {
+          "ok": true,
+          "sqlMs": 99.84
+        },
+        {
+          "ok": true,
+          "sqlMs": 99.311
+        },
+        {
+          "ok": true,
+          "sqlMs": 99.667
+        },
+        {
+          "ok": true,
+          "sqlMs": 99.407
+        },
+        {
+          "ok": true,
+          "sqlMs": 99.627
+        },
+        {
+          "ok": true,
+          "sqlMs": 99.263
+        },
+        {
+          "ok": true,
+          "sqlMs": 99.615
+        }
+      ]
+    },
+    {
+      "scale": 10,
+      "target": "burst_8",
+      "trial": 2,
+      "importShareObserved": true,
+      "dmlLockWaitObserved": true,
+      "import": {
+        "ok": true,
+        "sqlMs": 87.758
+      },
+      "dml": [
+        {
+          "ok": true,
+          "sqlMs": 74.63
+        },
+        {
+          "ok": true,
+          "sqlMs": 74.697
+        },
+        {
+          "ok": true,
+          "sqlMs": 73.8
+        },
+        {
+          "ok": true,
+          "sqlMs": 74.482
+        },
+        {
+          "ok": true,
+          "sqlMs": 73.997
+        },
+        {
+          "ok": true,
+          "sqlMs": 74.146
+        },
+        {
+          "ok": true,
+          "sqlMs": 74.085
+        },
+        {
+          "ok": true,
+          "sqlMs": 73.977
+        }
+      ]
+    }
+  ],
+  "preexistingUnrelatedWriter": {
+    "ok": false,
+    "sqlMs": 22.13,
+    "busy": true,
+    "lockTimeout": false
+  },
+  "limits": "Cardinality-matched synthetic context rows, private original payload A and observed geometry receiver. No production triggers/RLS, network or hardware equivalence. Three trials per target; 8-writer burst is chosen stress, not observed traffic. DML UPDATE same value holds real locks but excludes production RPC overhead. Persistent psql sessions avoid process-launch latency; polling can still miss short waits; observed=false is not proof of no blocking.",
+  "uncontendedUnrelatedDmlSqlMs": [
+    1.591,
+    0.386,
+    0.45,
+    0.387,
+    0.313,
+    0.329
+  ],
+  "finalCountsProductionProgramDetailProfileDocumentPieceCut": "13860|1780|4480|2360|1|255|0",
+  "controlNote": "Saved evidence control measured afterwards with fresh psql; reproducible script uses already-open writer. Both record SQL execution, excluding client launch time."
+}

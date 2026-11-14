@@ -24,6 +24,18 @@ function cellsFor(row,centers) {
   for(const item of row.items){let col=0;while(col<centers.length-1&&item.center>(centers[col]+centers[col+1])/2)col++;cells[col].push(item.text);}
   return cells.map(x=>x.join(' ').trim());
 }
+// Short right-aligned remainders may cross the midpoint between header labels.
+// Recover only from painted cell borders; never replace an absent value with zero.
+function terminalCells(row,centers,rules,cells){
+  if(cells[13]||!Array.isArray(rules))return cells;
+  const vertical=rules.filter(r=>Math.abs(r.x1-r.x2)<.05&&Math.min(r.y1,r.y2)<row.y&&Math.max(r.y1,r.y2)>row.y).map(r=>r.x1);
+  const left=Math.max(...vertical.filter(x=>x<centers[13])),right=Math.min(...vertical.filter(x=>x>centers[13]));
+  if(!(left>centers[12]&&right<centers[14]))return cells;
+  const inside=row.items.filter(i=>i.x>left&&2*i.center-i.x<right);
+  const outside=row.items.filter(i=>i.x>=right);
+  if(inside.length!==1||!inch.test(inside[0].text)||outside.length!==1||!['Cortar','Almac.'].includes(outside[0].text))return cells;
+  const result=[...cells];result[13]=inside[0].text;result[14]=outside[0].text;return result;
+}
 function count(map,key,quantity){map.set(key,(map.get(key)||0)+quantity);}
 function equals(a,b){return a.size===b.size&&[...a].every(([k,v])=>b.get(k)===v);}
 export function extractCoordinatePlans(pages) {
@@ -158,7 +170,7 @@ export function extractCoordinatePlans(pages) {
         continue;
       }
       if(mode!=='patterns'||!centers)continue;
-      const c=cellsFor(row,centers);
+      const c=terminalCells(row,centers,page.rules,cellsFor(row,centers));
       if(/^\d+$/.test(c[0])){
         const perf=Number(c[0]);
         if(!ref||!block||!Number.isSafeInteger(perf)||perf<1||perf>10000){issue('PATTERN_WITHOUT_CONTEXT',page.page);current=null;continue;}

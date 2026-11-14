@@ -50,7 +50,7 @@ export async function readExportGrid(input,{DOMParser=globalThis.DOMParser}={}){
  return readWorksheetGrid(input,{DOMParser,sheetName:'Export'});
 }
 // OPT uses an explicit sheet selector; Export keeps its original single-sheet policy.
-export async function readWorksheetGrid(input,{DOMParser=globalThis.DOMParser,sheetName='Export',allowOtherSheets=false,allowUnusedMacroDefault=false,allowStringCells=false,maxFileBytes=MAX_FILE}={}){
+export async function readWorksheetGrid(input,{DOMParser=globalThis.DOMParser,sheetName='Export',allowOtherSheets=false,allowUnusedMacroDefault=false,allowStringCells=false,maxFileBytes=MAX_FILE,readWorksheetXML}={}){
  if(!DOMParser)fail('Parser XML no disponible');const zip=await unzipXlsx(input,{maxFileBytes});
  for(const name of zip.keys())if(/vbaProject|externalLinks|embeddings/i.test(name))fail('Contenido activo/externo no admitido');
  const types=xml(zip.get('[Content_Types].xml'),DOMParser);if(Array.from(types.getElementsByTagName('*')).some(n=>{if(!/macroEnabled/i.test(n.getAttribute?.('ContentType')||''))return false;const ext=n.getAttribute('Extension');return !(allowUnusedMacroDefault&&n.localName==='Default'&&ext&&!Array.from(zip.keys()).some(name=>name.toLowerCase().endsWith('.'+ext.toLowerCase())));}))fail('Macros no admitidas');
@@ -64,10 +64,17 @@ export async function readWorksheetGrid(input,{DOMParser=globalThis.DOMParser,sh
  if(matches.length!==1)fail('Relación de hoja ambigua');let path=matches[0].getAttribute('Target');path=path.startsWith('/')?path.slice(1):'xl/'+path;
  if(path.includes('..')||!/^xl\/worksheets\/[^/]+\.xml$/.test(path))fail('Ruta de hoja incompatible');
  const shared=zip.has('xl/sharedStrings.xml')?Array.from(xml(zip.get('xl/sharedStrings.xml'),DOMParser).getElementsByTagNameNS(MAIN,'si')).map(textNodes):[];
+ if(readWorksheetXML)return {sheet:sheetName,rows:readWorksheetXML(zip.get(path),{shared,allowStringCells})};
  const doc=xml(zip.get(path),DOMParser),sheet=doc.documentElement;if(sheet.localName!=='worksheet'||sheet.namespaceURI!==MAIN)fail('Hoja inválida');
  if(sheet.getElementsByTagNameNS(MAIN,'f').length||sheet.getElementsByTagNameNS(MAIN,'mergeCell').length)fail('Fórmulas o celdas combinadas no admitidas');
  let last=0;const rows=[];for(const row of children(one(sheet,'sheetData'),'row')){
-  const rn=row.getAttribute('r'),rowNumber=rn?Number(rn):last+1;if(!Number.isInteger(rowNumber)||rowNumber<=last||rowNumber>20000||['1','true'].includes(row.getAttribute('hidden')))fail('Filas ocultas, repetidas o excesivas');last=rowNumber;
+  const parsed=readWorksheetRow(row,last,{shared,allowStringCells});rows.push(parsed);last=parsed.row;
+ }
+ return {sheet:sheetName,rows};
+}
+// The DOM and incremental readers share every row/cell semantic check.
+export function readWorksheetRow(row,last,{shared,allowStringCells}){
+  const rn=row.getAttribute('r'),rowNumber=rn?Number(rn):last+1;if(!Number.isInteger(rowNumber)||rowNumber<=last||rowNumber>20000||['1','true'].includes(row.getAttribute('hidden')))fail('Filas ocultas, repetidas o excesivas');
   let previous=-1;const values=[];for(const cell of children(row,'c')){
    const ref=cell.getAttribute('r');let column=previous+1;
    if(ref){const m=/^([A-Z]+)([1-9]\d*)$/.exec(ref);if(!m||Number(m[2])!==rowNumber)fail('Referencia de celda inválida');column=0;for(const ch of m[1])column=column*26+ch.charCodeAt(0)-64;column--;}
@@ -81,7 +88,5 @@ export async function readWorksheetGrid(input,{DOMParser=globalThis.DOMParser,sh
    else fail('Tipo de celda no admitido: '+type);
    values[column]=value;
   }
-  rows.push({row:rowNumber,values:Array.from({length:values.length},(_,i)=>values[i]??null)});
- }
- return {sheet:sheetName,rows};
+ return {row:rowNumber,values:Array.from({length:values.length},(_,i)=>values[i]??null)};
 }
