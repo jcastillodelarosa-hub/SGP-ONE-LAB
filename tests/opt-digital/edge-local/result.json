@@ -1,0 +1,109 @@
+{
+  "image": "supabase/edge-runtime:v1.70.5",
+  "digest": "sha256:941e21883ad961ce52da5caba666456a6f61f72c5131b3d22be7cfc2cec5d325",
+  "bundleSha256": "4447a9a17e38d28dc29565eb1171549154db305b81a0cfc34ffef971d27ef745",
+  "limits": {
+    "cpuHardMs": 2000,
+    "cpuSoftMs": 1900,
+    "memoryMb": 256
+  },
+  "network": "none",
+  "freshWorkerPerRequest": true,
+  "moduleCache": true,
+  "runs": [
+    {
+      "fixture": "A",
+      "run": 1,
+      "status": 200,
+      "outcome": "VALIDATED_STOPPED_BEFORE_WRITE",
+      "writes": 0,
+      "warningCodes": [
+        "OPT_PRINTED_ROUNDING_COMPATIBLE"
+      ],
+      "cpuMs": 1013,
+      "shutdownMemoryBytes": 43455626,
+      "shutdownReason": "EarlyDrop"
+    },
+    {
+      "fixture": "A",
+      "run": 2,
+      "status": 200,
+      "outcome": "VALIDATED_STOPPED_BEFORE_WRITE",
+      "writes": 0,
+      "warningCodes": [
+        "OPT_PRINTED_ROUNDING_COMPATIBLE"
+      ],
+      "cpuMs": 978,
+      "shutdownMemoryBytes": 42541842,
+      "shutdownReason": "EarlyDrop"
+    },
+    {
+      "fixture": "A",
+      "run": 3,
+      "status": 200,
+      "outcome": "VALIDATED_STOPPED_BEFORE_WRITE",
+      "writes": 0,
+      "warningCodes": [
+        "OPT_PRINTED_ROUNDING_COMPATIBLE"
+      ],
+      "cpuMs": 1038,
+      "shutdownMemoryBytes": 42339382,
+      "shutdownReason": "EarlyDrop"
+    },
+    {
+      "fixture": "B",
+      "run": 1,
+      "status": 200,
+      "outcome": "VALIDATED_STOPPED_BEFORE_WRITE",
+      "writes": 0,
+      "warningCodes": [
+        "OPT_PRINTED_ROUNDING_COMPATIBLE"
+      ],
+      "cpuMs": 983,
+      "shutdownMemoryBytes": 40562135,
+      "shutdownReason": "EarlyDrop"
+    },
+    {
+      "fixture": "B",
+      "run": 2,
+      "status": 200,
+      "outcome": "VALIDATED_STOPPED_BEFORE_WRITE",
+      "writes": 0,
+      "warningCodes": [
+        "OPT_PRINTED_ROUNDING_COMPATIBLE"
+      ],
+      "cpuMs": 1052,
+      "shutdownMemoryBytes": 40752830,
+      "shutdownReason": "EarlyDrop"
+    },
+    {
+      "fixture": "B",
+      "run": 3,
+      "status": 200,
+      "outcome": "VALIDATED_STOPPED_BEFORE_WRITE",
+      "writes": 0,
+      "warningCodes": [
+        "OPT_PRINTED_ROUNDING_COMPATIBLE"
+      ],
+      "cpuMs": 1002,
+      "shutdownMemoryBytes": 40874164,
+      "shutdownReason": "EarlyDrop"
+    }
+  ],
+  "negativeControl": {
+    "busyLoop": "cancelled by supervisor",
+    "cpuMs": 2011,
+    "status": 500
+  },
+  "cleanup": {
+    "containersRemoved": true,
+    "imageRemoved": true,
+    "temporarySourceAndPayloadsRemoved": true
+  },
+  "limitsOfEvidence": [
+    "Local host and runtime version, not hosted platform parity",
+    "Memory measured at shutdown, not peak",
+    "Synthetic authorization and read-only snapshots, no DB latency or writes",
+    "No gateway/JWT or live-session validation"
+  ]
+}
