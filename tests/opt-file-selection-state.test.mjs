@@ -11,6 +11,7 @@ test('local processed, persisted data, errors and uncertainty are separate facts
  assert.equal(state({file,serverOutcome:'confirmed'}).available,false);
  assert.equal(state({file,serverOutcome:'processing'}).savedDataConfirmed,false);
  assert.equal(state({file,serverOutcome:'rejected'}).savedDataConfirmed,false);
+ assert.equal(state({file,serverOutcome:'failed'}).savedDataConfirmed,false);assert.match(state({file,serverOutcome:'failed'}).labels.server,/Fallo/);
  assert.equal(state({file,serverOutcome:'uncertain'}).requiresReconciliation,true);
  assert.equal(state({file,localOutcome:'error',serverOutcome:'confirmed'}).savedDataConfirmed,true);
  assert.equal(state().location,null);assert.equal(state().available,false);

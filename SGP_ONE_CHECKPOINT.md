@@ -2062,3 +2062,10 @@ Clasificaciones separadas preparadas: PROGRAMMING_OMITTED, INDEX_EXCLUDED, DUPLI
 Para pendientes existentes se necesita su identidad local exacta; nueve documentos existentes no justifican confirmar por nombre todos los pendientes. Para cerrar ausencias hace falta evidencia de terminación del intento o un protocolo de resolución supervisada con barrera contra solicitudes en vuelo; diario antiguo no conserva request-id/timestamp del servidor. No se introdujo un botón de limpieza ni reintento automático.
 
 Bocetos aprobados: Library resolvió PDF libfile_fde3_f-b792a5b9bc2c8191b866f2fa39893f43_0bb98de6808c8191aa85b50141b9725d versión1; helper soportado falló descarga, sin bytes locales. Pendiente transferencia coordinada para inspección antes de integrar UI.
+
+
+## 2026-11-14 — Cuatro bocetos OPT integrados, solo local
+
+Implementados sobre df0e42b en feat/opt-week-linked-list: listado semanal con totales/búsqueda/filtro y tarjetas móviles; progreso por piezas autorizadas; origen/nombre/ruta relativa y estados de archivo independientes del input nativo; comprobación manual de pendientes históricos sin reenviar. Frames sin asignación permanece Revisar vínculo, sin porcentaje ni controles de corte. Solo coincidencia exacta confirma diario local; ausencia/error conserva bloqueo. RPC observación sigue propuesta, no aplicada.
+
+9 pruebas Node, 10 suites DOM afectadas y dos harness Chromium PC/móvil pasan; capturas inspeccionadas y verify:release válido localmente. Conservadas evidencias anteriores no afectadas. v458 provisional pendiente de coordinar main/PR270; sin push/PR/fusión/despliegue ni datos productivos. Detalle y próximos pasos: docs/OPT_APPROVED_UI_REVIEW.md. Transferencia visual sustituida por especificación fiel autorizada de coordinación; no requiere más imágenes.

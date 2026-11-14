@@ -11,7 +11,7 @@ const {JSDOM}=require(process.env.JSDOM_MODULE||'jsdom');
  const root=document.querySelector('#host').shadowRoot,$=s=>root.querySelector(s),tick=()=>new Promise(r=>setTimeout(r,20));
  $('#optWorkflowTab1').click();await $('#optScopeLoad').onclick();await tick();$('#optReservation').value='SYNTHETIC-GROUP';$('#optReservation').onchange();await tick();
  assert.equal($('.layout').hidden,true);assert.equal($('.mobile-controls').hidden,true);assert.equal(root.querySelectorAll('.opt-shared-references button').length,32);assert.equal(root.querySelectorAll('#optSharedScheme').length,1);
- assert.equal($('.opt-shared-piece-details').open,false);
+ assert.equal($('.opt-shared-piece-details').open,true);
  $('#optSharedScheme button.segment').click();assert.equal($('#optSharedPieces input').checked,true);
  root.querySelectorAll('.opt-shared-references button')[1].click();await tick();$('#optSharedScheme button.segment').click();
  $('#optReservationTab1').click();await tick();assert.equal(root.querySelectorAll('#optSummaryView table').length,2);$('#optReservationTab0').click();

@@ -1,3 +1,4 @@
+import {optPieceProgress} from '../src/domain/opt-piece-progress.js';
 import {importRoundingWarning} from './import-panel.js';
 import {mountMatrixPanel} from './matrix-panel.js';
 // Server manifests are the only source of cut identities. Local review never credits a cut.
@@ -18,7 +19,7 @@ export function createCutJournal(storage,scope) {
   // One key per UUID retains concurrent tabs' commands even if both prepare at once.
   return {read,save(command){if(!valid(command))throw Error('Comando de cortes inválido');if(read())throw Error('Hay una operación pendiente.');const key=prefix+command.idempotencyKey,raw=JSON.stringify(command);storage.setItem(key,raw);if(storage.getItem(key)!==raw)throw Error('No se pudo conservar el comando antes de enviarlo.');},clear(command){const key=prefix+command.idempotencyKey,raw=storage.getItem(key);if(raw===null)return;if(raw!==JSON.stringify(command))throw Error('El comando pendiente cambió.');storage.removeItem(key);if(storage.getItem(key)!==null)throw Error('No se pudo cerrar el comando pendiente.');}};
 }
-export function mountSharedCuts(container,{api,catalogApi=null,documentApi=null,matrixApi=null,storage,storageScope,createId=()=>crypto.randomUUID(),openDocument=()=>{},onReference=()=>{}}={}) {
+export function mountSharedCuts(container,{api,catalogApi=null,documentApi=null,matrixApi=null,storage,storageScope,createId=()=>crypto.randomUUID(),openDocument=()=>{},onReference=()=>{},onProgress=()=>{}}={}) {
   const make=(tag,text)=>{const n=container.ownerDocument.createElement(tag);if(text)n.textContent=text;return n;};
   const panel=make('section');panel.className='panel opt-shared';panel.id='optSharedCuts';
   const title=make('h2','Cortes realizados · estado compartido'),status=make('p');status.id='optSharedStatus';status.setAttribute('role','status');status.setAttribute('aria-live','polite');
@@ -28,6 +29,7 @@ export function mountSharedCuts(container,{api,catalogApi=null,documentApi=null,
   navigation.id='optSharedReferences';
   const railTools=make('div');railTools.className='opt-reference-tools';
   const toggle=make('button');toggle.id='optReferencesToggle';toggle.type='button';toggle.setAttribute('aria-controls',navigation.id);
+  const search=make('input');search.type='search';search.id='optReferenceSearch';search.placeholder='Buscar referencia';search.setAttribute('aria-label','Buscar referencia');search.oninput=()=>{for(const b of navigation.querySelectorAll('button[data-reference]'))b.hidden=!b.dataset.search.includes(search.value.trim().toLocaleLowerCase());};
   const railLabel=make('span','Referencias del documento');railTools.append(toggle,railLabel);
   const shade=make('button');shade.type='button';shade.className='opt-reference-shade';shade.setAttribute('aria-label','Cerrar referencias');shade.tabIndex=-1;
   const rows=make('div');rows.id='optSharedPieces';rows.tabIndex=0;rows.setAttribute('aria-label','Esquemas y detalle de la referencia');
@@ -35,7 +37,7 @@ export function mountSharedCuts(container,{api,catalogApi=null,documentApi=null,
   const mobileQuery=container.ownerDocument.defaultView?.matchMedia?.('(max-width:760px)');
   const mobile=()=>mobileQuery?.matches===true;
   let railClosed=mobile();
-  function setRail(closed,{focus=false}={}){railClosed=closed;layout.classList.toggle('opt-rail-closed',closed);navigation.hidden=closed;shade.hidden=closed||!mobile();toggle.textContent=closed?'Mostrar referencias':'Ocultar referencias';toggle.setAttribute('aria-expanded',String(!closed));if(focus)toggle.focus({preventScroll:true});}
+  function setRail(closed,{focus=false}={}){railClosed=closed;layout.classList.toggle('opt-rail-closed',closed);navigation.hidden=closed;shade.hidden=closed||!mobile();toggle.textContent=closed?(mobile()?'Cambiar referencia':'Mostrar referencias'):'Ocultar referencias';toggle.setAttribute('aria-expanded',String(!closed));if(focus)toggle.focus({preventScroll:true});}
   toggle.onclick=()=>setRail(!railClosed);shade.onclick=()=>setRail(true,{focus:true});
   layout.addEventListener('keydown',event=>{if(event.key==='Escape'&&!railClosed){event.preventDefault();setRail(true,{focus:true});}});
   const resizeRail=()=>setRail(railClosed);mobileQuery?.addEventListener?.('change',resizeRail);
@@ -64,10 +66,15 @@ export function mountSharedCuts(container,{api,catalogApi=null,documentApi=null,
     if(journalError)count.textContent+=' Registro bloqueado: '+journalError;
     for(const check of rows.querySelectorAll('input'))check.disabled=!canWrite||check.dataset.selectable!=='true';
   }
+  function appendProgress(target,progress){
+    const badge=make('span',progress.label);badge.className='opt-state-badge '+(progress.percent===100?'is-done':progress.percent===null?'is-warning':'is-active');target.append(badge);
+    if(progress.percent!==null){const bar=make('progress');bar.max=progress.total;bar.value=progress.done;bar.setAttribute('aria-label',`${progress.done} de ${progress.total} piezas cortadas`);target.append(bar,make('span',`${progress.percent}%`));}
+  }
   function render(resetSelection=true){
     const navigationScroll=navigation.scrollTop;
-    rows.replaceChildren();navigation.replaceChildren();if(resetSelection)selected.clear();confirm.hidden=true;prepared=null;
+    rows.replaceChildren();navigation.replaceChildren(search);if(resetSelection)selected.clear();confirm.hidden=true;prepared=null;
     const scoped=approvedReferences(state,group,documents,catalogApi);
+    const ledgerKnown=!!state&&sameScope(state.scope,group?.scope)&&state.reserva===group?.reservation&&state.habilitado===true&&state.manifiesto_validado===true;
     const references=documentReferences.filter(ref=>documentApi?.ownsReference(group,ref)).map(ref=>{
       const matched=scoped.find(r=>r.id_documento===ref.id_documento&&r.sha256===ref.sha256&&r.referencia===ref.referencia);
       const source=group.references.find(r=>r.id_documento===ref.id_documento);
@@ -77,11 +84,16 @@ export function mountSharedCuts(container,{api,catalogApi=null,documentApi=null,
     if(!references.some(ref=>referenceKey(ref)===activeReference))activeReference=references.length?referenceKey(references[0]):null;
     for(const ref of references){
       const key=referenceKey(ref),button=make('button');button.type='button';button.dataset.reference=key;button.setAttribute('aria-pressed',String(key===activeReference));button.setAttribute('aria-controls','optSharedPieces');
-      button.append(make('strong',ref.referencia),make('span',ref.documentReference?`${ref.piezas_documento} piezas en documento · ${ref.piezas.length} en ámbito de corte`:`${ref.piezas.filter(p=>p.estado==='CORTADO').length} / ${ref.piezas.length} cortadas`));
+      const progress=optPieceProgress(ref.piezas,{known:ledgerKnown});button.dataset.search=ref.referencia.toLocaleLowerCase();button.hidden=!button.dataset.search.includes(search.value.trim().toLocaleLowerCase());
+      button.append(make('strong',ref.referencia),make('span',progress.total?`${progress.done} / ${progress.total} piezas cortadas`:progress.label));
+      appendProgress(button,progress);if(ref.documentReference)button.append(make('span',`${ref.piezas_documento} piezas en documento · ${ref.piezas.length} en ámbito de corte`));
       button.onclick=()=>{if(key!==activeReference){activeReference=key;rows.scrollTop=0;render(false);}if(mobile())setRail(true,{focus:true});};navigation.append(button);
     }
     for(const ref of references.filter(ref=>referenceKey(ref)===activeReference)){
       const block=make('section');referenceHeading.replaceChildren(make('p',ref.consecutivo),make('h3',ref.referencia),make('p',ref.documentReference?'Documento completo · el registro conserva su ámbito autorizado':'Referencias del ámbito de corte'));
+      const progress=optPieceProgress(ref.piezas,{known:ledgerKnown});referenceHeading.append(make('p',progress.total?`${progress.done} cortadas de ${progress.total} asignadas a esta reserva`:progress.label));appendProgress(referenceHeading,progress);
+      if(progress.total)referenceHeading.append(make('p',`${progress.done} cortadas · ${progress.pending} pendientes`));
+      else referenceHeading.append(make('p',ledgerKnown?'Revisar vínculo: esta referencia no tiene piezas asignadas al ámbito consultado. La consulta documental no permite registrar cortes.':'Actualiza el estado para comprobar las piezas autorizadas.'));
       block.append(profileHeader);matrix.select(ref.sistema,ref.referencia);
       const schemeSlot=make('section');schemeSlot.id='optSharedScheme';schemeSlot.setAttribute('aria-label','Esquema de la referencia');block.append(schemeSlot);
       const technical=make('details');technical.className='opt-shared-technical';technical.append(make('summary','Detalle técnico del documento'));
@@ -92,14 +104,15 @@ export function mountSharedCuts(container,{api,catalogApi=null,documentApi=null,
       else if(ref.serverVerified)technical.append(make('p','Detalle validado en el servidor. Puedes consultar y registrar con tus permisos; el PDF local es opcional para revisar el original.'));
       else technical.append(make('p','Carga el PDF original con el mismo SHA para habilitar la selección de sus piezas. El nombre por sí solo no acredita el documento.'));
       block.append(technical);
-      const piecesDetails=make('details');piecesDetails.className='opt-shared-piece-details';piecesDetails.append(make('summary',`Piezas y registro de cortes (${ref.piezas.length})`));
+      const piecesDetails=make('details');piecesDetails.className='opt-shared-piece-details';piecesDetails.open=true;piecesDetails.append(make('summary',`Piezas y registro de cortes (${ref.piezas.length})`));
       const wrap=make('div');wrap.className='table-wrap';const table=make('table'),head=make('thead'),headRow=make('tr');
       for(const text of ['Seleccionar','Ubicación en PDF','Longitud (mm)','Estado','Usuario','Día operativo','Turno','Hora de registro (Bogotá)'])headRow.append(make('th',text));head.append(headRow);table.append(head);const body=make('tbody');
       for(const piece of ref.piezas){const tr=make('tr'),cell=make('td'),check=make('input');check.type='checkbox';check.checked=selected.has(piece.id_pieza);check.dataset.piece=piece.id_pieza;check.dataset.selectable=String(piece.estado==='PENDIENTE'&&piece.registrable===true&&(!!ref.localPdf||ref.serverVerified));check.setAttribute('aria-label',`Seleccionar ${ref.referencia}, página ${piece.pagina}, patrón ${piece.patron}, barra ${piece.barra}, corte ${piece.corte}`);check.onchange=()=>{if(check.disabled){check.checked=selected.has(piece.id_pieza);return;}if(check.checked)selected.add(piece.id_pieza);else selected.delete(piece.id_pieza);confirm.hidden=true;prepared=null;controls();};cell.append(check);tr.append(cell,make('td',`Pág. ${piece.pagina} · patrón ${piece.patron} · barra ${piece.barra} · corte ${piece.corte}`),make('td',String(piece.longitud_mm)),make('td',piece.estado==='CORTADO'?'Cortado':'Pendiente'),make('td',piece.usuario||'—'),make('td',piece.periodo?.fecha||'—'),make('td',piece.periodo?String(piece.periodo.turno):'—'),make('td',piece.registrado_en?new Date(piece.registrado_en).toLocaleString('es-CO',{timeZone:'America/Bogota'}):'—'));body.append(tr);}
+      const labels=['Seleccionar','Ubicación en PDF','Longitud (mm)','Estado','Usuario','Día operativo','Turno','Hora de registro (Bogotá)'];for(const tr of body.children)[...tr.children].forEach((td,i)=>td.dataset.label=labels[i]);
       table.append(body);wrap.append(table);piecesDetails.append(wrap);block.append(piecesDetails);rows.append(block);onReference(ref,schemeSlot);
     }
     if(!references.length){matrix.select(null,null);onReference(null,null);}
-    navigation.scrollTop=navigationScroll;controls();return references;
+    navigation.scrollTop=navigationScroll;controls();onProgress(group,optPieceProgress(scoped.flatMap(r=>r.piezas),{known:ledgerKnown}));return references;
   }
   async function refresh(){
     if(closed||busy)return;const request=++epoch;try{pending=journal.read()||pending;journalError='';}catch(e){journalError=e.message;}state=null;documentReferences=[];documentError='';documentApi?.invalidate();loading=true;render();
@@ -120,5 +133,5 @@ export function mountSharedCuts(container,{api,catalogApi=null,documentApi=null,
   yes.onclick=async()=>{if(!prepared||busy||register.disabled)return;const command=prepared;prepared=null;try{journal.save(command);pending=command;}catch(e){journalError=e.message;confirm.hidden=true;controls();message('No se envió el registro: '+e.message);return;}await submit(command);};
   retry.onclick=async()=>{if(retry.disabled)return;await submit(pending,true);};reload.onclick=refresh;
   controls();message('Selecciona una reserva para consultar el estado compartido.');
-  return {select(next,files=[]){if(closed)return;documents=files;const changed=JSON.stringify(group)!==JSON.stringify(next);group=next;if(changed){activeReference=null;epoch++;state=null;selected.clear();confirm.hidden=true;prepared=null;return refresh();}if(!busy&&!loading)render(false);},refresh,destroy(){mobileQuery?.removeEventListener?.('change',resizeRail);documentApi?.invalidate();onReference(null,null);matrix.destroy();closed=true;epoch++;prepared=null;selected.clear();panel.remove();}};
+  return {select(next,files=[]){if(closed)return;documents=files;const changed=JSON.stringify(group)!==JSON.stringify(next);group=next;if(changed){search.value='';activeReference=null;epoch++;state=null;selected.clear();confirm.hidden=true;prepared=null;return refresh();}if(!busy&&!loading)render(false);},refresh,destroy(){mobileQuery?.removeEventListener?.('change',resizeRail);documentApi?.invalidate();onReference(null,null);matrix.destroy();closed=true;epoch++;prepared=null;selected.clear();panel.remove();}};
 }
