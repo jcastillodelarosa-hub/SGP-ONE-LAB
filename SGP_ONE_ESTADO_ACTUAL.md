@@ -1523,3 +1523,7 @@ Decisión de Johan implementada en propuesta aislada: lectores legítimos del do
 
 ## Project data — filtro y orden aprobados
 Preparado sobre ab102489, v456 provisional: filtro sobre referencia completa, orden ascendente/descendente y original, contador visible/total sin alterar filas ni fracciones. Dos pruebas de dominio, DOM y Chromium PC 1440x1000/móvil 390x844 PASS con fixtures locales; capturas inspeccionadas. SQL privado/lector se entrega separado sobre 2b35890; no despliegue, producción ni reimportación. Retail y etiquetas intactos.
+
+
+## 2026-11-14 — integración LOCAL v456, no publicada
+Retail2b35890 + SQL a0e4691 + UI10a6394 + etiquetasad8addc reunidos en review/opt-v456-integration, ramas fuente intactas. Versión456 provisional; código conservado, pruebas focalizadas y release PASS. Contención de Project data probada, sin escrituras alojadas. Library siguev1 por fallo tools/list previo a transferencia. Plan vigente: docs/opt-import-endpoint/release-review/V456_INTEGRATION_PREPARATION.md.

@@ -1,6 +1,6 @@
 {
   "schema": "OPT-RETAIL-SOURCE-1",
-  "sourceSha256": "fe42bb731a891a1be2b2b1d6b3a2109b34ad12cf5edd2fb2b41bec5edc13d045",
+  "sourceSha256": "cc654bba2ba1e8eb1abfc418b7b965b5e2bb685180998f87b5f04c346c25e560",
   "inputs": [
     {
       "path": "functions/index.js",
@@ -63,8 +63,12 @@
       "sha256": "dd7854d86e9cf3a8c67605bfcbe6179a26e6bfbac1d66b099bdd0d34a1a7d94d"
     },
     {
+      "path": "opt-digital/project-data-extraction.js",
+      "sha256": "7a125ebb52ce789e6e59c921958baea2110afc4b2c77135cb0c740263b562978"
+    },
+    {
       "path": "opt-digital/reservation-summary.js",
-      "sha256": "266d3c72098e3e750c1239e2aa881a155147256aeff1e2847470c1bf70bfaaa3"
+      "sha256": "8e8ed22b70f42dbe0617bf67345f5d7c94907f85bd943f703179a43cbc8e2612"
     },
     {
       "path": "opt-digital/scope-panel.js",
@@ -80,7 +84,7 @@
     },
     {
       "path": "opt-digital/workflow.js",
-      "sha256": "df19af315338c0dac53148a0a32a30b1f0e590152bb58a16e2ef882b304d6ce3"
+      "sha256": "eb5557febc38a68f2c90baeb164a447601503acacb85cea985dff9da2185e988"
     },
     {
       "path": "package-lock.json",
@@ -292,7 +296,7 @@
     },
     {
       "path": "src/domain/opt-document-summary.js",
-      "sha256": "56d032a4a8f1d0d2044bfbbc63e376c0e785f15a4d06dc7295d4ef8a28920de4"
+      "sha256": "2171365435eab4d3bab5b41259c9c6158d82e103472adf7932e0a465e81e0026"
     },
     {
       "path": "src/domain/opt-import-endpoint.js",
@@ -333,6 +337,14 @@
     {
       "path": "src/domain/opt-physical-cuts.js",
       "sha256": "d238489a6967b2d63557d0ab6c02c979fc3dcf388977f48d59d45b7bc977534b"
+    },
+    {
+      "path": "src/domain/opt-project-data.js",
+      "sha256": "a009a59098052c65ae5a74df24126c7adb7a9df74ba4cc520c18d236c74de286"
+    },
+    {
+      "path": "src/domain/opt-reservation-label.js",
+      "sha256": "801cc50dd1f1de4cf50e915cf993dfcbf2765b42972526056748d019c3ea9802"
     },
     {
       "path": "src/domain/opt-rounding-compatibility.js",

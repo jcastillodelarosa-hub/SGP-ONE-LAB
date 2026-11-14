@@ -48,6 +48,15 @@ for(const args of [['valid-user-a',scope,'OTHER'],['valid-user-a',scope,'RES','O
 for(const column of ['sha256','manifest_sha256']){await db.exec('BEGIN');await db.query(`UPDATE sgp_opt_shared.documents SET ${column}=$1 WHERE id_documento=$2`,['e'.repeat(64),id(1)]);assert.equal((await read()).documents[0].summary.projectData,undefined);await db.exec('ROLLBACK');}
 await db.exec('BEGIN');await db.exec('ALTER TABLE sgp_opt_shared.project_data_metadata DISABLE TRIGGER project_data_no_mutation');await db.query('UPDATE sgp_opt_shared.project_data_metadata SET metadata_sha256=$1 WHERE id_documento=$2',['f'.repeat(64),id(1)]);assert.equal((await read()).documents[0].summary.projectData,undefined);await db.exec('ROLLBACK');
 assert.deepEqual(await config(),originalConfig);assert.deepEqual(await snapshots(),originalSnapshots);await db.exec(install);assert.deepEqual(await config(),originalConfig);
+// Containment is idempotent, retains private metadata/legacy summaries, and can resume.
+const metadataBefore=JSON.stringify((await db.query('SELECT * FROM sgp_opt_shared.project_data_metadata ORDER BY id_documento')).rows);
+const contain=readFileSync(new URL('project_data_containment_REVIEW.sql',import.meta.url),'utf8');
+await db.exec(contain);await db.exec(contain);
+const contained=await read();assert(contained.documents.every(d=>!d.summary?.projectData));assert.equal(contained.documents[2].status,'NOT_PERSISTED');
+for(const d of contained.documents.slice(0,2)){assert.deepEqual(d.summary.cutRows,summary.cutRows);assert.deepEqual(d.summary.materialRows,summary.materialRows);}
+assert.deepEqual(await config(),originalConfig);assert.deepEqual(await snapshots(),originalSnapshots);
+assert.equal(JSON.stringify((await db.query('SELECT * FROM sgp_opt_shared.project_data_metadata ORDER BY id_documento')).rows),metadataBefore);
+await assert.rejects(read(null),/DENIED/);await db.exec(install);assert.equal((await read()).documents[0].summary.projectData.totalQuantity,16);
 // Accept previously staged guard, preserving grants; reject unknown source.
 await db.exec(baseline);await db.exec(readFileSync(new URL('project_data_inline_guard_REVIEW.sql',import.meta.url),'utf8'));await db.exec(install);assert.equal((await read()).documents[0].summary.projectData.totalQuantity,16);
 await db.exec(baseline.replace('DECLARE docs jsonb;','DECLARE docs jsonb; -- unknown revision'));await assert.rejects(db.exec(install),/READER_CHANGED/);await db.exec('ROLLBACK');

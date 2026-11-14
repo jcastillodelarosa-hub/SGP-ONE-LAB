@@ -1,3 +1,5 @@
+> Integración actual: ver V456_INTEGRATION_PREPARATION.md y ../../sql-proposals/opt-shared/PROJECT_DATA_STORE_REVIEW.md. La decisión de visibilidad ya fue autorizada por Johan; las propuestas y gates anteriores se conservan como antecedentes. No aplicar este documento histórico como una migración.
+
 # Project data detail — prepared locally, not published
 
 Base main ab10248937e78e20b6b38c3da07ba9fc4a598b14; isolated branch feat/project-data-local. Candidate LAB v456 only; coordinate final version with Retail/labels before integration. Retail branch and backend remain unchanged.
