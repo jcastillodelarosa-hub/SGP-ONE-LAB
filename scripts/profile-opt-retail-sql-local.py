@@ -6,7 +6,7 @@ import json,re,subprocess,sys
 from pathlib import Path
 root=Path(__file__).resolve().parents[1];container,context_path,*payload_paths=sys.argv[1:]
 assert container.startswith('sgp-retail-') and payload_paths,'Dedicated local container required'
-snap=json.loads(Path(context_path).read_text());results=[]
+snap=json.loads(Path(context_path).read_text());results=[];prepared=[]
 def sql(q,db='postgres'):
  r=subprocess.run(['docker','exec','-i',container,'psql','-X','-U','postgres','-d',db,'-At','-v','ON_ERROR_STOP=1'],input=q,text=True,capture_output=True)
  if r.returncode:raise RuntimeError('Local SQL failed: '+r.stderr[-400:])
@@ -36,10 +36,12 @@ for number,path in enumerate(payload_paths):
  current=json.loads(sql('SELECT public.sgp_opt_import_contexto_retail_v3('+','.join(cargs)+');',db));binding['revision']=current['revision']
  args=[quote(payload['p_token']),quote(payload['p_pdf'])+'::bytea']+[quote(json.dumps(payload[k]))+'::jsonb' for k in ['p_manifest','p_sources','p_evidence']]
  call='SELECT public.sgp_opt_importar_retail_validado_v3('+','.join(args)+');'
+ prepared.append({'db':db,'call':call,'context':ctx})
+ if globals().get('PROFILE_PREPARE_ONLY',False):continue
  # Exact normal writer first; no instrumentation or synthetic delay.
  trials=[]
  for run in range(4):
   out=sql('\\timing on\n'+call,db);receipt=json.loads(next(line for line in out.splitlines() if line.startswith('{')));ms=float(re.search(r'Time: ([0-9.]+) ms',out).group(1));trials.append({'run':run,'duplicate':receipt['duplicado'],'sqlWallMs':ms})
  counts=sql('SELECT (SELECT count(*) FROM sgp_opt_shared.documents),(SELECT count(*) FROM sgp_opt_shared.pieces),(SELECT count(*) FROM sgp_opt_shared.document_plans),(SELECT count(*) FROM sgp_opt_shared.cuts);',db).strip()
  results.append({'fixture':chr(65+number),'trials':trials,'counts_document_pieces_geometry_cuts':counts})
-print(json.dumps({'engine':'PostgreSQL17.11','privateSnapshotLocalOnly':True,'timing':'whole writer, upper bound on internal table-lock duration; transaction ends after statement','productionWrites':0,'results':results,'limits':'Local schema fixture, observed persistence function, private original manifests; not live DB load/latency.'},indent=2))
+if not globals().get('PROFILE_PREPARE_ONLY',False):print(json.dumps({'engine':'PostgreSQL17.11','privateSnapshotLocalOnly':True,'timing':'whole writer, upper bound on internal table-lock duration; transaction ends after statement','productionWrites':0,'results':results,'limits':'Local schema fixture, observed persistence function, private original manifests; not live DB load/latency.'},indent=2))

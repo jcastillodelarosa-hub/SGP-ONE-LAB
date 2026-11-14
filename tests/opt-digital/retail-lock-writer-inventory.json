@@ -1,0 +1,134 @@
+{
+  "counts": {
+    "details": 448,
+    "profiles": 236,
+    "programs": 178,
+    "productions": 1386
+  },
+  "functions": [
+    {
+      "name": "public.sgp_cargar_paquete_semanal",
+      "locks": [
+        " if not pg_try_advisory_xact_lock(hashtext('SGP_CARGA_SEMANAL'),p_anio*100+p_semana) then",
+        " if not pg_try_advisory_xact_lock(hashtext('SGP_CARGA_SEMANAL_REPROGRAMACION'),0) then",
+        "  order by p.key_produccion for update of p loop"
+      ]
+    },
+    {
+      "name": "public.sgp_mecanizado_programacion_reordenar",
+      "locks": []
+    },
+    {
+      "name": "public.sgp_mecanizado_reprogramar_orden",
+      "locks": [
+        " select * into v_origen from public.sgp_mecanizado_programacion where id_programacion=p_id_programacion for update;"
+      ]
+    },
+    {
+      "name": "public.sgp_mecanizado_reconciliar_programacion_legacy",
+      "locks": []
+    },
+    {
+      "name": "public.sgp_mecanizado_programar",
+      "locks": [
+        "   perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended(v_key,742));"
+      ]
+    },
+    {
+      "name": "public.sgp_admin_maestro_piezas_guardar",
+      "locks": [
+        " select * into v_antes from public.sgp_maestro_piezas where codigo_sap=btrim(p_codigo_sap) for update;"
+      ]
+    },
+    {
+      "name": "public.sgp_mecanizado_partes_programar",
+      "locks": [
+        " perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended(p_clave::text,741));",
+        " perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended(p_key,742));"
+      ]
+    },
+    {
+      "name": "public.sgp_mecanizado_parte_mover",
+      "locks": [
+        " perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended(pt.key_produccion,742));",
+        " select * into strict mp from public.sgp_mecanizado_programacion where id_programacion=p_id for update;"
+      ]
+    },
+    {
+      "name": "public.sgp_export_aprobar",
+      "locks": [
+        " PERFORM pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended('EXPORT:'||l.linea,0));",
+        " FOR f IN SELECT * FROM sgp_export_revision.filas WHERE lote_id=p_lote_id AND estado='PENDIENTE' AND (cardinality(tipo_cambio)=0 OR id=ANY(coalesce(p_filas,ARRAY[]::uuid[]))) ORDER BY key_produccion FOR UPDATE LOOP",
+        "  SELECT * INTO old FROM public.sgp_producciones WHERE key_produccion=f.key_produccion FOR UPDATE;"
+      ]
+    }
+  ],
+  "triggers": [
+    {
+      "table": "sgp_mecanizado_programacion",
+      "definition": "CREATE TRIGGER parcial_proteger_header BEFORE DELETE OR UPDATE ON public.sgp_mecanizado_programacion FOR EACH ROW EXECUTE FUNCTION sgp_mecanizado_parcial.proteger()",
+      "locks": []
+    },
+    {
+      "table": "sgp_mecanizado_programacion",
+      "definition": "CREATE TRIGGER sgp_mecanizado_validar_prioridad_nueva BEFORE INSERT ON public.sgp_mecanizado_programacion FOR EACH ROW EXECUTE FUNCTION sgp_mecanizado_validar_prioridad_nueva()",
+      "locks": []
+    },
+    {
+      "table": "sgp_mecanizado_programacion",
+      "definition": "CREATE TRIGGER trg_pdt_manual_programacion_origen BEFORE DELETE OR UPDATE ON public.sgp_mecanizado_programacion FOR EACH ROW EXECUTE FUNCTION sgp_pdt_manual.proteger_programacion_origen()",
+      "locks": []
+    },
+    {
+      "table": "sgp_mecanizado_programacion",
+      "definition": "CREATE TRIGGER trg_sgp_mecanizado_programada_insert BEFORE INSERT ON public.sgp_mecanizado_programacion FOR EACH ROW EXECUTE FUNCTION sgp_mecanizado_programada_al_insertar()",
+      "locks": []
+    },
+    {
+      "table": "sgp_mecanizado_programacion",
+      "definition": "CREATE TRIGGER trg_sgp_mecanizado_programada_update BEFORE UPDATE OF estado ON public.sgp_mecanizado_programacion FOR EACH ROW EXECUTE FUNCTION sgp_mecanizado_programada_al_actualizar()",
+      "locks": []
+    },
+    {
+      "table": "sgp_mecanizado_programacion",
+      "definition": "CREATE TRIGGER trg_sgp_pdt_programacion_origen BEFORE DELETE OR UPDATE ON public.sgp_mecanizado_programacion FOR EACH ROW EXECUTE FUNCTION sgp_pdt_proteger_programacion_origen()",
+      "locks": []
+    },
+    {
+      "table": "sgp_mecanizado_programacion_detalle",
+      "definition": "CREATE TRIGGER parcial_proteger_detalle BEFORE DELETE OR UPDATE ON public.sgp_mecanizado_programacion_detalle FOR EACH ROW EXECUTE FUNCTION sgp_mecanizado_parcial.proteger_detalle()",
+      "locks": []
+    },
+    {
+      "table": "sgp_mecanizado_programacion_detalle",
+      "definition": "CREATE TRIGGER sgp_mecanizado_prevenir_detalle_duplicado BEFORE INSERT ON public.sgp_mecanizado_programacion_detalle FOR EACH ROW EXECUTE FUNCTION sgp_mecanizado_prevenir_detalle_duplicado()",
+      "locks": [
+        " perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended(new.key_produccion,742));",
+        " perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended(v_reserva||'|'||new.key_produccion,0));"
+      ]
+    },
+    {
+      "table": "sgp_producciones",
+      "definition": "CREATE TRIGGER lp_plan_catalogo AFTER UPDATE OF excluida_export, id_linea ON public.sgp_producciones FOR EACH ROW EXECUTE FUNCTION sgp_lp_operacion.plan_observar_catalogo()",
+      "locks": []
+    },
+    {
+      "table": "sgp_producciones",
+      "definition": "CREATE TRIGGER parcial_proteger_total BEFORE UPDATE OF cantidad, produccion, id_linea, key_produccion ON public.sgp_producciones FOR EACH ROW EXECUTE FUNCTION sgp_mecanizado_parcial.proteger_total()",
+      "locks": [
+        "  perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended(old.key_produccion,742));"
+      ]
+    },
+    {
+      "table": "sgp_producciones",
+      "definition": "CREATE TRIGGER trg_pdt_anio_inmutable BEFORE UPDATE OF anio ON public.sgp_producciones FOR EACH ROW EXECUTE FUNCTION sgp_pdt_manual.proteger_anio_programacion()",
+      "locks": []
+    },
+    {
+      "table": "sgp_producciones",
+      "definition": "CREATE CONSTRAINT TRIGGER trg_pdt_manual_auditar_programacion AFTER UPDATE ON public.sgp_producciones DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION sgp_pdt_manual.auditar_programacion()",
+      "locks": []
+    }
+  ],
+  "limitations": "Static catalog inspection, not exhaustive dynamic SQL or administrative writer inventory; enough counterexamples to disprove universal per-reservation cooperation."
+}
