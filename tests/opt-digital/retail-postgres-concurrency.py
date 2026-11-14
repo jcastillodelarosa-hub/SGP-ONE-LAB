@@ -19,7 +19,7 @@ def lit(v):return "'"+v.replace("'","''")+"'"
 args=[lit(payload['p_token']),lit(payload['p_pdf'])+'::bytea']+[lit(json.dumps(payload[k]))+'::jsonb' for k in ['p_manifest','p_sources','p_evidence']]
 call='SELECT public.sgp_opt_importar_retail_validado_v3('+','.join(args)+');'
 results=[]
-for mode,target in [(m,t) for m in ['baseline','hardened'] for t in ['production','program']]:
+for mode,target in [(m,t) for m in ['baseline','hardened'] for t in ['production','program','unrelated_program']]:
  db='retail_'+mode+'_'+target;require(sql('CREATE DATABASE '+db));require(sql(seed+alter,db))
  for name in ['install_REVIEW.sql','import_context_retail_v3_REVIEW.sql','import_channel_retail_v3_REVIEW.sql']:
   path='docs/sql-proposals/opt-shared/'+name
@@ -40,6 +40,8 @@ for mode,target in [(m,t) for m in ['baseline','hardened'] for t in ['production
  assert ready,'Writer did not reach controlled post-reread point: '+a.stderr.read() if a.poll() is not None else 'writer not ready'
  assert require(sql("BEGIN; SELECT pg_try_advisory_xact_lock(hashtextextended('OPT2099-46-5-TEST-3',440)); ROLLBACK;",db)).splitlines()[1]=='f'
  insert="INSERT INTO public.sgp_producciones SELECT 'competing',id,id_linea,reserva_al,sistema,anio,semana_base,activa,excluida_export,produccion FROM public.sgp_producciones WHERE id_linea='PANELES_2';" if target=='production' else "INSERT INTO public.sgp_mecanizado_programacion VALUES('00000000-0000-0000-0000-000000000002','9000001','SIN INICIAR'); INSERT INTO public.sgp_mecanizado_programacion_detalle VALUES('00000000-0000-0000-0000-000000000002','123456|PANELES_2','9000001',1);"
+ if target=='unrelated_program':
+  insert="INSERT INTO public.sgp_mecanizado_programacion VALUES('00000000-0000-0000-0000-000000000099','9999999','SIN INICIAR');"
  b=sql("BEGIN; SET lock_timeout='300ms'; "+insert+" COMMIT;",db)
  a.wait(timeout=8);assert a.returncode==0,a.stderr.read()
  if mode=='baseline':assert b.returncode==0,b.stderr

@@ -18,6 +18,13 @@
       "counts_document_competitor_cuts": "1|0|0"
     },
     {
+      "mode": "baseline",
+      "target": "unrelated_program",
+      "sharedConsecutiveLock": true,
+      "insertAfterFinalRead": "committed",
+      "counts_document_competitor_cuts": "1|0|0"
+    },
+    {
       "mode": "hardened",
       "target": "production",
       "sharedConsecutiveLock": true,
@@ -28,6 +35,13 @@
     {
       "mode": "hardened",
       "target": "program",
+      "sharedConsecutiveLock": true,
+      "insertAfterFinalRead": "blocked_until_import_commit",
+      "counts_document_competitor_cuts": "1|0|0"
+    },
+    {
+      "mode": "hardened",
+      "target": "unrelated_program",
       "sharedConsecutiveLock": true,
       "insertAfterFinalRead": "blocked_until_import_commit",
       "counts_document_competitor_cuts": "1|0|0"

@@ -1,0 +1,105 @@
+{
+  "status": "LOCAL_VALIDATION_ONLY_NOT_RELEASE_READY",
+  "runtime": "supabase/edge-runtime:v1.70.5",
+  "imageDigest": "sha256:941e21883ad961ce52da5caba666456a6f61f72c5131b3d22be7cfc2cec5d325",
+  "cpuHardLimitMs": 2000,
+  "memoryLimitMb": 256,
+  "network": "none",
+  "workers": "fresh user workers, module cache enabled",
+  "path": "original PDF + entire original XLSX + private read-only context snapshot + reconciliation + manifest + new geometry serializer + real PostgREST request/receipt JSON codec; RPC persistence receipt synthetic",
+  "baselineCpuMs": {
+    "A": [
+      1028,
+      982,
+      977
+    ],
+    "B": [
+      870,
+      904,
+      935
+    ]
+  },
+  "optimizedCpuMs": {
+    "A": [
+      718,
+      674,
+      600
+    ],
+    "B": [
+      557,
+      646,
+      601
+    ]
+  },
+  "geometryPlans": [
+    59,
+    57
+  ],
+  "documentaryPieces": [
+    255,
+    200
+  ],
+  "sql": {
+    "engine": "PostgreSQL17.11",
+    "privateSnapshotLocalOnly": true,
+    "timing": "whole writer, upper bound on internal table-lock duration; transaction ends after statement",
+    "productionWrites": 0,
+    "results": [
+      {
+        "fixture": "A",
+        "trials": [
+          {
+            "run": 0,
+            "duplicate": false,
+            "sqlWallMs": 109.124
+          },
+          {
+            "run": 1,
+            "duplicate": true,
+            "sqlWallMs": 69.579
+          },
+          {
+            "run": 2,
+            "duplicate": true,
+            "sqlWallMs": 58.603
+          },
+          {
+            "run": 3,
+            "duplicate": true,
+            "sqlWallMs": 50.39
+          }
+        ],
+        "counts_document_pieces_geometry_cuts": "1|255|1|0"
+      },
+      {
+        "fixture": "B",
+        "trials": [
+          {
+            "run": 0,
+            "duplicate": false,
+            "sqlWallMs": 59.935
+          },
+          {
+            "run": 1,
+            "duplicate": true,
+            "sqlWallMs": 39.975
+          },
+          {
+            "run": 2,
+            "duplicate": true,
+            "sqlWallMs": 39.859
+          },
+          {
+            "run": 3,
+            "duplicate": true,
+            "sqlWallMs": 54.886
+          }
+        ],
+        "counts_document_pieces_geometry_cuts": "1|200|1|0"
+      }
+    ],
+    "limits": "Local schema fixture, observed persistence function, private original manifests; not live DB load/latency."
+  },
+  "productionWrites": 0,
+  "limits": "No hosted hardware/load guarantee. SQL measured separately, not inside Edge. SQL statement wall time bounds internal lock duration only in autocommit fixture. No peak-memory claim."
+}

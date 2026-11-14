@@ -4,10 +4,18 @@ import { primaryReservation } from './opt-index-reconciliation.js';
 
 const canonical = text => String(text ?? '').normalize('NFD')
   .replace(/[\u0300-\u036f]/g, '').toUpperCase().replace(/[^A-Z0-9]/g, '');
-const pick = (row, aliases) => {
-  const columns = Object.keys(row ?? {});
-  const col = columns.find(name => aliases.some(alias => canonical(name) === canonical(alias)));
-  return col === undefined ? '' : row[col];
+const aliases = Object.fromEntries(Object.entries({
+  opt:['Consecutivo','Consecutivo OPT','consecutive','ID Optimización','Id Optimizacion','OPT'],
+  reservation:['# Reserva','N. Reserva','No Reserva','Reserva','Numero reserva'],
+  system:['Sistema','sistemas'],
+  production:['Producción','Produccion','Descripción','Descripcion','Nombre Produccion'],
+  project:['Proyecto'],finish:['Acabado']
+}).map(([field,names])=>[field,new Set(names.map(canonical))]));
+// Canonicalize each column once per row, preserving original first-column priority.
+// Rows may have different key order/schema; never reuse the first row's mapping.
+const rowPicker = row => {
+  const columns=Object.keys(row??{}).map(name=>({name,canonical:canonical(name)}));
+  return field=>{const column=columns.find(column=>aliases[field].has(column.canonical));return column===undefined?'':row[column.name];};
 };
 const asText = value => String(value ?? '').trim();
 
@@ -15,16 +23,16 @@ export function normalizeOptRows(rows, origin, {exactReservations=false}={}) {
   if (!Array.isArray(rows)) throw new TypeError('Las filas deben ser un arreglo');
   if (!['RETAIL', 'PROYECTO'].includes(origin)) throw new Error('Origen no admitido');
   return rows.map((row, index) => {
-    const opt = asText(pick(row, ['Consecutivo', 'Consecutivo OPT', 'consecutive', 'ID Optimización', 'Id Optimizacion', 'OPT']));
+    const pick=rowPicker(row),opt=asText(pick('opt'));
     return {
       origin, sourceRow: index + 2, opt,
       // PROYECTO cells are documentary selectors, not SGP primary-reservation lists.
       // Preserve all text so a multi-reservation cell cannot silently choose one.
-      reservation: (origin === 'PROYECTO' || exactReservations ? asText : primaryReservation)(pick(row, ['# Reserva', 'N. Reserva', 'No Reserva', 'Reserva', 'Numero reserva'])),
-      system: asText(pick(row, ['Sistema', 'sistemas'])),
-      production: asText(pick(row, ['Producción', 'Produccion', 'Descripción', 'Descripcion', 'Nombre Produccion'])),
-      project: asText(pick(row, ['Proyecto'])),
-      finish: asText(pick(row, ['Acabado']))
+      reservation: (origin === 'PROYECTO' || exactReservations ? asText : primaryReservation)(pick('reservation')),
+      system: asText(pick('system')),
+      production: asText(pick('production')),
+      project: asText(pick('project')),
+      finish: asText(pick('finish'))
     };
   }).filter(row => row.opt);
 }

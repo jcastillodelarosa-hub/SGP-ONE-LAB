@@ -10,7 +10,7 @@ import {SaxesParser} from 'npm:saxes@6.0.0';
 import {readOptPdf} from '../supabase/functions/opt-import/pdf-runtime.ts';
 import {createOptImportHandler} from '../src/server/opt-import-handler.js';
 import {createWorksheetXMLReader} from '../src/server/opt-worksheet-stream.js';
-const [indexPath,pdfPath,contextPath,mode='STREAM']=Deno.args;
+const [indexPath,pdfPath,contextPath,mode='STREAM',privatePayloadPath]=Deno.args;
 if(!indexPath||!pdfPath||!['DOM','STREAM'].includes(mode))throw Error('INDEX.xlsx PDF.pdf [context.json or -] [DOM|STREAM]');
 const index=await Deno.readFile(indexPath),pdf=await Deno.readFile(pdfPath);
 const hash=async(bytes:Uint8Array)=>Buffer.from(await crypto.subtle.digest('SHA-256',bytes)).toString('hex');
@@ -35,6 +35,7 @@ const handler=createOptImportHandler({retailV3:true,retailOnly:true,serializeRet
   const persisted=args.p_manifest.map((p:any)=>Math.round(p.longitud_mm*32/25.4)).sort((a:number,b:number)=>a-b);
   if(JSON.stringify(printed)!==JSON.stringify(persisted))throw Error('PROFILE_PRINTED_LENGTHS_CHANGED');
   writeBoundary={geometryPlans:args.p_evidence.documentary_plans.plans.length,geometryCuts:args.p_evidence.documentary_plans.plans.flatMap((p:any)=>p.bars.flatMap((b:any)=>b.cuts)).length,syntheticExtractorHash:true,printedLengthsPreserved:true,validationWarnings:args.p_evidence.validation_warnings,roundingPolicy:args.p_evidence.rounding_policy,roundingStatuses:args.p_evidence.rounding_evidence.map((p:any)=>p.diagnostic.status),manifestPieces:args.p_manifest.length,unassigned:args.p_manifest.filter((p:any)=>p.asignacion===null).length,manifestSha256:await hash(new TextEncoder().encode(JSON.stringify(args.p_manifest)))};
+  if(privatePayloadPath)await Deno.writeTextFile(privatePayloadPath,JSON.stringify(args));
   throw Error('PROFILE_WRITE_STOPPED');
  }
  throw Error('PROFILE_RPC_DENIED');
