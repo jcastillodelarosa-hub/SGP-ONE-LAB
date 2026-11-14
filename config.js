@@ -1,4 +1,6 @@
 window.SGP_CONFIG = Object.freeze({
+  // Retail con índice usa el endpoint aislado; paused detiene esa ruta sin fallback.
+  optRetailMode: "candidate",
   // Solo configuración pública del cliente web LAB.
   // La protección de datos permanece en RLS/RPC de Supabase.
   supabaseUrl: "https://ocvxbwzqxbrfndkvjmfx.supabase.co",
