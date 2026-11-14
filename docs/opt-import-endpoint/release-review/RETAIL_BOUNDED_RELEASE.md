@@ -30,3 +30,5 @@ Rollback: set optRetailMode=paused first, settle in-flight/uncertain outcomes, p
 Remaining prepublication requirements: hosted timeout-hoisting/config verification; final unused version/merged artifact and source/bundle verification; endpoint cleanup path; explicit SQL/Edge/UI deployment authorization. No Resumen changes included in this work.
 
 Reference: https://docs.postgrest.org/en/v12/references/configuration.html#db-hoisted-tx-settings .
+
+Read-only gate follow-up: see READ_ONLY_PUBLICATION_GATES.md. Hosted PostgREST14.18 observed, effective hoisting still not exposed by available tools. Functional retirement artifact prepared as an alternative to deletion, requiring future acceptance/authorization. Labels ad8addc merge-tree conflicts only in continuity docs; no integration performed.
