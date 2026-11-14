@@ -1,0 +1,20 @@
+// Local validation of the sandbox-only adapter. No network/DB permissions required.
+import process from 'node:process';
+import {Buffer} from 'node:buffer';
+import {basename} from 'node:path';
+import {DOMParser} from 'npm:@xmldom/xmldom@0.9.12';
+import {SaxesParser} from 'npm:saxes@6.0.0';
+import {createWorksheetXMLReader} from '../src/server/opt-worksheet-stream.js';
+import {createOptImportProbe} from '../src/server/opt-import-probe.js';
+import {readOptPdf} from '../supabase/functions/opt-import/pdf-runtime.ts';
+const [indexPath,pdfPath,contextPath]=Deno.args;
+if(!indexPath||!pdfPath||!contextPath)throw Error('INDEX PDF READ_ONLY_CONTEXT required');
+const opt=basename(pdfPath).replace(/\.pdf$/i,''),snapshot=JSON.parse(await Deno.readTextFile(contextPath));
+const secret=Buffer.from(crypto.getRandomValues(new Uint8Array(32))).toString('hex');
+const payload={context:snapshot.snapshots?.[opt]||snapshot,request:{p_token:'synthetic',scope:{linea:'PANELES_2',anio:2026,semana:46,modo:'BASE'},source:{origin:'RETAIL',opt,mode:'INDICE'},pdf:{name:basename(pdfPath),base64:Buffer.from(await Deno.readFile(pdfPath)).toString('base64')},index:{name:basename(indexPath),format:'xlsx',sheet:'ARCHIVOS',base64:Buffer.from(await Deno.readFile(indexPath)).toString('base64')}}};
+const probe=createOptImportProbe({secret,DOMParser,readPdf:readOptPdf,readWorksheetXML:createWorksheetXMLReader(SaxesParser)});
+globalThis.fetch=(()=>{throw Error('PROBE_NETWORK_DENIED');}) as typeof fetch;
+const request=new Request('https://offline.invalid',{method:'POST',headers:{'x-opt-probe-secret':secret},body:JSON.stringify(payload)}),cpu=process.cpuUsage();
+const result=await (await probe(request)).json(),used=process.cpuUsage(cpu);
+console.log(JSON.stringify({runtime:Deno.version,result,localProcessCpuMs:(used.user+used.system)/1000,memory:Deno.memoryUsage(),limits:'Local Deno; not hosted Edge CPU or database persistence.'},null,2));
+if(result.outcome!=='VALIDATED_STOPPED_BEFORE_WRITE'||result.writes!==0)Deno.exit(1);
