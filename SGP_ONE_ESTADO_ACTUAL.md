@@ -1506,3 +1506,7 @@ se incrementan de354 a355. Caso8+57=65 y controles de Issue97 conservados;259 pr
 34 aserciones SQL aisladas y PC/móvil aprobados. Ver checkpoint y tests/issue97/README.md.
 No fusionado/desplegado; publicación y aplicación productiva requieren autorización
 posterior. Este hito no sustituye la versión actualmente publicada.
+
+
+## Project data — preparación autorizada de lectura completa
+Decisión de Johan implementada en propuesta aislada: lectores legítimos del documento ven metadata completa verificada; sesión/ámbito/admisión preservados. Pruebas SQL sintéticas PASS, tablas operativas intactas. Ver docs/sql-proposals/opt-shared/PROJECT_DATA_STORE_REVIEW.md. Retail 2b35890 intacto; no producción/despliegue/reimportación.

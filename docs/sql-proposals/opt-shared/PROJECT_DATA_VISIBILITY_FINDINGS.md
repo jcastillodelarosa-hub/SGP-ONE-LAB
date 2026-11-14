@@ -1,3 +1,15 @@
+# Current decision: complete Project data for legitimate document readers
+
+Johan explicitly authorized: «Que la puedan ver todos y que se pueda ordenar y filtrar por la refwrncia». This resolves the former visibility decision: all users already admitted to a document through the existing actor/scope/assignment predicate can see its complete verified Project data, including other order references. It does not grant document access, anonymous sessions, or cut registration. No row-to-order inference is used.
+
+The prior investigation below is historical evidence. Its omission recommendation and pending owner decision are superseded. `project_data_document_reader_REVIEW.sql` is the current preparation: the SAME existing summary RPC strips unverified inline Project data from either legacy source and adds only private metadata joined by document/PDF/manifest and metadata digest. No alternate granted reader bypass is introduced. The provisional deny-all adapter was removed from the unapplied proposal.
+
+Apply only after separate deployment authorization: private store proposal, then exact-fingerprint reader replacement. The older inline guard is a historical transition/containment artifact, not an additional installation step. Unknown live definition aborts. Existing ACL, actor, scope and document admission are retained. Tests cover both approved readers, null/invalid sessions, unrelated scope/document, metadata integrity and unchanged operational hashes. No production change occurred.
+
+---
+
+## Historical investigation (superseded decision)
+
 # Bounded visibility investigation and direct-reader guard
 
 Preparation only. No production function, permission, data, Retail runtime or existing summary values changed. v456 remains provisional in the independent UI patch. This note supersedes any assumption that the new ungranted adapter alone prevents inline disclosure.

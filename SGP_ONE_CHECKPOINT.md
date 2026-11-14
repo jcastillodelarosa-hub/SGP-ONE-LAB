@@ -1985,3 +1985,7 @@ Read-only publication follow-up: PostgREST14.18 present; effective hoisting not 
 Project data storage isolated branch: append-only owner-only recovery SQL and ungranted read adapter pass synthetic SQL hash/idempotence/rollback/ACL/scope/operational invariants. Adapter deliberately omits full references until authoritative row visibility exists; no guessing by strings. Version1 UI patch inspected via Library text and applied only to isolated QA baseline; PC/mobile browser passed with installed Chromium harness override. No UI/production/Retail changes. See docs/sql-proposals/opt-shared/PROJECT_DATA_STORE_REVIEW.md.
 
 Visibility investigation: no complete authoritative source-item/all-orders relation found; document access differs from redacted order labels. Old granted summary RPC can expose inline/sidecar projectData. Prepared exact-definition guard strips only that field, preserves response/ACL/owner and refuses changed baseline; synthetic direct-RPC bypass test PASS. Production untouched; owner decision required for complete-reference disclosure. See PROJECT_DATA_VISIBILITY_FINDINGS.md. UIv456 remains separate.
+
+
+## Project data — preparación autorizada de lectura completa
+Decisión de Johan implementada en propuesta aislada: lectores legítimos del documento ven metadata completa verificada; sesión/ámbito/admisión preservados. Pruebas SQL sintéticas PASS, tablas operativas intactas. Ver docs/sql-proposals/opt-shared/PROJECT_DATA_STORE_REVIEW.md. Retail 2b35890 intacto; no producción/despliegue/reimportación.

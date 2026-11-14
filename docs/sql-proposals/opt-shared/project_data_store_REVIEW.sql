@@ -110,27 +110,6 @@ BEGIN
 END $$;
 REVOKE ALL ON FUNCTION sgp_opt_shared.recover_project_data_reviewed(jsonb) FROM PUBLIC,anon,authenticated,service_role;
 
--- Read adapter preserves existing actor/scope/document selection. Not granted/wired.
--- Full references may name other orders: no validated disclosure association exists.
--- Fail closed until a separate row-visibility contract is reviewed. Storage is not consent.
-CREATE FUNCTION public.sgp_opt_resumen_project_data_review_v1(p_token text,p_scope jsonb,p_reserva text,p_sistema text)
-RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
-DECLARE base jsonb; item jsonb; result jsonb:='[]'::jsonb; metadata_found boolean;
-BEGIN
- PERFORM sgp_opt_shared.actor(p_token,false);
- PERFORM sgp_opt_shared.validate_scope(p_scope);
- base:=public.sgp_opt_resumen_documental_v1(p_token,p_scope,p_reserva,p_sistema);
- FOR item IN SELECT value FROM jsonb_array_elements(base->'documents') LOOP
-  SELECT EXISTS(SELECT 1 FROM sgp_opt_shared.project_data_metadata m
-   JOIN sgp_opt_shared.documents d USING(id_documento)
-   WHERE m.id_documento=(item->>'id_documento')::uuid AND m.pdf_sha256=item->>'sha256'
-   AND m.pdf_sha256=d.sha256 AND m.manifest_sha256=d.manifest_sha256) INTO metadata_found;
-  -- Also remove inline projectData so the new optional field cannot bypass review.
-  IF jsonb_typeof(item->'summary')='object' THEN item:=jsonb_set(item,'{summary}',(item->'summary')-'projectData'); END IF;
-  result:=result||jsonb_build_array(item||jsonb_build_object('projectDataStatus',
-   CASE WHEN metadata_found THEN 'ASSOCIATION_NOT_AUTHORIZED' ELSE 'NOT_PERSISTED' END));
- END LOOP;
- RETURN jsonb_set(base,'{documents}',result);
-END $$;
-REVOKE ALL ON FUNCTION public.sgp_opt_resumen_project_data_review_v1(text,jsonb,text,text) FROM PUBLIC,anon,authenticated,service_role;
+-- Reader is installed separately with existing-document admission and existing ACL.
+-- See project_data_document_reader_REVIEW.sql. No new reader grant is introduced.
 COMMIT;

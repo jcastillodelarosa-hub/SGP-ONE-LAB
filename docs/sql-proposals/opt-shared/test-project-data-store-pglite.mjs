@@ -33,21 +33,12 @@ assert.deepEqual((await run(batch)).rows[0].result,{inserted:2,duplicates:0});as
 bad=structuredClone(batch);bad[0].projectData.rows[0].reference+=' CHANGED';await assert.rejects(run(bad),/REPLAY_MISMATCH/);
 bad=structuredClone(batch);bad[0].extractor_sha256='c'.repeat(64);await assert.rejects(run(bad),/REPLAY_MISMATCH/);
 await assert.rejects(db.exec('DELETE FROM sgp_opt_shared.project_data_metadata'),/IMMUTABLE/);await assert.rejects(db.exec('TRUNCATE sgp_opt_shared.project_data_metadata'),/IMMUTABLE/);
-const scope={linea:'PANELES_2',anio:2099,semana:1,key:'KEY-1'};
-const read=async(t='valid',s=scope,r='RES-1',sys='SYS')=>(await db.query('SELECT public.sgp_opt_resumen_project_data_review_v1($1,$2,$3,$4) result',[t,s,r,sys])).rows[0].result;
-for(const token of ['bad',null])await assert.rejects(read(token),/DENIED/);
-await assert.rejects(read('valid',{...scope,linea:'FRAMES_2'}),/SCOPE/);await assert.rejects(read('valid',{...scope,semana:2}),/SCOPE/);
-for(const args of [['valid',scope,'RES-2'],['valid',{...scope,key:'OTHER'}],['valid',scope,'RES-1','OTHER']])assert.equal((await read(...args)).documents.length,0);
-const legacy=await read('valid',{...scope,key:'KEY-3'},'RES-3');assert.equal(legacy.documents[0].projectDataStatus,'NOT_PERSISTED');assert.equal(legacy.documents[0].summary.projectData,undefined);
-const result=await read();assert.equal(result.documents.length,1);assert.equal(result.documents[0].projectDataStatus,'ASSOCIATION_NOT_AUTHORIZED');assert.equal(result.documents[0].status,'PARTIAL');assert.equal(result.documents[0].summary.projectData,undefined);assert(!JSON.stringify(result).includes('FOREIGN ORDER'));
-await db.exec('BEGIN');await db.query('UPDATE sgp_opt_shared.documents SET sha256=$1 WHERE id_documento=$2',['e'.repeat(64),id(1)]);assert.equal((await read()).documents[0].projectDataStatus,'NOT_PERSISTED');await db.exec('ROLLBACK');
 // Stored metadata isn't a registration or a disclosure capability, even if inline existed.
 for(const role of ['anon','authenticated','service_role']){
  assert.equal((await db.query("SELECT has_function_privilege($1,'sgp_opt_shared.recover_project_data_reviewed(jsonb)','EXECUTE') p",[role])).rows[0].p,false);
- assert.equal((await db.query("SELECT has_function_privilege($1,'public.sgp_opt_resumen_project_data_review_v1(text,jsonb,text,text)','EXECUTE') p",[role])).rows[0].p,false);
  assert.equal((await db.query("SELECT has_table_privilege($1,'sgp_opt_shared.project_data_metadata','SELECT,INSERT,UPDATE,DELETE,TRUNCATE') p",[role])).rows[0].p,false);
  await db.exec('SET ROLE '+role);await assert.rejects(run(batch),/permission denied/);await db.exec('RESET ROLE');
 }
 assert.deepEqual(await snapshot(),before);assert.equal(await count(),2);
 const rls=(await db.query("SELECT relrowsecurity,relforcerowsecurity FROM pg_class WHERE oid='sgp_opt_shared.project_data_metadata'::regclass")).rows[0];assert(rls.relrowsecurity&&rls.relforcerowsecurity);
-await db.close();console.log('PASS: synthetic hash/snapshot, batch rollback, idempotence, mismatch, immutability, ACL/RLS, actor/scope and foreign-reference omission; operational table hashes unchanged. Mock actor/scope helpers, not live-policy acceptance.');
+await db.close();console.log('PASS: synthetic hash/snapshot, batch rollback, idempotence, mismatch, immutability, ACL/RLS; operational table hashes unchanged. Local synthetic fixtures, not live-policy acceptance.');
