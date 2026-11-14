@@ -60,6 +60,20 @@ export function mountOptWorkflow(root,viewer,options={}){
  let importPanel=null,pendingImportScope='',pendingImportedHashes=[],entries=[],records=[],groups=[],localGroups=[],catalogSnapshot=null,catalogKey='',catalogEpoch=0,closed=false,renderTimer=null,indexOperation=0;const indexGenerations=new Map();
  const scopePanel=mountOptScopePanel(load,{queryContainer:scopeSlot,api:options.scopeApi,defaultScope:options.defaultScope,openDocument:key=>viewer.openDocument(key),onChange:plan=>{localGroups=plan.groups;syncCatalog();renderScoped();importPanel?.update();}});
  importPanel=mountOptImportPanel(load,{api:options.importApi,getScope:()=>scopePanel.getScope(),getProgrammingSnapshot:()=>scopePanel.getProgrammingSnapshot(),getOrigin:()=>origin.value,getEntries:()=>entries,getRecords:()=>records,onImported:receipts=>{pendingImportScope=scopeKey(scopePanel.getScope());pendingImportedHashes=receipts.map(r=>r.document.sha256);invalidateCatalog();syncCatalog();renderScoped();}});
+ const linkedList=make('details'),linkedTitle=make('summary'),linkedStatus=make('p'),linkedScroll=make('div'),linkedTable=make('table'),linkedBody=make('tbody');
+ linkedList.id='optWeekLinkedList';linkedList.className='panel';linkedList.open=true;linkedStatus.setAttribute('role','status');linkedScroll.style.overflow='auto';linkedScroll.style.maxHeight='320px';linkedScroll.tabIndex=0;linkedScroll.setAttribute('role','region');linkedScroll.setAttribute('aria-label','Reservas de la semana con OPT enlazada');linkedTable.style.width='100%';linkedTable.style.minWidth='480px';
+ const linkedHead=make('thead'),linkedHeaders=make('tr');for(const title of ['Reserva','Sistema','OPT enlazadas','Consultar']){const cell=make('th',title);cell.scope='col';linkedHeaders.append(cell);}linkedHead.append(linkedHeaders);linkedTable.append(linkedHead,linkedBody);linkedScroll.append(linkedTable);linkedList.append(linkedTitle,linkedStatus,linkedScroll);scopeSlot.append(linkedList);
+ function renderLinkedList(){
+  const current=options.catalogApi?.isCurrent(catalogSnapshot),snapshot=scopePanel.getProgrammingSnapshot(),scope=scopePanel.getScope(),valid=snapshot?.status==='READY'&&scope&&['linea','anio','semana','modo'].every(k=>snapshot.scope?.[k]===scope[k]),pairs=new Map();
+  for(const relation of valid?snapshot.relations:[]){if(relation.reservation&&relation.system)pairs.set(JSON.stringify([relation.reservation,relation.system]),{reservation:relation.reservation,system:relation.system});}
+  for(const group of current?catalogSnapshot.groups:[])pairs.set(JSON.stringify([group.reservation,group.system]),group);
+  const rows=[...pairs.values()].sort((a,b)=>a.reservation.localeCompare(b.reservation,undefined,{numeric:true})||a.system.localeCompare(b.system));
+  linkedTitle.textContent=`Reservas de la semana y OPT · ${valid?new Set(rows.map(g=>g.reservation)).size:'—'}`;
+  linkedStatus.textContent=valid?`${scope.linea} · semana ${scope.semana}/${scope.anio} · ${rows.length} reservas/sistemas. ${current?'Enlaces confirmados en SGP; no incluye candidatos locales ni acredita cortes.':catalogStatus.textContent}`:catalogStatus.textContent;
+  linkedBody.replaceChildren();linkedScroll.hidden=!rows.length;
+  if(valid&&!rows.length)linkedStatus.textContent+=' No hay reservas disponibles en este ámbito autorizado.';
+  for(const group of rows){const linked=group.origin==='SERVIDOR',row=make('tr');for(const value of [group.reservation,group.system,linked?group.opts.join(', '):current?'Sin OPT enlazada':'Enlace sin comprobar']){const cell=make('td',value);cell.style.overflowWrap='anywhere';row.append(cell);}const action=make('td');if(linked){const button=make('button','Consultar');button.type='button';button.setAttribute('aria-label',`Consultar reserva ${group.reservation}, sistema ${group.system}`);button.onclick=()=>{if(!options.catalogApi?.ownsGroup(group)){invalidateCatalog();syncCatalog();renderScoped();return;}reserve.value=group.key;show(1);renderDocuments();reserve.focus();};action.append(button);}else action.textContent='—';row.append(action);linkedBody.append(row);}
+ }
  const individualFiles=$('files');const captureIndividual=event=>{importPanel.invalidate('PDF individuales seleccionados para revisión local. El envío requiere el botón Procesar y guardar OPT en SGP.');importPanel.captureFiles([...event.target.files],'INDIVIDUAL');};individualFiles?.addEventListener('change',captureIndividual,true);
  function render(){renderIssues();scopePanel.update(entries,records);}
  const scopeKey=scope=>scope?JSON.stringify([scope.linea,scope.anio,scope.semana,scope.modo]):'';
@@ -82,6 +96,7 @@ export function mountOptWorkflow(root,viewer,options={}){
  }
  catalogReload.onclick=()=>{invalidateCatalog();syncCatalog();renderScoped();};
  function renderScoped(){
+  renderLinkedList();
   const selected=reserve.value;groups=[...(options.catalogApi?.isCurrent(catalogSnapshot)?catalogSnapshot.groups:[]),...localGroups];
   reserve.replaceChildren();const empty=make('option','Selecciona reserva de la programación');empty.value='';reserve.append(empty);
   for(const g of groups){const o=make('option',optReservationLabel(g,scopePanel.getProgrammingSnapshot()));o.value=g.key;reserve.append(o);}
