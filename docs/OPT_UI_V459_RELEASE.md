@@ -36,3 +36,5 @@ Rollback frontend: restaurar artefacto anterior verificado v457 mediante flujo a
 ## Corrección dirigida CI
 
 El primer CI de PR271 detectó harness nativo obsoleto: mock interceptaba opt-import aunque Retail usa opt-retail-import-v3 desde v457, y esperaba contador combinado anterior. Se corrigieron solo esas dos expectativas. Recorrido import-upload local PC/móvil PASS: dos envíos sintéticos secuenciales, rechazo definitivo separado, bloqueo local, duplicado, logout y segundo usuario sin PDF; cero escrituras reales.
+
+Una segunda ejecución detectó falso positivo previo en opt-import-probe: se buscaba el fragmento 700000 también en decimales de wallMs. Se separa exclusivamente el campo de tiempo (finito/no negativo) y se conserva la comprobación de identidades sobre todo el contenido restante. Dos pruebas locales PASS; ningún código runtime cambiado.

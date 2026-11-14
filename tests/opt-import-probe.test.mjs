@@ -13,7 +13,9 @@ test('probe requires independent secret before parsing, limits input, and never 
  assert.equal((await probe(request({unexpected:true}))).status,400);
  assert.equal((await probe(request('x'.repeat(16*1024*1024)))).status,413);
  const out=await (await probe(request(input()))).json();assert.equal(out.outcome,'VALIDATED_STOPPED_BEFORE_WRITE');assert.equal(out.writes,0);assert.equal(out.boundary.pieces,4);
- assert(!JSON.stringify(out).includes('9000001'));assert(!JSON.stringify(out).includes('700000'));assert(!JSON.stringify(out).includes('OUTCOME_UNKNOWN'));
+ // Wall-clock fractional digits can coincidentally contain an identity fragment.
+ const {wallMs,...reported}=out;assert(Number.isFinite(wallMs)&&wallMs>=0);
+ assert(!JSON.stringify(reported).includes('9000001'));assert(!JSON.stringify(reported).includes('700000'));assert(!JSON.stringify(reported).includes('OUTCOME_UNKNOWN'));
 });
 test('probe distinguishes compatible warnings from failed reconciliation without persistence',async()=>{
  for(const [total,accepted] of [['40 3/32',true],['39',false]]){
