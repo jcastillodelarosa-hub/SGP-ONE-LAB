@@ -31,3 +31,5 @@ Screenshots remain local ignored evidence under QA worktree tests/opt-digital/ev
 
 ## Handoff/integration
 Deliver this as an additive SQL/test/docs patch, not a replacement of Library's version1 UI patch. No overlapping UI files. Apply UI version1 to its intended baseline and then this proposal; reconcile version v456 with Retail/labels only in the integration branch. Existing Retail/labels branches are untouched. No PR/deploy/migration/recovery executed. Before activation: permission/association decision, reviewed live reader binding/ACL, appropriate migration packaging, exact reviewed metadata batch, final integrated QA and explicit authorization. This work adds no automatic reimport or registration capability.
+
+Follow-up: direct OLD reader can return inline/historical-sidecar projectData; adapter alone is insufficient. Exact-definition response guard prepared and tested in project_data_inline_guard_REVIEW.sql; existing grants and summaries preserved. See PROJECT_DATA_VISIBILITY_FINDINGS.md. Omission remains until owner selects a visibility policy.
