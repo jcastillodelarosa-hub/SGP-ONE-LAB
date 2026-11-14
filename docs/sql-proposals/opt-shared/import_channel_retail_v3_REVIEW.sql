@@ -1,10 +1,12 @@
 -- Preparation only. Requires the reviewed base install and real server validator.
 -- No client may submit its own extraction, bindings or validation evidence.
+-- PostgREST must hoist statement_timeout before executing this RPC. Verify before activation.
+-- Function-local lock_timeout affects only this Retail call; no global/role settings.
 -- No activation, data load or change to existing productive permissions.
 BEGIN;
 CREATE FUNCTION public.sgp_opt_importar_retail_validado_v3(
  p_token text,p_pdf bytea,p_manifest jsonb,p_sources jsonb,p_evidence jsonb
-) RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
+) RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path='' SET statement_timeout='1s' SET lock_timeout='250ms' AS $$
 DECLARE actor text; approval uuid; pdf_hash text; manifest_hash text; receipt jsonb;
  binding jsonb; current_context jsonb; source jsonb; selectors jsonb; refs text[];
 BEGIN

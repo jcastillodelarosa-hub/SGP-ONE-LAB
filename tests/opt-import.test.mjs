@@ -15,7 +15,7 @@ test('original-only payload, exact files, strict receipt, public Edge gateway wi
  const request=input();request.extraction={forged:true};request.bindings=[1];request.evidence='no';const result=await api.process(request);
  assert.equal(result.data.cantidad_piezas,3);assert.deepEqual(Object.keys(calls[0]).sort(),['index','p_token','pdf','scope','source']);assert.deepEqual(Object.keys(calls[0].index).sort(),['base64','format','name','sheet']);
  assert.equal(JSON.parse(store.getItem(store.key(0))).state,'confirmed');assert(!store.getItem(store.key(0)).includes('synthetic-session'));assert(!store.getItem(store.key(0)).includes('base64'));
- const host=readFileSync(new URL('../src/modules/opt-digital.js',import.meta.url),'utf8');assert.match(host,/functions\.invoke\('opt-import'/);assert.match(host,/lpPowerBiGatewayJwt/);assert(!/service_role/i.test(host));
+ const host=readFileSync(new URL('../src/modules/opt-digital.js',import.meta.url),'utf8');assert.match(host,/functions\.invoke\(endpoint/);assert.match(host,/optImportEndpoint\(body.source/);assert.match(host,/lpPowerBiGatewayJwt/);assert(!/service_role/i.test(host));
  await assert.rejects(api.process({...input(),pdf:file('similar.pdf','%PDF')}),/NOMBRE_EXACTO/);assert.equal(calls.length,1);
 });
 test('missing index, wrong origin/scope, oversize or storage failure prevent all writes',async()=>{
@@ -84,3 +84,12 @@ test('bounded PDF/index limits reject before reading or invoking the server',asy
    await assert.rejects(api.process(input()),e=>e.uncertain===true&&e.message===(status===546?'OPT_IMPORTACION_LIMITE_RECURSOS':'OPT_IMPORTACION_TRANSPORTE'));
   }
  });
+
+test('Retail confirmed timeout does not erase a previous uncertain attempt or auto retry',async()=>{
+ for(const priorUncertain of [false,true]){
+  let calls=0;const st=storage();const api=createOptImport({invoke:async()=>{calls++;if(priorUncertain&&calls===1)throw Error('lost response');return {data:{contract:'OPT-IMPORT-1',ok:false,code:'OPT_RETAIL_TIEMPO_AGOTADO',definitive:true}};}},()=> 'synthetic',{storage:st,storageScope:'retail-timeout'});
+  if(priorUncertain)await assert.rejects(api.process(input()),e=>e.uncertain===true);
+  await assert.rejects(api.process(input()),e=>e.message==='OPT_RETAIL_TIEMPO_AGOTADO'&&e.definitive===!priorUncertain&&!!e.uncertain===priorUncertain);
+  assert.equal(calls,priorUncertain?2:1);assert.equal(api.pending().length,priorUncertain?1:0);
+ }
+});

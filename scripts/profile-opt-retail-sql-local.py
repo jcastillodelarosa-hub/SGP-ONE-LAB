@@ -36,7 +36,7 @@ for number,path in enumerate(payload_paths):
  current=json.loads(sql('SELECT public.sgp_opt_import_contexto_retail_v3('+','.join(cargs)+');',db));binding['revision']=current['revision']
  args=[quote(payload['p_token']),quote(payload['p_pdf'])+'::bytea']+[quote(json.dumps(payload[k]))+'::jsonb' for k in ['p_manifest','p_sources','p_evidence']]
  call='SELECT public.sgp_opt_importar_retail_validado_v3('+','.join(args)+');'
- prepared.append({'db':db,'call':call,'context':ctx})
+ prepared.append({'db':db,'call':call,'context':ctx,'payload':payload})
  if globals().get('PROFILE_PREPARE_ONLY',False):continue
  # Exact normal writer first; no instrumentation or synthetic delay.
  trials=[]

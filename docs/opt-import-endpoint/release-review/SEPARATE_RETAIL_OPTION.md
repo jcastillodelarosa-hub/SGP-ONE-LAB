@@ -1,3 +1,5 @@
+Current operational update: Johan approved bounded broad protection. See RETAIL_BOUNDED_RELEASE.md for implemented limits, actual PostgREST timeout proof and remaining activation gates. Historical lock-choice blockers below are superseded, not deployment authorization. UI route patch is now applied with legacy default.
+
 # Decision candidate: separate Retail endpoint, v6 unchanged
 
 This supersedes the earlier proposal to replace opt-import. The exact v6 source is still unknown. Do not deploy the old activation patch; it has been removed. Nothing here has been deployed or applied to production.

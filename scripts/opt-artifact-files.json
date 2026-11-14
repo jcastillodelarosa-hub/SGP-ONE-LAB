@@ -1,4 +1,5 @@
 [
+  "src/domain/opt-import-endpoint.js",
   "opt-digital/index.html",
   "opt-digital/app.js",
   "opt-digital/document-materials.js",

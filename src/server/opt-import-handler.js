@@ -137,6 +137,8 @@ export function createOptImportHandler({rpc,readPdf,DOMParser,readWorksheetXML,a
    writeAttempted=true;
    const imported=await rpc(retailIndex?'sgp_opt_importar_retail_validado_v3':projectIndex?'sgp_opt_importar_proyecto_validado_v2':'sgp_opt_importar_validado_v1',args);
    if(imported.error){
+    // Only a returned PostgreSQL cancellation/lock error proves this transaction failed.
+    if(retailIndex&&['57014','55P03'].includes(imported.error.code))return reject(409,'OPT_RETAIL_TIEMPO_AGOTADO','La operación Retail superó el tiempo permitido y fue cancelada. No se guardaron cambios en este intento.');
     if(imported.error.code==='P0001'){const error=sqlError(imported.error);return reject(error.status,error.code,error.error);}
     return reject(503,'OPT_IMPORT_OUTCOME_UNKNOWN','No se pudo confirmar el resultado. Reintenta el mismo PDF y el mismo índice.',{definitive:false});
    }

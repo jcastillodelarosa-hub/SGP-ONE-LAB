@@ -1,0 +1,30 @@
+{
+  "engine": "PostgreSQL17.11",
+  "postgrest": "12.2.12",
+  "network": "none, companion shares database namespace",
+  "productionWrites": 0,
+  "statementTimeoutMs": 1000,
+  "lockTimeoutMs": 250,
+  "results": {
+    "statementTimeout": {
+      "status": 500,
+      "sqlstate": "57014",
+      "httpElapsedMs": 1076.115,
+      "counts": "0|0|0|0|0",
+      "locksReleased": true
+    },
+    "normal": {
+      "status": 200,
+      "httpElapsedMs": 136.303,
+      "counts": "1|1|255|1|0"
+    },
+    "lockTimeout": {
+      "status": 500,
+      "sqlstate": "55P03",
+      "httpElapsedMs": 335.139,
+      "countsUnchanged": true
+    },
+    "otherSessionSettings": "0|0"
+  },
+  "limits": "Local exact RPC SQL with synthetic actor and private original payload. Test-only 2s delay after manifest insert proves rollback. Hosted PostgREST hoisting/config remains a preactivation check."
+}

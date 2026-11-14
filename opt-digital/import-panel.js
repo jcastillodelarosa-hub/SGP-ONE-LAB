@@ -4,6 +4,12 @@ export function importRoundingWarning(result){
  return Array.isArray(result?.validationWarnings)&&result.validationWarnings.some(w=>w?.code==='OPT_PRINTED_ROUNDING_COMPATIBLE')
   ?'Advertencia: totales compatibles con redondeo de 1/32 de pulgada. Se conservan las medidas impresas; no se acredita la precisión original del programa. No confirma cortes realizados.':'';
 }
+export function importFailureMessage(error){
+ const messages={OPT_RETAIL_TIEMPO_AGOTADO:'La operación Retail superó el tiempo permitido. Espera a que termine la actividad de programación y vuelve a iniciar la carga manualmente.',OPT_CONTEXTO_OCUPADO:'La programación está siendo actualizada. Espera a que termine esa operación antes de iniciar la carga manualmente.'};
+ // A previous uncertain attempt cannot be cleared by a later confirmed rejection.
+ if(error.uncertain&&messages[error.message])return 'Este intento fue rechazado, pero una carga anterior sigue sin confirmar. Verifica su estado antes de volver a enviar los archivos.';
+ return messages[error.message]||error.message;
+}
 // Originals are retained in memory/the existing PDF library, never inferred from extraction.
 export function mountOptImportPanel(container,{api,getScope,getProgrammingSnapshot=()=>null,getOrigin,getEntries,getRecords,onImported=()=>{}}){
  const make=(tag,text)=>{const element=container.ownerDocument.createElement(tag);if(text)element.textContent=text;return element;};
@@ -75,7 +81,7 @@ export function mountOptImportPanel(container,{api,getScope,getProgrammingSnapsh
      const unknown=error.uncertain===true;unknown?uncertain++:rejected++;
      const blockers=Array.isArray(error.blockers)?error.blockers.slice(0,12).map(value=>typeof value==='string'?value:JSON.stringify(value)).join(' · '):'';
      const resourceLimit=error.message==='OPT_IMPORTACION_LIMITE_RECURSOS';
-     row.textContent=job.name+' · '+(resourceLimit?'Resultado incierto. El servidor interrumpió el procesamiento por límite de recursos. Conserva los originales y verifica el estado antes de reintentar. ':unknown?'Resultado incierto. Puede haberse guardado; verifica su estado y conserva exactamente el mismo PDF, índice, origen y ámbito. ':'No guardado en este intento: ')+error.message+(blockers?' · '+blockers:'');
+     row.textContent=job.name+' · '+(resourceLimit?'Resultado incierto. El servidor interrumpió el procesamiento por límite de recursos. Conserva los originales y verifica el estado antes de reintentar. ':unknown?'Resultado incierto. Puede haberse guardado; verifica su estado y conserva exactamente el mismo PDF, índice, origen y ámbito. ':'No guardado en este intento: ')+importFailureMessage(error)+(blockers?' · '+blockers:'');
     }
    }
    if(!closed&&operation===epoch){status.textContent=`${succeeded} confirmados · ${rejected} rechazados o bloqueados · ${uncertain} inciertos.${withWarning?` ${withWarning} confirmados con advertencia de redondeo.`:''} Los fallos no acreditan otros archivos.`+omittedText;if(confirmed.length)onImported(confirmed);}
