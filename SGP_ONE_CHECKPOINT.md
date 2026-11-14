@@ -2026,3 +2026,10 @@ Retail2b35890 + SQL a0e4691 + UI10a6394 + etiquetasad8addc reunidos en review/op
 APLICADO EN SUPABASE: almacén privado Project data y lector documental aprobado; fingerprint/ACL/RLS/sesión nula verificados, hashes de tablas operativas intactos. Recuperación metadata=0. Retail v6 sin cambios; v3 y UI sin publicar. Bloqueos: timeout efectivo PostgREST y transferencia hash-exacta de los nueve originales registrados. Estado detallado en V456_INTEGRATION_PREPARATION.md; no confundir preparación con publicación.
 
 CI PR268: corregidos firma opcional inferida por Deno, fixture DOM de advertencias con origen explícito y comparación de geometría relativa tras auto-scroll Playwright. Validación focalizada: Deno check2.2.12,18 tests handler/routing, DOM Proyecto/Retail y browser esquema PC/móvil PASS. No cambio de permisos ni activación Retail.
+
+
+## 2026-11-14 — Activación Retail LAB v457
+
+Base main 41837142d0c532da6ac79c9172511f700267f024. Activación autorizada de Retail INDICE en endpoint separado opt-retail-import-v3; otras rutas conservan opt-import v6. Migraciones lab_v457_opt_retail_context_v3 y lab_v457_opt_retail_writer_v3 aplicadas con EXECUTE solo service_role; writer statement_timeout 1s y lock_timeout 250ms. Sonda alojada acreditó SQLSTATE 57014 en 1136ms; función temporal y código diagnóstico retirados. Runtime final Edge v6 SHA 49619968217c387f8a218aee7a250644e7d285922de081745b80ac356235b4a7. Verificaciones alojadas: 422 OPT_REQUEST_FIELDS, 403 OPT_ORIGIN_DENIED, 401 SGP_SESSION_INVALID; todas definitivas. Siete snapshots de tablas documentales/operativas sin cambios; ninguna importación realizada.
+
+Contención: cambiar exclusivamente optRetailMode a paused y publicar por flujo controlado; no redirigir Retail a v6 ni reintentar resultados inciertos. Si se requiere contención inmediata del backend, sustituir exclusivamente endpoint Retail por deny-all revisado; conservar v6. Esta evidencia no acredita una importación real. Publicación web y postcheck pendientes del flujo de este commit.
