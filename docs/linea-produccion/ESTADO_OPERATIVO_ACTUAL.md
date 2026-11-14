@@ -1,3 +1,7 @@
+## 2026-11-14 — OPT UI v459 autorizada; RPC de observación aplicada
+
+Rama release/opt-ui-v459 sobre main 2ad7054, UI 2f3ebf0 intacta; PR270 excluido. RPC de lectura instalada y ACL/sesión inválida verificadas; diez tablas OPT conservan conteos/huellas. 213/215 ausentes, sin autorización de retry. QA local previa reutilizada; versión 459 verificada. CI, merge y Hosting pendientes al preparar este commit. Evidencia y contención: docs/OPT_UI_V459_RELEASE.md. Frames sigue sin vínculo hasta decisión; no bloquea UI.
+
 ## 2026-11-13 — Retail blocked diagnostics, no tolerance change
 
 Prepared detailed strict-total errors with page, original operands and signed integer1/32 differences.286 OPT tests PASS; original215 remains422/four blockers/zero writes. Searches did not establish optimizer precision or source workbooks. No policy/measurements/permissions/deploy changes. Native same-job evidence or explicit uncertainty-policy decision remains necessary. Labels v455 remain independent ad8addc.
