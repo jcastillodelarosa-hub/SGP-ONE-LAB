@@ -1,6 +1,6 @@
 {
   "schema": "OPT-RETAIL-SOURCE-1",
-  "sourceSha256": "cc654bba2ba1e8eb1abfc418b7b965b5e2bb685180998f87b5f04c346c25e560",
+  "sourceSha256": "7fe429724b3a15ad9bb9b98bb79daf417ee5b1d249416814008e10301f612f1c",
   "inputs": [
     {
       "path": "functions/index.js",
@@ -468,7 +468,7 @@
     },
     {
       "path": "src/server/opt-import-handler.js",
-      "sha256": "b508a1255e7cffaecbb9934f00e62415ef520f68e0fed787584ead3ca3376551"
+      "sha256": "2a61a98995524911539669cb4fec9127f0b9e26e051b21c006ab478762543710"
     },
     {
       "path": "src/server/opt-import-probe.js",

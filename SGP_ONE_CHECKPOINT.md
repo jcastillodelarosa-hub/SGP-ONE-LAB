@@ -2024,3 +2024,5 @@ Retail2b35890 + SQL a0e4691 + UI10a6394 + etiquetasad8addc reunidos en review/op
 
 ## 2026-11-14 — ejecución parcial autorizada v456
 APLICADO EN SUPABASE: almacén privado Project data y lector documental aprobado; fingerprint/ACL/RLS/sesión nula verificados, hashes de tablas operativas intactos. Recuperación metadata=0. Retail v6 sin cambios; v3 y UI sin publicar. Bloqueos: timeout efectivo PostgREST y transferencia hash-exacta de los nueve originales registrados. Estado detallado en V456_INTEGRATION_PREPARATION.md; no confundir preparación con publicación.
+
+CI PR268: corregidos firma opcional inferida por Deno, fixture DOM de advertencias con origen explícito y comparación de geometría relativa tras auto-scroll Playwright. Validación focalizada: Deno check2.2.12,18 tests handler/routing, DOM Proyecto/Retail y browser esquema PC/móvil PASS. No cambio de permisos ni activación Retail.

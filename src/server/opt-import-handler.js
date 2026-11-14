@@ -53,7 +53,7 @@ function receiptValid(receipt,manifest){return record(receipt)&&receipt.ok===tru
 
 /** Only server bootstrap supplies dependencies. Neither extraction nor SGP facts
  * are ever accepted from the caller. SQL remains the final authorization gate. */
-export function createOptImportHandler({rpc,readPdf,DOMParser,readWorksheetXML,allowedOrigins,retailV3=false,retailOnly=false,serializeRetailPlans}){
+export function createOptImportHandler({rpc,readPdf,DOMParser,readWorksheetXML,allowedOrigins,retailV3=false,retailOnly=false,serializeRetailPlans=undefined}){
  if(typeof rpc!=='function'||typeof readPdf!=='function'||!Array.isArray(allowedOrigins)||!allowedOrigins.length)throw Error('OPT_SERVER_DEPENDENCIES_REQUIRED');
  const origins=new Set(allowedOrigins);let busy=false;
  return async request=>{
