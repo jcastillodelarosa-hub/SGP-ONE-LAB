@@ -1,7 +1,10 @@
+import {validOptProjectData} from './opt-project-data.js';
 // Trusted extraction only, after full documentary reconciliation. No operational totals.
 export function buildOptDocumentSummary(extraction) {
  const string=v=>typeof v==='string'?v:null;
+ if(Object.hasOwn(extraction,'projectData')&&!validOptProjectData(extraction.projectData))throw Error('OPT_PROJECT_DATA_INVALID');
  return {contract:'OPT-DOCUMENT-SUMMARY-1',scope:'DOCUMENTO',
+  ...(extraction.projectData?{projectData:extraction.projectData}:{}),
   cutRows:(extraction.sourceProfileSummaries||[]).map(r=>({reference:r.ref,finish:r.finish,
    bars:r.bars??null,pieces:r.pieces??null,plans:r.plans??null,scrapPrinted:r.wasteLength,sourcePage:r.page,
    scrapPercentagePrinted:r.scrapPercentagePrinted??null,countsPage:r.countsPage??null,countsSourceText:r.countsSourceText??null,
@@ -15,6 +18,7 @@ export function validOptDocumentSummary(value) {
  const page=v=>Number.isSafeInteger(v)&&v>0&&v<=500;
  return obj(value)&&value.contract==='OPT-DOCUMENT-SUMMARY-1'&&value.scope==='DOCUMENTO'&&
  ['cutRows','materialRows'].every(k=>Array.isArray(value[k])&&value[k].length<=10000)&&
+ (!Object.hasOwn(value,'projectData')||validOptProjectData(value.projectData))&&
  value.cutRows.every(r=>obj(r)&&['reference','finish','scrapPrinted','cutLength','stockLength','reusedLength'].every(k=>text(r[k]))&&page(r.sourcePage)&&['bars','pieces','plans'].every(k=>r[k]===null||Number.isSafeInteger(r[k])&&r[k]>=0)&&
  (r.countsPage===null||page(r.countsPage))&&(r.countsSourceText===null||text(r.countsSourceText))&&
  (r.scrapPercentagePrinted===null||typeof r.scrapPercentagePrinted==='string'&&/^\d+(?:[.,]\d+)?%$/.test(r.scrapPercentagePrinted))&&

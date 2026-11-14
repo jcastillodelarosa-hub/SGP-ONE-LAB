@@ -1,3 +1,4 @@
+import {validOptProjectData} from '../src/domain/opt-project-data.js';
 // Read-only documentary view. It never registers cuts or reconstructs missing source values.
 const display=value=>value===null||value===undefined||value===''?'No informado':String(value);
 export function mountReservationSummary(container,{api}={}) {
@@ -11,7 +12,7 @@ export function mountReservationSummary(container,{api}={}) {
  function controls(){refresh.disabled=loading||!selected||selected.origin!=='SERVIDOR'||!api;section.setAttribute('aria-busy',String(loading));}
  function table(title,columns,rows,kind){
   const block=make('section');block.className='opt-summary-table-section';block.append(make('h3',title));
-  const hint=make('p','Desliza la tabla horizontalmente para ver todas las columnas. La referencia permanece fija.');hint.className='opt-summary-scroll-hint';block.append(hint);
+  const hint=make('p','Desliza la tabla horizontalmente para ver todas las columnas. La primera columna permanece fija.');hint.className='opt-summary-scroll-hint';block.append(hint);
   const wrap=make('div');wrap.className='table-wrap opt-summary-scroll';wrap.tabIndex=0;wrap.setAttribute('role','region');wrap.setAttribute('aria-label',title+' · tabla desplazable');
   const table=make('table');table.className='opt-documentary-table '+kind;table.setAttribute('aria-label',title);const head=make('thead'),tr=make('tr');
   for(const [,label]of columns){const th=make('th',label);th.scope='col';tr.append(th);}head.append(tr);table.append(head);
@@ -29,7 +30,13 @@ export function mountReservationSummary(container,{api}={}) {
    const pages=[...new Set([...(doc.cutRows||[]),...(doc.materialRows||[])].flatMap(row=>[row.sourcePage,row.countsPage]).filter(Number.isSafeInteger))].sort((a,b)=>a-b);
    if(pages.length)article.append(make('p','Fuente: resumen impreso del PDF · páginas '+pages.join(', ')));
    article.append(make('p',doc.scope==='RESERVA'?'Filas documentales acreditadas para la reserva seleccionada.':'Resumen del documento completo asociado a esta reserva. Sus totales no se atribuyen íntegramente a la reserva.'));
-   article.append(table('Resumen de cortes',[
+   if(doc.projectData&&validOptProjectData(doc.projectData)){
+    article.append(table('Resumen de cortes · detalle de piezas',[
+     ['item','Ítem'],['profile','Perfil'],['code','Código/acabado'],['length','Longitud'],['reference','Referencia'],['quantity','Cantidad']
+    ],doc.projectData.rows,'opt-project-data-table'));
+    article.append(make('p',`${doc.projectData.rows.length} ítems · ${doc.projectData.totalQuantity} piezas impresas en el documento. No representa cortes realizados.`));
+   }else article.append(make('p','Detalle de piezas (Project data) no disponible. Se conservan los resúmenes existentes; no se reconstruyen referencias ni se supone cantidad cero.'));
+   article.append(table('Totales de corte por perfil',[
     ['reference','Perfil'],['finish','Acabado'],['bars','Barras'],['pieces','Piezas OPT'],['plans','Planos'],['scrapPrinted','Scrap impreso']
    ],(doc.cutRows||[]).map(row=>({...row,scrapPrinted:row.scrapPercentagePrinted??(row.scrapPrinted?row.scrapPrinted+' (longitud)':null)})),'opt-cuts-summary-table'));
    article.append(table(doc.scope==='RESERVA'?'Referencias de la reserva · requerimientos de material':'Referencias del documento · requerimientos de material',[

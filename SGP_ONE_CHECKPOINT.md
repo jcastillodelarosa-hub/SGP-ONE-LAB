@@ -1,3 +1,13 @@
+## 2026-11-14 — Project data OPT · candidata local LAB v456, no publicada
+
+Tabla de seis columnas preparada con metadatos documentales opcionales. Lector
+separado verificado contra PDF original: 114 ítems / 502 piezas, acabados multilínea
+y referencias completas. 279 pruebas OPT, dos suites DOM y release PASS.
+Sin cambios Retail, registros operativos, SQL o recuperación productiva.
+Faltan lector/almacén privado de metadata con revisión ACL y QA visual PC/móvil
+(Chromium bloqueado por socket EPERM). No confundir vista preparada con publicación.
+Detalle: docs/opt-import-endpoint/release-review/PROJECT_DATA_METADATA_PLAN.md.
+
 ## OPT documental v451 · backend aplicado · 13/11/2026
 
 PR #264; publicación autorizada, pendiente de fusión y verificación Hosting.
