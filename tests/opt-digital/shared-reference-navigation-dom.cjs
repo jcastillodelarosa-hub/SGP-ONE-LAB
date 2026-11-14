@@ -12,8 +12,9 @@ const assert=require('node:assert/strict');const {JSDOM}=require(process.env.JSD
  const nav=()=>[...root.querySelectorAll('.opt-shared-references button')],check=()=>root.querySelector('input[type=checkbox]'),select=()=>{check().checked=true;check().onchange();};
  assert.equal(nav().length,2);assert.equal(root.querySelectorAll('table').length,1);
  assert.equal(root.querySelectorAll('#optSharedScheme').length,1);
- assert.equal(root.querySelector('.opt-shared-technical').open,false);assert.equal(root.querySelector('.opt-shared-piece-details').open,false);
+ assert.equal(root.querySelector('.opt-shared-technical').open,false);assert.equal(root.querySelector('.opt-shared-piece-details').open,true);
  assert.equal(root.querySelector('#optSharedScheme').nextElementSibling.className,'opt-shared-technical');
+ root.querySelector('#optReferenceSearch').value='REF-2';root.querySelector('#optReferenceSearch').oninput();assert.equal(nav()[0].hidden,true);assert.equal(nav()[1].hidden,false);root.querySelector('#optReferenceSearch').value='';root.querySelector('#optReferenceSearch').oninput();
  select();nav()[1].click();assert.equal(check().dataset.piece,id(2));assert.equal(check().checked,false);select();
  nav()[0].click();assert.equal(check().checked,true);assert.equal(nav()[0].getAttribute('aria-pressed'),'true');
  assert.match(root.querySelector('#optSharedSelection').textContent,/2 piezas seleccionadas/);
@@ -23,5 +24,5 @@ const assert=require('node:assert/strict');const {JSDOM}=require(process.env.JSD
  writable=false;await component.refresh();nav()[1].click();assert.equal(check().disabled,true);assert.equal(root.querySelector('#optSharedRegister').disabled,true);
  await component.select(null);assert.equal(root.querySelector('#optSharedScheme'),null);assert.equal(events.at(-1),null);
  component.destroy();assert.equal(root.children.length,0);
- console.log('PASS: synthetic reference navigation; one scheme/table; collapsed technical/pieces; multi-reference selection, exact registration, cancel, permissions, callback cleanup.');
+ console.log('PASS: synthetic reference navigation; one scheme/table; collapsed technical/expanded pieces; multi-reference selection, exact registration, cancel, permissions, callback cleanup.');
 })().catch(e=>{console.error(e);process.exitCode=1;});

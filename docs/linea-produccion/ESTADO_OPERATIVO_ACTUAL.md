@@ -1,3 +1,7 @@
+## 2026-11-14 — OPT UI v459 autorizada; RPC de observación aplicada
+
+Rama release/opt-ui-v459 sobre main 2ad7054, UI 2f3ebf0 intacta; PR270 excluido. RPC de lectura instalada y ACL/sesión inválida verificadas; diez tablas OPT conservan conteos/huellas. 213/215 ausentes, sin autorización de retry. QA local previa reutilizada; versión 459 verificada. CI, merge y Hosting pendientes al preparar este commit. Evidencia y contención: docs/OPT_UI_V459_RELEASE.md. Frames sigue sin vínculo hasta decisión; no bloquea UI.
+
 ## 2026-11-13 — Retail blocked diagnostics, no tolerance change
 
 Prepared detailed strict-total errors with page, original operands and signed integer1/32 differences.286 OPT tests PASS; original215 remains422/four blockers/zero writes. Searches did not establish optimizer precision or source workbooks. No policy/measurements/permissions/deploy changes. Native same-job evidence or explicit uncertainty-policy decision remains necessary. Labels v455 remain independent ad8addc.
@@ -1963,3 +1967,10 @@ Read-only publication follow-up: PostgREST14.18 present; effective hoisting not 
 Project data storage isolated branch: append-only owner-only recovery SQL and ungranted read adapter pass synthetic SQL hash/idempotence/rollback/ACL/scope/operational invariants. Adapter deliberately omits full references until authoritative row visibility exists; no guessing by strings. Version1 UI patch inspected via Library text and applied only to isolated QA baseline; PC/mobile browser passed with installed Chromium harness override. No UI/production/Retail changes. See docs/sql-proposals/opt-shared/PROJECT_DATA_STORE_REVIEW.md.
 
 Visibility investigation: no complete authoritative source-item/all-orders relation found; document access differs from redacted order labels. Old granted summary RPC can expose inline/sidecar projectData. Prepared exact-definition guard strips only that field, preserves response/ACL/owner and refuses changed baseline; synthetic direct-RPC bypass test PASS. Production untouched; owner decision required for complete-reference disclosure. See PROJECT_DATA_VISIBILITY_FINDINGS.md. UIv456 remains separate.
+
+
+## 2026-11-14 — Cuatro bocetos OPT integrados, solo local
+
+Implementados sobre df0e42b en feat/opt-week-linked-list: listado semanal con totales/búsqueda/filtro y tarjetas móviles; progreso por piezas autorizadas; origen/nombre/ruta relativa y estados de archivo independientes del input nativo; comprobación manual de pendientes históricos sin reenviar. Frames sin asignación permanece Revisar vínculo, sin porcentaje ni controles de corte. Solo coincidencia exacta confirma diario local; ausencia/error conserva bloqueo. RPC observación sigue propuesta, no aplicada.
+
+9 pruebas Node, 10 suites DOM afectadas y dos harness Chromium PC/móvil pasan; capturas inspeccionadas y verify:release válido localmente. Conservadas evidencias anteriores no afectadas. v458 provisional pendiente de coordinar main/PR270; sin push/PR/fusión/despliegue ni datos productivos. Detalle y próximos pasos: docs/OPT_APPROVED_UI_REVIEW.md. Transferencia visual sustituida por especificación fiel autorizada de coordinación; no requiere más imágenes.

@@ -50,7 +50,7 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
  const header=await host.locator('.opt-shared-profile-header').boundingBox(),matrix=await host.locator('.opt-shared-profile-header .opt-matrix-panel').boundingBox(),scheme=await host.locator('#optSharedScheme').boundingBox();
  assert(scheme.y>=header.y+header.height);assert(Math.abs(scheme.width-header.width)<2);if(width>1000)assert(matrix.x>header.x+100);
  assert.equal(await host.locator('#optSharedScheme').count(),1);assert.equal(await host.locator('#optSharedPieces > section').count(),1);
- assert.equal(await host.locator('.opt-shared-technical').getAttribute('open'),null);assert.equal(await host.locator('.opt-shared-piece-details').getAttribute('open'),null);
+ assert.equal(await host.locator('.opt-shared-technical').getAttribute('open'),null);assert.equal(await host.locator('.opt-shared-piece-details').getAttribute('open'),'');
  assert(!((await host.locator('#optSharedScheme').textContent()).includes('PRIVATE-OTHER-RESERVE')));
  // Independent scroll areas, hidden rail restores full width without remounting content.
  if(!await host.locator('.opt-shared-references').isVisible())await host.locator('#optReferencesToggle').click();
@@ -79,7 +79,7 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
  await host.locator('#optReservationTab1').click();await host.locator('#optSummaryView table').first().waitFor();assert.equal(await host.locator('#optSummaryView table').count(),2);
  const a=await host.locator('#optSummaryView table').nth(0).boundingBox(),b=await host.locator('#optSummaryView table').nth(1).boundingBox();assert(b.y>a.y+a.height);
  await host.locator('#optReservationTab0').click();assert.equal(await host.locator('#optSharedPieces input').isChecked(),true);
- await choose(0);await host.locator('.opt-shared-piece-details > summary').click();assert.equal(await host.locator('#optSharedPieces input').isChecked(),true);
+ await choose(0);assert.equal(await host.locator('#optSharedPieces input').isChecked(),true);
  await host.locator('#optSharedRegister').click();await host.locator('#optSharedCancel').click();assert.equal(await page.evaluate(()=>fixtureWrites.length),0);
  await host.locator('#optSharedRegister').click();await host.locator('#optSharedConfirm').click();await host.locator('#optSharedStatus').filter({hasText:'Cortes confirmados por el servidor'}).waitFor();
  await host.locator('#optSharedScheme button.segment').waitFor();assert.equal(await host.locator('#optSharedScheme button.segment').isDisabled(),true);await host.locator('#optSharedRefresh').click();await host.locator('#optSharedScheme button.segment').waitFor();assert.equal(await host.locator('#optSharedScheme button.segment').getAttribute('data-state'),'CORTADO');

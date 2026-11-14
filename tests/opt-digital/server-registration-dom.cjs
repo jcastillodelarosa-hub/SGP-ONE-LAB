@@ -14,9 +14,9 @@ const assert=require('node:assert/strict');const {JSDOM}=require(process.env.JSD
  const dom=new JSDOM('<main></main>',{url:'https://synthetic.invalid'}),root=dom.window.document.querySelector('main');
  const api=createOptSharedCuts(client,()=> 'synthetic-session'),mounted=mountSharedCuts(root,{api,storage:dom.window.localStorage,storageScope:'synthetic',createId:()=>commandId});
  const $=id=>root.querySelector('#'+id);
- await mounted.select(group,[{format:'pdf',key:'c'.repeat(64)}]);assert(root.querySelector('input').disabled);assert.equal(writes,0);
- await mounted.select(group,[{format:'pdf',key:sha}]);const box=root.querySelector('input');assert.equal(box.disabled,false);box.checked=true;box.onchange();$('optSharedRegister').click();$('optSharedCancel').click();assert.equal(writes,0);
- $('optSharedRegister').click();await $('optSharedConfirm').onclick();assert.equal(writes,1);assert.match($('optSharedPieces').textContent,/synthetic-cutter/,$('optSharedStatus').textContent);assert.equal(root.querySelector('input').disabled,true);assert.equal(group.canRegister,false);
+ await mounted.select(group,[{format:'pdf',key:'c'.repeat(64)}]);assert(root.querySelector('input[type=checkbox]').disabled);assert.equal(writes,0);
+ await mounted.select(group,[{format:'pdf',key:sha}]);const box=root.querySelector('input[type=checkbox]');assert.equal(box.disabled,false);box.checked=true;box.onchange();$('optSharedRegister').click();$('optSharedCancel').click();assert.equal(writes,0);
+ $('optSharedRegister').click();await $('optSharedConfirm').onclick();assert.equal(writes,1);assert.match($('optSharedPieces').textContent,/synthetic-cutter/,$('optSharedStatus').textContent);assert.equal(root.querySelector('input[type=checkbox]').disabled,true);assert.equal(group.canRegister,false);
  mounted.destroy();const second=mountSharedCuts(root,{api:createOptSharedCuts(client,()=> 'second-synthetic-cutter'),storage:dom.window.localStorage,storageScope:'second'});await second.select(group,[{format:'pdf',key:sha}]);assert.match($('optSharedPieces').textContent,/Cortado/);assert.match($('optSharedPieces').textContent,/synthetic-cutter/);assert.equal(writes,1);second.destroy();
  console.log('PASS: normal documentary group stays false; validated server identity + exact PDF enables confirmation; shared state visible to second synthetic cutter. No production writes.');
 })().catch(e=>{console.error(e);process.exit(1);});

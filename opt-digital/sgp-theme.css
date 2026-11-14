@@ -137,3 +137,35 @@
 
 /* Native selects may truncate long labels on mobile; repeat selected metadata. */
 #optShell #optReservationMetadata{overflow-wrap:anywhere;line-height:1.5;color:#31546e;margin:4px 0 10px}
+/* Approved weekly, reference and selected-file views; existing SGP tokens. */
+#optShell .opt-week-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:16px 0}
+#optShell .opt-week-metrics>div{background:var(--opt-soft);border:1px solid var(--opt-line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:6px}
+#optShell .opt-week-metrics strong{font-size:26px;color:var(--opt-blue)}
+#optShell .opt-week-tools{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
+#optShell .opt-week-tools input{flex:1 1 240px;min-width:0}
+#optShell .opt-week-table,#optShell .opt-file-table{width:100%;border-collapse:collapse}
+#optShell :is(.opt-week-table,.opt-file-table) :is(th,td){padding:12px;text-align:left;border-bottom:1px solid var(--opt-line);overflow-wrap:anywhere;vertical-align:top}
+#optShell :is(.opt-week-table,.opt-file-table) th{background:var(--opt-soft)}
+#optShell .opt-state-badge{display:inline-block;border-radius:14px;padding:4px 9px;font-size:12px;font-weight:650}
+#optShell .opt-state-badge.is-done{background:#dcfce7;color:#166534}
+#optShell .opt-state-badge.is-warning{background:#fff3d6;color:#795000}
+#optShell .opt-state-badge.is-active{background:var(--opt-soft);color:var(--opt-blue)}
+#optShell progress{width:100%;max-width:350px;height:10px;accent-color:var(--opt-blue)}
+#optShell #optReferenceSearch{width:100%;box-sizing:border-box;flex-shrink:0}
+#optShell .opt-file-result{padding:12px;border:1px solid var(--opt-line);border-radius:10px;overflow-wrap:anywhere}
+#optShell #optSelectedOrigin{padding:16px;background:var(--opt-soft);border-radius:12px;margin-bottom:16px}
+#optShell #optSelectedOrigin p{overflow-wrap:anywhere}
+@media(max-width:760px){
+ #optShell .opt-week-metrics{gap:6px}
+ #optShell .opt-week-metrics>div{padding:10px;font-size:12px}
+ #optShell .opt-week-metrics strong{font-size:22px}
+ #optShell .opt-week-tools>*{width:100%;flex-basis:100%}
+ #optShell :is(.opt-week-table,.opt-file-table,.opt-shared-piece-details table){min-width:0;display:block}
+ #optShell :is(.opt-week-table,.opt-file-table,.opt-shared-piece-details table) thead{display:none}
+ #optShell :is(.opt-week-table,.opt-file-table,.opt-shared-piece-details table) tbody{display:block}
+ #optShell :is(.opt-week-table,.opt-file-table,.opt-shared-piece-details table) tr{display:block;border:1px solid var(--opt-line);border-radius:12px;margin:10px 0;background:#fff;padding:8px}
+ #optShell :is(.opt-week-table,.opt-file-table,.opt-shared-piece-details table) td{display:block;border:0;padding:6px;white-space:normal}
+ #optShell :is(.opt-week-table,.opt-file-table,.opt-shared-piece-details table) td::before{content:attr(data-label);display:block;font-size:12px;font-weight:650;color:#526a87;margin-bottom:4px}
+ #optShell :is(.opt-week-table,.opt-file-table) button,#optShell .opt-shared>button,#optShell #optImportPanel>button,#optShell #optChangeFolder{width:100%;min-height:44px}
+ #optShell .opt-shared-piece-details input[type=checkbox]{width:28px;height:28px}
+}
