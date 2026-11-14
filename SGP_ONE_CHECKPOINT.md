@@ -2042,3 +2042,10 @@ Base publicada 2ad7054 (v457). Rama feat/opt-week-linked-list, sin publicación 
 Prueba DOM focalizada: enlace exacto, reserva faltante sin botón ni OPT atribuida, candidatos locales separados, errores, cambio de semana/sesión y selección. La prueba usa únicamente datos sintéticos. Versión v458 provisional sujeta a comprobar main antes de futura publicación.
 
 QA visual local del listado: Chromium 1440×1000 y 390×844, 18 reservas sintéticas, nueve enlaces y nueve faltantes. Capturas inspeccionadas; scroll horizontal móvil/vertical limitado a 320px, cierre/reapertura, selección exacta y limpieza al cambiar semana pasan. Corrección focalizada: botón Consultar sin salto de línea en móvil. Harness tests/opt-digital/week-linked-browser.cjs bloquea tráfico externo y cualquier RPC no esperado. Evidencia local /tmp/opt-week-list-evidence; no equivale a una sesión productiva. Sin push/PR/publicación.
+
+
+## 2026-11-14 — Estado de archivos preparado, UI pendiente de boceto
+
+Causa: workflow.js vacía el input de índice y carpeta tras capturar File; índices/originales se conservan en mapas de memoria del import-panel y PDFs revisados pueden persistir en IndexedDB local. Vaciar el input no borra esas referencias ni confirma guardado servidor. Nuevo modelo puro src/domain/opt-file-selection-state.js distingue disponibilidad local, lectura local y resultado del servidor (no enviado/en curso/confirmado/rechazado/incierto). Solo usa name y webkitRelativePath validada; rechaza ruta absoluta, fakepath, traversal y nombre discordante. Nunca afirma archivo PDF archivado en servidor.
+
+Modelo todavía NO conectado a UI ni servicios: el futuro controlador debe alimentar confirmed solo desde recibo validado por el servicio existente, y uncertain desde su diario, nunca desde extracción local. Índice temporal conserva sus contadores existentes; no convertirlos en recibo SGP. Dos pruebas focalizadas pasan. Sin UI nueva ni publicación hasta boceto aprobado. Frames permanece pendiente de decisión sobre ámbito/programación, sin creación de vínculos.
