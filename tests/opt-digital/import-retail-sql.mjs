@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import {readFileSync,writeFileSync} from 'node:fs';
 import * as pdfjs from 'pdfjs-dist/build/pdf.mjs';
 import {DOMParser} from '@xmldom/xmldom';
+import {createOptDocumentPlans} from '../../src/services/opt-document-plans.js';
+import {retailDocumentPlans} from '../../src/server/opt-retail-geometry-contract.js';
 import {createOptImportHandler} from '../../src/server/opt-import-handler.js';
 import {createOptPdfReader} from '../../src/server/opt-pdf-reader.js';
 import {body as fixtureBody,program,scope,fullPdf,base64,pages} from './import-fixtures.mjs';
@@ -29,7 +31,10 @@ INSERT INTO public.sgp_mecanizado_programacion_detalle VALUES('${program}','1234
 await db.exec("ALTER TABLE public.sgp_producciones ADD COLUMN produccion text; UPDATE public.sgp_producciones SET id='700000',produccion='123456 - Synthetic'; INSERT INTO public.sgp_producciones SELECT '700000|FRAMES_2',id,'FRAMES_2',reserva_al,sistema,anio,semana_base,activa,excluida_export,produccion FROM public.sgp_producciones;");
 for(const file of ['install_REVIEW.sql','import_context_retail_v3_REVIEW.sql','import_channel_retail_v3_REVIEW.sql','rounding_read_warnings_REVIEW.sql'])await db.exec(readFileSync(new URL('../../docs/sql-proposals/opt-shared/'+file,import.meta.url),'utf8'));
 await db.exec("UPDATE sgp_opt_shared.config SET enabled=true,access_window='mecanizado',read_roles=ARRAY['LIDER MECANIZADO'],write_roles=ARRAY['LIDER MECANIZADO']");
-let writes=0,lastWrite=null,beforeWrite=null;
+await db.exec("CREATE TABLE sgp_opt_shared.document_plans(id_documento uuid PRIMARY KEY,sha256 text,id_aprobacion uuid,manifest_sha256 text,evidence_sha256 text,extractor_sha256 text,geometry jsonb);");
+await db.exec(readFileSync(new URL('./fixtures/persist-document-plans-receiver.sql',import.meta.url),'utf8'));
+await db.exec(readFileSync(new URL('./fixtures/document-plans-reader.sql',import.meta.url),'utf8'));
+let writes=0,lastWrite=null,beforeWrite=null,corruptGeometry=false;
 const rpc=async(name,a)=>{try{
  if(name==='sgp_sesion_actual')return {data:(await db.query('SELECT public.sgp_sesion_actual($1) AS data',[a.p_token])).rows[0].data};
  if(name==='sgp_mis_accesos')return {data:(await db.query('SELECT * FROM public.sgp_mis_accesos($1)',[a.p_token])).rows};
@@ -37,7 +42,7 @@ const rpc=async(name,a)=>{try{
  if(name==='sgp_opt_importar_retail_validado_v3'){writes++;lastWrite=structuredClone(a);if(beforeWrite)await beforeWrite();return {data:(await db.query('SELECT public.sgp_opt_importar_retail_validado_v3($1,$2::text::bytea,$3,$4,$5) AS data',[a.p_token,a.p_pdf,JSON.stringify(a.p_manifest),JSON.stringify(a.p_sources),JSON.stringify(a.p_evidence)])).rows[0].data};}
  throw Error('UNEXPECTED_RPC');
 }catch(error){return {error:{code:error.code,message:error.message}};}};
-const handler=createOptImportHandler({rpc,readPdf:createOptPdfReader(pdfjs),DOMParser,retailV3:true,allowedOrigins:['https://offline.invalid']});
+const handler=createOptImportHandler({rpc,readPdf:createOptPdfReader(pdfjs),DOMParser,retailV3:true,retailOnly:true,serializeRetailPlans:(extraction,manifest)=>{const g=retailDocumentPlans(extraction,manifest,'a'.repeat(64));if(corruptGeometry)g.documentary_plans.plans[0].bars[0].cuts.pop();return g;},allowedOrigins:['https://offline.invalid']});
 let fixtureOpt='OPT2099-46-5-TEST-3';
 function input(){const b=body(),opt=fixtureOpt;b.source.opt=opt;b.pdf.base64=base64(new TextEncoder().encode(atob(b.pdf.base64).replaceAll('OPT-SYNTH',opt)));b.index.base64=base64(new TextEncoder().encode(`OPT,Reserva,Sistema,Proyecto,Acabado\n${opt},9000001,SYNTH-SYS,123456 - Synthetic,FINISH\n`));return b;}
 const run=async()=>{const response=await handler(new Request('https://offline.invalid',{method:'POST',headers:{origin:'https://offline.invalid','content-type':'application/json'},body:JSON.stringify(input())}));return {status:response.status,...await response.json()};};
@@ -57,8 +62,20 @@ const saved=(await db.query('SELECT a.evidencia FROM sgp_opt_shared.approvals a 
 assert.equal(saved.validation_warnings[0].code,'OPT_PRINTED_ROUNDING_COMPATIBLE');assert.equal(saved.rounding_policy.originalPrecisionVerified,false);
 assert.equal((await db.query('SELECT sgp_opt_shared.document_validation_warnings($1) AS warnings',[roundedResult.data.id_documento])).rows[0].warnings[0].code,'OPT_PRINTED_ROUNDING_COMPATIBLE');
 fixtureOpt=originalOpt;await run();
+const persistedPlans=(await db.query('SELECT geometry FROM sgp_opt_shared.document_plans WHERE id_documento=$1',[first.data.id_documento])).rows[0].geometry;
+assert.equal(persistedPlans.plans[0].bars.length,2);assert.equal(persistedPlans.plans[0].bars.flatMap(b=>b.cuts).length,4);assert(persistedPlans.plans[0].bars.flatMap(b=>b.cuts).every(c=>c.id_pieza&&c.longitud_mm===254.79375));
+async function readScheme(receipt,ref){
+ const source={id_documento:receipt.data.id_documento,sha256:receipt.document.sha256,referencia:ref,sistema:'SYNTH-SYS'},reference={...source,documentReference:source};
+ const api=createOptDocumentPlans({rpc:async(name,a)=>({data:(await db.query('SELECT public.sgp_opt_esquema_documental_v2($1,$2,$3,$4,$5,$6) AS data',[a.p_token,JSON.stringify(a.p_scope),a.p_reserva,a.p_sistema,a.p_id_documento,a.p_referencia])).rows[0].data})},()=> 'synthetic-token',{documentApi:{ownsReference:()=>true}});
+ return api.load({scope,reservation:'9000001',system:'SYNTH-SYS'},reference);
+}
+const visible=await readScheme(first,'R1');assert.equal(visible.status,'AVAILABLE');assert.equal(visible.plans[0].cuts.length,4);assert(visible.plans[0].cuts.every(c=>c.id_pieza&&c.selectedReservation&&c.length==='10 1/32"'));
 const forged=structuredClone(lastWrite);for(const piece of forged.p_manifest)piece.asignacion.key_produccion='700000|FRAMES_2';assert.match((await rpc('sgp_opt_importar_retail_validado_v3',forged)).error.message,/OPT_RETAIL_ASIGNACION_FUERA_AMBITO/);
 const repeat=await run();assert.equal(repeat.data.duplicado,true);assert.equal(first.data.id_documento,repeat.data.id_documento);
+const geometryReplay=structuredClone(lastWrite);geometryReplay.p_evidence.documentary_plans.plans[0].rest='DIFFERENT';
+const approvalsBeforeReplay=(await db.query('SELECT count(*)::int n FROM sgp_opt_shared.approvals')).rows[0].n;
+assert.match((await rpc('sgp_opt_importar_retail_validado_v3',geometryReplay)).error.message,/OPT_PLANS_REPLAY_MISMATCH/);
+assert.equal((await db.query('SELECT count(*)::int n FROM sgp_opt_shared.approvals')).rows[0].n,approvalsBeforeReplay);
 const count=async()=> (await db.query('SELECT count(*)::int n FROM sgp_opt_shared.approvals')).rows[0].n;
 for(const sql of ["UPDATE public.sgp_producciones SET activa='NO' WHERE id_linea='PANELES_2'","UPDATE public.sgp_maestro_piezas SET destino_productivo='FRAME'","UPDATE public.sgp_producciones SET produccion='123456 - Other'","UPDATE public.sgp_mecanizado_programacion SET estado='CANCELADA'"]){
  const n=await count();beforeWrite=()=>db.exec(sql);const out=await run();assert.equal(out.code,'OPT_CONTEXTO_CAMBIO_REINTENTAR',JSON.stringify(out));assert.equal(await count(),n);
@@ -84,9 +101,12 @@ fixtureOpt='OPT2099-46-5-TEST-7';const mixed=input(),mixedPages=[...pages(),...p
 for(let n=0;n<mixedPages.length;n++)for(const item of mixedPages[n].items){item.str=item.str.replaceAll('OPT-SYNTH',fixtureOpt);if(n>=3)item.str=item.str.replaceAll('R1','R2').replaceAll('123456 - Synthetic','654321 - Second');}
 mixed.pdf.base64=base64(fullPdf(mixedPages));mixed.index.base64=base64(new TextEncoder().encode(`OPT,Reserva,Sistema,Proyecto,Acabado\n${fixtureOpt},9000001,SYNTH-SYS,123456 - Synthetic,FINISH\n${fixtureOpt},9000002,SYNTH-SYS,654321 - Second,FINISH\n`));
 const mixedResponse=await handler(new Request('https://offline.invalid',{method:'POST',headers:{origin:'https://offline.invalid','content-type':'application/json'},body:JSON.stringify(mixed)}));const mixedResult=await mixedResponse.json();assert.equal(mixedResponse.status,200,JSON.stringify(mixedResult));assert.equal(mixedResult.data.cantidad_piezas,8);
+const foreignScheme=await readScheme(mixedResult,'R2');assert.equal(foreignScheme.status,'AVAILABLE');assert(foreignScheme.plans[0].cuts.every(c=>c.id_pieza===null&&c.selectedReservation===false&&c.project===''));
+
 const week47=(await db.query("SELECT p.id_pieza FROM sgp_opt_shared.pieces p JOIN sgp_opt_shared.assignments a USING(id_pieza) WHERE p.id_documento=$1 AND a.key_produccion='800000|PANELES_2'",[mixedResult.data.id_documento])).rows.map(r=>r.id_pieza);assert.equal(week47.length,4);
 await assert.rejects(db.query('SELECT sgp_opt_shared.assert_units($1,$2)',[week47,JSON.stringify(scope)]),/OPT_UNIDAD_FUERA_AMBITO/);
 await db.query('SELECT sgp_opt_shared.assert_units($1,$2)',[week47,JSON.stringify({...scope,semana:47})]);fixtureOpt=originalOpt;
+fixtureOpt='OPT2099-46-5-TEST-8';const beforeGeometryFailure=await count(),beforeDocFailure=(await db.query('SELECT count(*)::int n FROM sgp_opt_shared.documents')).rows[0].n;corruptGeometry=true;assert.equal((await run()).code,'OPT_PLANS_COVERAGE_MISMATCH');corruptGeometry=false;assert.equal(await count(),beforeGeometryFailure);assert.equal((await db.query('SELECT count(*)::int n FROM sgp_opt_shared.documents')).rows[0].n,beforeDocFailure);fixtureOpt=originalOpt;
 // Classification as Frame remains documentary-only, with no cut assignment.
 await db.exec("UPDATE public.sgp_maestro_piezas SET tipo_pieza='FRAME',destino_productivo='FRAME'");
 assert.equal((await run()).code,'OPT_DOCUMENTO_REQUIERE_RECONCILIACION');

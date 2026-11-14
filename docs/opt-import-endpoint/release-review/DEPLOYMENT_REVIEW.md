@@ -1,3 +1,5 @@
+> Historical replacement plan; NOT executable. Superseded by SEPARATE_RETAIL_OPTION.md. Existing v6 must remain untouched.
+
 # Retail release package — execution not authorized
 
 ## Pins and independent review

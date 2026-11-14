@@ -25,6 +25,8 @@ for mode,target in [(m,t) for m in ['baseline','hardened'] for t in ['production
   path='docs/sql-proposals/opt-shared/'+name
   source=subprocess.check_output(['git','show','a0c9a6e:'+path],cwd=root,text=True) if mode=='baseline' and name.startswith('import_channel') else (root/path).read_text()
   require(sql(source,db))
+ require(sql("CREATE TABLE sgp_opt_shared.document_plans(id_documento uuid PRIMARY KEY,sha256 text,id_aprobacion uuid,manifest_sha256 text,evidence_sha256 text,extractor_sha256 text,geometry jsonb);",db))
+ require(sql((root/'tests/opt-digital/fixtures/persist-document-plans-receiver.sql').read_text(),db))
  require(sql("UPDATE sgp_opt_shared.config SET enabled=true,access_window='mecanizado',read_roles=ARRAY['LIDER MECANIZADO'],write_roles=ARRAY['LIDER MECANIZADO'];",db))
  # Session A has completed the whole writer, including final context reread,
  # and remains in the same transaction before COMMIT. Session B inserts then.

@@ -65,6 +65,10 @@ BEGIN
  AND NOT EXISTS(SELECT 1 FROM jsonb_array_elements(p_evidence->'validation_warnings') w
   WHERE w->>'code'='OPT_PRINTED_ROUNDING_COMPATIBLE')
  THEN RAISE EXCEPTION 'OPT_REDONDEO_ADVERTENCIA_REQUERIDA'; END IF;
+ IF p_evidence#>>'{documentary_plans,contract}' IS DISTINCT FROM 'OPT-DOCUMENT-PLANS-1'
+ OR p_evidence#>>'{documentary_plans,scope}' IS DISTINCT FROM 'DOCUMENTO'
+ OR coalesce(p_evidence->>'extractor_sha256','') !~ '^[0-9a-f]{64}$'
+ THEN RAISE EXCEPTION 'OPT_RETAIL_PLANS_REQUIRED'; END IF;
  IF p_manifest IS NULL OR jsonb_typeof(p_manifest)<>'array'
  OR p_sources IS NULL OR jsonb_typeof(p_sources)<>'array' THEN RAISE EXCEPTION 'OPT_MANIFIESTO_INVALIDO'; END IF;
  IF jsonb_array_length(p_sources)<>1 THEN RAISE EXCEPTION 'OPT_FUENTE_INVALIDA'; END IF;
@@ -169,6 +173,7 @@ BEGIN
    'validation_warnings',p_evidence->'validation_warnings'),actor)
  RETURNING id_aprobacion INTO approval;
  receipt:=sgp_opt_shared.import_manifest(approval,p_pdf,p_manifest);
+ PERFORM sgp_opt_shared.persist_document_plans((receipt->>'id_documento')::uuid,p_evidence->'documentary_plans',p_evidence->>'extractor_sha256');
  RETURN receipt||jsonb_build_object('import_contract','OPT-IMPORT-1','contract_version',2,'ok',true,'physical_completion_verified',false);
 END $$;
 REVOKE ALL ON FUNCTION public.sgp_opt_importar_retail_validado_v3(text,bytea,jsonb,jsonb,jsonb) FROM PUBLIC,anon,authenticated;

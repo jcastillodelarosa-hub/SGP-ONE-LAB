@@ -53,7 +53,7 @@ function receiptValid(receipt,manifest){return record(receipt)&&receipt.ok===tru
 
 /** Only server bootstrap supplies dependencies. Neither extraction nor SGP facts
  * are ever accepted from the caller. SQL remains the final authorization gate. */
-export function createOptImportHandler({rpc,readPdf,DOMParser,readWorksheetXML,allowedOrigins,retailV3=false}){
+export function createOptImportHandler({rpc,readPdf,DOMParser,readWorksheetXML,allowedOrigins,retailV3=false,retailOnly=false,serializeRetailPlans}){
  if(typeof rpc!=='function'||typeof readPdf!=='function'||!Array.isArray(allowedOrigins)||!allowedOrigins.length)throw Error('OPT_SERVER_DEPENDENCIES_REQUIRED');
  const origins=new Set(allowedOrigins);let busy=false;
  return async request=>{
@@ -69,6 +69,7 @@ export function createOptImportHandler({rpc,readPdf,DOMParser,readWorksheetXML,a
   try{
    if(!/^application\/json(?:;|$)/i.test(request.headers.get('content-type')||''))fail('OPT_JSON_REQUIRED','Se requiere JSON',415);
    const body=await bodyJSON(request);checkRequest(body);
+   if(retailOnly&&(body.source.origin!=='RETAIL'||body.source.mode!=='INDICE'))fail('OPT_RETAIL_ONLY');
    const retailIndex=retailV3===true&&body.source.origin==='RETAIL'&&body.source.mode==='INDICE';
    const auth=await rpc('sgp_sesion_actual',{p_token:body.p_token});
    if(auth.error)return reject(503,'SGP_SESSION_UNAVAILABLE','No se pudo comprobar la sesión SGP');
@@ -123,7 +124,8 @@ export function createOptImportHandler({rpc,readPdf,DOMParser,readWorksheetXML,a
    const result=validateOptImportManifest({document,extraction},server);
    if(!result.importable)return reject(422,'OPT_DOCUMENT_BLOCKED','El documento no supera la conciliación completa',{blockers:result.blockers.slice(0,100).map(blocker=>({...blocker,...(Array.isArray(blocker.candidates)?{candidates:blocker.candidates.slice(0,20),candidate_count:blocker.candidates.length}:{}),...(Array.isArray(blocker.issues)?{issues:blocker.issues.slice(0,100),issue_count:blocker.issues.length}:{})})),blocker_count:result.blockers.length});
    const manifest=result.manifest;
-   const evidence={contract:retailIndex?'OPT-SERVER-VALIDATION-RETAIL-3':projectIndex?'OPT-SERVER-VALIDATION-PROYECTO-2':'OPT-SERVER-VALIDATION-1',algorithm:retailIndex?'opt-import-manifest-retail-v3':projectIndex?'opt-import-manifest-project-v2':'opt-import-manifest-v1',pdf_sha256:hash,validation:'DOCUMENTARY_MANIFEST_READY',physical_completion_verified:false,
+   const geometry=retailIndex&&serializeRetailPlans?serializeRetailPlans(extraction,manifest):{};
+   const evidence={...geometry,contract:retailIndex?'OPT-SERVER-VALIDATION-RETAIL-3':projectIndex?'OPT-SERVER-VALIDATION-PROYECTO-2':'OPT-SERVER-VALIDATION-1',algorithm:retailIndex?'opt-import-manifest-retail-v3':projectIndex?'opt-import-manifest-project-v2':'opt-import-manifest-v1',pdf_sha256:hash,validation:'DOCUMENTARY_MANIFEST_READY',physical_completion_verified:false,
     sgp_binding:{contract:context.contract,scope:body.scope,revision:context.revision,...(retailIndex?{opt,selectores:retailSelection,referencias:references}:projectIndex?{opt,selectores:selectors,referencias:references}:{producciones:productions})},
     original_document_title:identity.title,
     documentary_summary:buildOptDocumentSummary(extraction),
