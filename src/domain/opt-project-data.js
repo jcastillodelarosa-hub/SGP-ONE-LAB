@@ -23,3 +23,14 @@ export function buildOptProjectData(sourceProjectRows){
  if(!validOptProjectData(result))throw Error('OPT_PROJECT_DATA_INVALID');
  return result;
 }
+
+// Display-only operations: keep original rows, quantities, fractions and text untouched.
+export function projectDataView(data,{query='',order='source'}={}){
+ const normalize=s=>String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('es').replace(/\s+/g,' ').trim();
+ const needle=normalize(query),rows=data.rows.filter(row=>normalize(row.reference).includes(needle));
+ if(order==='asc'||order==='desc'){
+  const compare=new Intl.Collator('es',{numeric:true,sensitivity:'base'}).compare;
+  rows.sort((a,b)=>(order==='asc'?1:-1)*compare(a.reference,b.reference));
+ }
+ return {rows,visibleQuantity:rows.reduce((sum,row)=>sum+row.quantity,0),totalRows:data.rows.length,totalQuantity:data.totalQuantity};
+}

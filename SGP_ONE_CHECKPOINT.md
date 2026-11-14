@@ -1932,3 +1932,8 @@ Pruebas: suite 972 PASS/10 skip antes de agregar regresión focal; 6 focales PAS
 verify:release PASS. Browser local bloqueado al arrancar Chromium por socket EPERM;
 prueba sintética PC/móvil añadida a CI. No acredita validación productiva/SQL.
 Estado: implementado en rama; CI, integración y publicación pendientes.
+
+
+## Project data — filtro y orden aprobados
+Preparado sobre ab102489, v456 provisional: filtro sobre referencia completa, orden ascendente/descendente y original, contador visible/total sin alterar filas ni fracciones. Dos pruebas de dominio, DOM y Chromium PC 1440x1000/móvil 390x844 PASS con fixtures locales; capturas inspeccionadas. SQL privado/lector se entrega separado sobre 2b35890; no despliegue, producción ni reimportación. Retail y etiquetas intactos.
+Empaquetado: npm ci, build:opt-vendor, build:vendor y verify:release PASS (LAB v456 provisional).

@@ -1516,3 +1516,7 @@ se incrementan de354 a355. Caso8+57=65 y controles de Issue97 conservados;259 pr
 34 aserciones SQL aisladas y PC/móvil aprobados. Ver checkpoint y tests/issue97/README.md.
 No fusionado/desplegado; publicación y aplicación productiva requieren autorización
 posterior. Este hito no sustituye la versión actualmente publicada.
+
+
+## Project data — filtro y orden aprobados
+Preparado sobre ab102489, v456 provisional: filtro sobre referencia completa, orden ascendente/descendente y original, contador visible/total sin alterar filas ni fracciones. Dos pruebas de dominio, DOM y Chromium PC 1440x1000/móvil 390x844 PASS con fixtures locales; capturas inspeccionadas. SQL privado/lector se entrega separado sobre 2b35890; no despliegue, producción ni reimportación. Retail y etiquetas intactos.

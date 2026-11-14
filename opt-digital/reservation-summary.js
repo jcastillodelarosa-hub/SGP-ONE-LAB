@@ -1,4 +1,4 @@
-import {validOptProjectData} from '../src/domain/opt-project-data.js';
+import {validOptProjectData,projectDataView} from '../src/domain/opt-project-data.js';
 // Read-only documentary view. It never registers cuts or reconstructs missing source values.
 const display=value=>value===null||value===undefined||value===''?'No informado':String(value);
 export function mountReservationSummary(container,{api}={}) {
@@ -10,14 +10,14 @@ export function mountReservationSummary(container,{api}={}) {
  section.append(make('h2','Resumen de la reserva'),status,refresh,body);container.append(section);
  let selected=null,active=false,closed=false,epoch=0,loaded=false,loading=false;
  function controls(){refresh.disabled=loading||!selected||selected.origin!=='SERVIDOR'||!api;section.setAttribute('aria-busy',String(loading));}
- function table(title,columns,rows,kind){
+ function table(title,columns,rows,kind,emptyText='No hay filas documentales disponibles. No se interpreta como cantidad cero.'){
   const block=make('section');block.className='opt-summary-table-section';block.append(make('h3',title));
   const hint=make('p','Desliza la tabla horizontalmente para ver todas las columnas. La primera columna permanece fija.');hint.className='opt-summary-scroll-hint';block.append(hint);
   const wrap=make('div');wrap.className='table-wrap opt-summary-scroll';wrap.tabIndex=0;wrap.setAttribute('role','region');wrap.setAttribute('aria-label',title+' · tabla desplazable');
   const table=make('table');table.className='opt-documentary-table '+kind;table.setAttribute('aria-label',title);const head=make('thead'),tr=make('tr');
   for(const [,label]of columns){const th=make('th',label);th.scope='col';tr.append(th);}head.append(tr);table.append(head);
   const tbody=make('tbody');for(const row of rows){const tr=make('tr');for(const [key]of columns)tr.append(make('td',display(row[key])));tbody.append(tr);}table.append(tbody);wrap.append(table);block.append(wrap);
-  if(!rows.length)block.append(make('p','No hay filas documentales disponibles. No se interpreta como cantidad cero.'));
+  if(!rows.length)block.append(make('p',emptyText));
   return block;
  }
  function render(result){
@@ -31,10 +31,23 @@ export function mountReservationSummary(container,{api}={}) {
    if(pages.length)article.append(make('p','Fuente: resumen impreso del PDF · páginas '+pages.join(', ')));
    article.append(make('p',doc.scope==='RESERVA'?'Filas documentales acreditadas para la reserva seleccionada.':'Resumen del documento completo asociado a esta reserva. Sus totales no se atribuyen íntegramente a la reserva.'));
    if(doc.projectData&&validOptProjectData(doc.projectData)){
-    article.append(table('Resumen de cortes · detalle de piezas',[
-     ['item','Ítem'],['profile','Perfil'],['code','Código/acabado'],['length','Longitud'],['reference','Referencia'],['quantity','Cantidad']
-    ],doc.projectData.rows,'opt-project-data-table'));
-    article.append(make('p',`${doc.projectData.rows.length} ítems · ${doc.projectData.totalQuantity} piezas impresas en el documento. No representa cortes realizados.`));
+    const controls=make('div');controls.className='opt-project-data-controls';
+    const filterLabel=make('label','Filtrar por referencia'),filter=make('input');filter.type='search';filter.className='opt-project-data-filter';filter.placeholder='Buscar en la referencia completa';filterLabel.append(filter);
+    const orderLabel=make('label','Orden por referencia'),order=make('select');order.className='opt-project-data-order';
+    for(const [value,label] of [['source','Orden del PDF'],['asc','Referencia ascendente'],['desc','Referencia descendente']]){const option=make('option',label);option.value=value;order.append(option);}orderLabel.append(order);
+    const clear=make('button','Limpiar filtro');clear.type='button';clear.onclick=()=>{filter.value='';draw();filter.focus();};
+    controls.append(filterLabel,orderLabel,clear);const slot=make('div'),counts=make('p');counts.className='opt-project-data-counts';counts.setAttribute('role','status');
+    article.append(controls,slot,counts);
+    function draw(){
+     const left=slot.querySelector('.opt-summary-scroll')?.scrollLeft||0;
+     const visible=projectDataView(doc.projectData,{query:filter.value,order:order.value});
+     slot.replaceChildren(table('Resumen de cortes · detalle de piezas',[
+      ['item','Ítem'],['profile','Perfil'],['code','Código/acabado'],['length','Longitud'],['reference','Referencia'],['quantity','Cantidad']
+     ],visible.rows,'opt-project-data-table','No hay coincidencias con el filtro. El documento conserva todas sus filas.'));
+     slot.querySelector('.opt-summary-scroll').scrollLeft=left;
+     counts.textContent=`${visible.rows.length} de ${visible.totalRows} ítems · ${visible.visibleQuantity} de ${visible.totalQuantity} piezas impresas en el documento. No representa cortes realizados.`;
+    }
+    filter.oninput=draw;order.onchange=draw;draw();
    }else article.append(make('p','Detalle de piezas (Project data) no disponible. Se conservan los resúmenes existentes; no se reconstruyen referencias ni se supone cantidad cero.'));
    article.append(table('Totales de corte por perfil',[
     ['reference','Perfil'],['finish','Acabado'],['bars','Barras'],['pieces','Piezas OPT'],['plans','Planos'],['scrapPrinted','Scrap impreso']
