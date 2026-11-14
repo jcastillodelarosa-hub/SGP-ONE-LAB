@@ -1,3 +1,4 @@
+import {readWithAccessoryAlerts} from '../services/accessory-alerts.js';
 import {acceptCloseReceipt,closeReadbackPending} from './lp01-export-close-editor.js';
 import {historicalTurnController} from '../services/lp01-historical-turn.js';
 import {packingInclusionController} from '../services/lp01-packing-inclusion.js';
@@ -59,7 +60,7 @@ export function mountOperation({tracking,operation,bridge,legacyLoad,orderSaleEn
  const coordinator=()=>['COORDINADOR','ADMINISTRADOR'].includes(data?.role);
  const writeCompatible=()=>data?.writeContract==='LP-OPERACION-CAS-2';
  const writable=()=>writeCompatible()&&data?.writes&&(!data.operations||data.operations.includes('EJECUTAR'))&&data?.role!=='CONSULTA'&&data?.turn.estado!=='CERRADO'&&(data?.turn.estado!=='EN_REVISION'||coordinator());
- async function rpc(name,args,{signal}={}){const token=bridge.getToken();if(!token)throw Error('Inicia sesión para consultar');const client=await bridge.getClient();let query=client.rpc(name,{p_token:token,...args});if(signal&&typeof query.abortSignal==='function')query=query.abortSignal(signal);const r=await query;if(r.error)throw Object.assign(new Error(r.error.message),r.error,{status:r.status});return r.data;}
+ async function rpc(name,args,{signal}={}){const token=bridge.getToken();if(!token)throw Error('Inicia sesión para consultar');const client=await bridge.getClient();const r=await readWithAccessoryAlerts(client,name,{p_token:token,...args},{signal});if(r.error)throw Object.assign(new Error(r.error.message),r.error,{status:r.status});return r.data;}
  function globalControls(global){
   // The shared controls remain available in Ensamble/Empaque, outside Seguimiento.
   tracking.querySelector('.lp-followup-heading').hidden=global;

@@ -5,6 +5,7 @@ const panel=document.createElement('section');panel.className='sgp-planner-opera
 panel.innerHTML='<h3>Programación por turno</h3><p>La cantidad y el saldo del Export no se modifican. Las acciones requieren sesión y permisos.</p><div class="sgp-planner-actions"><label>Fecha <input type="date" id="sgpPlanDate"></label><label>Turno <select id="sgpPlanShift"><option value="1">Turno 1</option><option value="2">Turno 2</option></select></label><label>Prioridad <input type="number" min="1" value="1" id="sgpPlanPriority"></label><button id="sgpPlanLoad" type="button">Consultar turnos</button></div><div class="sgp-planner-actions"><label>Producción <select id="sgpPlanProduction"></select></label><label>Cantidad <input id="sgpPlanQuantity" type="number" min="1" step="1"></label><button id="sgpPlanSave" type="button">Programar</button></div><p id="sgpPlanMessage" role="status"></p><div id="sgpPlanPartBatch" hidden><strong id="sgpPlanPartTitle"></strong><p id="sgpPlanPartPreview"></p><button id="sgpPlanPartSave" type="button">Programar todas las producciones de la parte</button><button id="sgpPlanPartCancel" type="button">Cancelar selección de parte</button></div><div id="sgpPlanAssignments"></div>';
 root.append(panel);
 const styles=document.createElement('style');styles.textContent='.sgp-planner-operations{margin:18px 0;padding:14px;border:1px solid #c9d9eb;border-radius:12px;background:#f8fbff}.sgp-planner-operations h3{color:#174f89}.sgp-planner-operations label{display:grid;gap:4px}.sgp-planner-operations select,.sgp-planner-operations input{padding:8px;border:1px solid #b7cee9;border-radius:7px;max-width:240px}.sgp-plan-row{padding:10px;border:1px solid #d5e1ef;border-radius:9px;margin:8px 0;background:white}.sgp-plan-row button{margin:4px;padding:8px;border-radius:7px;border:1px solid #bfd2e8;background:#eaf3ff;color:#124b8b}';document.head.append(styles);
+const alertMarkup=row=>window.SGPAccessoryAlerts?.(row)||'';
 const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const date=$('sgpPlanDate');date.value=new Date().toLocaleDateString('en-CA');let items=[];let pendingPart=null;
 const toISO=value=>new Date(value).toISOString().slice(0,10);
@@ -30,7 +31,7 @@ async function rpc(name,params,requestScope=null){
   if(!trackedWriter)trackedWriter=import('./src/services/lp01-planner-write.js').then(({createPlannerWriter})=>createPlannerWriter({storage:window.sessionStorage,uuid:()=>crypto.randomUUID(),promptReason:()=>window.prompt('Motivo de la programación o cambio','')}));
   return (await trackedWriter)({name,params,send,requestScope});
  }
- const {data,error}=await send(name,params);if(error)throw error;return data;
+ const {readWithAccessoryAlerts}=await import('./src/services/accessory-alerts.js');const {data,error}=await readWithAccessoryAlerts(client,name,{p_token:token,...params});if(error)throw error;if(token!==window.SGPPlannerBridge?.getToken?.())throw Error('La sesión cambió; vuelve a consultar');return data;
 }
 const inFlight=new Set();
 async function groupBalances(keys){
@@ -107,7 +108,7 @@ function renderViews(){
    list.replaceChildren();
    if(!filtered.length){list.textContent='No hay producciones con saldo positivo para el filtro actual.';return}
    filtered.forEach(a=>{const line=document.createElement('div');line.className='sgp-line-pending-row';
-    line.innerHTML='<div><strong>'+escape(a.produccion||a.id||'Producción')+'</strong><small>'+escape(a.sistema||'—')+' · Reserva '+escape(a.reserva_al||a.reserva||'—')+' · Saldo Export '+escape(a.saldo_ensamble)+'</small></div><button type="button">Programar</button>';
+    line.innerHTML='<div><strong>'+escape(a.produccion||a.id||'Producción')+'</strong>'+alertMarkup(a)+'<small>'+escape(a.sistema||'—')+' · Reserva '+escape(a.reserva_al||a.reserva||'—')+' · Saldo Export '+escape(a.saldo_ensamble)+'</small></div><button type="button">Programar</button>';
     line.querySelector('button').onclick=()=>{const result=selectProduction(a.key_produccion);notify(result.message);if(result.ok)panel.querySelector('#sgpPlanProduction')?.scrollIntoView({behavior:'smooth',block:'center'});};
     list.append(line);
    });
@@ -126,7 +127,7 @@ function renderViews(){
     const systems=new Map();subset.forEach(a=>systems.set(String(a.sistema||'Sin sistema'),(systems.get(String(a.sistema||'Sin sistema'))||0)+(Number(a.cantidad)||0)));
     if(systems.size){const breakdown=document.createElement('small');breakdown.className='lp-week-systems';breakdown.textContent=[...systems].map(([name,qty])=>name+': '+qty).join(' · ');cell.append(breakdown)}
     if(!subset.length){const empty=document.createElement('small');empty.className='lp-week-empty';empty.textContent='Suelta aquí una producción';cell.append(empty)}
-    subset.sort((a,b)=>Number(a.prioridad)-Number(b.prioridad)).forEach(a=>{const card=document.createElement('article');card.className='lp-week-assignment';card.draggable=Boolean(a.id);if(a.id)card.dataset.lpAssignment=String(a.id);card.title='Arrastra para mover esta asignación';card.innerHTML='<strong>'+escape(a.produccion||'Producción')+'</strong><small>'+escape(a.sistema||'—')+' · '+escape(a.cantidad)+' und. · Prioridad '+escape(a.prioridad)+'</small>';cell.append(card)});
+    subset.sort((a,b)=>Number(a.prioridad)-Number(b.prioridad)).forEach(a=>{const card=document.createElement('article');card.className='lp-week-assignment';card.draggable=Boolean(a.id);if(a.id)card.dataset.lpAssignment=String(a.id);card.title='Arrastra para mover esta asignación';card.innerHTML='<strong>'+escape(a.produccion||'Producción')+'</strong><small>'+escape(a.sistema||'—')+' · '+escape(a.cantidad)+' und. · Prioridad '+escape(a.prioridad)+'</small>';card.insertAdjacentHTML('beforeend',alertMarkup(a));cell.append(card)});
     grid.append(cell)})
   }
   const weekInput=viewContent.querySelector('#sgpPlanWeek');weekInput.value=isoWeekValue(weekAnchor);
@@ -137,7 +138,7 @@ function renderViews(){
   viewContent.innerHTML='<div class="sgp-line-view-head"><h4>Programación · tabla</h4><small>Orden visual por fecha, turno y prioridad; no modifica prioridades guardadas.</small></div><div class="sgp-line-table-wrap"><table><thead><tr><th>Fecha</th><th>Turno</th><th>Prioridad</th><th>Producción</th><th>Sistema</th><th>Programadas</th><th>Ejecutadas</th><th>Estado</th><th>Acción</th></tr></thead><tbody></tbody></table></div>';
   const body=viewContent.querySelector('tbody');const ordered=[...data].sort((a,b)=>dayKey(a).localeCompare(dayKey(b))||Number(a.turno)-Number(b.turno)||Number(a.prioridad)-Number(b.prioridad));
   if(!ordered.length){body.innerHTML='<tr><td colspan="9">Sin asignaciones para el rango consultado.</td></tr>';return}
-  ordered.forEach(a=>{const tr=document.createElement('tr');[dayKey(a),a.turno,a.prioridad,a.produccion,a.sistema,a.cantidad,a.ejecutado,a.estado].forEach(value=>{const td=document.createElement('td');td.textContent=String(value??'—');tr.append(td)});const cell=document.createElement('td');const button=document.createElement('button');button.type='button';button.textContent='Mover/dividir';button.onclick=()=>openMove(a);cell.append(button);tr.append(cell);body.append(tr)});return;
+  ordered.forEach(a=>{const tr=document.createElement('tr');[dayKey(a),a.turno,a.prioridad,a.produccion,a.sistema,a.cantidad,a.ejecutado,a.estado].forEach(value=>{const td=document.createElement('td');td.textContent=String(value??'—');tr.append(td)});const cell=document.createElement('td');const button=document.createElement('button');button.type='button';button.textContent='Mover/dividir';button.onclick=()=>openMove(a);cell.append(button);tr.append(cell);tr.children[3]?.insertAdjacentHTML('beforeend',alertMarkup(a));body.append(tr)});return;
  }
  if(activeView==='kanban'){
   const day=selectedDay||date.value;const entries=data.filter(a=>dayKey(a)===day);
@@ -147,11 +148,11 @@ function renderViews(){
   [0,1,2].forEach(shift=>{const column=document.createElement('section');column.className='sgp-line-kanban-column';const subset=shift?entries.filter(a=>Number(a.turno)===shift):[];const heading=document.createElement('h5');heading.textContent=shift?'Turno '+shift+' · '+sum(subset,'cantidad')+' programadas':'Por asignar';column.append(heading);
    if(!shift){const hint=document.createElement('p');hint.textContent='Consulta la pestaña Por programar para seleccionar una producción con saldo Export. El saldo no equivale a cantidad sin asignar.';column.append(hint);const link=document.createElement('button');link.type='button';link.textContent='Ver pendientes';link.onclick=()=>{activeView='pending';renderViews()};column.append(link)}
    else if(!subset.length){const empty=document.createElement('p');empty.textContent='Sin asignaciones para este turno.';column.append(empty)}
-   subset.forEach(a=>{const card=document.createElement('article');card.className='sgp-line-kanban-card';const title=document.createElement('strong');title.textContent=a.produccion||'Producción';const info=document.createElement('p');info.textContent=[a.sistema,a.cantidad+' programadas','Prioridad '+a.prioridad].filter(Boolean).join(' · ');const button=document.createElement('button');button.type='button';button.textContent='Mover/dividir';button.onclick=()=>openMove(a);card.append(title,info,button);column.append(card)});board.append(column)});return;
+   subset.forEach(a=>{const card=document.createElement('article');card.className='sgp-line-kanban-card';const title=document.createElement('strong');title.textContent=a.produccion||'Producción';const info=document.createElement('p');info.textContent=[a.sistema,a.cantidad+' programadas','Prioridad '+a.prioridad].filter(Boolean).join(' · ');const button=document.createElement('button');button.type='button';button.textContent='Mover/dividir';button.onclick=()=>openMove(a);card.append(title,info,button);card.insertAdjacentHTML('beforeend',alertMarkup(a));column.append(card)});board.append(column)});return;
  }
  viewContent.innerHTML='<div class="sgp-line-view-head"><h4>Seguimiento de Ensamble</h4><small>Datos de asignaciones y ejecución consultadas</small></div><div class="sgp-line-table-wrap"><table><thead><tr><th>Fecha</th><th>Turno</th><th>Prioridad</th><th>Producción</th><th>Programado</th><th>Ensamblado</th><th>Pendiente</th><th>Estado</th></tr></thead><tbody></tbody></table></div>';
  const tbody=viewContent.querySelector('tbody');if(!data.length){tbody.innerHTML='<tr><td colspan="8">Sin asignaciones consultadas</td></tr>';return}
- data.forEach(a=>{const tr=document.createElement('tr');const cells=[dayKey(a),a.turno,a.prioridad,a.produccion,a.cantidad,a.ejecutado,Math.max(0,(Number(a.cantidad)||0)-(Number(a.ejecutado)||0)),a.estado];cells.forEach(v=>{const td=document.createElement('td');td.textContent=String(v??'—');tr.append(td)});tbody.append(tr)});
+ data.forEach(a=>{const tr=document.createElement('tr');const cells=[dayKey(a),a.turno,a.prioridad,a.produccion,a.cantidad,a.ejecutado,Math.max(0,(Number(a.cantidad)||0)-(Number(a.ejecutado)||0)),a.estado];cells.forEach(v=>{const td=document.createElement('td');td.textContent=String(v??'—');tr.append(td)});tr.children[3]?.insertAdjacentHTML('beforeend',alertMarkup(a));tbody.append(tr)});
 }
 viewShell.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>{activeView=b.dataset.view;renderViews()});
 const viewCss=document.createElement('style');
