@@ -1938,3 +1938,10 @@ Pruebas: suite 972 PASS/10 skip antes de agregar regresión focal; 6 focales PAS
 verify:release PASS. Browser local bloqueado al arrancar Chromium por socket EPERM;
 prueba sintética PC/móvil añadida a CI. No acredita validación productiva/SQL.
 Estado: implementado en rama; CI, integración y publicación pendientes.
+
+## Política Retail aprobada — preparación local, sin despliegue
+Johan autorizó aplicar también a Retail el modelo existente OPT-PRINTED-ROUNDING-1: ±1/64 de pulgada por número impreso acumulado, intersección de intervalos y conservación conjunta. Esta decisión sustituye los bloqueos por falta de aprobación descritos en los antecedentes de esta rama; no prueba el algoritmo del optimizador. La implementación conserva medidas originales y evidencia originalPrecisionVerified=false, advierte explícitamente y rechaza valores fuera del modelo.
+
+Validación: 287 pruebas Node OPT; PostgreSQL local sintético con parser PDF real, persistencia y lectura de advertencia, idempotencia, observaciones concurrentes, sesión revocada, roles y Frames sin asignación; Chromium PC/móvil para Retail y regresión Proyecto, incluida recarga de catálogo. Los dos originales privados llegan a la frontera de escritura, con manifiestos estables y todas las longitudes impresas conservadas. No se llamó al escritor real ni se registraron cortes. El profiler detiene intencionalmente esa frontera y su respuesta simulada de incertidumbre no es un resultado productivo.
+
+Tres procesos fríos Deno2.2.12 STREAM por original: medianas CPU 1416/1319 ms, máximo1833 ms. No demuestra presupuesto de Edge alojado ni incluye escritura SQL remota. Sigue pendiente validación en entorno Edge aislado autorizado y aprobación de publicación/SQL. retailV3 continúa desactivado por defecto; ninguna migración aplicada, ningún despliegue ni reimportación de inciertos. Etiquetas v455 permanece paquete independiente. Los documentos originales y snapshots privados no forman parte del parche público.

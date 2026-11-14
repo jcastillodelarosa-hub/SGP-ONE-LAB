@@ -55,3 +55,17 @@ test('printed zero remainder uses painted borders, never default zero or midpoin
  page.rules=[750,800,840].map(x=>({x1:x,x2:x,y1:400,y2:460}));rest.str='';
  assert.equal(extractCoordinatePlans(source).plans[0].rest,'');
 });
+
+test('Retail rounding preserves every printed cut, persists warning evidence, and rejects outside envelope',async()=>{
+ const {pages,fullPdf}=await import('./opt-digital/import-fixtures.mjs');
+ for(const [summary,accepted] of [['40 3/32',true],['39',false]]){
+  const source=pages();source[1].items.find(i=>i.str.startsWith('Longitud de los cortes:')).str=`Longitud de los cortes: ${summary}\", Longitud de los perfiles usados: 60\", Length of reused stubs: 18\", Longitud del desperdicio: 1 7/8\"`;
+  const request=retailBody();request.pdf.base64=base64(fullPdf(source));const r=await run({request});
+  assert.equal(r.status,accepted?200:422,JSON.stringify(r.out));assert.equal(r.writes.length,accepted?1:0);
+  if(accepted){
+   const exact=await run();assert.deepEqual(r.writes[0].p_manifest,exact.writes[0].p_manifest);
+   const evidence=r.writes[0].p_evidence;assert.equal(evidence.rounding_policy.originalPrecisionVerified,false);assert.equal(evidence.rounding_policy.originalsPreserved,true);
+   assert.equal(evidence.validation_warnings[0].code,'OPT_PRINTED_ROUNDING_COMPATIBLE');assert.deepEqual(r.out.validationWarnings,evidence.validation_warnings);
+  }
+ }
+});

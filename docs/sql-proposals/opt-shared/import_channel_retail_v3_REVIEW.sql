@@ -24,7 +24,47 @@ BEGIN
  OR NOT(p_evidence ? 'sgp_binding') OR jsonb_typeof(p_evidence->'sgp_binding')<>'object'
  OR (p_evidence ? 'documentary_source_groups' AND jsonb_typeof(p_evidence->'documentary_source_groups') IS DISTINCT FROM 'array')
  THEN RAISE EXCEPTION 'OPT_VALIDACION_SERVIDOR_REQUERIDA'; END IF;
- -- Retail retains strict printed totals; no rounding-policy override.
+ -- Server-only rounding provenance, not a browser override or tolerance switch.
+ -- The private parser/validator must construct this from the original PDF.
+ IF jsonb_typeof(p_evidence->'rounding_policy') IS DISTINCT FROM 'object'
+ OR p_evidence#>>'{rounding_policy,version}' IS DISTINCT FROM 'OPT-PRINTED-ROUNDING-1'
+ OR p_evidence#>>'{rounding_policy,model}' IS DISTINCT FROM 'INDEPENDENT_NEAREST_1_32_CLOSED_ENVELOPE'
+ OR p_evidence#>'{rounding_policy,originalPrecisionVerified}' IS DISTINCT FROM 'false'::jsonb
+ OR p_evidence#>'{rounding_policy,originalsPreserved}' IS DISTINCT FROM 'true'::jsonb
+ OR jsonb_typeof(p_evidence->'rounding_evidence') IS DISTINCT FROM 'array'
+ OR jsonb_typeof(p_evidence->'validation_warnings') IS DISTINCT FROM 'array'
+ THEN RAISE EXCEPTION 'OPT_REDONDEO_EVIDENCIA_INVALIDA'; END IF;
+ IF jsonb_array_length(p_evidence->'rounding_evidence') NOT BETWEEN 1 AND 1000
+ OR jsonb_array_length(p_evidence->'validation_warnings')>1
+ OR EXISTS(SELECT 1 FROM jsonb_array_elements(p_evidence->'rounding_evidence') r WHERE
+  jsonb_typeof(r) IS DISTINCT FROM 'object'
+  OR jsonb_typeof(r->'reference') IS DISTINCT FROM 'string' OR btrim(r->>'reference')=''
+  OR jsonb_typeof(r->'finish') IS DISTINCT FROM 'string' OR btrim(r->>'finish')=''
+  OR jsonb_typeof(r->'printedSummary') IS DISTINCT FROM 'object'
+  OR jsonb_typeof(r->'diagnostic') IS DISTINCT FROM 'object'
+  OR r#>>'{diagnostic,status}' IS NULL
+  OR r#>>'{diagnostic,status}' NOT IN ('PRINTED_EQUALITY','ROUNDING_COMPATIBLE')
+  OR r#>'{diagnostic,originalPrecisionVerified}' IS DISTINCT FROM 'false'::jsonb
+  OR r#>'{diagnostic,authorizesImport}' IS DISTINCT FROM 'false'::jsonb
+  OR jsonb_typeof(r#>'{diagnostic,intervals}') IS DISTINCT FROM 'object'
+  OR jsonb_typeof(r#>'{diagnostic,printedDelta32}') IS DISTINCT FROM 'object'
+  OR NOT ((r#>'{diagnostic,printedDelta32}') ?& ARRAY['stock','cuts','balance'])
+  OR EXISTS(SELECT 1 FROM unnest(ARRAY['stock','cuts','balance']) k WHERE
+   jsonb_typeof(r#>ARRAY['diagnostic','printedDelta32',k]) IS DISTINCT FROM 'string'
+   OR r#>>ARRAY['diagnostic','printedDelta32',k] !~ '^-?[0-9]+$')
+  OR r#>>'{diagnostic,schema}' IS DISTINCT FROM 'sgp.opt.rounding-diagnostic.v1'
+  OR r#>>'{diagnostic,model}' IS DISTINCT FROM 'INDEPENDENT_NEAREST_1_32_CLOSED_ENVELOPE'
+  OR r#>'{diagnostic,physicalCompletionVerified}' IS DISTINCT FROM 'false'::jsonb)
+ OR EXISTS(SELECT 1 FROM jsonb_array_elements(p_evidence->'validation_warnings') w WHERE
+  jsonb_typeof(w) IS DISTINCT FROM 'object'
+  OR w->>'code' IS DISTINCT FROM 'OPT_PRINTED_ROUNDING_COMPATIBLE'
+  OR jsonb_typeof(w->'message') IS DISTINCT FROM 'string' OR btrim(w->>'message')='')
+ THEN RAISE EXCEPTION 'OPT_REDONDEO_EVIDENCIA_INVALIDA'; END IF;
+ IF EXISTS(SELECT 1 FROM jsonb_array_elements(p_evidence->'rounding_evidence') r
+  WHERE r#>>'{diagnostic,status}'='ROUNDING_COMPATIBLE')
+ AND NOT EXISTS(SELECT 1 FROM jsonb_array_elements(p_evidence->'validation_warnings') w
+  WHERE w->>'code'='OPT_PRINTED_ROUNDING_COMPATIBLE')
+ THEN RAISE EXCEPTION 'OPT_REDONDEO_ADVERTENCIA_REQUERIDA'; END IF;
  IF p_manifest IS NULL OR jsonb_typeof(p_manifest)<>'array'
  OR p_sources IS NULL OR jsonb_typeof(p_sources)<>'array' THEN RAISE EXCEPTION 'OPT_MANIFIESTO_INVALIDO'; END IF;
  IF jsonb_array_length(p_sources)<>1 THEN RAISE EXCEPTION 'OPT_FUENTE_INVALIDA'; END IF;

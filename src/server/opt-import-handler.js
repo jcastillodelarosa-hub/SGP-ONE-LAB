@@ -127,7 +127,7 @@ export function createOptImportHandler({rpc,readPdf,DOMParser,readWorksheetXML,a
     sgp_binding:{contract:context.contract,scope:body.scope,revision:context.revision,...(retailIndex?{opt,selectores:retailSelection,referencias:references}:projectIndex?{opt,selectores:selectors,referencias:references}:{producciones:productions})},
     original_document_title:identity.title,
     documentary_summary:buildOptDocumentSummary(extraction),
-    ...(projectIndex?{documentary_source_groups:manifest.sourceGroups||[],rounding_policy:manifest.roundingPolicy,rounding_evidence:manifest.roundingEvidence,validation_warnings:manifest.validationWarnings}:{}),
+    ...((projectIndex || retailIndex)?{documentary_source_groups:manifest.sourceGroups||[],rounding_policy:manifest.roundingPolicy,rounding_evidence:manifest.roundingEvidence,validation_warnings:manifest.validationWarnings}:{}),
     original_index:body.index?{sha256:indexHash,name:body.index.name,format:body.index.format,sheet:indexSheet}:null};
    // PostgreSQL bytea hex notation is used only inside the private server call.
    // It is never put in a browser config or returned to the client.
@@ -139,7 +139,7 @@ export function createOptImportHandler({rpc,readPdf,DOMParser,readWorksheetXML,a
     return reject(503,'OPT_IMPORT_OUTCOME_UNKNOWN','No se pudo confirmar el resultado. Reintenta el mismo PDF y el mismo índice.',{definitive:false});
    }
    if(!receiptValid(imported.data,manifest))return reject(503,'OPT_IMPORT_OUTCOME_UNKNOWN','Respuesta de registro incompatible. Conserva y reintenta los mismos archivos.',{definitive:false});
-   return send(200,{ok:true,data:imported.data,document:{sha256:hash,source_key:document.sourceKey,origin:document.origin,opt,mode:document.mode},scope:body.scope,totals:manifest.totals,scopeTotals:manifest.scopeTotals,...(projectIndex?{roundingPolicy:manifest.roundingPolicy,roundingEvidence:manifest.roundingEvidence,validationWarnings:manifest.validationWarnings}:{}),physical_completion_verified:false});
+   return send(200,{ok:true,data:imported.data,document:{sha256:hash,source_key:document.sourceKey,origin:document.origin,opt,mode:document.mode},scope:body.scope,totals:manifest.totals,scopeTotals:manifest.scopeTotals,...((projectIndex || retailIndex)?{roundingPolicy:manifest.roundingPolicy,roundingEvidence:manifest.roundingEvidence,validationWarnings:manifest.validationWarnings}:{}),physical_completion_verified:false});
   }catch(error){
    if(writeAttempted)return reject(503,'OPT_IMPORT_OUTCOME_UNKNOWN','No se pudo confirmar el resultado. Reintenta los mismos archivos.',{definitive:false});
    return reject(error.status||422,error.code||'OPT_INPUT_INVALID',String(error.message||'No se pudo validar el documento').slice(0,500));

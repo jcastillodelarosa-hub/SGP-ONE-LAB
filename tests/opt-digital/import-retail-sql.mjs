@@ -5,7 +5,7 @@ import * as pdfjs from 'pdfjs-dist/build/pdf.mjs';
 import {DOMParser} from '@xmldom/xmldom';
 import {createOptImportHandler} from '../../src/server/opt-import-handler.js';
 import {createOptPdfReader} from '../../src/server/opt-pdf-reader.js';
-import {body as fixtureBody,program,scope,fullPdf,base64} from './import-fixtures.mjs';
+import {body as fixtureBody,program,scope,fullPdf,base64,pages} from './import-fixtures.mjs';
 const {PGlite}=await import(process.env.PGLITE_MODULE||'@electric-sql/pglite');
 const db=new PGlite();
 // Numeric synthetic reservation satisfies the private PROYECTO selector contract.
@@ -27,7 +27,7 @@ INSERT INTO public.sgp_mecanizado_programacion VALUES('${program}','9000001','SI
 INSERT INTO public.sgp_mecanizado_programacion_detalle VALUES('${program}','123456|PANELES_2','9000001',1);`);
 
 await db.exec("ALTER TABLE public.sgp_producciones ADD COLUMN produccion text; UPDATE public.sgp_producciones SET id='700000',produccion='123456 - Synthetic'; INSERT INTO public.sgp_producciones SELECT '700000|FRAMES_2',id,'FRAMES_2',reserva_al,sistema,anio,semana_base,activa,excluida_export,produccion FROM public.sgp_producciones;");
-for(const file of ['install_REVIEW.sql','import_context_retail_v3_REVIEW.sql','import_channel_retail_v3_REVIEW.sql'])await db.exec(readFileSync(new URL('../../docs/sql-proposals/opt-shared/'+file,import.meta.url),'utf8'));
+for(const file of ['install_REVIEW.sql','import_context_retail_v3_REVIEW.sql','import_channel_retail_v3_REVIEW.sql','rounding_read_warnings_REVIEW.sql'])await db.exec(readFileSync(new URL('../../docs/sql-proposals/opt-shared/'+file,import.meta.url),'utf8'));
 await db.exec("UPDATE sgp_opt_shared.config SET enabled=true,access_window='mecanizado',read_roles=ARRAY['LIDER MECANIZADO'],write_roles=ARRAY['LIDER MECANIZADO']");
 let writes=0,lastWrite=null,beforeWrite=null;
 const rpc=async(name,a)=>{try{
@@ -42,6 +42,20 @@ let fixtureOpt='OPT2099-46-5-TEST-3';
 function input(){const b=body(),opt=fixtureOpt;b.source.opt=opt;b.pdf.base64=base64(new TextEncoder().encode(atob(b.pdf.base64).replaceAll('OPT-SYNTH',opt)));b.index.base64=base64(new TextEncoder().encode(`OPT,Reserva,Sistema,Proyecto,Acabado\n${opt},9000001,SYNTH-SYS,123456 - Synthetic,FINISH\n`));return b;}
 const run=async()=>{const response=await handler(new Request('https://offline.invalid',{method:'POST',headers:{origin:'https://offline.invalid','content-type':'application/json'},body:JSON.stringify(input())}));return {status:response.status,...await response.json()};};
 const first=await run();assert.equal(first.status,200,JSON.stringify(first));assert.equal(first.data.cantidad_piezas,4);assert.equal(first.data.sin_asignacion,0);
+// A compatible printed discrepancy is preserved in the private approval and manifest.
+const exactManifest=structuredClone(lastWrite.p_manifest);
+const originalOpt=fixtureOpt;fixtureOpt='OPT2099-46-5-TEST-5';
+const rounded=input(),source=pages();source[1].items.find(i=>i.str.startsWith('Longitud de los cortes:')).str=source[1].items.find(i=>i.str.startsWith('Longitud de los cortes:')).str.replace('40 1/8','40 3/32');
+for(const page of source)for(const item of page.items)item.str=item.str.replaceAll('OPT-SYNTH',fixtureOpt);
+rounded.pdf.base64=base64(fullPdf(source));
+const roundedResponse=await handler(new Request('https://offline.invalid',{method:'POST',headers:{origin:'https://offline.invalid','content-type':'application/json'},body:JSON.stringify(rounded)}));
+assert.equal(roundedResponse.status,200);const roundedResult=await roundedResponse.json();
+assert.equal(roundedResult.validationWarnings[0].code,'OPT_PRINTED_ROUNDING_COMPATIBLE');
+assert.deepEqual(lastWrite.p_manifest,exactManifest);
+const saved=(await db.query('SELECT a.evidencia FROM sgp_opt_shared.approvals a JOIN sgp_opt_shared.documents d USING(id_aprobacion) WHERE d.id_documento=$1',[roundedResult.data.id_documento])).rows[0].evidencia;
+assert.equal(saved.validation_warnings[0].code,'OPT_PRINTED_ROUNDING_COMPATIBLE');assert.equal(saved.rounding_policy.originalPrecisionVerified,false);
+assert.equal((await db.query('SELECT sgp_opt_shared.document_validation_warnings($1) AS warnings',[roundedResult.data.id_documento])).rows[0].warnings[0].code,'OPT_PRINTED_ROUNDING_COMPATIBLE');
+fixtureOpt=originalOpt;await run();
 const forged=structuredClone(lastWrite);for(const piece of forged.p_manifest)piece.asignacion.key_produccion='700000|FRAMES_2';assert.match((await rpc('sgp_opt_importar_retail_validado_v3',forged)).error.message,/OPT_RETAIL_ASIGNACION_FUERA_AMBITO/);
 const repeat=await run();assert.equal(repeat.data.duplicado,true);assert.equal(first.data.id_documento,repeat.data.id_documento);
 const count=async()=> (await db.query('SELECT count(*)::int n FROM sgp_opt_shared.approvals')).rows[0].n;

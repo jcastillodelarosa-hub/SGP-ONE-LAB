@@ -179,7 +179,7 @@ export function validateOptImportManifest({document, extraction}, server) {
     const structureInvalid=summaryKeys.has(id) || !profileKeys.has(id) || !positive(balance.page) || balance.page > extraction.pdfPages ||
       [balance.stock32,balance.cut32,balance.reused32,balance.waste32].some(value => !Number.isSafeInteger(value) || value < 0);
     const exactTotals=balance.summaryBalanceDelta32===0&&balance.patternStockDelta32===0&&balance.patternCutsDelta32===0;
-    if(indexedProject){
+    if(indexedProject || indexedRetail){
       const ownPlans=plans.filter(plan=>plan.ref===balance.ref&&plan.finish===balance.finish);
       const diagnostic=profileRoundingCompatibility({
         stockTerms:ownPlans.map(plan=>({length:plan.length,quantity:plan.barqty})),
@@ -333,7 +333,7 @@ export function validateOptImportManifest({document, extraction}, server) {
   return result({pdfSha256:document.sha256, source:{source_key:document.sourceKey, origen:document.origin, consecutivo:document.opt, modo_carga:document.mode},
     serverRevision:server.revision, scope:{...server.scope}, units, pieces,
     sourceGroups:structuredClone(coverage.sourceGroups),
-    ...(indexedProject?{
+    ...((indexedProject || indexedRetail)?{
       roundingPolicy:{version:'OPT-PRINTED-ROUNDING-1',model:'INDEPENDENT_NEAREST_1_32_CLOSED_ENVELOPE',originalPrecisionVerified:false,originalsPreserved:true},
       roundingEvidence:roundingProfiles,
       validationWarnings:roundingProfiles.some(profile=>profile.diagnostic.status==='ROUNDING_COMPATIBLE')?
