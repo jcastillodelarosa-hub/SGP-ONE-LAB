@@ -103,8 +103,17 @@ BEGIN
  current_context:=public.sgp_opt_import_contexto_retail_v3(
   p_token,binding->'scope',binding->>'opt',binding->'selectores',refs);
  selectors:=current_context->'selectores';
- -- Existing assignment rows stay locked until commit. The final re-read below
- -- is the observation point; this does not claim predicate/gap locking.
+ -- Freeze context tables through commit, including absent rows. SHARE conflicts
+ -- with every INSERT/UPDATE/DELETE's ROW EXCLUSIVE lock, closing phantom races.
+ -- NOWAIT fails definitively before approval; never wait behind active programming.
+ -- This is table-wide serialization, not predicate locking. Review contention cost.
+ BEGIN
+  LOCK TABLE public.sgp_maestro_piezas, public.sgp_producciones,
+   public.sgp_mecanizado_programacion, public.sgp_mecanizado_programacion_detalle
+   IN SHARE MODE NOWAIT;
+ EXCEPTION WHEN lock_not_available THEN RAISE EXCEPTION 'OPT_CONTEXTO_OCUPADO';
+ END;
+ -- Existing assignment rows and the final reread are protected until commit.
  PERFORM 1 FROM sgp_opt_shared.config WHERE singleton FOR SHARE;
  PERFORM m.codigo_sap FROM public.sgp_maestro_piezas m
  WHERE m.codigo_sap=ANY(refs) ORDER BY m.codigo_sap FOR SHARE OF m;
@@ -140,7 +149,9 @@ BEGIN
     AND b->>'id_programacion'=piece#>>'{asignacion,id_programacion}'
     AND b->>'reserva'=piece#>>'{asignacion,reserva}'
     AND b->>'sistema'=piece#>>'{asignacion,sistema}'
-    AND sgp_opt_shared.in_scope(b->>'key_produccion',binding->'scope'))))
+    AND sgp_opt_shared.in_scope(b->>'key_produccion',jsonb_build_object(
+      'linea',b->>'id_linea','anio',(b->>'anio')::integer,
+      'semana',(b->>'semana_base')::integer,'modo','BASE')))))
  THEN RAISE EXCEPTION 'OPT_RETAIL_ASIGNACION_FUERA_AMBITO'; END IF;
 
  manifest_hash:=encode(sha256(convert_to(p_manifest::text,'UTF8')),'hex');

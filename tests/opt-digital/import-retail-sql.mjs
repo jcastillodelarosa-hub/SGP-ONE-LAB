@@ -1,6 +1,6 @@
 // Real PDF parser + manifest validator + in-memory PostgreSQL. No product data/network.
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
+import {readFileSync,writeFileSync} from 'node:fs';
 import * as pdfjs from 'pdfjs-dist/build/pdf.mjs';
 import {DOMParser} from '@xmldom/xmldom';
 import {createOptImportHandler} from '../../src/server/opt-import-handler.js';
@@ -43,6 +43,7 @@ function input(){const b=body(),opt=fixtureOpt;b.source.opt=opt;b.pdf.base64=bas
 const run=async()=>{const response=await handler(new Request('https://offline.invalid',{method:'POST',headers:{origin:'https://offline.invalid','content-type':'application/json'},body:JSON.stringify(input())}));return {status:response.status,...await response.json()};};
 const first=await run();assert.equal(first.status,200,JSON.stringify(first));assert.equal(first.data.cantidad_piezas,4);assert.equal(first.data.sin_asignacion,0);
 // A compatible printed discrepancy is preserved in the private approval and manifest.
+if(process.env.OPT_RETAIL_SYNTHETIC_REQUEST_PATH)writeFileSync(process.env.OPT_RETAIL_SYNTHETIC_REQUEST_PATH,JSON.stringify(lastWrite));
 const exactManifest=structuredClone(lastWrite.p_manifest);
 const originalOpt=fixtureOpt;fixtureOpt='OPT2099-46-5-TEST-5';
 const rounded=input(),source=pages();source[1].items.find(i=>i.str.startsWith('Longitud de los cortes:')).str=source[1].items.find(i=>i.str.startsWith('Longitud de los cortes:')).str.replace('40 1/8','40 3/32');
@@ -69,6 +70,23 @@ assert.equal((await run()).code,'OPT_CONTEXTO_CAMBIO_REINTENTAR');assert.equal(a
 await db.exec("DELETE FROM public.sgp_producciones WHERE key_produccion='competing'");
 beforeWrite=()=>db.exec('UPDATE fixture_users SET active=false');assert.equal((await run()).code,'OPT_NO_AUTORIZADO');beforeWrite=null;await db.exec('UPDATE fixture_users SET active=true');
 for(const role of ['anon','authenticated']){await db.exec('SET ROLE '+role);assert((await rpc('sgp_opt_importar_retail_validado_v3',lastWrite)).error);assert((await rpc('sgp_opt_import_contexto_retail_v3',{p_token:'synthetic-token',p_scope:scope,p_opt:input().source.opt,p_selectores:lastWrite.p_evidence.sgp_binding.selectores,p_referencias:['R1']})).error);await db.exec('RESET ROLE');}
+// Another original week is retained documentarily, but cannot register in selected week.
+fixtureOpt='OPT2099-46-5-TEST-6';await db.exec("UPDATE public.sgp_producciones SET semana_base=47");
+const otherWeek=await run();assert.equal(otherWeek.status,200,JSON.stringify(otherWeek));
+const otherIds=(await db.query('SELECT id_pieza FROM sgp_opt_shared.pieces WHERE id_documento=$1',[otherWeek.data.id_documento])).rows.map(r=>r.id_pieza);
+await assert.rejects(db.query('SELECT sgp_opt_shared.assert_units($1,$2)',[otherIds,JSON.stringify(scope)]),/OPT_UNIDAD_FUERA_AMBITO/);
+await db.query('SELECT sgp_opt_shared.assert_units($1,$2)',[otherIds,JSON.stringify({...scope,semana:47})]);
+await db.exec("UPDATE public.sgp_producciones SET semana_base=46");fixtureOpt=originalOpt;
+// A single original PDF mixes two valid original weeks: preserve both assignments,
+// while registration in week46 still rejects the week47 units.
+await db.exec("INSERT INTO public.sgp_maestro_piezas VALUES('R2','PANEL','PANEL','SI'); INSERT INTO public.sgp_producciones VALUES('800000|PANELES_2','800000','PANELES_2','9000002','SYNTH-SYS',2026,47,'SI',false,'654321 - Second'); INSERT INTO public.sgp_mecanizado_programacion VALUES('00000000-0000-0000-0000-000000000002','9000002','SIN INICIAR'); INSERT INTO public.sgp_mecanizado_programacion_detalle VALUES('00000000-0000-0000-0000-000000000002','800000|PANELES_2','9000002',1);");
+fixtureOpt='OPT2099-46-5-TEST-7';const mixed=input(),mixedPages=[...pages(),...pages()];
+for(let n=0;n<mixedPages.length;n++)for(const item of mixedPages[n].items){item.str=item.str.replaceAll('OPT-SYNTH',fixtureOpt);if(n>=3)item.str=item.str.replaceAll('R1','R2').replaceAll('123456 - Synthetic','654321 - Second');}
+mixed.pdf.base64=base64(fullPdf(mixedPages));mixed.index.base64=base64(new TextEncoder().encode(`OPT,Reserva,Sistema,Proyecto,Acabado\n${fixtureOpt},9000001,SYNTH-SYS,123456 - Synthetic,FINISH\n${fixtureOpt},9000002,SYNTH-SYS,654321 - Second,FINISH\n`));
+const mixedResponse=await handler(new Request('https://offline.invalid',{method:'POST',headers:{origin:'https://offline.invalid','content-type':'application/json'},body:JSON.stringify(mixed)}));const mixedResult=await mixedResponse.json();assert.equal(mixedResponse.status,200,JSON.stringify(mixedResult));assert.equal(mixedResult.data.cantidad_piezas,8);
+const week47=(await db.query("SELECT p.id_pieza FROM sgp_opt_shared.pieces p JOIN sgp_opt_shared.assignments a USING(id_pieza) WHERE p.id_documento=$1 AND a.key_produccion='800000|PANELES_2'",[mixedResult.data.id_documento])).rows.map(r=>r.id_pieza);assert.equal(week47.length,4);
+await assert.rejects(db.query('SELECT sgp_opt_shared.assert_units($1,$2)',[week47,JSON.stringify(scope)]),/OPT_UNIDAD_FUERA_AMBITO/);
+await db.query('SELECT sgp_opt_shared.assert_units($1,$2)',[week47,JSON.stringify({...scope,semana:47})]);fixtureOpt=originalOpt;
 // Classification as Frame remains documentary-only, with no cut assignment.
 await db.exec("UPDATE public.sgp_maestro_piezas SET tipo_pieza='FRAME',destino_productivo='FRAME'");
 assert.equal((await run()).code,'OPT_DOCUMENTO_REQUIERE_RECONCILIACION');
