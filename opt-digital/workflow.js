@@ -1,3 +1,4 @@
+import {optReservationLabel} from '../src/domain/opt-reservation-label.js';
 import {mountSharedScheme} from './shared-scheme.js';
 import {mountReservationSummary} from './reservation-summary.js';
 import {mountMatrixPanel} from './matrix-panel.js';
@@ -45,7 +46,7 @@ export function mountOptWorkflow(root,viewer,options={}){
  let issueOffset=0,issues=[];
  function renderIssues(){issues=entries.filter(e=>!e.reservation||!e.system);unassociated.hidden=!issues.length;issueTitle.textContent=`${issues.length} filas sin reserva o sistema · pendientes de asociación`;issueOffset=Math.min(issueOffset,Math.max(0,Math.floor((issues.length-1)/50)*50));issueRows.replaceChildren();for(const e of issues.slice(issueOffset,issueOffset+50))issueRows.append(make('p',`${e.origin} · fila ${e.sourceRow} · ${e.opt} · Reserva: ${e.reservation||'ausente'} · Sistema: ${e.system||'ausente'}`));issuePage.textContent=issues.length?`Filas ${issueOffset+1}–${Math.min(issueOffset+50,issues.length)} de ${issues.length}. Todas se conservan hasta cambiar el índice.`:'';issuePrevious.disabled=issueOffset===0;issueNext.disabled=issueOffset+50>=issues.length;}
  issuePrevious.onclick=()=>{issueOffset=Math.max(0,issueOffset-50);renderIssues();};issueNext.onclick=()=>{issueOffset+=50;renderIssues();};
- const reserve=make('select');reserve.id='optReservation';reserve.setAttribute('aria-label','Reserva y sistema del catálogo compartido o candidatos locales');const documents=make('div');documents.id='optReservationDocuments';const detail=make('p','Consulta el ámbito de programación para seleccionar una reserva compartida. No necesitas volver a cargar el índice o PDF.');detail.setAttribute('role','status');const catalogStatus=make('p','Consulta la línea, el año y la semana de origen para cargar el catálogo compartido.');catalogStatus.id='optCatalogStatus';catalogStatus.setAttribute('role','status');const catalogReload=make('button','Actualizar catálogo compartido');catalogReload.id='optCatalogRefresh';catalogReload.type='button';catalogReload.disabled=true;const reserveLabel=make('label','Reserva y sistema');reserveLabel.className='opt-reservation-select';reserveLabel.append(reserve);cuts.prepend(catalogStatus,catalogReload,reserveLabel,detail,documents);
+ const reserve=make('select');reserve.id='optReservation';reserve.setAttribute('aria-label','Reserva, sistema, acabado y origen del catálogo compartido o candidatos locales');const documents=make('div');documents.id='optReservationDocuments';const detail=make('p','Consulta el ámbito de programación para seleccionar una reserva compartida. No necesitas volver a cargar el índice o PDF.');detail.setAttribute('role','status');const catalogStatus=make('p','Consulta la línea, el año y la semana de origen para cargar el catálogo compartido.');catalogStatus.id='optCatalogStatus';catalogStatus.setAttribute('role','status');const catalogReload=make('button','Actualizar catálogo compartido');catalogReload.id='optCatalogRefresh';catalogReload.type='button';catalogReload.disabled=true;const selectedMetadata=make('p');selectedMetadata.id='optReservationMetadata';selectedMetadata.setAttribute('aria-live','polite');reserve.setAttribute('aria-describedby',selectedMetadata.id);const reserveLabel=make('label','Reserva · Sistema · Acabado · Retail/Proyecto');reserveLabel.className='opt-reservation-select';reserveLabel.append(reserve);cuts.prepend(catalogStatus,catalogReload,reserveLabel,selectedMetadata,detail,documents);
  let matrixSystem='',matrixReference='';
  const matrixSlot=make('div');$('refTitle').after(matrixSlot);
  const matrix=mountMatrixPanel(matrixSlot,{api:options.matrixApi});
@@ -83,12 +84,13 @@ export function mountOptWorkflow(root,viewer,options={}){
  function renderScoped(){
   const selected=reserve.value;groups=[...(options.catalogApi?.isCurrent(catalogSnapshot)?catalogSnapshot.groups:[]),...localGroups];
   reserve.replaceChildren();const empty=make('option','Selecciona reserva de la programación');empty.value='';reserve.append(empty);
-  for(const g of groups){const o=make('option',`${g.reservation} · ${g.system} · ${g.origin==='SERVIDOR'?'Compartida · manifiesto importado':'Candidato local · '+g.origin}`);o.value=g.key;reserve.append(o);}
+  for(const g of groups){const o=make('option',optReservationLabel(g,scopePanel.getProgrammingSnapshot()));o.value=g.key;reserve.append(o);}
   reserve.value=groups.some(g=>g.key===selected)?selected:'';renderDocuments();
  }
  function renderDocuments(){
   if(groups.length&&!scopePanel.getScope()){scopePanel.invalidate();return;}
   const selected=groups.find(g=>g.key===reserve.value);
+  selectedMetadata.textContent=selected?optReservationLabel(selected,scopePanel.getProgrammingSnapshot()):'';selectedMetadata.hidden=!selected;
   if(selected?.origin==='SERVIDOR'&&!options.catalogApi?.ownsGroup(selected)){invalidateCatalog();renderScoped();return;}
   for(const child of localViewerNodes)if(child.id!=='refDock'&&child.id!=='shade'&&child.id!=='refDrawer')child.hidden=!selected||selected.origin==='SERVIDOR';
   matrixSystem=selected?.system||'';matrix.select(matrixSystem,matrixReference);

@@ -15,7 +15,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs');const {JSDOM}=r
  Object.defineProperty($('optPdfFolder'),'files',{value:[{name:'EXACT.pdf'},{name:'ok.pdf'},{name:'ignored.txt'}]});$('optPdfFolder').onchange();assert.deepEqual(imported.map(f=>f.name),['EXACT.pdf']);
  // Equal bytes retain both original source names; the second source opens the same document.
  $('optIndexOrigin').value='PROYECTO';Object.defineProperty($('optIndexFile'),'files',{value:[{name:'project.csv',size:30,text:async()=> 'OPT,Reserva,Sistema\nPROJECT,R,PANEL\n'}],configurable:true});await $('optIndexFile').onchange();
- $('optReservation').value=[...$('optReservation').options].find(o=>o.textContent.endsWith('PROYECTO')).value;$('optReservation').onchange();assert.match($('optReservationDocuments').textContent,/PROJECT.pdf/);$('optReservationDocuments').querySelector('button').click();assert.equal(opened,sha);
+ $('optReservation').value=[...$('optReservation').options].find(o=>o.value===JSON.stringify(['PROYECTO','R','PANEL'])).value;$('optReservation').onchange();assert.match($('optReservationDocuments').textContent,/PROJECT.pdf/);$('optReservationDocuments').querySelector('button').click();assert.equal(opened,sha);
  // A token replacement for the same person must not reuse the old candidates.
  token='same-user-new-session';$('optReservation').onchange();assert.equal($('optReservation').options.length,1);assert.equal($('optReservationDocuments').children.length,0);await $('optScopeLoad').onclick();assert.equal($('optReservation').options.length,3);
  $('optScopeWeek').value='45';$('optScopeWeek').onchange();assert.equal($('optReservation').options.length,1);assert.equal($('optSharedPieces').children.length,0);

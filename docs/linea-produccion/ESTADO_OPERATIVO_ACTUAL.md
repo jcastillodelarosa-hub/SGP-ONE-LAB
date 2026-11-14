@@ -14,6 +14,18 @@ Parent independently applied CPU patch on exact v454 base and verified full pars
 
 Isolated fix/opt-index-cpu on published v454 ab102489. Selected worksheet uses server-only event parser with shared row checks and complete-document validation; ZIP/metadata/ACL/import writer unchanged. Synthetic equivalent7692 entries, lower local CPU/heap; Deno check/tests pass. New XML depth/row-node caps explicit. Original-file differential profile pending in parent executor. See docs/opt-import-endpoint/CPU_INDEX_REVIEW.md. No production imports, deploy or retry of uncertain uploads.
 
+## 2026-11-13 — Etiquetas listas como candidata independiente LAB v455
+
+Base main ab102489 verificada. Acabado/origen exactos, módulo añadido al artefacto positivo y versión/cache-bust coherentes. Release y42 archivos contra artefacto PASS; pruebas nativas PC/móvil sobre artefacto PASS. Sin SQL/CPU/Retail v3 ni publicación. Hosting no revalidable por403 desde este entorno. Pendiente autorización push/PR/merge/deploy. Detalle docs/OPT_RESERVATION_LABELS_REVIEW.md.
+
+## Selector OPT: acabado y origen · candidato local · 13/11/2026
+
+Preparado sobre v454 (ab102489), sin publicación ni cambios de datos. Etiquetas
+Reserva · Sistema · Acabado · Retail/Proyecto con estado compartido/local
+independiente; fuentes existentes verificadas en lectura, sin nueva RPC.
+275 pruebas OPT y flujos DOM/PC/móvil sintéticos PASS. Falta autorización de
+publicación y asignar versión al integrar. Detalle: docs/OPT_RESERVATION_LABELS_REVIEW.md.
+
 ## OPT documental v451 · backend aplicado · 13/11/2026
 
 PR #264; publicación autorizada, pendiente de fusión y verificación Hosting.

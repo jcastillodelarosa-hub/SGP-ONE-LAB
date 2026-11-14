@@ -42,5 +42,6 @@
   "src/services/opt-document-plans.js",
   "src/services/opt-document-references.js",
   "src/domain/opt-project-data.js",
-  "opt-digital/project-data-extraction.js"
+  "opt-digital/project-data-extraction.js",
+  "src/domain/opt-reservation-label.js"
 ]
