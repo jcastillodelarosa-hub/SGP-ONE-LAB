@@ -46,7 +46,7 @@ export function mountSharedCuts(container,{api,catalogApi=null,documentApi=null,
   const retry=make('button','Reintentar la misma operación');retry.id='optSharedRetry';retry.type='button';
   const confirm=make('section');confirm.id='optSharedConfirmation';confirm.hidden=true;confirm.setAttribute('aria-label','Confirmar registro de cortes');
   const question=make('p'),yes=make('button','Confirmar cortes realizados'),no=make('button','Cancelar');yes.id='optSharedConfirm';no.id='optSharedCancel';yes.type=no.type='button';confirm.append(question,yes,no);
-  panel.append(title,status,reload,layout,count,register,retry,confirm);container.append(panel);
+  panel.append(title,status,reload,count,register,retry,confirm,layout);container.append(panel);
   const profileHeader=make('div');profileHeader.className='opt-shared-profile-header';
   const referenceHeading=make('div');profileHeader.append(referenceHeading);
   const matrix=mountMatrixPanel(profileHeader,{api:matrixApi});
