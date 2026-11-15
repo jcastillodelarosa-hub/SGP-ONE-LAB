@@ -1,0 +1,23 @@
+// Synthetic journal and stub transport; browser traffic restricted to localhost.
+const assert=require('node:assert/strict'),fs=require('node:fs'),{chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
+(async()=>{
+ const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH,args:['--no-sandbox']}),page=await browser.newPage({acceptDownloads:true}),errors=[];page.on('pageerror',e=>errors.push(e.message));
+ const base='http://127.0.0.1:8765',dir='/tmp/opt-resolution-browser';fs.mkdirSync(dir,{recursive:true});
+ await page.route('**/*',r=>new URL(r.request().url()).origin!==base?r.abort():new URL(r.request().url()).pathname==='/recovery-fixture'?r.fulfill({contentType:'text/html',body:'<!doctype html><link rel="stylesheet" href="/opt-digital/pilot.css"><body id="optShell"><main style="padding:16px"></main>'}):r.continue());
+ for(const [name,width,height] of [['desktop',1440,1000],['mobile',390,844]]){
+ await page.setViewportSize({width,height});await page.goto(base+'/recovery-fixture');await page.evaluate(async()=>{
+  const {createOptImport,prepareOptImport}=await import('/src/services/opt-import.js'),{mountOptImportRecovery}=await import('/opt-digital/import-recovery-panel.js');
+  localStorage.clear();const scope={linea:'PANELES_2',anio:2026,semana:46,modo:'BASE'},source={origin:'RETAIL',mode:'INDICE',opt:'OPT2099-46-5-TEST-3'},input={scope,source,pdf:new File(['%PDF-synthetic'],source.opt+'.pdf'),index:{file:new File(['synthetic'],'index.csv'),format:'csv',sheet:'ARCHIVOS'}},p=await prepareOptImport(input);
+  localStorage.setItem('sgp-opt-import-v1:synthetic:'+p.requestHash,JSON.stringify({version:1,state:'pending',identity:p.identity,requestHash:p.requestHash}));window.calls=[];window.certified=false;
+  const api=createOptImport({invoke:async b=>{window.calls.push(b);throw Error('synthetic lost response');}},()=> 'synthetic-private-token',{getContext:()=>scope,storage:localStorage,storageScope:'synthetic',resolutionApi:{resolve:async()=>{if(!window.certified)throw Error('OPT_RESOLUTION_UNAVAILABLE');return {contract:'OPT-IMPORT-RESOLUTION-1',status:'ABSENT_FINAL',proofKind:'DURABLE_FENCE',retryMode:'MANUAL_EXACT_ONLY',pdfArchived:false,identity:p.identity,requestHash:p.requestHash,evidenceSha256:'a'.repeat(64),decisionId:crypto.randomUUID(),retryGeneration:crypto.randomUUID(),issuedAt:new Date(Date.now()-1000).toISOString(),expiresAt:new Date(Date.now()+60000).toISOString()};}}});
+  mountOptImportRecovery(document.querySelector('main'),{api,getScope:()=>scope});
+ });
+ const downloadPromise=page.waitForEvent('download');await page.getByRole('button',{name:'Exportar identidades para revisión'}).click();const download=await downloadPromise;await download.saveAs(dir+'/identities-'+name+'.json');const exported=fs.readFileSync(dir+'/identities-'+name+'.json','utf8');assert(!/synthetic-private-token|base64/.test(exported));assert.equal(JSON.parse(exported).items.length,1);
+ const resolve=page.getByRole('button',{name:'Consultar cierre certificado'}),retry=page.getByRole('button',{name:'Reintentar manualmente este PDF'});
+ await resolve.click();await page.getByText('No hay cierre certificado utilizable.',{exact:false}).waitFor();assert(await retry.isDisabled());assert.equal(await page.evaluate(()=>calls.length),0);
+ await page.evaluate(()=>window.certified=true);await resolve.click();await page.getByText('Cierre certificado disponible.',{exact:false}).waitFor();assert(await retry.isDisabled());
+ await page.getByLabel('PDF original OPT2099-46-5-TEST-3.pdf').setInputFiles({name:'OPT2099-46-5-TEST-3.pdf',mimeType:'application/pdf',buffer:Buffer.from('%PDF-synthetic')});await page.getByLabel('Índice original index.csv').setInputFiles({name:'index.csv',mimeType:'text/csv',buffer:Buffer.from('synthetic')});assert(await retry.isEnabled());assert.equal(await page.evaluate(()=>calls.length),0);
+ assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));await page.screenshot({path:dir+'/'+name+'.png',fullPage:true});await retry.click();await page.getByText('Sin confirmación de guardado.',{exact:false}).waitFor();await retry.click();await page.waitForFunction(()=>calls.length===2);assert.equal(await page.evaluate(()=>calls.length),2);assert(await page.evaluate(()=>calls[0].resolution.attemptId===calls[1].resolution.attemptId));
+ }
+ assert.deepEqual(errors,[]);await browser.close();console.log('PASS recovery PC/mobile: safe download, absence blocked, certificate never sends, explicit file retry, stable UUID after lost response, no horizontal overflow. Synthetic only.');
+})().catch(e=>{console.error(e);process.exit(1);});

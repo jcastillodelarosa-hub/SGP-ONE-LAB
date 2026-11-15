@@ -1,0 +1,33 @@
+{
+  "nodeImportRetail": {
+    "passed": 111,
+    "failed": 0
+  },
+  "dom": "PASS import-upload-dom",
+  "browser": "PASS desktop 1440x1000 / mobile 390x844; download, certification fail closed, explicit retry, stable UUID; synthetic localhost only",
+  "deno": "PASS deno check separate Retail entrypoint",
+  "postgres": {
+    "engine": "PostgreSQL 18.6 on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 7.5.0-3ubuntu1~18.04) 7.5.0, 64-bit",
+    "tests": "real PDF \u2192 Edge validator \u2192 installed SQL \u2192 unchanged Retail v3; active legacy lock; ACL; isolation; certification idempotence; old writer fencing; tamper rejection; single consumption; same attempt replay; different attempt denied",
+    "counts": {
+      "documents": 1,
+      "consumed": 1,
+      "permits": 0,
+      "cuts": 0
+    },
+    "hostedWrites": 0
+  },
+  "hostedPreflight": {
+    "documents": 9,
+    "pieces": 3007,
+    "assignments": 1754,
+    "cuts": 3,
+    "decisions": 0,
+    "consumed": 0,
+    "migration": "20261114221005 already installed"
+  },
+  "limits": [
+    "No real identities for 213/215; no certification or hosted import performed",
+    "Synthetic PostgreSQL 18.6 checks, not a hosted acceptance test"
+  ]
+}

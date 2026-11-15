@@ -1,0 +1,69 @@
+{
+  "branch": "recovery/opt-v460-rebuild",
+  "files": [
+    {
+      "path": "docs/opt-import-endpoint/release-review/retail-source-manifest.json",
+      "sha256": "02a4b86acdbab093239ba22f0bbd1f3861d98731beb78fa29cd5be04a0b8bea4"
+    },
+    {
+      "path": "docs/opt-recovery/REBUILD_V460.md",
+      "sha256": "663ce4d8da132ba528e418e9feeaf25732cb75e8c21dc4002175c8ef6c5ac813"
+    },
+    {
+      "path": "docs/opt-recovery/installed-resolution-20261114221005.sql",
+      "sha256": "5fb22be634ac7ca4c45ed4ed9a42af03c34bdd03c96c3a4af85a9961b0ad5826"
+    },
+    {
+      "path": "docs/opt-recovery/validation.json",
+      "sha256": "001e3b48173760b40a895b860a2ca4c618a52448d45a53544c5d19c7412112c7"
+    },
+    {
+      "path": "index.html",
+      "sha256": "21252b6095d100eb1006b176b4ba63a980472af9137f30aae4daed0e781c6925"
+    },
+    {
+      "path": "opt-digital/import-recovery-panel.js",
+      "sha256": "1202a4c549d72008ae222ea6a6dc31473592eff14e040e9e964e0299f49ea237"
+    },
+    {
+      "path": "scripts/build-release-info.mjs",
+      "sha256": "5ea135f1f96064ca5d42221dc9dfe11d0dc543d68e0ec12793a1a7857118efd3"
+    },
+    {
+      "path": "src/server/opt-import-handler.js",
+      "sha256": "907829733f30c5a6342dc390c1ef3617f62d1ef531d2ebced238115e8529d685"
+    },
+    {
+      "path": "src/server/opt-retail-resolution.js",
+      "sha256": "476796d50fbac93aef5788d807999e8b09c6c0989cb1f5148e8aab3d2e35c0b2"
+    },
+    {
+      "path": "src/services/opt-import-resolution.js",
+      "sha256": "103c4a6776d66fc96e8d16c7732c263c93e9fb84899f64351b5b9e0aaddadd01"
+    },
+    {
+      "path": "src/services/opt-import.js",
+      "sha256": "47b8afe9eaa60acfa8fe446d76117395b29089fe69c540a2f7a96f2a2a222485"
+    },
+    {
+      "path": "supabase/functions/opt-retail-import-v3-review/source-id.generated.ts",
+      "sha256": "257a5dcb574fd950271a82b91988ed9dc39d4292ab0cfe940cb570c373accf28"
+    },
+    {
+      "path": "tests/opt-digital/import-upload-dom.cjs",
+      "sha256": "6cba8fd2edba02e6fe8f66913bb55ff0b6821a863b082681ae2c6c593bfe1a2d"
+    },
+    {
+      "path": "tests/opt-digital/resolution-browser.cjs",
+      "sha256": "57db9aa1ca82751c3eff152099e724d367bd7cae32d751ec6b3b3da5579d510a"
+    },
+    {
+      "path": "tests/opt-digital/resolution-postgres.mjs",
+      "sha256": "32ad8d97a3e060d040c77e985d0f239f43a10f0115f9df52e369a0b0dfd4ff63"
+    },
+    {
+      "path": "tests/opt-import.test.mjs",
+      "sha256": "5d6b7d132677a648ed7f36333941aba7ca9fbcd1ee34059c89824a497a0e740e"
+    }
+  ]
+}
