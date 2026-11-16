@@ -21,3 +21,14 @@ export function auditDecisions(rows){
   return {...row};
  });
 }
+
+/** Explicit area confirmation. Unclaimed legacy rows remain for the other reviewer. */
+export function auditAreaDecisions({area,resultado,rows,differences}) {
+ if(!area)throw Error('Selecciona el área que revisas.');
+ if(!['SIN_FALTANTES','CON_FALTANTES'].includes(resultado))throw Error('Indica si tu área está completa o tiene faltantes.');
+ const decisions=auditDecisions(rows.filter(r=>r.accion!=='NO_CORRESPONDE'));
+ const hasMissing=differences.length>0||decisions.some(r=>r.accion!=='ELIMINAR');
+ if(resultado==='SIN_FALTANTES'&&hasMissing)throw Error('Hay faltantes en tu revisión; selecciona Con faltantes.');
+ if(resultado==='CON_FALTANTES'&&!hasMissing)throw Error('Registra o acepta al menos un faltante de tu área.');
+ return decisions;
+}
