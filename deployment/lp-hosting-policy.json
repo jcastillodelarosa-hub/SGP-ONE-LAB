@@ -24,9 +24,9 @@
     "scripts/lp-backend-readiness.py": "0347837ace3ecb08b52ac16b9fb82b1ca8b8462853a33e9d14a4f608bc92482e"
   },
   "legacy_navigation_sha256": "4f0992b1c98f4933fe5a0daa98d95fd85b35fceaffbbbd904fef7d422f21f0af",
-  "certification_reference": "docs/opt-publication/RELEASE_REVIEW_V439.md",
-  "baseline_version": "sites/sgp-one-lab/versions/8a5b654ce1faaa2a",
-  "rollback_version": "sites/sgp-one-lab/versions/afbba2ab69f61867",
+  "certification_reference": "docs/accessory-alerts/RELEASE_REVIEW_V460.md",
+  "baseline_version": "sites/sgp-one-lab/versions/a4efd059109ba877",
+  "rollback_version": "sites/sgp-one-lab/versions/a4efd059109ba877",
   "artifact_kind": "runtime",
   "backend_contracts_verified": true,
   "backend_probe_required": true

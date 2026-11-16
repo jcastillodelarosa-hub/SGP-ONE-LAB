@@ -1,3 +1,7 @@
+## 2026-11-16 — publicación alertas v460: baseline acreditada, publicación pendiente
+
+PR270 fusionado en 64706c9. El primer publish se detuvo antes de Firebase por baseline histórica. Inspect GET 43796542516 confirma live v459 a4efd059109ba877 FINALIZED. Revisión mínima actualiza solo referencias de baseline/rollback/certificación, preserva todos los guards; push debe quedar HOLD. Detalle y siguiente paso: [RELEASE_REVIEW_V460](../accessory-alerts/RELEASE_REVIEW_V460.md). No se repite migración ni se afirma publicación.
+
 ## 2026-11-14 — OPT UI v459 autorizada; RPC de observación aplicada
 
 Rama release/opt-ui-v459 sobre main 2ad7054, UI 2f3ebf0 intacta; PR270 excluido. RPC de lectura instalada y ACL/sesión inválida verificadas; diez tablas OPT conservan conteos/huellas. 213/215 ausentes, sin autorización de retry. QA local previa reutilizada; versión 459 verificada. CI, merge y Hosting pendientes al preparar este commit. Evidencia y contención: docs/OPT_UI_V459_RELEASE.md. Frames sigue sin vínculo hasta decisión; no bloquea UI.
