@@ -17,6 +17,7 @@ try:
     page.goto(f'http://127.0.0.1:{server.server_port}/tests/pdt-table-design/fixture.html')
     page.wait_for_function("typeof window.openFixture==='function'")
     page.evaluate('manual=>openFixture(manual)',manual)
+    assert page.locator('.piece-modal-head').evaluate("e=>getComputedStyle(e).backgroundColor")=='rgb(255, 255, 255)'
     if manual:page.locator('[data-production]').select_option('QA|R')
     page.locator('[data-ref]').select_option('CODE1')
     selector='[data-group]' if manual else '[data-source-radio]'
@@ -37,6 +38,8 @@ try:
     assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
     page.locator('.repo-work-body').evaluate('e=>e.scrollTop=0')
     page.screenshot(path=str(out/f'{"manual" if manual else "ensamble"}-{width}.png'),full_page=True)
+    page.locator('[data-entry]').nth(1).scroll_into_view_if_needed()
+    page.screenshot(path=str(out/f'{"manual" if manual else "ensamble"}-detail-{width}.png'),full_page=True)
     page.locator('[data-save]').click()
     page.wait_for_function("calls.some(x=>['sgp_pdt_manual_registrar_v1','sgp_pdt_registrar_v4'].includes(x.name))")
     payload=page.evaluate("calls.filter(x=>['sgp_pdt_manual_registrar_v1','sgp_pdt_registrar_v4'].includes(x.name)).at(-1).args")

@@ -18,8 +18,10 @@ SGP_PDT_boceto_1.png, inspeccionada; continuidad de diseño B aprobado.
 - Número de novedad tiene preparación separada con su contrato y pruebas.
 
 ## Evidencia y estado
-IMPLEMENTADO LOCAL sobre v464. 1368 Node PASS, 10 omitidas; DOM auditoría de
+IMPLEMENTADO EN PR280 sobre v465. 1371 Node PASS, 10 omitidas; DOM de
 entrada PDT/guardado/roles PASS. Browser sintético preparado para manual y
-Ensamble a 1440/768/390 con dos piezas independientes. CI/capturas pendientes.
-No SQL ni publicación. Integrar después de Picking v465 conservando sus roles,
+Ensamble a 1440/768/390 con dos piezas independientes. CI visual inicial PASS (run43968682190); capturas revisadas y cabecera B ajustada.
+Regresiones posteriores al ajuste y captura final pendientes.
+SQL de novedad preparado y respaldo privado restaurado, todavía NO aplicado.
+Candidata v467 conserva Picking v465 y sus roles; no publicada,
 y coordinar con OPT. No presentar esta preparación como cambio productivo.

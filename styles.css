@@ -3057,10 +3057,10 @@ table.glass-burro-table th:not(:first-child){width:36%}
 
 /* Approved PDT option 1: direct table, existing identities and controls retained. */
 :is(.pdt-registration-modal,.pdt-manual-modal) .piece-modal-head{
- background:#fff;color:var(--sgp-window-title);border-top:5px solid #195393;border-bottom:1px solid var(--sgp-window-line);
+ background:#fff!important;color:var(--sgp-window-title)!important;border-top:5px solid #195393!important;border-bottom:1px solid var(--sgp-window-line)!important;
 }
-:is(.pdt-registration-modal,.pdt-manual-modal) .piece-modal-head h2{color:var(--sgp-window-title);font-size:24px}
-:is(.pdt-registration-modal,.pdt-manual-modal) .piece-modal-head button{color:var(--sgp-window-title);background:#f3f6f9}
+:is(.pdt-registration-modal,.pdt-manual-modal) .piece-modal-head h2{color:var(--sgp-window-title)!important;font-size:24px}
+:is(.pdt-registration-modal,.pdt-manual-modal) .piece-modal-head button{color:var(--sgp-window-title)!important;background:#f3f6f9!important;border:1px solid var(--sgp-window-line)!important}
 :is(.pdt-registration,.pdt-manual-body) fieldset{margin:16px 0;padding:16px;border:1px solid var(--sgp-window-line);border-radius:9px;min-width:0}
 :is(.pdt-registration,.pdt-manual-body) legend{padding:0 6px;font-weight:700;color:var(--sgp-window-title)}
 :is(.pdt-registration,.pdt-manual-body) .sgp-window-section-title{margin:10px 0 14px}
@@ -3074,3 +3074,5 @@ table.glass-burro-table th:not(:first-child){width:36%}
  :is(.pdt-registration,.pdt-manual-body) fieldset{padding:12px}
  :is(.pdt-registration-modal,.pdt-manual-modal) .piece-modal-head h2{font-size:21px}
 }
+
+:is(.pdt-registration-modal,.pdt-manual-modal) .piece-modal-head .eyebrow{color:var(--sgp-window-help)!important}
