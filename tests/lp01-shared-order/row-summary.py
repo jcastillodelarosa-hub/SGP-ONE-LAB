@@ -10,6 +10,8 @@ document.querySelector('#productionTrackingPanel').append(document.querySelector
 window.qaSaved=[];window.qaHistory=[];window.qaToken='QA';window.qaMode='shared';window.qaReads=[];
 const key='QA|PANELES_2';
 const bridge={getToken:()=>qaToken,getClient:async()=>({rpc:async(name,args)=>{
+ if(name==='sgp_alertas_accesorio_consultar')return {error:{code:'PGRST202',message:'QA accessory alert backend not installed'}};
+ if(name==='sgp_lp_shared_nc_states_v1')return {error:{code:'42883',message:'QA scoped NCV reader not installed'}};
  qaReads.push({name,args});const stage=args.p_stage||args.p_etapa,line='PANELES_2';
  if(name==='sgp_lp_seguimiento_consultar')return {data:{contract:'LP-SEGUIMIENTO-1',role:'COORDINADOR',line,stage,productions:[{key,line,stage,classification:'ABIERTA',assignments:[],operations:[],history:[],oficial:{key_produccion:key,id_linea:line,produccion:'QA',sistema:'QA',saldos_inicializados:true,presente_ultimo_export:true,saldo_ensamble:20,saldo_empaque:20,cantidad:30,anio:2026,semana_base:44}}]}};
  if(name==='sgp_lp_order_details_read_v1')return {error:{code:'42883',message:'missing'}};
