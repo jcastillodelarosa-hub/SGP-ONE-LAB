@@ -1,5 +1,12 @@
 const clean=value=>String(value??'').trim();
 export const MANUAL_ORIGINS=Object.freeze(['PICKING','ENSAMBLE','EMPAQUE']);
+// UI scope only. RPCs always validate the authenticated server-side role.
+export function manualOriginsForRole(role){
+ if(role==='PICKING')return ['PICKING'];
+ if(['ADMINISTRADOR','COORDINADOR'].includes(role))return [...MANUAL_ORIGINS];
+ if(role==='LIDER LINEA')return ['ENSAMBLE','EMPAQUE'];
+ return [];
+}
 export function manualGroupKey(row){
  return JSON.stringify([row.key_produccion,row.reserva,row.codigo_sap,clean(row.fabricacion).toLowerCase(),clean(row.marca).toLowerCase(),Number(row.longitud),clean(row.acabado).toUpperCase()]);
 }
