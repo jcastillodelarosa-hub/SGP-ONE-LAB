@@ -1,3 +1,4 @@
+import {validateOptResolution} from './opt-import-resolution.js';
 import {sameOptImportIdentity} from './opt-import-observation.js';
 // Only original bytes cross this boundary. Client extraction and associations are not authority.
 const object=value=>value&&typeof value==='object'&&!Array.isArray(value);
@@ -37,12 +38,13 @@ function validateReceipt(value,prepared){
  if(!exact(value.totals,'documentaryBars,documentaryCuts,cutLength32')||!Object.values(value.totals).every(n=>Number.isSafeInteger(n)&&n>0)||value.totals.documentaryCuts!==receipt.cantidad_piezas||!exact(value.scopeTotals,'assigned,outsideScope')||!Object.values(value.scopeTotals).every(n=>Number.isSafeInteger(n)&&n>=0)||value.scopeTotals.assigned+value.scopeTotals.outsideScope!==receipt.cantidad_piezas||value.scopeTotals.outsideScope!==receipt.sin_asignacion)fail();
  return structuredClone(value);
 }
-export function createOptImport(client,getToken,{getContext,storage,storageScope,timeoutMs=120000,observationApi=null}={}){
+export function createOptImport(client,getToken,{getContext,storage,storageScope,timeoutMs=120000,observationApi=null,resolutionApi=null}={}){
  if(!Number.isSafeInteger(timeoutMs)||timeoutMs<=0)throw Error('OPT_ESPERA_INVALIDA');
  let epoch=0,busy=false;const prefix='sgp-opt-import-v1:'+storageScope+':';
  const current=scope=>{try{return !getContext||scopeKey(getContext())===scopeKey(scope);}catch{return false;}};
  const invalidate=()=>{epoch++;};
- async function process(input){
+ async function processInternal(input,resolved=false){
+  if(resolved&&!resolutionApi)throw fault('OPT_RECUPERACION_PAUSADA',{definitive:true});
   if(busy)throw fault('OPT_IMPORTACION_EN_CURSO',{definitive:true});
   busy=true;const operation=epoch,token=getToken();let journal,key,wasUncertain=false,sent=false;
   try{
@@ -56,13 +58,21 @@ export function createOptImport(client,getToken,{getContext,storage,storageScope
     for(let n=0;n<storage.length;n++){
      const name=storage.key(n);if(!name?.startsWith(prefix))continue;
      const saved=JSON.parse(storage.getItem(name));
-     if(saved?.version!==1||!sha(saved.requestHash)||!sha(saved.identity?.pdf?.sha256))throw Error('diario inválido');
+     if(![1,2].includes(saved?.version)||!sha(saved.requestHash)||!sha(saved.identity?.pdf?.sha256))throw Error('diario inválido');
      if(saved.state==='pending'&&(saved.identity.pdf.sha256===prepared.identity.pdf.sha256||['origin','mode','opt'].every(field=>saved.identity.source?.[field]===prepared.identity.source[field]))&&saved.requestHash!==prepared.requestHash)throw fault('OPT_REINTENTO_IDENTICO_REQUERIDO',{definitive:true});
     }
     const saved=JSON.parse(storage.getItem(key)||'null');wasUncertain=saved?.state==='pending';
-    journal={version:1,state:'pending',requestHash:prepared.requestHash,identity:prepared.identity};
+    if(wasUncertain&&!resolved)throw fault('OPT_RESOLUTION_REQUERIDA',{uncertain:true,definitive:false});
+    if(resolved){
+     if(!wasUncertain||!sameOptImportIdentity(saved.identity,prepared.identity)||!saved.resolution)throw fault('OPT_RESOLUTION_UNAVAILABLE',{definitive:true});
+     const certificate=validateOptResolution(saved.resolution.certificate,saved.identity,saved.requestHash);
+     const attemptId=saved.resolution.attemptId||crypto.randomUUID();
+     if(!uuid(attemptId))throw fault('OPT_RESOLUTION_UNAVAILABLE',{definitive:true});
+     journal={...saved,resolution:{...saved.resolution,attemptId},history:[...saved.history,{event:'manual_attempt',attemptId,at:new Date().toISOString()}]};
+     prepared.body.resolution={identity:structuredClone(saved.identity),requestHash:saved.requestHash,decisionId:certificate.decisionId,retryGeneration:certificate.retryGeneration,attemptId};
+    }else journal={...(saved||{}),version:1,state:'pending',requestHash:prepared.requestHash,identity:prepared.identity};
     storage.setItem(key,JSON.stringify(journal));if(storage.getItem(key)!==JSON.stringify(journal))throw Error('diario no verificado');
-   }catch(error){if(error.message==='OPT_REINTENTO_IDENTICO_REQUERIDO')throw error;throw fault('OPT_DIARIO_NO_DISPONIBLE',{definitive:true});}
+   }catch(error){if(error.message==='OPT_REINTENTO_IDENTICO_REQUERIDO'||error.message.startsWith('OPT_RESOLUTION_'))throw error;throw fault('OPT_DIARIO_NO_DISPONIBLE',{definitive:true});}
    assertCurrent();let timer;sent=true;
    const result=await Promise.race([Promise.resolve().then(()=>client.invoke({...structuredClone(prepared.body),p_token:token})),new Promise((_,reject)=>{timer=setTimeout(()=>reject(fault('OPT_IMPORTACION_TIMEOUT',{uncertain:true})),timeoutMs);})]).finally(()=>clearTimeout(timer));
    assertCurrent();
@@ -82,14 +92,14 @@ export function createOptImport(client,getToken,{getContext,storage,storageScope
    return receipt;
   }catch(error){
    if(sent&&(!error.definitive||wasUncertain)){error.uncertain=true;error.definitive=false;}
-   else if(key&&journal){try{storage.setItem(key,JSON.stringify({...journal,state:'rejected'}));}catch{}}
+   else if(key&&journal&&!wasUncertain){try{storage.setItem(key,JSON.stringify({...journal,state:'rejected'}));}catch{}}
    throw error;
   }finally{busy=false;}
  }
  function pending(){
   if(!storage||!storageScope)return [];
   const items=[];
-  try{for(let n=0;n<storage.length;n++){const name=storage.key(n);if(!name?.startsWith(prefix))continue;const saved=JSON.parse(storage.getItem(name));if(saved?.version===1&&saved.state==='pending')items.push(structuredClone(saved.identity));}}catch{return null;}
+  try{for(let n=0;n<storage.length;n++){const name=storage.key(n);if(!name?.startsWith(prefix))continue;const saved=JSON.parse(storage.getItem(name));if([1,2].includes(saved?.version)&&saved.state==='pending')items.push(structuredClone(saved.identity));}}catch{return null;}
   return items;
  }
  async function reconcilePending(identity){
@@ -99,7 +109,7 @@ export function createOptImport(client,getToken,{getContext,storage,storageScope
   busy=true;
   try{
    const requestHash=await hash(new TextEncoder().encode(JSON.stringify(identity))),key=prefix+requestHash,raw=storage.getItem(key),saved=JSON.parse(raw||'null');
-   if(saved?.version!==1||saved.state!=='pending'||saved.requestHash!==requestHash||JSON.stringify(saved.identity)!==JSON.stringify(identity))throw fault('OPT_DIARIO_IDENTIDAD_NO_COINCIDE');
+   if(![1,2].includes(saved?.version)||saved.state!=='pending'||saved.requestHash!==requestHash||JSON.stringify(saved.identity)!==JSON.stringify(identity))throw fault('OPT_DIARIO_IDENTIDAD_NO_COINCIDE');
    const observation=await observationApi.observe(structuredClone(saved.identity));
    if(operation!==epoch||getToken()!==token||!current(identity.scope))throw fault('OPT_OBSERVACION_OBSOLETA');
    if(storage.getItem(key)!==raw)throw fault('OPT_DIARIO_CAMBIO');
@@ -113,5 +123,46 @@ export function createOptImport(client,getToken,{getContext,storage,storageScope
    return structuredClone(observation);
   }finally{busy=false;}
  }
- return {process,invalidate,pending,reconcilePending};
+
+ function identityValid(i){
+  const clean=v=>typeof v==='string'&&v.length>0&&v.length<=255&&!/[\x00-\x1f\x7f/\\]/.test(v);
+  return exact(i,'scope,source,pdf,index')&&scopeValid(i.scope)&&exact(i.source,'origin,opt,mode')&&['PROYECTO','RETAIL','DESCONOCIDO'].includes(i.source.origin)&&['INDICE','INDIVIDUAL'].includes(i.source.mode)&&clean(i.source.opt)&&exact(i.pdf,'name,sha256')&&clean(i.pdf.name)&&i.pdf.name===i.source.opt+'.pdf'&&sha(i.pdf.sha256)&&(i.source.mode==='INDIVIDUAL'?i.index===null:exact(i.index,'name,sha256,format,sheet')&&clean(i.index.name)&&sha(i.index.sha256)&&['xlsx','csv','json'].includes(i.index.format)&&clean(i.index.sheet)&&i.index.sheet.length<=80);
+ }
+ async function exportPendingIdentities(){
+  const token=getToken(),operation=epoch;if(!token||!storage||!storageScope)throw fault('OPT_SESION_REQUERIDA');
+  const items=[];
+  for(let n=0;n<storage.length;n++){
+   const key=storage.key(n);if(!key?.startsWith(prefix))continue;
+   const raw=storage.getItem(key),saved=JSON.parse(raw||'null');
+   if(![1,2].includes(saved?.version))throw fault('OPT_DIARIO_NO_DISPONIBLE');
+   if(saved.state!=='pending')continue;
+   if(!identityValid(saved.identity)||!sha(saved.requestHash))throw fault('OPT_DIARIO_IDENTIDAD_NO_COINCIDE');
+   if(!current(saved.identity.scope))continue;
+   const identityText=JSON.stringify(saved.identity),requestHash=await hash(new TextEncoder().encode(identityText));
+   if(key!==prefix+requestHash||saved.requestHash!==requestHash||storage.getItem(key)!==raw)throw fault('OPT_DIARIO_IDENTIDAD_NO_COINCIDE');
+   if(operation!==epoch||token!==getToken()||!current(saved.identity.scope))throw fault('OPT_IMPORTACION_OBSOLETA');
+   items.push({identity:structuredClone(saved.identity),identityText,requestHash});
+  }
+  if(operation!==epoch||token!==getToken())throw fault('OPT_IMPORTACION_OBSOLETA');
+  return {contract:'OPT-IMPORT-IDENTITIES-1',items};
+ }
+ async function resolvePending(identity){
+  if(busy)throw fault('OPT_IMPORTACION_EN_CURSO');
+  const token=getToken(),operation=epoch;
+  if(!token||!current(identity?.scope)||!identityValid(identity)||!resolutionApi||!storage)throw fault('OPT_RESOLUTION_UNAVAILABLE');
+  busy=true;
+  try{
+   const requestHash=await hash(new TextEncoder().encode(JSON.stringify(identity))),key=prefix+requestHash,raw=storage.getItem(key),saved=JSON.parse(raw||'null');
+   if(![1,2].includes(saved?.version)||saved.state!=='pending'||saved.requestHash!==requestHash||!sameOptImportIdentity(saved.identity,identity))throw fault('OPT_RESOLUTION_UNAVAILABLE');
+   // Once an attempt exists, never allocate another generation or replace its evidence.
+   if(saved.resolution?.attemptId)return validateOptResolution(saved.resolution.certificate,identity,requestHash);
+   const certificate=validateOptResolution(await resolutionApi.resolve(structuredClone(identity),requestHash),identity,requestHash);
+   if(operation!==epoch||token!==getToken()||!current(identity.scope))throw fault('OPT_RESOLUTION_OBSOLETA');
+   if(storage.getItem(key)!==raw)throw fault('OPT_DIARIO_CAMBIO');
+   const next={...saved,version:2,history:saved.history||[{event:'original_entry',entry:structuredClone(saved)}],resolution:{certificate,checkedAt:new Date().toISOString()}};
+   const serialized=JSON.stringify(next);storage.setItem(key,serialized);if(storage.getItem(key)!==serialized)throw fault('OPT_DIARIO_NO_DISPONIBLE');
+   return certificate;
+  }finally{busy=false;}
+ }
+ return {canResolveImports:Boolean(resolutionApi),process:input=>processInternal(input),retryResolved:input=>processInternal(input,true),invalidate,pending,reconcilePending,exportPendingIdentities,resolvePending};
 }

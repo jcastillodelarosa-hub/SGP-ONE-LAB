@@ -17,6 +17,8 @@ on:
       - 'docs/sql-proposals/opt-matrices/**'
       - 'tests/opt-matrix-library/**'
       - 'supabase/functions/opt-import/**'
+      - 'supabase/functions/opt-retail-import-v3-review/**'
+      - 'src/services/opt-import-resolution.js'
       - 'supabase/config.toml'
       - 'functions/opt-import-manifest-*.mjs'
       - 'src/services/opt-programming-scope.js'
@@ -70,6 +72,7 @@ jobs:
           node tests/opt-digital/shared-catalog-dom.cjs
           node tests/opt-digital/reservation-summary-dom.cjs
           node tests/opt-digital/import-upload-dom.cjs
+          node tests/opt-digital/recovery-paused-dom.cjs
           node tests/opt-digital/rounding-warning-fixture-dom.cjs
           node tests/opt-digital/cut-report-dom.cjs
           node docs/sql-proposals/opt-shared/test-synthetic.mjs
@@ -106,6 +109,7 @@ jobs:
         run: |
           deno check --no-config --node-modules-dir=manual supabase/functions/opt-import/index.ts
           deno check --no-config --node-modules-dir=manual supabase/functions/opt-matrix-read/index.ts
+          deno check --no-config --node-modules-dir=manual supabase/functions/opt-retail-import-v3-review/index.ts
           deno test --no-config --no-check --node-modules-dir=manual tests/opt-digital/import-handler-deno.test.ts tests/opt-digital/server-pdf-deno.test.ts
   isolated:
     runs-on: ubuntu-24.04
@@ -152,6 +156,8 @@ jobs:
           python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/opt-http.log 2>&1 &
           trap 'kill $!' EXIT
           for i in $(seq 1 20); do curl -fsS http://127.0.0.1:8765/opt-digital/index.html >/dev/null && break || sleep 1; done
+          node tests/opt-digital/resolution-browser.cjs
+          node tests/opt-digital/approved-ui-browser.cjs
           node tests/opt-digital/shared-workflow-browser.cjs
           node tests/opt-digital/import-upload-browser.cjs
           node tests/opt-digital/rounding-warning-browser.cjs
@@ -166,7 +172,10 @@ jobs:
         if: always()
         with:
           name: opt-synthetic-browser
-          path: tests/opt-digital/evidence/
+          path: |
+            tests/opt-digital/evidence/
+            /tmp/opt-resolution-browser/
+            /tmp/opt-approved-ui-evidence/
   postgres-concurrency:
     runs-on: ubuntu-24.04
     timeout-minutes: 6

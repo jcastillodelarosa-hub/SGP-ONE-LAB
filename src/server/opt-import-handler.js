@@ -1,3 +1,4 @@
+import {validateRetailResolution} from './opt-retail-resolution.js';
 import {retailSelectors,validateRetailContext} from './opt-retail-contract.js';
 import {buildOptDocumentSummary} from '../domain/opt-document-summary.js';
 import {parseIndex,parseIndexWorkbook} from '../domain/opt-index-file.js';
@@ -34,8 +35,8 @@ function decodeFile(file,kind){
  if(kind==='PDF'&&(!/\.pdf$/i.test(file.name)||utf8.decode(bytes.subarray(0,5))!=='%PDF-'))fail('OPT_PDF_INVALID','Se requiere un PDF original');
  return bytes;
 }
-function checkRequest(body){
- if(!exactKeys(body,['p_token','scope','source','pdf'],['index']))fail('OPT_REQUEST_FIELDS','Campos de solicitud no permitidos');
+function checkRequest(body,allowResolution=false){
+ if(!exactKeys(body,['p_token','scope','source','pdf'],allowResolution?['index','resolution']:['index']))fail('OPT_REQUEST_FIELDS','Campos de solicitud no permitidos');
  if(!text(body.p_token,4096)||!scopeValid(body.scope))fail('OPT_REQUEST_INVALID','Sesión o ámbito inválido');
  const s=body.source;if(!exactKeys(s,['origin','opt','mode'])||!['RETAIL','PROYECTO','DESCONOCIDO'].includes(s.origin)||!['INDICE','INDIVIDUAL'].includes(s.mode)||!text(s.opt))fail('OPT_SOURCE_INVALID','Origen, OPT o modalidad inválidos');
  if(!exactKeys(body.pdf,['name','base64']))fail('OPT_PDF_INVALID');
@@ -53,7 +54,7 @@ function receiptValid(receipt,manifest){return record(receipt)&&receipt.ok===tru
 
 /** Only server bootstrap supplies dependencies. Neither extraction nor SGP facts
  * are ever accepted from the caller. SQL remains the final authorization gate. */
-export function createOptImportHandler({rpc,readPdf,DOMParser,readWorksheetXML,allowedOrigins,retailV3=false,retailOnly=false,serializeRetailPlans=undefined}){
+export function createOptImportHandler({rpc,readPdf,DOMParser,readWorksheetXML,allowedOrigins,retailV3=false,retailOnly=false,retailResolution=false,serializeRetailPlans=/** @type {((extraction: any, manifest: any) => any) | undefined} */ (undefined)}){
  if(typeof rpc!=='function'||typeof readPdf!=='function'||!Array.isArray(allowedOrigins)||!allowedOrigins.length)throw Error('OPT_SERVER_DEPENDENCIES_REQUIRED');
  const origins=new Set(allowedOrigins);let busy=false;
  return async request=>{
@@ -68,7 +69,7 @@ export function createOptImportHandler({rpc,readPdf,DOMParser,readWorksheetXML,a
   busy=true;let writeAttempted=false;
   try{
    if(!/^application\/json(?:;|$)/i.test(request.headers.get('content-type')||''))fail('OPT_JSON_REQUIRED','Se requiere JSON',415);
-   const body=await bodyJSON(request);checkRequest(body);
+   const body=await bodyJSON(request);checkRequest(body,retailResolution===true&&retailOnly===true&&retailV3===true);
    if(retailOnly&&(body.source.origin!=='RETAIL'||body.source.mode!=='INDICE'))fail('OPT_RETAIL_ONLY');
    const retailIndex=retailV3===true&&body.source.origin==='RETAIL'&&body.source.mode==='INDICE';
    const auth=await rpc('sgp_sesion_actual',{p_token:body.p_token});
@@ -85,6 +86,7 @@ export function createOptImportHandler({rpc,readPdf,DOMParser,readWorksheetXML,a
     if(body.index.format==='xlsx'){const parsed=await parseIndexWorkbook(raw,body.source.origin,{sheetName:body.index.sheet,DOMParser,readWorksheetXML,exactReservations:retailIndex});indexEntries=parsed.entries;indexSheet=parsed.sheet;}
     else indexEntries=parseIndex(utf8.decode(raw),body.index.format,body.source.origin,{exactReservations:retailIndex});
    }
+   const resolution=Object.hasOwn(body,'resolution')?await validateRetailResolution(body,{pdfHash:hash,indexHash,indexSheet}):null;
    const extraction=await readPdf(bytes);
    const rows=extraction?.sourceProjectRows;
    if(!Array.isArray(rows)||!rows.length)fail('FINAL_DETAIL_OR_EXTRACTION_MISSING','El PDF no contiene el detalle final completo');
@@ -134,8 +136,9 @@ export function createOptImportHandler({rpc,readPdf,DOMParser,readWorksheetXML,a
    // PostgreSQL bytea hex notation is used only inside the private server call.
    // It is never put in a browser config or returned to the client.
    const args={p_token:body.p_token,p_pdf:'\\x'+hex(bytes),p_manifest:manifest.pieces,p_sources:[manifest.source],p_evidence:evidence};
+   if(resolution)Object.assign(args,{p_identity:resolution.identity,p_request_hash:resolution.requestHash,p_decision:resolution.decisionId,p_generation:resolution.retryGeneration,p_attempt:resolution.attemptId});
    writeAttempted=true;
-   const imported=await rpc(retailIndex?'sgp_opt_importar_retail_validado_v3':projectIndex?'sgp_opt_importar_proyecto_validado_v2':'sgp_opt_importar_validado_v1',args);
+   const imported=await rpc(resolution?'sgp_opt_importar_retail_resuelto_v1':retailIndex?'sgp_opt_importar_retail_validado_v3':projectIndex?'sgp_opt_importar_proyecto_validado_v2':'sgp_opt_importar_validado_v1',args);
    if(imported.error){
     // Only a returned PostgreSQL cancellation/lock error proves this transaction failed.
     if(retailIndex&&['57014','55P03'].includes(imported.error.code))return reject(409,'OPT_RETAIL_TIEMPO_AGOTADO','La operación Retail superó el tiempo permitido y fue cancelada. No se guardaron cambios en este intento.');

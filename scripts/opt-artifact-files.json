@@ -46,5 +46,7 @@
   "src/domain/opt-reservation-label.js",
   "src/services/opt-import-observation.js",
   "src/domain/opt-piece-progress.js",
-  "src/domain/opt-file-selection-state.js"
+  "src/domain/opt-file-selection-state.js",
+  "src/services/opt-import-resolution.js",
+  "opt-digital/import-recovery-panel.js"
 ]

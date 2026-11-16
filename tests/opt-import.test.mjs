@@ -23,11 +23,11 @@ test('missing index, wrong origin/scope, oversize or storage failure prevent all
  for(const request of [{...input(),index:null},{...input(),scope:{...scope,linea:'FRAMES_2'}},{...input(),source:{origin:'DESCONOCIDO',opt:'OPT-1',mode:'INDICE'}},{...input(),pdf:{name:'OPT-1.pdf',size:16*1024*1024+1,arrayBuffer:()=>assert.fail('too big')}}])await assert.rejects(api.process(request));
  const broken=createOptImport({invoke:async()=>calls++},()=> 't',{storage:{length:0,getItem:()=>null,setItem:()=>{throw Error('quota');}},storageScope:'a'});await assert.rejects(broken.process(input()),/DIARIO/);assert.equal(calls,0);
 });
-test('malformed/false/inconsistent successes are uncertain and replay identical',async()=>{
+test('malformed/false/inconsistent successes stay uncertain and cannot be replayed ordinarily',async()=>{
  for(const mutate of [r=>delete r.data,r=>r.ok=false,r=>r.data.id_documento='bad',r=>r.document.sha256='f'.repeat(64),r=>r.scope.semana=45,r=>r.scopeTotals.assigned++,r=>r.document.source_key='client-key',r=>r.data.physical_completion_verified=true]){
   const calls=[],store=storage();let bad=true;const api=createOptImport({invoke:async body=>{calls.push(structuredClone(body));const r=await receipt(body);if(bad)mutate(r);return {data:r};}},()=> 't',{storage:store,storageScope:'a'});
   await assert.rejects(api.process(input()),e=>e.uncertain===true);assert.equal(JSON.parse(store.getItem(store.key(0))).state,'pending');
-  bad=false;await api.process(input());assert.deepEqual(calls[0],calls[1]);
+  bad=false;const before=store.getItem(store.key(0));await assert.rejects(api.process(input()),/OPT_RESOLUTION_REQUERIDA/);assert.equal(calls.length,1);assert.equal(store.getItem(store.key(0)),before);
  }
 });
 test('timeout keeps journal, late result is ignored, different source or index cannot replace pending identity',async()=>{
@@ -35,7 +35,7 @@ test('timeout keeps journal, late result is ignored, different source or index c
  await assert.rejects(api.process(input()),e=>e.uncertain===true);const saved=store.getItem(store.key(0));resolve({data:await receipt(calls[0])});await new Promise(r=>setTimeout(r,10));assert.equal(store.getItem(store.key(0)),saved);
  for(const request of [{...input(),source:{origin:'PROYECTO',opt:'OPT-1',mode:'INDICE'}},{...input(),index:{...input().index,file:file('index.csv','changed')}},{...input(),scope:{...scope,semana:45}},{...input(),pdf:file('OPT-1.pdf','changed bytes')}])await assert.rejects(api.process(request),/REINTENTO_IDENTICO/);
  assert.equal(calls.length,1);
- const resumed=createOptImport({invoke:async body=>{calls.push(body);return {data:await receipt(body)};}},()=> 'new-session',{storage:store,storageScope:'a'});assert.equal(resumed.pending().length,1);await resumed.process(input());assert.equal(resumed.pending().length,0);assert.deepEqual({...calls[0],p_token:'new-session'},calls[1]);
+ const resumed=createOptImport({invoke:async body=>{calls.push(body);return {data:await receipt(body)};}},()=> 'new-session',{storage:store,storageScope:'a'});assert.equal(resumed.pending().length,1);await assert.rejects(resumed.process(input()),/OPT_RESOLUTION_REQUERIDA/);assert.equal(resumed.pending().length,1);assert.equal(calls.length,1);assert.equal(store.getItem(store.key(0)),saved);
 });
 test('session/filter invalidation does not claim a late write failed',async()=>{
  for(const change of ['session','scope','invalidate']){
@@ -89,7 +89,7 @@ test('Retail confirmed timeout does not erase a previous uncertain attempt or au
  for(const priorUncertain of [false,true]){
   let calls=0;const st=storage();const api=createOptImport({invoke:async()=>{calls++;if(priorUncertain&&calls===1)throw Error('lost response');return {data:{contract:'OPT-IMPORT-1',ok:false,code:'OPT_RETAIL_TIEMPO_AGOTADO',definitive:true}};}},()=> 'synthetic',{storage:st,storageScope:'retail-timeout'});
   if(priorUncertain)await assert.rejects(api.process(input()),e=>e.uncertain===true);
-  await assert.rejects(api.process(input()),e=>e.message==='OPT_RETAIL_TIEMPO_AGOTADO'&&e.definitive===!priorUncertain&&!!e.uncertain===priorUncertain);
-  assert.equal(calls,priorUncertain?2:1);assert.equal(api.pending().length,priorUncertain?1:0);
+  await assert.rejects(api.process(input()),e=>e.message===(priorUncertain?'OPT_RESOLUTION_REQUERIDA':'OPT_RETAIL_TIEMPO_AGOTADO')&&e.definitive===!priorUncertain&&!!e.uncertain===priorUncertain);
+  assert.equal(calls,1);assert.equal(api.pending().length,priorUncertain?1:0);
  }
 });

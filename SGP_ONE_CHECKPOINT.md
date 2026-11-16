@@ -2073,3 +2073,12 @@ Bocetos aprobados: Library resolvió PDF libfile_fde3_f-b792a5b9bc2c8191b866f2fa
 Implementados sobre df0e42b en feat/opt-week-linked-list: listado semanal con totales/búsqueda/filtro y tarjetas móviles; progreso por piezas autorizadas; origen/nombre/ruta relativa y estados de archivo independientes del input nativo; comprobación manual de pendientes históricos sin reenviar. Frames sin asignación permanece Revisar vínculo, sin porcentaje ni controles de corte. Solo coincidencia exacta confirma diario local; ausencia/error conserva bloqueo. RPC observación sigue propuesta, no aplicada.
 
 9 pruebas Node, 10 suites DOM afectadas y dos harness Chromium PC/móvil pasan; capturas inspeccionadas y verify:release válido localmente. Conservadas evidencias anteriores no afectadas. v458 provisional pendiente de coordinar main/PR270; sin push/PR/fusión/despliegue ni datos productivos. Detalle y próximos pasos: docs/OPT_APPROVED_UI_REVIEW.md. Transferencia visual sustituida por especificación fiel autorizada de coordinación; no requiere más imágenes.
+
+## 2026-11-16 — OPT + alertas, candidata local v461
+
+Integración local de recovery/opt-v460-rebuild 9e957cd sobre main 64706c9 sin
+conflictos. Conserva alertas y política protegida; incrementa versión a461.
+1339 pruebas pasan,10 omitidas,0 fallos;3 DOM focalizadas y verify:release PASS.
+Chromium no arranca por restricción socket EPERM, incluso tras escalación; QA
+visual integrada pendiente. Sin push, publicación, migración, despliegue Edge ni
+mutaciones alojadas. Evidencia y siguiente paso: docs/opt-recovery/INTEGRATION_V461.md.
