@@ -54,7 +54,7 @@ try:
      document.querySelector('[data-view-panel="ensamble"]').hidden=false;
      window.SGP_CONFIG={...window.SGP_CONFIG,lpPowerBiUrl:endpoint};window.qaRole='LIDER';window.calls=[];
      window.SGPPlannerBridge.getToken=()=>window.qaRole;
-     window.SGPPlannerBridge.getClient=async()=>({rpc:async(name,args)=>{window.calls.push({name,args});return(await fetch('/rpc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,args})})).json();}});
+     window.SGPPlannerBridge.getClient=async()=>({rpc:async(name,args)=>{if(name==='sgp_alertas_accesorio_consultar')return {error:{code:'PGRST202',message:'QA accessory alert backend not installed'}};window.calls.push({name,args});return(await fetch('/rpc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,args})})).json();}});
      document.querySelector('[data-op-date]').value='2026-10-31';document.querySelector('[data-op-stage]').value='EMPAQUE';
     }''',{'endpoint':endpoint})
     audit=db.sql('SELECT count(*) FROM sgp_lp_operacion.auditoria')

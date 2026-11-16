@@ -1,6 +1,6 @@
 {
   "pass": true,
-  "checks": 13,
+  "checks": 16,
   "environment": "JSDOM 26.1.0; actual configuration, assembly, tracking and planner renderers with synthetic RPCs",
   "visual": "Not a pixel/browser/mobile test. Chromium launch blocked by environment socket policy."
 }

@@ -28,7 +28,7 @@ try:
     db.fixture();before=db.unchanged();part=db.parts[0]
     page=browser.new_page(viewport={'width':width,'height':950 if width>400 else 844});errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
     page.route('**/*',lambda r:r.continue_() if r.request.url.startswith(base) else r.abort());page.goto(base+'/')
-    page.evaluate('''()=>{document.querySelector('[data-view-panel="ensamble"]').hidden=false;window.qaToken='COORDINADOR';window.SGPPlannerBridge.getToken=()=>window.qaToken;window.SGPPlannerBridge.getClient=async()=>({rpc:async(name,args)=>(await fetch('/rpc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,args})})).json()});}''')
+    page.evaluate('''()=>{document.querySelector('[data-view-panel="ensamble"]').hidden=false;window.qaToken='COORDINADOR';window.SGPPlannerBridge.getToken=()=>window.qaToken;window.SGPPlannerBridge.getClient=async()=>({rpc:async(name,args)=>name==='sgp_alertas_accesorio_consultar'?{error:{code:'PGRST202',message:'QA accessory alert backend not installed'}}:(await fetch('/rpc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,args})})).json()});}''')
     page.locator('#productionPackingTab').click();page.wait_for_selector('[data-op-date]')
     page.locator('[data-op-date]').fill('2026-11-01');page.locator('[data-op-date]').dispatch_event('change')
     page.wait_for_selector('[data-assembly-key]')

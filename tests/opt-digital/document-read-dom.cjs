@@ -11,8 +11,9 @@ const assert=require('node:assert/strict');const {JSDOM}=require(process.env.JSD
  const documentApi={invalidate(){},load:async()=>{if(docFail)throw Error('synthetic unavailable');return refs;},ownsReference:(g,r)=>g===group&&refs.includes(r)};
  const c=mountSharedCuts(root,{api,catalogApi,documentApi,storage:dom.window.localStorage,storageScope:'qa'});await c.select(group);
  assert.equal(root.querySelectorAll('[data-warning]').length,1);
- assert.equal(root.querySelector('input').disabled,false,'ambiguous matrix system must not remove existing cut authority');assert.match(root.textContent,/sistema del perfil sin vínculo inequívoco/);
- root.querySelectorAll('.opt-shared-references button')[1].click();assert.equal(root.querySelectorAll('input').length,0);
+ assert.equal(root.querySelector('input[type=checkbox]').disabled,false,'ambiguous matrix system must not remove existing cut authority');assert.match(root.textContent,/sistema del perfil sin vínculo inequívoco/);
+ root.querySelectorAll('.opt-shared-references button')[1].click();assert.equal(root.querySelectorAll('input[type=checkbox]').length,0);
+ assert.match(root.querySelector('#optSharedPieces').textContent,/Revisar vínculo/);assert.equal(root.querySelector('#optSharedPieces progress'),null);
  cutsFail=true;await c.refresh();assert.equal(root.querySelectorAll('.opt-shared-references button').length,2);assert.equal(root.querySelector('#optSharedRegister').disabled,true);assert.match(root.querySelector('#optSharedStatus').textContent,/Saldo de cortes sin confirmar/);assert.doesNotMatch(root.querySelector('#optSharedStatus').textContent,/0 pendientes/);
  cutsFail=false;docFail=true;await c.refresh();assert.equal(root.querySelectorAll('.opt-shared-references button').length,1);assert.match(root.querySelector('#optSharedStatus').textContent,/Consulta documental completa no disponible/);
  c.destroy();console.log('PASS documentary DOM: ambiguous matrix preserves authorized cuts; outside scope cannot select; ledger outage keeps documentary read without zero balance; missing new RPC explicitly falls back.');

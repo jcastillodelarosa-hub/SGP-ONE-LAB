@@ -22,6 +22,10 @@ vm.runInThisContext((await readFile('planner-operations-v326.js','utf8')).replac
 for(const view of ['calendar','table','kanban','pending','tracking']){const button=document.querySelector('.sgp-line-view-tabs [data-view="'+view+'"]');if(!button)continue;button.click();if(view==='kanban'){const day=document.querySelector('#sgpKanbanDay');day.value=assignments()[0].fecha;day.onchange();}assert.ok(document.querySelectorAll('.sgp-line-view-content .sgp-accessory-alert').length>=2,view);checks++;}
 config.querySelector('[data-alert-active]').checked=false;await submit();paint();assert.equal(document.querySelectorAll('#assembly .sgp-accessory-alert').length,1);checks++;
 await mount();assert.equal(config.querySelector('[data-alert-active]').checked,false);checks++;
+// No active rules is an available, empty result in all three views.
+for(const rule of rules)rule.activa=false;
+paint();await window.SGPLinePlanner.reloadAssignments();
+for(const id of ['assembly','tracking','productionPlannerPanel']){const host=document.getElementById(id);assert.equal(host.querySelectorAll('.sgp-accessory-alert').length,0);assert.doesNotMatch(host.textContent,/no disponibles/);checks++;}
 admin=false;await mount();assert.equal(config.querySelector('form'),null);checks++;
 // A delayed catalog from an old session must not render its controls.
 admin=true;let resolve;const stale=mountAccessoryAlertConfig({host:config,client:{rpc:()=>new Promise(r=>resolve=r)},token,getToken:()=>token,canEdit:()=>admin});token='new';resolve({data:rules});await stale;assert.equal(config.querySelector('form'),null);checks++;

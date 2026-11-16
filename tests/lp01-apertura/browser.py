@@ -31,7 +31,7 @@ try:
     official=db.sql('SELECT jsonb_agg(to_jsonb(a) ORDER BY key_produccion) FROM public.sgp_producciones a');planning=db.sql('SELECT jsonb_agg(to_jsonb(a) ORDER BY id) FROM public.sgp_linea_plan_asignaciones a')
     page=browser.new_page(viewport={'width':width,'height':950 if width>400 else 844});errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
     page.route('**/*',lambda r:r.continue_() if r.request.url.startswith(origin) else r.abort());page.goto(origin+'/')
-    page.evaluate('''()=>{document.querySelector('[data-view-panel="ensamble"]').hidden=false;window.SGPPlannerBridge.getToken=()=> 'COORDINADOR';window.SGPPlannerBridge.getClient=async()=>({rpc:async(name,args)=>(await fetch('/rpc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,args})})).json()});}''')
+    page.evaluate('''()=>{document.querySelector('[data-view-panel="ensamble"]').hidden=false;window.SGPPlannerBridge.getToken=()=> 'COORDINADOR';window.SGPPlannerBridge.getClient=async()=>({rpc:async(name,args)=>name==='sgp_alertas_accesorio_consultar'?{error:{code:'PGRST202',message:'QA accessory alert backend not installed'}}:(await fetch('/rpc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,args})})).json()});}''')
     audit=db.sql('SELECT count(*) FROM sgp_lp_operacion.auditoria');turns=db.sql('SELECT count(*) FROM sgp_lp_operacion.turnos')
     page.evaluate("document.querySelector('[data-op-date]').value='2026-11-01'")
     page.locator('#productionPackingTab').click();inspect_sheet(page)

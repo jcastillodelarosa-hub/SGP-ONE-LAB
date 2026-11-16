@@ -34,6 +34,9 @@ try:
     page=browser.new_page(viewport={'width':width,'height':950 if width>700 else 844});errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
     page.add_init_script("sessionStorage.setItem('sgp_one_session',"+json.dumps(token)+")")
     def intercept(route):
+     # This isolated backend predates the alert migration; original reader ACLs remain in force.
+     if route.request.url.split('/rpc/')[-1]=='sgp_alertas_accesorio_consultar':
+      route.fulfill(status=404,content_type='application/json',body=json.dumps({'code':'PGRST202','message':'QA accessory alert backend not installed'}));return
      name=route.request.url.split('/rpc/')[-1];calls.append(name)
      try:route.fulfill(status=200,content_type='application/json',body=json.dumps(rpc(name,route.request.post_data_json)))
      except Exception as e:

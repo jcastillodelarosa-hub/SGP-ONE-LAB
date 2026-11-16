@@ -19,7 +19,7 @@ def run(page, label):
       const builder={select:()=>builder,in:()=>builder,neq:()=>Promise.resolve({data:[],error:null})};
       window.SGPPlannerBridge={getRows:()=>orders,getToken:()=> 'synthetic-session',loadAssembly:async()=>{},getClient:async()=>({
         from:()=>builder,
-        rpc:async(name,args)=>{window.__lpCalls.push({name,args});return {error:null,data:name==='sgp_linea_plan_consultar' ? [
+        rpc:async(name,args)=>{if(name==='sgp_alertas_accesorio_consultar')return {error:{code:'PGRST202',message:'QA accessory alert backend not installed'}};window.__lpCalls.push({name,args});return {error:null,data:name==='sgp_linea_plan_consultar' ? [
           {id:'A1',key_produccion:'KEY1',fecha:args.p_desde,turno:1,prioridad:1,produccion:'TORRE NORTE',sistema:'ES7100',cantidad:12,ejecutado:0,estado:'ABIERTA'}
         ] : name==='sgp_linea_plan_explorador_v327' ? [
           {key_produccion:'KEY1',parte:'1.1',vidrio_preparado:14,vidrio_novedad:2,vidrio_traslado:1}

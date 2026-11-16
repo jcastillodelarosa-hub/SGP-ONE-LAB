@@ -1,3 +1,7 @@
+## 2026-11-14 — OPT UI v459 autorizada; RPC de observación aplicada
+
+Rama release/opt-ui-v459 sobre main 2ad7054, UI 2f3ebf0 intacta; PR270 excluido. RPC de lectura instalada y ACL/sesión inválida verificadas; diez tablas OPT conservan conteos/huellas. 213/215 ausentes, sin autorización de retry. QA local previa reutilizada; versión 459 verificada. CI, merge y Hosting pendientes al preparar este commit. Evidencia y contención: docs/OPT_UI_V459_RELEASE.md. Frames sigue sin vínculo hasta decisión; no bloquea UI.
+
 ## 2026-11-13 — Retail blocked diagnostics, no tolerance change
 
 Prepared detailed strict-total errors with page, original operands and signed integer1/32 differences.286 OPT tests PASS; original215 remains422/four blockers/zero writes. Searches did not establish optimizer precision or source workbooks. No policy/measurements/permissions/deploy changes. Native same-job evidence or explicit uncertainty-policy decision remains necessary. Labels v455 remain independent ad8addc.
@@ -2033,3 +2037,39 @@ CI PR268: corregidos firma opcional inferida por Deno, fixture DOM de advertenci
 Base main 41837142d0c532da6ac79c9172511f700267f024. Activación autorizada de Retail INDICE en endpoint separado opt-retail-import-v3; otras rutas conservan opt-import v6. Migraciones lab_v457_opt_retail_context_v3 y lab_v457_opt_retail_writer_v3 aplicadas con EXECUTE solo service_role; writer statement_timeout 1s y lock_timeout 250ms. Sonda alojada acreditó SQLSTATE 57014 en 1136ms; función temporal y código diagnóstico retirados. Runtime final Edge v6 SHA 49619968217c387f8a218aee7a250644e7d285922de081745b80ac356235b4a7. Verificaciones alojadas: 422 OPT_REQUEST_FIELDS, 403 OPT_ORIGIN_DENIED, 401 SGP_SESSION_INVALID; todas definitivas. Siete snapshots de tablas documentales/operativas sin cambios; ninguna importación realizada.
 
 Contención: cambiar exclusivamente optRetailMode a paused y publicar por flujo controlado; no redirigir Retail a v6 ni reintentar resultados inciertos. Si se requiere contención inmediata del backend, sustituir exclusivamente endpoint Retail por deny-all revisado; conservar v6. Esta evidencia no acredita una importación real. Publicación web y postcheck pendientes del flujo de este commit.
+
+
+## 2026-11-14 — Preparación separada del listado semanal OPT (v458 provisional)
+
+Base publicada 2ad7054 (v457). Rama feat/opt-week-linked-list, sin publicación autorizada. Lista desplegable bajo consulta semanal con reserva, sistema, OPT enlazadas y acceso a consulta. Reutiliza snapshot de programación y catálogo autenticados; une únicamente por reserva/sistema exactos, nunca por key_produccion ni texto separado por comas. Incluye Sin OPT enlazada solo cuando el catálogo vigente confirmó ausencia; fallo/carga informa Enlace sin comprobar. Candidatos locales no acreditan enlaces. Invalida filas al cambiar semana/sesión; conserva las comprobaciones de permisos al seleccionar. Sin RPC nueva, cambios de datos ni cambios a las rutas v6/Retail.
+
+Prueba DOM focalizada: enlace exacto, reserva faltante sin botón ni OPT atribuida, candidatos locales separados, errores, cambio de semana/sesión y selección. La prueba usa únicamente datos sintéticos. Versión v458 provisional sujeta a comprobar main antes de futura publicación.
+
+QA visual local del listado: Chromium 1440×1000 y 390×844, 18 reservas sintéticas, nueve enlaces y nueve faltantes. Capturas inspeccionadas; scroll horizontal móvil/vertical limitado a 320px, cierre/reapertura, selección exacta y limpieza al cambiar semana pasan. Corrección focalizada: botón Consultar sin salto de línea en móvil. Harness tests/opt-digital/week-linked-browser.cjs bloquea tráfico externo y cualquier RPC no esperado. Evidencia local /tmp/opt-week-list-evidence; no equivale a una sesión productiva. Sin push/PR/publicación.
+
+
+## 2026-11-14 — Estado de archivos preparado, UI pendiente de boceto
+
+Causa: workflow.js vacía el input de índice y carpeta tras capturar File; índices/originales se conservan en mapas de memoria del import-panel y PDFs revisados pueden persistir en IndexedDB local. Vaciar el input no borra esas referencias ni confirma guardado servidor. Nuevo modelo puro src/domain/opt-file-selection-state.js distingue disponibilidad local, lectura local y resultado del servidor (no enviado/en curso/confirmado/rechazado/incierto). Solo usa name y webkitRelativePath validada; rechaza ruta absoluta, fakepath, traversal y nombre discordante. Nunca afirma archivo PDF archivado en servidor.
+
+Modelo todavía NO conectado a UI ni servicios: el futuro controlador debe alimentar confirmed solo desde recibo validado por el servicio existente, y uncertain desde su diario, nunca desde extracción local. Índice temporal conserva sus contadores existentes; no convertirlos en recibo SGP. Dos pruebas focalizadas pasan. Sin UI nueva ni publicación hasta boceto aprobado. Frames permanece pendiente de decisión sobre ámbito/programación, sin creación de vínculos.
+
+
+## 2026-11-14 — Reconciliación histórica preparada, sin despliegue
+
+Consulta real solo lectura: cero documentos/aprobaciones por hashes conocidos Retail213/215 y cero fuentes por sus consecutivos. No equivale a rechazo definitivo ni autoriza reenvío. El diario local guarda pending tras transporte/timeout y sobrevive recarga; UI actual mezcla bloqueo histórico con rechazados del intento. Los archivos heredados de biblioteca local también entran en jobsFor, aunque la selección nueva de carpeta esté filtrada.
+
+Propuesta SQL import_observation_REVIEW.sql: lectura autenticada, actor/scope existentes, acceso por assignments/bound/in_scope, comparación PDF/origen/consecutivo/modo/índice/ámbito; COMMITTED_MATCH solo ante evidencia exacta. NOT_OBSERVED no revela existencia fuera de ámbito ni permite reintentar. Sin PDF, importación o mutación. No aplicada. Servicio opt-import-observation y reconcilePending preparado: confirma solo el registro local exacto con observación positiva; conserva identidad, requestHash y evidencia de reconciliación. No borra pendientes ni ejecuta process/invoke. Ausencia, discrepancia, sesión/contexto cambiado o diario modificado permanecen bloqueados. Falta integrar UI y RPC alojada autorizada.
+
+Clasificaciones separadas preparadas: PROGRAMMING_OMITTED, INDEX_EXCLUDED, DUPLICATE_BLOCKED, PREVIOUS_UNCERTAINTY, DEFINITIVE_REJECTION, UNCERTAIN, JOURNAL_UNAVAILABLE, CONFIRMED y NOT_SENT. Sin cambios visuales. 17 pruebas Node afectadas pasan; SQL PGlite sintético verifica match, identidad/hash/índice/semana, ACL, sesión y snapshots intactos; helpers actor/scope simulados, no acreditación alojada.
+
+Para pendientes existentes se necesita su identidad local exacta; nueve documentos existentes no justifican confirmar por nombre todos los pendientes. Para cerrar ausencias hace falta evidencia de terminación del intento o un protocolo de resolución supervisada con barrera contra solicitudes en vuelo; diario antiguo no conserva request-id/timestamp del servidor. No se introdujo un botón de limpieza ni reintento automático.
+
+Bocetos aprobados: Library resolvió PDF libfile_fde3_f-b792a5b9bc2c8191b866f2fa39893f43_0bb98de6808c8191aa85b50141b9725d versión1; helper soportado falló descarga, sin bytes locales. Pendiente transferencia coordinada para inspección antes de integrar UI.
+
+
+## 2026-11-14 — Cuatro bocetos OPT integrados, solo local
+
+Implementados sobre df0e42b en feat/opt-week-linked-list: listado semanal con totales/búsqueda/filtro y tarjetas móviles; progreso por piezas autorizadas; origen/nombre/ruta relativa y estados de archivo independientes del input nativo; comprobación manual de pendientes históricos sin reenviar. Frames sin asignación permanece Revisar vínculo, sin porcentaje ni controles de corte. Solo coincidencia exacta confirma diario local; ausencia/error conserva bloqueo. RPC observación sigue propuesta, no aplicada.
+
+9 pruebas Node, 10 suites DOM afectadas y dos harness Chromium PC/móvil pasan; capturas inspeccionadas y verify:release válido localmente. Conservadas evidencias anteriores no afectadas. v458 provisional pendiente de coordinar main/PR270; sin push/PR/fusión/despliegue ni datos productivos. Detalle y próximos pasos: docs/OPT_APPROVED_UI_REVIEW.md. Transferencia visual sustituida por especificación fiel autorizada de coordinación; no requiere más imágenes.

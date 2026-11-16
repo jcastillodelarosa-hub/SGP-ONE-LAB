@@ -29,7 +29,7 @@ const indexText='OPT,Reserva,Sistema,Acabado\nA,R-SYNTH,PANEL,White\nB,R-SYNTH,P
       const body=request.postDataJSON();assert.equal(body.p_token,token);assert.equal(body.sistema,'PANEL');assert.equal(body.referencia,'REF-SYNTH');
       return route.fulfill({json:{contract:'OPT-MATRIX-1',ok:true,sistema:body.sistema,referencia:body.referencia,status:'unavailable',matrix:null}});
      }
-     if(url.pathname==='/functions/v1/opt-import'){
+     if(url.pathname==='/functions/v1/opt-retail-import-v3'){
       const body=request.postDataJSON();uploads.push(structuredClone(body));inflight++;maxInflight=Math.max(maxInflight,inflight);
       try{
        assert.equal(body.p_token,token);assert.deepEqual(Object.keys(body).sort(),['index','p_token','pdf','scope','source']);assert.deepEqual(body.scope,scope);
@@ -82,7 +82,7 @@ const indexText='OPT,Reserva,Sistema,Acabado\nA,R-SYNTH,PANEL,White\nB,R-SYNTH,P
    // Loading/selecting originals is not consent to transmit them.
    assert.equal(uploads.length,0);assert.match(await host.locator('#optImportPanel').textContent(),/se envían el PDF original y su índice a Supabase/);
    await host.locator('#optImportProcess').click();
-   await page.waitForFunction(()=>document.querySelector('#optDigitalHost').shadowRoot.querySelector('#optImportStatus').textContent.includes('1 confirmados · 2 rechazados o bloqueados · 0 inciertos'));
+   await page.waitForFunction(()=>document.querySelector('#optDigitalHost').shadowRoot.querySelector('#optImportStatus').textContent.includes('1 confirmados · 1 rechazos definitivos · 0 inciertos de este intento · 0 bloqueos por estado anterior · 0 excluidos por índice · 1 bloqueos locales · 0 fallos'));
    assert.equal(uploads.length,2);assert.equal(maxInflight,1);
    const results=await host.locator('#optImportResults').textContent();
    assert.match(results,/A.pdf · Guardado en SGP · 3 piezas documentales; 2 asignadas a PANELES_2/);assert.match(results,/1 sin asignación a PANELES_2 y no disponibles para cortar/);assert.match(results,/No acredita cortes realizados/);assert.match(results,/B.pdf · No guardado en este intento: OPT_AMBIGUA/);assert.match(results,/MISSING.pdf · Bloqueado: Falta PDF con nombre exacto/);

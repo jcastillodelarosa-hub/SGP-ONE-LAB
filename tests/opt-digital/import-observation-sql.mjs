@@ -1,0 +1,24 @@
+import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';
+const {PGlite}=await import(process.env.PGLITE_MODULE||'@electric-sql/pglite');const db=new PGlite();
+await db.exec(`CREATE ROLE anon;CREATE ROLE authenticated;CREATE ROLE service_role;CREATE SCHEMA sgp_opt_shared;
+CREATE TABLE sgp_opt_shared.documents(id_documento uuid PRIMARY KEY,sha256 text);
+CREATE TABLE sgp_opt_shared.approvals(id_aprobacion uuid PRIMARY KEY,evidencia jsonb);
+CREATE TABLE sgp_opt_shared.sources(id_documento uuid,id_aprobacion uuid,origen text,modo_carga text,consecutivo text,source_key text);
+CREATE TABLE sgp_opt_shared.pieces(id_pieza uuid,id_documento uuid);
+CREATE TABLE sgp_opt_shared.assignments(id_pieza uuid,key_produccion text);
+CREATE FUNCTION sgp_opt_shared.actor(t text,w boolean) RETURNS void LANGUAGE plpgsql AS $$BEGIN IF t IS DISTINCT FROM 'synthetic-authorized' THEN RAISE EXCEPTION 'DENIED';END IF;END$$;
+CREATE FUNCTION sgp_opt_shared.validate_scope(s jsonb) RETURNS void LANGUAGE plpgsql AS $$BEGIN IF s IS NULL OR s->>'linea'<>'PANELES_2' OR s->>'modo'<>'BASE' THEN RAISE EXCEPTION 'SCOPE';END IF;END$$;
+CREATE FUNCTION sgp_opt_shared.bound(p uuid) RETURNS boolean LANGUAGE sql AS $$SELECT true$$;
+CREATE FUNCTION sgp_opt_shared.in_scope(k text,s jsonb) RETURNS boolean LANGUAGE sql AS $$SELECT k='SYNTH-KEY' AND s->>'semana'='46'$$;`);
+await db.exec(readFileSync('docs/sql-proposals/opt-shared/import_observation_REVIEW.sql','utf8'));
+const doc='00000000-0000-4000-8000-000000000001',approval='00000000-0000-4000-8000-000000000002',piece='00000000-0000-4000-8000-000000000003';
+const identity={scope:{linea:'PANELES_2',anio:2026,semana:46,modo:'BASE'},source:{origin:'RETAIL',opt:'OPT2026-46-5-PLI-1',mode:'INDICE'},pdf:{name:'OPT2026-46-5-PLI-1.pdf',sha256:'a'.repeat(64)},index:{name:'synthetic.xlsx',sha256:'b'.repeat(64),format:'xlsx',sheet:'ARCHIVOS'}};
+await db.query('INSERT INTO sgp_opt_shared.documents VALUES($1,$2)',[doc,identity.pdf.sha256]);await db.query('INSERT INTO sgp_opt_shared.approvals VALUES($1,$2)',[approval,JSON.stringify({sgp_binding:{scope:identity.scope},original_index:identity.index})]);
+await db.query('INSERT INTO sgp_opt_shared.sources VALUES($1,$2,$3,$4,$5,$6)',[doc,approval,'RETAIL','INDICE',identity.source.opt,'OPT:'+identity.source.opt]);await db.query('INSERT INTO sgp_opt_shared.pieces VALUES($1,$2)',[piece,doc]);await db.query('INSERT INTO sgp_opt_shared.assignments VALUES($1,$2)',[piece,'SYNTH-KEY']);
+const tables=['documents','approvals','sources','pieces','assignments'],snapshot=async()=>JSON.stringify(await Promise.all(tables.map(t=>db.query('SELECT * FROM sgp_opt_shared.'+t))));const before=await snapshot();
+const observe=async(i=identity,token='synthetic-authorized')=>(await db.query('SELECT public.sgp_opt_import_observacion_v1($1,$2) result',[token,JSON.stringify(i)])).rows[0].result;
+assert.equal((await observe()).status,'COMMITTED_MATCH');assert.equal((await observe()).retryAuthorized,false);
+for(const mutate of [i=>i.pdf.sha256='c'.repeat(64),i=>i.source.origin='PROYECTO',i=>i.scope.semana=47]){const i=structuredClone(identity);mutate(i);assert.equal((await observe(i)).status,'NOT_OBSERVED');}
+const otherIndex=structuredClone(identity);otherIndex.index.sha256='d'.repeat(64);assert.equal((await observe(otherIndex)).status,'EVIDENCE_MISMATCH');await assert.rejects(observe(identity,'invalid'));const wrongScope=structuredClone(identity);wrongScope.scope.linea='FRAMES_2';await assert.rejects(observe(wrongScope));
+await db.exec('SET ROLE anon');await assert.rejects(observe(identity,'invalid'));assert.equal((await observe()).status,'COMMITTED_MATCH');await assert.rejects(db.query('SELECT * FROM sgp_opt_shared.documents'));await db.exec('RESET ROLE');
+assert.equal(await snapshot(),before);await db.close();console.log('PASS synthetic SQL: exact match, wrong hash/origin/week/index, session/scope denial, private table ACL and unchanged snapshots. Actor/scope helpers stubbed; not hosted verification.');

@@ -27,6 +27,9 @@ try:
      page=browser.new_page(viewport={'width':width,'height':950});page.clock.install();reads=[0];errors=[];page.on('pageerror',lambda e:errors.append(str(e)));page.add_init_script("sessionStorage.setItem('sgp_one_session',"+json.dumps(user)+")")
      page.route('**/*',lambda r:r.continue_() if r.request.url.startswith(origin) else r.abort())
      def rpc(route):
+      # This isolated backend predates the alert migration; original reader ACLs remain in force.
+      if route.request.url.split('/rpc/')[-1]=='sgp_alertas_accesorio_consultar':
+       route.fulfill(status=404,content_type='application/json',body=json.dumps({'code':'PGRST202','message':'QA accessory alert backend not installed'}));return
       name=route.request.url.split('/rpc/')[-1];a=route.request.post_data_json
       try:
        if name in shared.RPCS:data=shared.rpc(db,name,a)
