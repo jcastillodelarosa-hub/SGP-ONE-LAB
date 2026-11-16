@@ -67,7 +67,7 @@ try:
        drawer.locator('[data-advance-context] summary').click();rect=drawer.locator('[data-tracking-context]').bounding_box();assert rect['x']+rect['width']<=width
       if token=='COORDINADOR':page.screenshot(path='/tmp/sgp-global-'+str(width)+'-'+stage+'.png')
       drawer.locator('[data-live-operate]').click();assert page.locator('[data-op-date]').input_value()=='2026-11-01'
-      page.wait_for_selector('section[data-assembly-detail]');assert 'QA|PANELES_2' in page.locator('section[data-assembly-detail] h3').inner_text()
+      page.wait_for_selector('section[data-assembly-detail]');assert 'QA|PANELES_2' in page.locator('section[data-assembly-detail] > header > h3').inner_text()
       assert page.locator('[data-order-form],[data-validate-save],[data-executed]').count()==0
       if stage=='EMPAQUE':
        assert 'Saldo Empaque' in page.locator('section[data-assembly-detail]').inner_text()
