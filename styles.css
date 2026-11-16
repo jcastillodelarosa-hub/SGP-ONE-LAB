@@ -3001,6 +3001,55 @@ table.glass-burro-table th:not(:first-child){width:36%}
 
 /* NC source closure, separate from physical receipt. Existing SGP success tokens. */
 .lp-ncv-finalized{display:inline-flex;align-items:center;max-width:100%;overflow-wrap:anywhere;gap:4px;margin:3px 4px 3px 0;padding:5px 8px;border:1px solid #86efac;border-radius:6px;background:#dcfce7;color:#166534;font-size:12px;font-weight:700}
+
+/* Approved B: common window hierarchy. Presentation only; no state selectors. */
+:root{
+ --sgp-window-title:#173458;--sgp-window-text:#20344c;--sgp-window-help:#52657c;
+ --sgp-window-line:#d4dfec;--sgp-window-soft:#edf3fb;--sgp-window-guide:#f3f6f9;
+}
+/* Common typography foundation; the approved white header is opt-in for audit.
+   Other windows keep their existing header colors until individually verified.
+   Never override height, scroll, sticky positioning or semantic status colors. */
+:is(.modal-card,.piece-modal-card,.prog-day-card,dialog){color:var(--sgp-window-text);font-size:14px;line-height:1.5}
+#pickAuditModal .modal-header{
+ background:#fff!important;color:var(--sgp-window-title)!important;border-top:5px solid #195393!important;border-bottom:1px solid var(--sgp-window-line)!important;
+ padding:18px 22px!important;
+}
+#pickAuditModal .modal-header :is(strong,h2,h3){
+ color:var(--sgp-window-title)!important;font-size:24px!important;line-height:1.2;font-weight:750;
+}
+#pickAuditModal .modal-header :is(small,p,.piece-modal-meta){
+ color:var(--sgp-window-help)!important;font-size:13px!important;line-height:1.5;font-weight:400;letter-spacing:.01em;
+}
+#pickAuditModal .modal-header :is(.modal-close,button){
+ color:#315678!important;background:#f3f6f9!important;border:1px solid var(--sgp-window-line)!important;
+}
+:is(.modal-card,.piece-modal-card,.prog-day-card,dialog) :is(h3,h4,legend){font-weight:700;line-height:1.3}
+:is(.modal-card,.piece-modal-card,.prog-day-card,dialog) label{font-weight:600;line-height:1.4;letter-spacing:.01em}
+:is(.modal-card,.piece-modal-card,.prog-day-card,dialog) :is(input,select,textarea){font:400 14px/1.4 Inter,system-ui,sans-serif;letter-spacing:normal}
+:is(.modal-card,.piece-modal-card,.prog-day-card,dialog) :is(.help,.hint,.lp-sale-hint){color:var(--sgp-window-help);font-size:13px;line-height:1.5;font-weight:400}
+:is(.modal-card,.piece-modal-card,.prog-day-card) .modal-actions{background:#fff!important;border-top:1px solid var(--sgp-window-line)!important}
+/* Explicit semantic blocks can be reused by additional windows without guessing content. */
+.sgp-window-context{padding:16px 18px;background:var(--sgp-window-soft);border-radius:9px;color:var(--sgp-window-title);margin-bottom:18px}
+.sgp-window-context strong{display:block;font-size:20px;line-height:1.35;font-weight:750;overflow-wrap:anywhere}
+.sgp-window-context small{display:block;margin-top:5px;font-size:13px;color:var(--sgp-window-help)}
+.sgp-window-section-title{font-size:18px;color:var(--sgp-window-title);margin:20px 0 10px;font-weight:700}
+.sgp-window-guide{padding:12px 14px;background:var(--sgp-window-guide);border-radius:7px;font-size:13px;line-height:1.5;color:var(--sgp-window-help);font-weight:400}
+#pickAuditModal .pick-audit-body{padding:20px 22px;color:var(--sgp-window-text)}
+#pickAuditModal [data-area-progress]{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:10px;margin:12px 0}
+#pickAuditModal [data-area-progress]>p{margin:0;padding:12px 14px;border:1px solid var(--sgp-window-line);border-radius:8px;line-height:1.5}
+#pickAuditModal .pick-audit-decision{padding:16px;margin:12px 0}
+#pickAuditModal .pick-audit-decision h3{color:var(--sgp-window-title);font-size:17px;margin:0 0 8px}
+#pickAuditModal .pick-audit-decision>p{color:var(--sgp-window-text);font-size:14px}
+#pickAuditModal .pick-audit-decision>small{display:block;color:var(--sgp-window-help);font-size:13px;line-height:1.5;margin-top:7px}
+#pickAuditModal .pick-audit-body>label{font-size:14px;color:var(--sgp-window-help);margin:14px 0}
+#pickAuditModal .pick-audit-body>label :is(input,select,textarea){color:var(--sgp-window-text);border:1px solid #bacbdf;border-radius:7px;padding:10px;min-height:44px;width:100%;box-sizing:border-box;background:#fff}
+@media(max-width:600px){
+ #pickAuditModal .modal-header{padding:16px!important}
+ #pickAuditModal .modal-header :is(strong,h2,h3){font-size:21px!important}
+ #pickAuditModal .pick-audit-body{padding:16px}
+ .sgp-window-context{padding:14px}.sgp-window-context strong{font-size:18px}
+}
 /* Audit state is always readable outside the OS-native option popup. */
 #pickAuditModal .pick-audit-area-status{padding:9px 12px;border:1px solid;border-left-width:4px;border-radius:8px;line-height:1.5;overflow-wrap:anywhere}
 #pickAuditModal [data-area-state="pending"]{color:#9a3412;background:#fff4e6;border-color:#c2410c}

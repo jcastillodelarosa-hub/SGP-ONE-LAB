@@ -1,3 +1,11 @@
+## 2026-11-16 — Jerarquía visual B, candidata v464 sobre v463
+
+B elegida por Johan; fundamento tipográfico compartido y primera aplicación
+por bloques en auditoría. Sin modificar funcionalidad, datos ni publicación.
+1368 pruebas Node PASS/10 omitidas; DOM y release PASS. Chromium local EPERM,
+validación visual de implementación pendiente. Alcance y límites en
+[WINDOW_HIERARCHY_B_REVIEW](../design/WINDOW_HIERARCHY_B_REVIEW.md).
+
 ## 2026-11-16 — integración candidata v463 sobre auditoría v462
 
 NCV compartida Seguimiento/Ensamble + PDT perfiles/NC y refresco + deduplicación
