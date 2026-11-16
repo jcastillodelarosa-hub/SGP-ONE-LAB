@@ -1,0 +1,15 @@
+<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/styles.css"><body><script type="module">
+import {openPdtRegistration} from '/src/modules/pdt-registration-form.js';
+import {openManualPdt} from '/src/modules/pdt-manual-form.js';
+window.calls=[];
+const context={key_produccion:'QA',produccion:'Orden sintética',reserva:'R',reserva_principal:'R',sistema:'ES-EL400',linea:'PANELES_2',anio:2026,semana:47,acabado:'WHITE'};
+const sources=[1,2].map(i=>({...context,id_pieza:'PIECE'+i,codigo_sap:'CODE'+i,fabricacion:'Vertical '+i,marca:'E49-'+i,longitud:50+i,acabado:'WHITE',cantidad_referencia:10,tipo_pieza:'PANEL',id_linea:'PANELES_2'}));
+const client={rpc:async(name,args)=>{calls.push({name,args});
+ if(name==='sgp_pdt_registro_fuentes_v4')return {data:{ok:true,contract_version:4,fuentes:sources}};
+ if(name==='sgp_pdt_manual_catalogo_v1')return {data:{ok:true,producciones:[context]}};
+ if(name==='sgp_pdt_manual_fuentes_v1')return {data:{ok:true,fuentes:sources}};
+ if(name==='sgp_pdt_manual_nc_consultar_v1')return {data:{ok:true,nc:{numero:args.p_referencia,estado:'ABIERTA'}}};
+ return {data:{ok:true,id_reporte:'QA',ids_pendientes:['QA1','QA2']}};
+}};
+window.openFixture=async manual=>manual?openManualPdt({client,token:'SYNTHETIC',role:'COORDINADOR'}):openPdtRegistration({client,token:'SYNTHETIC',origin:'ENSAMBLE',context});
+</script></body></html>

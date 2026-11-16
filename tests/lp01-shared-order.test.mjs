@@ -24,3 +24,11 @@ test('estimates use active pieces and distinct known glass NC references without
  const shared={...scope,revision:0,reports:[{origin_stage:'EMPAQUE',cause:'NC_V',quantity:7,confirmed:0,nc_reference:'NC1'},{origin_stage:'EMPAQUE',cause:'NC_V',quantity:2,confirmed:0,nc_reference:'NC1'}],legacyReports:[]};
  const s=sharedOrderSummary(native,shared);assert.equal(s.estimates.length,1);assert.equal(s.estimates[0].quantity,4);assert.equal(s.ncEstimate,1);assert.deepEqual(s.reportedQuantities.NC_V,[7,2]);assert.equal(s.total,null);
 });
+test('shared reader retains novelty number independently from NC and accepts unnumbered history',async()=>{
+ const report={id:'novelty',key:scope.key,origin_stage:scope.stage,cause:'NOVEDAD',quantity:2,solved:0,confirmed:0,numero_novedad:'00042-A'};
+ const d={...data,reports:[report],revision:1,history:[{reportId:'novelty',revision:1}]};
+ assert.equal((await t(d).read()).reports[0].numero_novedad,'00042-A');
+ for(const numero_novedad of [undefined,null])assert.equal((await t({...d,reports:[{...report,numero_novedad}]}).read()).reports[0].numero_novedad,numero_novedad);
+ for(const numero_novedad of [42,'','x'.repeat(81),'bad\nnumber'])await assert.rejects(t({...d,reports:[{...report,numero_novedad}]}).read(),/REPORT_INVALID/);
+ await assert.rejects(t({...d,reports:[{...report,cause:'NC_V'}]}).read(),/REPORT_INVALID/);
+});

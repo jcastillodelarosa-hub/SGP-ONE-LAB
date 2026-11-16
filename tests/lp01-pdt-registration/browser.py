@@ -10,7 +10,7 @@ with sync_playwright() as p:
  browser=p.chromium.launch(args=['--no-sandbox'])
  for width in [1440,390]:
   page=browser.new_page(viewport={'width':width,'height':950});page.goto(f'http://127.0.0.1:{server.server_port}/tests/lp01-pdt-registration/fixture.html')
-  page.locator('[data-register-order-pdt]').click();page.locator('[data-ref]').select_option('PROFILE');page.locator('[data-source]').select_option(label='FAB · 50 in · WHITE · R · Ref. 10');page.locator('[data-nc]').fill('123456')
+  page.locator('[data-register-order-pdt]').click();page.locator('[data-ref]').select_option('PROFILE');page.locator('[data-source-radio]').check();page.locator('[data-nc]').fill('123456')
   page.locator('[data-save]').click();page.get_by_text('PDT registrado. Puedes cerrar esta ventana.').wait_for();assert page.evaluate("calls.filter(x=>x[0]==='sgp_pdt_registrar_v4').length")==1
   page.screenshot(path=f'/tmp/pdt-ensamble-{width}.png',full_page=True);page.locator('[data-close]').click();page.get_by_text('PDT registrado. Selecciona el pendiente nuevo para indicar sus ventanas afectadas.').wait_for();page.goto(f'http://127.0.0.1:{server.server_port}/tests/ncv-finalizada/fixture.html')
   page.locator('#compact .lp-ncv-finalized').wait_for();page.locator('#panel .lp-ncv-finalized').wait_for()
