@@ -1,0 +1,8 @@
+<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/styles.css"><body><main id="panel" style="padding:20px"></main><script type="module">
+import {mountSharedAffectationsPanel} from '/src/modules/lp01-shared-affectations-panel.js';
+import {scopedPdtRegistration} from '/src/services/lp01-pdt-registration.js';
+window.calls=[];const source={key_produccion:'QA',produccion:'Orden QA',reserva:'R',reserva_principal:'R',id_pieza:'PIECE',codigo_sap:'PROFILE',fabricacion:'FAB',marca:'M',longitud:50,acabado:'WHITE',cantidad_referencia:10,tipo_pieza:'PANEL',id_linea:'PANELES_2'};
+const native={reports:[],events:[],aluminumPending:{status:'AVAILABLE',rows:[]}};
+const client={rpc:async(name,args)=>{window.calls.push([name,args]);return name==='sgp_pdt_registro_fuentes_v4'?{data:{ok:true,contract_version:4,fuentes:[source]}}:{data:{ok:true}};}};
+await mountSharedAffectationsPanel(document.querySelector('#panel'),{scope:{stage:'ENSAMBLE'},read:async()=>native,refreshNative:async()=>native,openAluminumRegistration:scopedPdtRegistration({client,getToken:()=> 'QA',context:{key:'QA',line:'PANELES_2',stage:'ENSAMBLE',production:'Orden QA'}}),shared:{read:async()=>({revision:0,reports:[],history:[],legacyReports:[],canReport:true,stageBalance:21})}},{fixedCause:'NC_AL'});
+</script></body></html>

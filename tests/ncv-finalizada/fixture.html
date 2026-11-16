@@ -1,0 +1,14 @@
+<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/styles.css"><body><main style="padding:20px"><h1>Estado compartido NCV · prueba aislada</h1><button id="reopen">Simular reapertura fuente</button><div id="compact"></div><div id="panel"></div></main><script type="module">
+import {sharedOrderTransport} from '/src/services/lp01-shared-order.js';
+import {sharedOrderSummary} from '/src/domain/lp01-shared-order-summary.js';
+import {compactSummaryMarkup} from '/src/modules/lp01-affectation-summary.js';
+import {mountSharedAffectationsPanel} from '/src/modules/lp01-shared-affectations-panel.js';
+const scope={key:'QA|PANELES_2',line:'PANELES_2',stage:'ENSAMBLE'};
+const report={id:'r1',key:scope.key,cause:'NC_V',origin_stage:'ENSAMBLE',nc_reference:'12922461',quantity:1,solved:0,confirmed:0};
+const data={contract:'LP-SHARED-ORDER-1',...scope,revision:1,canReport:false,reports:[report],history:[{revision:1,reportId:'r1'}],legacyReports:[],accessories:[]};
+const native={...scope,reports:[],events:[],aluminumPending:{status:'AVAILABLE',rows:[]}};
+let state='CERRADA',cleanup;
+const shared=sharedOrderTransport({...scope,getToken:()=> 'QA',client:{rpc:async name=>({data:name==='sgp_lp_shared_order_read_v1'?data:{contract:'NCV-ORDER-STATE-1',...scope,rows:[{reference:'12922461',state,active:true}]}})}});
+async function render(){cleanup?.();const snapshot=await shared.read();document.querySelector('#compact').innerHTML=compactSummaryMarkup(sharedOrderSummary(native,snapshot));cleanup=await mountSharedAffectationsPanel(document.querySelector('#panel'),{scope,shared,read:async()=>native},{fixedCause:'NC_V'});}
+document.querySelector('#reopen').onclick=async()=>{state='ABIERTA';await render();};await render();
+</script></body></html>

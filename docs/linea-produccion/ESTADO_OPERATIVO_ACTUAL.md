@@ -1,3 +1,41 @@
+## 2026-11-16 — integración candidata v463 sobre auditoría v462
+
+NCV compartida Seguimiento/Ensamble + PDT perfiles/NC y refresco + deduplicación
+de órdenes abiertas, sin filtro semanal. 1364 Node PASS/10 omitidas, DOM PDT y
+SQL sintético PASS. Sin SQL ni Hosting; auditoría activa intacta. Riesgos, respaldo
+y secuencia: [LP_NCV_PDT_V463_REVIEW](../LP_NCV_PDT_V463_REVIEW.md).
+
+## 2026-11-16 — NCV finalizada informativa, candidata sin publicar
+
+NC12922461 confirmada CERRADA en fuente; reporte sigue sin recepción física.
+Preparado lector autenticado independiente de semanas abiertas y aviso verde en
+compacta/detalle de Seguimiento y Ensamble, usando autorización por orden/etapa.
+Sin acceso global nuevo para líderes ni cambios de vínculos/cantidades. SQL probado solo localmente,
+NO APLICADO; frontend NO PUBLICADO. Ver [NCV finalizada](../sql-proposals/ncv-finalizada/README.md).
+Integrar con versión nueva después de auditoría/OPT, instalar lector y verificar
+sesión alojada; no confundir cierre fuente con recepción física.
+## PDT desde Ensamble/Empaque · corrección preparada · 16/11/2026
+
+IMPLEMENTADO EN RAMA, NO PUBLICADO. Base main `12dc927` (v461).
+En la pestaña PDT Aluminio se restaura el acceso al registro de perfiles y NC,
+reutilizando el editor multiorigen y su escritor v4 instalado. Orden y etapa
+quedan fijas; identidad física y límites de piezas verificados, sin inventar
+referencias ni convertir piezas en ventanas. Las ventanas afectadas se informan
+separadamente después de registrar el PDT. No cambia el historial ni SQL.
+Seguimiento y Ensamble comparten fuente y editor por orden. Actualizar/guardar
+reconsulta también el estado PDT nativo; Ensamble rechaza revisiones tardías
+anteriores, como Seguimiento. No se promete sincronización realtime entre equipos.
+Se bloquean cambios de sesión/orden y apertura con borrador de ventanas; al cerrar
+un registro confirmado se renueva la consulta de pendientes de la orden.
+
+1345 pruebas Node PASS, 10 omitidas; DOM focal PASS, sintaxis y release PASS.
+RPC/lector instalados contrastados solo lectura (rol y fuentes por orden).
+Navegador PC/móvil preparado, no ejecutado: Chromium falla con socket EPERM.
+No hay registro productivo de prueba ni validación de líder real.
+Siguiente: integrar con entrega posterior a auditoría, incrementar versión,
+CI exacta y QA navegador antes de publicación autorizada. Evidencia y ejecución:
+`tests/lp01-pdt-registration/README.md`.
+
 ## 2026-11-16 — publicación alertas v460: baseline acreditada, publicación pendiente
 
 PR270 fusionado en 64706c9. El primer publish se detuvo antes de Firebase por baseline histórica. Inspect GET 43796542516 confirma live v459 a4efd059109ba877 FINALIZED. Revisión mínima actualiza solo referencias de baseline/rollback/certificación, preserva todos los guards; push debe quedar HOLD. Detalle y siguiente paso: [RELEASE_REVIEW_V460](../accessory-alerts/RELEASE_REVIEW_V460.md). No se repite migración ni se afirma publicación.

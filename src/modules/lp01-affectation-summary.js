@@ -49,5 +49,11 @@ export function compactSummaryMarkup(summary){
  const empty=aluminumUnavailable||!chips&&!reportGroups&&!estimates&&!aluminum&&!glass?'<span class="lp-summary-pending" title="'+emptyLabel+'" aria-label="'+emptyLabel+'">'+(aluminumUnavailable?'Pendiente':'—')+'</span>':'';
  const glassAffected=summary.exportGlass?.status==='AVAILABLE'&&Number(summary.exportGlass.rounded)>0;
  const total=summary.total===null||summary.total===undefined?(chips||reportGroups||estimates||aluminum||glassAffected?'<span class="lp-summary-pending" title="Total de ventanas distintas pendiente de validación; las causas pueden coincidir">Total por validar</span>':''):'<small title="Total de ventanas distintas validado">Total '+summary.total+(summary.available===null||summary.available===undefined?'':' · Disponibles '+summary.available)+'</small>';
- return '<span class="lp-summary-chips">'+chips+reportGroups+estimates+aluminum+glass+'</span>'+empty+total;
+ return '<span class="lp-summary-chips">'+chips+reportGroups+estimates+aluminum+glass+ncFinalizedMarkup(summary.ncFinalized||[])+'</span>'+empty+total;
+}
+
+/** Source closure is not physical receipt and never changes affected quantities. */
+export function ncFinalizedMarkup(rows=[]){
+ const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ return rows.map(row=>'<span class="lp-ncv-finalized" title="Estado de la fuente. No confirma recepción física ni elimina la afectación.">✓ NCV finalizada · '+esc(row.reference)+'</span>').join('');
 }

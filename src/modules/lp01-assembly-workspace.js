@@ -108,7 +108,7 @@ export function mountAssemblyWorkspace({host,bridge,isCurrent,onClose,onReports,
   void mountOrderSaleCell(saleHost,transport(key)).then(dispose=>{if(current())saleDispose=dispose;else dispose?.();});
   try{
    const client=await bridge.getClient();if(!current())return;
-   const dispose=await mountTrackingAffectations({host:detailHost,row,target:row.first,cause,scope:context,client,getToken:()=>current()?bridge.getToken():null,isCurrent:current,initialDetails:details.get(key),getLatestDetails:()=>details.get(key),onDetails:value=>{if(current())rememberDetails(key,value);},onSummary:value=>{if(current()){summaries.set(key,value);summaryAt.set(key,Date.now());}}});
+   const dispose=await mountTrackingAffectations({host:detailHost,row,target:row.first,cause,scope:context,client,getToken:()=>current()?bridge.getToken():null,isCurrent:current,initialDetails:details.get(key),getLatestDetails:()=>details.get(key),onDetails:value=>{if(current())rememberDetails(key,value);},onSummary:value=>{if(current()){if((summaries.get(key)?.sharedRevision??-1)>(value?.sharedRevision??-1))return;summaries.set(key,value);summaryAt.set(key,Date.now());}}});
    if(current())detailDispose=dispose;else dispose?.();
   }catch(error){if(current())detailHost.textContent='No se pudieron consultar afectaciones: '+error.message;}
  }
@@ -126,7 +126,7 @@ export function mountAssemblyWorkspace({host,bridge,isCurrent,onClose,onReports,
      if(outcomes.some(result=>result.status==='rejected'&&result.reason.message==='NO_AUTORIZADO'))throw Error('NO_AUTORIZADO');
      const [native,shared,note]=outcomes,detail=note.status==='fulfilled'?note.value:null;
      const base=native.status==='fulfilled'&&shared.status==='fulfilled'?sharedOrderSummary(native.value,shared.value):{status:'UNAVAILABLE'};
-     const summary=withExportGlassSummary(base,detail,{key,line:context.line,stage:context.stage});summaries.set(key,summary);rememberDetails(key,detail);paintNote(key);
+     const summary=withExportGlassSummary(base,detail,{key,line:context.line,stage:context.stage});if(Number.isSafeInteger(summary.sharedRevision)&&(summaries.get(key)?.sharedRevision??-1)>summary.sharedRevision)continue;summaries.set(key,summary);rememberDetails(key,detail);paintNote(key);
     }catch(error){if(!alive(version))return;if(error.message==='NO_AUTORIZADO'){clear();onAccessRevoked?.();host.textContent='Acceso revocado. Vuelve a consultar la hoja.';return;}summaries.set(key,{status:'UNAVAILABLE'});}
     summaryAt.set(key,Date.now());
     if(!selected)host.querySelectorAll('[data-order-summary]').forEach(slot=>{if(slot.dataset.orderSummary===key){slot.innerHTML=compactSummaryMarkup(summaryFor(rows.find(r=>r.key===key)));slot.querySelectorAll('[data-summary-cause]').forEach(button=>button.onclick=()=>open(key,button.dataset.summaryCause));}});
