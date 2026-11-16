@@ -553,3 +553,22 @@ test('strict printed-total rejection carries original operands, page and exact s
  assert.equal(b.comparison.unit,'1/32 inch');assert.equal(b.comparison.roundingCauseVerified,false);
  assert.equal(b.comparison.acceptance,'BLOCKED_EXACT_TOTALS_REQUIRED');assert.equal(JSON.stringify(input),before);
 });
+
+test('approved shared project machining program binds Frame without changing physical identity',()=>{
+ const {input,server}=indexedProjectFixture();
+ server.sharedMachiningProgram='PANELES_2';
+ server.profileDestinations[0]={referencia:'R1',destino_productivo:'FRAME',tipo_pieza:'FRAME',activa:'SI'};
+ server.bindings.push({...binding(),id_linea:'FRAMES_2',key_produccion:'123456|FRAMES_2',id_programacion:null});
+ const before=structuredClone(input),out=run(input,server);
+ assert.equal(out.importable,true,JSON.stringify(out.blockers));
+ assert(out.manifest.units.every(u=>u.assignment.key_produccion===binding().key_produccion));
+ assert.deepEqual(input,before);assert.equal(server.profileDestinations[0].destino_productivo,'FRAME');
+ server.bindings[0].id_programacion=null;
+ blocked(input,server,'SGP_BINDING_OUTSIDE_VALID_PROGRAMMING');
+});
+test('shared Frame machining does not choose between competing Panel productions',()=>{
+ const {input,server}=indexedProjectFixture();server.sharedMachiningProgram='PANELES_2';
+ server.profileDestinations[0]={referencia:'R1',destino_productivo:'FRAME',tipo_pieza:'COVER',activa:'SI'};
+ server.bindings.push({...server.bindings[0],key_produccion:'COMPETING|PANELES_2'});
+ blocked(input,server,'SGP_BINDING_AMBIGUOUS');
+});

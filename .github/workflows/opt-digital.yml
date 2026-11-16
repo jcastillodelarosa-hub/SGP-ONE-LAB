@@ -17,6 +17,7 @@ on:
       - 'docs/sql-proposals/opt-matrices/**'
       - 'tests/opt-matrix-library/**'
       - 'supabase/functions/opt-import/**'
+      - 'supabase/functions/opt-import-shared-program-v1/**'
       - 'supabase/functions/opt-retail-import-v3-review/**'
       - 'src/services/opt-import-resolution.js'
       - 'supabase/config.toml'

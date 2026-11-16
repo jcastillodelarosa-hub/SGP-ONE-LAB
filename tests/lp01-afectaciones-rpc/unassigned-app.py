@@ -59,9 +59,11 @@ try:
       db.sql("UPDATE sgp_lp_operacion.turnos SET estado='CERRADO'")
       closed=db.sql('SELECT jsonb_agg(to_jsonb(t)) FROM sgp_lp_operacion.turnos t')
       page.locator('[data-order-type=NOVEDAD]').click();report=page.locator('[data-affect-content=NOVEDAD] form');report.wait_for(state='visible')
-      page.locator('[data-order-type=NOVEDAD]').click();report=page.locator('[data-affect-content=NOVEDAD] form');report.locator('[name=quantity]').fill('3');report.locator('[name=observation]').fill('QA sin asignación');report.locator('button[type=submit]').click()
+      page.locator('[data-order-type=NOVEDAD]').click();report=page.locator('[data-affect-content=NOVEDAD] form');report.locator('[name=quantity]').fill('3');report.locator('[name=noveltyReference]').fill('QA-0007');report.locator('[name=observation]').fill('QA sin asignación');report.locator('button[type=submit]').click()
       page.wait_for_function("document.querySelector('[data-type-pane=NOVEDAD] [data-shared-status]').textContent==='Guardado.'")
-      assert shared.rpc(db,'sgp_lp_shared_order_read_v1',dict(p_token='COORDINADOR',p_key=x.key,p_stage='ENSAMBLE'))['reports'][0]['quantity']==3
+      saved_report=shared.rpc(db,'sgp_lp_shared_order_read_v1',dict(p_token='COORDINADOR',p_key=x.key,p_stage='ENSAMBLE'))['reports'][0]
+      assert saved_report['quantity']==3 and saved_report['numero_novedad']=='QA-0007'
+      assert 'QA-0007' in page.locator('[data-type-pane=NOVEDAD] [data-shared-list]').inner_text()
       assert db.sql('SELECT jsonb_agg(to_jsonb(t)) FROM sgp_lp_operacion.turnos t')==closed
       assert db.sql('SELECT count(*) FROM sgp_lp_operacion.ordenes')=='0'
       assert db.sql('SELECT count(*) FROM public.sgp_linea_plan_asignaciones')=='0'
