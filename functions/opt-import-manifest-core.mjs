@@ -230,7 +230,10 @@ export function validateOptImportManifest({document, extraction}, server) {
       if(new Set(matches.map(profile=>key(profile.tipo_pieza,profile.destino_productivo,profile.activa))).size!==1){
         fail('PROFILE_DESTINATION_CONFLICTING',{profile:row.ref});continue;
       }
-      profileLine=matches[0].destino_productivo==='PANEL'?'PANELES_2':'FRAMES_2';
+      // Physical profile classification is retained above. The trusted server may
+      // separately bind Frame cutting to the shared Panel machining program.
+      profileLine=indexedProject && server.sharedMachiningProgram==='PANELES_2'
+        ? 'PANELES_2' : matches[0].destino_productivo==='PANEL'?'PANELES_2':'FRAMES_2';
     }
     const applicable = indexes.filter(index => (index.sourceRowId == null || index.sourceRowId === row.sourceId) &&
       (index.documentProduction == null || index.documentProduction === production) &&
