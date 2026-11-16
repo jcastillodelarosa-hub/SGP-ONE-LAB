@@ -15,7 +15,7 @@ try:
     page=browser.new_page(viewport={'width':width,'height':950})
     page.route('https://**/*',lambda route:route.abort())
     page.goto(f'http://127.0.0.1:{server.server_port}/tests/pdt-table-design/fixture.html')
-    page.wait_for_function('window.openFixture')
+    page.wait_for_function("typeof window.openFixture==='function'")
     page.evaluate('manual=>openFixture(manual)',manual)
     if manual:page.locator('[data-production]').select_option('QA|R')
     page.locator('[data-ref]').select_option('CODE1')
