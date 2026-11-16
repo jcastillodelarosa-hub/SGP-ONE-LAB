@@ -54,7 +54,7 @@ function receiptValid(receipt,manifest){return record(receipt)&&receipt.ok===tru
 
 /** Only server bootstrap supplies dependencies. Neither extraction nor SGP facts
  * are ever accepted from the caller. SQL remains the final authorization gate. */
-export function createOptImportHandler({rpc,readPdf,DOMParser,readWorksheetXML,allowedOrigins,retailV3=false,retailOnly=false,retailResolution=false,serializeRetailPlans=/** @type {((extraction: any, manifest: any) => any) | undefined} */ (undefined)}){
+export function createOptImportHandler({rpc,readPdf,DOMParser,readWorksheetXML,allowedOrigins,sharedProjectProgram=false,retailV3=false,retailOnly=false,retailResolution=false,serializeRetailPlans=/** @type {((extraction: any, manifest: any) => any) | undefined} */ (undefined)}){
  if(typeof rpc!=='function'||typeof readPdf!=='function'||!Array.isArray(allowedOrigins)||!allowedOrigins.length)throw Error('OPT_SERVER_DEPENDENCIES_REQUIRED');
  const origins=new Set(allowedOrigins);let busy=false;
  return async request=>{
@@ -122,13 +122,13 @@ export function createOptImportHandler({rpc,readPdf,DOMParser,readWorksheetXML,a
     indexRows=rows.flatMap(row=>context.bindings.filter(binding=>binding.documentProduction===documentProduction(row.reference)).map((binding,i)=>({...common,rowId:`individual-${row.sourceId}-${i}`,sourceRowId:row.sourceId,reference:row.reference,documentProduction:binding.documentProduction,reservation:binding.reserva,system:binding.sistema})));
    }
    if(rows.length*indexRows.length>2000000)fail('OPT_INDEX_COMPLEXITY_LIMIT','El índice seleccionado excede el límite de procesamiento');
-   const server={...(retailIndex?{bindingMode:'OPT_RETAIL_EXACT_3',profileDestinations:context.profileDestinations}:{}),...(projectIndex?{bindingMode:'OPT_INDEX_RESERVATION',profileDestinations:context.profileDestinations}:{}),schema:'sgp.opt.server-evidence.v1',revision:context.revision,scope:body.scope,pdfSha256:hash,bindings:context.bindings,indexRows};
+   const server={...(retailIndex?{bindingMode:'OPT_RETAIL_EXACT_3',profileDestinations:context.profileDestinations}:{}),...(projectIndex?{bindingMode:'OPT_INDEX_RESERVATION',profileDestinations:context.profileDestinations,...(sharedProjectProgram?{sharedMachiningProgram:'PANELES_2'}:{})}:{}),schema:'sgp.opt.server-evidence.v1',revision:context.revision,scope:body.scope,pdfSha256:hash,bindings:context.bindings,indexRows};
    const result=validateOptImportManifest({document,extraction},server);
    if(!result.importable)return reject(422,'OPT_DOCUMENT_BLOCKED','El documento no supera la conciliación completa',{blockers:result.blockers.slice(0,100).map(blocker=>({...blocker,...(Array.isArray(blocker.candidates)?{candidates:blocker.candidates.slice(0,20),candidate_count:blocker.candidates.length}:{}),...(Array.isArray(blocker.issues)?{issues:blocker.issues.slice(0,100),issue_count:blocker.issues.length}:{})})),blocker_count:result.blockers.length});
    const manifest=result.manifest;
    const geometry=retailIndex&&serializeRetailPlans?serializeRetailPlans(extraction,manifest):{};
    const evidence={...geometry,contract:retailIndex?'OPT-SERVER-VALIDATION-RETAIL-3':projectIndex?'OPT-SERVER-VALIDATION-PROYECTO-2':'OPT-SERVER-VALIDATION-1',algorithm:retailIndex?'opt-import-manifest-retail-v3':projectIndex?'opt-import-manifest-project-v2':'opt-import-manifest-v1',pdf_sha256:hash,validation:'DOCUMENTARY_MANIFEST_READY',physical_completion_verified:false,
-    sgp_binding:{contract:context.contract,scope:body.scope,revision:context.revision,...(retailIndex?{opt,selectores:retailSelection,referencias:references}:projectIndex?{opt,selectores:selectors,referencias:references}:{producciones:productions})},
+    sgp_binding:{contract:context.contract,scope:body.scope,revision:context.revision,...(retailIndex?{opt,selectores:retailSelection,referencias:references}:projectIndex?{opt,selectores:selectors,referencias:references,...(sharedProjectProgram?{shared_machining_program:'PANELES_2',policy:'OPT-SHARED-PROGRAM-20261116'}:{})}:{producciones:productions})},
     original_document_title:identity.title,
     documentary_summary:buildOptDocumentSummary(extraction),
     ...((projectIndex || retailIndex)?{documentary_source_groups:manifest.sourceGroups||[],rounding_policy:manifest.roundingPolicy,rounding_evidence:manifest.roundingEvidence,validation_warnings:manifest.validationWarnings}:{}),

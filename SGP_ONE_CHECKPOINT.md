@@ -1,3 +1,7 @@
+## 2026-11-16 — OPT shared program clarified; v462 candidate
+
+Owner confirms Frame/Panel use the same machining program. Applied bounded append-only recovery: 1,253 assignments across9 OPT, zero unassigned, no cuts/measurements/original evidence changed. Restorable private backup checked. Future Project validator prepared; Edge/Hosting publication pending exact Edge backup and CI. Retail uncertain recovery untouched. See docs/opt-recovery/SHARED_PROGRAM_V462.md.
+
 ## 2026-11-14 — OPT UI v459 autorizada; RPC de observación aplicada
 
 Rama release/opt-ui-v459 sobre main 2ad7054, UI 2f3ebf0 intacta; PR270 excluido. RPC de lectura instalada y ACL/sesión inválida verificadas; diez tablas OPT conservan conteos/huellas. 213/215 ausentes, sin autorización de retry. QA local previa reutilizada; versión 459 verificada. CI, merge y Hosting pendientes al preparar este commit. Evidencia y contención: docs/OPT_UI_V459_RELEASE.md. Frames sigue sin vínculo hasta decisión; no bloquea UI.
