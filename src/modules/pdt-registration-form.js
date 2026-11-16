@@ -51,12 +51,12 @@ export async function mountPdtRegistration(host,{client,token,origin,context,onC
 }
 /** Stable opening API for parallel Ensamble/Empaque work. Picking uses the same
  * embedded editor inside its existing complete/incomplete delivery dialog. */
-export async function openPdtRegistration({client,token,origin,context,onSaved=()=>{}}){
+export async function openPdtRegistration({client,token,origin,context,onSaved=()=>{},onClosed=()=>{}}){
  if(origin==='PICKING')throw new Error('Picking debe usar el diálogo de entrega para guardar toda la operación de forma atómica.');
  const previous=document.activeElement,m=document.createElement('div');m.className='piece-modal';
  m.innerHTML=`<div class="piece-modal-card repo-work-card" role="dialog" aria-modal="true" aria-labelledby="pdtRegistrationTitle"><div class="piece-modal-head"><div><span class="eyebrow">${esc(origin)} · PDT</span><h2 id="pdtRegistrationTitle">Registrar PDT</h2></div><button data-close aria-label="Cerrar">×</button></div><div class="piece-modal-meta">${esc(context.produccion)} · Reserva ${esc(context.reserva||'según pieza')} · ${esc(context.sistema||'')}</div><div class="repo-work-body" data-editor></div><p role="status" data-result></p><div class="repo-work-footer"><button data-save class="primary" disabled>Guardar PDT</button></div></div>`;
  document.body.appendChild(m);const save=m.querySelector('[data-save]'),result=m.querySelector('[data-result]');let saving=false,key=crypto.randomUUID(),frozen=null,done=false;
- const close=()=>{if(!saving){m.remove();previous?.focus();}};m.querySelector('[data-close]').onclick=close;
+ const close=()=>{if(!saving){m.remove();previous?.focus();onClosed({saved:done});}};m.querySelector('[data-close]').onclick=close;
  m.onkeydown=e=>{if(e.key==='Escape')close();if(e.key==='Tab'){const nodes=[...m.querySelectorAll('button,input,select,textarea')].filter(x=>!x.disabled),first=nodes[0],last=nodes.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}};
  const editor=await mountPdtRegistration(m.querySelector('[data-editor]'),{client,token,origin,context,onChange:valid=>{if(!saving&&!done)save.disabled=!valid;}});
  save.onclick=async()=>{if(saving||done)return;saving=true;save.disabled=true;editor.setDisabled(true);

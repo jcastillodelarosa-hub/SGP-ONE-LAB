@@ -2998,3 +2998,6 @@ table.glass-burro-table th:not(:first-child){width:36%}
 .sgp-accessory-form label{display:grid;gap:5px}
 .sgp-accessory-form select,.sgp-accessory-form textarea,[data-alert-search]{width:100%;min-width:0;box-sizing:border-box;padding:9px;border:1px solid #b7cee9;border-radius:7px;font:inherit}
 .sgp-accessory-form select{max-width:100%}.sgp-accessory-form .sgp-accessory-active{display:flex;align-items:center}.sgp-accessory-form button{justify-self:start;min-height:40px}
+
+/* NC source closure, separate from physical receipt. Existing SGP success tokens. */
+.lp-ncv-finalized{display:inline-flex;align-items:center;max-width:100%;overflow-wrap:anywhere;gap:4px;margin:3px 4px 3px 0;padding:5px 8px;border:1px solid #86efac;border-radius:6px;background:#dcfce7;color:#166534;font-size:12px;font-weight:700}

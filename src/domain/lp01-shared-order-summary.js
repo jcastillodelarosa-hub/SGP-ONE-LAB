@@ -25,5 +25,6 @@ export function sharedOrderSummary(nativeSnapshot,sharedSnapshot){
  // Includes received/closed reports: a detected NC is not new merely because its
  // previously recorded windows are no longer pending physical confirmation.
  const ncRecordedReferences=[...new Set([...sharedSnapshot.reports.filter(r=>r.cause==='NC_V').map(r=>r.nc_reference),...sharedSnapshot.legacyReports.filter(r=>r.causa==='NC_V').map(r=>r.ncReference)].filter(v=>typeof v==='string'&&v.trim()).map(v=>v.trim()))];
- return {...original,stageBalance:sharedSnapshot.stageBalance??null,sharedRevision:sharedSnapshot.revision,reportedQuantities,estimates,ncEstimate:ncReferences.size||null,ncRecordedReferences,aluminumNeedsIndicator:unlinked.length>0,aluminumReported:reportedQuantities.NC_AL.length>0,categories,accessories,hasReports:sharedSnapshot.reports.length>0||sharedSnapshot.legacyReports.length>0,total:null,available:null};
+ const finalizedByReference=new Map([...sharedSnapshot.reports,...sharedSnapshot.legacyReports].map(r=>r.sourceNotice).filter(Boolean).map(n=>[n.reference,n]));
+ return {...original,ncFinalized:[...finalizedByReference.values()],stageBalance:sharedSnapshot.stageBalance??null,sharedRevision:sharedSnapshot.revision,reportedQuantities,estimates,ncEstimate:ncReferences.size||null,ncRecordedReferences,aluminumNeedsIndicator:unlinked.length>0,aluminumReported:reportedQuantities.NC_AL.length>0,categories,accessories,hasReports:sharedSnapshot.reports.length>0||sharedSnapshot.legacyReports.length>0,total:null,available:null};
 }

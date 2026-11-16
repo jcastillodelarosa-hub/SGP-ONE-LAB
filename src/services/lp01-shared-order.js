@@ -18,7 +18,22 @@ export function sharedOrderTransport({client,getToken,key,line,stage}){
    if(!identity(d)||d.contract!=='LP-SHARED-ORDER-1'||!valid(d.revision)||typeof d.canReport!=='boolean'||!Array.isArray(d.reports)||!Array.isArray(d.history)||!Array.isArray(d.legacyReports)||!Array.isArray(d.accessories))throw Error('SHARED_ORDER_CONTRACT_INVALID');
    const ids=new Set();for(const r of d.reports){if(!r.id||ids.has(r.id)||r.key!==key||!['ENSAMBLE','EMPAQUE'].includes(r.origin_stage)||!['NC_AL','NC_V','NOVEDAD','ACCESORIOS'].includes(r.cause)||![r.quantity,r.solved,r.confirmed].every(valid)||r.confirmed>r.solved||r.solved>r.quantity||(r.nc_link&&r.nc_link.source?.reference!==r.nc_reference)||(r.sourceNow&&r.sourceNow.reference!==r.nc_reference))throw Error('SHARED_ORDER_REPORT_INVALID');ids.add(r.id);}
    if(d.history.length!==d.revision||d.history.some((e,i)=>e.revision!==i+1||!ids.has(e.reportId)))throw Error('SHARED_ORDER_HISTORY_INVALID');
-   return packingSharedEvidence(d);
+   let visible=packingSharedEvidence(d);
+   const references=new Set([...visible.reports.filter(r=>r.cause==='NC_V').map(r=>r.nc_reference),...visible.legacyReports.filter(r=>r.causa==='NC_V').map(r=>r.ncReference)].filter(Boolean).map(r=>String(r).trim()));
+   if(references.size){
+    try{
+     const states=await rpc('sgp_lp_shared_nc_states_v1');
+     if(!identity(states)||states.contract!=='NCV-ORDER-STATE-1'||!Array.isArray(states.rows))throw Error('NCV_STATE_CONTRACT_INVALID');
+     const groups=new Map();
+     for(const item of states.rows){
+      if(!item||typeof item.reference!=='string'||!references.has(item.reference))throw Error('NCV_STATE_CONTRACT_INVALID');
+      const group=groups.get(item.reference)||[];group.push(item);groups.set(item.reference,group);
+     }
+     const finalized=new Map([...groups].filter(([,items])=>items.length===1&&items[0].active===true&&['CERRADA','FINALIZADA'].includes(String(items[0].state??'').trim().toUpperCase())).map(([ref,items])=>[ref,items[0]]));
+     visible={...visible,reports:visible.reports.map(r=>({...r,sourceNotice:r.cause==='NC_V'?finalized.get(String(r.nc_reference??'').trim())||null:null})),legacyReports:visible.legacyReports.map(r=>({...r,sourceNotice:r.causa==='NC_V'?finalized.get(String(r.ncReference??'').trim())||null:null}))};
+    }catch(error){if(error.message==='NO_AUTORIZADO')throw error;/* A missing reader never invents closure or removes saved affectations. */}
+   }
+   return visible;
   },
   async command(cmd){
    if(stage==='EMPAQUE'&&cmd?.cause==='TECNO')throw Error('TECNO_SOLO_ENSAMBLE');

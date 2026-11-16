@@ -1,3 +1,4 @@
+import {scopedPdtRegistration} from '../services/lp01-pdt-registration.js';
 import {officialBalance} from '../domain/lp01-operation.js';
 import {sharedOrderSummary} from '../domain/lp01-shared-order-summary.js';
 import {withExportGlassSummary} from '../domain/lp01-export-glass-summary.js';
@@ -17,8 +18,10 @@ export async function mountTrackingAffectations({host,row,target,cause,scope,cli
   if(!['ENSAMBLE','EMPAQUE'].includes(stage))throw Error('Selecciona una etapa válida.');
   const transport=affectationsTransport({client,getToken:()=>alive()?getToken():null,contractVersion:2,context:{key:row.key,line:scope.line,stage,production:row.produccion}});
   transport.scope={key:row.key,line:scope.line,stage};
+  if(scope.line==='PANELES_2')transport.openAluminumRegistration=scopedPdtRegistration({client,getToken:()=>alive()?getToken():null,context:{key:row.key,line:scope.line,stage,production:row.produccion}});
   transport.shared=sharedOrderTransport({client,getToken:()=>alive()?getToken():null,key:row.key,line:scope.line,stage});
   const read=transport.read;let nativeRead=null;transport.read=()=>nativeRead||(nativeRead=read().catch(e=>{nativeRead=null;throw e;}));
+  transport.refreshNative=()=>{nativeRead=null;return transport.read();};
   const sharedRead=transport.shared.read;transport.shared.read=async()=>{const snapshot=await sharedRead();try{const native=await transport.read();if(alive()&&stage===scope.stage){latestSummary=sharedOrderSummary(native,snapshot);publish();}else if(alive()&&originTransport){await originTransport.shared.read();}}catch(e){if(e.message==='NO_AUTORIZADO')throw e;}return {...snapshot,stageBalance:Object.hasOwn(snapshot,'stageBalance')?snapshot.stageBalance:officialBalance(row,stage)};};
   return transport;
  }
