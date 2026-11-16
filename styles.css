@@ -2990,3 +2990,11 @@ table.glass-burro-table th:not(:first-child){width:36%}
 #pickReportPanel #pickReportDeliveryPanel .pick-toolbar{grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
 @media(max-width:720px){#pickReportPanel #pickReportDeliveryPanel .pick-toolbar{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:480px){#pickReportPanel .pick-toolbar>.report-date-label{grid-column:1/-1}}
+
+/* Accessory notices: shared by existing order views. */
+.sgp-accessory-alert{display:flex;flex-wrap:wrap;gap:4px 8px;margin:4px 0;padding:5px 8px;border-left:3px solid #2363a0;background:#edf5ff;color:#163d66;font-size:12px;line-height:1.4;white-space:normal;overflow-wrap:anywhere;max-width:100%;text-align:left}
+.sgp-accessory-alert.unavailable{color:#79500a;background:#fff6df}
+.sgp-accessory-form{display:grid;gap:12px;margin-top:12px;max-width:760px}
+.sgp-accessory-form label{display:grid;gap:5px}
+.sgp-accessory-form select,.sgp-accessory-form textarea,[data-alert-search]{width:100%;min-width:0;box-sizing:border-box;padding:9px;border:1px solid #b7cee9;border-radius:7px;font:inherit}
+.sgp-accessory-form select{max-width:100%}.sgp-accessory-form .sgp-accessory-active{display:flex;align-items:center}.sgp-accessory-form button{justify-self:start;min-height:40px}

@@ -34,6 +34,9 @@ try:
     page=browser.new_page(viewport={'width':width,'height':950 if width>700 else 844});errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
     page.add_init_script("sessionStorage.setItem('sgp_one_session',"+json.dumps(token)+")")
     def intercept(route):
+     # This isolated backend predates the alert migration; original reader ACLs remain in force.
+     if route.request.url.split('/rpc/')[-1]=='sgp_alertas_accesorio_consultar':
+      route.fulfill(status=404,content_type='application/json',body=json.dumps({'code':'PGRST202','message':'QA accessory alert backend not installed'}));return
      name=route.request.url.split('/rpc/')[-1];calls.append(name)
      try:route.fulfill(status=200,content_type='application/json',body=json.dumps(rpc(name,route.request.post_data_json)))
      except Exception as e:
@@ -64,7 +67,7 @@ try:
        drawer.locator('[data-advance-context] summary').click();rect=drawer.locator('[data-tracking-context]').bounding_box();assert rect['x']+rect['width']<=width
       if token=='COORDINADOR':page.screenshot(path='/tmp/sgp-global-'+str(width)+'-'+stage+'.png')
       drawer.locator('[data-live-operate]').click();assert page.locator('[data-op-date]').input_value()=='2026-11-01'
-      page.wait_for_selector('section[data-assembly-detail]');assert 'QA|PANELES_2' in page.locator('section[data-assembly-detail] h3').inner_text()
+      page.wait_for_selector('section[data-assembly-detail]');assert 'QA|PANELES_2' in page.locator('section[data-assembly-detail] > header > h3').inner_text()
       assert page.locator('[data-order-form],[data-validate-save],[data-executed]').count()==0
       if stage=='EMPAQUE':
        assert 'Saldo Empaque' in page.locator('section[data-assembly-detail]').inner_text()

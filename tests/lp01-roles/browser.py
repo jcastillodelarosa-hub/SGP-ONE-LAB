@@ -33,6 +33,9 @@ try:
     setup(db)
     db.sql((ROOT/'docs/sql-proposals/lp01-seguimiento/INSTALL_REVIEW.sql').read_text())
     def intercept(route):
+     # This isolated backend predates the alert migration; original reader ACLs remain in force.
+     if route.request.url.split('/rpc/')[-1]=='sgp_alertas_accesorio_consultar':
+      route.fulfill(status=404,content_type='application/json',body=json.dumps({'code':'PGRST202','message':'QA accessory alert backend not installed'}));return
      try:answer=rpc(db,route.request.url.split('/rpc/')[-1],json.loads(route.request.post_data or '{}'));route.fulfill(status=200,content_type='application/json',body=json.dumps(answer))
      except Exception as e:route.fulfill(status=400,content_type='application/json',body=json.dumps({'code':'QA_SQL','message':str(e)}))
     def page_for(token):

@@ -1,3 +1,4 @@
+import {accessoryAlertsMarkup} from './accessory-alerts.js';
 import {packingAssemblyState} from '../domain/lp01-assembly-sheet.js';
 import {assemblySheetRows,filterAssemblySheetRows,ASSEMBLY_COLUMNS,assemblyColumnValue,assemblyValueKey} from '../domain/lp01-assembly-sheet.js';
 import {retainOrderSaleRows} from './lp01-order-sale-rows.js';
@@ -29,7 +30,7 @@ function rowMarkup(row,{stage,state,onDetail,onGlass,onAvailable,onAffectations,
  const available=orderSaleProvider?'<div data-sale-order-key="'+esc(row.key)+'"></div>':onAvailable?'<button type="button" class="lp-assembly-link" data-assembly-available="'+esc(row.key)+'" aria-label="Consultar Disponible de '+esc(row.produccion)+'">Por consultar</button>':'<span class="lp-assembly-pending">Por consultar</span>';
  return '<tr data-assembly-key="'+esc(row.key)+'" data-assembly-state="'+row.state+'"'+(selected?' class="is-selected"':'')+'>'+
   '<td data-label="Semana" class="lp-assembly-week">'+value(row.week?.label)+'</td>'+
-  '<td data-label="Producción" class="lp-assembly-identity"><div class="lp-assembly-identity-line"><span class="lp-assembly-badge"'+(row.reviewReason?' title="'+esc(row.reviewReason)+'"':'')+'>'+stateLabels[row.state]+'</span><button type="button" data-assembly-detail="'+esc(row.key)+'" class="lp-assembly-name"'+(!onDetail?' disabled':'')+' aria-label="Ver detalle de '+esc(row.produccion)+'"><b>'+esc(row.produccion)+'</b></button></div>'+(secondary?'<small class="lp-assembly-context'+(row.scheduled?' is-scheduled':'')+'">'+esc(secondary)+'</small>':'')+'</td>'+
+  '<td data-label="Producción" class="lp-assembly-identity"><div class="lp-assembly-identity-line"><span class="lp-assembly-badge"'+(row.reviewReason?' title="'+esc(row.reviewReason)+'"':'')+'>'+stateLabels[row.state]+'</span><button type="button" data-assembly-detail="'+esc(row.key)+'" class="lp-assembly-name"'+(!onDetail?' disabled':'')+' aria-label="Ver detalle de '+esc(row.produccion)+'"><b>'+esc(row.produccion)+'</b></button></div>'+accessoryAlertsMarkup(row)+(secondary?'<small class="lp-assembly-context'+(row.scheduled?' is-scheduled':'')+'">'+esc(secondary)+'</small>':'')+'</td>'+
   '<td data-label="Reserva" class="lp-assembly-reservation">'+value(text(row.oficial.reserva_al)||null)+'</td>'+
   '<td data-label="Prioridad" class="lp-assembly-reservation-part">'+value(text(row.oficial.prioridad_reserva)||null)+'</td>'+
   '<td data-label="Sistema" class="lp-assembly-system">'+value(text(row.oficial.sistema)||null)+'</td>'+

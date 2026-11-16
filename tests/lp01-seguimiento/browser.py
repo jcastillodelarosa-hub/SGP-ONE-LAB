@@ -19,7 +19,7 @@ with sync_playwright() as p:
    const products=[{key_produccion:'QA1|PANELES_2',produccion:'TORRE NORTE',id_linea:'PANELES_2',sistema:'ES7100',reserva_al:'R1,R2',saldos_inicializados:true,ensamblado:100,empacado:40,saldo_ensamble:188,saldo_empaque:248,estado_mecanizado:'MECANIZADO',observacion_mecanizado:'P1 procesada · P2 pendiente',pendientes_mecanizado:'PDT PANEL en validación'},
     {key_produccion:'QA2|PANELES_2',produccion:'TORRE NORTE',id_linea:'PANELES_2',sistema:'ES7100',reserva_al:'R3',saldos_inicializados:false,saldo_ensamble:null,saldo_empaque:null,estado_mecanizado:'CORTE'}];
    window.calls=[];window.failRead=false;
-   window.SGPPlannerBridge.getToken=()=> 'qa-synthetic';window.SGPPlannerBridge.getClient=async()=>({rpc:async(name,args)=>{
+   window.SGPPlannerBridge.getToken=()=> 'qa-synthetic';window.SGPPlannerBridge.getClient=async()=>({rpc:async(name,args)=>{if(name==='sgp_alertas_accesorio_consultar')return {error:{code:'PGRST202',message:'QA accessory alert backend not installed'}};
     window.calls.push({name,args});if(name==='sgp_lp_operacion_consultar')return {data:null,error:{code:'PGRST202',message:'QA contrato no instalado'}};if(!['sgp_linea_plan_consultar','sgp_consultar_ensamble'].includes(name))throw Error('Unexpected RPC: '+name);
     if(window.failRead)return {error:{message:'QA no disponible'},data:null};
     return {error:null,data:name==='sgp_consultar_ensamble'?{filas:products}:[

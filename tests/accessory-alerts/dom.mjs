@@ -1,0 +1,32 @@
+import {JSDOM} from 'jsdom';
+import {readFile,writeFile} from 'node:fs/promises';import assert from 'node:assert/strict';import vm from 'node:vm';import {pathToFileURL} from 'node:url';
+import {mountAccessoryAlertConfig,accessoryAlertsMarkup} from '../../src/modules/accessory-alerts.js';
+import {assemblySheetRows} from '../../src/domain/lp01-assembly-sheet.js';import {assemblySheetMarkup} from '../../src/modules/lp01-assembly-sheet.js';
+import {globalTrackingData} from '../../src/domain/lp01-tracking-global.js';import {renderTracking} from '../../src/modules/lp01-tracking.js';
+const dom=new JSDOM('<body><section id="config"></section><section id="assembly"></section><section id="tracking"></section><select id="assemblyLine"><option>PANELES_2</option></select><button id="productionPlannerTab">Planner</button><div id="productionPlannerPanel"></div></body>',{url:'http://localhost/',pretendToBeVisual:true});
+for(const k of ['Option','window','document','HTMLElement','HTMLInputElement','Node','MutationObserver','CustomEvent','Event','localStorage','sessionStorage','getComputedStyle'])globalThis[k]=dom.window[k];
+globalThis.CSS={escape:s=>s};window.scrollTo=()=>{};HTMLElement.prototype.scrollIntoView=()=>{};globalThis.requestAnimationFrame=fn=>setTimeout(fn,0);globalThis.cancelAnimationFrame=clearTimeout;
+let token='fixture',admin=true,checks=0;const rules=[{codigo_sap:'A',descripcion:'Synthetic accessory',revision:0,activa:false,mensaje:null},{codigo_sap:'B',descripcion:'Synthetic second accessory',revision:1,activa:true,mensaje:'Second notice'}];const alerts=()=>rules.filter(r=>r.activa).map(r=>({codigo:r.codigo_sap,mensaje:r.mensaje}));
+const context={line:'PANELES_2',stage:'ENSAMBLE',date:'2026-11-14',shift:1};const official=()=>({key_produccion:'QA|PANELES_2',id_linea:'PANELES_2',produccion:'QA order',sistema:'ES-QA',reserva_al:'QA',cantidad:20,saldo_ensamble:10,saldos_inicializados:true,presente_ultimo_export:true,anio:2026,semana_base:46,accessory_alerts:alerts()});
+const assignments=()=>[{...official(),id:'qa-plan',fecha:new Date().toLocaleDateString('en-CA'),turno:1,cantidad:20,prioridad:1,estado:'PROGRAMADA',ejecutado:0}];
+const calls=[];const client={rpc:async(name,args)=>{calls.push(name);if(name==='sgp_alertas_accesorio_catalogo')return {data:structuredClone(rules)};if(name==='sgp_alertas_accesorio_guardar'){if(!admin)return {error:{message:'PERMISO_DENEGADO'}};const row=rules.find(r=>r.codigo_sap===args.p_codigo);if(row.revision!==args.p_revision)return {error:{message:'REGLA_MODIFICADA_RECARGAR'}};Object.assign(row,{mensaje:args.p_mensaje,activa:args.p_activa,revision:row.revision+1});return {data:structuredClone(row)}};if(name==='sgp_alertas_accesorio_consultar')return {data:assignments()};return {data:[]};}};
+const config=document.querySelector('#config');const mount=()=>mountAccessoryAlertConfig({host:config,client,token,getToken:()=>token,canEdit:()=>admin});await mount();
+const submit=async()=>config.querySelector('form').onsubmit({preventDefault(){}});
+config.querySelector('textarea').value='EL-400 CON SILICONA';await submit();assert.equal(rules[0].revision,1);checks++;
+config.querySelector('textarea').value='Edited <img src=x onerror=alert(1)>';await submit();assert.equal(rules[0].revision,2);checks++;
+function paint(){const p={key:'QA|PANELES_2',line:context.line,stage:context.stage,oficial:official(),assignments:[],operations:[],history:[],classification:'ABIERTA'};document.querySelector('#assembly').innerHTML=assemblySheetMarkup(assemblySheetRows({contract:'LP-OPERACION-1',orders:[],catalog:{contract:'LP-HOJA-1',...context,productions:[p]}},context));renderTracking({host:document.querySelector('#tracking'),data:globalTrackingData({contract:'LP-SEGUIMIENTO-1',role:'ADMINISTRADOR',line:context.line,stage:context.stage,productions:[p]},context),context,state:{}});}
+paint();for(const id of ['assembly','tracking']){const host=document.getElementById(id);assert.equal(host.querySelectorAll('.sgp-accessory-alert').length,2);assert.equal(host.querySelectorAll('img').length,0);assert.match(host.textContent,/Edited <img/);checks++;}
+window.SGPAccessoryAlerts=accessoryAlertsMarkup;window.SGPPlannerBridge={getRows:()=>[official()],getToken:()=>token,getClient:async()=>client,getRole:()=>admin?'ADMINISTRADOR':'CONSULTA'};
+globalThis.qaImport=path=>import(new URL(path,pathToFileURL(process.cwd()+'/')).href);
+vm.runInThisContext((await readFile('planner-operations-v326.js','utf8')).replaceAll('import(', 'globalThis.qaImport('));await window.SGPLinePlanner.reloadAssignments();
+for(const view of ['calendar','table','kanban','pending','tracking']){const button=document.querySelector('.sgp-line-view-tabs [data-view="'+view+'"]');if(!button)continue;button.click();if(view==='kanban'){const day=document.querySelector('#sgpKanbanDay');day.value=assignments()[0].fecha;day.onchange();}assert.ok(document.querySelectorAll('.sgp-line-view-content .sgp-accessory-alert').length>=2,view);checks++;}
+config.querySelector('[data-alert-active]').checked=false;await submit();paint();assert.equal(document.querySelectorAll('#assembly .sgp-accessory-alert').length,1);checks++;
+await mount();assert.equal(config.querySelector('[data-alert-active]').checked,false);checks++;
+// No active rules is an available, empty result in all three views.
+for(const rule of rules)rule.activa=false;
+paint();await window.SGPLinePlanner.reloadAssignments();
+for(const id of ['assembly','tracking','productionPlannerPanel']){const host=document.getElementById(id);assert.equal(host.querySelectorAll('.sgp-accessory-alert').length,0);assert.doesNotMatch(host.textContent,/no disponibles/);checks++;}
+admin=false;await mount();assert.equal(config.querySelector('form'),null);checks++;
+// A delayed catalog from an old session must not render its controls.
+admin=true;let resolve;const stale=mountAccessoryAlertConfig({host:config,client:{rpc:()=>new Promise(r=>resolve=r)},token,getToken:()=>token,canEdit:()=>admin});token='new';resolve({data:rules});await stale;assert.equal(config.querySelector('form'),null);checks++;
+const result={pass:true,checks,environment:'JSDOM 26.1.0; actual configuration, assembly, tracking and planner renderers with synthetic RPCs',visual:'Not a pixel/browser/mobile test. Chromium launch blocked by environment socket policy.'};console.log(result);await writeFile('tests/accessory-alerts/dom-result.json',JSON.stringify(result,null,2)+'\n');dom.window.close();

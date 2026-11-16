@@ -30,6 +30,9 @@ try:
      notes={};note_commands=[];note_receipts={}
      page.route('**/*',lambda r:r.continue_() if r.request.url.startswith(origin) else r.abort())
      def rpc(route):
+      # This isolated backend predates the alert migration; original reader ACLs remain in force.
+      if route.request.url.split('/rpc/')[-1]=='sgp_alertas_accesorio_consultar':
+       route.fulfill(status=404,content_type='application/json',body=json.dumps({'code':'PGRST202','message':'QA accessory alert backend not installed'}));return
       name=route.request.url.split('/rpc/')[-1];a=route.request.post_data_json
       if name=='sgp_lp_afectaciones_consultar_v2' and holding[0]:held.append(route);return
       if name=='sgp_lp_operacion_consultar':operation_reads[0]+=1
@@ -123,7 +126,11 @@ try:
      if width==1440:
       # A native response read before revocation must not resurrect a cleared view.
       held.clear();holding[0]=True
-      page.locator('[data-assembly-back]').click();page.clock.fast_forward(20001)
+      # The alert compatibility facade adds a round trip. Await the completed
+      # native read before advancing another poll; do not coalesce two ticks.
+      with page.expect_response(lambda response: response.url.endswith('/sgp_lp_operacion_consultar') and response.status==200) as refreshed:
+       page.locator('[data-assembly-back]').click();page.clock.fast_forward(20001)
+      refreshed.value.finished()
       for _ in range(50):
        if held:break
        page.wait_for_timeout(100)
@@ -132,7 +139,7 @@ try:
       for _ in range(50):
        if held_native:break
        page.wait_for_timeout(100)
-      assert len(held_native)==1
+      assert len(held_native)==1, {'heldNative':len(held_native),'nativeReads':operation_reads[0]}
       db.sql("UPDATE public.sgp_usuario_accesos SET permitido=false WHERE id_usuario=(SELECT id_usuario FROM public.sgp_usuarios WHERE usuario='ll')")
       holding[0]=False
       for route in held:rpc(route)

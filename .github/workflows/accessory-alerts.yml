@@ -1,0 +1,41 @@
+name: Accessory alerts (isolated)
+on:
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'planner-operations-v326.js'
+      - 'planner-readonly-v171.js'
+      - 'supabase/migrations/*accessory_alert_rules.sql'
+      - 'tests/accessory-alerts/**'
+      - 'tests/accessory-alerts.test.mjs'
+      - '.github/workflows/accessory-alerts.yml'
+permissions:
+  contents: read
+jobs:
+  synthetic:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --prefix tests/accessory-alerts --ignore-scripts --no-audit --no-fund
+      - name: Exact matching, ACL, config persistence and three view renderers
+        run: |
+          node --test tests/accessory-alerts.test.mjs
+          node tests/accessory-alerts/sql.mjs
+          node tests/accessory-alerts/dom.mjs
+      - name: Install matching test browser in isolated runner
+        run: node tests/accessory-alerts/node_modules/playwright/cli.js install --with-deps chromium
+      - name: Synthetic create, edit, disable and no rules at 1440 and 390 pixels
+        run: node tests/accessory-alerts/browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: accessory-alerts-synthetic-evidence
+          path: |
+            tests/accessory-alerts/*-result.json
+            tests/accessory-alerts/evidence/

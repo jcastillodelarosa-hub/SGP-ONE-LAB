@@ -12,7 +12,7 @@ const {mountOperation}=await import('../../src/modules/lp01-operation.js');
 const tracking=document.querySelector('#tracking'),operation=document.querySelector('#operation');let token='authenticated-admin',calls=0;
 // Authentication completed before lazy module mounted: the old event has already gone.
 document.dispatchEvent(new CustomEvent('sgp:lp-role',{detail:'ADMINISTRADOR'}));
-const api=mountOperation({tracking,operation,bridge:{getToken:()=>token,getRole:()=>token==='authenticated-admin'?'ADMINISTRADOR':null,getClient:async()=>({rpc:async name=>{if(name==='sgp_lp_seguimiento_consultar'){calls++;return {error:{code:'QA_END',message:'Reached protected RPC'}};}return {error:{message:'Not used'}};}})}});
+const api=mountOperation({tracking,operation,bridge:{getToken:()=>token,getRole:()=>token==='authenticated-admin'?'ADMINISTRADOR':null,getClient:async()=>({rpc:async name=>{if(name==='sgp_alertas_accesorio_consultar')return {error:{code:'PGRST202',message:'QA accessory alert backend not installed'}};if(name==='sgp_lp_seguimiento_consultar'){calls++;return {error:{code:'QA_END',message:'Reached protected RPC'}};}return {error:{message:'Not used'}};}})}});
 try{
  document.dispatchEvent(new CustomEvent('sgp:production-panel',{detail:'seguimiento'}));await new Promise(r=>setTimeout(r,15));
  assert.equal(calls,1,'late mount must recover already-validated presentation role');assert.match(tracking.querySelector('[data-op-status]').textContent,/Reached protected RPC/);
