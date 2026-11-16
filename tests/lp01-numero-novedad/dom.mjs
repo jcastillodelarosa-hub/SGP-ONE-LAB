@@ -1,0 +1,18 @@
+const {JSDOM}=await import(process.env.JSDOM_MODULE||'jsdom');
+import assert from 'node:assert/strict';
+import {mountSharedAffectationsPanel} from '../../src/modules/lp01-shared-affectations-panel.js';
+const dom=new JSDOM('<main></main>');globalThis.document=dom.window.document;globalThis.window=dom.window;
+let d={revision:0,canReport:true,stageBalance:20,reports:[],history:[],legacyReports:[]},calls=[],fail=false;
+const transport={scope:{stage:'ENSAMBLE'},read:async()=>({reports:[],events:[]}),shared:{read:async()=>structuredClone(d),command:async c=>{calls.push(c);if(fail)throw Error('NETWORK');if(c.action==='CREATE'){const r={id:c.id,cause:c.cause,quantity:c.quantity,solved:0,confirmed:0,observation:c.observation,numero_novedad:c.noveltyReference,origin_stage:'ENSAMBLE',actor:'QA'};d.reports.push(r);d.history.push({after:r,action:c.action});}d.revision++;return {};}}};
+const host=document.querySelector('main');let cleanup=await mountSharedAffectationsPanel(host,transport,{fixedCause:'NOVEDAD'});
+const edit=(name,value)=>{const el=host.querySelector(`[name=${name}]`);el.value=value;el.dispatchEvent(new dom.window.Event('input',{bubbles:true}));};
+edit('noveltyReference','0007-A');edit('quantity','2');edit('observation','Prueba');
+await host.querySelector('form').onsubmit({preventDefault(){}});
+assert.equal(calls[0].noveltyReference,'0007-A');assert.match(host.querySelector('[data-shared-list]').textContent,/0007-A/);assert.match(host.querySelector('[data-shared-history]').textContent,/0007-A/);
+edit('action','CORRECT');assert.equal(host.querySelector('[name=noveltyReference]').value,'0007-A');
+edit('action','SOLVE');assert.equal(host.querySelector('[name=noveltyReference]').closest('label').hidden,true);assert.equal(host.querySelector('[name=noveltyReference]').disabled,true);
+edit('quantity','1');edit('observation','Solución');await host.querySelector('form').onsubmit({preventDefault(){}});assert.equal(calls.at(-1).noveltyReference,undefined);
+edit('noveltyReference','<img src=x>');edit('quantity','1');edit('observation','Escape');await host.querySelector('form').onsubmit({preventDefault(){}});assert.equal(host.querySelector('[data-shared-list] img'),null);assert.match(host.querySelector('[data-shared-list]').textContent,/<img src=x>/);
+edit('noveltyReference','0009');edit('quantity','1');edit('observation','Retry');fail=true;await host.querySelector('form').onsubmit({preventDefault(){}});const pending=calls.at(-1);assert.equal(host.querySelector('[name=noveltyReference]').disabled,true);fail=false;await host.querySelector('form').onsubmit({preventDefault(){}});assert.deepEqual(calls.at(-1),pending);
+cleanup();cleanup=await mountSharedAffectationsPanel(host,transport,{fixedCause:'NC_V'});assert.equal(host.querySelector('[name=noveltyReference]'),null);assert.ok(host.querySelector('[name=ncReference]'));cleanup();
+console.log('PASS: NOVEDAD input, list/history persistence, correction preload, solve omission, escaped output, uncertain retry identity and NC separation. DOM simulation, not browser/hosted verification.');

@@ -1,0 +1,36 @@
+name: PDT direct table design
+on:
+  pull_request:
+    paths:
+      - 'styles.css'
+      - 'src/modules/pdt-registration-form.js'
+      - 'tests/pdt-table-design/**'
+      - 'src/modules/pdt-manual-form.js'
+      - '.github/workflows/pdt-table-design.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  visual:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test tests/pdt-registration.test.mjs tests/pdt-manual.test.mjs
+      - run: python3 -m pip install playwright==1.56.0
+      - name: Desktop, tablet and mobile synthetic PDT flow
+        env:
+          RECEPTION_CHROMIUM: /usr/bin/google-chrome
+          SGP_VISUAL_OUTPUT: artifacts/pdt-table-design
+        run: python3 tests/pdt-table-design/browser.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pdt-table-design-screenshots
+          path: artifacts/pdt-table-design
+          if-no-files-found: warn

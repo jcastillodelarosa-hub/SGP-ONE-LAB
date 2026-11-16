@@ -3054,3 +3054,23 @@ table.glass-burro-table th:not(:first-child){width:36%}
 #pickAuditModal .pick-audit-area-status{padding:9px 12px;border:1px solid;border-left-width:4px;border-radius:8px;line-height:1.5;overflow-wrap:anywhere}
 #pickAuditModal [data-area-state="pending"]{color:#9a3412;background:#fff4e6;border-color:#c2410c}
 #pickAuditModal [data-area-state="audited"]{color:#166534;background:#ecfdf3;border-color:#15803d}
+
+/* Approved PDT option 1: direct table, existing identities and controls retained. */
+:is(.pdt-registration-modal,.pdt-manual-modal) .piece-modal-head{
+ background:#fff;color:var(--sgp-window-title);border-top:5px solid #195393;border-bottom:1px solid var(--sgp-window-line);
+}
+:is(.pdt-registration-modal,.pdt-manual-modal) .piece-modal-head h2{color:var(--sgp-window-title);font-size:24px}
+:is(.pdt-registration-modal,.pdt-manual-modal) .piece-modal-head button{color:var(--sgp-window-title);background:#f3f6f9}
+:is(.pdt-registration,.pdt-manual-body) fieldset{margin:16px 0;padding:16px;border:1px solid var(--sgp-window-line);border-radius:9px;min-width:0}
+:is(.pdt-registration,.pdt-manual-body) legend{padding:0 6px;font-weight:700;color:var(--sgp-window-title)}
+:is(.pdt-registration,.pdt-manual-body) .sgp-window-section-title{margin:10px 0 14px}
+:is(.pdt-registration,.pdt-manual-body) [data-preview]{font-size:13px;color:var(--sgp-window-help);margin:8px 0}
+:is(.pdt-registration,.pdt-manual-body) .pdt-manual-table tr[data-selected=true] td{background:#edf3fb;color:#173458;font-weight:600}
+:is(.pdt-registration,.pdt-manual-body) .pdt-manual-table input[type=radio]{width:20px;height:20px}
+:is(.pdt-registration,.pdt-manual-body) .pdt-manual-table th{font-size:12px;color:#52657c}
+.pdt-help{margin:8px 0 14px;color:var(--sgp-window-help);font-size:13px}
+.pdt-help summary{cursor:pointer;font-weight:600}
+@media(max-width:600px){
+ :is(.pdt-registration,.pdt-manual-body) fieldset{padding:12px}
+ :is(.pdt-registration-modal,.pdt-manual-modal) .piece-modal-head h2{font-size:21px}
+}

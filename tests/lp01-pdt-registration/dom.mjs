@@ -23,7 +23,7 @@ let calls=[],closed;
 const source={key_produccion:'ORDER',produccion:'Order',reserva:'R',reserva_principal:'R',id_pieza:'PIECE',codigo_sap:'PROFILE',fabricacion:'FAB',marca:'M',longitud:50,acabado:'WHITE',cantidad_referencia:10,tipo_pieza:'PANEL',id_linea:'PANELES_2'};
 const modal=await openPdtRegistration({origin:'ENSAMBLE',token:'token',context:{key_produccion:'ORDER',produccion:'Order'},client:{rpc:async(name,args)=>{calls.push([name,args]);return name==='sgp_pdt_registro_fuentes_v4'?{data:{ok:true,contract_version:4,fuentes:[source]}}:{data:{ok:true}};}},onClosed:r=>closed=r});
 const ref=modal.querySelector('[data-ref]');ref.value='PROFILE';ref.onchange({target:ref});
-const pick=modal.querySelector('[data-source]');pick.value=JSON.stringify(['ORDER','R','PIECE']);pick.onchange({target:pick});
+const pick=modal.querySelector('[data-source-radio]');assert.equal(pick.dataset.sourceRadio,JSON.stringify(['ORDER','R','PIECE']));pick.onchange();assert.equal(pick.closest('tr').dataset.selected,'true');
 const nc=modal.querySelector('[data-nc]');nc.value='NC123';nc.oninput({target:nc});
 const save=modal.querySelector('[data-save]');assert.equal(save.disabled,false);await save.onclick();await save.onclick();assert.equal(calls.filter(([n])=>n==='sgp_pdt_registrar_v4').length,1);
 const args=calls[1][1];assert.equal(args.p_piezas[0].nc,'NC123');assert.equal(args.p_piezas[0].id_pieza,'PIECE');assert.equal(args.p_origen,'ENSAMBLE');
