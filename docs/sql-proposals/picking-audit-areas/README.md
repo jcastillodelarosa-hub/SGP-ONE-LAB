@@ -17,10 +17,10 @@ Trigger bloquea cierre anticipado desde otras rutas legacy. Writer legacy preser
 
 ## Instalación coordinada
 
-1. Confirmar main/versión/CI del frontend; no aplicar con días/horas de antelación porque impide cierre antiguo de Paneles.
+1. Publicar y verificar primero frontend compatible. Sólo PGRST202 que identifica la RPC de áreas ausente permite contrato legacy; permisos/red no activan fallback. Tras instalar, nuevas aperturas usan áreas y el guard rechaza sesiones legacy aún abiertas con instrucción de reabrir. No aplicar antes del frontend porque impide cierre antiguo de Paneles.
 2. Respaldo restaurable vigente de tablas afectadas y definiciones; refrescar tras regularización administrativa, no usar snapshot anterior.
 3. `install-review.sql` generado por `build.mjs`, una transacción, hashes exactos de writer/lector anteriores, sin reintentos inciertos.
-4. Verificar catálogo, ACL y rechazo de token inválido. Publicar frontend autorizado y verificar semana 47. No prueba sintética constituye recepción real.
+4. Verificar catálogo, ACL y rechazo de token inválido. Verificar frontend ya publicado y semana 47. No prueba sintética constituye recepción real.
 5. `rollback-unused.sql` sólo si no hay lotes/revisiones/cambios config, con huellas de funciones. Tras uso requiere corrección hacia adelante conservando todo el ledger. No CASCADE ni borrado de auditorías.
 
 ## Evidencia y límites

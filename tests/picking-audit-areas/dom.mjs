@@ -44,3 +44,19 @@ await mountPickingAuditConfig({host,canEdit:()=>true,rpc:async(name,args)=>{if(n
 const configLine=host.querySelector('select');configLine.value='FRAMES_2';configLine.onchange();assert.match(host.querySelector('textarea').value,/GENERAL/);await host.querySelector('button').onclick();assert.equal(configCalls,1);
 await mountPickingAuditConfig({host,canEdit:()=>false,rpc:()=>{throw Error('not allowed')}});assert.match(host.textContent,/Solo un administrador/);
 console.log('PASS config: default other line single area, save and role guard');
+
+let activated=false,legacySaves=0,legacyReads=0;
+const rolloutRpc=async(name,args)=>{
+ if(name==='sgp_picking_auditoria_areas_contexto'&&!activated)throw Object.assign(Error('Could not find the function public.sgp_picking_auditoria_areas_contexto in schema cache'),{code:'PGRST202'});
+ if(name==='sgp_picking_auditoria_contexto'){legacyReads++;return {...snapshot};}
+ if(name==='sgp_picking_auditoria_guardar'){if(activated)throw Error('AUDITORIA_POR_AREAS_REQUERIDA');legacySaves++;assert.equal(args.p_area,undefined);assert.equal(args.p_decisiones.length,1);return {ok:true};}
+ return rpc(name,args);
+};
+await openAudit({target,rpc:rolloutRpc,onSaved:async()=>{}});
+assert.match(document.body.textContent,/aún no está activada/);$('[data-area]').value='GENERAL';$('[data-result]').value='CON_FALTANTES';$('[data-shift]').value='TURNO 1';$('[data-action]').value='ACEPTAR';$('[data-action]').onchange();assert.equal($('[data-field="nc"]'),null);await $('[data-save]').onclick();assert.equal(legacySaves,1);
+await openAudit({target,rpc:rolloutRpc,onSaved:async()=>{}});$('[data-area]').value='GENERAL';$('[data-result]').value='CON_FALTANTES';$('[data-shift]').value='TURNO 1';$('[data-action]').value='ACEPTAR';$('[data-action]').onchange();assert.equal($('[data-field="nc"]'),null);activated=true;await $('[data-save]').onclick();assert.match($('[data-error]').textContent,/ya está activa/);assert.equal(legacySaves,1);$('[data-close]').onclick();
+await openAudit({target,rpc:rolloutRpc,onSaved:async()=>{}});assert.equal($('[data-area]').options.length,3);assert.equal(legacyReads,2);$('[data-close]').onclick();
+for(const failure of [Object.assign(Error('permission denied'),{code:'42501'}),Object.assign(Error('could not find OTHER RPC'),{code:'PGRST202'}),Error('network offline')]){
+ await openAudit({target,rpc:async(name,args)=>{if(name==='sgp_picking_auditoria_areas_contexto')throw failure;throw Error('UNEXPECTED FALLBACK');},onSaved:()=>{}});assert.match(document.body.textContent,/Auditoría no disponible/);assert.ok(!document.body.textContent.includes('UNEXPECTED FALLBACK'));$('[data-close]').onclick();
+}
+console.log('PASS staged rollout: strict absent-RPC only, legacy save, activated stale modal blocked, reopen new contract, permissions/network never fallback');
