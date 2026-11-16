@@ -20,7 +20,7 @@ import {programmingPartState,programmingPartsPlan,validateProgrammingDestination
 import {saveProgrammingParts} from './src/services/programming-part-selection.js';
 import {coverageAmount,partDeliveryStatus} from './src/domain/mecanizado-partes.js';
 import {mountPdtRegistration,openPdtRegistration} from './src/modules/pdt-registration-form.js';
-import {openManualPdt} from './src/modules/pdt-manual-form.js?v=368-multi-nc';
+import {openManualPdt} from './src/modules/pdt-manual-form.js?v=picking-create';
 import {saveRegistration,registrationMetadata} from './src/services/pdt-registration.js';
 import {filterPdtRegistrations,ncAssignment,pdtReportCsv} from './src/domain/pdt-registration.js';
 import {basePhysicalProgress} from './src/domain/mecanizado-base-progress.js';
@@ -1793,8 +1793,8 @@ repoBindTabs();
 document.querySelector('[data-view="pendientes-aluminio"]')?.addEventListener('click',loadRepoPending);
 document.querySelector('#repoRefresh')?.addEventListener('click',loadRepoPending);
 document.querySelector('#repoNewManual')?.addEventListener('click',async()=>{
- if(!['ADMINISTRADOR','COORDINADOR','LIDER LINEA'].includes(repoRole())){alert('El registro manual PDT requiere Coordinador, Administrador o Líder de Línea.');return;}
- try{await openManualPdt({client:await getSupabaseClient(),token:getAppToken(),onSaved:loadRepoPending});}
+ if(!['ADMINISTRADOR','COORDINADOR','LIDER LINEA','PICKING'].includes(repoRole())){alert('El registro manual PDT requiere Picking, Coordinador, Administrador o Líder de Línea.');return;}
+ try{await openManualPdt({client:await getSupabaseClient(),token:getAppToken(),role:repoRole(),onSaved:loadRepoPending});}
  catch(error){alert('No fue posible abrir el registro PDT: '+error.message);}
 });
 document.querySelector('#repoSearch')?.addEventListener('input',renderRepoPending);
