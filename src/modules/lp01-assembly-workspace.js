@@ -27,14 +27,16 @@ export function mountAssemblyWorkspace({host,bridge,isCurrent,onClose,onReports,
  const noteProvider=key=>{const result=orderDetailsTransport({key,line:context.line,stage:context.stage,getToken:()=>alive()&&rows.some(r=>r.key===key)?token:null,client:{rpc:async(name,args)=>(await bridge.getClient()).rpc(name,args)}});result.onDetails=value=>{rememberDetails(key,value);paintNote(key);};return result;};
  const transport=key=>orderSaleTransport({key,stage:context.stage,getToken:()=>alive()&&rows.some(r=>r.key===key)?token:null,client:{rpc:async(name,args)=>(await bridge.getClient()).rpc(name,args)}});
  function disposeDetail(){detailDispose?.();saleDispose?.();detailDispose=null;saleDispose=null;}
+ // The editor distinguishes reads from unacknowledged writes. Keep the conservative
+ // disabled-control fallback for older/unmarked editors. Dirty drafts still block.
  function canLeave(){
-  const rowPending=[...host.querySelectorAll('[data-sale-retry],[data-incorporation-retry]')].some(button=>!button.hidden)||[...host.querySelectorAll('[data-order-note-save]')].some(button=>button.textContent.includes('Reintentar')||(button.disabled&&button.parentElement?.querySelector('[data-order-note-refresh]')?.disabled));
+  const rowPending=[...host.querySelectorAll('[data-sale-retry],[data-incorporation-retry]')].some(button=>!button.hidden)||[...host.querySelectorAll('[data-order-note-save]')].some(button=>button.textContent.includes('Reintentar')||(button.dataset.orderNotePending!=='false'&&button.disabled&&button.parentElement?.querySelector('[data-order-note-refresh]')?.disabled));
   const rowDirty=[...host.querySelectorAll('[data-order-note-discard]')].some(button=>!button.hidden);
   const pane=host.querySelector('section[data-assembly-detail]');
   if(!pane){if(!rowPending&&!rowDirty)return true;let notice=host.querySelector('[data-assembly-leave-status]');if(!notice){notice=document.createElement('p');notice.dataset.assemblyLeaveStatus='';notice.setAttribute('role','status');host.prepend(notice);}notice.textContent=rowPending?'Resuelve el guardado pendiente de Disponible u observación antes de salir de la hoja.':'Guarda o descarta el borrador de observación antes de salir de la hoja.';return false;}
   const noteSave=pane.querySelector('[data-order-note-save]'),noteDiscard=pane.querySelector('[data-order-note-discard]'),noteRefresh=pane.querySelector('[data-order-note-refresh]');
   const sharedForms=[...pane.querySelectorAll('[data-shared-form]')];
-  const pendingNote=noteSave?.textContent.includes('Reintentar')||(noteSave?.disabled&&noteRefresh?.disabled);
+  const pendingNote=noteSave?.textContent.includes('Reintentar')||(noteSave?.dataset.orderNotePending!=='false'&&noteSave?.disabled&&noteRefresh?.disabled);
   const pendingShared=sharedForms.some(form=>form.parentElement?.querySelector('[data-shared-discard]')?.disabled&&form.querySelector('input:disabled,textarea:disabled'));
   const dirtyNote=Boolean(noteDiscard&&!noteDiscard.hidden);
   const dirtyShared=sharedForms.some(form=>[...form.querySelectorAll('textarea,input[name=quantity],input[name=ncReference]')].some(el=>el.value?.trim()));

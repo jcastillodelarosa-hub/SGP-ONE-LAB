@@ -8,6 +8,8 @@
     "Quiet refresh retains table host, local search and visible group filter",
     "A pending row-level Disponible command cannot be discarded by opening a detail",
     "Compact row notes protect dirty drafts and in-flight saves before detail, close or reports navigation",
+    "Delayed initial note read without a draft or command does not block sheet navigation",
+    "Delayed clean note read does not block return from detail",
     "B12 preserves its editor node/draft during quiet Export balance refresh",
     "Uncertain note command blocks leaving the detail and retains the original editor",
     "Every mounted affectation panel, including a hidden nonfirst panel, guards drafts and uncertain saves",
@@ -15,7 +17,9 @@
     "Removed/revoked production closes stale detail and clears its editor",
     "Current-turn shortcut uses the server schedule and only requests consultation",
     "Viewing, filtering and refreshing make authenticated reads only; no write RPC",
-    "Synthetic incorporation modal locks uncertain input/cancel and retries the same controller command"
+    "Synthetic incorporation modal locks uncertain input/cancel and retries the same controller command",
+    "Changing stage rebuilds the heading and removes glass actions",
+    "Clearing the inactive workspace preserves shared Seguimiento DOM for focus restoration"
   ],
   "reads": 19
 }

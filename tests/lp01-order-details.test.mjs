@@ -50,7 +50,7 @@ test('dirty draft retains r1 after B saves r2 and refresh; explicit discard adop
 
 // Control-state double only; actual browser geometry remains in browser.py.
 function noteControls(withCancel=false){
- const input={value:'',disabled:true},save={disabled:true},refresh={disabled:false},discard={hidden:true},status={},text={},current={hidden:true,querySelector:()=>text};
+ const input={value:'',disabled:true},save={disabled:true,dataset:{}},refresh={disabled:false},discard={hidden:true},status={},text={},current={hidden:true,querySelector:()=>text};
  const cancel={disabled:false};
  const controls={'textarea':input,'[data-order-note-save]':save,'[data-order-note-refresh]':refresh,'[data-order-note-discard]':discard,'[role=status]':status,'[data-order-note-current]':current};
  if(withCancel)controls['[data-order-note-cancel]']=cancel;
