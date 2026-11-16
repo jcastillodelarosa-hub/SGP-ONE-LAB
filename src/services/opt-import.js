@@ -44,6 +44,7 @@ export function createOptImport(client,getToken,{getContext,storage,storageScope
  const current=scope=>{try{return !getContext||scopeKey(getContext())===scopeKey(scope);}catch{return false;}};
  const invalidate=()=>{epoch++;};
  async function processInternal(input,resolved=false){
+  if(resolved&&!resolutionApi)throw fault('OPT_RECUPERACION_PAUSADA',{definitive:true});
   if(busy)throw fault('OPT_IMPORTACION_EN_CURSO',{definitive:true});
   busy=true;const operation=epoch,token=getToken();let journal,key,wasUncertain=false,sent=false;
   try{
@@ -163,5 +164,5 @@ export function createOptImport(client,getToken,{getContext,storage,storageScope
    return certificate;
   }finally{busy=false;}
  }
- return {process:input=>processInternal(input),retryResolved:input=>processInternal(input,true),invalidate,pending,reconcilePending,exportPendingIdentities,resolvePending};
+ return {canResolveImports:Boolean(resolutionApi),process:input=>processInternal(input),retryResolved:input=>processInternal(input,true),invalidate,pending,reconcilePending,exportPendingIdentities,resolvePending};
 }

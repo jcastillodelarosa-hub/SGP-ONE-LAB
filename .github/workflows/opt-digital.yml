@@ -72,6 +72,7 @@ jobs:
           node tests/opt-digital/shared-catalog-dom.cjs
           node tests/opt-digital/reservation-summary-dom.cjs
           node tests/opt-digital/import-upload-dom.cjs
+          node tests/opt-digital/recovery-paused-dom.cjs
           node tests/opt-digital/rounding-warning-fixture-dom.cjs
           node tests/opt-digital/cut-report-dom.cjs
           node docs/sql-proposals/opt-shared/test-synthetic.mjs

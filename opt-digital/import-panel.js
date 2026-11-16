@@ -25,7 +25,7 @@ export function mountOptImportPanel(container,{api,getScope,getProgrammingSnapsh
  const selection=make('section');selection.id='optSelectedOrigin';selection.append(make('h3','Origen seleccionado'));
  const selectionNote=make('p','Sin archivos seleccionados. Seleccionar o leer un archivo no significa guardarlo en SGP.'),selectionTable=make('table'),selectionBody=make('tbody'),selectionHead=make('thead'),selectionRow=make('tr');selectionTable.className='opt-file-table';for(const label of ['Nombre / ruta relativa','Estado','Resultado'])selectionRow.append(make('th',label));selectionHead.append(selectionRow);selectionTable.append(selectionHead,selectionBody);selection.append(selectionNote,selectionTable);panel.prepend(selection);
  const verify=make('button','Comprobar cargas anteriores sin reenviar');verify.id='optImportReconcile';verify.type='button';const verification=make('div');verification.id='optImportReconciliation';verification.setAttribute('role','status');pendingNotice.after(verify,verification);
- const recovery=mountOptImportRecovery(panel,{api,getScope,onImported});
+ const recovery=mountOptImportRecovery(panel,{api,getScope,onImported,recoveryEnabled:api?.canResolveImports===true});
  const selectedFiles=new Map(),fileStates=new Map(),indexSelections=new Map();
  const reasonLabels={CONTEXT_REQUIRED:'Falta índice o programación',PENDING_OUTCOME:'Bloqueado por resultado anterior incierto',EXACT_NAME_MISSING:'Excluido: sin nombre exacto en el índice',OUTSIDE_PROGRAMMING:'Omitido: fuera de programación',DUPLICATE_NAME:'Bloqueado: nombre duplicado',CANDIDATE:'Candidato exacto; no guardado'};
  function renderSelection(){

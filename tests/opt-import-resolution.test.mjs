@@ -33,3 +33,13 @@ test('Edge binds resolution to original byte hashes, scope and exact envelope',a
  await assert.rejects(validateRetailResolution({...body,resolution:{...r,token:'x'}},hashes),/IDENTITY/);
  await assert.rejects(validateRetailResolution({...body,scope:{...scope,semana:47}},hashes),/IDENTITY/);
 });
+
+test('unverified backend keeps certified retry disabled without changing the journal',async()=>{
+ const {p,s,key,original}=await setup();let sends=0;
+ const api=createOptImport({invoke:async()=>{sends++;}},()=> 'token',{storage:s,storageScope:'actor',getContext:()=>scope});
+ assert.equal(api.canResolveImports,false);
+ assert.equal((await api.exportPendingIdentities()).items.length,1);
+ await assert.rejects(api.resolvePending(p.identity),/UNAVAILABLE/);
+ await assert.rejects(api.retryResolved(input),/OPT_RECUPERACION_PAUSADA/);
+ assert.equal(sends,0);assert.equal(s.getItem(key),JSON.stringify(original));
+});
