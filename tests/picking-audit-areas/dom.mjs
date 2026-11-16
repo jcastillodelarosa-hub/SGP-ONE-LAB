@@ -23,7 +23,7 @@ mode='ok';snapshot.fuentes=[{id_pieza:'pieza1',key_produccion:'key1',reserva:'R1
 await openAudit({target,rpc,onSaved:async()=>saved++});
 $('[data-area]').value='ZOCALERO';$('[data-result]').value='CON_FALTANTES';$('[data-shift]').value='TURNO 1';$('[data-add]').onclick();
 $('[data-reference]').value='SAP1';$('[data-reference]').onchange();$('[data-piece]').onchange();
-assert.ok($('[data-field="nc"]'));$('[data-field="nc"]').value='NO-EXISTE';$('[data-field="nc"]').oninput();
+assert.match(document.body.textContent,/no su relación con la orden/);assert.ok($('[data-field="nc"]'));$('[data-field="nc"]').value='NO-EXISTE';$('[data-field="nc"]').oninput();
 await $('[data-save]').onclick();assert.match($('[data-error]').textContent,/no encontrada/);assert.equal(saved,1);
 $('[data-field="nc"]').value='NC-REAL';$('[data-field="nc"]').oninput();await $('[data-field="nc"]').onblur();assert.match($('[data-nc-info]').textContent,/NC-REAL/);
 await $('[data-save]').onclick();assert.equal(saved,2);assert.equal(calls.at(-1).args.p_diferencias[0].nc,'NC-REAL');
