@@ -32,3 +32,12 @@ export function auditAreaDecisions({area,resultado,rows,differences}) {
  if(resultado==='CON_FALTANTES'&&!hasMissing)throw Error('Registra o acepta al menos un faltante de tu área.');
  return decisions;
 }
+
+/** Display-only names for Paneles; never rewrite area identities or saved history. */
+export function auditAreaLabel(linea,area){
+ if(linea==='PANELES_2'){
+  if(area.id==='VERTICALES')return 'Verticales';
+  if(area.id==='ZOCALERO')return 'Zócalos';
+ }
+ return area.nombre;
+}
