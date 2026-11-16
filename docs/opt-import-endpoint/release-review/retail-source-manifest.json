@@ -1,6 +1,6 @@
 {
   "schema": "OPT-RETAIL-SOURCE-1",
-  "sourceSha256": "7fe429724b3a15ad9bb9b98bb79daf417ee5b1d249416814008e10301f612f1c",
+  "sourceSha256": "e017501eda9b1c288b017080a3abde09eac147e5d18107db67386ac893148ade",
   "inputs": [
     {
       "path": "functions/index.js",
@@ -16,7 +16,7 @@
     },
     {
       "path": "opt-digital/app.js",
-      "sha256": "826c88cb255c2de43693994c3b9980332ae99b3ee63239232eec42c085e45330"
+      "sha256": "16cf40ab76a843cca0c0bae6d188728bfd2e4e0f00dceba46002ecc42ab4e938"
     },
     {
       "path": "opt-digital/cut-report.js",
@@ -36,7 +36,11 @@
     },
     {
       "path": "opt-digital/import-panel.js",
-      "sha256": "4ad488debbe954ef8dc8fb2cc786ef4896b10f3c887c0159133aa74cc81996fc"
+      "sha256": "3129cd3832388faa97c9b421493d61c409592c5136c24e75e4cfc3fb02cdacc4"
+    },
+    {
+      "path": "opt-digital/import-recovery-panel.js",
+      "sha256": "1202a4c549d72008ae222ea6a6dc31473592eff14e040e9e964e0299f49ea237"
     },
     {
       "path": "opt-digital/import-selection.js",
@@ -76,7 +80,7 @@
     },
     {
       "path": "opt-digital/shared-cuts.js",
-      "sha256": "213b0d2d41cd972988e43ad39444fd69c330a2c1313ba43a801ac8911242b8af"
+      "sha256": "99623344fa16591cd58bdacd091490c4339ab13759481a4db4952a517c2d8288"
     },
     {
       "path": "opt-digital/shared-scheme.js",
@@ -84,7 +88,7 @@
     },
     {
       "path": "opt-digital/workflow.js",
-      "sha256": "eb5557febc38a68f2c90baeb164a447601503acacb85cea985dff9da2185e988"
+      "sha256": "4a535eff89f9e182e5aad6ed51711f8e53bd9cee788e3b4a394cd9b52e1ae12b"
     },
     {
       "path": "package-lock.json",
@@ -299,6 +303,10 @@
       "sha256": "2171365435eab4d3bab5b41259c9c6158d82e103472adf7932e0a465e81e0026"
     },
     {
+      "path": "src/domain/opt-file-selection-state.js",
+      "sha256": "eb36de54de6935fe89608a05e349643e54652cb3e77cc1a7ee9ab2261eb0e71c"
+    },
+    {
       "path": "src/domain/opt-import-endpoint.js",
       "sha256": "19aa01cd95a3355f62a7a85af837a6a1c54785b2ab92a95de4573879d5524060"
     },
@@ -337,6 +345,10 @@
     {
       "path": "src/domain/opt-physical-cuts.js",
       "sha256": "d238489a6967b2d63557d0ab6c02c979fc3dcf388977f48d59d45b7bc977534b"
+    },
+    {
+      "path": "src/domain/opt-piece-progress.js",
+      "sha256": "ca642862a817f8ec448512585eba143b42137c1279a4a2515411a231568ef99e"
     },
     {
       "path": "src/domain/opt-project-data.js",
@@ -468,7 +480,7 @@
     },
     {
       "path": "src/server/opt-import-handler.js",
-      "sha256": "2a61a98995524911539669cb4fec9127f0b9e26e051b21c006ab478762543710"
+      "sha256": "907829733f30c5a6342dc390c1ef3617f62d1ef531d2ebced238115e8529d685"
     },
     {
       "path": "src/server/opt-import-probe.js",
@@ -495,6 +507,10 @@
       "sha256": "cc27684f382392777f374570940ade0b2008444019648f3f48df60d9bb012884"
     },
     {
+      "path": "src/server/opt-retail-resolution.js",
+      "sha256": "476796d50fbac93aef5788d807999e8b09c6c0989cb1f5148e8aab3d2e35c0b2"
+    },
+    {
       "path": "src/server/opt-worksheet-stream.js",
       "sha256": "213b2c93e876860fa8e1eaa01902e55460b16972b2c55bdea15c0b523303f726"
     },
@@ -508,7 +524,7 @@
     },
     {
       "path": "supabase/functions/opt-retail-import-v3-review/index.ts",
-      "sha256": "f3ac8cdfeb6a619cd557fe12c85d35f4b479c8c41d11dc117e382e93368f21c6"
+      "sha256": "22c0f9be672342aa04c9ca21b5d7df3b304e97520f2054eaa7f01f02f4d54cfd"
     }
   ]
 }

@@ -68,3 +68,5 @@
 
 /* Visible non-error caveat retained alongside each confirmed import result. */
 .opt-rounding-warning{display:block;margin-top:8px;padding:10px 12px;border-left:4px solid #a56a00;background:#fff6dc;color:#654600;line-height:1.5;overflow-wrap:anywhere}
+
+#optImportRecovery{margin-top:1rem;border-top:1px solid #dbe3ee;padding-top:1rem} .opt-recovery-row{margin:1rem 0;padding:1rem;border:1px solid #dbe3ee;border-radius:12px;overflow-wrap:anywhere}.opt-recovery-row input{display:block;max-width:100%;margin:.8rem 0}.opt-recovery-row input[hidden]{display:none}@media(max-width:600px){#optImportRecovery button{width:100%;min-height:44px;margin:.4rem 0}.opt-recovery-row{padding:.75rem}}

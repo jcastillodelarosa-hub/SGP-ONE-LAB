@@ -1,0 +1,22 @@
+import {sameOptImportIdentity} from '../src/services/opt-import-observation.js';
+export function mountOptImportRecovery(container,{api,getScope,onImported=()=>{}}){
+ const doc=container.ownerDocument,make=(tag,text)=>{const e=doc.createElement(tag);e.textContent=text||'';return e;};
+ const panel=make('section'),status=make('p'),rows=make('div'),exportButton=make('button','Exportar identidades para revisión'),refresh=make('button','Actualizar pendientes');panel.id='optImportRecovery';status.setAttribute('role','status');exportButton.type=refresh.type='button';
+ panel.append(make('h3','Resolver cargas anteriores'),make('p','La exportación no envía archivos ni desbloquea cargas. Tras una certificación de mantenimiento podrás consultar el cierre y reintentar manualmente con los mismos originales. El historial se conserva.'),exportButton,refresh,status,rows);container.append(panel);
+ let closed=false,busy=false,epoch=0;
+ const current=(id,op)=>!closed&&epoch===op&&sameOptImportIdentity(getScope(),id.scope);
+ exportButton.onclick=async()=>{if(busy||closed)return;busy=true;const op=epoch;try{const data=await api.exportPendingIdentities();if(closed||op!==epoch)return;const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'})),link=make('a');link.href=url;link.download='OPT-identidades-revision.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);status.textContent=`${data.items.length} identidades exportadas, sin tokens ni archivos PDF/índice.`;}catch(e){status.textContent='Exportación no disponible: '+e.message;}finally{busy=false;}};
+ function update(){epoch++;rows.replaceChildren();if(closed)return;const ids=api?.pending?.();exportButton.disabled=!api?.exportPendingIdentities;refresh.disabled=!api;
+ if(!Array.isArray(ids)){status.textContent='Diario no disponible. Se conserva el bloqueo.';return;}
+ for(const id of ids.filter(i=>sameOptImportIdentity(getScope(),i.scope))){
+  const row=make('article'),note=make('p','Resultado anterior incierto. No se reenviará automáticamente.'),resolve=make('button','Consultar cierre certificado'),pdf=make('input'),index=make('input'),retry=make('button','Reintentar manualmente este PDF');row.className='opt-recovery-row';resolve.type=retry.type='button';pdf.type=index.type='file';pdf.accept='.pdf';index.accept='.xlsx,.csv,.json';pdf.setAttribute('aria-label','PDF original '+id.pdf.name);index.setAttribute('aria-label','Índice original '+(id.index?.name||''));retry.disabled=true;let certified=false;
+  row.append(make('h4',id.pdf.name),make('p',`${id.source.origin} · ${id.scope.linea} · ${id.scope.anio}/${id.scope.semana} · Índice: ${id.index?.name||'No corresponde'}`),resolve,note,pdf,index,retry);rows.append(row);
+  const retail=id.source.origin==='RETAIL'&&id.source.mode==='INDICE';resolve.disabled=!retail||!api.resolvePending;pdf.hidden=index.hidden=retry.hidden=!retail;
+  const select=()=>{retry.disabled=!certified||!pdf.files?.[0]||!index.files?.[0];};pdf.onchange=index.onchange=select;
+  resolve.onclick=async()=>{if(busy||closed)return;busy=true;const op=epoch;resolve.disabled=true;try{await api.resolvePending(id);if(!current(id,op))return;certified=true;note.textContent='Cierre certificado disponible. Selecciona exactamente el PDF y el índice originales; solo el botón de reintento los enviará.';select();}catch(e){if(current(id,op))note.textContent='No hay cierre certificado utilizable. El bloqueo y la evidencia se conservan. '+e.message;}finally{busy=false;if(current(id,op))resolve.disabled=false;}};
+  retry.onclick=async()=>{if(busy||retry.disabled||closed)return;const op=epoch;if(!current(id,op))return;busy=true;retry.disabled=true;try{const receipt=await api.retryResolved({scope:structuredClone(id.scope),source:structuredClone(id.source),pdf:pdf.files[0],index:{file:index.files[0],format:id.index.format,sheet:id.index.sheet}});if(!current(id,op))return;note.textContent='Guardado confirmado por recibo del servidor. No confirma cortes realizados.';certified=false;resolve.disabled=true;onImported([receipt]);}catch(e){if(current(id,op))note.textContent='Sin confirmación de guardado. Se conserva el historial y el mismo identificador de intento. '+e.message;}finally{busy=false;if(current(id,op))select();}};
+ }
+ }
+ refresh.onclick=()=>{if(!busy)update();};update();
+ return {invalidate(){update();},destroy(){closed=true;epoch++;panel.remove();}};
+}
