@@ -25,6 +25,8 @@ on:
       - 'tests/lp01-assembly*'
       - 'tests/lp01-packing-sheet.test.mjs'
       - 'tests/lp01-assembly-workspace/**'
+      - 'tests/lp01-pdt-registration/**'
+      - 'tests/ncv-finalizada/**'
       - 'tests/fixtures/lp01-closure-export-v2.mjs'
       - 'tests/fixtures/lp01-closure-plan-v4-synthetic.json'
       - 'tests/lp01-closure-plan-v4.test.mjs'
@@ -71,6 +73,8 @@ jobs:
       - run: pip install playwright==1.55.0
       - run: python -m playwright install --with-deps chromium
       - run: python tests/lp01-assembly-workspace/browser.py
+      - name: Scoped PDT and finalized NCV PC/mobile regression
+        run: python tests/lp01-pdt-registration/browser.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -78,6 +82,8 @@ jobs:
           path: |
             tests/lp01-assembly-workspace/*results.json
             tests/lp01-assembly-workspace/evidence/
+            /tmp/pdt-ensamble-*.png
+            /tmp/ncv-finalizada-*.png
 
   export-dual-full-chain:
     runs-on: ubuntu-24.04
