@@ -2,7 +2,7 @@
 create role anon;create role authenticated;create role service_role;
 create schema sgp_mecanizado_parcial;create schema sgp_pdt_multiorigen;
 create table public.sgp_mecanizado_programacion(id_programacion uuid primary key,reserva text,sistema text,acabado text);
-create table public.sgp_producciones(key_produccion text primary key,produccion text,id_linea text,cantidad integer);
+create table public.sgp_producciones(key_produccion text primary key,produccion text,id_linea text,cantidad integer,id text default 'ROW-ID-DISTINCT-FROM-DELIVERY');
 create table public.sgp_prioridades(key_produccion text,reserva text,id_linea text);
 create table public.sgp_picking_entregas(id_entrega uuid primary key,id_programacion uuid,produccion text,estado text default 'PENDIENTE_VALIDACION',completa boolean,usuario_validacion text,fecha_validacion timestamptz,observacion_validacion text);
 create table sgp_mecanizado_parcial.partes(id_programacion uuid primary key,key_produccion text,cantidad integer);
