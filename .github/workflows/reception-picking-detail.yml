@@ -4,6 +4,9 @@ on:
     paths:
       - 'app.js'
       - 'src/modules/picking-audit.js'
+      - 'src/modules/picking-audit-config.js'
+      - 'src/domain/picking-audit.js'
+      - 'tests/picking-audit-areas/**'
       - 'src/domain/pdt-registration.js'
       - 'tests/reception-picking-v436/**'
       - '.github/workflows/reception-picking-detail.yml'
@@ -22,3 +25,7 @@ jobs:
         env:
           RECEPTION_CHROMIUM: /usr/bin/google-chrome
         run: python3 tests/reception-picking-v436/browser.py
+      - name: Area audit confirmation, PC and mobile
+        env:
+          RECEPTION_CHROMIUM: /usr/bin/google-chrome
+        run: python3 tests/picking-audit-areas/browser.py

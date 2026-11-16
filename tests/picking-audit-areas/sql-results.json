@@ -1,0 +1,20 @@
+{
+  "passed": [
+    "exact installer and unused rollback",
+    "historical replay preserved",
+    "two explicit empty reviews required; one consolidated event; same-request replay",
+    "missing decisions claimed once; per-area actor preserved; all must be decided",
+    "differences persisted immediately, no closure until second area, all differences in receipt",
+    "invalid differences roll back area ledger and operational writes",
+    "explicit result validation, invalid area, invalid token, no direct table/worker access",
+    "legacy RPC and direct close cannot bypass required areas; historical rows stay unchanged",
+    "NC reader audit roles, missing/ambiguous references, malformed values and authorization",
+    "NC append preserves primary and prior links; retries do not duplicate; missing NC remains optional",
+    "new difference NC validated before writes and linked by adapter; blank allowed",
+    "modify can append NC after safe correction; deletion with new NC rejected",
+    "other line defaults single; configuration admin-only, schema frozen after first review",
+    "line ambiguity fails closed",
+    "used rollback refused without data loss"
+  ],
+  "environment": "PGlite synthetic; real copied audit writer, stub auth and multiorigin adapter; no live concurrency"
+}

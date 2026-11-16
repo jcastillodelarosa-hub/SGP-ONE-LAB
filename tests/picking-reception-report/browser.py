@@ -26,7 +26,7 @@ try:
     const {initPickingReceptionReport}=await import('./src/modules/picking-reception-report-controller.js');
     window.calls=[];
     const rows=Array.from({length:6},(_,i)=>({id_recepcion:'demo-'+i,id_entrega:'demo-'+i,id_programacion:'p'+i,produccion:'DEMO-00'+(i+1),reserva:'R-DEMO-10'+i,sistema:['EL400','SGD2020','MX4000'][i%3],fecha_recepcion:'2026-11-'+String(11-Math.floor(i/2)).padStart(2,'0'),turno_recepcion:i%2?'TURNO 2':'TURNO 1',registrado_en:'2026-11-11T14:30:00Z',nombre_entrego:i%2?'Ana Demo':'Carlos Demo',nombre_recibio:i%2?'María Demo':'Luis Demo',completa_al_recibir:i%2===0,pendientes_al_recibir:i%2?[{cantidad:2,perfil:'ES-SGD2020-088',observacion:'Falta mecanizado',fabricacion:'Marco Demo'}]:[],cantidad_ventanas_recibidas:null}));
-    const client={rpc:async(name,args)=>{window.calls.push(name);if(name!=='sgp_picking_reporte_recepciones_v1')throw Error('Unexpected RPC');return {data:{ok:true,contract_version:1,rows,total_rows:rows.length,coverage:{recepciones_sin_fecha_operativa:0},warnings:['VENTANAS_RECIBIDAS_NO_CONSTAN']}};}};
+    const client={rpc:async(name,args)=>{window.calls.push(name);if(name==='sgp_picking_auditoria_areas_contexto')return {data:{areas:[{id:'VERTICALES',nombre:'Verticales',revision:{usuario:'Auditor Demo',fecha:'2026-11-11',turno:'TURNO 1',resultado:'SIN_FALTANTES'}}]}};if(name!=='sgp_picking_reporte_recepciones_v1')throw Error('Unexpected RPC');return {data:{ok:true,contract_version:1,rows,total_rows:rows.length,coverage:{recepciones_sin_fecha_operativa:0},warnings:['VENTANAS_RECIBIDAS_NO_CONSTAN']}};}};
     const options={getSupabaseClient:async()=>client,getAppToken:()=> 'synthetic-only'};initPickingDeliveryReport(options);initPickingReceptionReport(options);
    }''')
    page.locator('#pickReportTab').click()
@@ -51,12 +51,12 @@ try:
    if width<720:
     assert page.locator('#pickReceptionReportRows .table-wrap').evaluate('(el)=>el.scrollWidth>el.clientWidth')
    page.screenshot(path=str(OUT/f'reception-{width}.png'),full_page=True,animations='disabled')
-   page.locator('#pickReceptionReportRows summary').first.click();page.screenshot(path=str(OUT/f'reception-detail-{width}.png'),full_page=True,animations='disabled');assert page.locator('#pickReceptionReportRows details').first.get_attribute('open') is not None
+   page.locator('#pickReceptionReportRows summary').first.click();page.get_by_text('Auditor Demo',exact=False).wait_for();page.screenshot(path=str(OUT/f'reception-detail-{width}.png'),full_page=True,animations='disabled');assert page.locator('#pickReceptionReportRows details').first.get_attribute('open') is not None
    page.locator('#pickReceptionReportSearch').fill('DEMO-002');assert page.locator('#pickReceptionReportRows tbody tr').count()==1
    page.locator('#pickReceptionReportState').select_option('completa');assert page.locator('#pickReceptionReportRows tbody tr').count()==0
    page.locator('#pickReportDeliveryTab').click();page.locator('#pickReportReceptionTab').click();assert page.locator('#pickReceptionReportSearch').input_value()=='DEMO-002'
    page.locator('#pickDeliveryTab').click();page.locator('#pickDirectReport').click();assert page.locator('#pickReportDeliveryPanel').is_visible();page.keyboard.press('Escape');assert page.locator('.pick-report-modal-overlay').count()==0
-   assert not errors,errors;assert set(page.evaluate('window.calls'))=={'sgp_picking_reporte_recepciones_v1'}
+   assert not errors,errors;assert set(page.evaluate('window.calls'))=={'sgp_picking_reporte_recepciones_v1','sgp_picking_auditoria_areas_contexto'}
    checks.append({'viewport':width,'passed':True,'source':'synthetic read-only fixture'});page.close()
   browser.close();(OUT/'result.json').write_text(json.dumps(checks,indent=2))
 finally:server.shutdown()

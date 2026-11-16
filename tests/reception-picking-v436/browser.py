@@ -24,12 +24,13 @@ with sync_playwright() as pw:
    const base={key_produccion:'QA',reserva:'R1',acabado:'BLANCO',longitud:20,cantidad_referencia:8};
    window.sources=[{...base,id_pieza:'p1',codigo_sap:'REF1',fabricacion:'FAB1'}, {...base,id_pieza:'p2',codigo_sap:'REF1',fabricacion:'FAB2',cantidad_referencia:12}, {...base,id_pieza:'p3',codigo_sap:'REF2',fabricacion:'FAB3',cantidad_referencia:3}];
    window.sent=[];window.open=()=>openAudit({target:{id_entrega:'qa',reserva:'R1'},rpc:async(name,args)=>{
-    if(name==='sgp_picking_auditoria_contexto')return {version:'qa',fuentes:sources,faltantes:[]};
+    if(name==='sgp_picking_auditoria_areas_contexto')return {version:'qa',fuentes:sources,faltantes:[],areas:[{id:'VERTICALES',nombre:'Verticales'},{id:'ZOCALERO',nombre:'Zocalero'}]};
     if(name==='sgp_configuracion_general_obtener')return [{clave:'HORARIOS_TURNOS',valor:config}];
-    if(name==='sgp_picking_auditoria_guardar'){sent.push(args);return {ok:true};}
+    if(name==='sgp_picking_auditoria_area_guardar'){sent.push(args);return {ok:true};}
     throw Error(name);
    },onSaved:async()=>{}});await window.open();
   }""")
+  page.locator('[data-area]').select_option('VERTICALES');page.locator('[data-result]').select_option('CON_FALTANTES')
   page.locator('[data-add]').click();assert page.locator('[data-piece]').count()==0
   page.locator('[data-reference]').select_option('REF1');assert page.locator('[data-piece]').count()==2
   page.locator('[data-piece]').nth(1).check();page.locator('[data-field="cantidad"]').fill('4')

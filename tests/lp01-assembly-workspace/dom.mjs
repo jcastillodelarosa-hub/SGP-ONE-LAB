@@ -13,6 +13,7 @@ window.HTMLElement.prototype.showModal=function(){this.open=true;};window.HTMLEl
 const intervals=new Set(),set=globalThis.setInterval,clear=globalThis.clearInterval;
 globalThis.setInterval=(...a)=>{const t=set(...a);intervals.add(t);return t;};globalThis.clearInterval=t=>{intervals.delete(t);clear(t);};
 if(process.env.LP_TEST_VISIBILITY==='1')globalThis.IntersectionObserver=class {constructor(callback){this.callback=callback;this.targets=new Set();}observe(target){this.targets.add(target);queueMicrotask(()=>{if(this.targets.has(target))this.callback([{target,isIntersecting:(target.dataset.orderSummary||target.dataset.saleCellKey)==='ABIERTA|PANELES_2'}]);});}unobserve(target){this.targets.delete(target);}disconnect(){this.targets.clear();}};
+const {mountOrderNote}=await import('../../src/modules/lp01-order-note.js');
 const {mountAssemblyWorkspace}=await import('../../src/modules/lp01-assembly-workspace.js');
 const host=document.querySelector('#sheet'),context={line:'PANELES_2',stage:'ENSAMBLE',date:'2026-11-07',shift:1};
 const p=(name,balance,assignments=[])=>({key:name+'|PANELES_2',oficial:{key_produccion:name+'|PANELES_2',id_linea:'PANELES_2',produccion:name,sistema:'ES100',reserva_al:'R-'+name,cantidad:20,saldo_ensamble:balance,saldos_inicializados:true,presente_ultimo_export:true,anio:2026,semana_base:43,activa:'SI'},assignments});
@@ -41,10 +42,19 @@ try{
  rowDiscard.hidden=true;rowSave.disabled=true;rowRefresh.disabled=true;assert.equal(workspace.canLeave(),false);assert.match(host.querySelector('[data-assembly-leave-status]').textContent,/guardado pendiente/);
  rowSave.disabled=false;rowRefresh.disabled=false;assert.equal(workspace.canLeave(),true);rowEditor.remove();
  checks.push('Compact row notes protect dirty drafts and in-flight saves before detail, close or reports navigation');
+ async function cleanReadCanLeave(parent){
+  const note=document.createElement('section');parent.append(note);let resolveRead;
+  const dispose=mountOrderNote(note,{isCurrent:()=>true,read:()=>new Promise(resolve=>resolveRead=resolve),save:()=>{throw Error('Unexpected write');}});
+  assert(note.querySelector('[data-order-note-save]').disabled&&note.querySelector('[data-order-note-refresh]').disabled);
+  assert.equal(workspace.canLeave(),true,'A clean pending read must not masquerade as an unsaved command');
+  dispose();note.remove();resolveRead({capabilities:['READ'],note:{revision:0,observation:''}});await tick();
+ }
+ await cleanReadCanLeave(host);
+ checks.push('Delayed initial note read without a draft or command does not block sheet navigation');
  host.querySelector('[data-assembly-search]').value='';host.querySelector('[data-assembly-search]').dispatchEvent(new Event('input'));
  host.querySelector('[data-assembly-glass]').click();assert.equal(glass.length,1);
  workspace.open('ABIERTA|PANELES_2');await tick();
- const detail=host.querySelector('[data-assembly-detail]');assert(detail);const draft=document.createElement('textarea');draft.value='Preservar borrador';detail.append(draft);
+ const detail=host.querySelector('[data-assembly-detail]');assert(detail);await cleanReadCanLeave(detail);checks.push('Delayed clean note read does not block return from detail');const draft=document.createElement('textarea');draft.value='Preservar borrador';detail.append(draft);
  const changed=structuredClone(data);changed.catalog.productions[0].oficial.saldo_ensamble=5;changed.turn.estado='ABIERTO';workspace.update(changed,context);assert.match(host.querySelector('[data-assembly-period-state]').textContent,/^ABIERTO/);
  assert.equal(host.querySelector('[data-assembly-detail]'),detail);assert.equal(draft.value,'Preservar borrador');assert.equal(host.querySelector('[data-assembly-balance]').textContent,'5');assert.equal(host.querySelector('[data-assembly-realized]').textContent,'Pendiente');
  checks.push('B12 preserves its editor node/draft during quiet Export balance refresh');

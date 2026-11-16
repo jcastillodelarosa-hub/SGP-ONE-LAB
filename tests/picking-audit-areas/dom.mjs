@@ -1,0 +1,62 @@
+import assert from 'node:assert/strict';
+import {pathToFileURL} from 'node:url';
+const {JSDOM}=await import(pathToFileURL(process.env.SGP_JSDOM_MODULE).href);
+const {openAudit}=await import('../../src/modules/picking-audit.js');
+const dom=new JSDOM('<button id="origin">Auditar</button><div id="pickAuditModal" hidden><div class="pick-audit-card"></div></div>');
+globalThis.document=dom.window.document;
+const $=s=>document.querySelector(s),calls=[];
+const config={lunes_sabado:{turno1:{inicio:'07:00',fin:'19:00'},turno2:{inicio:'19:00',fin:'07:00'}},domingo:{turno1:{inicio:'07:00',fin:'18:00'},turno2:{inicio:'18:00',fin:'05:00'}}};
+let saved=0,mode='ok';
+const target={id_entrega:'e1',produccion:'Orden semana 47',reserva:'R1',sistema:'EL400'};
+const snapshot={version:'v1',fuentes:[],faltantes:[],areas:[{id:'VERTICALES',nombre:'Verticales'},{id:'ZOCALERO',nombre:'Zocalero (top y bottom)'}]};
+const rpc=async(name,args)=>{calls.push({name,args});if(name==='sgp_picking_auditoria_areas_contexto')return snapshot;if(name==='sgp_configuracion_general_obtener')return [{clave:'HORARIOS_TURNOS',valor:config}];if(name==='sgp_picking_auditoria_nc_consultar')return {ok:true,nc:args.p_referencia==='NC-REAL'?{numero:'NC-REAL',estado:'ABIERTA'}:null};if(mode==='denied')throw Error('PERMISO_DENEGADO');return {ok:true,cerrada:false};};
+await openAudit({target,rpc,onSaved:async()=>saved++});
+assert.equal($('[data-area]').options.length,3);assert.match(document.body.textContent,/Zocalero/);
+await $('[data-save]').onclick();assert.match($('[data-error]').textContent,/Selecciona el área/);assert.equal(saved,0);
+$('[data-area]').value='VERTICALES';$('[data-result]').value='SIN_FALTANTES';$('[data-shift]').value='TURNO 1';await $('[data-save]').onclick();
+assert.equal(saved,1);assert.equal($('#pickAuditModal').hidden,true);const call=calls.at(-1);assert.equal(call.name,'sgp_picking_auditoria_area_guardar');assert.equal(call.args.p_area,'VERTICALES');assert.equal(call.args.p_resultado,'SIN_FALTANTES');
+snapshot.areas[0].revision={usuario:'Cortador 1',fecha:'2026-11-16',resultado:'SIN_FALTANTES'};
+await openAudit({target,rpc,onSaved:async()=>saved++});assert.equal($('[data-area]').options[1].disabled,true);assert.match(document.body.textContent,/Cortador 1/);
+$('[data-area]').value='ZOCALERO';$('[data-result]').value='SIN_FALTANTES';$('[data-shift]').value='TURNO 1';mode='denied';await $('[data-save]').onclick();assert.match($('[data-error]').textContent,/PERMISO_DENEGADO/);assert.equal(saved,1);assert.equal($('#pickAuditModal').hidden,false);
+$('[data-close]').onclick();assert.equal($('#pickAuditModal').hidden,true);
+mode='ok';snapshot.fuentes=[{id_pieza:'pieza1',key_produccion:'key1',reserva:'R1',acabado:'BL',codigo_sap:'SAP1',fabricacion:'VERTICAL',cantidad_referencia:5}];
+await openAudit({target,rpc,onSaved:async()=>saved++});
+$('[data-area]').value='ZOCALERO';$('[data-result]').value='CON_FALTANTES';$('[data-shift]').value='TURNO 1';$('[data-add]').onclick();
+$('[data-reference]').value='SAP1';$('[data-reference]').onchange();$('[data-piece]').onchange();
+assert.match(document.body.textContent,/no su relación con la orden/);assert.ok($('[data-field="nc"]'));$('[data-field="nc"]').value='NO-EXISTE';$('[data-field="nc"]').oninput();
+await $('[data-save]').onclick();assert.match($('[data-error]').textContent,/no encontrada/);assert.equal(saved,1);
+$('[data-field="nc"]').value='NC-REAL';$('[data-field="nc"]').oninput();await $('[data-field="nc"]').onblur();assert.match($('[data-nc-info]').textContent,/NC-REAL/);
+await $('[data-save]').onclick();assert.equal(saved,2);assert.equal(calls.at(-1).args.p_diferencias[0].nc,'NC-REAL');
+await openAudit({target,rpc,onSaved:async()=>saved++});
+$('[data-area]').value='ZOCALERO';$('[data-result]').value='CON_FALTANTES';$('[data-shift]').value='TURNO 1';$('[data-add]').onclick();$('[data-reference]').value='SAP1';$('[data-reference]').onchange();$('[data-piece]').onchange();
+await $('[data-save]').onclick();assert.equal(saved,3);assert.equal(calls.at(-1).args.p_diferencias[0].nc,undefined);
+snapshot.faltantes=[{id_faltante:'f1',nc:'NC-HISTORICA',id_pieza:'pieza1',reserva_pendiente:'R1',acabado_pendiente:'BL',cantidad:1,pendiente:{reserva:'R1',acabado_pendiente:'BL'}}];
+await openAudit({target,rpc,onSaved:async()=>saved++});
+$('[data-area]').value='ZOCALERO';$('[data-result]').value='CON_FALTANTES';$('[data-shift]').value='TURNO 1';$('[data-action]').value='ACEPTAR';$('[data-action]').onchange();
+assert.match(document.body.textContent,/NC-HISTORICA/);assert.equal($('[data-field="nc"]').value,'');
+$('[data-field="nc"]').value='NC-REAL';$('[data-field="nc"]').oninput();await $('[data-save]').onclick();
+assert.equal(saved,4);assert.equal(calls.at(-1).args.p_decisiones[0].nc,'NC-REAL');assert.equal(calls.at(-1).args.p_decisiones[0].nc_historica,'NC-HISTORICA');
+console.log('PASS NC: existing NC query and payload, unknown blocks, optional without NC');
+console.log('PASS modal: explicit area/outcome, empty complete, per-area progress, rejection, close and reopen');
+const {mountPickingAuditConfig}=await import('../../src/modules/picking-audit-config.js');
+const host=document.createElement('section');document.body.append(host);let configCalls=0;
+await mountPickingAuditConfig({host,canEdit:()=>true,rpc:async(name,args)=>{if(name.endsWith('_configuracion'))return [{linea:'PANELES_2',areas:[{id:'VERTICALES',nombre:'Verticales'},{id:'ZOCALERO',nombre:'Zócalos'}]}];configCalls++;assert.equal(args.p_linea,'FRAMES_2');assert.deepEqual(args.p_areas,[{id:'GENERAL',nombre:'Recepción'}]);return {ok:true};}});
+const configLine=host.querySelector('select');configLine.value='FRAMES_2';configLine.onchange();assert.match(host.querySelector('textarea').value,/GENERAL/);await host.querySelector('button').onclick();assert.equal(configCalls,1);
+await mountPickingAuditConfig({host,canEdit:()=>false,rpc:()=>{throw Error('not allowed')}});assert.match(host.textContent,/Solo un administrador/);
+console.log('PASS config: default other line single area, save and role guard');
+
+let activated=false,legacySaves=0,legacyReads=0;
+const rolloutRpc=async(name,args)=>{
+ if(name==='sgp_picking_auditoria_areas_contexto'&&!activated)throw Object.assign(Error('Could not find the function public.sgp_picking_auditoria_areas_contexto in schema cache'),{code:'PGRST202'});
+ if(name==='sgp_picking_auditoria_contexto'){legacyReads++;return {...snapshot};}
+ if(name==='sgp_picking_auditoria_guardar'){if(activated)throw Error('AUDITORIA_POR_AREAS_REQUERIDA');legacySaves++;assert.equal(args.p_area,undefined);assert.equal(args.p_decisiones.length,1);return {ok:true};}
+ return rpc(name,args);
+};
+await openAudit({target,rpc:rolloutRpc,onSaved:async()=>{}});
+assert.match(document.body.textContent,/aún no está activada/);$('[data-area]').value='GENERAL';$('[data-result]').value='CON_FALTANTES';$('[data-shift]').value='TURNO 1';$('[data-action]').value='ACEPTAR';$('[data-action]').onchange();assert.equal($('[data-field="nc"]'),null);await $('[data-save]').onclick();assert.equal(legacySaves,1);
+await openAudit({target,rpc:rolloutRpc,onSaved:async()=>{}});$('[data-area]').value='GENERAL';$('[data-result]').value='CON_FALTANTES';$('[data-shift]').value='TURNO 1';$('[data-action]').value='ACEPTAR';$('[data-action]').onchange();assert.equal($('[data-field="nc"]'),null);activated=true;await $('[data-save]').onclick();assert.match($('[data-error]').textContent,/ya está activa/);assert.equal(legacySaves,1);$('[data-close]').onclick();
+await openAudit({target,rpc:rolloutRpc,onSaved:async()=>{}});assert.equal($('[data-area]').options.length,3);assert.equal(legacyReads,2);$('[data-close]').onclick();
+for(const failure of [Object.assign(Error('permission denied'),{code:'42501'}),Object.assign(Error('could not find OTHER RPC'),{code:'PGRST202'}),Error('network offline')]){
+ await openAudit({target,rpc:async(name,args)=>{if(name==='sgp_picking_auditoria_areas_contexto')throw failure;throw Error('UNEXPECTED FALLBACK');},onSaved:()=>{}});assert.match(document.body.textContent,/Auditoría no disponible/);assert.ok(!document.body.textContent.includes('UNEXPECTED FALLBACK'));$('[data-close]').onclick();
+}
+console.log('PASS staged rollout: strict absent-RPC only, legacy save, activated stale modal blocked, reopen new contract, permissions/network never fallback');
