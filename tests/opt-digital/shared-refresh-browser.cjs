@@ -6,6 +6,8 @@ const assert=require('node:assert/strict'),fs=require('node:fs');const {chromium
   const page=await browser.newPage({viewport:{width,height:900}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.route('**/*',r=>new URL(r.request().url()).hostname==='127.0.0.1'?r.continue():r.abort());
   await page.clock.install();await page.goto('http://127.0.0.1:8765/opt-digital/index.html');
+  await page.addStyleTag({url:'http://127.0.0.1:8765/opt-digital/sgp-theme.css'});
+  await page.addStyleTag({content:'body{display:block!important;margin:0;padding:12px;--opt-blue:#1264c8;--opt-ink:#103b73;--opt-line:#cbd9e8;--opt-soft:#eaf2fb}'});
   await page.evaluate(async()=>{
    document.body.replaceChildren();const host=document.createElement('main');document.body.append(host);
    const {mountSharedCuts}=await import('/opt-digital/shared-cuts.js');
