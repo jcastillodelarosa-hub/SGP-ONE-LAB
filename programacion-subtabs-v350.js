@@ -32,10 +32,10 @@ const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const qty=v=>Number(v)||0;
 const fmt=v=>Math.round(v).toLocaleString('es-CO');
 const names=[['resumen','▦ Resumen'],['calendario','▣ Calendario'],['reservas','▤ Reservas'],['ordenes','☷ Órdenes'],['carga','▥ Carga por sistema'],['conflictos','⚠ Conflictos']];
-let active='resumen',busy=false,programmingLoading=false,programmingError='';
-window.addEventListener('sgp:programming-loading',()=>{programmingLoading=true;programmingError='';physicalKey='';physicalGeneration++;physicalCache=null;if(active==='resumen')render()});
-window.addEventListener('sgp:programming-loaded',()=>{programmingLoading=false;programmingError='';syncWeekSelection();operationalCache=null;operationalKey='';operationalGeneration++;physicalKey='';physicalGeneration++;physicalCache=null;if(active==='resumen'){weekDemandKey='';refreshWeekDemand()}else if(!['reservas','calendario'].includes(active))render()});
-window.addEventListener('sgp:programming-error',event=>{programmingLoading=false;programmingError=String(event.detail?.message||'No fue posible cargar Programación');if(active==='resumen')render()});
+let active='resumen',busy=false,programmingLoading=false,programmingError='',programmingErrorCode='',confirmedWeekOptions=[];
+window.addEventListener('sgp:programming-loading',()=>{programmingLoading=true;programmingError='';programmingErrorCode='';physicalKey='';physicalGeneration++;physicalCache=null;if(active==='resumen')render()});
+window.addEventListener('sgp:programming-loaded',()=>{programmingLoading=false;programmingError='';programmingErrorCode='';confirmedWeekOptions=[];syncWeekSelection();operationalCache=null;operationalKey='';operationalGeneration++;physicalKey='';physicalGeneration++;physicalCache=null;if(active==='resumen'){weekDemandKey='';refreshWeekDemand()}else if(!['reservas','calendario'].includes(active))render()});
+window.addEventListener('sgp:programming-error',event=>{programmingLoading=false;programmingError=String(event.detail?.message||'No fue posible cargar Programación');programmingErrorCode=String(event.detail?.code||'');confirmedWeekOptions=Array.isArray(event.detail?.confirmedWeeks)?event.detail.confirmedWeeks:[];syncWeekSelection();if(active==='resumen')render()});
 function table(head,rows){return '<div class="sgp-prog-table-wrap"><table class="sgp-prog-table"><thead><tr>'+head.map(h=>'<th>'+esc(h)+'</th>').join('')+'</tr></thead><tbody>'+rows.map(row=>'<tr>'+row.map(v=>'<td>'+esc(v)+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>'}
 function getRows(){return window.SGPWeeklyDemand?.()||[]}
 function getSchedule(){return (window.SGPWeeklySchedule?.()||[]).filter(x=>x.estado!=='CANCELADA')}
@@ -53,7 +53,7 @@ function weekMonday(d){const x=new Date(d+'T12:00:00');x.setDate(x.getDate()-(x.
 function dateKey(d){return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')}
 function getProgrammingWeek(x){for(const k of ['semana_programacion','semana_prog','semana_origen','semana']){const n=Number(x[k]);if(Number.isInteger(n)&&n>=1&&n<=53)return n}return null}
 function programmingWeekOptions(){
- return [...new Set([...getSchedule().map(getProgrammingWeek),...getRows().map(getProgrammingWeek),...weekDemandRows.map(getProgrammingWeek),...Array.from(document.querySelector('#progWeek')?.options||[],o=>Number(o.value)),...selectedWeeks].filter(n=>Number.isInteger(n)&&n>=1&&n<=53))].sort((a,b)=>a-b);
+ return [...new Set([...confirmedWeekOptions.map(Number),...getSchedule().map(getProgrammingWeek),...getRows().map(getProgrammingWeek),...weekDemandRows.map(getProgrammingWeek),...Array.from(document.querySelector('#progWeek')?.options||[],o=>Number(o.value)),...selectedWeeks].filter(n=>Number.isInteger(n)&&n>=1&&n<=53))].sort((a,b)=>a-b);
 }
 function syncWeekSelection(){
  const options=programmingWeekOptions(),chosen=Number(document.querySelector('#progWeek')?.value)||null;
@@ -116,7 +116,14 @@ function physicalSection(){
  const grid=physicalMode==='chart'?'<div class="sgp360-chart">'+ordered.map(r=>'<article><h4>'+esc(r.system)+'</h4><p>'+columns.filter(([k])=>k!=='system').map(([key,label])=>label+': <b>'+esc(value(r,key))+'</b>').join(' · ')+'</p>'+bar(r)+details(r)+detail(r)+'</article>').join('')+'</div><p class="sgp360-total" data-physical-footer>Total: '+columns.filter(([k])=>k!=='system').map(([key,label])=>label+' '+esc(value(total,key))).join(' · ')+'</p>':'<table class="sgp359-table"><caption>Barra única anidada; recibidas y procesadas no se suman.</caption><thead><tr>'+columns.map(([key,label])=>'<th scope="col" aria-sort="'+(physicalSort===key?(physicalDescending?'descending':'ascending'):'none')+'"><button type="button" data-physical-sort="'+key+'">'+label+'</button></th>').join('')+'<th scope="col">Avance anidado</th></tr></thead><tbody>'+ordered.map(r=>'<tr>'+columns.map(([key,label])=>'<td data-label="'+label+'">'+esc(value(r,key))+(key==='system'?details(r):'')+'</td>').join('')+'<td class="sgp360-barcell" data-label="Avance anidado">'+bar(r)+'</td></tr>'+(physicalExpanded===r.system?'<tr class="sgp-progress-detail-row"><td colspan="'+(columns.length+1)+'">'+detail(r)+'</td></tr>':'')).join('')+'</tbody><tfoot><tr data-physical-footer>'+columns.map(([key,label])=>'<td data-label="'+label+'">'+(key==='system'?'Total':esc(value(total,key)))+'</td>').join('')+'<td>Porcentajes sobre totales agregados</td></tr></tfoot></table>';
  return title+warning+audit+metrics+select+grid+legend+(!rows.length?'<p role="status">Sin producciones base para los filtros. Lecturas completadas.</p>':'')+'<p>La barra gris es la programación base; naranja y lila se superponen, no se acumulan. Pendientes = programadas − procesadas. La carga por fecha/turno sigue separada en el calendario.</p></section>';
 }
+function programmingUnavailable(){
+ const weeks=syncWeekSelection();
+ const reason=programmingLoading?'Cargando Programación…':programmingErrorCode==='57014'?'La consulta tardó demasiado. No se completó la carga.':'No se pudo cargar Programación: '+programmingError;
+ const choices=weeks.map(w=>'<label class="sgp351-weekcheck"><input type="checkbox" data-sgp351-week="'+w+'" '+(selectedWeeks.has(w)?'checked':'')+'> Semana '+w+'</label>').join('');
+ return '<section class="sgp351"><h2>Programación semanal</h2><p role="'+(programmingLoading?'status':'alert')+'">'+esc(reason)+'</p><p>No se muestran totales ni disponibilidad hasta completar la consulta.</p>'+(choices?'<fieldset><legend>Semanas conocidas</legend>'+choices+'</fieldset>':'<p>Semanas pendientes de consulta.</p>')+'<button type="button" data-sgp351-refresh '+(programmingLoading?'disabled':'')+'>Actualizar</button></section>';
+}
 function weeklyDashboard(){
+ if(programmingLoading||programmingError)return programmingUnavailable();
  const all=getSchedule().filter(x=>/^\d{4}-\d\d-\d\d$/.test(String(x.fecha_programacion||'').slice(0,10)));
  const options=syncWeekSelection();
  const demandByReservation=getReservationWeeks();
@@ -185,7 +192,7 @@ function render(){
  if(active==='resumen'&&!operationalCache){root.querySelectorAll('.sgp351-cards,.sgp351-board').forEach(node=>node.hidden=true);}
  root.querySelectorAll('[data-sgp-weekly]').forEach(b=>b.addEventListener('click',weekly));
  root.querySelector('[data-sgp351-system]')?.addEventListener('change',e=>{weeklySystem=e.target.value;render()});
- root.querySelectorAll('[data-sgp351-week]').forEach(c=>c.addEventListener('change',()=>{weeklyDropdownOpen=true;const w=Number(c.dataset.sgp351Week);if(c.checked)selectedWeeks.add(w);else selectedWeeks.delete(w);weeklyAnchor='';weeklySystem='';refreshWeekDemand()}));
+ root.querySelectorAll('[data-sgp351-week]').forEach(c=>c.addEventListener('change',()=>{weeklyDropdownOpen=true;const w=Number(c.dataset.sgp351Week);if(c.checked)selectedWeeks.add(w);else selectedWeeks.delete(w);weeklyAnchor='';weeklySystem='';if(programmingLoading||programmingError)render();else refreshWeekDemand()}));
  root.querySelectorAll('[data-sgp351-prev],[data-sgp351-next]').forEach(b=>b.addEventListener('click',()=>{const d=weekMonday(weeklyAnchor);d.setDate(d.getDate()+(b.hasAttribute('data-sgp351-next')?7:-7));weeklyAnchor=dateKey(d);render()}));
  root.querySelectorAll('[data-sgp351-day]').forEach(button=>button.addEventListener('click',()=>{const rows=(operationalCache?.rows||[]).filter(x=>selectedWeeks.has(resolveProgrammingWeek(x,getReservationWeeks()))&&(!weeklySystem||String(x.sistema||'SIN SISTEMA').trim()===weeklySystem));window.SGPOpenOperationalDetail?.({date:button.dataset.sgp351Day,shift:button.dataset.sgp351Shift,rows,notes:operationalCache?.notes||[]});}));
  root.querySelector('[data-sgp351-close]')?.addEventListener('click',()=>root.querySelector('#sgp351Modal')?.close());
