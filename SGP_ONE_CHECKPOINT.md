@@ -1,3 +1,13 @@
+## 2026-11-17 — Ajuste escritorio PDT · candidata LAB v472
+Referencia: imagen de Pendientes de aluminio / Por validar a zoom 67%.
+Solo puntero fino con hover y viewport >=900px: contenido usa ancho disponible,
+tabla fluida con ajuste multilínea; mínimo 1100px mantiene legibilidad a zoom extremo.
+No se ocultan columnas ni cambian datos/acciones. Móvil conserva CSS anterior.
+npm test: 1426 PASS / 10 omitidas; build:vendor y verify:release PASS.
+Prueba navegador local bloqueada por socket EPERM aun con escalación; no publicada.
+Prueba adicional tests/pdt-desktop-zoom-browser.py cubre anchos equivalentes a zoom
+67/100/125/150/200% sobre 1920px y móvil 390px. Requiere ejecutor Chromium operativo.
+
 ## 2026-11-17 — LAB v471 · corrección de impacto, candidata
 
 PR289 solicita impacto explícito al ACEPTAR un PDT sin dato en Paneles.
