@@ -60,6 +60,7 @@ export function mountSharedCuts(container,{api,catalogApi=null,documentApi=null,
     register.disabled=!canWrite||selected.size===0;reload.disabled=!api||!group||busy||loading;
     retry.hidden=!pending;retry.disabled=!api||busy||loading||!registrationAllowed()||group.reservation!==pending?.reserva||pending?.version!==2||!sameScope(group.scope,pending?.scope)||!!journalError;
     count.textContent=`${selected.size} piezas seleccionadas.`;
+    if(selected.size)count.textContent+=' Actualización automática pausada mientras preparas el registro; Actualizar estado descarta la selección.';
     if(group&&!registrationAllowed())count.textContent+=' Sin vínculo de piezas verificado por el servidor para este PDF. El índice por sí solo no habilita registros ni reintentos.';
     if(pending?.version===1)count.textContent+=' Hay una operación del contrato anterior sin confirmar. No se convierte automáticamente al contrato nuevo; requiere comprobar su recibo original.';
     else if(pending)count.textContent+=` Hay una operación pendiente de ${pending.piezas.length} piezas para reserva ${pending.reserva}. Conserva su identificador y reintenta la misma operación.`;
@@ -115,7 +116,7 @@ export function mountSharedCuts(container,{api,catalogApi=null,documentApi=null,
     navigation.scrollTop=navigationScroll;controls();onProgress(group,optPieceProgress(scoped.flatMap(r=>r.piezas),{known:ledgerKnown}));return references;
   }
   async function refresh(){
-    if(closed||busy)return;const request=++epoch;try{pending=journal.read()||pending;journalError='';}catch(e){journalError=e.message;}state=null;documentReferences=[];documentError='';documentApi?.invalidate();loading=true;render();
+    if(closed||busy||loading)return;const request=++epoch;try{pending=journal.read()||pending;journalError='';}catch(e){journalError=e.message;}state=null;documentReferences=[];documentError='';documentApi?.invalidate();loading=true;render();
     if(!api||!group){loading=false;message(!api?'Backend compartido no disponible. Las revisiones locales no registran fabricación.':'Selecciona una reserva del índice para consultar el estado compartido.');controls();return;}
     const target={...group};message('Consultando el manifiesto y los cortes guardados…');
     try{const [cutResult,documentResult]=await Promise.allSettled([api.estado(target.reservation,target.scope),group.origin==='SERVIDOR'&&documentApi?documentApi.load(group):Promise.resolve([])]);if(closed||request!==epoch)return;if(cutResult.status==='fulfilled')state=cutResult.value;else documentError='Estado de cortes no disponible; registro bloqueado. ';if(documentResult.status==='fulfilled')documentReferences=documentResult.value;else documentError+='Consulta documental completa no disponible; se muestran solo referencias del ámbito autorizado. ';if(!state&&!documentReferences.length)throw cutResult.reason||documentResult.reason;loading=false;const refs=render();if(!refs.length)message(documentError+'No hay un manifiesto aprobado que coincida exactamente con esta reserva, origen, sistema y OPT. No se acredita un saldo cero.');else if(!state)message(documentError+`Documento completo: ${refs.length} referencias. Saldo de cortes sin confirmar.`);else {const pieces=refs.flatMap(r=>r.piezas),done=pieces.filter(p=>p.estado==='CORTADO').length;message(`${documentError}${documentReferences.length?'Documento completo: '+documentReferences.length+' referencias. ':''}${done} cortadas y ${pieces.length-done} pendientes en el ámbito de corte autorizado.${state?.puede_registrar===true?'':' Tu acceso permite consultar, no registrar.'}`);}}
@@ -133,5 +134,18 @@ export function mountSharedCuts(container,{api,catalogApi=null,documentApi=null,
   yes.onclick=async()=>{if(!prepared||busy||register.disabled)return;const command=prepared;prepared=null;try{journal.save(command);pending=command;}catch(e){journalError=e.message;confirm.hidden=true;controls();message('No se envió el registro: '+e.message);return;}await submit(command);};
   retry.onclick=async()=>{if(retry.disabled)return;await submit(pending,true);};reload.onclick=refresh;
   controls();message('Selecciona una reserva para consultar el estado compartido.');
-  return {select(next,files=[]){if(closed)return;documents=files;const changed=JSON.stringify(group)!==JSON.stringify(next);group=next;if(changed){search.value='';activeReference=null;epoch++;state=null;selected.clear();confirm.hidden=true;prepared=null;return refresh();}if(!busy&&!loading)render(false);},refresh,destroy(){mobileQuery?.removeEventListener?.('change',resizeRail);documentApi?.invalidate();onReference(null,null);matrix.destroy();closed=true;epoch++;prepared=null;selected.clear();panel.remove();}};
+  // Read-only synchronization. Never interrupt a selection, confirmation or uncertain write.
+  const doc=container.ownerDocument,win=doc.defaultView;
+  async function autoRefresh(){
+    if(closed||!group||!api||doc.visibilityState==='hidden'||busy||loading||prepared||selected.size||pending||journalError)return;
+    // Do not interrupt search or an enlarged profile matrix.
+    if(doc.activeElement===search||panel.querySelector('dialog[open]'))return;
+    const scroll=rows.scrollTop,target=group;
+    await refresh();
+    if(!closed&&group===target)rows.scrollTop=scroll;
+  }
+  const onVisible=()=>{if(doc.visibilityState!=='hidden')void autoRefresh();};
+  win?.addEventListener('focus',onVisible);doc.addEventListener('visibilitychange',onVisible);
+  const refreshTimer=win?.setInterval(()=>void autoRefresh(),20000);
+  return {select(next,files=[]){if(closed)return;documents=files;const changed=JSON.stringify(group)!==JSON.stringify(next);group=next;if(changed){search.value='';activeReference=null;epoch++;loading=false;state=null;selected.clear();confirm.hidden=true;prepared=null;return refresh();}if(!busy&&!loading)render(false);},refresh,destroy(){if(refreshTimer!==undefined)win?.clearInterval(refreshTimer);win?.removeEventListener('focus',onVisible);doc.removeEventListener('visibilitychange',onVisible);mobileQuery?.removeEventListener?.('change',resizeRail);documentApi?.invalidate();onReference(null,null);matrix.destroy();closed=true;epoch++;prepared=null;selected.clear();panel.remove();}};
 }
