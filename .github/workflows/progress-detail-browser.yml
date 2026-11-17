@@ -1,0 +1,31 @@
+name: Mecanizado inline detail (isolated)
+on:
+  pull_request:
+    paths:
+      - 'src/modules/mecanizado-progress-detail.js'
+      - 'programacion-subtabs-v350.js'
+      - 'styles.css'
+      - 'tests/progress-detail-browser/**'
+      - '.github/workflows/progress-detail-browser.yml'
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - run: python3 -m pip install playwright==1.56.0
+      - name: Synthetic desktop/mobile detail, state and consultation flows
+        env:
+          DETAIL_CHROMIUM: /usr/bin/google-chrome
+          DETAIL_QA_OUT: ${{ runner.temp }}/progress-detail
+        run: python3 tests/progress-detail-browser/browser.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: progress-detail-${{ github.sha }}
+          path: ${{ runner.temp }}/progress-detail
+          retention-days: 7

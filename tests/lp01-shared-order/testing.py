@@ -8,6 +8,10 @@ def install(db):
  db.sql('CREATE TABLE public.sgp_nc_vidrio(consecutivo text PRIMARY KEY,estado_nc text,activo boolean NOT NULL,fecha_actualizacion timestamptz NOT NULL,orden text,linea_afectada text);CREATE TABLE public.sgp_accesorios(id_accesorio text PRIMARY KEY,key_produccion text,codigo_sap text,descripcion text,cantidad numeric,unidad text)')
  db.sql((ROOT/'docs/sql-proposals/lp01-shared-order/01_definition_REVIEW.sql').read_text())
  db.sql((ROOT/'docs/sql-proposals/lp01-shared-order/02_activate_REVIEW.sql').read_text())
+ # Match the current application contract in this isolated synthetic backend.
+ # Apply reviewed migrations unchanged so dependency/ACL guards still execute.
+ db.sql((ROOT/'docs/sql-proposals/lp01-window-balance/01_patch_REVIEW.sql').read_text())
+ db.sql((ROOT/'docs/sql-proposals/lp01-numero-novedad/01_install_REVIEW.sql').read_text())
  db.sql('GRANT EXECUTE ON FUNCTION public.sgp_lp_order_details_read_v1(text,text,text),public.sgp_lp_order_note_save_v1(text,text,text,jsonb) TO anon;UPDATE sgp_lp_order_details.config SET writes=true')
 def rpc(db,name,args):
  assert name in RPCS
