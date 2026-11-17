@@ -30,7 +30,7 @@ export function filterReceptionRows(rows,{search='',state=''}={}){return rows.fi
 const knownQuantity=value=>value!==null&&value!==undefined&&value!==''&&Number.isFinite(Number(value))&&Number(value)>=0;
 const orderKey=row=>JSON.stringify([row.key_produccion||row.key_produccion_parte||row.id_programacion,(row.key_produccion||row.key_produccion_parte)?'':row.produccion,row.sistema]);
 // Current scheduled quantity is not a historical receipt quantity.
-export function receptionQuantities(row){
+export function historicalReceptionQuantities(row){
  const total=knownQuantity(row.cantidad_programada)?Number(row.cantidad_programada):null;
  const pending=row.pendientes_al_recibir;
  if(!Array.isArray(pending))return {total,afectadas:null,efectiva:null,estimada:false};
@@ -44,15 +44,22 @@ export function receptionQuantities(row){
  // Different missing profiles may affect the same panels; no panel identities exist in this snapshot.
  return {total,afectadas:affected,efectiva:total===null?null:Math.max(0,total-affected),estimada:count>1||(total!==null&&affected>total)};
 }
+export function receptionQuantities(row){
+ const historical=historicalReceptionQuantities(row),c=row.impacto_complementario;
+ if(c?.fuente!=='COMPLEMENTO_POSTERIOR')return historical;
+ const n=knownQuantity(c.total_consolidado)?Number(c.total_consolidado):null;
+ const valid=n!==null&&Number.isSafeInteger(n)&&n>=1;
+ return {total:historical.total,afectadas:valid?n:null,efectiva:valid&&historical.total!==null&&n<=historical.total?historical.total-n:null,estimada:false,actualizada:true};
+}
 export function summarizeReceptionQuantities(rows=[]){
  const orders=new Map();
  for(const row of rows){const key=orderKey(row),old=orders.get(key);
   // One quantity per order; latest recorded reception supplies the impact snapshot.
   if(!old||String(row.registrado_en||'')>String(old.registrado_en||''))orders.set(key,row);
  }
- let total=0,efectiva=0,sin_total=0,sin_efectiva=0,estimadas=0;
- for(const row of orders.values()){const q=receptionQuantities(row);if(q.total===null)sin_total++;else total+=q.total;if(q.efectiva===null)sin_efectiva++;else efectiva+=q.efectiva;if(q.estimada)estimadas++;}
- return {total:sin_total?null:total,efectiva:sin_efectiva?null:efectiva,sin_total,sin_efectiva,estimadas};
+ let total=0,efectiva=0,sin_total=0,sin_efectiva=0,estimadas=0,actualizadas=0;
+ for(const row of orders.values()){const q=receptionQuantities(row);if(q.total===null)sin_total++;else total+=q.total;if(q.efectiva===null)sin_efectiva++;else efectiva+=q.efectiva;if(q.estimada)estimadas++;if(q.actualizada)actualizadas++;}
+ return {total:sin_total?null:total,efectiva:sin_efectiva?null:efectiva,sin_total,sin_efectiva,estimadas,actualizadas};
 }
 export function summarizeReceptions(rows=[]){
  const systems=new Map(),dateShifts=new Map(),orders=new Set();
@@ -76,7 +83,18 @@ export function summarizeReceptions(rows=[]){
 }
 export function receptionCsv(rows){
  const cell=value=>'"'+String(value??'').replace(/^[=+@\-\t\r]/,"'$&").replaceAll('"','""')+'"';
- const lines=[['Semana programada','Orden','Reserva','Sistema','Fecha operativa recepción','Turno recepción','Registrado en','Entregó','Recibió','Estado al recibir','Pendientes al recibir','Ventanas recibidas','Fuente ventanas','Cantidad programada','Paneles afectados al recibir','Cantidad efectiva','Cálculo efectivo']];
- for(const row of rows)lines.push([row.semana_programada??'Sin dato',row.produccion,row.reserva,row.sistema,row.fecha_recepcion||'Sin dato',row.turno_recepcion||'Sin dato',row.registrado_en||'Sin dato',row.nombre_entrego||row.usuario_entrega||'Sin dato',row.nombre_recibio||row.usuario_recepcion||'Sin dato',row.completa_al_recibir===true?'Completa':row.completa_al_recibir===false?'Incompleta':'Sin evidencia histórica',Array.isArray(row.pendientes_al_recibir)?row.pendientes_al_recibir.map(p=>[p.cantidad,p.perfil||p.referencia,p.observacion].filter(x=>x!=null).join(' · ')).join(' | ')||'Sin pendientes reportados':'Sin evidencia histórica',row.fuente_ventanas&&knownQuantity(row.cantidad_ventanas_recibidas)?row.cantidad_ventanas_recibidas:'Sin dato',row.fuente_ventanas||'Sin evidencia',receptionQuantities(row).total??'Sin dato',receptionQuantities(row).afectadas??'Sin dato',receptionQuantities(row).efectiva??'Sin dato',receptionQuantities(row).estimada?'Estimado: posible solapamiento':'Total menos afectados']);
+ const lines=[['Semana programada','Orden','Reserva','Sistema','Fecha operativa recepción','Turno recepción','Registrado en','Entregó','Recibió','Estado al recibir','Pendientes al recibir','Ventanas recibidas','Fuente ventanas','Cantidad programada','Paneles afectados al recibir','Cantidad efectiva','Cálculo efectivo','Fuente del cálculo','Fecha del complemento','Paneles afectados al recibir (original)','Efectiva calculada sin complemento']];
+ for(const row of rows)lines.push([row.semana_programada??'Sin dato',row.produccion,row.reserva,row.sistema,row.fecha_recepcion||'Sin dato',row.turno_recepcion||'Sin dato',row.registrado_en||'Sin dato',row.nombre_entrego||row.usuario_entrega||'Sin dato',row.nombre_recibio||row.usuario_recepcion||'Sin dato',row.completa_al_recibir===true?'Completa':row.completa_al_recibir===false?'Incompleta':'Sin evidencia histórica',Array.isArray(row.pendientes_al_recibir)?row.pendientes_al_recibir.map(p=>[p.cantidad,p.perfil||p.referencia,p.observacion].filter(x=>x!=null).join(' · ')).join(' | ')||'Sin pendientes reportados':'Sin evidencia histórica',row.fuente_ventanas&&knownQuantity(row.cantidad_ventanas_recibidas)?row.cantidad_ventanas_recibidas:'Sin dato',row.fuente_ventanas||'Sin evidencia',receptionQuantities(row).total??'Sin dato',receptionQuantities(row).afectadas??'Sin dato',receptionQuantities(row).efectiva??'Sin dato',receptionQuantities(row).estimada?'Estimado: posible solapamiento':'Total menos afectados',row.impacto_complementario?.fuente==='COMPLEMENTO_POSTERIOR'?'ACTUALIZADO_CON_COMPLEMENTO':'LEDGER_AUDITORIA',row.impacto_complementario?.registrado_en||'',historicalReceptionQuantities(row).afectadas??'Sin dato',historicalReceptionQuantities(row).efectiva??'Sin dato']);
  return '\ufeff'+lines.map(line=>line.map(cell).join(';')).join('\r\n');
+}
+
+// Missing impact is not a missing PDT. Do not substitute piece quantities for panels.
+export function receptionQuantityMissingLabel(row,key){
+ const q=receptionQuantities(row);
+ if(q[key]!==null)return '';
+ if(q.actualizada&&key!=='total')return row.impacto_complementario?.total_consolidado==null?'Pendiente de consolidar':'Revisar cantidad actual';
+ if(key==='total')return 'Cantidad no vinculada';
+ if(!Array.isArray(row.pendientes_al_recibir))return 'Sin registro histórico';
+ if(row.pendientes_al_recibir.some(p=>!knownQuantity(p.ventanas_afectadas)))return key==='afectadas'?'Paneles sin registrar':'Por calcular';
+ return key==='efectiva'&&q.total===null?'Cantidad no vinculada':'Revisar afectaciones';
 }

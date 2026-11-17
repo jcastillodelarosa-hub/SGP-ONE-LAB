@@ -1,3 +1,12 @@
+## 2026-11-17 — LAB v471 · corrección de impacto, candidata
+
+PR289 solicita impacto explícito al ACEPTAR un PDT sin dato en Paneles.
+Complementos posteriores autorizados solo Admin/Coordinador, con motivo y trazabilidad;
+originales conservados y cálculo actualizado rotulado. No rellena históricos.
+Pruebas sintéticas DOM, navegador PC/móvil, permisos y concurrencia PostgreSQL PASS.
+Publicación autorizada; respaldo fresco recuperable y guardas SQL obligatorios antes
+de aplicación única. CI final, migración y Hosting se verifican por separado.
+
 ## 2026-11-17 — Consolidado LAB v470 · candidato no publicado
 
 PR288 reúne PR285 (refresco OPT), PR286 (estado de auditoría por sección) y

@@ -121,3 +121,5 @@
 #pickReceptionReportRows td:nth-child(10)>div+div{margin-top:8px}
 #pickReceptionReportRows td small{font-weight:400}
 .pick-report-column-menu [hidden]{display:none!important}
+
+.pick-impact-complement{width:min(600px,calc(100vw - 32px));max-height:90dvh;overflow:auto;padding:20px;border:1px solid #b9d0ed;border-radius:12px}.pick-impact-complement::backdrop{background:#10294580}.pick-impact-complement form,.pick-impact-complement label{display:grid;gap:8px}.pick-impact-complement form{gap:16px}.pick-impact-complement input,.pick-impact-complement textarea{min-height:42px;width:100%;box-sizing:border-box}.pick-impact-complement [data-status]{white-space:normal}

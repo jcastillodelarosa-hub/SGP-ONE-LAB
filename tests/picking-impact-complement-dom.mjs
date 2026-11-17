@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict';
+const {JSDOM}=await import(process.env.JSDOM_MODULE||'jsdom');
+const dom=new JSDOM('<button id="origin">Origin</button>',{url:'https://example.test'});global.document=dom.window.document;
+dom.window.HTMLDialogElement.prototype.showModal=function(){this.open=true;};dom.window.HTMLDialogElement.prototype.close=function(){this.open=false;};
+const {openPickingImpactComplement}=await import('../src/modules/picking-impact-complement.js');
+let writes=0;
+let modal=await openPickingImpactComplement({idEntrega:'synthetic',rpc:async()=>({ok:true,contract_version:1,pendientes:[],can_complement:false})});assert.equal(modal.querySelector('form'),null);modal.querySelector('[data-close]').click();
+modal=await openPickingImpactComplement({idEntrega:'synthetic',rpc:async(name,args)=>{if(name.endsWith('contexto'))return {ok:true,contract_version:1,pendientes:[{id_faltante:'f1',id_pendiente:'p1',perfil:'DEMO',ventanas_afectadas:null}],can_complement:true,cantidad_programada:4};writes++;assert.equal(args.p_detalle.faltantes[0].ventanas_afectadas,2);assert.equal(args.p_detalle.total_consolidado,2);assert.ok(args.p_id_solicitud);return {ok:true};}});
+const form=modal.querySelector('form');assert.equal(form.querySelector('[data-impact]').value,'');form.querySelector('[data-impact]').value='2';form.elements.motivo.value='Confirmed synthetic count';form.dispatchEvent(new dom.window.Event('submit',{cancelable:true}));await new Promise(r=>setTimeout(r,10));assert.equal(writes,1);form.dispatchEvent(new dom.window.Event('submit',{cancelable:true}));await new Promise(r=>setTimeout(r,10));assert.equal(writes,1);modal.querySelector('[data-close]').click();
+console.log('PASS: permissions gate, blank input, explicit per-item impact, one-item total, single submission');
