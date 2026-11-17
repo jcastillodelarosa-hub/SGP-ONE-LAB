@@ -1,3 +1,13 @@
+## 2026-11-17 — Consolidado LAB v470 · candidato no publicado
+
+PR288 reúne PR285 (refresco OPT), PR286 (estado de auditoría por sección) y
+PR287 (alertas de accesorios multiselección), sobre main v469 4dd702ae.
+Integración sin conflictos de app.js/styles.css; pins y política Hosting intactos.
+Pruebas individuales aprobadas; CI combinada y publicación pendientes.
+Aplicación SQL es operación separada coordinada: no ejecutada por el release.
+No publicar hasta cierre verificado de dependencias SQL y autorización final.
+Después: un único merge a main, revisar Hosting, versión visible y sello exacto.
+
 ## 2026-11-17 — Informe Recepciones · candidata LAB v469
 
 PR284 integrado sobre main v468. Semana de programación primera columna, filtros y

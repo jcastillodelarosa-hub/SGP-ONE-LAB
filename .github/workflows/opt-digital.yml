@@ -64,6 +64,7 @@ jobs:
           node tests/opt-digital/scope-panel-dom.cjs
           node tests/opt-digital/native-session-dom.cjs
           node tests/opt-digital/shared-workflow-dom.cjs
+          node tests/opt-digital/shared-refresh-dom.cjs
           node tests/opt-digital/shared-reference-navigation-dom.cjs
           node tests/opt-digital/document-read-dom.cjs
           node tests/opt-digital/shared-scheme-dom.cjs
@@ -159,6 +160,7 @@ jobs:
           node tests/opt-digital/resolution-browser.cjs
           node tests/opt-digital/approved-ui-browser.cjs
           node tests/opt-digital/shared-workflow-browser.cjs
+          node tests/opt-digital/shared-refresh-browser.cjs
           node tests/opt-digital/import-upload-browser.cjs
           node tests/opt-digital/rounding-warning-browser.cjs
           node tests/opt-digital/local-review-browser.cjs

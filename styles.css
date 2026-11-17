@@ -2994,6 +2994,7 @@ table.glass-burro-table th:not(:first-child){width:36%}
 /* Accessory notices: shared by existing order views. */
 .sgp-accessory-alert{display:flex;flex-wrap:wrap;gap:4px 8px;margin:4px 0;padding:5px 8px;border-left:3px solid #2363a0;background:#edf5ff;color:#163d66;font-size:12px;line-height:1.4;white-space:normal;overflow-wrap:anywhere;max-width:100%;text-align:left}
 .sgp-accessory-alert.unavailable{color:#79500a;background:#fff6df}
+.sgp-accessory-options{max-height:300px;overflow:auto;border:1px solid #b7cee9;border-radius:7px;background:#fff}.sgp-accessory-form .sgp-accessory-choice{display:flex;align-items:center;gap:10px;padding:10px;border-bottom:1px solid #e2eaf4}.sgp-accessory-choice b{color:#123c69}.sgp-accessory-choice small{display:block;color:#52677d}.sgp-accessory-choice input{width:18px;height:18px;flex-shrink:0}[data-alert-selected]{font-size:.9em;color:#335d85;overflow-wrap:anywhere}
 .sgp-accessory-form{display:grid;gap:12px;margin-top:12px;max-width:760px}
 .sgp-accessory-form label{display:grid;gap:5px}
 .sgp-accessory-form select,.sgp-accessory-form textarea,[data-alert-search]{width:100%;min-width:0;box-sizing:border-box;padding:9px;border:1px solid #b7cee9;border-radius:7px;font:inherit}
@@ -3076,3 +3077,11 @@ table.glass-burro-table th:not(:first-child){width:36%}
 }
 
 :is(.pdt-registration-modal,.pdt-manual-modal) .piece-modal-head .eyebrow{color:var(--sgp-window-help)!important}
+
+/* Review completion is independent of missing material. */
+.pick-audit-progress{display:flex;flex-direction:column;gap:5px;margin-top:8px;font-size:12px;line-height:1.4}
+.pick-audit-progress>strong{color:#334155;font-size:11px}
+.pick-audit-progress-section{align-self:flex-start;border-radius:6px;padding:4px 7px;border:1px solid;font-weight:650;white-space:normal}
+.pick-audit-progress-section.audited{color:#166534;background:#f0fdf4;border-color:#bbf7d0}
+.pick-audit-progress-section.pending{color:#9a3412;background:#fff7ed;border-color:#fed7aa}
+.pick-audit-progress.unavailable{color:#64748b;max-width:240px}
