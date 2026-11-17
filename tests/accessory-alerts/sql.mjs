@@ -9,7 +9,7 @@ const denied=async(q,pattern)=>{await assert.rejects(()=>db.query(q),pattern);ch
 await db.exec(`CREATE ROLE anon; CREATE ROLE authenticated;
 CREATE TABLE sgp_producciones(id text,key_produccion text primary key);
 CREATE TABLE sgp_accesorios(codigo_sap text,descripcion text,id text,key_produccion text,estado_relacion_produccion text,activo text);
-CREATE FUNCTION sgp_validar_sesion_rol(token text,roles text[]) RETURNS text LANGUAGE plpgsql AS $$ BEGIN IF token='admin' AND 'ADMINISTRADOR'=ANY(roles) THEN RETURN 'fixture-admin'; END IF; RAISE EXCEPTION 'PERMISO_DENEGADO'; END $$;
+CREATE FUNCTION sgp_validar_sesion_rol(token text,roles text[]) RETURNS text LANGUAGE plpgsql AS $$ BEGIN IF token='coord' AND 'COORDINADOR'=ANY(roles) THEN RETURN 'fixture-coord'; END IF; IF token='admin' AND 'ADMINISTRADOR'=ANY(roles) THEN RETURN 'fixture-admin'; END IF; RAISE EXCEPTION 'PERMISO_DENEGADO'; END $$;
 CREATE FUNCTION fixture_source(token text) RETURNS jsonb LANGUAGE plpgsql AS $$ BEGIN IF token NOT IN ('admin','viewer') THEN RAISE EXCEPTION 'SOURCE_ACL_DENIED'; END IF;
  RETURN '{"filas":[{"key_produccion":"1|PANELES_2"},{"key_produccion":"1|FRAMES_2"},{"key_produccion":"2|PANELES_2"}],"catalog":{"productions":[{"key":"1|PANELES_2","oficial":{"key_produccion":"1|PANELES_2"}}]}}'; END $$;
 CREATE FUNCTION sgp_consultar_ensamble(text,integer,text) RETURNS jsonb LANGUAGE sql AS $$ SELECT public.fixture_source($1) $$;
@@ -25,6 +25,7 @@ INSERT INTO sgp_accesorios VALUES
 ('A','conflicting line','2','1|PANELES_2','RELACIONADO','SI'),('SECRET','hidden','hidden',NULL,'RELACIONADO','SI');`);
 const file=(await readdir('supabase/migrations')).find(x=>x.endsWith('_accessory_alert_rules.sql'));
 await db.exec(await readFile('supabase/migrations/'+file,'utf8'));
+await db.exec(await readFile('supabase/migrations/20261117010000_accessory_alert_multiselect.sql','utf8'));
 await db.exec('SET ROLE anon');
 await denied("select * from sgp_accessory_alerts.rules",/permission denied/);
 await denied("select sgp_accessory_alerts.decorate('{}','{}')",/permission denied/);
@@ -35,6 +36,19 @@ await denied("select sgp_alertas_accesorio_guardar('admin','A',' ',true,0)",/DAT
 await denied("select sgp_alertas_accesorio_guardar('admin','A',repeat('x',501),true,0)",/DATOS_INVALIDOS/);
 let catalog=(await sql("select sgp_alertas_accesorio_catalogo('admin') x"))[0].x;
 ok(catalog.length===4&&catalog.every(r=>r.revision===0),'catalog lists actual codes with no seeded rules');
+const batch=(token,codes,msg='Batch')=>db.query('select sgp_alertas_accesorio_guardar_lote($1,$2,$3,true) x',[token,JSON.stringify(codes),msg]);
+await assert.rejects(()=>batch('viewer',[{codigo_sap:'A',revision:0}]),/PERMISO_DENEGADO/);checks++;
+await assert.rejects(()=>batch('coord',[{codigo_sap:'A',revision:0},{codigo_sap:'G05',revision:0}]),/ACCESORIO_INEXISTENTE/);checks++;
+ok((await sql("select sgp_alertas_accesorio_catalogo('coord') x"))[0].x.every(r=>r.revision===0),'failed batch leaves zero rules');
+await assert.rejects(()=>batch('coord',[{codigo_sap:'A',revision:0},{codigo_sap:'A',revision:0}]),/CODIGOS_DUPLICADOS/);checks++;
+await assert.rejects(()=>batch('coord',[]),/DATOS_INVALIDOS/);checks++;
+await assert.rejects(()=>batch('coord',[{codigo_sap:'A',revision:null}]),/DATOS_INVALIDOS/);checks++;
+await assert.rejects(()=>batch('coord',Array.from({length:101},(_,i)=>({codigo_sap:'CODE'+i,revision:0}))),/DATOS_INVALIDOS/);checks++;
+const multi=(await batch('coord',[{codigo_sap:'A',revision:0},{codigo_sap:'B',revision:0}])).rows[0].x;
+ok(multi.length===2&&multi.every(r=>r.actualizado_por==='fixture-coord'),'coordinator saves chosen exact codes');
+await assert.rejects(()=>batch('coord',[{codigo_sap:'A',revision:1},{codigo_sap:'B',revision:0}],'Bad update'),/REGLA_MODIFICADA_RECARGAR/);checks++;
+ok((await sql("select sgp_alertas_accesorio_catalogo('coord') x"))[0].x.find(r=>r.codigo_sap==='A').mensaje==='Batch','stale revision rolls entire batch back');
+await db.exec('RESET ROLE; DELETE FROM sgp_accessory_alerts.rules; SET ROLE anon');
 for(const code of ['A','B','SECRET'])await sql(`select sgp_alertas_accesorio_guardar('admin','${code}','Notice ${code}',true,0)`);
 const read=async(source='sgp_consultar_ensamble',token='viewer',extra={})=>(await db.query('select sgp_alertas_accesorio_consultar($1,$2,$3) x',[token,source,JSON.stringify({p_linea:'PANELES_2',p_etapa:'ENSAMBLE',p_fecha:'2026-11-14',p_turno:1,...extra})])).rows[0].x;
 let data=await read();ok(data.filas[0].accessory_alerts.length===2,'cumulative, repeated accessory deduplicated');ok(data.filas[1].accessory_alerts.length===1,'null key applies to both lines, explicit key only selected line');ok(data.filas[2].accessory_alerts.length===0,'exact code + ID + line rejects prefixes, inactive and conflicting relationship');ok(!JSON.stringify(data).includes('SECRET'),'hidden order cannot leak');ok(data.catalog.productions[0].oficial.accessory_alerts.length===2,'nested catalog enriched');
@@ -50,6 +64,7 @@ await sql("select sgp_alertas_accesorio_guardar('admin','A','Edited',false,2)");
 await sql("select sgp_alertas_accesorio_guardar('admin','A','Edited',true,3)");ok((await read()).filas[0].accessory_alerts.length===2,'reactivation');
 await db.exec('RESET ROLE');
 // Test rollback guard directly in transaction, then clear synthetic data and execute full rollback.
+await db.exec(await readFile('docs/accessory-alerts/ROLLBACK_MULTISELECT.sql','utf8'));
 const rollback=await readFile('docs/accessory-alerts/ROLLBACK_REVIEW.sql','utf8');
 await assert.rejects(()=>db.exec(rollback),/RULES_EXIST/);checks++;await db.exec('ROLLBACK');
 await db.exec('DELETE FROM sgp_accessory_alerts.rules');await db.exec(rollback);checks++;

@@ -5,24 +5,42 @@ export function accessoryAlertsMarkup(row){
  if(!Array.isArray(alerts))return '';
  const seen=new Set();return alerts.filter(a=>a&&typeof a.codigo==='string'&&typeof a.mensaje==='string'&&!seen.has(a.codigo)&&seen.add(a.codigo)).map(a=>'<div class="sgp-accessory-alert"><b>'+esc(a.codigo)+'</b><span>'+esc(a.mensaje)+'</span></div>').join('');
 }
+const configMounts=new WeakMap();
 export async function mountAccessoryAlertConfig({host,client,token,getToken,canEdit}){
  if(!host)return;
- host.innerHTML='<div class="general-config-head"><div><b>Alertas por accesorio</b><span>El aviso aparece cuando la orden contiene el código SAP seleccionado. Se acumulan los avisos de sus accesorios.</span></div></div><p role="status">Cargando catálogo…</p>';
- const current=()=>host.isConnected&&token===getToken();
- if(!canEdit()){host.querySelector('[role=status]').textContent='Solo un administrador puede configurar estas alertas.';return;}
+ const mount=Symbol();configMounts.set(host,mount);
+ const current=()=>host.isConnected&&token===getToken()&&configMounts.get(host)===mount;
+ host.innerHTML='<h3>Alertas por accesorios</h3><p role="status">Cargando catálogo…</p>';
+ if(!canEdit()){host.querySelector('[role=status]').textContent='Requiere rol Administrador o Coordinador.';return;}
  try{
   const {data,error}=await client.rpc('sgp_alertas_accesorio_catalogo',{p_token:token});if(error)throw error;if(!current())return;
   if(!Array.isArray(data))throw Error('Catálogo incompatible');
-  host.innerHTML='<div class="general-config-head"><div><b>Alertas por accesorio</b><span>Coincidencia exacta por código SAP · avisos en Ensamble, Seguimiento y Programación.</span></div></div><label>Buscar accesorio <input type="search" data-alert-search placeholder="Código SAP o descripción"></label><form class="sgp-accessory-form"><label>Accesorio existente <select data-alert-code required></select></label><label>Texto / condición a mostrar <textarea data-alert-message maxlength="500" rows="3" required></textarea></label><label class="sgp-accessory-active"><input type="checkbox" data-alert-active> Regla activa</label><button class="primary" type="submit">Guardar regla</button></form><p role="status" aria-live="polite"></p>';
-  const select=host.querySelector('select'),message=host.querySelector('textarea'),active=host.querySelector('[data-alert-active]'),status=host.querySelector('[role=status]'),form=host.querySelector('form'),search=host.querySelector('[data-alert-search]');let rows=data,busy=false;
-  function paint(){const r=rows.find(r=>r.codigo_sap===select.value);message.value=r?.mensaje||'';active.checked=r?.revision?r.activa:true;status.textContent=r?(r.revision?(r.activa?'Regla activa':'Regla desactivada'):'Sin regla configurada'):'Sin accesorios coincidentes';form.querySelectorAll('input,textarea,button').forEach(x=>x.disabled=!r||!canEdit()||!current());}
-  function options(){const old=select.value,q=search.value.trim().toLocaleLowerCase();select.innerHTML=rows.filter(r=>[r.codigo_sap,r.descripcion].some(v=>String(v).toLocaleLowerCase().includes(q))).map(r=>'<option value="'+esc(r.codigo_sap)+'">'+esc(r.codigo_sap+' · '+r.descripcion+(r.revision?(r.activa?' · Activa':' · Desactivada'):''))+'</option>').join('');if([...select.options].some(o=>o.value===old))select.value=old;paint();}
-  search.oninput=options;select.onchange=paint;options();
-  form.onsubmit=async event=>{event.preventDefault();if(busy||!current()||!canEdit())return;const row=rows.find(r=>r.codigo_sap===select.value);if(!row)return;
-   const input={p_token:token,p_codigo:row.codigo_sap,p_mensaje:message.value,p_activa:active.checked,p_revision:row.revision};busy=true;host.querySelectorAll('input,textarea,select,button').forEach(x=>x.disabled=true);status.textContent='Guardando…';
-   try{const {data:saved,error}=await client.rpc('sgp_alertas_accesorio_guardar',input);if(error)throw error;if(!current())return;if(saved?.codigo_sap!==row.codigo_sap||!Number.isInteger(saved.revision))throw Error('Respuesta de guardado incompatible');Object.assign(row,saved);status.textContent='Regla guardada. Actualiza las vistas de órdenes para consultar los avisos vigentes.';}
-   catch(e){if(current())status.textContent='No se confirmó el guardado: '+(e.message||e)+'. Recarga la pestaña antes de reintentar.';}
-   finally{busy=false;if(current()){host.querySelectorAll('input,textarea,select,button').forEach(x=>x.disabled=!canEdit());}}
+  host.innerHTML='<h3>Alertas por accesorios</h3><form class="sgp-accessory-form"><label>Buscar accesorio<input type="search" data-alert-search placeholder="Código SAP o descripción"></label><div class="sgp-accessory-options" data-alert-options></div><strong data-alert-count></strong><div data-alert-selected></div><label>Mensaje de alerta<textarea data-alert-message maxlength="500" rows="3" required></textarea></label><label class="sgp-accessory-active"><input type="checkbox" data-alert-active> Alerta activa</label><label class="sgp-accessory-active" data-alert-replace-wrap hidden><input type="checkbox" data-alert-replace> Reemplazar las reglas existentes de los códigos seleccionados</label><button class="primary" type="submit" disabled>Guardar alerta</button></form><p role="status" aria-live="polite"></p>';
+  const find=q=>host.querySelector(q),selected=new Set(),rows=data;
+  const message=find('textarea'),active=find('[data-alert-active]'),status=find('[role=status]'),form=find('form'),search=find('[data-alert-search]'),replace=find('[data-alert-replace]');let busy=false,uncertain=false;
+  function render(){
+   const q=search.value.trim().toLocaleLowerCase(),matches=rows.filter(r=>[r.codigo_sap,r.descripcion].some(v=>String(v??'').toLocaleLowerCase().includes(q)));
+   find('[data-alert-options]').innerHTML=matches.length?matches.map(r=>'<label class="sgp-accessory-choice"><input type="checkbox" data-alert-code="'+esc(r.codigo_sap)+'" '+(selected.has(r.codigo_sap)?'checked':'')+'><span><b>'+esc(r.codigo_sap)+'</b> '+esc(r.descripcion)+(r.revision?' <small>Regla '+(r.activa?'activa':'inactiva')+'</small>':'')+'</span></label>').join(''):'<p>Sin coincidencias</p>';
+   find('[data-alert-count]').textContent=selected.size+' códigos seleccionados';find('[data-alert-selected]').textContent=[...selected].join(' · ');
+   const existing=rows.some(r=>selected.has(r.codigo_sap)&&r.revision>0);find('[data-alert-replace-wrap]').hidden=!existing;
+   form.querySelector('button').disabled=busy||uncertain||!selected.size||selected.size>100||!canEdit()||!current()||(existing&&!replace.checked);
+   find('[data-alert-options]').querySelectorAll('input').forEach(x=>x.disabled=busy||uncertain||!canEdit()||!current());
+  }
+  search.oninput=render;replace.onchange=render;
+  find('[data-alert-options]').onchange=e=>{const code=e.target.dataset.alertCode;if(!code||busy||uncertain||!canEdit()||!current())return;
+   const wasEmpty=selected.size===0;
+   if(e.target.checked)selected.add(code);else selected.delete(code);replace.checked=false;
+   if(wasEmpty&&selected.size===1){const row=rows.find(r=>selected.has(r.codigo_sap));message.value=row.mensaje||'';active.checked=row.revision?row.activa:false;}
+   status.textContent=selected.size>100?'Selecciona hasta 100 códigos.':'';render();};render();
+  form.onsubmit=async event=>{event.preventDefault();if(busy||uncertain||!current()||!canEdit()||!selected.size||selected.size>100)return;
+   const chosen=rows.filter(r=>selected.has(r.codigo_sap));if(chosen.some(r=>r.revision>0)&&!replace.checked)return;
+   if(!message.value.trim()||message.value.trim().length>500){status.textContent='Escribe un mensaje de hasta 500 caracteres.';return;}
+   const input={p_token:token,p_codigos:chosen.map(r=>({codigo_sap:r.codigo_sap,revision:r.revision})),p_mensaje:message.value.trim(),p_activa:active.checked};busy=true;host.querySelectorAll('input,textarea,button').forEach(x=>x.disabled=true);status.textContent='Guardando…';
+   try{const {data:saved,error}=await client.rpc('sgp_alertas_accesorio_guardar_lote',input);if(error)throw error;if(!current())return;
+    if(!Array.isArray(saved)||saved.length!==chosen.length||new Set(saved.map(r=>r.codigo_sap)).size!==chosen.length||saved.some(r=>!selected.has(r.codigo_sap)||!Number.isInteger(r.revision)))throw Error('Respuesta de guardado incompatible');
+    saved.forEach(r=>Object.assign(rows.find(x=>x.codigo_sap===r.codigo_sap),r));replace.checked=false;status.textContent='Alerta guardada para '+saved.length+' códigos.';
+   }catch(e){uncertain=true;if(current())status.textContent='No se confirmó el guardado. Recarga antes de reintentar. '+(e.message||e);}
+   finally{busy=false;if(current()){host.querySelectorAll('input,textarea,button').forEach(x=>x.disabled=uncertain||!canEdit());render();}}
   };
  }catch(e){if(current())host.querySelector('[role=status]').textContent='No se pudo cargar el catálogo. '+(e.code==='PGRST202'?'La migración de alertas está pendiente.':e.message);}
 }

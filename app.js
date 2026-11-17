@@ -425,7 +425,7 @@ async function applyUserAccess(auth,validatedToken=null){
    if(token!==getAppToken() || currentAuth!==auth)return;
    const access=(data||[]).map(x=>x.ventana);
    optDigitalHost.update({valid:auth?.valida===true,username:auth?.usuario,access});
-   buttons.forEach(b=>{const v=b.dataset.view;b.hidden=!(access.includes(v)||access.some(x=>x.startsWith(v+'.')))});
+   buttons.forEach(b=>{const v=b.dataset.view;b.hidden=!((v==='configuracion'&&auth?.rol==='COORDINADOR')||access.includes(v)||access.some(x=>x.startsWith(v+'.')))});
    document.querySelectorAll('[data-mach-tab]').forEach(b=>{if(b.dataset.machTab==='opt-digital'){b.hidden=!optDigitalHost.canOpen();return;}const key='mecanizado.'+b.dataset.machTab;const legacy=b.dataset.machTab==='proceso'&&access.includes('mecanizado.produccion');b.hidden=!(access.includes('mecanizado')||access.includes(key)||legacy)});
    document.querySelectorAll('[data-daily-tab]').forEach(b=>{const key='actualizacion.'+b.dataset.dailyTab;b.hidden=!(access.includes('actualizacion')||access.includes(key))});
    const pickDelivery=document.querySelector('#pickDeliveryTab'),pickReception=document.querySelector('#pickReceptionTab');
@@ -454,7 +454,7 @@ async function saveUser(){
  const args={p_token:getAppToken(),p_id_usuario:editingUserId,p_usuario:document.querySelector('#userName').value,p_nombre:document.querySelector('#userFullName').value,p_rol:document.querySelector('#userRole').value,p_password:document.querySelector('#userPassword').value,p_activo:document.querySelector('#userActive').checked,p_accesos:[...document.querySelectorAll('#userAccessGrid input:checked')].map(x=>x.value)};
  const c=await getSupabaseClient(),{error}=await c.rpc('sgp_admin_usuario_guardar',args);if(error){alert(error.message);return}closeUserModal();await loadUserAdmin()
 }
-document.querySelectorAll('[data-config-tab]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-config-tab]').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('[data-config-panel]').forEach(p=>p.hidden=p.dataset.configPanel!==b.dataset.configTab);if(b.dataset.configTab==='usuarios')loadUserAdmin();if(b.dataset.configTab==='roles')loadRoleAccess();if(b.dataset.configTab==='alertas')loadAccessoryAlertConfig()}));
+document.querySelectorAll('[data-config-tab]').forEach(b=>b.addEventListener('click',()=>{if(repoRole()==='COORDINADOR'&&b.dataset.configTab!=='alertas')return;document.querySelectorAll('[data-config-tab]').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('[data-config-panel]').forEach(p=>p.hidden=p.dataset.configPanel!==b.dataset.configTab);if(b.dataset.configTab==='usuarios')loadUserAdmin();if(b.dataset.configTab==='roles')loadRoleAccess();if(b.dataset.configTab==='alertas')loadAccessoryAlertConfig()}));
 document.querySelector('#newUserBtn')?.addEventListener('click',()=>openUserModal());document.querySelector('#userRole')?.addEventListener('change',e=>{if(!editingUserId||confirm('¿Aplicar los accesos por defecto del rol '+e.target.value+'?'))renderAccessGrid(roleDefaults(e.target.value))});document.querySelector('#resetPasswordBtn')?.addEventListener('click',async()=>{if(!editingUserId)return;const pw=prompt('Nueva contraseña temporal (mínimo 4 caracteres):');if(pw===null)return;const c=await getSupabaseClient(),{error}=await c.rpc('sgp_admin_password_restablecer',{p_token:getAppToken(),p_id_usuario:editingUserId,p_password:pw});if(error)return alert(error.message);alert('Contraseña restablecida correctamente')});document.querySelector('#userModalClose')?.addEventListener('click',closeUserModal);document.querySelector('#userCancel')?.addEventListener('click',closeUserModal);document.querySelector('#userSave')?.addEventListener('click',saveUser);
 function currentFilters() { return { q: els.search?.value||"", estado: els.state?.value||"", linea: els.line?.value||"" }; }
 function renderMecanizado() {
@@ -501,6 +501,11 @@ document.querySelectorAll("[data-daily-tab]").forEach(b=>b.classList.toggle("act
 }
 
 function openView(viewName) {
+  if(viewName==='configuracion'){
+    const coordinator=repoRole()==='COORDINADOR';
+    document.querySelectorAll('[data-config-tab]').forEach(b=>b.hidden=coordinator&&b.dataset.configTab!=='alertas');
+    if(coordinator){document.querySelectorAll('[data-config-panel]').forEach(p=>p.hidden=p.dataset.configPanel!=='alertas');loadAccessoryAlertConfig();}
+  }
   els.views.forEach(view => { view.hidden = view.dataset.viewPanel !== viewName; });
   els.nav.forEach(button => button.classList.toggle("active", button.dataset.view === viewName));
 }
@@ -1451,7 +1456,7 @@ async function commitProgramming() {
     }
   }
 }
-els.nav.forEach(button => button.addEventListener("click", async () => {openView(button.dataset.view);if(button.dataset.view==='inicio')loadHomeBalances();if(button.dataset.view==='configuracion')loadUserAdmin();if(button.dataset.view==='picking')loadPicking();if(button.dataset.view==='ensamble'){await refreshAssemblyWeeks(true);loadAssembly()}}));
+els.nav.forEach(button => button.addEventListener("click", async () => {openView(button.dataset.view);if(button.dataset.view==='inicio')loadHomeBalances();if(button.dataset.view==='configuracion'&&repoRole()==='ADMINISTRADOR')loadUserAdmin();if(button.dataset.view==='picking')loadPicking();if(button.dataset.view==='ensamble'){await refreshAssemblyWeeks(true);loadAssembly()}}));
 function getISOWeekNumber(date=new Date()){
   // La semana operativa de la portada sigue el calendario ISO en Colombia,
   // nunca la semana máxima importada ni la zona horaria del dispositivo.
@@ -3220,6 +3225,6 @@ initPickingDeliveryReport({getSupabaseClient,getAppToken});
 initPickingReceptionReport({getSupabaseClient,getAppToken});
 
 
-async function loadAccessoryAlertConfig(){const token=getAppToken();const client=await getSupabaseClient();await mountAccessoryAlertConfig({host:document.querySelector('[data-accessory-alert-config]'),client,token,getToken:getAppToken,canEdit:()=>repoRole()==='ADMINISTRADOR'&&token===getAppToken()});}
+async function loadAccessoryAlertConfig(){const token=getAppToken();const client=await getSupabaseClient();await mountAccessoryAlertConfig({host:document.querySelector('[data-accessory-alert-config]'),client,token,getToken:getAppToken,canEdit:()=>['ADMINISTRADOR','COORDINADOR'].includes(repoRole())&&token===getAppToken()});}
 
 window.SGPAccessoryAlerts=accessoryAlertsMarkup;
