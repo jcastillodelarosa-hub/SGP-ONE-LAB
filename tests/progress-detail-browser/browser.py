@@ -27,6 +27,9 @@ with sync_playwright() as p:
   assert page.locator('[data-progress-save]').count()==2
   page.locator('[data-progress-filter="all"]').click();assert page.locator('[data-progress-save]').count()==3
   page.screenshot(path=str(OUT/f'detail-{width}.png'),full_page=True)
+  if width<500:
+   page.locator('.sgp-progress-scroll').evaluate('(el)=>el.scrollLeft=el.scrollWidth')
+   page.screenshot(path=str(OUT/f'detail-states-{width}.png'),full_page=True)
   assert page.evaluate('document.documentElement.scrollWidth <= innerWidth+1'), 'Document overflow'
   page.locator('[data-progress-state]').first.select_option('PROCESADO'); assert page.evaluate('calls')==0
   assert page.locator('[data-progress-state]').nth(1).is_disabled()
