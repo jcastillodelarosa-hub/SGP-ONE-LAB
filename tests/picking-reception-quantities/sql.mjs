@@ -28,6 +28,7 @@ INSERT INTO public.sgp_prioridades VALUES('K1','R1','L1'),('K2','R1','L1');
 `);
 for(let n=1;n<=3;n++)await db.exec(`INSERT INTO public.sgp_picking_entregas VALUES('${id(n)}','${id(n)}','DEMO-${n}','v','z',now(),'VALIDADA');INSERT INTO sgp_picking_audit.eventos VALUES('${id(n)}','{"decisiones":[],"diferencias":[]}','{"ok":true,"id_entrega":"${id(n)}"}','z','2026-11-16','TURNO 1',now());`);
 await db.exec(`INSERT INTO sgp_picking_audit_areas.revisiones VALUES('${id(1)}','VERTICALES','v','2026-11-16','TURNO 1','SIN_FALTANTES',now(),'{}'),('${id(1)}','ZOCALERO','z','2026-11-16','TURNO 1','SIN_FALTANTES',now(),'{}');`);
+const originalReport=(await db.query("select pg_get_functiondef('public.sgp_picking_reporte_recepciones_v1(text,date,date,text,text,integer,integer)'::regprocedure) def")).rows[0].def;
 for(const [file,sig] of [['area-names-review.sql','sgp_picking_audit_areas.resumen(uuid)'],['report-enrichment-review.sql','public.sgp_picking_reporte_recepciones_v1(text,date,date,text,text,integer,integer)']]){
  const checksum=(await db.query(`select md5(pg_get_functiondef('${sig}'::regprocedure)) hash`)).rows[0].hash;
  await db.exec(read(file).replace(/<> '[a-f0-9]{32}'/,`<> '${checksum}'`));
@@ -41,5 +42,20 @@ await db.exec(`INSERT INTO public.sgp_producciones VALUES('K4','DEMO-1','S1','L1
 await db.exec(`INSERT INTO sgp_mecanizado_parcial.partes VALUES('${id(1)}','K1');`);result=(await query()).rows[0].result;assert.equal(result.rows.find(r=>r.produccion==='DEMO-1').cantidad_programada,30);
 await assert.rejects(()=>db.query(`select public.sgp_picking_reporte_recepciones_v1('denied','2026-11-16','2026-11-16')`),/UNAUTHORIZED/);
 await db.exec('SET ROLE anon');await query();await assert.rejects(()=>db.query('select * from public.sgp_usuarios'),/permission denied/);await db.exec('RESET ROLE');
-console.log('SQL PASS: exact week/quantity, absent/ambiguous order, canonical key, area names, unchanged receipt evidence and roles');
+// Duplicate priorities must not multiply report rows (EXISTS, not a join).
+await db.exec("INSERT INTO public.sgp_prioridades VALUES('K2','R1','L1'),('K2','R1','L1')");
+result=(await query()).rows[0].result;assert.equal(result.total_rows,3);assert.equal(result.rows.filter(r=>r.produccion==='DEMO-2').length,1);
+// Invalid/missing historical snapshots must stay unknown, not complete.
+await db.exec(`UPDATE sgp_picking_audit.eventos SET payload='{}' WHERE id_entrega='${id(2)}'`);
+result=(await query()).rows[0].result;const invalid=result.rows.find(r=>r.produccion==='DEMO-2');assert.equal(invalid.pendientes_al_recibir,null);assert.equal(invalid.completa_al_recibir,null);
+// CREATE OR REPLACE preserves owner and ACL. Guard rejects a changed definition atomically.
+const signature='public.sgp_picking_reporte_recepciones_v1(text,date,date,text,text,integer,integer)';
+const capture=async()=>(await db.query(`select pg_get_functiondef('${signature}'::regprocedure) def,proacl::text acl,proowner::text owner from pg_proc where oid='${signature}'::regprocedure`)).rows[0];
+const before=await capture();
+await assert.rejects(()=>db.exec(read('report-enrichment-review.sql')),/SOURCE_CHANGED_REVIEW_REQUIRED/);await db.exec('ROLLBACK');assert.deepEqual(await capture(),before);
+// A failed rollout can restore the exact saved definition without grants or data edits.
+const checksum=(await db.query(`select md5(pg_get_functiondef('${signature}'::regprocedure)) hash`)).rows[0].hash;
+await db.exec(read('report-enrichment-review.sql').replace(/<> '[a-f0-9]{32}'/,`<> '${checksum}'`));assert.deepEqual(await capture(),before);
+await db.exec('BEGIN;'+originalReport+'; COMMIT;');const restored=await capture();assert.equal(restored.def,originalReport);assert.equal(restored.acl,before.acl);assert.equal(restored.owner,before.owner);assert.deepEqual((await query()).rows[0].result,{});
+console.log('SQL PASS: no fanout, missing snapshot unknown, changed-source guard and rollback/ACL preservation; exact week/quantity, absent/ambiguous order, canonical key, area names, unchanged receipt evidence and roles');
 }finally{await db.close()}
