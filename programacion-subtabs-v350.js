@@ -1,13 +1,3 @@
- syncWeekSelection();
-function programmingWeekOptions(){
- return [...new Set([...getSchedule().map(getProgrammingWeek),...getRows().map(getProgrammingWeek),...weekDemandRows.map(getProgrammingWeek),...Array.from(document.querySelector('#progWeek')?.options||[],o=>Number(o.value)),...selectedWeeks].filter(n=>Number.isInteger(n)&&n>=1&&n<=53))].sort((a,b)=>a-b);
-}
-function syncWeekSelection(){
- const options=programmingWeekOptions(),chosen=Number(document.querySelector('#progWeek')?.value)||null;
- // Initial render can run before the async programming read. Do not freeze an empty selection.
- if(!weeksReady&&options.length){selectedWeeks=new Set(chosen&&options.includes(chosen)?[chosen]:options.slice(-1));weeksReady=true;}
- return options;
-}
 /* LAB v350 — navegación de Programación, solo lectura para vistas analíticas. */
 (()=>{
 'use strict';
@@ -61,9 +51,19 @@ function weekOf(d){const x=new Date(d+'T12:00:00');x.setDate(x.getDate()+3-(x.ge
 function weekMonday(d){const x=new Date(d+'T12:00:00');x.setDate(x.getDate()-(x.getDay()+6)%7);return x}
 function dateKey(d){return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')}
 function getProgrammingWeek(x){for(const k of ['semana_programacion','semana_prog','semana_origen','semana']){const n=Number(x[k]);if(Number.isInteger(n)&&n>=1&&n<=53)return n}return null}
+function programmingWeekOptions(){
+ return [...new Set([...getSchedule().map(getProgrammingWeek),...getRows().map(getProgrammingWeek),...weekDemandRows.map(getProgrammingWeek),...Array.from(document.querySelector('#progWeek')?.options||[],o=>Number(o.value)),...selectedWeeks].filter(n=>Number.isInteger(n)&&n>=1&&n<=53))].sort((a,b)=>a-b);
+}
+function syncWeekSelection(){
+ const options=programmingWeekOptions(),chosen=Number(document.querySelector('#progWeek')?.value)||null;
+ // Initial render can run before the async programming read. Do not freeze an empty selection.
+ if(!weeksReady&&options.length){selectedWeeks=new Set(chosen&&options.includes(chosen)?[chosen]:options.slice(-1));weeksReady=true;}
+ return options;
+}
 function getReservationWeeks(){const by=new Map();for(const r of weekDemandRows){const id=String(r.reserva||'');if(!id)continue;const w=getProgrammingWeek(r);if(w===null)continue;const set=by.get(id)||new Set();set.add(w);by.set(id,set)}return by}
 function resolveProgrammingWeek(x,by){const direct=getProgrammingWeek(x);if(direct!==null)return direct;const weeks=by.get(String(x.reserva||''));return weeks?.size===1?[...weeks][0]:null}
 async function refreshWeekDemand(){
+ syncWeekSelection();
  const weeks=[...selectedWeeks].sort((a,b)=>a-b),key=weeks.join(','),generation=++weekDemandGeneration;
  if(!weeks.length){weekDemandRows=[];weekDemandKey='';weekDemandError='';weekDemandLoading=false;render();return}
  if(weekDemandKey===key&&!weekDemandError){render();return}
