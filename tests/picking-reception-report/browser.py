@@ -54,7 +54,7 @@ try:
    assert page.locator('#pickReceptionReportRows tbody tr').first.locator('td').first.inner_text()=='46'
    assert 'Auditor V Demo' in page.locator('#pickReceptionReportRows').inner_text() and 'Auditor Z Demo' in page.locator('#pickReceptionReportRows').inner_text()
    assert 'private-v' not in page.locator('#pickReceptionReportRows').inner_text()
-   page.locator('[data-report-column="semana_programada"]').click();page.locator('[data-column-order="desc"]').click()
+   page.locator('[data-report-column="semana_programada"]').click();page.locator('[data-menu-section="sort"] > summary').click();page.locator('[data-column-order="desc"]').click()
    assert page.locator('#pickReceptionReportRows tbody tr').first.locator('td').first.inner_text()=='47'
    page.locator('[data-report-column="semana_programada"]').click();page.locator('[data-column-none]').click();page.locator('[data-column-value="47"]').check();page.locator('[data-column-apply]').click()
    assert page.locator('#pickReceptionReportRows tbody tr').count()==3
