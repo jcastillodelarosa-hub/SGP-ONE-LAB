@@ -10,7 +10,7 @@ import {createOptImportHandler} from '../../src/server/opt-import-handler.js';
 import {createOptPdfReader} from '../../src/server/opt-pdf-reader.js';
 import {body as fixtureBody,program,scope,fullPdf,base64,pages} from './import-fixtures.mjs';
 const {default:pg}=await import(process.env.PG_MODULE||'pg');const {Client}=pg;
-const config={host:'127.0.0.1',port:55439,user:'postgres',database:'postgres'};
+const config={host:process.env.OPT_TEST_PG_SOCKET||'127.0.0.1',port:process.env.OPT_TEST_PG_SOCKET?5432:55439,user:'postgres',database:'postgres'};
 const admin=new Client(config);await admin.connect();await admin.query("DO $$BEGIN IF NOT EXISTS(SELECT FROM pg_roles WHERE rolname='anon') THEN CREATE ROLE anon;END IF;IF NOT EXISTS(SELECT FROM pg_roles WHERE rolname='authenticated') THEN CREATE ROLE authenticated;END IF;IF NOT EXISTS(SELECT FROM pg_roles WHERE rolname='service_role') THEN CREATE ROLE service_role;END IF;END$$");config.database='opt_resolution_'+process.pid;await admin.query('CREATE DATABASE '+config.database);const db=new Client(config);await db.connect();db.exec=q=>db.query(q);
 
 // Numeric synthetic reservation satisfies the private PROYECTO selector contract.
@@ -52,6 +52,18 @@ function input(){const b=body(),opt=fixtureOpt;b.source.opt=opt;b.pdf.base64=bas
 const ordinaryRun=async()=>{const response=await handler(new Request('https://offline.invalid',{method:'POST',headers:{origin:'https://offline.invalid','content-type':'application/json'},body:JSON.stringify(input())}));return {status:response.status,...await response.json()};};
 
 await db.exec(readFileSync(new URL('../../docs/opt-recovery/installed-resolution-20261114221005.sql',import.meta.url),'utf8'));
+const withFence=process.env.OPT_TEST_UNCERTAINTY_FENCE==='1';
+if(withFence){
+ for(const file of ['import_channel_REVIEW.sql','import_channel_proyecto_v2_REVIEW.sql','import_channel_retail_v4_REVIEW.sql','import_uncertainty_fence_REVIEW.sql'])await db.exec(readFileSync(new URL('../../docs/sql-proposals/opt-shared/'+file,import.meta.url),'utf8'));
+ await db.exec(`INSERT INTO sgp_opt_shared.import_uncertainties(incident_id,pdf_sha256,opt,original_identity) VALUES
+ ('00000000-0000-4000-8000-000000000001',repeat('1',64),'OPT-SYNTH-1','{}'),
+ ('00000000-0000-4000-8000-000000000002',repeat('2',64),'OPT-SYNTH-2','{}');
+ UPDATE sgp_opt_shared.import_fence_control SET certified=true,certificate='SYNTHETIC-CERTIFICATE';`);
+ const {targets,buildReview}=await import('../../scripts/build-opt-fence-precheck-review.mjs');
+ const snapshot=(await db.query(`SELECT n.nspname||'.'||p.proname AS name,n.nspname||'.'||p.proname||'('||oidvectortypes(p.proargtypes)||')' AS signature,pg_get_functiondef(p.oid) AS definition,encode(sha256(convert_to(pg_get_functiondef(p.oid),'UTF8')),'hex') AS sha256 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname||'.'||p.proname=ANY($1)`,[Object.keys(targets)])).rows;
+ await db.exec(buildReview(snapshot));
+}
+
 const {prepareOptImport}=await import('../../src/services/opt-import.js');
 const b=input();b.pdf.name=fixtureOpt+'.pdf';b.index.sheet='ARCHIVOS';
 const f=(name,encoded)=>new File([Uint8Array.from(atob(encoded),c=>c.charCodeAt(0))],name);
@@ -84,5 +96,19 @@ const duplicate=await send(b);assert.equal(duplicate.status,200,JSON.stringify(d
 const changed=structuredClone(b);changed.resolution.attemptId=crypto.randomUUID();assert.notEqual((await send(changed)).status,200);
 const counts=(await db.query('SELECT (SELECT count(*)::int FROM sgp_opt_shared.documents) documents,(SELECT count(*)::int FROM sgp_opt_shared.import_resolution_consumption) consumed,(SELECT count(*)::int FROM sgp_opt_shared.import_resolution_permit) permits,(SELECT count(*)::int FROM sgp_opt_shared.cuts) cuts')).rows[0];assert.deepEqual(counts,{documents:1,consumed:1,permits:0,cuts:0});
 assert.notEqual((await send(input())).status,200);
+if(withFence){
+ // Proven ordinary successful import, not merely a validation error beyond the fence.
+ fixtureOpt='OPT2099-46-5-TEST-9';
+ const unrelated=await ordinaryRun();assert.equal(unrelated.status,200,JSON.stringify(unrelated));
+ assert.equal((await db.query('SELECT count(*)::int n FROM sgp_opt_shared.documents')).rows[0].n,2);
+ assert.equal((await db.query('SELECT count(*)::int n FROM sgp_opt_shared.import_resolution_consumption')).rows[0].n,1);
+ // Re-quarantining an already-consumed synthetic identity must block cached replay.
+ await db.query("UPDATE sgp_opt_shared.import_uncertainties SET pdf_sha256=$1,opt=$2 WHERE incident_id='00000000-0000-4000-8000-000000000001'",[prepared.identity.pdf.sha256,prepared.identity.source.opt]);
+ const replay=await send(b);assert.notEqual(replay.status,200);assert.match(JSON.stringify(replay),/OPT_PREVIOUS_OUTCOME_UNRESOLVED/);
+ assert.equal((await db.query('SELECT count(*)::int n FROM sgp_opt_shared.documents')).rows[0].n,2);
+ assert.equal((await db.query('SELECT count(*)::int n FROM sgp_opt_shared.import_resolution_consumption')).rows[0].n,1);
+ console.log(JSON.stringify({fenceCoexistence:true,ordinaryImportSucceeded:true,resolutionPermitAndSingleConsumptionVerified:true,cachedReceiptBlockedWhenQuarantined:true,productionWrites:0}));
+}
+
 console.log(JSON.stringify({engine:(await db.query('SELECT version() v')).rows[0].v,tests:'real PDF → Edge validator → installed SQL → unchanged Retail v3; active legacy lock; ACL; isolation; certification idempotence; old writer fencing; tamper rejection; single consumption; same attempt replay; different attempt denied',counts,hostedWrites:0}));
 await other.end();await db.end();await admin.query('DROP DATABASE '+config.database);await admin.end();

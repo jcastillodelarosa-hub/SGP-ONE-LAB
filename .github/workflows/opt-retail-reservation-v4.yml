@@ -13,6 +13,8 @@ on:
       - 'tests/opt-retail-reservation*'
       - 'tests/opt-digital/*v4*'
       - 'scripts/test-opt-retail-v4-timeouts-local.py'
+      - 'scripts/build-opt-fence-precheck-review.mjs'
+      - 'tests/opt-digital/resolution-postgres.mjs'
 permissions:
   contents: read
 jobs:
@@ -28,7 +30,7 @@ jobs:
           node-version: 22
       - run: |
           npm ci --no-audit --no-fund
-          npm install --prefix /tmp/opt-v4-qa --no-audit --no-fund @electric-sql/pglite@0.3.14 deno@2.2.12
+          npm install --prefix /tmp/opt-v4-qa --no-audit --no-fund @electric-sql/pglite@0.3.14 deno@2.2.12 pg@8.16.3
       - name: Synthetic tests and original payload generation
         env:
           PGLITE_MODULE: /tmp/opt-v4-qa/node_modules/@electric-sql/pglite/dist/index.js
@@ -45,7 +47,9 @@ jobs:
           docker pull postgrest/postgrest:v12.2.12
           c="opt-v4-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           trap 'docker rm -f "$c-rest" "$c" >/dev/null 2>&1 || true' EXIT
-          docker run -d --name "$c" --network none -e POSTGRES_HOST_AUTH_METHOD=trust postgres:17.11
+          mkdir -p /tmp/opt-v4-socket
+          chmod 777 /tmp/opt-v4-socket
+          docker run -d --name "$c" --network none -v /tmp/opt-v4-socket:/var/run/postgresql -e POSTGRES_HOST_AUTH_METHOD=trust postgres:17.11
           for n in $(seq 1 60); do
             if docker exec "$c" pg_isready -U postgres; then break; fi
             sleep 1
@@ -53,6 +57,8 @@ jobs:
           mkdir -p /tmp/opt-v4-evidence
           python tests/opt-digital/retail-reservation-v4-concurrency.py "$c" /tmp/opt-v4-request.json > /tmp/opt-v4-evidence/concurrency.json
           python tests/opt-digital/import-uncertainty-fence-native.py "$c" > /tmp/opt-v4-evidence/fence.json
+          python tests/opt-digital/import-uncertainty-integration-native.py "$c" > /tmp/opt-v4-evidence/fence-integration.json
+          OPT_TEST_PG_SOCKET=/tmp/opt-v4-socket OPT_TEST_UNCERTAINTY_FENCE=1 PG_MODULE=/tmp/opt-v4-qa/node_modules/pg/lib/index.js node tests/opt-digital/resolution-postgres.mjs > /tmp/opt-v4-evidence/fence-resolution.json
           python scripts/test-opt-retail-v4-timeouts-local.py "$c" /tmp/opt-v4-request.json > /tmp/opt-v4-evidence/timeouts.json
       - uses: actions/upload-artifact@v4
         if: always()

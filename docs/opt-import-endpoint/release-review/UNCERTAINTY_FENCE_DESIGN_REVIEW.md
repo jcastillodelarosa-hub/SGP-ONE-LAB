@@ -59,3 +59,32 @@ Native synthetic test added: shared read locks serialize against closure, regist
 reject concurrent import NOWAIT, cached receipt precheck blocks matching identity even
 when labelled Proyecto, unrelated Proyecto is allowed, repeatable-read isolation is rejected,
 and rollback preserves registry. No native result claimed until CI succeeds.
+
+## Request-entry integration proposal (offline generator)
+
+`scripts/build-opt-fence-precheck-review.mjs` takes six independently reviewed private
+`pg_get_functiondef` snapshots plus signatures and SHA256 checksums. It emits SQL only;
+it neither connects to a database nor executes output. The complete allowlist is legacy
+v1, Proyecto v2, Retail v3, proposed Retail v4, resolved-Retail v1 and owner import_manifest.
+The five RPC calls are inserted immediately after actor authorization, including before
+resolution locks and its cached receipt return. The core call follows the approval lookup
+and required-approval check, before document duplicate handling. This closes both observed
+receipt bypasses without changing documentary validation or resolution permit semantics.
+The output checks the current definition digest before each CREATE OR REPLACE; a missing,
+drifted or partially patched function aborts the transaction. ACLs/owners are not recreated.
+Private output must not be committed. V4 must already exist in the same reviewed rollout;
+its absence aborts rather than silently reducing coverage.
+
+Compatibility: the new precheck obtains registry SHARE NOWAIT before resolution_gate and
+before table writes. Existing resolution_guard remains installed and authoritative: its
+permit cannot bypass unresolved quarantine. Absence certification acquires target-table
+locks NOWAIT, so it fails instead of waiting in a table/advisory lock cycle. Registry
+maintenance must also use NOWAIT/bounded locks, never call import or absence certification
+while holding registry write locks. Closing the fence preserves resolution decisions,
+permits, consumption and documentary data. Do not drop old guards or replay a receipt as
+proof of closure. Reopening needs independent certified registry reconciliation.
+
+These are source-fixture tests, not a claim that generated replacements have been applied
+or exercised against production. Native coexistence testing with the complete installed
+recovery schema, fresh read-only function fingerprints and independent review remain
+required before any deployment. Prior native CI certified barrier primitives only.
