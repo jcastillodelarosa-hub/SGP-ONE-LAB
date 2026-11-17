@@ -11,7 +11,9 @@ const indexText='OPT,Reserva,Sistema,Acabado\nA,R-SYNTH,PANEL,White\nB,R-SYNTH,P
  const temporary=fs.mkdtempSync(path.join(os.tmpdir(),'opt-upload-browser-'));
  const folder=path.join(temporary,'retail');fs.mkdirSync(folder);
  const pdf=require('./synthetic-pdf.cjs')();fs.writeFileSync(path.join(folder,'A.pdf'),pdf);fs.writeFileSync(path.join(folder,'B.pdf'),Buffer.concat([pdf,Buffer.from('\n \n')]));
- for(const name of ['FOREIGN.pdf','WRONG.pdf','A-near.pdf'])fs.writeFileSync(path.join(folder,name),'not a PDF; must never be read');
+ for(const name of ['FOREIGN.pdf','A-near.pdf'])fs.writeFileSync(path.join(folder,name),'not a PDF; must never be read');
+ // Same reservation/different documentary system now qualifies, but invalid bytes remain blocked locally.
+ fs.writeFileSync(path.join(folder,'WRONG.pdf'),'not a PDF; selected by reservation, never importable');
  const browser=await chromium.launch({...(process.env.OPT_CHROMIUM?{executablePath:process.env.OPT_CHROMIUM}:{}),headless:true,args:['--no-sandbox']});
  fs.mkdirSync('tests/opt-digital/evidence',{recursive:true});
  try{
@@ -77,12 +79,12 @@ const indexText='OPT,Reserva,Sistema,Acabado\nA,R-SYNTH,PANEL,White\nB,R-SYNTH,P
    await host.locator('#optPdfFolder').setInputFiles(folder);
    await page.waitForFunction(()=>!document.querySelector('#optDigitalHost').shadowRoot.querySelector('#optImportProcess').disabled);
    await host.locator('summary').filter({hasText:'Resultado de selección por archivo'}).click();
-   assert.match(await host.locator('#optLoadPanel').textContent(),/Sin reserva\/sistema en la programación/);
+   assert.match(await host.locator('#optLoadPanel').textContent(),/Sin reserva en la programación/);
    assert.match(await host.locator('#optLoadPanel').textContent(),/Nombre exacto ausente del índice/);
    // Loading/selecting originals is not consent to transmit them.
    assert.equal(uploads.length,0);assert.match(await host.locator('#optImportPanel').textContent(),/se envían el PDF original y su índice a Supabase/);
    await host.locator('#optImportProcess').click();
-   await page.waitForFunction(()=>document.querySelector('#optDigitalHost').shadowRoot.querySelector('#optImportStatus').textContent.includes('1 confirmados · 1 rechazos definitivos · 0 inciertos de este intento · 0 bloqueos por estado anterior · 0 excluidos por índice · 1 bloqueos locales · 0 fallos'));
+   await page.waitForFunction(()=>document.querySelector('#optDigitalHost').shadowRoot.querySelector('#optImportStatus').textContent.includes('1 confirmados · 1 rechazos definitivos · 0 inciertos de este intento · 0 bloqueos por estado anterior · 0 excluidos por índice · 2 bloqueos locales · 0 fallos'));
    assert.equal(uploads.length,2);assert.equal(maxInflight,1);
    const results=await host.locator('#optImportResults').textContent();
    assert.match(results,/A.pdf · Guardado en SGP · 3 piezas documentales; 2 asignadas a PANELES_2/);assert.match(results,/1 sin asignación a PANELES_2 y no disponibles para cortar/);assert.match(results,/No acredita cortes realizados/);assert.match(results,/B.pdf · No guardado en este intento: OPT_AMBIGUA/);assert.match(results,/MISSING.pdf · Bloqueado: Falta PDF con nombre exacto/);

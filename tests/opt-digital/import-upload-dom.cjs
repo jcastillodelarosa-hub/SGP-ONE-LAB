@@ -64,17 +64,17 @@ const assert=require('node:assert/strict'),fs=require('node:fs');const {JSDOM}=r
   Object.defineProperty(select('optPdfFolder'),'files',{value:[file('MIX.pdf',mixedBytes),file('FOREIGN.pdf'),file('WRONG_SYSTEM.pdf')],configurable:true});select('optPdfFolder').onchange();await wait();
   assert(select('optImportProcess').disabled);await select('optImportProcess').onclick();assert.equal(sent.length,0);
   assert.deepEqual(localReads,[]);
-  await select('optScopeLoad').onclick();select('optPdfFolder').onchange();await wait();assert.deepEqual(localReads,['MIX.pdf']);await select('optImportProcess').onclick();
-  assert.equal(sent.length,1);assert.equal(sent[0].source.origin,sourceOrigin);assert.equal(sent[0].source.opt,'MIX');assert.equal(atob(sent[0].pdf.base64),mixedBytes);assert.equal(atob(sent[0].index.base64),rawIndex);
-  assert.match(select('optImportStatus').textContent,/3 OPT del índice omitidas/);assert.match(select('optImportStatus').textContent,/0 rechazos definitivos/);
-  assert.equal(select('optImportResults').querySelectorAll('[data-file]').length,1);
+  await select('optScopeLoad').onclick();select('optPdfFolder').onchange();await wait();assert.deepEqual(localReads,sourceOrigin==='RETAIL'?['MIX.pdf','WRONG_SYSTEM.pdf']:['MIX.pdf']);await select('optImportProcess').onclick();
+  assert.equal(sent.length,sourceOrigin==='RETAIL'?2:1);assert.equal(sent[0].source.origin,sourceOrigin);assert.equal(sent[0].source.opt,'MIX');assert.equal(atob(sent[0].pdf.base64),mixedBytes);assert.equal(atob(sent[0].index.base64),rawIndex);
+  assert.match(select('optImportStatus').textContent,new RegExp((sourceOrigin==='RETAIL'?2:3)+' OPT del índice omitidas'));assert.match(select('optImportStatus').textContent,/0 rechazos definitivos/);
+  assert.equal(select('optImportResults').querySelectorAll('[data-file]').length,sourceOrigin==='RETAIL'?2:1);
   if(sourceOrigin==='PROYECTO'){assert.equal(select('optImportResults').querySelectorAll('[data-warning=OPT_PRINTED_ROUNDING_COMPATIBLE]').length,1);assert.match(select('optImportResults').textContent,/no se acredita la precisión original/);assert.match(select('optImportStatus').textContent,/1 confirmados con advertencia de redondeo/);assert.equal(select('optImportResults').querySelectorAll('img,script').length,0);}else assert.equal(select('optImportResults').querySelectorAll('[data-warning]').length,0);assert(!select('optImportResults').textContent.includes('FOREIGN.pdf'));assert(!select('optImportResults').textContent.includes('OTHER_WEEK.pdf'));
   // Changing a filter discards scope immediately; a confirmed empty week omits all index OPTs.
-  select('optScopeWeek').value='47';select('optScopeWeek').onchange();assert(select('optImportProcess').disabled);await select('optImportProcess').onclick();assert.equal(sent.length,1);
-  await select('optScopeLoad').onclick();await select('optImportProcess').onclick();assert.equal(sent.length,1);assert.match(select('optImportStatus').textContent,/No hay OPT candidatas/);assert.match(select('optImportStatus').textContent,/4 OPT del índice omitidas/);assert.equal(select('optImportResults').children.length,0);
+  select('optScopeWeek').value='47';select('optScopeWeek').onchange();assert(select('optImportProcess').disabled);await select('optImportProcess').onclick();assert.equal(sent.length,sourceOrigin==='RETAIL'?2:1);
+  await select('optScopeLoad').onclick();await select('optImportProcess').onclick();assert.equal(sent.length,sourceOrigin==='RETAIL'?2:1);assert.match(select('optImportStatus').textContent,/No hay OPT candidatas/);assert.match(select('optImportStatus').textContent,/4 OPT del índice omitidas/);assert.equal(select('optImportResults').children.length,0);
   // Direct value changes or a replaced session cannot reuse a previously confirmed snapshot.
-  select('optScopeWeek').value='46';await select('optImportProcess').onclick();assert.equal(sent.length,1);assert.match(select('optImportStatus').textContent,/programación vigente/);
-  await select('optScopeLoad').onclick();token='replaced-session';await select('optImportProcess').onclick();assert.equal(sent.length,1);
+  select('optScopeWeek').value='46';await select('optImportProcess').onclick();assert.equal(sent.length,sourceOrigin==='RETAIL'?2:1);assert.match(select('optImportStatus').textContent,/programación vigente/);
+  await select('optScopeLoad').onclick();token='replaced-session';await select('optImportProcess').onclick();assert.equal(sent.length,sourceOrigin==='RETAIL'?2:1);
   selectedWorkflow.destroy();
  }
  console.log('PASS: original-only explicit upload; sequential partial success/error/duplicate; exact PDF, source and index; repeated click; missing/ambiguous files; individual; late filter/close; identical replay; shared catalog refreshed and selected. Synthetic DOM, no production.');
