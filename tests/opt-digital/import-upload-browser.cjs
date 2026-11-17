@@ -12,7 +12,7 @@ const indexText='OPT,Reserva,Sistema,Acabado\nA,R-SYNTH,PANEL,White\nB,R-SYNTH,P
  const folder=path.join(temporary,'retail');fs.mkdirSync(folder);
  const pdf=require('./synthetic-pdf.cjs')();fs.writeFileSync(path.join(folder,'A.pdf'),pdf);fs.writeFileSync(path.join(folder,'B.pdf'),Buffer.concat([pdf,Buffer.from('\n \n')]));
  for(const name of ['FOREIGN.pdf','A-near.pdf'])fs.writeFileSync(path.join(folder,name),'not a PDF; must never be read');
- // Same reservation/different documentary system now qualifies, but invalid bytes remain blocked locally.
+ // Same reservation/different documentary system now qualifies, but invalid bytes remain rejected by the server boundary.
  fs.writeFileSync(path.join(folder,'WRONG.pdf'),'not a PDF; selected by reservation, never importable');
  const browser=await chromium.launch({...(process.env.OPT_CHROMIUM?{executablePath:process.env.OPT_CHROMIUM}:{}),headless:true,args:['--no-sandbox']});
  fs.mkdirSync('tests/opt-digital/evidence',{recursive:true});
@@ -40,6 +40,7 @@ const indexText='OPT,Reserva,Sistema,Acabado\nA,R-SYNTH,PANEL,White\nB,R-SYNTH,P
        assert.deepEqual(body.source,{origin:'RETAIL',opt:body.pdf.name.replace(/\.pdf$/i,''),mode:'INDICE'});
        const authorization=request.headers().authorization;assert.match(authorization,/^Bearer /);const gateway=JSON.parse(Buffer.from(authorization.slice(7).split('.')[1],'base64url').toString());assert.equal(gateway.role,'anon');
        await new Promise(resolve=>setTimeout(resolve,80));
+       if(body.source.opt==='WRONG')return route.fulfill({status:422,json:{contract:'OPT-IMPORT-1',ok:false,code:'OPT_PDF_INVALIDO',error:'Synthetic invalid PDF',definitive:true}});
        if(body.source.opt==='B')return route.fulfill({status:422,json:{contract:'OPT-IMPORT-1',ok:false,code:'OPT_AMBIGUA',error:'Synthetic ambiguous production',definitive:true,blockers:['Dos producciones posibles; no se creó esta OPT.']}});
        assert.equal(body.source.opt,'A');assert.deepEqual(Buffer.from(body.pdf.base64,'base64'),pdf);
        const sha=crypto.createHash('sha256').update(pdf).digest('hex'),duplicate=!!receipt;
@@ -84,20 +85,20 @@ const indexText='OPT,Reserva,Sistema,Acabado\nA,R-SYNTH,PANEL,White\nB,R-SYNTH,P
    // Loading/selecting originals is not consent to transmit them.
    assert.equal(uploads.length,0);assert.match(await host.locator('#optImportPanel').textContent(),/se envían el PDF original y su índice a Supabase/);
    await host.locator('#optImportProcess').click();
-   await page.waitForFunction(()=>document.querySelector('#optDigitalHost').shadowRoot.querySelector('#optImportStatus').textContent.includes('1 confirmados · 1 rechazos definitivos · 0 inciertos de este intento · 0 bloqueos por estado anterior · 0 excluidos por índice · 2 bloqueos locales · 0 fallos'));
-   assert.equal(uploads.length,2);assert.equal(maxInflight,1);
+   await page.waitForFunction(()=>document.querySelector('#optDigitalHost').shadowRoot.querySelector('#optImportStatus').textContent.includes('1 confirmados · 2 rechazos definitivos · 0 inciertos de este intento · 0 bloqueos por estado anterior · 0 excluidos por índice · 1 bloqueos locales · 0 fallos'));
+   assert.equal(uploads.length,3);assert.equal(maxInflight,1);
    const results=await host.locator('#optImportResults').textContent();
-   assert.match(results,/A.pdf · Guardado en SGP · 3 piezas documentales; 2 asignadas a PANELES_2/);assert.match(results,/1 sin asignación a PANELES_2 y no disponibles para cortar/);assert.match(results,/No acredita cortes realizados/);assert.match(results,/B.pdf · No guardado en este intento: OPT_AMBIGUA/);assert.match(results,/MISSING.pdf · Bloqueado: Falta PDF con nombre exacto/);
+   assert.match(results,/A.pdf · Guardado en SGP · 3 piezas documentales; 2 asignadas a PANELES_2/);assert.match(results,/1 sin asignación a PANELES_2 y no disponibles para cortar/);assert.match(results,/No acredita cortes realizados/);assert.match(results,/B.pdf · No guardado en este intento: OPT_AMBIGUA/);assert.match(results,/WRONG.pdf · No guardado en este intento: OPT_PDF_INVALIDO/);assert.match(results,/MISSING.pdf · Bloqueado: Falta PDF con nombre exacto/);
    await page.waitForFunction(()=>document.querySelector('#optDigitalHost').shadowRoot.querySelector('#optReservation').selectedOptions[0]?.textContent.includes('Compartida'));assert.equal(catalogReads,2);
    await host.locator('#optImportPanel').scrollIntoViewIfNeeded();const buttonBox=await host.locator('#optImportProcess').boundingBox();assert(buttonBox&&buttonBox.width>0&&buttonBox.x>=0&&buttonBox.x+buttonBox.width<=viewport.width+2);
    await page.screenshot({path:`tests/opt-digital/evidence/import-upload-${size}.png`,fullPage:true});
    // Repeating the explicit command preserves exact original payloads and yields a duplicate receipt.
    await host.locator('#optImportProcess').click();await page.waitForFunction(()=>document.querySelector('#optDigitalHost').shadowRoot.querySelector('#optImportResults').textContent.includes('Duplicado confirmado'));
-   await page.waitForFunction(()=>!document.querySelector('#optDigitalHost').shadowRoot.querySelector('#optImportProcess').disabled);assert.equal(uploads.length,4);assert.deepEqual(uploads[0],uploads[2]);assert.deepEqual(uploads[1],uploads[3]);
+   await page.waitForFunction(()=>!document.querySelector('#optDigitalHost').shadowRoot.querySelector('#optImportProcess').disabled);assert.equal(uploads.length,6);assert.deepEqual(uploads[0],uploads[3]);assert.deepEqual(uploads[1],uploads[4]);assert.deepEqual(uploads[2],uploads[5]);
    // logout awaits sgp_logout before clearing the native host; click alone does not await that handler.
    await page.locator('#authLogout').click();await host.locator('#optImportProcess').waitFor({state:'detached'});assert.equal(await host.locator('#optImportProcess').count(),0);await first.context.close();
    // New browser storage + a different user sees the shared catalog without any original files.
-   const second=await openSession('cutter-'+size);assert.equal(await second.host.locator('#library button').count(),0);assert.equal(uploads.length,4);
+   const second=await openSession('cutter-'+size);assert.equal(await second.host.locator('#library button').count(),0);assert.equal(uploads.length,6);
    await second.host.locator('#optWorkflowTab1').click();await second.host.locator('#optReservation').selectOption(JSON.stringify(['SERVIDOR','R-SYNTH','PANEL']));
    await second.page.waitForFunction(()=>document.querySelector('#optDigitalHost').shadowRoot.querySelector('#optSharedPieces').textContent.includes('REF-SYNTH'));
    const chosen=JSON.stringify(['SERVIDOR','R-SYNTH','PANEL']);
