@@ -3085,3 +3085,30 @@ table.glass-burro-table th:not(:first-child){width:36%}
 .pick-audit-progress-section.audited{color:#166534;background:#f0fdf4;border-color:#bbf7d0}
 .pick-audit-progress-section.pending{color:#9a3412;background:#fff7ed;border-color:#fed7aa}
 .pick-audit-progress.unavailable{color:#64748b;max-width:240px}
+
+/* Desktop PDT: use the available workspace instead of a 1420px island.
+   Keep touch/mobile tables unchanged; extreme zoom retains local scrolling. */
+@media (hover:hover) and (pointer:fine) and (min-width:900px){
+ .workspace>main:has(>.pdt-dashboard:not([hidden])){max-width:none!important}
+ .pdt-dashboard .repo-table{width:100%;min-width:1100px;table-layout:fixed}
+ .pdt-dashboard .repo-table :is(th,td){min-width:0;max-width:none;white-space:normal;overflow-wrap:anywhere;padding:10px 6px}
+ .pdt-dashboard .repo-table :is(th,td):nth-child(1){width:4%}
+ .pdt-dashboard .repo-table :is(th,td):nth-child(2){width:9%}
+ .pdt-dashboard .repo-table :is(th,td):nth-child(3){width:6%}
+ .pdt-dashboard .repo-table :is(th,td):nth-child(4){width:6%}
+ .pdt-dashboard .repo-table :is(th,td):nth-child(5){width:6%}
+ .pdt-dashboard .repo-table :is(th,td):nth-child(6){width:5%}
+ .pdt-dashboard .repo-table :is(th,td):nth-child(7){width:6%}
+ .pdt-dashboard .repo-table :is(th,td):nth-child(8){width:4%}
+ .pdt-dashboard .repo-table :is(th,td):nth-child(9){width:3%}
+ .pdt-dashboard .repo-table :is(th,td):nth-child(10){width:5%}
+ .pdt-dashboard .repo-table :is(th,td):nth-child(11){width:6%}
+ .pdt-dashboard .repo-table :is(th,td):nth-child(12){width:6%}
+ .pdt-dashboard .repo-table :is(th,td):nth-child(13){width:7%}
+ .pdt-dashboard .repo-table :is(th,td):nth-child(14){width:6%}
+ .pdt-dashboard .repo-table :is(th,td):nth-child(15){width:13%}
+ .pdt-dashboard .repo-table :is(th,td):nth-child(16){width:8%}
+ .pdt-dashboard .repo-table select{font-size:11px;padding:6px 2px}
+ .pdt-dashboard .repo-table :is(select,button){min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere}
+ .pdt-dashboard .repo-table :is(.repo-validation-badge,.badge,.repo-contract-badge,.pending-week-badge,.nc-linked,.nc-unlinked,.nc-status){max-width:100%;white-space:normal;overflow-wrap:anywhere;box-sizing:border-box}
+}

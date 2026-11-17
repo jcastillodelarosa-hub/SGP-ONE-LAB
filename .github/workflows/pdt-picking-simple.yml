@@ -7,6 +7,7 @@ on:
       - 'src/services/pdt-production-deliveries.js'
       - 'index.html'
       - 'tests/pdt-dashboard-tabs*'
+      - 'tests/pdt-desktop-zoom-browser.py'
       - 'app.js'
       - 'styles.css'
       - 'tests/pdt-production-queue-browser.py'
@@ -22,6 +23,7 @@ on:
       - 'src/services/pdt-production-deliveries.js'
       - 'index.html'
       - 'tests/pdt-dashboard-tabs*'
+      - 'tests/pdt-desktop-zoom-browser.py'
       - 'app.js'
       - 'styles.css'
       - 'tests/pdt-production-queue-browser.py'
@@ -47,6 +49,11 @@ jobs:
           SGP_QA_CHROMIUM: /usr/bin/google-chrome
           SGP_QA_OUT: ${{ runner.temp }}/pdt-dashboard-tabs-browser
         run: python3 tests/pdt-dashboard-tabs-browser.py
+      - name: Desktop PDT responsive widths, synthetic data only
+        env:
+          SGP_QA_CHROMIUM: /usr/bin/google-chrome
+          SGP_QA_OUT: ${{ runner.temp }}/pdt-dashboard-tabs-browser/desktop-zoom
+        run: python3 tests/pdt-desktop-zoom-browser.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
