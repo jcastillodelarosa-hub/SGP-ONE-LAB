@@ -66,8 +66,9 @@ export function validateOptImportManifest({document, extraction}, server) {
     fail('SERVER_EVIDENCE_INVALID'); return result();
   }
   const indexedProject = server.bindingMode === 'OPT_INDEX_RESERVATION';
-  const indexedRetail = server.bindingMode === 'OPT_RETAIL_EXACT_3';
-  if ((server.bindingMode != null && !['DOCUMENT_PRODUCTION','OPT_INDEX_RESERVATION','OPT_RETAIL_EXACT_3'].includes(server.bindingMode)) ||
+  const reservationOnly = server.bindingMode === 'OPT_RETAIL_RESERVATION_4';
+  const indexedRetail = reservationOnly || server.bindingMode === 'OPT_RETAIL_EXACT_3';
+  if ((server.bindingMode != null && !['DOCUMENT_PRODUCTION','OPT_INDEX_RESERVATION','OPT_RETAIL_EXACT_3','OPT_RETAIL_RESERVATION_4'].includes(server.bindingMode)) ||
       (indexedProject && (document.origin !== 'PROYECTO' || document.mode !== 'INDICE')) ||
       (indexedRetail && (document.origin !== 'RETAIL' || document.mode !== 'INDICE'))) {
     fail('SERVER_BINDING_MODE_INVALID'); return result();
@@ -208,7 +209,7 @@ export function validateOptImportManifest({document, extraction}, server) {
   const indexes = server.indexRows.filter(row => row.pdfSha256 === document.sha256 && row.sourceKey === document.sourceKey &&
     row.origin === document.origin && row.opt === document.opt);
   if (document.mode === 'INDICE' && !indexes.length) fail('DOCUMENT_INDEX_LINK_MISSING');
-  if (indexes.some(row => !text(row.rowId) || !text(row.reservation) || !text(row.system) ||
+  if (indexes.some(row => !text(row.rowId) || !text(row.reservation) || (!reservationOnly&&!text(row.system)) ||
       (row.sourceRowId != null && !rowIds.has(row.sourceRowId)) ||
       (row.documentProduction != null && !/^\d+$/.test(row.documentProduction)) ||
       (row.reference != null && !text(row.reference)) ||
@@ -239,11 +240,11 @@ export function validateOptImportManifest({document, extraction}, server) {
     // Never assign a mixed-reservation PDF by row order, approximate names, or
     // whichever binding happens to remain eligible. Each source row needs one
     // exact documentary reservation/system selector before looking at SGP.
-    if ((indexedProject || indexedRetail) && new Set(applicable.map(index => key(index.reservation,index.system))).size > 1) {
+    if ((indexedProject || indexedRetail) && new Set(applicable.map(index => key(index.reservation,reservationOnly?null:index.system))).size > 1) {
       fail('INDEX_RESERVATION_AMBIGUOUS', {sourceRowId:row.sourceId}); continue;
     }
     const candidates = server.bindings.filter(binding => (indexedProject ? binding.id_linea===profileLine : binding.documentProduction === production) && (!indexedRetail || binding.id_linea===profileLine) && applicable.some(index =>
-      index.reservation === binding.reserva && index.system === binding.sistema &&
+      index.reservation === binding.reserva && (reservationOnly || index.system === binding.sistema) &&
       (index.key_produccion == null || index.key_produccion === binding.key_produccion) &&
       (index.id_programacion == null || index.id_programacion === binding.id_programacion)));
     // Individual PDFs need an explicit server-resolved documentary relation.
@@ -264,7 +265,7 @@ export function validateOptImportManifest({document, extraction}, server) {
       exclusions.set(row.sourceId, {code:'FUERA_ALCANCE', linea:identity.id_linea, resolvedIdentity:identity});
       // Multiple/missing operational programs outside our line cannot affect a
       // null assignment. Keep every documentary unit and its original length.
-      for (const index of applicable) if (candidates.some(candidate => index.reservation === candidate.reserva && index.system === candidate.sistema &&
+      for (const index of applicable) if (candidates.some(candidate => index.reservation === candidate.reserva && (reservationOnly || index.system === candidate.sistema) &&
           (index.key_produccion == null || index.key_produccion === candidate.key_produccion) &&
           (index.id_programacion == null || index.id_programacion === candidate.id_programacion))) indexUsed.add(index);
       continue;
@@ -295,7 +296,7 @@ export function validateOptImportManifest({document, extraction}, server) {
     // Otherwise opening this PDF in another week would require rewriting it.
     originalScopes.set(row.sourceId,{linea:binding.id_linea,anio:binding.anio,semana:binding.semana_base,modo:'BASE'});
     assignments.set(row.sourceId, assignmentOf(binding));
-    for (const index of applicable) if (index.reservation === binding.reserva && index.system === binding.sistema &&
+    for (const index of applicable) if (index.reservation === binding.reserva && (reservationOnly || index.system === binding.sistema) &&
         (index.key_produccion == null || index.key_produccion === binding.key_produccion) &&
         (index.id_programacion == null || index.id_programacion === binding.id_programacion)) indexUsed.add(index);
   }

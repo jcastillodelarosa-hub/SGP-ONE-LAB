@@ -1,0 +1,57 @@
+name: OPT Retail V4 isolated PostgreSQL verification
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/opt-retail-reservation-v4.yml'
+      - 'opt-digital/import-*.js'
+      - 'src/server/opt-*.js'
+      - 'functions/opt-import-manifest-core.mjs'
+      - 'supabase/functions/opt-retail-import-v4-review/**'
+      - 'docs/sql-proposals/opt-shared/*v4*'
+      - 'tests/opt-retail-reservation*'
+      - 'tests/opt-digital/*v4*'
+      - 'scripts/test-opt-retail-v4-timeouts-local.py'
+permissions:
+  contents: read
+jobs:
+  synthetic-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: |
+          npm ci --no-audit --no-fund
+          npm install --prefix /tmp/opt-v4-qa --no-audit --no-fund @electric-sql/pglite@0.3.14 deno@2.2.12
+      - name: Synthetic tests and original payload generation
+        env:
+          PGLITE_MODULE: /tmp/opt-v4-qa/node_modules/@electric-sql/pglite/dist/index.js
+          OPT_RETAIL_SYNTHETIC_REQUEST_PATH: /tmp/opt-v4-request.json
+        run: |
+          node --test tests/opt-import*.test.mjs tests/opt-retail*.test.mjs
+          node tests/opt-digital/import-retail-reservation-v4-sql.mjs
+          /tmp/opt-v4-qa/node_modules/.bin/deno check --node-modules-dir=manual supabase/functions/opt-retail-import-v4-review/index.ts
+          /tmp/opt-v4-qa/node_modules/.bin/deno test --node-modules-dir=manual --allow-read tests/opt-retail-reservation-v4-deno.mjs
+      - name: Native PostgreSQL concurrency and PostgREST timeout (network isolated)
+        run: |
+          docker pull postgres:17.11
+          docker pull postgrest/postgrest:v12.2.12
+          c="opt-v4-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          trap 'docker rm -f "$c-rest" "$c" >/dev/null 2>&1 || true' EXIT
+          docker run -d --name "$c" --network none -e POSTGRES_HOST_AUTH_METHOD=trust postgres:17.11
+          for n in $(seq 1 60); do
+            if docker exec "$c" pg_isready -U postgres; then break; fi
+            sleep 1
+          done
+          mkdir -p /tmp/opt-v4-evidence
+          python tests/opt-digital/retail-reservation-v4-concurrency.py "$c" /tmp/opt-v4-request.json > /tmp/opt-v4-evidence/concurrency.json
+          python scripts/test-opt-retail-v4-timeouts-local.py "$c" /tmp/opt-v4-request.json > /tmp/opt-v4-evidence/timeouts.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: opt-retail-v4-synthetic-evidence
+          path: /tmp/opt-v4-evidence/*.json
