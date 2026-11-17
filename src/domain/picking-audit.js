@@ -13,20 +13,21 @@ export function auditOperationalTime(now,config){
  }
  return {fecha:day,turno:''}; // Configured gaps require an explicit operational correction.
 }
-export function auditDecisions(rows){
+export function auditDecisions(rows,{requireAcceptedImpact=false,acceptedImpactIds=null}={}){
  return rows.map(row=>{
   if(!['ACEPTAR','MODIFICAR','ELIMINAR'].includes(row.accion))throw Error('Decide cada pendiente antes de guardar.');
   if(row.accion!=='ACEPTAR'&&!row.motivo?.trim())throw Error('Indica el motivo de modificación o anulación.');
   if(row.accion==='MODIFICAR'&&(!row.id_pieza||!row.reserva||!row.acabado||!Number.isInteger(Number(row.cantidad))||Number(row.cantidad)<1||!Number.isInteger(Number(row.ventanas_afectadas))||Number(row.ventanas_afectadas)<1))throw Error('Selecciona una pieza y cantidades válidas.');
+  if(requireAcceptedImpact&&row.accion==='ACEPTAR'&&(acceptedImpactIds===null||acceptedImpactIds.has(row.id_faltante))&&(row.ventanas_afectadas===null||row.ventanas_afectadas===undefined||String(row.ventanas_afectadas).trim()===''||!Number.isSafeInteger(Number(row.ventanas_afectadas))||Number(row.ventanas_afectadas)<1))throw Error('Indica las ventanas afectadas antes de aceptar el pendiente.');
   return {...row};
  });
 }
 
 /** Explicit area confirmation. Unclaimed legacy rows remain for the other reviewer. */
-export function auditAreaDecisions({area,resultado,rows,differences}) {
+export function auditAreaDecisions({area,resultado,rows,differences,requireAcceptedImpact=false,acceptedImpactIds=null}) {
  if(!area)throw Error('Selecciona el área que revisas.');
  if(!['SIN_FALTANTES','CON_FALTANTES'].includes(resultado))throw Error('Indica si tu área está completa o tiene faltantes.');
- const decisions=auditDecisions(rows.filter(r=>r.accion!=='NO_CORRESPONDE'));
+ const decisions=auditDecisions(rows.filter(r=>r.accion!=='NO_CORRESPONDE'),{requireAcceptedImpact,acceptedImpactIds});
  const hasMissing=differences.length>0||decisions.some(r=>r.accion!=='ELIMINAR');
  if(resultado==='SIN_FALTANTES'&&hasMissing)throw Error('Hay faltantes en tu revisión; selecciona Con faltantes.');
  if(resultado==='CON_FALTANTES'&&!hasMissing)throw Error('Registra o acepta al menos un faltante de tu área.');
