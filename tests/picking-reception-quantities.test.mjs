@@ -1,0 +1,12 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {receptionQuantities,summarizeReceptions,receptionCsv} from '../src/domain/picking-reception-report.js';
+import {receptionRowsHtml} from '../src/modules/picking-reception-report-controller.js';
+const r={id_programacion:'p1',produccion:'DEMO',sistema:'S',cantidad_programada:20,pendientes_al_recibir:[],registrado_en:'2026-01-01',completa_al_recibir:true};
+test('no missing produces total; affected windows are not missing pieces',()=>{assert.equal(receptionQuantities(r).efectiva,20);assert.equal(receptionQuantities({...r,pendientes_al_recibir:[{cantidad:8,ventanas_afectadas:3}]}).efectiva,17);});
+test('unknown history or affected count remains unknown',()=>{assert.equal(receptionQuantities({...r,pendientes_al_recibir:null}).efectiva,null);assert.equal(receptionQuantities({...r,pendientes_al_recibir:[{cantidad:2}]}).efectiva,null);});
+test('same missing identity counted once; conflicting duplicate is unknown',()=>{assert.equal(receptionQuantities({...r,pendientes_al_recibir:[{id_faltante:'f',ventanas_afectadas:2},{id_faltante:'f',ventanas_afectadas:2}]}).efectiva,18);assert.equal(receptionQuantities({...r,pendientes_al_recibir:[{id_faltante:'f',ventanas_afectadas:2},{id_faltante:'f',ventanas_afectadas:3}]}).efectiva,null);});
+test('physical overlap is marked estimated and negative values prevented',()=>{const q=receptionQuantities({...r,pendientes_al_recibir:[{ventanas_afectadas:15},{ventanas_afectadas:15}]});assert.equal(q.efectiva,0);assert.equal(q.estimada,true);});
+test('summary counts once per order latest snapshot, not two reviewers',()=>{const s=summarizeReceptions([r,{...r,registrado_en:'2026-01-02',pendientes_al_recibir:[{ventanas_afectadas:3}]}]);assert.equal(s.total,20);assert.equal(s.efectiva,17);assert.equal(s.ordenes,1);});
+test('table and CSV expose both quantities without relabeling as receipts',()=>{const html=receptionRowsHtml([r]);assert.match(html,/Total/);assert.match(html,/Efectiva/);assert.match(html,/>20<\/td>/);assert.match(receptionCsv([r]),/Cantidad programada/);});
+
+test('missing scheduled order makes overall totals unknown, not a partial sum',()=>{const enriched=[r,{...r,id_programacion:'missing',cantidad_programada:null}];const s=summarizeReceptions(enriched);assert.equal(s.total,null);assert.equal(s.efectiva,null);assert.equal(s.sin_total,1);assert.equal(s.sin_efectiva,1);});

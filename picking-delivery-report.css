@@ -112,3 +112,12 @@
 #pickReportPanel .pick-report-shift-card b{display:block;color:#103b73;font-size:18px}
 #pickReportPanel.pick-report-export .pick-report-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
 #pickReportPanel.pick-report-export{display:grid;grid-template-columns:minmax(0,1fr)}
+/* Reception design A: exact scheduled week first, column controls, explicit metrics. */
+#pickReceptionReportRows th button[data-report-column]{color:inherit;background:transparent;border:0;padding:0;min-height:36px;text-align:left;white-space:nowrap;font:inherit;cursor:pointer}
+#pickReceptionReportRows th button.is-filtered{box-shadow:inset 0 -2px currentColor}
+#pickReceptionReportRows td:nth-child(1){font-weight:700;color:#174575}
+#pickReceptionReportRows td:nth-child(4),#pickReceptionReportRows td:nth-child(5),#pickReceptionReportRows td:nth-child(6){text-align:right;font-variant-numeric:tabular-nums;font-weight:700}
+#pickReceptionReportRows td:nth-child(5){color:#a2580a}#pickReceptionReportRows td:nth-child(6){color:#097249}
+#pickReceptionReportRows td:nth-child(10)>div+div{margin-top:8px}
+#pickReceptionReportRows td small{font-weight:400}
+.pick-report-column-menu [hidden]{display:none!important}

@@ -29,6 +29,31 @@ export function receptionStatus(row){return row.completa_al_recibir===true?'comp
 export function filterReceptionRows(rows,{search='',state=''}={}){return rows.filter(row=>matchesOrderSearch(row,search)&&(!state||receptionStatus(row)===state));}
 const knownQuantity=value=>value!==null&&value!==undefined&&value!==''&&Number.isFinite(Number(value))&&Number(value)>=0;
 const orderKey=row=>JSON.stringify([row.key_produccion||row.key_produccion_parte||row.id_programacion,(row.key_produccion||row.key_produccion_parte)?'':row.produccion,row.sistema]);
+// Current scheduled quantity is not a historical receipt quantity.
+export function receptionQuantities(row){
+ const total=knownQuantity(row.cantidad_programada)?Number(row.cantidad_programada):null;
+ const pending=row.pendientes_al_recibir;
+ if(!Array.isArray(pending))return {total,afectadas:null,efectiva:null,estimada:false};
+ const seen=new Map();let affected=0,count=0;
+ for(const piece of pending){
+  if(!knownQuantity(piece.ventanas_afectadas))return {total,afectadas:null,efectiva:null,estimada:false};
+  const n=Number(piece.ventanas_afectadas),id=piece.id_pendiente||piece.id_faltante;
+  if(id&&seen.has(String(id))){if(seen.get(String(id))!==n)return {total,afectadas:null,efectiva:null,estimada:false};continue;}
+  if(id)seen.set(String(id),n);affected+=n;if(n)count++;
+ }
+ // Different missing profiles may affect the same panels; no panel identities exist in this snapshot.
+ return {total,afectadas:affected,efectiva:total===null?null:Math.max(0,total-affected),estimada:count>1||(total!==null&&affected>total)};
+}
+export function summarizeReceptionQuantities(rows=[]){
+ const orders=new Map();
+ for(const row of rows){const key=orderKey(row),old=orders.get(key);
+  // One quantity per order; latest recorded reception supplies the impact snapshot.
+  if(!old||String(row.registrado_en||'')>String(old.registrado_en||''))orders.set(key,row);
+ }
+ let total=0,efectiva=0,sin_total=0,sin_efectiva=0,estimadas=0;
+ for(const row of orders.values()){const q=receptionQuantities(row);if(q.total===null)sin_total++;else total+=q.total;if(q.efectiva===null)sin_efectiva++;else efectiva+=q.efectiva;if(q.estimada)estimadas++;}
+ return {total:sin_total?null:total,efectiva:sin_efectiva?null:efectiva,sin_total,sin_efectiva,estimadas};
+}
 export function summarizeReceptions(rows=[]){
  const systems=new Map(),dateShifts=new Map(),orders=new Set();
  let complete=0,incomplete=0,unknownState=0,pendingPieces=0,unknownPending=0;
@@ -45,13 +70,13 @@ export function summarizeReceptions(rows=[]){
   if(!dateShifts.has(dateKey))dateShifts.set(dateKey,{fecha:row.fecha_recepcion,turno:row.turno_recepcion,recepciones:0,completas:0,incompletas:0,sin_estado:0});
   const day=dateShifts.get(dateKey);day.recepciones++;day[status==='completa'?'completas':status==='incompleta'?'incompletas':'sin_estado']++;
  }
- return {recepciones:rows.length,ordenes:orders.size,completas:complete,incompletas:incomplete,sin_estado:unknownState,piezas_pendientes:pendingPieces,recepciones_sin_pendientes:unknownPending,
+ return {...summarizeReceptionQuantities(rows),recepciones:rows.length,ordenes:orders.size,completas:complete,incompletas:incomplete,sin_estado:unknownState,piezas_pendientes:pendingPieces,recepciones_sin_pendientes:unknownPending,
   sistemas:[...systems.values()].map(({orders,...group})=>({...group,ordenes:orders.size})).sort((a,b)=>a.sistema.localeCompare(b.sistema)),
   fechas_turnos:[...dateShifts.values()].sort((a,b)=>`${b.fecha}|${b.turno}`.localeCompare(`${a.fecha}|${a.turno}`))};
 }
 export function receptionCsv(rows){
  const cell=value=>'"'+String(value??'').replace(/^[=+@\-\t\r]/,"'$&").replaceAll('"','""')+'"';
- const lines=[['Orden','Reserva','Sistema','Fecha operativa recepción','Turno recepción','Registrado en','Entregó','Recibió','Estado al recibir','Pendientes al recibir','Ventanas recibidas','Fuente ventanas']];
- for(const row of rows)lines.push([row.produccion,row.reserva,row.sistema,row.fecha_recepcion||'Sin dato',row.turno_recepcion||'Sin dato',row.registrado_en||'Sin dato',row.nombre_entrego||row.usuario_entrega||'Sin dato',row.nombre_recibio||row.usuario_recepcion||'Sin dato',row.completa_al_recibir===true?'Completa':row.completa_al_recibir===false?'Incompleta':'Sin evidencia histórica',Array.isArray(row.pendientes_al_recibir)?row.pendientes_al_recibir.map(p=>[p.cantidad,p.perfil||p.referencia,p.observacion].filter(x=>x!=null).join(' · ')).join(' | ')||'Sin pendientes reportados':'Sin evidencia histórica',row.fuente_ventanas&&knownQuantity(row.cantidad_ventanas_recibidas)?row.cantidad_ventanas_recibidas:'Sin dato',row.fuente_ventanas||'Sin evidencia']);
+ const lines=[['Semana programada','Orden','Reserva','Sistema','Fecha operativa recepción','Turno recepción','Registrado en','Entregó','Recibió','Estado al recibir','Pendientes al recibir','Ventanas recibidas','Fuente ventanas','Cantidad programada','Paneles afectados al recibir','Cantidad efectiva','Cálculo efectivo']];
+ for(const row of rows)lines.push([row.semana_programada??'Sin dato',row.produccion,row.reserva,row.sistema,row.fecha_recepcion||'Sin dato',row.turno_recepcion||'Sin dato',row.registrado_en||'Sin dato',row.nombre_entrego||row.usuario_entrega||'Sin dato',row.nombre_recibio||row.usuario_recepcion||'Sin dato',row.completa_al_recibir===true?'Completa':row.completa_al_recibir===false?'Incompleta':'Sin evidencia histórica',Array.isArray(row.pendientes_al_recibir)?row.pendientes_al_recibir.map(p=>[p.cantidad,p.perfil||p.referencia,p.observacion].filter(x=>x!=null).join(' · ')).join(' | ')||'Sin pendientes reportados':'Sin evidencia histórica',row.fuente_ventanas&&knownQuantity(row.cantidad_ventanas_recibidas)?row.cantidad_ventanas_recibidas:'Sin dato',row.fuente_ventanas||'Sin evidencia',receptionQuantities(row).total??'Sin dato',receptionQuantities(row).afectadas??'Sin dato',receptionQuantities(row).efectiva??'Sin dato',receptionQuantities(row).estimada?'Estimado: posible solapamiento':'Total menos afectados']);
  return '\ufeff'+lines.map(line=>line.map(cell).join(';')).join('\r\n');
 }
