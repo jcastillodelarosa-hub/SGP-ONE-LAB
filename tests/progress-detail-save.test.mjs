@@ -1,0 +1,16 @@
+import test from 'node:test';import assert from 'node:assert/strict';import vm from 'node:vm';import {readFileSync} from 'node:fs';
+const source=readFileSync(new URL('../app.js',import.meta.url),'utf8');
+const bridge=source.slice(source.indexOf('window.SGPWeeklyPhysicalCanEdit='),source.indexOf('window.SGPWeeklyAnchor='));
+function harness({role='COORDINADOR',token='TEST',scopeToken='TEST',state='CORTE',editable=true,delay=null,error=null}={}){
+ const calls=[],events=[];const scope={token:scopeToken,revision:1,weeks:[47],year:2026,line:'PANELES_2',system:''};
+ const context={window:{dispatchEvent:e=>events.push(e.type),SGPWeeklyPhysicalProgress:async()=>{calls.push('read');if(delay)await delay;return {details:[{editable,assignments:[{id_programacion:'P',produccion:'O',state,editable}]}]};}},Event:class{constructor(type){this.type=type;}},repoRole:()=>role,getAppToken:()=>token,physicalDetailScope:scope,physicalRevision:1,physicalStateSaving:new Set(),physicalSnapshot:{},physicalPending:null,PROD_STATES:['SIN INICIAR','CORTE','MECANIZADO','PROCESADO'],getSupabaseClient:async()=>({rpc:async(name,args)=>{calls.push({name,args});return {error};}})};
+ vm.runInNewContext(bridge,context);return {save:context.window.SGPWeeklyPhysicalSaveState,calls,events,context};
+}
+const change={id:'P',production:'O',state:'MECANIZADO',expected:'CORTE'};
+test('read-only roles cannot save and do not issue requests',async()=>{const h=harness({role:'CONSULTA'});await assert.rejects(h.save(change),/rol/);assert.equal(h.calls.length,0);});
+test('reprogramming cannot be invented by setting a status',async()=>{const h=harness();await assert.rejects(h.save({...change,state:'REPROGRAMADO'}),/no permitido/);assert.equal(h.calls.length,0);});
+test('session change blocks the write before any read',async()=>{const h=harness({scopeToken:'OLD'});await assert.rejects(h.save(change),/consulta cambió/);assert.equal(h.calls.length,0);});
+test('fresh state mismatch or noneditable assignment rejects write',async()=>{for(const opts of [{state:'PROCESADO'},{editable:false}]){const h=harness(opts);await assert.rejects(h.save(change));assert.deepEqual(h.calls,['read']);}});
+test('valid save uses existing RPC and invalidates only after success',async()=>{const h=harness();await h.save(change);assert.equal(h.calls[1].name,'sgp_mecanizado_guardar_estado_orden');assert.equal(h.calls[1].args.p_id_programacion,'P');assert.equal(h.calls[1].args.p_produccion,'O');assert.equal(h.calls[1].args.p_observacion,null);assert.deepEqual(h.events,['sgp:physical-state-saved']);assert.equal(h.context.physicalRevision,2);});
+test('RPC failure keeps revision and allows deliberate retry',async()=>{const h=harness({error:Error('Denied')});await assert.rejects(h.save(change),/Denied/);assert.equal(h.context.physicalRevision,1);assert.deepEqual(h.events,[]);await assert.rejects(h.save(change),/Denied/);assert.equal(h.calls.length,4);});
+test('simultaneous duplicate saves issue exactly one write',async()=>{let resolve;const delay=new Promise(r=>resolve=r),h=harness({delay});const first=h.save(change);await assert.rejects(h.save(change),/ya se está guardando/);resolve();await first;assert.equal(h.calls.filter(c=>c.name).length,1);});

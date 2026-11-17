@@ -1,3 +1,4 @@
+import {progressDetailMarkup,bindProgressDetail} from './src/modules/mecanizado-progress-detail.js';
 import {uniqueOpenPickingOrders} from './src/domain/picking-open-orders.js';
 import {mountPickingAuditConfig} from './src/modules/picking-audit-config.js';
 import {readWithAccessoryAlerts} from './src/services/accessory-alerts.js';
@@ -2120,9 +2121,12 @@ window.SGPWeeklyDemandForWeeks=async weeks=>{
  }));
  return result.flat();
 };
+window.SGPPhysicalDetail={progressDetailMarkup,bindProgressDetail};
 // Issue103: one session-scoped read snapshot; filters do not refetch per system/order.
 let physicalSnapshot=null,physicalPending=null,physicalSession=null,physicalRevision=0,physicalScheduleReady=false;
 const physicalBaseCache=new Map();
+let physicalDetailScope=null;
+const physicalStateSaving=new Set();
 window.addEventListener('sgp:programming-loaded',()=>{physicalScheduleReady=true;physicalRevision++;physicalSnapshot=null;physicalPending=null;physicalBaseCache.clear();});
 window.addEventListener('sgp:programming-loading',()=>{physicalScheduleReady=false;physicalRevision++;physicalSnapshot=null;physicalPending=null;physicalBaseCache.clear();});
 window.SGPWeeklyPhysicalContext=()=>{const token=getAppToken();if(token!==physicalSession){physicalSession=token;physicalRevision++;physicalSnapshot=null;physicalPending=null;physicalBaseCache.clear();}return token?physicalRevision:null;};
@@ -2176,7 +2180,31 @@ window.SGPWeeklyPhysicalProgress=async({weeks,year=new Date().getFullYear(),line
  if(token!==getAppToken()||revision!==physicalRevision)throw new Error('Datos de avance obsoletos');
  const data=physicalSnapshot.data;
  if(!base.some(p=>p.id_linea===line&&Number(p.anio)===year&&weeks.includes(Number(p.semana_base)))&&data.schedule.some(s=>Number(String(s.fecha_programacion||'').slice(0,4))===year&&data.links.some(l=>l.id_linea===line&&String(l.reserva)===String(s.reserva)&&weeks.includes(Number(l.semana_produccion)))))throw new Error('La base devolvió cero pese a relaciones productivas del alcance; revisar acceso y contrato de la RPC');
- return basePhysicalProgress({...data,base},{weeks,year,line,system});
+ const progress=basePhysicalProgress({...data,base},{weeks,year,line,system});
+ physicalDetailScope={token,revision,weeks:[...weeks],year,line,system};
+ return progress;
+};
+window.SGPWeeklyPhysicalCanEdit=()=>['ADMINISTRADOR','COORDINADOR','LIDER MECANIZADO','LIDER','LIDER LINEA'].includes(repoRole());
+window.SGPWeeklyPhysicalSaveState=async({id,production,state,expected})=>{
+ if(!window.SGPWeeklyPhysicalCanEdit())throw new Error('Tu rol no permite cambiar estados de mecanizado');
+ if(!PROD_STATES.includes(state))throw new Error('Estado operativo no permitido');
+ const scope=physicalDetailScope,key=JSON.stringify([id,production]);
+ if(!scope||scope.token!==getAppToken()||scope.revision!==physicalRevision)throw new Error('La consulta cambió. Actualiza el detalle.');
+ if(physicalStateSaving.has(key))throw new Error('Este cambio ya se está guardando');
+ physicalStateSaving.add(key);
+ try{
+  physicalSnapshot=null;physicalPending=null;
+  const fresh=await window.SGPWeeklyPhysicalProgress(scope);
+  const matches=fresh.details.filter(r=>r.editable).flatMap(r=>r.assignments).filter(a=>a.id_programacion===id&&a.produccion===production);
+  if(matches.length!==1||!matches[0].editable)throw new Error('Asignación no editable o sin identidad única');
+  if(matches[0].state!==expected)throw new Error('El estado cambió desde tu consulta. Actualiza antes de guardar.');
+  if(scope.token!==getAppToken()||scope.revision!==physicalRevision)throw new Error('La sesión o programación cambió');
+  const db=await getSupabaseClient();
+  const {error}=await db.rpc('sgp_mecanizado_guardar_estado_orden',{p_token:scope.token,p_id_programacion:id,p_produccion:production,p_estado:state,p_observacion:null});
+  if(error)throw error;
+  physicalSnapshot=null;physicalPending=null;physicalRevision++;
+  window.dispatchEvent(new Event('sgp:physical-state-saved'));
+ }finally{physicalStateSaving.delete(key);}
 };
 window.SGPWeeklyAnchor=()=>progCalendarAnchor;
 const progGroupName={1:'OK / Entregadas en sistema',2:'Recibidas sin legalizar',3:'Pendientes por Bodega',4:'Pendientes por Abastecimiento'};
@@ -2201,7 +2229,7 @@ async function loadProgramming(options={}){
    progRows=a.data||[];progSchedule=b.data||[];progMoves=mv.error?[]:(mv.data||[]);progMovesError=mv.error?'No fue posible comprobar reprogramaciones: '+mv.error.message:'';
    progCoverage=cv.data||[];progOrderCoverage=oc.data||[];progConfirmations=cf.error?[]:(cf.data||[]);
    machiningMetrics.sync('programming',()=>renderProgramming());window.dispatchEvent(new Event('sgp:programming-loaded'));
-  }catch(error){if(request===programmingRequestSeq&&token===getAppToken()){const pool=document.querySelector('#progPool');if(pool)pool.innerHTML='<p role="alert">No se pudo actualizar Programación: '+escapeHtml(error.message)+'</p>';}}
+  }catch(error){if(request===programmingRequestSeq&&token===getAppToken()){window.dispatchEvent(new CustomEvent('sgp:programming-error',{detail:{message:error.message||String(error)}}));const pool=document.querySelector('#progPool');if(pool)pool.innerHTML='<p role="alert">No se pudo actualizar Programación: '+escapeHtml(error.message)+'</p>';}}
  });
 }
 function glassClass(p){p=Number(p||0);return p>=100?'good':p>=70?'mid':'low'}
@@ -2281,7 +2309,7 @@ function renderProgramming(options={}){
  const coverageFor=(res,part=null)=>progCoverage.find(x=>String(x.reserva)===String(res)&&(part==null||String(x.prioridad_semanal||'')===String(part)))||null;
  const programmedFor=(res,prod=null)=>{if(prod){const oc=progOrderCoverage.filter(x=>String(x.reserva)===String(res)&&String(x.produccion)===String(prod));if(oc.length&&!oc.some(x=>x.estado_orden==='REVISAR'))return Math.max(...oc.map(coverageAmount));const row=progRows.find(r=>String(r.reserva)===String(res)),order=(row?.ordenes||[]).find(o=>String(o.produccion)===String(prod));if(order){const parts=(row?.partes||[]).filter(p=>(p.ordenes||[]).some(o=>String(o.produccion)===String(prod))),covered=parts.reduce((n,p)=>n+Number(coverageFor(res,p.prioridad)?.cantidad_cubierta||0),0),canonical=parts.reduce((n,p)=>n+Number((p.ordenes||[]).find(o=>String(o.produccion)===String(prod))?.cantidad||0),0);if(parts.length&&covered>=parts.reduce((n,p)=>n+Number(p.cantidad||0),0))return Number(order.cantidad||canonical||0)}}return progSchedule.filter(x=>x.estado!=='CANCELADA'&&x.reserva===res&&(!prod||x.produccion===prod)).reduce((n,x)=>n+Number(x.cantidad_programada||0),0)};
  const reserveCoverage=res=>{const cs=progCoverage.filter(x=>String(x.reserva)===String(res));return cs.length?cs.reduce((n,x)=>n+Number(x.cantidad_cubierta||0),0):programmedFor(res)};
- const wk=document.querySelector('#progWeek');if(wk&&!wk.dataset.ready){const weeks=[...new Set(progRows.map(r=>Number(r.semana)).filter(Boolean))].sort((a,b)=>b-a);wk.innerHTML='<option value="">Todas las semanas</option>'+weeks.map(w=>'<option value="'+w+'">Semana '+w+'</option>').join('');wk.dataset.ready='1'}
+ const wk=document.querySelector('#progWeek');if(wk){const selected=wk.value,weeks=[...new Set([...Array.from(wk.options||[],o=>Number(o.value)),...progRows.map(r=>Number(r.semana))].filter(n=>Number.isInteger(n)&&n>=1&&n<=53))].sort((a,b)=>b-a);wk.innerHTML='<option value="">Todas las semanas</option>'+weeks.map(w=>'<option value="'+w+'">Semana '+w+'</option>').join('');wk.value=selected}
  const q=(document.querySelector('#progSearch')?.value||'').toLowerCase(),rows=progRows.filter(r=>!q||[r.reserva,r.sistema,r.acabado,JSON.stringify(r.ordenes)].join(' ').toLowerCase().includes(q));
  const enriched=rows.map(r=>{const done=reserveCoverage(r.reserva),left=Math.max(0,Number(r.cantidad)-done),confirmation=progConfirmations.find(c=>String(c.reserva)===String(r.reserva)&&c.estado==='CONFIRMADA_OPERACION'&&Number(c.cantidad_canonica)===Number(r.cantidad));return {...r,_done:done,_left:left,_confirmation:confirmation,_progress:Number(r.cantidad)?Math.min(100,done/Number(r.cantidad)*100):0}});
  const complete=enriched.filter(r=>(r._left<=0&&r._done>0)||r._confirmation),pending=enriched.filter(r=>r._left>0&&!r._confirmation);
