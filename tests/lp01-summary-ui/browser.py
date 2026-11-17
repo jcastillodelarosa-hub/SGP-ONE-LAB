@@ -24,7 +24,11 @@ try:
    legacy=page.locator('[data-order-summary="QA1|PANELES_2"]');assert 'Total por validar' in legacy.inner_text();legacy.locator('[data-summary-cause=NC_AL]').click()
    card=page.locator('.lp-pdt-compact');card.wait_for();page.wait_for_function("document.querySelector('[data-pdt-nc]').textContent==='SOLUCIONADA'")
    summary=card.locator('summary');text=summary.inner_text();assert all(s in text for s in ['ES-EL400-004','19 piezas','NC1','SOLUCIONADA','PRODUCCION']);assert 'synthetic-legacy-id' not in text
-   assert 'Las causas pueden coincidir. No se suman como total único.' in page.locator('[data-order-affectations]').inner_text();assert not card.get_attribute('open');summary.focus();page.keyboard.press('Enter');assert card.get_attribute('open') is not None;assert 'synthetic-legacy-id' not in card.inner_text();assert 'Reserva:' in card.inner_text() and 'Estado PDT:' in card.inner_text();page.keyboard.press('Enter')
+   # Compact UI keeps overlap semantics in the pending-total label, not long helper copy.
+   pending_total=legacy.locator('.lp-summary-pending').filter(has_text='Total por validar')
+   assert pending_total.count()==1 and 'las causas pueden coincidir' in pending_total.get_attribute('title')
+   assert 'Total 18' not in legacy.inner_text() and 'Disponibles' not in legacy.inner_text()
+   assert not card.get_attribute('open');summary.focus();page.keyboard.press('Enter');assert card.get_attribute('open') is not None;assert 'synthetic-legacy-id' not in card.inner_text();assert 'Reserva:' in card.inner_text() and 'Estado PDT:' in card.inner_text();page.keyboard.press('Enter')
    page.evaluate("window.panelNode=document.querySelector('.lp-pdt-compact')");page.clock.fast_forward(20000);page.wait_for_timeout(100);assert page.evaluate("panelNode===document.querySelector('.lp-pdt-compact')")
    assert 'Total por validar' in legacy.inner_text();assert '10 × NC AL' in legacy.inner_text(),'NC solution must not release windows'
    assert page.evaluate('document.documentElement.scrollWidth<=innerWidth');page.screenshot(path=str(OUT/f'compact-{width}.png'),full_page=True)
