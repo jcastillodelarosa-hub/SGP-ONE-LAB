@@ -1,7 +1,7 @@
 name: Picking missing impact browser
 on:
   pull_request:
-    paths: ['src/domain/picking*', 'src/modules/picking*', 'picking-delivery-report.css', 'styles.css', 'index.html', 'tests/picking-impact-browser/**', '.github/workflows/picking-impact-browser.yml']
+    paths: ['src/domain/picking*', 'src/modules/picking*', 'picking-delivery-report.css', 'styles.css', 'index.html', 'tests/picking-impact-browser/**', 'tests/picking-impact-sql/**', 'tests/picking-impact*.mjs', 'tests/picking-audit-impact*.mjs', 'docs/sql-proposals/picking-impact/**', '.github/workflows/picking-impact-browser.yml']
 permissions:
   contents: read
 jobs:
@@ -36,3 +36,35 @@ jobs:
           name: picking-missing-impact-browser-${{ github.sha }}
           path: /tmp/sgp-picking-impact-browser
           retention-days: 7
+  postgres-concurrency:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: sgp_impact_qa
+          POSTGRES_PASSWORD: synthetic-only-not-production
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install psycopg2-binary==2.9.10
+      - name: Real two-session contention against a local synthetic service only
+        env:
+          SGP_SYNTHETIC_PG: '1'
+          PGHOST: 127.0.0.1
+          PGPORT: '5432'
+          PGDATABASE: sgp_impact_qa
+          PGUSER: postgres
+          PGPASSWORD: synthetic-only-not-production
+        run: python tests/picking-impact-sql/postgres-concurrency.py
