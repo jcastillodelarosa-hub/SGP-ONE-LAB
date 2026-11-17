@@ -5,7 +5,7 @@ on:
       - 'src/**'
       - 'planner-operations-v326.js'
       - 'planner-readonly-v171.js'
-      - 'supabase/migrations/*accessory_alert_rules.sql'
+      - 'supabase/migrations/*accessory_alert*.sql'
       - 'tests/accessory-alerts/**'
       - 'tests/accessory-alerts.test.mjs'
       - '.github/workflows/accessory-alerts.yml'
@@ -28,6 +28,7 @@ jobs:
           node --test tests/accessory-alerts.test.mjs
           node tests/accessory-alerts/sql.mjs
           node tests/accessory-alerts/dom.mjs
+          node tests/accessory-alerts/multiselect.mjs
       - name: Install matching test browser in isolated runner
         run: node tests/accessory-alerts/node_modules/playwright/cli.js install --with-deps chromium
       - name: Synthetic create, edit, disable and no rules at 1440 and 390 pixels

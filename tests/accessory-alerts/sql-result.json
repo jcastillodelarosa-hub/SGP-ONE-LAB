@@ -1,6 +1,6 @@
 {
   "environment": "PGlite 0.3.14 isolated PostgreSQL, synthetic source ACL fixtures",
-  "checks": 27,
+  "checks": 37,
   "pass": true,
   "limitations": "Tests actual new migration. Existing source RPC bodies are ACL fixtures; no hosted session or production migration tested."
 }
