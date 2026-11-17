@@ -38,7 +38,7 @@ export function basePhysicalProgress(input,{year,weeks,line='PANELES_2',system='
   if(!row.id_linea||!Number.isInteger(Number(row.anio))||!Number.isInteger(weekOf(row)))throw new Error('La base no acredita línea/año/semana');
   if(row.id_linea!==line||Number(row.anio)!==year||!chosen.has(weekOf(row)))continue;
   const key=text(row.key_produccion),q=quantity(row.cantidad);
-  records.set(key,{...row,key,system:text(row.sistema)||'SIN SISTEMA',programmed:q,received:null,partialReceiptBase:0,processed:0,assigned:0,allocationInvalid:false});
+  records.set(key,{...row,key,system:text(row.sistema)||'SIN SISTEMA',programmed:q,received:null,partialReceiptBase:0,processed:0,assigned:0,allocationInvalid:false,assignments:[]});
  }
  const relation=key=>shared.filter(row=>text(row.key_produccion)===key);
  const requiredReserves=p=>{
@@ -135,7 +135,9 @@ export function basePhysicalProgress(input,{year,weeks,line='PANELES_2',system='
     p.assigned+=aq;
     const complete=e?.estado==='PROCESADO'||oe.some(o=>o.produccion===p.produccion&&o.estado==='PROCESADO');
     if(complete&&partial>0&&partial!==aq)throw new Error('Ejecución agregada y por orden contradictorias');
-    p.processed+=complete?(correctedActual?completedQuantity:aq):partial;
+    const actual=complete?(correctedActual?completedQuantity:aq):partial;
+    p.processed+=actual;
+    p.assignments.push({id_programacion:text(row.id_programacion),produccion:text(p.produccion),reserva:text(row.reserva),date:text(row.fecha_programacion),shift:text(row.turno),quantity:aq,processed:actual,state:complete?'PROCESADO':text(oe.find(o=>o.produccion===p.produccion)?.estado||e?.estado)||'SIN INICIAR',part:text(row.identificador_parte||row.prioridad_semanal),editable:Boolean(row.parte_id)||e?.estado!=='PROCESADO'});
    }
   }catch(error){fail(failureCandidates,error.message);}
  }
@@ -158,5 +160,6 @@ export function basePhysicalProgress(input,{year,weeks,line='PANELES_2',system='
  const finish=r=>({...r,pending:r.processed===null?null:r.programmed-r.processed,receivedPercent:pct(r.received,r.programmed),percent:pct(r.processed,r.programmed),consistent:r.unresolved===0&&r.received!==null&&r.processed!==null&&r.programmed>=r.received&&r.received>=r.processed,warnings:[...r.warnings]});
  const rows=[...grouped.values()].sort((a,b)=>a.system.localeCompare(b.system)).map(finish);
  const t=rows.reduce((a,r)=>({programmed:a.programmed+r.programmed,received:a.received===null||r.received===null?null:a.received+r.received,processed:a.processed===null||r.processed===null?null:a.processed+r.processed,receivedKnown:a.receivedKnown+r.receivedKnown,partialReceiptBase:a.partialReceiptBase+r.partialReceiptBase,processedKnown:a.processedKnown+r.processedKnown,unresolved:a.unresolved+r.unresolved,warnings:new Set([...a.warnings,...r.warnings])}),{programmed:0,received:0,processed:0,receivedKnown:0,partialReceiptBase:0,processedKnown:0,unresolved:0,warnings:new Set()});
- const total=finish(t);return {rows,total,warnings:[...t.warnings],complete:rows.every(r=>r.consistent&&r.unresolved===0),baseCount:[...records.values()].filter(p=>!system||p.system===system).length};
+ const details=[...records.values()].filter(p=>!system||p.system===system).map(p=>({key:p.key,system:p.system,production:text(p.produccion),reserve:primary(p),programmed:p.programmed,processed:p.processed,pending:p.processed===null?null:p.programmed-p.processed,unassigned:p.allocationInvalid?null:Math.max(0,p.programmed-p.assigned),warnings:[...(issues.get(p.key)||[])],editable:!p.allocationInvalid,assignments:p.assignments}));
+ const total=finish(t);return {rows,total,details,warnings:[...t.warnings],complete:rows.every(r=>r.consistent&&r.unresolved===0),baseCount:[...records.values()].filter(p=>!system||p.system===system).length};
 }
