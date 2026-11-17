@@ -21,12 +21,17 @@ snap=ok("""SELECT json_agg(json_build_object('name',n.nspname||'.'||p.proname,'s
 # Compare all target definitions, owner and ACL before/after a deliberately aborted install.
 fingerprint_query="SELECT md5(string_agg(pg_get_functiondef(p.oid)||p.proowner::text||coalesce(p.proacl::text,''),'' ORDER BY p.oid)) FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname IN ('public','sgp_opt_shared');"
 before=ok(fingerprint_query)
+trigger_fingerprint_query="SELECT md5(coalesce(string_agg(pg_get_triggerdef(t.oid),'' ORDER BY t.oid),'')) FROM pg_trigger t JOIN pg_class c ON c.oid=t.tgrelid JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='sgp_opt_shared' AND NOT t.tgisinternal;"
+table_acl_query="SELECT md5(string_agg(c.relname||c.relowner::text||coalesce(c.relacl::text,''),'' ORDER BY c.oid)) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='sgp_opt_shared' AND c.relkind='r';"
+before_triggers=ok(trigger_fingerprint_query);before_tables=ok(table_acl_query)
 def bundle(fail):
  code="import {syntheticAtomicFence} from './tests/opt-digital/build-synthetic-atomic-fence.mjs';let s='';for await(const b of process.stdin)s+=b;process.stdout.write(syntheticAtomicFence(JSON.parse(s),{injectFailure:"+str(fail).lower()+"}));"
  r=subprocess.run(['node','--input-type=module','-e',code],input=snap,text=True,capture_output=True,cwd=root);assert r.returncode==0,r.stderr;return r.stdout
 assert 'SYNTHETIC_FAILURE_BEFORE_COMMIT' in query(bundle(True)).stderr
 assert ok("SELECT to_regclass('sgp_opt_shared.import_uncertainties') IS NULL;")=='t'
 assert ok(fingerprint_query)==before
+assert ok(trigger_fingerprint_query)==before_triggers
+assert ok(table_acl_query)==before_tables
 assert ok('SELECT count(*) FROM sgp_opt_shared.approvals;')=='1'
 ok(bundle(False))
 assert ok('SELECT count(*) FROM sgp_opt_shared.import_uncertainties;')=='9'
