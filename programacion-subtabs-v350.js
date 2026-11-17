@@ -165,6 +165,7 @@ function bindNestedLabels(root){
 }
 function render(){
  const root=document.querySelector('#sgpProgView');if(!root)return;
+ if(root.querySelector('.sgp-progress-detail[data-progress-dirty="true"],.sgp-progress-detail[data-progress-busy="true"]'))return;
  const data=weekRows(),schedule=getSchedule();
  let html='';
  if(active==='resumen')html=weeklyDashboard();
