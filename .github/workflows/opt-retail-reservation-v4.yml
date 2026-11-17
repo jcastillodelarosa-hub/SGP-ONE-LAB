@@ -15,6 +15,7 @@ on:
       - 'scripts/test-opt-retail-v4-timeouts-local.py'
       - 'scripts/build-opt-fence-precheck-review.mjs'
       - 'tests/opt-digital/resolution-postgres.mjs'
+      - 'tests/opt-digital/build-synthetic-atomic-fence.mjs'
 permissions:
   contents: read
 jobs:
@@ -58,6 +59,7 @@ jobs:
           python tests/opt-digital/retail-reservation-v4-concurrency.py "$c" /tmp/opt-v4-request.json > /tmp/opt-v4-evidence/concurrency.json
           python tests/opt-digital/import-uncertainty-fence-native.py "$c" > /tmp/opt-v4-evidence/fence.json
           python tests/opt-digital/import-uncertainty-integration-native.py "$c" > /tmp/opt-v4-evidence/fence-integration.json
+          python tests/opt-digital/import-uncertainty-atomic-native.py "$c" > /tmp/opt-v4-evidence/fence-atomic.json
           OPT_TEST_PG_SOCKET=/tmp/opt-v4-socket OPT_TEST_UNCERTAINTY_FENCE=1 PG_MODULE=/tmp/opt-v4-qa/node_modules/pg/lib/index.js node tests/opt-digital/resolution-postgres.mjs > /tmp/opt-v4-evidence/fence-resolution.json
           python scripts/test-opt-retail-v4-timeouts-local.py "$c" /tmp/opt-v4-request.json > /tmp/opt-v4-evidence/timeouts.json
       - uses: actions/upload-artifact@v4
