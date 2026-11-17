@@ -3108,6 +3108,7 @@ table.glass-burro-table th:not(:first-child){width:36%}
  .pdt-dashboard .repo-table :is(th,td):nth-child(14){width:6%}
  .pdt-dashboard .repo-table :is(th,td):nth-child(15){width:10%}
  .pdt-dashboard .repo-table :is(th,td):nth-child(16){width:8%}
+ .pdt-dashboard .repo-table select{font-size:11px;padding:6px 2px}
  .pdt-dashboard .repo-table :is(select,button){min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere}
  .pdt-dashboard .repo-table :is(.repo-validation-badge,.badge,.repo-contract-badge,.pending-week-badge,.nc-linked,.nc-unlinked,.nc-status){max-width:100%;white-space:normal;overflow-wrap:anywhere;box-sizing:border-box}
 }
