@@ -1,3 +1,11 @@
+## 2026-11-17 — Informe Recepciones · candidata LAB v469
+
+PR284 integrado sobre main v468. Semana de programación primera columna, filtros y
+ordenamiento SGP, cantidades total/afectadas/efectiva y revisores por sección.
+Enriquecimiento SQL aplicado con respaldo privado recuperable y guardas de definición;
+owner y ACL conservados, sin modificaciones de filas operativas. Pruebas aisladas y CI
+del merge previo aprobados; CI final, integración única y Hosting pendientes.
+
 ## 2026-11-17 — Programación semanal y detalle inline · candidata LAB v468
 
 PR282 integra PR283 sobre main b45b580 (LAB v467). Recuperación de selector semanal,
