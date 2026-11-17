@@ -1,3 +1,4 @@
+import {progressDetailMarkup,bindProgressDetail} from './src/modules/mecanizado-progress-detail.js';
 import {uniqueOpenPickingOrders} from './src/domain/picking-open-orders.js';
 import {mountPickingAuditConfig} from './src/modules/picking-audit-config.js';
 import {readWithAccessoryAlerts} from './src/services/accessory-alerts.js';
@@ -2120,9 +2121,12 @@ window.SGPWeeklyDemandForWeeks=async weeks=>{
  }));
  return result.flat();
 };
+window.SGPPhysicalDetail={progressDetailMarkup,bindProgressDetail};
 // Issue103: one session-scoped read snapshot; filters do not refetch per system/order.
 let physicalSnapshot=null,physicalPending=null,physicalSession=null,physicalRevision=0,physicalScheduleReady=false;
 const physicalBaseCache=new Map();
+let physicalDetailScope=null;
+const physicalStateSaving=new Set();
 window.addEventListener('sgp:programming-loaded',()=>{physicalScheduleReady=true;physicalRevision++;physicalSnapshot=null;physicalPending=null;physicalBaseCache.clear();});
 window.addEventListener('sgp:programming-loading',()=>{physicalScheduleReady=false;physicalRevision++;physicalSnapshot=null;physicalPending=null;physicalBaseCache.clear();});
 window.SGPWeeklyPhysicalContext=()=>{const token=getAppToken();if(token!==physicalSession){physicalSession=token;physicalRevision++;physicalSnapshot=null;physicalPending=null;physicalBaseCache.clear();}return token?physicalRevision:null;};
@@ -2176,7 +2180,31 @@ window.SGPWeeklyPhysicalProgress=async({weeks,year=new Date().getFullYear(),line
  if(token!==getAppToken()||revision!==physicalRevision)throw new Error('Datos de avance obsoletos');
  const data=physicalSnapshot.data;
  if(!base.some(p=>p.id_linea===line&&Number(p.anio)===year&&weeks.includes(Number(p.semana_base)))&&data.schedule.some(s=>Number(String(s.fecha_programacion||'').slice(0,4))===year&&data.links.some(l=>l.id_linea===line&&String(l.reserva)===String(s.reserva)&&weeks.includes(Number(l.semana_produccion)))))throw new Error('La base devolvió cero pese a relaciones productivas del alcance; revisar acceso y contrato de la RPC');
- return basePhysicalProgress({...data,base},{weeks,year,line,system});
+ const progress=basePhysicalProgress({...data,base},{weeks,year,line,system});
+ physicalDetailScope={token,revision,weeks:[...weeks],year,line,system};
+ return progress;
+};
+window.SGPWeeklyPhysicalCanEdit=()=>['ADMINISTRADOR','COORDINADOR','LIDER MECANIZADO','LIDER','LIDER LINEA'].includes(repoRole());
+window.SGPWeeklyPhysicalSaveState=async({id,production,state,expected})=>{
+ if(!window.SGPWeeklyPhysicalCanEdit())throw new Error('Tu rol no permite cambiar estados de mecanizado');
+ if(!PROD_STATES.includes(state))throw new Error('Estado operativo no permitido');
+ const scope=physicalDetailScope,key=JSON.stringify([id,production]);
+ if(!scope||scope.token!==getAppToken()||scope.revision!==physicalRevision)throw new Error('La consulta cambió. Actualiza el detalle.');
+ if(physicalStateSaving.has(key))throw new Error('Este cambio ya se está guardando');
+ physicalStateSaving.add(key);
+ try{
+  physicalSnapshot=null;physicalPending=null;
+  const fresh=await window.SGPWeeklyPhysicalProgress(scope);
+  const matches=fresh.details.filter(r=>r.editable).flatMap(r=>r.assignments).filter(a=>a.id_programacion===id&&a.produccion===production);
+  if(matches.length!==1||!matches[0].editable)throw new Error('Asignación no editable o sin identidad única');
+  if(matches[0].state!==expected)throw new Error('El estado cambió desde tu consulta. Actualiza antes de guardar.');
+  if(scope.token!==getAppToken()||scope.revision!==physicalRevision)throw new Error('La sesión o programación cambió');
+  const db=await getSupabaseClient();
+  const {error}=await db.rpc('sgp_mecanizado_guardar_estado_orden',{p_token:scope.token,p_id_programacion:id,p_produccion:production,p_estado:state,p_observacion:null});
+  if(error)throw error;
+  physicalSnapshot=null;physicalPending=null;physicalRevision++;
+  window.dispatchEvent(new Event('sgp:physical-state-saved'));
+ }finally{physicalStateSaving.delete(key);}
 };
 window.SGPWeeklyAnchor=()=>progCalendarAnchor;
 const progGroupName={1:'OK / Entregadas en sistema',2:'Recibidas sin legalizar',3:'Pendientes por Bodega',4:'Pendientes por Abastecimiento'};
