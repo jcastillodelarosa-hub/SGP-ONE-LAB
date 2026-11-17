@@ -1,3 +1,13 @@
+## 2026-11-17 — Programación semanal y detalle inline · candidata LAB v468
+
+PR282 integra PR283 sobre main b45b580 (LAB v467). Recuperación de selector semanal,
+errores visibles y detalle inline por orden desde barras de Mecanizado; conserva
+ediciones pendientes y utiliza contratos existentes. Fixtures sintéticos LP alineados
+con contrato de novedad y ayuda actual, sin cambios SQL productivos. CI de ambas
+ramas PASS antes de consolidar; CI y publicación de candidata consolidada pendientes.
+Política de Hosting, pins y permisos intactos. Próximo paso: CI del SHA final, una
+integración a main y comprobación de Hosting/version/sello; no asumir publicación.
+
 ## 2026-11-14 — OPT UI v459 autorizada; RPC de observación aplicada
 
 Rama release/opt-ui-v459 sobre main 2ad7054, UI 2f3ebf0 intacta; PR270 excluido. RPC de lectura instalada y ACL/sesión inválida verificadas; diez tablas OPT conservan conteos/huellas. 213/215 ausentes, sin autorización de retry. QA local previa reutilizada; versión 459 verificada. CI, merge y Hosting pendientes al preparar este commit. Evidencia y contención: docs/OPT_UI_V459_RELEASE.md. Frames sigue sin vínculo hasta decisión; no bloquea UI.
