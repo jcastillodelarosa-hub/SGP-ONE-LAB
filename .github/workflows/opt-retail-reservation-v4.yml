@@ -8,6 +8,8 @@ on:
       - 'functions/opt-import-manifest-core.mjs'
       - 'supabase/functions/opt-retail-import-v4-review/**'
       - 'docs/sql-proposals/opt-shared/*v4*'
+      - 'docs/sql-proposals/opt-shared/import_uncertainty*'
+      - 'tests/opt-digital/import-uncertainty*'
       - 'tests/opt-retail-reservation*'
       - 'tests/opt-digital/*v4*'
       - 'scripts/test-opt-retail-v4-timeouts-local.py'
@@ -34,6 +36,7 @@ jobs:
         run: |
           node --test tests/opt-import*.test.mjs tests/opt-retail*.test.mjs
           node tests/opt-digital/import-retail-reservation-v4-sql.mjs
+          node tests/opt-digital/import-uncertainty-fence-sql.mjs
           /tmp/opt-v4-qa/node_modules/.bin/deno check --node-modules-dir=manual supabase/functions/opt-retail-import-v4-review/index.ts
           /tmp/opt-v4-qa/node_modules/.bin/deno test --node-modules-dir=manual --allow-read tests/opt-retail-reservation-v4-deno.mjs
       - name: Native PostgreSQL concurrency and PostgREST timeout (network isolated)
@@ -49,6 +52,7 @@ jobs:
           done
           mkdir -p /tmp/opt-v4-evidence
           python tests/opt-digital/retail-reservation-v4-concurrency.py "$c" /tmp/opt-v4-request.json > /tmp/opt-v4-evidence/concurrency.json
+          python tests/opt-digital/import-uncertainty-fence-native.py "$c" > /tmp/opt-v4-evidence/fence.json
           python scripts/test-opt-retail-v4-timeouts-local.py "$c" /tmp/opt-v4-request.json > /tmp/opt-v4-evidence/timeouts.json
       - uses: actions/upload-artifact@v4
         if: always()
