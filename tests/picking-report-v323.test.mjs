@@ -7,7 +7,7 @@ const controller=readFileSync('src/modules/picking-delivery-report-controller.js
 const css=readFileSync('picking-delivery-report.css','utf8');
 test('LAB v323 report has branded header and no new data contract',()=>{
  assert.match(html,new RegExp(releaseLabel));
- assert.match(html,/picking-delivery-report[.]css[?]v=348/);
+ assert.ok(html.includes('picking-delivery-report.css?v='+releaseLabel.match(/v(\d+)/)[1]));
  assert.match(controller,/pick-report-wordmark/);
  assert.match(controller,/Reporte de Entregas/);
  assert.match(controller,/Picking · Entrega de órdenes/);

@@ -89,5 +89,5 @@ test('v348: interfaz y recursos reportan versión coincidente',()=>{
  for(const asset of ['styles.css','app.js']){
   assert.ok(html.includes(asset+'?v='+releaseLabel.match(/v(\d+)/)[1]));
  }
- assert.ok(html.includes('picking-delivery-report.css?v=348'));
+ assert.ok(html.includes('picking-delivery-report.css?v='+releaseLabel.match(/v(\d+)/)[1]));
 });
