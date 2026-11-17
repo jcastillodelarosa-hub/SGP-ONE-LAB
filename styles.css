@@ -3076,3 +3076,11 @@ table.glass-burro-table th:not(:first-child){width:36%}
 }
 
 :is(.pdt-registration-modal,.pdt-manual-modal) .piece-modal-head .eyebrow{color:var(--sgp-window-help)!important}
+
+/* Review completion is independent of missing material. */
+.pick-audit-progress{display:flex;flex-direction:column;gap:5px;margin-top:8px;font-size:12px;line-height:1.4}
+.pick-audit-progress>strong{color:#334155;font-size:11px}
+.pick-audit-progress-section{align-self:flex-start;border-radius:6px;padding:4px 7px;border:1px solid;font-weight:650;white-space:normal}
+.pick-audit-progress-section.audited{color:#166534;background:#f0fdf4;border-color:#bbf7d0}
+.pick-audit-progress-section.pending{color:#9a3412;background:#fff7ed;border-color:#fed7aa}
+.pick-audit-progress.unavailable{color:#64748b;max-width:240px}
