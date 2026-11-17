@@ -1,0 +1,38 @@
+name: Picking missing impact browser
+on:
+  pull_request:
+    paths: ['src/domain/picking*', 'src/modules/picking*', 'picking-delivery-report.css', 'styles.css', 'index.html', 'tests/picking-impact-browser/**', '.github/workflows/picking-impact-browser.yml']
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Isolated synthetic SQL and DOM dependencies
+        run: npm install --prefix /tmp/impact-qa --ignore-scripts --no-audit --no-fund jsdom@26.1.0 @electric-sql/pglite@0.3.14
+      - name: Synthetic modal and SQL contracts
+        env:
+          JSDOM_MODULE: /tmp/impact-qa/node_modules/jsdom/lib/api.js
+          PGLITE_MODULE: /tmp/impact-qa/node_modules/@electric-sql/pglite/dist/index.js
+        run: |
+          node tests/picking-audit-impact-dom.mjs
+          node tests/picking-impact-complement-dom.mjs
+          for test in tests/picking-impact-sql/test-*.mjs; do node "$test"; done
+      - run: python3 -m pip install playwright==1.56.0
+      - name: Synthetic accepted-impact, permission, update and session-change flows
+        env:
+          SGP_CHROME_PATH: /usr/bin/google-chrome
+        run: python3 tests/picking-impact-browser/browser.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: picking-missing-impact-browser-${{ github.sha }}
+          path: /tmp/sgp-picking-impact-browser
+          retention-days: 7
