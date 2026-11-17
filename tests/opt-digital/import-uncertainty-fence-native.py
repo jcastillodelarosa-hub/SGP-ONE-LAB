@@ -21,6 +21,18 @@ CREATE FUNCTION public.cached_synthetic(p_pdf bytea,p_sources jsonb) RETURNS jso
 BEGIN PERFORM sgp_opt_shared.assert_import_request(p_pdf,p_sources);RETURN '{"duplicate":true}'::jsonb;END$$;""")
 assert 'PREVIOUS_OUTCOME_UNRESOLVED' in query("SELECT public.cached_synthetic('safe','[{\"consecutivo\":\"OPT-SYNTH-1\",\"origen\":\"PROYECTO\"}]');").stderr
 assert 'true' in ok("SELECT public.cached_synthetic('safe','[{\"consecutivo\":\"PROJECT-SAFE\",\"origen\":\"PROYECTO\"}]');")
+# Inventory cardinality is evidence-driven, not hardcoded to the original two.
+ok("""INSERT INTO sgp_opt_shared.import_uncertainties(incident_id,pdf_sha256,opt,original_identity)
+SELECT ('00000000-0000-4000-8000-'||lpad(n::text,12,'0'))::uuid,
+encode(sha256(convert_to('synthetic-'||n,'UTF8')),'hex'),'OPT-SYNTH-'||n,'{}'::jsonb
+FROM generate_series(3,9) n;
+UPDATE sgp_opt_shared.import_fence_control SET expected_active=9;""")
+for n in range(1,10):
+ assert 'PREVIOUS_OUTCOME_UNRESOLVED' in query("SELECT public.cached_synthetic('safe','[{\"consecutivo\":\"OPT-SYNTH-"+str(n)+"\",\"origen\":\"PROYECTO\"}]');").stderr
+ok('UPDATE sgp_opt_shared.import_fence_control SET expected_active=2;')
+assert 'REGISTRY_MISMATCH' in query("SELECT public.cached_synthetic('safe','[{\"consecutivo\":\"PROJECT-SAFE\"}]');").stderr
+ok('UPDATE sgp_opt_shared.import_fence_control SET expected_active=9;')
+assert 'true' in ok("SELECT public.cached_synthetic('safe','[{\"consecutivo\":\"PROJECT-SAFE\"}]');")
 assert 'FENCE_ISOLATION' in query("BEGIN ISOLATION LEVEL REPEATABLE READ; SELECT public.cached_synthetic('safe','[{\"consecutivo\":\"PROJECT-SAFE\"}]');").stderr
 # Shared precheck lock protects decisions until importer commits.
 def session(q,name):
@@ -39,5 +51,5 @@ r=query("SELECT public.cached_synthetic('safe','[{\"consecutivo\":\"PROJECT-SAFE
 a.wait(timeout=5);assert a.returncode==0,a.stderr.read()
 ok((root/'docs/sql-proposals/opt-shared/import_uncertainty_fence_CLOSE_REVIEW.sql').read_text())
 assert 'FENCE_CLOSED' in query("SELECT public.cached_synthetic('safe','[{\"consecutivo\":\"PROJECT-SAFE\"}]');").stderr
-assert ok('SELECT count(*) FROM sgp_opt_shared.import_uncertainties;')=='2'
-print(json.dumps({'synthetic':True,'productionWrites':0,'registryRowsPreserved':2,'cachedReceiptProtected':True,'safeProyectoAllowedWhenCertified':True,'importVsClosureSerialized':True,'registryChangeBlocksImportWithoutWrite':True,'repeatableReadRejected':True,'closedRollback':True}))
+assert ok('SELECT count(*) FROM sgp_opt_shared.import_uncertainties;')=='9'
+print(json.dumps({'synthetic':True,'productionWrites':0,'registryRowsPreserved':9,'nineSyntheticIdentitiesBlocked':True,'staleExpectedCountFailsClosed':True,'cachedReceiptProtected':True,'safeProyectoAllowedWhenCertified':True,'importVsClosureSerialized':True,'registryChangeBlocksImportWithoutWrite':True,'repeatableReadRejected':True,'closedRollback':True}))
