@@ -1,3 +1,7 @@
+## 2026-11-18 — nombre de entrega reconstruido, candidata LAB v473
+Cambio local acotado sobre main9df2656. Ver docs/sql-proposals/delivery-name/README.md.
+1430 pruebas PASS/10 omitidas; SQL sintético y reversión PASS. Sin publicación ni cambios productivos.
+
 ## 2026-11-17 — Ajuste escritorio PDT · candidata LAB v472
 Referencia: imagen de Pendientes de aluminio / Por validar a zoom 67%.
 Solo puntero fino con hover y viewport >=900px: contenido usa ancho disponible,
