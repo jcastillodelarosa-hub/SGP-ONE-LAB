@@ -17,7 +17,8 @@ test('Picking PDT polling gates session, role and effective access; global poll 
  const h=harness();assert.equal(h.interval.ms,30000);h.interval.fn();assert.deepEqual(h.calls,['reset']);
  h.state.token='T';h.auth({valida:true,usuario:'synthetic',rol:'PICKING'},'old',true);h.interval.fn();assert.equal(h.calls.at(-1),'reset');
  h.auth({valida:true,usuario:'synthetic',rol:'PICKING'},'T',false);h.interval.fn();assert.equal(h.calls.at(-1),'reset');
- h.auth({valida:true,usuario:'synthetic',rol:'LIDER MECANIZADO'},'T',true);h.interval.fn();assert.equal(h.calls.at(-1),'reset');
+ h.auth({valida:true,usuario:'synthetic',rol:'LIDER MECANIZADO'},'T',true);h.interval.fn();assert.equal(h.calls.at(-1),'notices');
+ h.auth({valida:true,usuario:'synthetic',rol:'LIDER MECANIZADO'},'T',false);h.interval.fn();assert.equal(h.calls.at(-1),'reset');
  h.auth({valida:true,usuario:'synthetic',rol:'PICKING'},'T',true);h.interval.fn();assert.equal(h.calls.at(-1),'notices');
  h.state.pickingVisible=true;h.interval.fn();assert.equal(h.calls.at(-1),'notices','timer never reloads queue or loaded pages');h.refreshPickingPdtFlow();assert.equal(h.calls.at(-1),'refresh');
  h.state.hidden=true;const count=h.calls.length;h.interval.fn();assert.equal(h.calls.length,count);
