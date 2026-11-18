@@ -1,3 +1,4 @@
+import {readFileSync} from 'node:fs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {escapePdt,pdtBalance,filterPickingPdt,validatePdtQuantity,validatePickingPdtSnapshot,isDefinitivePdtRejection} from '../src/ui/picking-pdt-flow.js';
@@ -10,3 +11,5 @@ test('escape all user supplied markup',()=>assert.equal(escapePdt('<script>"\'&'
 test('malformed snapshot and impossible balances never render as empty truth',()=>{const snapshot={ok:true,contract_version:1,has_more:false,next_cursor:null,rows:[{...row,can_deliver:true,can_receive:true}],notifications:[],capabilities:{deliver:true,receive:true}};assert.equal(validatePickingPdtSnapshot(snapshot),snapshot);for(const bad of [{...snapshot,ok:false},{...snapshot,rows:null},{...snapshot,contract_version:2},{...snapshot,rows:[{...snapshot.rows[0],recibido:5}]},{...snapshot,rows:[{...snapshot.rows[0],disponible_entrega:99}]}])assert.throws(()=>validatePickingPdtSnapshot(bad));});
 
 test('only explicit rollback classifications clear request',()=>{assert.equal(isDefinitivePdtRejection({code:'P0001',message:'PDT_FLOW_SUPERA_ENTREGADO'}),true);assert.equal(isDefinitivePdtRejection({code:'40001'}),true);for(const e of [{code:'57014'},{code:'P0001',message:'PDT_FLOW_CLAVE_REUTILIZADA'},{code:'P0001',message:'Unknown'},{message:'Timeout'}])assert.equal(isDefinitivePdtRejection(e),false);});
+
+test('PDT UI namespaces every owned data attribute to avoid LP01/global selector collisions',()=>{const source=readFileSync(new URL('../src/ui/picking-pdt-flow.js',import.meta.url),'utf8');const attrs=[...source.matchAll(/data-[a-z][a-z-]*/g)].map(x=>x[0]);assert.ok(attrs.length>20);assert.ok(attrs.every(x=>x.startsWith('data-pdt-')),attrs.filter(x=>!x.startsWith('data-pdt-')).join(','));assert.ok(attrs.every(x=>!x.startsWith('data-pdt-pdt-')));const dataset=[...source.matchAll(/dataset\.([A-Za-z]+)/g)].map(x=>x[1]);assert.ok(dataset.every(x=>x.startsWith('pdt')),dataset.join(','));});

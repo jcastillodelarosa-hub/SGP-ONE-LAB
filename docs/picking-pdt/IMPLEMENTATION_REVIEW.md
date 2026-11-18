@@ -101,3 +101,10 @@ La regresión LP01 también detectó colisión del atributo genérico data-close
 modal oculto; el control nuevo se renombra data-pdt-close, sin cambiar ni debilitar
 las pruebas LP01. Estas últimas correcciones requieren reejecución de CI y nueva
 inspección visual antes de integración. No se ha desplegado ni aplicado SQL.
+
+### Aislamiento DOM frente a LP01
+El último job LP01 de01086b6 detectó colisión de data-week en una prueba global.
+Se aíslan los31 atributos propios del componente como data-pdt-* y sus accesos
+por dataset; CSS y pruebas propias se actualizan, sin modificar pruebas LP01.
+Una prueba contractual rechaza atributos/datasets genéricos o doble prefijo.
+23 pruebas focalizadas y DOM pasan localmente. Requiere CI completo posterior.
