@@ -113,10 +113,16 @@ try:
             expect(page.locator('#pickDeliveryPanel .picking-pdt-orders')).to_be_hidden()
             expect(page.locator('#pickDeliveryPanel tbody')).to_contain_text('42.125 in')
             page.screenshot(path=str(OUT/f'full-delivery-{width}.png'),full_page=True)
+            page.locator('#pickDeliveryPanel [data-move]').scroll_into_view_if_needed()
+            before_modal_scroll=page.evaluate('window.scrollY')
             page.locator('#pickDeliveryPanel [data-move]').click()
             expect(page.locator('.picking-pdt-modal')).to_be_visible()
             expect(page.locator('.picking-pdt-modal [data-meta]')).to_contain_text('42.125 in')
             expect(page.locator('.picking-pdt-modal [data-quantity]')).to_have_value('2')
+            modal_box=page.locator('.picking-pdt-modal > .modal-card').bounding_box()
+            assert modal_box and modal_box['x']>=0 and modal_box['y']>=0 and modal_box['x']+modal_box['width']<=width+1 and modal_box['y']+modal_box['height']<=height+1, modal_box
+            assert abs(page.evaluate('window.scrollY')-before_modal_scroll)<2, 'Opening modal scrolled the page'
+            assert page.locator('.picking-pdt-modal').evaluate("el=>getComputedStyle(el).position")=='fixed'
             page.screenshot(path=str(OUT/f'full-delivery-modal-{width}.png'),full_page=True)
             page.locator('.picking-pdt-modal [data-cancel]').click()
             expect(page.locator('.picking-pdt-modal')).to_be_hidden()
@@ -131,9 +137,13 @@ try:
             page.locator('#pickReceptionPanel [data-move]').click()
             expect(page.locator('.picking-pdt-modal [data-quantity]')).to_have_value('1')
             expect(page.locator('#pickingPdtTitle')).to_have_text('Recibir PDT aluminio')
-            page.locator('.picking-pdt-modal [data-close]').click()
+            page.locator('.picking-pdt-modal [data-pdt-close]').click()
             expect(page.locator('.picking-pdt-modal')).to_be_hidden()
             page.locator('#pickingPdtNotifications [data-bell]').click()
+            notice_box=page.locator('.picking-pdt-notice-popover').bounding_box()
+            assert notice_box and notice_box['x']>=0 and notice_box['y']>=0 and notice_box['x']+notice_box['width']<=width+1 and notice_box['y']+notice_box['height']<=height+1, notice_box
+            notice_button=page.locator('.picking-pdt-notice-popover [data-go]').first
+            assert notice_button.evaluate("el=>{const r=el.getBoundingClientRect();return el.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))}"), 'Notice action is covered by other content'
             page.screenshot(path=str(OUT/f'full-notices-{width}.png'),full_page=True)
             assert '/index.html' in loaded and '/app.js' in loaded and '/src/ui/picking-pdt-flow.js' in loaded
             assert '/vendor/supabase.js' in loaded, 'Real local SDK must load'

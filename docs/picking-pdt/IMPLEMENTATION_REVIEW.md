@@ -89,3 +89,15 @@ para CI y revisión. Sin merge, despliegue ni SQL productivo. Main revalidado
 90e526c/v473; candidata v475 mantiene OPT v474 separado. Última corrección UX:
 los avisos limpian semana/búsqueda/estado y abren pendientes desde primera página,
 con pruebas DOM de ambos enlaces.
+
+### Validación de CI y revisión visual posterior
+PR borrador294, separado de OPT292. En commit da2bda4 pasan los contratos PDT,
+DOM, flujo sintético de parciales y aplicación completa index/app/SDK en1440px y
+390px, con cero errores JavaScript y cero peticiones externas permitidas.
+La inspección manual de PNG encontró modal fuera del viewport y avisos detrás
+de contenido/fuera del borde móvil. Se corrigen con overlay propio y portal
+acotado al viewport; CI ahora exige geometría y botón de aviso no cubierto.
+La regresión LP01 también detectó colisión del atributo genérico data-close del
+modal oculto; el control nuevo se renombra data-pdt-close, sin cambiar ni debilitar
+las pruebas LP01. Estas últimas correcciones requieren reejecución de CI y nueva
+inspección visual antes de integración. No se ha desplegado ni aplicado SQL.
