@@ -33,8 +33,8 @@ test('full label identity, numeric namespace, finish and exact reservation prese
 test('different internal ID resolves exact Panel profile without choosing by eligible program',async()=>{
  const r=await run();assert.equal(r.status,200,JSON.stringify(r.out));assert.equal(r.writes[0].p_manifest.length,4);assert(r.writes[0].p_manifest.every(p=>p.asignacion.key_produccion==='700000|PANELES_2'));assert.equal(r.writes[0].p_evidence.contract,'OPT-SERVER-VALIDATION-RETAIL-4');
 });
-test('Frames documentary units remain unassigned even with a Panel program',async()=>{
- const r=await run({profile:'FRAME'});assert.equal(r.status,200,JSON.stringify(r.out));assert(r.writes[0].p_manifest.every(p=>p.asignacion===null));
+test('Frames use the shared Panel program while preserving physical profile',async()=>{
+ const r=await run({profile:'FRAME'});assert.equal(r.status,200,JSON.stringify(r.out));assert(r.writes[0].p_manifest.every(p=>p.asignacion.key_produccion==='700000|PANELES_2'));
 });
 test('missing/conflicting profile, wrong labels, changed scope, duplicate identity and absent program never write',async()=>{
  const mutations=[c=>({...c,profileDestinations:[]}),c=>({...c,profileDestinations:[...c.profileDestinations,{referencia:'R1',tipo_pieza:'FRAME',destino_productivo:'FRAME',activa:'SI'}]}),c=>({...c,bindings:c.bindings.map(b=>({...b,documentLabel:'wrong'}))}),c=>({...c,scope:{...c.scope,linea:'FRAMES_2'}}),c=>({...c,bindings:[...c.bindings,{...c.bindings[0],key_produccion:'competing'}]}),c=>({...c,bindings:c.bindings.map(b=>({...b,id_programacion:null}))})];
@@ -91,4 +91,8 @@ test('v4 cannot choose one of two canonical systems in same reservation',async()
 });
 test('v4 never accepts prior-contract recovery requests',async()=>{
  const b=retailBody();b.resolution={};const r=await run({request:b});assert.equal(r.status,422);assert.equal(r.writes.length,0);
+});
+
+test('Frames reject missing or ambiguous shared Panel programming, without fallback to Frame line',async()=>{
+ for(const mutate of [c=>({...c,bindings:c.bindings.filter(b=>b.id_linea==='FRAMES_2')}),c=>({...c,bindings:c.bindings.map(b=>({...b,id_programacion:null}))}),c=>({...c,bindings:[...c.bindings,{...c.bindings[0],key_produccion:'competing'}]})]){const r=await run({profile:'FRAME',mutate});assert.equal(r.status,422);assert.equal(r.writes.length,0);}
 });

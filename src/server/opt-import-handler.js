@@ -105,7 +105,7 @@ export function createOptImportHandler({rpc,readPdf,DOMParser,readWorksheetXML,a
    const document={sha256:hash,sourceKey:body.source.mode==='INDICE'?`OPT:${encodeURIComponent(opt)}`:`SHA256:${hash}`,origin:body.source.origin,opt,mode:body.source.mode};
    const references=[...new Set(rows.map(row=>row.ref))].sort();
    if(projectIndex&&(!references.length||references.length>1000||references.some(ref=>!text(ref))))fail('OPT_PROFILE_REFERENCES_INVALID');
-   const productions=[...new Set(rows.map(row=>documentProduction(row.reference)))];
+   const productions=[...new Set(rows.map(row=>documentProduction(row.reference,{numericRanges:retailReservationOnly})))];
    if(!projectIndex&&(productions.some(id=>typeof id!=='string'||!/^\d{1,30}$/.test(id))||productions.length>1000))fail('OPT_DOCUMENT_PRODUCTION_UNRESOLVED','Referencias documentales sin una producción única');
    const retailSelection=retailIndex?retailSelectors(selectedIndex,rows,{reservationOnly:retailReservationOnly}):null;
    const contextResult=retailIndex?await rpc(retailReservationOnly?'sgp_opt_import_contexto_retail_v4':'sgp_opt_import_contexto_retail_v3',{p_token:body.p_token,p_scope:body.scope,p_opt:opt,p_selectores:retailSelection,p_referencias:references}):projectIndex?await rpc('sgp_opt_import_contexto_proyecto_v2',{p_token:body.p_token,p_scope:body.scope,p_opt:opt,p_selectores:selectors,p_referencias:references}):await rpc('sgp_opt_import_contexto_v1',{p_token:body.p_token,p_scope:body.scope,p_producciones:productions});
@@ -117,11 +117,11 @@ export function createOptImportHandler({rpc,readPdf,DOMParser,readWorksheetXML,a
    let indexRows;
    const common={pdfSha256:hash,sourceKey:document.sourceKey,origin:document.origin,opt};
    if(document.mode==='INDICE'){
-    indexRows=indexEntries.filter(row=>row.opt===opt).map(row=>({...common,rowId:`index-${row.sourceRow}`,reservation:row.reservation,system:row.system,...(retailIndex?{documentProduction:documentProduction(row.project),finish:row.finish}:{} )}));
+    indexRows=indexEntries.filter(row=>row.opt===opt).map(row=>({...common,rowId:`index-${row.sourceRow}`,reservation:row.reservation,system:row.system,...(retailIndex?{documentProduction:documentProduction(row.project,{numericRanges:retailReservationOnly}),finish:row.finish}:{} )}));
    }else{
     // Documentary production IDs join to ALL real SGP destinations. Preserve
     // competing reservations/programs for the validator instead of choosing one.
-    indexRows=rows.flatMap(row=>context.bindings.filter(binding=>binding.documentProduction===documentProduction(row.reference)).map((binding,i)=>({...common,rowId:`individual-${row.sourceId}-${i}`,sourceRowId:row.sourceId,reference:row.reference,documentProduction:binding.documentProduction,reservation:binding.reserva,system:binding.sistema})));
+    indexRows=rows.flatMap(row=>context.bindings.filter(binding=>binding.documentProduction===documentProduction(row.reference,{numericRanges:retailReservationOnly})).map((binding,i)=>({...common,rowId:`individual-${row.sourceId}-${i}`,sourceRowId:row.sourceId,reference:row.reference,documentProduction:binding.documentProduction,reservation:binding.reserva,system:binding.sistema})));
    }
    if(rows.length*indexRows.length>2000000)fail('OPT_INDEX_COMPLEXITY_LIMIT','El índice seleccionado excede el límite de procesamiento');
    const server={...(retailIndex?{bindingMode:retailReservationOnly?'OPT_RETAIL_RESERVATION_4':'OPT_RETAIL_EXACT_3',profileDestinations:context.profileDestinations}:{}),...(projectIndex?{bindingMode:'OPT_INDEX_RESERVATION',profileDestinations:context.profileDestinations}:{}),schema:'sgp.opt.server-evidence.v1',revision:context.revision,scope:body.scope,pdfSha256:hash,bindings:context.bindings,indexRows};

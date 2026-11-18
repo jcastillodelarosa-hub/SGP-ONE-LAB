@@ -141,15 +141,17 @@ BEGIN
  IF current_context->>'revision' IS DISTINCT FROM binding->>'revision'
  THEN RAISE EXCEPTION 'OPT_CONTEXTO_CAMBIO_REINTENTAR'; END IF;
  IF sgp_opt_shared.actor(p_token,true) IS DISTINCT FROM actor THEN RAISE EXCEPTION 'OPT_NO_AUTORIZADO'; END IF;
- -- Defense in depth: this contract can never create Frames assignments, even
- -- if a future machining program exists for Frames. Its registration rule is
- -- separate and has not been authorized by this documentary contract.
+ -- Retail V4 shared machining: FRAME remains a physical classification, while
+ -- the operational assignment must resolve to the exact Panel production/program.
+ -- No FRAMES_2 key, invented program or changed physical destination is accepted.
  IF EXISTS(SELECT 1 FROM jsonb_array_elements(p_manifest) piece
   WHERE piece->'asignacion'<>'null'::jsonb AND (
    NOT EXISTS(SELECT 1 FROM jsonb_array_elements(current_context->'profileDestinations') profile
     WHERE profile->>'referencia'=piece->>'referencia' AND profile->>'activa'='SI'
-    AND profile->>'destino_productivo'='PANEL'
-    AND profile->>'tipo_pieza' IN ('PANEL','COVER','REFUERZO','MUNTIN'))
+    AND profile->>'destino_productivo' IN ('PANEL','FRAME')
+    AND profile->>'tipo_pieza' IN ('PANEL','FRAME','COVER','REFUERZO','MUNTIN')
+    AND (profile->>'tipo_pieza' NOT IN ('PANEL','FRAME')
+      OR profile->>'tipo_pieza'=profile->>'destino_productivo'))
    OR NOT EXISTS(SELECT 1 FROM jsonb_array_elements(current_context->'bindings') b
     WHERE b->>'id_linea'='PANELES_2'
     AND b->>'key_produccion'=piece#>>'{asignacion,key_produccion}'

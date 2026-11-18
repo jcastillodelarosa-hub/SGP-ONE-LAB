@@ -1,3 +1,16 @@
+## 2026-11-18 — Retail V4 candidata LAB v474, no publicada
+PR292 mantiene propuesta aislada. Integra main v473 sin modificar su corrección de nombres.
+Frames conserva perfil físico y usa programación compartida exacta Paneles.
+Rangos numéricos del título se admiten solo con etiqueta completa exacta en V4;
+no se ignoran identidades adicionales del sufijo Line. V3/Proyecto conservados.
+Pruebas sintéticas Node/Deno/PGlite y release locales PASS. No datos privados en Git.
+Sin migración productiva, merge, endpoint o Hosting publicado. Operaciones inciertas
+continúan pendientes; no se considera un nuevo endpoint como evidencia de cierre.
+
+## 2026-11-18 — nombre de entrega reconstruido, candidata LAB v473
+Cambio local acotado sobre main9df2656. Ver docs/sql-proposals/delivery-name/README.md.
+1430 pruebas PASS/10 omitidas; SQL sintético y reversión PASS. Sin publicación ni cambios productivos.
+
 ## 2026-11-17 — Ajuste escritorio PDT · candidata LAB v472
 Referencia: imagen de Pendientes de aluminio / Por validar a zoom 67%.
 Solo puntero fino con hover y viewport >=900px: contenido usa ancho disponible,

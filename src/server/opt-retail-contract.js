@@ -9,7 +9,7 @@ export function retailSelectors(entries,rows,{reservationOnly=false}={}){
  const selectors=new Map();
  for(const entry of entries){
   const label=entry.project;
-  const id=documentProduction(label);
+  const id=documentProduction(label,{numericRanges:reservationOnly});
   if(!text(label)||!id||!/^[0-9]{1,30}$/.test(entry.reservation)||(reservationOnly?(typeof entry.system!=='string'||entry.system.length>255||entry.system!==entry.system.trim()||/[\u0000-\u001f\u007f]/.test(entry.system)):!text(entry.system))||!text(entry.finish))fail('OPT_RETAIL_SELECTOR_INVALID');
   const selector={documentProduction:id,produccion:label,reserva:entry.reservation,sistema:entry.system};
   selectors.set(key(selector),selector);
@@ -18,7 +18,7 @@ export function retailSelectors(entries,rows,{reservationOnly=false}={}){
  // Only whitespace introduced by PDF line wrapping is normalized here. SQL
  // compares the original full index label literally against the master.
  for(const row of rows){
-  const id=documentProduction(row.reference),reference=norm(String(row.reference));
+  const id=documentProduction(row.reference,{numericRanges:reservationOnly}),reference=norm(String(row.reference));
   const labels=[...new Set([...selectors.values()].filter(x=>x.documentProduction===id).map(x=>x.produccion))];
   if(labels.length!==1)fail('OPT_RETAIL_DOCUMENT_LABEL_AMBIGUOUS');
   const label=norm(labels[0]);

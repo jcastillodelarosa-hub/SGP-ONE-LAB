@@ -168,7 +168,7 @@ export function validateOptImportManifest({document, extraction}, server) {
     blocks:[...printedBars].map(([id,bars]) => ({id,bars}))});
   if (!summary.verified) fail('FINAL_TOTALS_MISMATCH', {issues:summary.issues});
   const coverage = reconcileIndividuals({plans, projectRows:rows, profileSummaries,
-    referenceMode:indexedProject ? 'EXACT_PRINTED_REFERENCE' : 'DOCUMENT_PRODUCTION'});
+    referenceMode:indexedProject ? 'EXACT_PRINTED_REFERENCE' : 'DOCUMENT_PRODUCTION',numericRanges:reservationOnly});
   for (const cut of coverage.cuts) if (!['UNIQUE_DOCUMENT_ROW','ROW_GROUP_MATCH',...(indexedProject?['DOCUMENT_ROW_GROUP_MATCH']:[])].includes(cut.status))
     fail('DOCUMENTARY_REFERENCE_UNRESOLVED', {cutId:cut.cutId, reason:cut.reason});
   for (const row of coverage.sourceCoverage) if (!['ROW_QUANTITY_MATCH',...(indexedProject?['ROW_GROUP_QUANTITY_MATCH']:[])].includes(row.status)) fail('FINAL_DETAIL_ROW_UNCOVERED', {sourceRowId:row.sourceId});
@@ -217,7 +217,7 @@ export function validateOptImportManifest({document, extraction}, server) {
       (row.id_programacion != null && !uuid(row.id_programacion)))) fail('DOCUMENT_INDEX_ROW_INVALID');
   const indexUsed = new Set(), assignments = new Map(), exclusions = new Map(), originalScopes = new Map();
   for (const row of rows) {
-    const production = documentProduction(row.reference);
+    const production = documentProduction(row.reference,{numericRanges:reservationOnly});
     let profileLine=null;
     if(indexedProject || indexedRetail){
       const matches=server.profileDestinations.filter(profile=>profile.referencia===row.ref);
@@ -231,7 +231,11 @@ export function validateOptImportManifest({document, extraction}, server) {
       if(new Set(matches.map(profile=>key(profile.tipo_pieza,profile.destino_productivo,profile.activa))).size!==1){
         fail('PROFILE_DESTINATION_CONFLICTING',{profile:row.ref});continue;
       }
-      profileLine=matches[0].destino_productivo==='PANEL'?'PANELES_2':'FRAMES_2';
+      // Retail V4 uses the explicitly shared Panel machining program for both
+      // destinations. The physical profile stays FRAME in the master/evidence;
+      // only its operational assignment uses the Panel production key. V3 and
+      // Project contracts retain their existing documentary-only Frame behavior.
+      profileLine=reservationOnly?'PANELES_2':matches[0].destino_productivo==='PANEL'?'PANELES_2':'FRAMES_2';
     }
     const applicable = indexes.filter(index => (index.sourceRowId == null || index.sourceRowId === row.sourceId) &&
       (index.documentProduction == null || index.documentProduction === production) &&

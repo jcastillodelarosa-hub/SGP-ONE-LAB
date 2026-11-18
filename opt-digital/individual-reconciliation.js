@@ -2,23 +2,27 @@
 import {inchesToThirtySeconds} from '../src/domain/opt-summary-reconciliation.js';
 const norm=v=>String(v??'').replace(/\s+/g,'');
 const length=v=>{try{return inchesToThirtySeconds(v);}catch{return null;}};
-export function documentProduction(reference) {
+export function documentProduction(reference, {numericRanges=false}={}) {
   const text=String(reference??'');const first=text.match(/^\s*(\d+)\s*-\s*\S/);
-  const ids=[...new Set([...text.matchAll(/\b(\d{5,})\s*-\s*\S/g)].map(m=>m[1]))];
+  // V4 exact-label matching distinguishes a compact numeric range in the title
+  // from a second documentary ID. Legacy/individual matching remains strict.
+  const lineSuffix=text.search(/\s+\(Line\s/);
+  const candidates=[...text.matchAll(/\b(\d{5,})\s*-\s*\S/g)].filter(m=>!numericRanges || m.index===first?.index || (lineSuffix>=0 && m.index>=lineSuffix) || !/^\d{5,}-\d+(?=$|[\s),;])/.test(text.slice(m.index)));
+  const ids=[...new Set(candidates.map(m=>m[1]))];
   return first && ids.length===1 && first[1]===ids[0] ? first[1] : null;
 }
-export function reconcileIndividuals({plans=[],projectRows=[],profileSummaries=[],referenceMode='DOCUMENT_PRODUCTION'}) {
+export function reconcileIndividuals({plans=[],projectRows=[],profileSummaries=[],referenceMode='DOCUMENT_PRODUCTION',numericRanges=false}) {
   // Exact printed-reference coverage is independent of an SGP production ID.
   // Only the trusted import manifest opts into this mode for indexed projects.
   if (!['DOCUMENT_PRODUCTION','EXACT_PRINTED_REFERENCE'].includes(referenceMode)) throw new TypeError('OPT_REFERENCE_MODE_INVALID');
   const printedReference=referenceMode==='EXACT_PRINTED_REFERENCE';
-  const source=projectRows.map((r,i)=>({...r,sourceId:r.sourceId||null,index:i,length32:length(r.length),production:documentProduction(r.reference)}));
+  const source=projectRows.map((r,i)=>({...r,sourceId:r.sourceId||null,index:i,length32:length(r.length),production:documentProduction(r.reference,{numericRanges})}));
   const entries=[],bars=[],unresolved=[];
   for(const p of plans){
     const perBar=new Map();
     for(const [index,c] of p.cuts.entries()){
       const cutId=JSON.stringify([p.id,c.profileInstance,c.sourceColumn,c.sourceSlot,c.unitInstance]);
-      const production=documentProduction(c.project),cutLength=length(c.length);
+      const production=documentProduction(c.project,{numericRanges}),cutLength=length(c.length);
       const candidates=source.filter(r=>(!r.grouping||r.grouping==='PRINTED_CELL')&&r.ref===p.ref&&r.finish===p.finish&&r.length32!==null&&r.length32===cutLength&&(printedReference||(r.production===production&&production!==null)));
       const exact=candidates.filter(r=>norm(r.reference)===norm(c.project));
       const entry={cutId,patternId:p.id,index,profile:p.ref,finish:p.finish,length32:cutLength,documentProduction:production,

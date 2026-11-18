@@ -110,10 +110,14 @@ const week47=(await db.query("SELECT p.id_pieza FROM sgp_opt_shared.pieces p JOI
 await assert.rejects(db.query('SELECT sgp_opt_shared.assert_units($1,$2)',[week47,JSON.stringify(scope)]),/OPT_UNIDAD_FUERA_AMBITO/);
 await db.query('SELECT sgp_opt_shared.assert_units($1,$2)',[week47,JSON.stringify({...scope,semana:47})]);fixtureOpt=originalOpt;
 fixtureOpt='OPT2099-46-5-TEST-8';const beforeGeometryFailure=await count(),beforeDocFailure=(await db.query('SELECT count(*)::int n FROM sgp_opt_shared.documents')).rows[0].n;corruptGeometry=true;assert.equal((await run()).code,'OPT_PLANS_COVERAGE_MISMATCH');corruptGeometry=false;assert.equal(await count(),beforeGeometryFailure);assert.equal((await db.query('SELECT count(*)::int n FROM sgp_opt_shared.documents')).rows[0].n,beforeDocFailure);fixtureOpt=originalOpt;
-// Classification as Frame remains documentary-only, with no cut assignment.
+// Frame classification retains its master identity and uses shared Panel programming.
 await db.exec("UPDATE public.sgp_maestro_piezas SET tipo_pieza='FRAME',destino_productivo='FRAME'");
-assert.equal((await run()).code,'OPT_DOCUMENTO_REQUIERE_RECONCILIACION');
-fixtureOpt='OPT2099-46-5-TEST-4';const frames=await run();assert.equal(frames.status,200,JSON.stringify(frames));assert(lastWrite.p_manifest.every(p=>p.asignacion===null));
+// Reclassification does not rewrite immutable dimensions or the identical shared assignment.
+assert.equal((await run()).data.duplicado,true);
+fixtureOpt='OPT2099-46-5-TEST-4';const frames=await run();assert.equal(frames.status,200,JSON.stringify(frames));assert(lastWrite.p_manifest.every(p=>p.asignacion.key_produccion==='123456|PANELES_2'));
+assert.equal((await db.query("SELECT destino_productivo FROM public.sgp_maestro_piezas WHERE codigo_sap='R1'")).rows[0].destino_productivo,'FRAME');
+const frameIds=(await db.query('SELECT id_pieza FROM sgp_opt_shared.pieces WHERE id_documento=$1',[frames.data.id_documento])).rows.map(r=>r.id_pieza);
+await db.query('SELECT sgp_opt_shared.assert_units($1,$2)',[frameIds,JSON.stringify(scope)]);
 assert.deepEqual((await db.query('SELECT (SELECT count(*)::int FROM sgp_opt_shared.cuts) cuts,(SELECT count(*)::int FROM sgp_opt_shared.events) events')).rows[0],{cuts:0,events:0});
 // Rollback only pauses V4; retained data and V3 identities are not deleted.
 const beforeRollback=(await db.query('SELECT count(*)::int n FROM sgp_opt_shared.documents')).rows[0].n;
@@ -122,4 +126,4 @@ await db.exec('SET ROLE service_role');
 assert((await rpc('sgp_opt_importar_retail_validado_v4',lastWrite)).error);
 await db.exec('RESET ROLE');
 assert.equal((await db.query('SELECT count(*)::int n FROM sgp_opt_shared.documents')).rows[0].n,beforeRollback);
-await db.close();console.log('PASS Retail V4 reservation-only real parser -> SQL context -> private writer; exact identity, idempotency, stale observations, revoked session, role denial, Frame unassigned, zero cut events. Synthetic local only.');
+await db.close();console.log('PASS Retail V4 reservation-only real parser -> SQL context -> private writer; exact identity, idempotency, stale observations, revoked session, role denial, Frame shared programming with preserved classification, zero cut events. Synthetic local only.');
