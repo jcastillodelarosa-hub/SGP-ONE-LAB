@@ -54,8 +54,9 @@ function receiptValid(receipt,manifest){return record(receipt)&&receipt.ok===tru
 
 /** Only server bootstrap supplies dependencies. Neither extraction nor SGP facts
  * are ever accepted from the caller. SQL remains the final authorization gate. */
-export function createOptImportHandler({rpc,readPdf,DOMParser,readWorksheetXML,allowedOrigins,retailV3=false,retailOnly=false,retailResolution=false,serializeRetailPlans=/** @type {((extraction: any, manifest: any) => any) | undefined} */ (undefined)}){
+export function createOptImportHandler({rpc,readPdf,DOMParser,readWorksheetXML,allowedOrigins,retailV3=false,retailReservationOnly=false,retailOnly=false,retailResolution=false,serializeRetailPlans=/** @type {((extraction: any, manifest: any) => any) | undefined} */ (undefined)}){
  if(typeof rpc!=='function'||typeof readPdf!=='function'||!Array.isArray(allowedOrigins)||!allowedOrigins.length)throw Error('OPT_SERVER_DEPENDENCIES_REQUIRED');
+ if(retailReservationOnly&&(!retailV3||!retailOnly||retailResolution))throw Error('OPT_RETAIL_V4_ISOLATION_REQUIRED');
  const origins=new Set(allowedOrigins);let busy=false;
  return async request=>{
   const origin=request.headers.get('origin'),headers={'Content-Type':'application/json','Cache-Control':'no-store','Vary':'Origin'};
@@ -86,6 +87,7 @@ export function createOptImportHandler({rpc,readPdf,DOMParser,readWorksheetXML,a
     if(body.index.format==='xlsx'){const parsed=await parseIndexWorkbook(raw,body.source.origin,{sheetName:body.index.sheet,DOMParser,readWorksheetXML,exactReservations:retailIndex});indexEntries=parsed.entries;indexSheet=parsed.sheet;}
     else indexEntries=parseIndex(utf8.decode(raw),body.index.format,body.source.origin,{exactReservations:retailIndex});
    }
+   if(retailReservationOnly&&Object.hasOwn(body,'resolution'))fail('OPT_RETAIL_V4_RECOVERY_NOT_ENABLED','Los intentos anteriores conservan su contrato original');
    const resolution=Object.hasOwn(body,'resolution')?await validateRetailResolution(body,{pdfHash:hash,indexHash,indexSheet}):null;
    const extraction=await readPdf(bytes);
    const rows=extraction?.sourceProjectRows;
@@ -97,37 +99,37 @@ export function createOptImportHandler({rpc,readPdf,DOMParser,readWorksheetXML,a
    const {opt}=identity;
    const projectIndex=body.source.mode==='INDICE'&&body.source.origin==='PROYECTO';
    const selectedIndex=indexEntries.filter(row=>row.opt===opt);
-   if(body.source.mode==='INDICE'&&(!selectedIndex.length||selectedIndex.some(row=>!text(row.reservation)||!text(row.system))))fail('OPT_INDEX_LINK_INVALID','La OPT requiere reserva y sistema exactos en el índice');
+   if(body.source.mode==='INDICE'&&(!selectedIndex.length||selectedIndex.some(row=>!text(row.reservation)||(!retailReservationOnly&&!text(row.system)))))fail('OPT_INDEX_LINK_INVALID','La OPT requiere reserva y sistema exactos en el índice');
    if(projectIndex&&selectedIndex.some(row=>row.reservation.includes(',')))fail('OPT_INDEX_RESERVATION_AMBIGUOUS','La celda del índice contiene varias reservas; no se elige la primera');
    const selectors=[...new Map(selectedIndex.map(row=>[JSON.stringify([row.reservation,row.system]),{reserva:row.reservation,sistema:row.system}])).values()].sort((a,b)=>a.reserva.localeCompare(b.reserva)||a.sistema.localeCompare(b.sistema));
    const document={sha256:hash,sourceKey:body.source.mode==='INDICE'?`OPT:${encodeURIComponent(opt)}`:`SHA256:${hash}`,origin:body.source.origin,opt,mode:body.source.mode};
    const references=[...new Set(rows.map(row=>row.ref))].sort();
    if(projectIndex&&(!references.length||references.length>1000||references.some(ref=>!text(ref))))fail('OPT_PROFILE_REFERENCES_INVALID');
-   const productions=[...new Set(rows.map(row=>documentProduction(row.reference)))];
+   const productions=[...new Set(rows.map(row=>documentProduction(row.reference,{numericRanges:retailReservationOnly})))];
    if(!projectIndex&&(productions.some(id=>typeof id!=='string'||!/^\d{1,30}$/.test(id))||productions.length>1000))fail('OPT_DOCUMENT_PRODUCTION_UNRESOLVED','Referencias documentales sin una producción única');
-   const retailSelection=retailIndex?retailSelectors(selectedIndex,rows):null;
-   const contextResult=retailIndex?await rpc('sgp_opt_import_contexto_retail_v3',{p_token:body.p_token,p_scope:body.scope,p_opt:opt,p_selectores:retailSelection,p_referencias:references}):projectIndex?await rpc('sgp_opt_import_contexto_proyecto_v2',{p_token:body.p_token,p_scope:body.scope,p_opt:opt,p_selectores:selectors,p_referencias:references}):await rpc('sgp_opt_import_contexto_v1',{p_token:body.p_token,p_scope:body.scope,p_producciones:productions});
+   const retailSelection=retailIndex?retailSelectors(selectedIndex,rows,{reservationOnly:retailReservationOnly}):null;
+   const contextResult=retailIndex?await rpc(retailReservationOnly?'sgp_opt_import_contexto_retail_v4':'sgp_opt_import_contexto_retail_v3',{p_token:body.p_token,p_scope:body.scope,p_opt:opt,p_selectores:retailSelection,p_referencias:references}):projectIndex?await rpc('sgp_opt_import_contexto_proyecto_v2',{p_token:body.p_token,p_scope:body.scope,p_opt:opt,p_selectores:selectors,p_referencias:references}):await rpc('sgp_opt_import_contexto_v1',{p_token:body.p_token,p_scope:body.scope,p_producciones:productions});
    if(contextResult.error){const error=sqlError(contextResult.error);return reject(error.status,error.code,error.error);}
    const context=contextResult.data;
-   if(retailIndex)validateRetailContext(context,{scope:body.scope,opt,selectors:retailSelection,references});
+   if(retailIndex)validateRetailContext(context,{scope:body.scope,opt,selectors:retailSelection,references,reservationOnly:retailReservationOnly});
    if(!retailIndex&&(context?.contract!==(projectIndex?'OPT-IMPORT-CONTEXT-PROYECTO-2':'OPT-IMPORT-CONTEXT-1')||(projectIndex&&(context.opt!==opt||!Array.isArray(context.profileDestinations)||!context.profileDestinations.every(record)||!Array.isArray(context.referencias)||JSON.stringify([...context.referencias].sort())!==JSON.stringify(references)||!Array.isArray(context.selectores)||!context.selectores.every(row=>exactKeys(row,['reserva','sistema'])&&text(row.reserva)&&text(row.sistema))||JSON.stringify(context.selectores.map(row=>[row.reserva,row.sistema]).sort())!==JSON.stringify(selectors.map(row=>[row.reserva,row.sistema]).sort())))||!text(context.revision,128)||!scopeEqual(context.scope,body.scope)||!Array.isArray(context.bindings)||context.bindings.length>20000||!context.bindings.every(record)))fail('OPT_CONTEXT_INVALID','Respuesta de contexto SGP incompatible',503);
    if(rows.length*context.bindings.length>2000000)fail('OPT_CONTEXT_COMPLEXITY_LIMIT','El cruce documental excede el límite de procesamiento');
    let indexRows;
    const common={pdfSha256:hash,sourceKey:document.sourceKey,origin:document.origin,opt};
    if(document.mode==='INDICE'){
-    indexRows=indexEntries.filter(row=>row.opt===opt).map(row=>({...common,rowId:`index-${row.sourceRow}`,reservation:row.reservation,system:row.system,...(retailIndex?{documentProduction:documentProduction(row.project),finish:row.finish}:{} )}));
+    indexRows=indexEntries.filter(row=>row.opt===opt).map(row=>({...common,rowId:`index-${row.sourceRow}`,reservation:row.reservation,system:row.system,...(retailIndex?{documentProduction:documentProduction(row.project,{numericRanges:retailReservationOnly}),finish:row.finish}:{} )}));
    }else{
     // Documentary production IDs join to ALL real SGP destinations. Preserve
     // competing reservations/programs for the validator instead of choosing one.
-    indexRows=rows.flatMap(row=>context.bindings.filter(binding=>binding.documentProduction===documentProduction(row.reference)).map((binding,i)=>({...common,rowId:`individual-${row.sourceId}-${i}`,sourceRowId:row.sourceId,reference:row.reference,documentProduction:binding.documentProduction,reservation:binding.reserva,system:binding.sistema})));
+    indexRows=rows.flatMap(row=>context.bindings.filter(binding=>binding.documentProduction===documentProduction(row.reference,{numericRanges:retailReservationOnly})).map((binding,i)=>({...common,rowId:`individual-${row.sourceId}-${i}`,sourceRowId:row.sourceId,reference:row.reference,documentProduction:binding.documentProduction,reservation:binding.reserva,system:binding.sistema})));
    }
    if(rows.length*indexRows.length>2000000)fail('OPT_INDEX_COMPLEXITY_LIMIT','El índice seleccionado excede el límite de procesamiento');
-   const server={...(retailIndex?{bindingMode:'OPT_RETAIL_EXACT_3',profileDestinations:context.profileDestinations}:{}),...(projectIndex?{bindingMode:'OPT_INDEX_RESERVATION',profileDestinations:context.profileDestinations}:{}),schema:'sgp.opt.server-evidence.v1',revision:context.revision,scope:body.scope,pdfSha256:hash,bindings:context.bindings,indexRows};
+   const server={...(retailIndex?{bindingMode:retailReservationOnly?'OPT_RETAIL_RESERVATION_4':'OPT_RETAIL_EXACT_3',profileDestinations:context.profileDestinations}:{}),...(projectIndex?{bindingMode:'OPT_INDEX_RESERVATION',profileDestinations:context.profileDestinations}:{}),schema:'sgp.opt.server-evidence.v1',revision:context.revision,scope:body.scope,pdfSha256:hash,bindings:context.bindings,indexRows};
    const result=validateOptImportManifest({document,extraction},server);
    if(!result.importable)return reject(422,'OPT_DOCUMENT_BLOCKED','El documento no supera la conciliación completa',{blockers:result.blockers.slice(0,100).map(blocker=>({...blocker,...(Array.isArray(blocker.candidates)?{candidates:blocker.candidates.slice(0,20),candidate_count:blocker.candidates.length}:{}),...(Array.isArray(blocker.issues)?{issues:blocker.issues.slice(0,100),issue_count:blocker.issues.length}:{})})),blocker_count:result.blockers.length});
    const manifest=result.manifest;
    const geometry=retailIndex&&serializeRetailPlans?serializeRetailPlans(extraction,manifest):{};
-   const evidence={...geometry,contract:retailIndex?'OPT-SERVER-VALIDATION-RETAIL-3':projectIndex?'OPT-SERVER-VALIDATION-PROYECTO-2':'OPT-SERVER-VALIDATION-1',algorithm:retailIndex?'opt-import-manifest-retail-v3':projectIndex?'opt-import-manifest-project-v2':'opt-import-manifest-v1',pdf_sha256:hash,validation:'DOCUMENTARY_MANIFEST_READY',physical_completion_verified:false,
+   const evidence={...geometry,contract:retailIndex?(retailReservationOnly?'OPT-SERVER-VALIDATION-RETAIL-4':'OPT-SERVER-VALIDATION-RETAIL-3'):projectIndex?'OPT-SERVER-VALIDATION-PROYECTO-2':'OPT-SERVER-VALIDATION-1',algorithm:retailIndex?(retailReservationOnly?'opt-import-manifest-retail-v4':'opt-import-manifest-retail-v3'):projectIndex?'opt-import-manifest-project-v2':'opt-import-manifest-v1',pdf_sha256:hash,validation:'DOCUMENTARY_MANIFEST_READY',physical_completion_verified:false,
     sgp_binding:{contract:context.contract,scope:body.scope,revision:context.revision,...(retailIndex?{opt,selectores:retailSelection,referencias:references}:projectIndex?{opt,selectores:selectors,referencias:references}:{producciones:productions})},
     original_document_title:identity.title,
     documentary_summary:buildOptDocumentSummary(extraction),
@@ -138,7 +140,7 @@ export function createOptImportHandler({rpc,readPdf,DOMParser,readWorksheetXML,a
    const args={p_token:body.p_token,p_pdf:'\\x'+hex(bytes),p_manifest:manifest.pieces,p_sources:[manifest.source],p_evidence:evidence};
    if(resolution)Object.assign(args,{p_identity:resolution.identity,p_request_hash:resolution.requestHash,p_decision:resolution.decisionId,p_generation:resolution.retryGeneration,p_attempt:resolution.attemptId});
    writeAttempted=true;
-   const imported=await rpc(resolution?'sgp_opt_importar_retail_resuelto_v1':retailIndex?'sgp_opt_importar_retail_validado_v3':projectIndex?'sgp_opt_importar_proyecto_validado_v2':'sgp_opt_importar_validado_v1',args);
+   const imported=await rpc(resolution?'sgp_opt_importar_retail_resuelto_v1':retailIndex?(retailReservationOnly?'sgp_opt_importar_retail_validado_v4':'sgp_opt_importar_retail_validado_v3'):projectIndex?'sgp_opt_importar_proyecto_validado_v2':'sgp_opt_importar_validado_v1',args);
    if(imported.error){
     // Only a returned PostgreSQL cancellation/lock error proves this transaction failed.
     if(retailIndex&&['57014','55P03'].includes(imported.error.code))return reject(409,'OPT_RETAIL_TIEMPO_AGOTADO','La operación Retail superó el tiempo permitido y fue cancelada. No se guardaron cambios en este intento.');

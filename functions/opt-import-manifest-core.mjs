@@ -66,8 +66,9 @@ export function validateOptImportManifest({document, extraction}, server) {
     fail('SERVER_EVIDENCE_INVALID'); return result();
   }
   const indexedProject = server.bindingMode === 'OPT_INDEX_RESERVATION';
-  const indexedRetail = server.bindingMode === 'OPT_RETAIL_EXACT_3';
-  if ((server.bindingMode != null && !['DOCUMENT_PRODUCTION','OPT_INDEX_RESERVATION','OPT_RETAIL_EXACT_3'].includes(server.bindingMode)) ||
+  const reservationOnly = server.bindingMode === 'OPT_RETAIL_RESERVATION_4';
+  const indexedRetail = reservationOnly || server.bindingMode === 'OPT_RETAIL_EXACT_3';
+  if ((server.bindingMode != null && !['DOCUMENT_PRODUCTION','OPT_INDEX_RESERVATION','OPT_RETAIL_EXACT_3','OPT_RETAIL_RESERVATION_4'].includes(server.bindingMode)) ||
       (indexedProject && (document.origin !== 'PROYECTO' || document.mode !== 'INDICE')) ||
       (indexedRetail && (document.origin !== 'RETAIL' || document.mode !== 'INDICE'))) {
     fail('SERVER_BINDING_MODE_INVALID'); return result();
@@ -167,7 +168,7 @@ export function validateOptImportManifest({document, extraction}, server) {
     blocks:[...printedBars].map(([id,bars]) => ({id,bars}))});
   if (!summary.verified) fail('FINAL_TOTALS_MISMATCH', {issues:summary.issues});
   const coverage = reconcileIndividuals({plans, projectRows:rows, profileSummaries,
-    referenceMode:indexedProject ? 'EXACT_PRINTED_REFERENCE' : 'DOCUMENT_PRODUCTION'});
+    referenceMode:indexedProject ? 'EXACT_PRINTED_REFERENCE' : 'DOCUMENT_PRODUCTION',numericRanges:reservationOnly});
   for (const cut of coverage.cuts) if (!['UNIQUE_DOCUMENT_ROW','ROW_GROUP_MATCH',...(indexedProject?['DOCUMENT_ROW_GROUP_MATCH']:[])].includes(cut.status))
     fail('DOCUMENTARY_REFERENCE_UNRESOLVED', {cutId:cut.cutId, reason:cut.reason});
   for (const row of coverage.sourceCoverage) if (!['ROW_QUANTITY_MATCH',...(indexedProject?['ROW_GROUP_QUANTITY_MATCH']:[])].includes(row.status)) fail('FINAL_DETAIL_ROW_UNCOVERED', {sourceRowId:row.sourceId});
@@ -208,7 +209,7 @@ export function validateOptImportManifest({document, extraction}, server) {
   const indexes = server.indexRows.filter(row => row.pdfSha256 === document.sha256 && row.sourceKey === document.sourceKey &&
     row.origin === document.origin && row.opt === document.opt);
   if (document.mode === 'INDICE' && !indexes.length) fail('DOCUMENT_INDEX_LINK_MISSING');
-  if (indexes.some(row => !text(row.rowId) || !text(row.reservation) || !text(row.system) ||
+  if (indexes.some(row => !text(row.rowId) || !text(row.reservation) || (!reservationOnly&&!text(row.system)) ||
       (row.sourceRowId != null && !rowIds.has(row.sourceRowId)) ||
       (row.documentProduction != null && !/^\d+$/.test(row.documentProduction)) ||
       (row.reference != null && !text(row.reference)) ||
@@ -216,7 +217,7 @@ export function validateOptImportManifest({document, extraction}, server) {
       (row.id_programacion != null && !uuid(row.id_programacion)))) fail('DOCUMENT_INDEX_ROW_INVALID');
   const indexUsed = new Set(), assignments = new Map(), exclusions = new Map(), originalScopes = new Map();
   for (const row of rows) {
-    const production = documentProduction(row.reference);
+    const production = documentProduction(row.reference,{numericRanges:reservationOnly});
     let profileLine=null;
     if(indexedProject || indexedRetail){
       const matches=server.profileDestinations.filter(profile=>profile.referencia===row.ref);
@@ -230,7 +231,11 @@ export function validateOptImportManifest({document, extraction}, server) {
       if(new Set(matches.map(profile=>key(profile.tipo_pieza,profile.destino_productivo,profile.activa))).size!==1){
         fail('PROFILE_DESTINATION_CONFLICTING',{profile:row.ref});continue;
       }
-      profileLine=matches[0].destino_productivo==='PANEL'?'PANELES_2':'FRAMES_2';
+      // Retail V4 uses the explicitly shared Panel machining program for both
+      // destinations. The physical profile stays FRAME in the master/evidence;
+      // only its operational assignment uses the Panel production key. V3 and
+      // Project contracts retain their existing documentary-only Frame behavior.
+      profileLine=reservationOnly?'PANELES_2':matches[0].destino_productivo==='PANEL'?'PANELES_2':'FRAMES_2';
     }
     const applicable = indexes.filter(index => (index.sourceRowId == null || index.sourceRowId === row.sourceId) &&
       (index.documentProduction == null || index.documentProduction === production) &&
@@ -239,11 +244,11 @@ export function validateOptImportManifest({document, extraction}, server) {
     // Never assign a mixed-reservation PDF by row order, approximate names, or
     // whichever binding happens to remain eligible. Each source row needs one
     // exact documentary reservation/system selector before looking at SGP.
-    if ((indexedProject || indexedRetail) && new Set(applicable.map(index => key(index.reservation,index.system))).size > 1) {
+    if ((indexedProject || indexedRetail) && new Set(applicable.map(index => key(index.reservation,reservationOnly?null:index.system))).size > 1) {
       fail('INDEX_RESERVATION_AMBIGUOUS', {sourceRowId:row.sourceId}); continue;
     }
     const candidates = server.bindings.filter(binding => (indexedProject ? binding.id_linea===profileLine : binding.documentProduction === production) && (!indexedRetail || binding.id_linea===profileLine) && applicable.some(index =>
-      index.reservation === binding.reserva && index.system === binding.sistema &&
+      index.reservation === binding.reserva && (reservationOnly || index.system === binding.sistema) &&
       (index.key_produccion == null || index.key_produccion === binding.key_produccion) &&
       (index.id_programacion == null || index.id_programacion === binding.id_programacion)));
     // Individual PDFs need an explicit server-resolved documentary relation.
@@ -264,7 +269,7 @@ export function validateOptImportManifest({document, extraction}, server) {
       exclusions.set(row.sourceId, {code:'FUERA_ALCANCE', linea:identity.id_linea, resolvedIdentity:identity});
       // Multiple/missing operational programs outside our line cannot affect a
       // null assignment. Keep every documentary unit and its original length.
-      for (const index of applicable) if (candidates.some(candidate => index.reservation === candidate.reserva && index.system === candidate.sistema &&
+      for (const index of applicable) if (candidates.some(candidate => index.reservation === candidate.reserva && (reservationOnly || index.system === candidate.sistema) &&
           (index.key_produccion == null || index.key_produccion === candidate.key_produccion) &&
           (index.id_programacion == null || index.id_programacion === candidate.id_programacion))) indexUsed.add(index);
       continue;
@@ -295,7 +300,7 @@ export function validateOptImportManifest({document, extraction}, server) {
     // Otherwise opening this PDF in another week would require rewriting it.
     originalScopes.set(row.sourceId,{linea:binding.id_linea,anio:binding.anio,semana:binding.semana_base,modo:'BASE'});
     assignments.set(row.sourceId, assignmentOf(binding));
-    for (const index of applicable) if (index.reservation === binding.reserva && index.system === binding.sistema &&
+    for (const index of applicable) if (index.reservation === binding.reserva && (reservationOnly || index.system === binding.sistema) &&
         (index.key_produccion == null || index.key_produccion === binding.key_produccion) &&
         (index.id_programacion == null || index.id_programacion === binding.id_programacion)) indexUsed.add(index);
   }

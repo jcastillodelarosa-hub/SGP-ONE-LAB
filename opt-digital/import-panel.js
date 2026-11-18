@@ -1,7 +1,7 @@
 import {mountOptImportRecovery} from './import-recovery-panel.js';
 import {optFileSelectionState} from '../src/domain/opt-file-selection-state.js';
 import {optImportOutcomeKind} from '../src/services/opt-import-observation.js';
-import {selectProgrammedFiles} from './import-selection.js';
+import {selectProgrammedFiles,programmedEntryMatcher} from './import-selection.js';
 import {fileIdentity} from './library.js';
 export function importRoundingWarning(result){
  return Array.isArray(result?.validationWarnings)&&result.validationWarnings.some(w=>w?.code==='OPT_PRINTED_ROUNDING_COMPATIBLE')
@@ -21,7 +21,7 @@ export function mountOptImportPanel(container,{api,getScope,getProgrammingSnapsh
  const status=make('p');status.id='optImportStatus';status.setAttribute('role','status');
  const pendingNotice=make('p');pendingNotice.id='optImportPending';
  const results=make('div');results.id='optImportResults';results.setAttribute('aria-live','polite');
- panel.append(make('h2','Crear OPT compartidas'),make('p','Al pulsar Procesar y guardar OPT en SGP, se envían el PDF original y su índice a Supabase para validarlos contra la programación y crear las OPT compartidas. Retail y Proyecto incluyen solo las OPT con alguna reserva y sistema en la programación consultada de PANELES_2. Un PDF mixto se envía completo, junto con el índice original sin recortar. Esta selección no autoriza la importación. Los individuales se validan con su PDF y SGP. No se envían revisiones, planes ni asociaciones locales. Esto no registra cortes realizados. Perfil acotado: PDF de hasta 1 MiB y 100 páginas; índice de hasta 3 MiB. Los documentos que excedan estos límites se rechazan completos, sin dividirlos ni importar unidades parciales.'),button,status,pendingNotice,results);container.append(panel);
+ panel.append(make('h2','Crear OPT compartidas'),make('p','Al pulsar Procesar y guardar OPT en SGP, se envían el PDF original y su índice a Supabase para validarlos contra la programación y crear las OPT compartidas. Retail selecciona por reserva; Proyecto conserva el cruce por reserva y sistema. Ambos usan la programación consultada de PANELES_2. Un PDF mixto se envía completo, junto con el índice original sin recortar. Esta selección no autoriza la importación. Los individuales se validan con su PDF y SGP. No se envían revisiones, planes ni asociaciones locales. Esto no registra cortes realizados. Perfil acotado: PDF de hasta 1 MiB y 100 páginas; índice de hasta 3 MiB. Los documentos que excedan estos límites se rechazan completos, sin dividirlos ni importar unidades parciales.'),button,status,pendingNotice,results);container.append(panel);
  const selection=make('section');selection.id='optSelectedOrigin';selection.append(make('h3','Origen seleccionado'));
  const selectionNote=make('p','Sin archivos seleccionados. Seleccionar o leer un archivo no significa guardarlo en SGP.'),selectionTable=make('table'),selectionBody=make('tbody'),selectionHead=make('thead'),selectionRow=make('tr');selectionTable.className='opt-file-table';for(const label of ['Nombre / ruta relativa','Estado','Resultado'])selectionRow.append(make('th',label));selectionHead.append(selectionRow);selectionTable.append(selectionHead,selectionBody);selection.append(selectionNote,selectionTable);panel.prepend(selection);
  const verify=make('button','Comprobar cargas anteriores sin reenviar');verify.id='optImportReconcile';verify.type='button';const verification=make('div');verification.id='optImportReconciliation';verification.setAttribute('role','status');pendingNotice.after(verify,verification);
@@ -66,10 +66,9 @@ export function mountOptImportPanel(container,{api,getScope,getProgrammingSnapsh
   if(origin==='INDIVIDUAL')return {jobs:files.map(item=>({...item,opt:item.name.replace(/\.pdf$/i,'')})),omitted:0};
   // A confirmed read selects documents only. It never binds units or grants a write.
   const snapshot=programming();if(!snapshot)return {jobs:[],omitted:0,unavailable:true};
-  const pair=(reservation,system)=>JSON.stringify([String(reservation??'').trim(),String(system??'').trim()]);
-  const pairs=new Set(snapshot.relations.filter(r=>r.reservation&&r.system).map(r=>pair(r.reservation,r.system)));
+  const matchesReservation=programmedEntryMatcher(snapshot.relations,origin);
   const index=indexes.get(origin),entries=getEntries().filter(e=>e.origin===origin),allOpts=[...new Set(entries.map(e=>e.opt))];
-  const opts=[...new Set(entries.filter(e=>e.reservation&&e.system&&pairs.has(pair(e.reservation,e.system))).map(e=>e.opt))],jobs=[];
+  const opts=[...new Set(entries.filter(matchesReservation).map(e=>e.opt))],jobs=[];
   const omitted=allOpts.filter(opt=>!opts.includes(opt)).length;
   if(!index){return {jobs:files.length?files.map(item=>({...item,error:'Falta el índice original de '+origin+'. Cárgalo antes de enviar este archivo.'})):[{name:origin,error:'Faltan el índice original y los PDF de este origen.'}],omitted:0};}
   for(const opt of opts){const matches=files.filter(item=>item.name===opt+'.pdf'||item.name.replace(/\.pdf$/i,'')===opt);if(matches.length===1)jobs.push({...matches[0],opt,index});else jobs.push({name:opt+'.pdf',error:matches.length?'Hay varios PDF con ese nombre exacto y contenido distinto. No se elige uno automáticamente.':'Falta PDF con nombre exacto. No se asigna por semejanza.'});}
