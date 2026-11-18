@@ -1,3 +1,9 @@
+## 2026-11-18 — Picking PDT líder de mecanizado · candidata LAB v476
+Extensión acotada solo de entrega, lectura y avisos; recepción no autorizada.
+SQL guardado e inversa en docs/sql-proposals/picking-leader-delivery. Sin datos
+operativos ni ACL modificados. Pruebas sintéticas de roles, saldos/reintentos,
+recepción denegada, acceso efectivo y rollback exacto PASS. No publicado/aplicado.
+
 ## 2026-11-18 — nombre de entrega reconstruido, candidata LAB v473
 Cambio local acotado sobre main9df2656. Ver docs/sql-proposals/delivery-name/README.md.
 1430 pruebas PASS/10 omitidas; SQL sintético y reversión PASS. Sin publicación ni cambios productivos.
