@@ -1,4 +1,5 @@
 const deliveryErrors = {
+  PDT_FLOW_ACCESO_DENEGADO: 'Tu usuario no tiene acceso a Entrega en Picking.',
   PDT_SIMPLE_ENTREGAS_PREVIAS_POR_CONCILIAR: 'Este PDT tiene entregas anteriores pendientes de conciliar. Revisa el historial antes de confirmar otra cantidad.',
   PDT_SIMPLE_COBERTURA_ANTERIOR_NO_ACREDITADA: 'La entrega anterior no coincide con este PDT. Revisa el historial antes de confirmar otra cantidad.',
   PDT_SIMPLE_SUPERA_PROCESADO_O_TOTAL: 'La cantidad supera las piezas procesadas disponibles. Actualiza el PDT.',

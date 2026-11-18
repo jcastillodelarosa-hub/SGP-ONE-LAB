@@ -1,0 +1,12 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {escapePdt,pdtBalance,filterPickingPdt,validatePdtQuantity,validatePickingPdtSnapshot,isDefinitivePdtRejection} from '../src/ui/picking-pdt-flow.js';
+const row={id:'a',semana:47,produccion:'Orden A',reserva:'100',perfil:'Perfil',nc:'300',procesado:10,entregado:4,recibido:2};
+test('delivery and receipt preserve different balances; server balance takes precedence',()=>{assert.equal(pdtBalance(row,'delivery'),6);assert.equal(pdtBalance(row,'reception'),2);assert.equal(pdtBalance({...row,disponible_entrega:1},'delivery'),1);assert.equal(pdtBalance({...row,procesado:null,entregado:2},'delivery'),0)});
+test('only positive integer deltas within current balance',()=>{for(const n of ['',0,-1,1.5,Infinity,7,'abc'])assert.throws(()=>validatePdtQuantity(row,'delivery',n));assert.equal(validatePdtQuantity(row,'reception','2'),2)});
+test('filters retain partials, hide closed/historical in open, weeks independent of search',()=>{const closed={...row,id:'b',estado:'CERRADO'},historical={...row,id:'h',estado:'HISTORICO_POR_CONCILIAR'};assert.equal(filterPickingPdt([row,closed,historical]).length,1);assert.equal(filterPickingPdt([row,closed],{state:'closed'})[0].id,'b');assert.equal(filterPickingPdt([row],{query:'300',week:'47'}).length,1);assert.equal(filterPickingPdt([row],{query:'300',week:'46'}).length,0)});
+test('escape all user supplied markup',()=>assert.equal(escapePdt('<script>"\'&'), '&lt;script&gt;&quot;&#39;&amp;'));
+
+test('malformed snapshot and impossible balances never render as empty truth',()=>{const snapshot={ok:true,contract_version:1,has_more:false,next_cursor:null,rows:[{...row,can_deliver:true,can_receive:true}],notifications:[],capabilities:{deliver:true,receive:true}};assert.equal(validatePickingPdtSnapshot(snapshot),snapshot);for(const bad of [{...snapshot,ok:false},{...snapshot,rows:null},{...snapshot,contract_version:2},{...snapshot,rows:[{...snapshot.rows[0],recibido:5}]},{...snapshot,rows:[{...snapshot.rows[0],disponible_entrega:99}]}])assert.throws(()=>validatePickingPdtSnapshot(bad));});
+
+test('only explicit rollback classifications clear request',()=>{assert.equal(isDefinitivePdtRejection({code:'P0001',message:'PDT_FLOW_SUPERA_ENTREGADO'}),true);assert.equal(isDefinitivePdtRejection({code:'40001'}),true);for(const e of [{code:'57014'},{code:'P0001',message:'PDT_FLOW_CLAVE_REUTILIZADA'},{code:'P0001',message:'Unknown'},{message:'Timeout'}])assert.equal(isDefinitivePdtRejection(e),false);});
