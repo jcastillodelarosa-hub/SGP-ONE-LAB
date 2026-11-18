@@ -2134,3 +2134,30 @@ conflictos. Conserva alertas y política protegida; incrementa versión a461.
 Chromium no arranca por restricción socket EPERM, incluso tras escalación; QA
 visual integrada pendiente. Sin push, publicación, migración, despliegue Edge ni
 mutaciones alojadas. Evidencia y siguiente paso: docs/opt-recovery/INTEGRATION_V461.md.
+
+## 2026-11-18 — Picking PDT entrega/recepción, candidata local v475
+
+Sobre main90e526c/v473, rama feat/picking-pdt-flow. Implementación local autorizada de
+subpestañas Órdenes/PDT aluminio en Entrega y Recepción, saldos parciales, avisos de
+procesado y cierre solo al recibir completo. No modifica el flujo de órdenes ni
+impone auditoría dual a PDT. Propuesta SQL separa históricos sin asumir recepción;
+protege roles/accesos efectivos y reintentos con ledger y bloqueos transaccionales.
+No aplicada en Supabase; sin push, fusión ni publicación. v475 provisional para
+coordinar con candidata OPT v474; revalidar main antes de entregar.
+
+Pruebas Node, DOM y PostgreSQL sintético ejecutadas; detalle y límites en
+`docs/picking-pdt/IMPLEMENTATION_REVIEW.md` y
+`docs/sql-proposals/picking-pdt-flow/README.md`. QA visual Chromium bloqueada por
+restricción socket del entorno; no equivale a validación productiva. Próximo paso:
+revisión final y QA visual del artefacto en entorno habilitado, antes de solicitar
+aplicación SQL/publicación concreta.
+
+### Picking PDT — revisión previa al PR borrador
+Tres observaciones corregidas: pulgadas sin conversión, permisos efectivos también
+en once RPC previas, consultas paginadas y sondeo exclusivo de avisos. Ensayo
+esquema completo/ACL afectadas en copia aislada PASS; evidencia delimitada en docs.
+1441 pruebas Node PASS,10 omitidas,DOM/PGlite/concurrencia PASS. Enlaces de avisos
+limpian filtros antiguos. Autorizado PR borrador/CI únicamente; no merge, hosting ni
+SQL productivo. QA visual pendiente de CI: Chromium local bloqueado y navegador
+cloud no expuesto. El siguiente paso es verificar CI del SHA remoto antes de
+solicitar cualquier publicación.

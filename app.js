@@ -1,3 +1,4 @@
+import {mountPickingPdtFlow} from './src/ui/picking-pdt-flow.js';
 import {receptionAuditProgressMarkup} from './src/domain/reception-audit-progress.js';
 import {progressDetailMarkup,bindProgressDetail} from './src/modules/mecanizado-progress-detail.js';
 import {uniqueOpenPickingOrders} from './src/domain/picking-open-orders.js';
@@ -309,7 +310,7 @@ function fmtShiftTime(v){if(!v)return'';let [h,m]=v.split(':').map(Number),ap=h>
 function shiftLabelForDate(date,turno){const s=shiftScheduleForDate(date,turno);return s?fmtShiftTime(s.inicio)+' a '+fmtShiftTime(s.fin):''}
 
 function saveAppToken(token){sessionStorage.setItem(APP_SESSION_KEY,token);localStorage.setItem(APP_PERSIST_SESSION_KEY,token)}
-function clearAppToken(){optDigitalHost.update();sessionStorage.removeItem(APP_SESSION_KEY);localStorage.removeItem(APP_PERSIST_SESSION_KEY)}
+function clearAppToken(){optDigitalHost.update();sessionStorage.removeItem(APP_SESSION_KEY);localStorage.removeItem(APP_PERSIST_SESSION_KEY);pickingPdtFlow.reset()}
 
 async function refreshAuthStatus() {
   try {
@@ -324,7 +325,7 @@ async function refreshAuthStatus() {
     const { data, error } = await client.rpc("sgp_sesion_actual", { p_token: token });
     if(token!==getAppToken())return null;
     if (error) {
-      optDigitalHost.update();console.warn("Error temporal validando sesión SGP:", error);
+      optDigitalHost.update();pickingPdtFlow.reset();console.warn("Error temporal validando sesión SGP:", error);
       els.authStatus.textContent = "Reintentando sesión…";
       return null;
     }
@@ -339,7 +340,7 @@ async function refreshAuthStatus() {
     await applyUserAccess(data,token);
     return data;
   } catch {
-    optDigitalHost.update();els.authStatus.textContent = "Auth no disponible";
+    optDigitalHost.update();pickingPdtFlow.reset();els.authStatus.textContent = "Auth no disponible";
     return null;
   }
 }
@@ -412,18 +413,41 @@ const SGP_ACCESS_TREE=[
 const SGP_WINDOWS=SGP_ACCESS_TREE.flatMap(x=>[[x.key,x.label],...(x.children||[])]);
 function accessTreeHtml(selected=[],mode='user'){return SGP_ACCESS_TREE.map(x=>{const kids=x.children||[],on=selected.includes(x.key),kidOn=kids.filter(k=>selected.includes(k[0])).length;if(!kids.length)return '<label class="access-leaf"><input type="checkbox" value="'+x.key+'" '+(on?'checked':'')+'><span><b>'+x.label+'</b></span></label>';return '<details class="access-module"><summary><span class="access-module-title">'+x.label+'</span><small>'+kidOn+'/'+kids.length+' ventanas</small></summary><div class="access-module-body"><label class="access-all"><input type="checkbox" value="'+x.key+'" '+(on?'checked':'')+'><span><b>Acceso completo al módulo</b><small>Permite todas las ventanas actuales del módulo</small></span></label>'+kids.map(k=>'<label><input type="checkbox" value="'+k[0]+'" '+(selected.includes(k[0])?'checked':'')+'><span><b>'+k[1]+'</b><small>Ventana interna</small></span></label>').join('')+'</div></details>'}).join('')}
 let currentAuth=null,currentAuthToken=null,userAdminRows=[],editingUserId=null,roleAccessRows=[];
+let currentPickingPdtAccess=false;
+const pickingPdtRoles=new Set(['ADMINISTRADOR','COORDINADOR','PICKING','SUPERVISOR DE PICKING','RECEPCION','LIDER LINEA','LIDER','PATINADOR','CONSULTA']);
+const pickingPdtFlow=mountPickingPdtFlow({
+ deliveryPanel:document.querySelector('#pickDeliveryPanel'),
+ receptionPanel:document.querySelector('#pickReceptionPanel'),
+ notificationHost:document.querySelector('#pickingPdtNotifications'),
+ client:{rpc:async(name,args)=>(await getSupabaseClient()).rpc(name,args)},
+ getToken:getAppToken,getActor:()=>currentPickingPdtAccess&&currentAuthToken===getAppToken()?currentAuth:null,
+ onNavigate:mode=>{openView('picking');document.querySelector(mode==='recepcion'?'#pickReceptionTab':'#pickDeliveryTab')?.click();},
+ onChanged:async()=>{await Promise.all([loadPicking(),loadPickingReception(),loadAluminumPending()]);}
+});
+function refreshPickingPdtFlow({noticesOnly=false}={}){
+ if(!getAppToken()||currentAuthToken!==getAppToken()||currentAuth?.valida!==true||!currentPickingPdtAccess||!pickingPdtRoles.has(String(currentAuth.rol||'').trim().toUpperCase())){pickingPdtFlow.reset();return;}
+ if(!noticesOnly&&document.querySelector('[data-view-panel="picking"]')?.hidden===false)void pickingPdtFlow.refresh();
+ else void pickingPdtFlow.refreshNotices();
+}
+// Read-only polling: no automatic deliveries, receipts or acknowledgement.
+setInterval(()=>{if(!document.hidden)refreshPickingPdtFlow({noticesOnly:true});},30000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshPickingPdtFlow({noticesOnly:true});});
+window.addEventListener('storage',()=>{if(currentAuthToken!==getAppToken())pickingPdtFlow.reset();});
+
+
 async function applyUserAccess(auth,validatedToken=null){
  if(auth&&(!validatedToken||validatedToken!==getAppToken()))return;
- currentAuthToken=auth?validatedToken:null;currentAuth=auth||null;const token=getAppToken(),buttons=[...document.querySelectorAll('.nav [data-view]')];
+ currentAuthToken=auth?validatedToken:null;currentAuth=auth||null;currentPickingPdtAccess=false;pickingPdtFlow.reset();const token=getAppToken(),buttons=[...document.querySelectorAll('.nav [data-view]')];
  // Presentation only: protected RPCs still validate current role and effective access.
  document.dispatchEvent(new CustomEvent('sgp:lp-role',{detail:auth?.rol||null}));
  if(!token){optDigitalHost.update();buttons.forEach(b=>b.hidden=false);return}
- if(String(auth?.rol||'').toUpperCase()==='ADMINISTRADOR'){optDigitalHost.update({valid:auth?.valida===true,admin:true,username:auth?.usuario});buttons.forEach(b=>b.hidden=false);return}
+ if(String(auth?.rol||'').toUpperCase()==='ADMINISTRADOR'){currentPickingPdtAccess=true;refreshPickingPdtFlow();optDigitalHost.update({valid:auth?.valida===true,admin:true,username:auth?.usuario});buttons.forEach(b=>b.hidden=false);return}
  try{
    const c=await getSupabaseClient(),{data,error}=await c.rpc('sgp_mis_accesos',{p_token:token});
    if(error)throw error;
    if(token!==getAppToken() || currentAuth!==auth)return;
    const access=(data||[]).map(x=>x.ventana);
+   currentPickingPdtAccess=access.some(x=>['picking','picking.entrega','picking.recepcion'].includes(x));refreshPickingPdtFlow();
    optDigitalHost.update({valid:auth?.valida===true,username:auth?.usuario,access});
    buttons.forEach(b=>{const v=b.dataset.view;b.hidden=!((v==='configuracion'&&auth?.rol==='COORDINADOR')||access.includes(v)||access.some(x=>x.startsWith(v+'.')))});
    document.querySelectorAll('[data-mach-tab]').forEach(b=>{if(b.dataset.machTab==='opt-digital'){b.hidden=!optDigitalHost.canOpen();return;}const key='mecanizado.'+b.dataset.machTab;const legacy=b.dataset.machTab==='proceso'&&access.includes('mecanizado.produccion');b.hidden=!(access.includes('mecanizado')||access.includes(key)||legacy)});
@@ -508,6 +532,7 @@ function openView(viewName) {
   }
   els.views.forEach(view => { view.hidden = view.dataset.viewPanel !== viewName; });
   els.nav.forEach(button => button.classList.toggle("active", button.dataset.view === viewName));
+  if(viewName==='picking')refreshPickingPdtFlow();
 }
 function refreshWeeklyRelations() {
   if (!validatedProductions.length) return;

@@ -15,3 +15,13 @@ test('historical coverage offers finalization without fabricating another delive
 test('explicit historical pending mode selects compatibility without mixed quantities',()=>{const p={ok:true,contract_version:1,modo:'ANTERIOR_PENDIENTE',finalizado:false,detalles:[],entregas:[]};assert.equal(adaptPdtPickingSimple(p,original).legacy,true);for(const field of ['detalles','entregas'])assert.throws(()=>adaptPdtPickingSimple({...p,[field]:[{}]},original),/Cobertura anterior/);assert.equal(adaptPdtPickingSimple({...payload(),modo:'DIRECTO'},original).legacy,undefined);});
 test('completed historical coverage is read only and retains amounts',()=>{const details=[{id_detalle:'a',cantidad_validada:3,avance_neto:3}];const state=adaptPdtPickingSimple({ok:true,contract_version:1,modo:'ANTERIOR_COMPLETA',finalizado:true,detalles:[{id_detalle:'a',cantidad_validada:3,procesada:3,entregada:3,saldo_entrega:0,disponible_entrega:0}],entregas:[]},details);assert.equal(state.detalles[0].entregada,3);assert.doesNotMatch(pdtPickingSimpleForm(state,true,String),/data-operation=/);});
 test('reader error never falls back to historical RPC',async()=>{const names=[];await assert.rejects(loadPdtPickingSimple({rpc:async name=>{names.push(name);return {error:new Error('reader offline')};}},'T','P',original),/reader offline/);assert.deepEqual(names,['sgp_pdt_picking_simple_estado_v1']);});
+test('receipt-required PDT cannot be closed from the prior delivery panel',()=>{
+ const state={requiere_recepcion:true,finalizado:false,detalles:[{id_detalle:'a',saldo_entrega:0,disponible_entrega:0}],entregas:[]};
+ const html=pdtPickingSimpleForm(state,true,String);
+ assert.doesNotMatch(html,/data-operation="(?:close|delivery)"/);
+ assert.match(html,/pendiente de recepción/);
+ assert.doesNotMatch(html,/Al completar todas las piezas, el PDT finalizará/);
+ assert.match(pdtPickingSimpleForm({...state,detalles:[{id_detalle:'a',saldo_entrega:2,disponible_entrega:2}]},true,String),/data-operation="delivery"/);
+});
+
+test('prior delivery path explains denied Picking window without retrying another writer',async()=>{const calls=[];await assert.rejects(confirmPdtPickingSimple({rpc:async name=>{calls.push(name);return {error:{code:'P0001',message:'PDT_FLOW_ACCESO_DENEGADO'}};}},{p_id_detalle:'d',p_cantidad:1,p_idempotency_key:'key'}),/no tiene acceso a Entrega en Picking/);assert.deepEqual(calls,['sgp_pdt_picking_simple_v1']);});

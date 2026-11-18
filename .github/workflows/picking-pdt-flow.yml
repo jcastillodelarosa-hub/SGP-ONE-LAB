@@ -1,0 +1,51 @@
+name: Picking PDT delivery and receipt
+on:
+  pull_request:
+    paths:
+      - 'src/ui/picking-pdt-flow.js'
+      - 'picking-pdt-flow.css'
+      - 'app.js'
+      - 'index.html'
+      - 'src/modules/pdt-picking-simple.js'
+      - 'docs/sql-proposals/picking-pdt-flow/**'
+      - 'tests/picking-pdt*'
+      - 'tests/picking-pdt-flow/**'
+      - '.github/workflows/picking-pdt-flow.yml'
+permissions:
+  contents: read
+jobs:
+  isolated:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci && npm run build:vendor && npm run verify:release
+      - run: node --test tests/picking-pdt-flow-ui.test.mjs tests/picking-pdt-integration.test.mjs tests/pdt-picking-simple-ui.test.mjs
+      - name: Install isolated test tools only
+        run: npm install --prefix "$RUNNER_TEMP/pdt-tools" --no-audit --no-fund jsdom@26.1.0 @electric-sql/pglite@0.3.14
+      - name: DOM replay, partials, session and existing orders
+        run: SGP_JSDOM_PATH="$RUNNER_TEMP/pdt-tools/node_modules/jsdom/lib/api.js" node tests/picking-pdt-flow-dom.mjs
+      - name: SQL contract with synthetic rows only
+        run: PGLITE_MODULE="$RUNNER_TEMP/pdt-tools/node_modules/@electric-sql/pglite/dist/index.js" node tests/picking-pdt-flow/run.mjs
+      - run: python3 -m pip install playwright==1.56.0
+      - name: PC and mobile synthetic workflow, no live requests
+        env:
+          SGP_QA_CHROMIUM: /usr/bin/google-chrome
+          SGP_QA_OUT: ${{ runner.temp }}/picking-pdt-flow-ui
+        run: python3 tests/picking-pdt-flow-browser.py
+      - name: Full app PC and mobile, synthetic services only
+        env:
+          SGP_QA_CHROMIUM: /usr/bin/google-chrome
+          SGP_QA_OUT: ${{ runner.temp }}/picking-pdt-flow-ui
+        run: python3 tests/picking-pdt-full-app-browser.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: picking-pdt-flow-${{ github.sha }}
+          path: ${{ runner.temp }}/picking-pdt-flow-ui
+          retention-days: 7
