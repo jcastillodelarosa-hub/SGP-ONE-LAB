@@ -38,6 +38,11 @@ jobs:
           SGP_QA_CHROMIUM: /usr/bin/google-chrome
           SGP_QA_OUT: ${{ runner.temp }}/picking-pdt-flow-ui
         run: python3 tests/picking-pdt-flow-browser.py
+      - name: Full app PC and mobile, synthetic services only
+        env:
+          SGP_QA_CHROMIUM: /usr/bin/google-chrome
+          SGP_QA_OUT: ${{ runner.temp }}/picking-pdt-flow-ui
+        run: python3 tests/picking-pdt-full-app-browser.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
