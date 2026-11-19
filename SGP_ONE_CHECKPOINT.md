@@ -1,3 +1,6 @@
+## 2026-11-19 — Apariencia y navegación en pestaña · candidata LAB v483
+La tarjeta de preferencias locales pasa a una pestaña de Configuración. Conserva almacenamiento, controles y acceso previo de Coordinador y Administrador; sin cambios en alertas, permisos de servidor o datos. Las pestañas se ajustan en móvil. Pendiente verificación CI y publicación por separado.
+
 ## 2026-11-19 — Gestión de alertas creadas · candidata local LAB v482
 Base main v481 bbb99c3f. Lista de alertas guardadas, edición y confirmación de
 activación/inactivación por código; mensaje preservado durante toggle. Flujo

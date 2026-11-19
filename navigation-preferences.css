@@ -119,3 +119,9 @@
 .app-shell .sidebar .nav button:not([hidden]).active .sgp-nav-name{color:#fff!important}
 .app-shell .sidebar .nav button:disabled{opacity:.58;cursor:not-allowed}
 @media(min-width:761px){.app-shell[data-sgp-nav-mode]:not(.sgp-nav-expanded)>.sidebar .brand .sgp-nav-logo{font-size:14px!important}}
+
+/* Tabs in Configuración stay reachable without horizontal scrolling on phones. */
+@media(max-width:760px){
+ [data-view-panel="configuracion"] .config-tabs{flex-wrap:wrap;overflow-x:visible}
+ [data-view-panel="configuracion"] .config-tabs button{flex:1 1 140px;min-width:0;min-height:44px;white-space:normal}
+}

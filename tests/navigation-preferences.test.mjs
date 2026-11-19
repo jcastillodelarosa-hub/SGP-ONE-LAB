@@ -5,8 +5,8 @@ const html=readFileSync('index.html','utf8');
 const js=readFileSync('navigation-preferences.js','utf8');
 const css=readFileSync('navigation-preferences.css','utf8');
 test('navigation assets are loaded by SGP shell',()=>{
- assert.match(html,/navigation-preferences\.css\?v=4/);
- assert.match(html,/navigation-preferences\.js\?v=4/);
+ assert.match(html,/navigation-preferences\.css\?v=5"/);
+ assert.match(html,/navigation-preferences\.js\?v=5"/);
 });
 test('navigation preferences are isolated from business and auth layers',()=>{
  assert.match(js,/localStorage\.setItem\(KEY/);
