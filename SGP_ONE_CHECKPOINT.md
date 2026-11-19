@@ -1,3 +1,11 @@
+## 2026-11-19 — Fecha y turno de recepción PDT aluminio · candidata LAB v480
+Picking → Recepción → Recibir PDT aluminio, sobre main v479 00fc52c4.
+Fecha y turno operativos separados de la entrega y del instante de registro;
+prefill con reglas de planta Bogotá y edición para turnos iniciados. Historial
+sin inferir esos datos para recepciones anteriores. Contrato v1 conservado para
+entrega y reintentos existentes; SQL aditivo primero. Ver [propuesta](docs/sql-proposals/picking-pdt-reception-shift/README.md).
+Solo candidata local: no aplicada, fusionada ni publicada.
+
 ## 2026-11-18 — Picking PDT líder de mecanizado · candidata LAB v476
 Extensión acotada solo de entrega, lectura y avisos; recepción no autorizada.
 SQL guardado e inversa en docs/sql-proposals/picking-leader-delivery. Sin datos

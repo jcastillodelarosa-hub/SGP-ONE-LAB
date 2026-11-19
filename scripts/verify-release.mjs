@@ -2,7 +2,7 @@ import {releaseLabel} from './build-release-info.mjs';
 import { access, readFile } from "node:fs/promises";
 
 const optFiles=JSON.parse(await readFile("scripts/opt-artifact-files.json","utf8"));
-const required=[...optFiles,"src/ui/picking-pdt-flow.js","picking-pdt-flow.css","src/modules/opt-digital.js","index.html","app.js","config.js","styles.css","src/services/supabase-client.js","vendor/supabase.js","vendor/html2canvas.min.js","vendor/jspdf.umd.min.js"];
+const required=[...optFiles,"src/ui/picking-pdt-flow.js","src/domain/picking-shifts.js","picking-pdt-flow.css","src/modules/opt-digital.js","index.html","app.js","config.js","styles.css","src/services/supabase-client.js","vendor/supabase.js","vendor/html2canvas.min.js","vendor/jspdf.umd.min.js"];
 for(const file of required){await access(file);console.log("release: ok",file)}
 
 const index=await readFile("index.html","utf8");

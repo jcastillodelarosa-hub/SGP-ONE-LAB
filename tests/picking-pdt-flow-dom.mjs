@@ -17,6 +17,7 @@ for(const mode of ['delivery','reception']){
  assert.match($('#'+mode+' tbody').textContent,/42\.125 in/,'preserves native inch length in '+mode+' table');
  assert.doesNotMatch($('#'+mode+' tbody').textContent,/42\.125 mm/);
  $('#'+mode+' [data-pdt-move]').click();
+ assert.equal($('[data-pdt-receipt-fields]').hidden,mode==='delivery');
  assert.match($('[data-pdt-meta]').textContent,/42\.125 in/,'preserves native inch length in '+mode+' modal');
  assert.equal(row.longitud,42.125,'no conversion or source mutation');
  $('[data-pdt-cancel]').click();
@@ -38,4 +39,15 @@ await paged.refreshNotices();assert.equal(pageCalls.length,0,'background notific
 await paged.refresh();assert.ok(pageCalls.every(p=>p.p_estado==='open'),'closed history never loads by default');assert.equal($('#delivery [data-pdt-more]').hidden,false);$('#delivery [data-pdt-more]').click();await tick();assert.equal($('#delivery tbody').querySelectorAll('tr').length,2);assert.equal($('#delivery [data-pdt-count]').textContent,'· 1 cargado','count unique PDT across details');assert.equal($('#delivery [data-pdt-more]').hidden,true);assert.match($('#delivery [data-pdt-page-status]').textContent,/orden por semana de filas cargadas/);
 $('#reception [data-pdt-history]').click();await tick();assert.equal(pageCalls.at(-1).p_estado,'closed');const closedCalls=pageCalls.filter(p=>p.p_estado==='closed').length;await paged.refresh();assert.equal(pageCalls.filter(p=>p.p_estado==='closed').length,closedCalls,'background full refresh does not refetch history');$('#delivery [data-pdt-week]').value='46';$('#delivery [data-pdt-week]').dispatchEvent(new dom.window.Event('change'));await tick();assert.equal(pageCalls.at(-1).p_semana,'46');assert.equal(pageCalls.at(-1).p_cursor,null,'filter resets cursor');$('#delivery [data-pdt-search]').value='fabricación';$('#delivery [data-pdt-search]').dispatchEvent(new dom.window.Event('input'));await new Promise(r=>setTimeout(r,300));assert.equal(pageCalls.at(-1).p_busqueda,'fabricación','search is server-side');for(const link of ['#delivery [data-pdt-see-ready]','.picking-pdt-notice-popover [data-pdt-go]']){const h=$('#delivery');h.querySelector('[data-pdt-state]').value='closed';h.querySelector('[data-pdt-week]').value='46';h.querySelector('[data-pdt-search]').value='no-coincide';if(link.startsWith('.picking-pdt-notice-popover')){$('#alerts [data-pdt-bell]').click();}$(link).click();await tick();assert.equal(pageCalls.at(-1).p_modo,'delivery');assert.equal(pageCalls.at(-1).p_estado,'open');assert.equal(pageCalls.at(-1).p_semana,null);assert.equal(pageCalls.at(-1).p_busqueda,null);assert.equal(pageCalls.at(-1).p_cursor,null);assert.equal($('#delivery .picking-pdt-host').hidden,false);assert.equal($('.picking-pdt-notice-popover').hidden,true,'opening ready queue dismisses notification overlay');}
 paged.destroy();
+rows=[row];const receiptCalls=[];
+const receiptUi=mountPickingPdtFlow({deliveryPanel:$('#delivery'),receptionPanel:$('#reception'),getToken:()=>token,getActor:()=>({id:'qa'}),api:{list:async p=>data(p),notices:async()=>data(),move:async p=>{receiptCalls.push({...p});if(receiptCalls.length===1)throw Error('Sin confirmación');return {ok:true}}}});
+receiptUi.select('reception','pdt');await tick();$('#reception [data-pdt-move]').click();
+$('[data-pdt-receipt-date]').value='';$('[data-pdt-save]').click();await tick();
+assert.equal(receiptCalls.length,0);assert.match($('[data-pdt-error]').textContent,/Selecciona la fecha/);
+$('[data-pdt-receipt-date]').value='2099-01-01';$('[data-pdt-receipt-shift]').value='TURNO 1';$('[data-pdt-save]').click();await tick();
+assert.equal(receiptCalls.length,0);assert.match($('[data-pdt-error]').textContent,/ya haya iniciado/);
+$('[data-pdt-receipt-date]').value='2026-01-01';$('[data-pdt-receipt-shift]').value='TURNO 2';$('[data-pdt-save]').click();await tick();
+assert.equal(receiptCalls.length,1);assert.equal(receiptCalls[0].p_fecha_recepcion,'2026-01-01');assert.equal(receiptCalls[0].p_turno_recepcion,'TURNO 2');
+assert.equal($('[data-pdt-receipt-date]').disabled,true);assert.equal($('[data-pdt-receipt-shift]').disabled,true);
+$('[data-pdt-save]').click();await tick();assert.deepEqual(receiptCalls[0],receiptCalls[1]);assert.equal($('.picking-pdt-modal').hidden,true);receiptUi.destroy();
 console.log('PASS isolated DOM: existing orders, banner, escaped fields, partial quantities, double click, uncertainty/retry, malformed confirmation, history, errors, logout race, teardown.');

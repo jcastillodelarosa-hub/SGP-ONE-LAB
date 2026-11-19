@@ -1,0 +1,33 @@
+DO $$
+DECLARE p uuid:=gen_random_uuid(); d uuid:=gen_random_uuid(); k uuid:=gen_random_uuid(); oldkey uuid:=gen_random_uuid();
+ localdate date:=(now() AT TIME ZONE 'America/Bogota')::date;
+ delivered date:=localdate-4; receipt date:=localdate-3;
+ q jsonb; m jsonb;
+BEGIN
+ INSERT INTO public.sgp_aluminio_pendientes(id_pendiente,cantidad) VALUES(p,3);
+ INSERT INTO public.sgp_aluminio_pendiente_detalles(id_detalle,id_pendiente,cantidad_validada) VALUES(d,p,3);
+ INSERT INTO public.sgp_aluminio_pendiente_movimientos(id_detalle,id_pendiente,tipo,cantidad) VALUES(d,p,'AVANCE',3);
+ PERFORM public.sgp_pdt_picking_movimiento_v1('PICKING',d,'ENTREGAR',3,gen_random_uuid());
+ UPDATE sgp_pdt_picking_simple.entregas SET creado_en=(delivered+time '13:00') AT TIME ZONE 'America/Bogota' WHERE id_detalle=d;
+ BEGIN PERFORM public.sgp_pdt_picking_recepcion_v2('RECEPCION',d,3,gen_random_uuid(),NULL,delivered-2,'TURNO 1'); RAISE EXCEPTION 'unexpected success'; EXCEPTION WHEN OTHERS THEN IF SQLERRM<>'PDT_FLOW_RECEPCION_SIN_SALDO_EN_TURNO' THEN RAISE; END IF; END;
+ ASSERT (SELECT estado='PENDIENTE' FROM public.sgp_aluminio_pendientes WHERE id_pendiente=p);
+ ASSERT NOT EXISTS (SELECT FROM sgp_pdt_picking_flow.recepciones WHERE id_detalle=d);
+ BEGIN PERFORM public.sgp_pdt_picking_recepcion_v2('RECEPCION',d,1,k,NULL,localdate+1,'TURNO 1'); RAISE EXCEPTION 'unexpected success'; EXCEPTION WHEN OTHERS THEN IF SQLERRM<>'PDT_FLOW_RECEPCION_FUTURA' THEN RAISE; END IF; END;
+ BEGIN PERFORM public.sgp_pdt_picking_recepcion_v2('RECEPCION',d,1,k,NULL,receipt,'X'); RAISE EXCEPTION 'unexpected success'; EXCEPTION WHEN OTHERS THEN IF SQLERRM<>'PDT_FLOW_TURNO_RECEPCION_INVALIDO' THEN RAISE; END IF; END;
+ BEGIN PERFORM public.sgp_pdt_picking_recepcion_v2('LIDER MECANIZADO',d,1,k,NULL,receipt,'TURNO 1'); RAISE EXCEPTION 'unexpected success'; EXCEPTION WHEN OTHERS THEN IF SQLERRM NOT IN ('SIN_PERMISO','PDT_FLOW_ACCESO_DENEGADO') THEN RAISE; END IF; END;
+ PERFORM public.sgp_pdt_picking_movimiento_v1('RECEPCION',d,'RECIBIR',1,oldkey);
+ ASSERT public.sgp_pdt_picking_movimiento_v1('RECEPCION',d,'RECIBIR',1,oldkey)->>'duplicado'='true';
+ BEGIN PERFORM public.sgp_pdt_picking_recepcion_v2('RECEPCION',d,1,oldkey,NULL,receipt,'TURNO 1'); RAISE EXCEPTION 'unexpected success'; EXCEPTION WHEN OTHERS THEN IF SQLERRM<>'PDT_FLOW_CLAVE_REUTILIZADA' THEN RAISE; END IF; END;
+ q:=public.sgp_pdt_picking_recepcion_v2('RECEPCION',d,2,k,NULL,receipt,'TURNO 2');
+ ASSERT q->>'turno_recepcion'='TURNO 2' AND q->>'fecha_recepcion'=receipt::text AND q->>'finalizado'='true';
+ ASSERT public.sgp_pdt_picking_recepcion_v2('RECEPCION',d,2,k,NULL,receipt,'TURNO 2')->>'duplicado'='true';
+ BEGIN PERFORM public.sgp_pdt_picking_recepcion_v2('RECEPCION',d,2,k,NULL,receipt,'TURNO 1'); RAISE EXCEPTION 'unexpected success'; EXCEPTION WHEN OTHERS THEN IF SQLERRM<>'PDT_FLOW_CLAVE_REUTILIZADA' THEN RAISE; END IF; END;
+ ASSERT public.sgp_pdt_picking_movimiento_v1('RECEPCION',d,'RECIBIR',2,k)->>'duplicado'='true';
+ ASSERT (SELECT count(*)=2 AND sum(cantidad)=3 FROM sgp_pdt_picking_flow.recepciones WHERE id_detalle=d);
+ ASSERT (SELECT fecha_recepcion IS NULL AND turno_recepcion IS NULL FROM sgp_pdt_picking_flow.recepciones WHERE idempotency_key=oldkey);
+ ASSERT (SELECT fecha_recepcion=receipt AND turno_recepcion='TURNO 2' AND creado_en=now() FROM sgp_pdt_picking_flow.recepciones WHERE idempotency_key=k);
+ SELECT elem->'movimientos' INTO m FROM jsonb_array_elements(public.sgp_pdt_picking_cola_v1('RECEPCION','reception','closed')->'rows') elem WHERE elem->>'id'=d::text;
+ ASSERT EXISTS (SELECT FROM jsonb_array_elements(m) e WHERE e->>'tipo'='RECEPCION' AND e->>'fecha_recepcion'=receipt::text AND e->>'turno_recepcion'='TURNO 2');
+ ASSERT EXISTS (SELECT FROM jsonb_array_elements(m) e WHERE e->>'tipo'='RECEPCION' AND e->'fecha_recepcion'='null');
+ ASSERT NOT has_table_privilege('anon','sgp_pdt_picking_flow.recepciones','UPDATE');
+END $$;
