@@ -46,7 +46,8 @@ with sync_playwright() as p:
   page.evaluate("Object.assign(details[2],{received:0,receiptReserves:['RES-DEMO-2'],warnings:['Procesadas supera recibidas']});render()")
   page.locator('[data-progress-filter="review"]').click()
   assert page.locator('.sgp-progress-order').count()==1
-  assert 'Pendientes 0 · Diferencia 12' in page.locator('.sgp-progress-order').inner_text()
+  totals=page.locator('.sgp-progress-order small').text_content() or ''
+  assert re.search(r'Pendientes\s+0\s*·\s*Diferencia\s+12\b',totals,re.I),repr(totals)
   page.locator('[data-progress-review="recepcion"]').click()
   page.locator('[data-progress-review="proceso"]').click()
   assert page.evaluate("navigation.length===2 && navigation[0].reserve==='RES-DEMO-2' && navigation[1].shift==='TURNO 1' && calls===3")
