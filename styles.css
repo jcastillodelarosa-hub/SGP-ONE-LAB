@@ -3003,6 +3003,7 @@ table.glass-burro-table th:not(:first-child){width:36%}
 /* NC source closure, separate from physical receipt. Existing SGP success tokens. */
 .lp-ncv-finalized{display:inline-flex;align-items:center;max-width:100%;overflow-wrap:anywhere;gap:4px;margin:3px 4px 3px 0;padding:5px 8px;border:1px solid #86efac;border-radius:6px;background:#dcfce7;color:#166534;font-size:12px;font-weight:700}
 
+.sgp-progress-review-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}.sgp-progress-review-actions button,[data-physical-review]{min-height:44px;white-space:normal}.sgp-progress-detail [data-progress-review-status]:empty{display:none}
 /* Approved B: common window hierarchy. Presentation only; no state selectors. */
 :root{
  --sgp-window-title:#173458;--sgp-window-text:#20344c;--sgp-window-help:#52657c;

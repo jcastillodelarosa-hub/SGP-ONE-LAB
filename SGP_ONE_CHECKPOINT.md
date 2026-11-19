@@ -1,3 +1,15 @@
+## 2026-11-19 — Revisar diferencias de mecanizado · candidata LAB v481
+Programación → Resumen: aviso accionable, filtro Conciliar incluye producciones
+con alertas aunque no tengan saldo por procesar. Cifras por orden separan base,
+recibidas y procesadas; rutas a la reserva en Recepción y al turno en Producción
+solo con acceso efectivo. Las rutas no guardan ni acreditan recepciones.
+No se alteran los cálculos de recepción/ejecución ni el contrato de conciliación legacy.
+Para órdenes agregadas a una reserva recibida, el cálculo vigente usa el estado de
+la reserva y la base vigente. Acreditar individualmente esas altas requiere probar
+qué órdenes/cantidades pertenecían a la reserva al momento de la recepción.
+No afirmar que esa situación haya causado el aviso observado.
+Solo candidata local sobre v480 c020506b; sin SQL, push, fusión ni publicación.
+
 ## 2026-11-19 — Fecha y turno de recepción PDT aluminio · candidata LAB v480
 Picking → Recepción → Recibir PDT aluminio, sobre main v479 00fc52c4.
 Fecha y turno operativos separados de la entrega y del instante de registro;

@@ -8,9 +8,9 @@ ORIGIN='http://detail.test/'
 css=re.search(r'style.textContent=`(.*?)`;', (ROOT/'programacion-subtabs-v350.js').read_text(),re.S).group(1)
 html='<html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><link rel="stylesheet" href="/styles.css"><style>body{margin:0;padding:16px;background:white;color:#17334d}main{max-width:1300px;margin:auto;min-width:0}'+css+'</style><main><h2>Mecanizado · Programación</h2><p>Validación aislada · Datos ficticios</p><div id="detail"></div></main></html>'
 setup='''async()=>{ const {progressDetailMarkup,bindProgressDetail}=await import('/src/modules/mecanizado-progress-detail.js');
-window.calls=0;window.fail=false;window.qaClosed=false;window.canManage=true;window.filter='pending';
+window.calls=0;window.navigation=[];window.fail=false;window.qaClosed=false;window.canManage=true;window.filter='pending';
 window.details=['CORTE','MECANIZADO','PROCESADO'].map((state,i)=>({system:'SISTEMA DEMO',production:'ORDEN DEMO '+i,reserve:'RES-DEMO-'+i,programmed:12,processed:state==='PROCESADO'?12:0,pending:state==='PROCESADO'?0:12,unassigned:0,warnings:[],editable:true,assignments:[{id_programacion:'PLAN-DEMO-'+i,produccion:'ORDEN DEMO '+i,reserva:'RES-DEMO-'+i,part:'PARTE '+(i+1),quantity:12,processed:state==='PROCESADO'?12:0,date:'2026-11-17',shift:'TURNO 1',state,editable:true}]}));
-window.render=()=>{document.querySelector('#detail').innerHTML=progressDetailMarkup(details,'SISTEMA DEMO',{canManage,filter});bindProgressDetail(document.querySelector('#detail'),{save:async p=>{calls++;await new Promise(r=>setTimeout(r,80));if(fail)throw Error('Fallo simulado');const d=details.find(d=>d.production===p.production);d.assignments[0].state=p.state;d.assignments[0].processed=p.state==='PROCESADO'?12:0;d.processed=d.assignments[0].processed;d.pending=12-d.processed;},onSaved:async()=>render(),onFilter:f=>{filter=f;render()},onClose:()=>{qaClosed=true;document.querySelector('#detail').innerHTML=''}})};render();}'''
+window.render=()=>{document.querySelector('#detail').innerHTML=progressDetailMarkup(details,'SISTEMA DEMO',{canManage,filter,canReception:true,canProduction:true});bindProgressDetail(document.querySelector('#detail'),{save:async p=>{calls++;await new Promise(r=>setTimeout(r,80));if(fail)throw Error('Fallo simulado');const d=details.find(d=>d.production===p.production);d.assignments[0].state=p.state;d.assignments[0].processed=p.state==='PROCESADO'?12:0;d.processed=d.assignments[0].processed;d.pending=12-d.processed;},onSaved:async()=>render(),onReview:p=>navigation.push({...p}),onFilter:f=>{filter=f;render()},onClose:()=>{qaClosed=true;document.querySelector('#detail').innerHTML=''}})};render();}'''
 with sync_playwright() as p:
  browser=p.chromium.launch(executable_path=os.environ.get('DETAIL_CHROMIUM','/usr/bin/chromium'),args=['--no-sandbox'])
  results=[]
@@ -43,6 +43,14 @@ with sync_playwright() as p:
   page.evaluate('fail=true');page.locator('[data-progress-state]').first.select_option('CORTE');page.locator('[data-progress-save]').first.click();page.get_by_text('Fallo simulado',exact=True).wait_for()
   page.evaluate('fail=false');page.locator('[data-progress-save]').first.click();page.wait_for_function('calls===3 && !document.querySelector("[data-progress-state]").disabled')
   page.evaluate('canManage=false;render()');assert page.locator('[data-progress-save]').count()==0
+  page.evaluate("Object.assign(details[2],{received:0,receiptReserves:['RES-DEMO-2'],warnings:['Procesadas supera recibidas']});render()")
+  page.locator('[data-progress-filter="review"]').click()
+  assert page.locator('.sgp-progress-order').count()==1
+  assert 'Pendientes 0 · Diferencia 12' in page.locator('.sgp-progress-order').inner_text()
+  page.locator('[data-progress-review="recepcion"]').click()
+  page.locator('[data-progress-review="proceso"]').click()
+  assert page.evaluate("navigation.length===2 && navigation[0].reserve==='RES-DEMO-2' && navigation[1].shift==='TURNO 1' && calls===3")
+  page.screenshot(path=str(OUT/f'detail-conciliar-{width}.png'),full_page=True)
   page.locator('[data-progress-close]').click();assert page.evaluate('qaClosed && calls===3')
   assert not errors,errors;assert not external,external
   results.append({'width':width,'passed':True,'backendRequests':0,'simulatedSaves':3});page.close()

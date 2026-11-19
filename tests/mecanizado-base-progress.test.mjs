@@ -57,3 +57,13 @@ test('corrected actual cannot fabricate ambiguous reservation quantities or exce
  s.schedule=[assignment('A',{produccion:null,cantidad_programada:8,prioridad_semanal:1})];s.coverage=[{key_produccion:'K',reserva:'R',prioridad_semanal:1,produccion:'PK',cantidad:8,estado_orden:'PROGRAMADA'}];
  assert.equal(run(s).total.processed,null);
 });
+
+test('una orden añadida conserva su saldo y la procesada sin recepción sigue conciliable',()=>{
+ const s=snapshot({base:[production('K',10),production('NEW',4)],schedule:[assignment('A',{turno:'TURNO 1'})],executions:[{id_programacion:'A',estado:'PROCESADO',cantidad_procesada:10}]});
+ const original=JSON.stringify(s);const r=run(s);
+ const done=r.details.find(x=>x.key==='K'),added=r.details.find(x=>x.key==='NEW');
+ assert.deepEqual([done.programmed,done.received,done.processed,done.pending,done.receiptReserves],[10,0,10,0,['R']]);
+ assert.match(done.warnings[0],/supera recibidas/);
+ assert.deepEqual([added.programmed,added.received,added.processed,added.pending,added.unassigned],[4,0,0,4,4]);
+ assert.equal(JSON.stringify(s),original);
+});

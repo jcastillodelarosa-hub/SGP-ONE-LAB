@@ -414,7 +414,7 @@ const SGP_ACCESS_TREE=[
 const SGP_WINDOWS=SGP_ACCESS_TREE.flatMap(x=>[[x.key,x.label],...(x.children||[])]);
 function accessTreeHtml(selected=[],mode='user'){return SGP_ACCESS_TREE.map(x=>{const kids=x.children||[],on=selected.includes(x.key),kidOn=kids.filter(k=>selected.includes(k[0])).length;if(!kids.length)return '<label class="access-leaf"><input type="checkbox" value="'+x.key+'" '+(on?'checked':'')+'><span><b>'+x.label+'</b></span></label>';return '<details class="access-module"><summary><span class="access-module-title">'+x.label+'</span><small>'+kidOn+'/'+kids.length+' ventanas</small></summary><div class="access-module-body"><label class="access-all"><input type="checkbox" value="'+x.key+'" '+(on?'checked':'')+'><span><b>Acceso completo al módulo</b><small>Permite todas las ventanas actuales del módulo</small></span></label>'+kids.map(k=>'<label><input type="checkbox" value="'+k[0]+'" '+(selected.includes(k[0])?'checked':'')+'><span><b>'+k[1]+'</b><small>Ventana interna</small></span></label>').join('')+'</div></details>'}).join('')}
 let currentAuth=null,currentAuthToken=null,userAdminRows=[],editingUserId=null,roleAccessRows=[];
-let currentPickingPdtAccess=false;
+let currentPickingPdtAccess=false, currentMachWindowAccess=new Set();
 const pickingPdtRoles=new Set(['LIDER MECANIZADO','ADMINISTRADOR','COORDINADOR','PICKING','SUPERVISOR DE PICKING','RECEPCION','LIDER LINEA','LIDER','PATINADOR','CONSULTA']);
 const pickingPdtFlow=mountPickingPdtFlow({
  deliveryPanel:document.querySelector('#pickDeliveryPanel'),
@@ -438,7 +438,7 @@ window.addEventListener('storage',()=>{if(currentAuthToken!==getAppToken())picki
 
 async function applyUserAccess(auth,validatedToken=null){
  if(auth&&(!validatedToken||validatedToken!==getAppToken()))return;
- currentAuthToken=auth?validatedToken:null;currentAuth=auth||null;currentPickingPdtAccess=false;pickingPdtFlow.reset();const token=getAppToken(),buttons=[...document.querySelectorAll('.nav [data-view]')];
+ currentAuthToken=auth?validatedToken:null;currentAuth=auth||null;currentPickingPdtAccess=false;currentMachWindowAccess=new Set();pickingPdtFlow.reset();const token=getAppToken(),buttons=[...document.querySelectorAll('.nav [data-view]')];
  // Presentation only: protected RPCs still validate current role and effective access.
  document.dispatchEvent(new CustomEvent('sgp:lp-role',{detail:auth?.rol||null}));
  if(!token){optDigitalHost.update();buttons.forEach(b=>b.hidden=false);return}
@@ -447,7 +447,7 @@ async function applyUserAccess(auth,validatedToken=null){
    const c=await getSupabaseClient(),{data,error}=await c.rpc('sgp_mis_accesos',{p_token:token});
    if(error)throw error;
    if(token!==getAppToken() || currentAuth!==auth)return;
-   const access=(data||[]).map(x=>x.ventana);
+   const access=(data||[]).map(x=>x.ventana);currentMachWindowAccess=new Set(access);
    currentPickingPdtAccess=access.some(x=>['picking','picking.entrega','picking.recepcion'].includes(x));refreshPickingPdtFlow();
    optDigitalHost.update({valid:auth?.valida===true,username:auth?.usuario,access});
    buttons.forEach(b=>{const v=b.dataset.view;b.hidden=!((v==='configuracion'&&auth?.rol==='COORDINADOR')||access.includes(v)||access.some(x=>x.startsWith(v+'.')))});
@@ -2216,6 +2216,28 @@ window.SGPWeeklyPhysicalProgress=async({weeks,year=new Date().getFullYear(),line
  physicalDetailScope={token,revision,weeks:[...weeks],year,line,system};
  return progress;
 };
+window.SGPWeeklyPhysicalCanReview=tab=>{
+ const token=getAppToken();
+ if(!token||currentAuthToken!==token||currentAuth?.valida!==true||!['recepcion','proceso'].includes(tab))return false;
+ return repoRole()==='ADMINISTRADOR'||currentMachWindowAccess.has('mecanizado')||currentMachWindowAccess.has('mecanizado.'+tab)||(tab==='proceso'&&currentMachWindowAccess.has('mecanizado.produccion'));
+};
+window.SGPWeeklyPhysicalReview=({progressReview:tab,reserve,date,shift})=>{
+ if(!window.SGPWeeklyPhysicalCanReview(tab))return false;
+ const button=document.querySelector('[data-mach-tab="'+tab+'"]');
+ if(!button||button.hidden)return false; // Never bypass the module's existing access UI.
+ if(tab==='recepcion'){
+  if(!reserve)return false;
+  const search=document.querySelector('#recSearch'),week=document.querySelector('#recWeek');
+  if(!search||!week)return false;
+  search.value=reserve;week.value=''; // Include historical reception and other weeks for this reserve.
+ }else{
+  if(!/^\d{4}-\d\d-\d\d$/.test(date||''))return false;
+  const day=document.querySelector('#prodDate'),turn=document.querySelector('#prodShift');
+  if(!day||!turn)return false;
+  day.value=date;turn.value=['TURNO 1','TURNO 2'].includes(shift)?shift:'';
+ }
+ button.click();return true;
+};
 window.SGPWeeklyPhysicalCanEdit=()=>['ADMINISTRADOR','COORDINADOR','LIDER MECANIZADO','LIDER','LIDER LINEA'].includes(repoRole());
 window.SGPWeeklyPhysicalSaveState=async({id,production,state,expected})=>{
  if(!window.SGPWeeklyPhysicalCanEdit())throw new Error('Tu rol no permite cambiar estados de mecanizado');
@@ -2630,7 +2652,7 @@ async function saveProgramming(){if(progWriteBusy||!progSelection)return;if(Arra
 const c=await getSupabaseClient();let {error}=await c.rpc('sgp_mecanizado_programar',args);if(error&&/schema cache|Could not find the function/i.test(error.message||'')){await new Promise(r=>setTimeout(r,700));({error}=await c.rpc('sgp_mecanizado_programar',args))}if(error){alert(error.message);return}closeProgModal();await loadProgramming({invalidateCarry:true})}
 document.querySelector('#progRefresh')?.addEventListener('click',()=>{deferredProgrammingLoad.cancel();loadProgramming({invalidateCarry:true})});document.querySelector('#progWeek')?.addEventListener('change',scheduleProgrammingLoad);document.querySelector('#progSearch')?.addEventListener('input',latestTask(()=>machiningMetrics.sync('programming-filter',()=>renderProgramming({skipCalendar:true})),40));document.querySelector('#progModalClose')?.addEventListener('click',closeProgModal);document.querySelector('#progCancel')?.addEventListener('click',closeProgModal);document.querySelector('#progSave')?.addEventListener('click',saveProgramming);
 
-document.querySelectorAll('[data-mach-tab]').forEach(b=>b.onclick=()=>{if(b.dataset.machTab==='opt-digital'&&!optDigitalHost.canOpen())return;document.querySelectorAll('[data-mach-tab]').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('[data-mach-panel]').forEach(x=>x.hidden=x.dataset.machPanel!==b.dataset.machTab);if(b.dataset.machTab==='recepcion')loadReception();if(b.dataset.machTab==='faltantes')loadMissing();if(b.dataset.machTab==='programacion')loadProgramming();if(b.dataset.machTab==='produccion')loadProductionBoard();if(b.dataset.machTab==='novedades')loadNovelties();if(b.dataset.machTab==='opt-digital')optDigitalHost.open()});
+document.querySelectorAll('[data-mach-tab]').forEach(b=>b.onclick=()=>{if(b.dataset.machTab==='opt-digital'&&!optDigitalHost.canOpen())return;document.querySelectorAll('[data-mach-tab]').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('[data-mach-panel]').forEach(x=>x.hidden=x.dataset.machPanel!==b.dataset.machTab);if(b.dataset.machTab==='recepcion')loadReception();if(b.dataset.machTab==='faltantes')loadMissing();if(b.dataset.machTab==='programacion')loadProgramming();if(b.dataset.machTab==='proceso')loadProductionBoard();if(b.dataset.machTab==='novedades')loadNovelties();if(b.dataset.machTab==='opt-digital')optDigitalHost.open()});
 document.querySelectorAll('input[name="recCompleteChoice"]').forEach(x=>x.addEventListener('change',()=>{const incomplete=x.checked&&x.value==='NO';document.querySelector('#recMissingSection').hidden=!incomplete;if(incomplete&&recMissingDraft.length===0){recMissingDraft.push({perfil:'',cantidad:1,longitud:'',observacion:''});renderMissingEditor()}if(!incomplete){recMissingDraft=[];renderMissingEditor()}}));
 document.querySelector('#recRefresh')?.addEventListener('click',loadReception);document.querySelector('#recWeek')?.addEventListener('change',loadReception);document.querySelector('#recSearch')?.addEventListener('input',renderReception);document.querySelector('#addMissing')?.addEventListener('click',()=>{recMissingDraft.push({perfil:'',cantidad:1,longitud:'',observacion:''});const no=document.querySelector('input[name="recCompleteChoice"][value="NO"]');if(no)no.checked=true;document.querySelector('#recMissingSection').hidden=false;renderMissingEditor()});document.querySelector('#recClose')?.addEventListener('click',()=>document.querySelector('#recModal').hidden=true);document.querySelector('#recCancel')?.addEventListener('click',()=>document.querySelector('#recModal').hidden=true);document.querySelector('#recSave')?.addEventListener('click',saveReception);
 
