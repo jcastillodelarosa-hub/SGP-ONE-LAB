@@ -1,0 +1,25 @@
+import {JSDOM} from 'jsdom';
+import assert from 'node:assert/strict';
+import {mountAccessoryAlertConfig} from '../../src/modules/accessory-alerts.js';
+const dom=new JSDOM('<main></main>'),host=dom.window.document.querySelector('main');
+const seed=[{codigo_sap:'QA-A',descripcion:'Manija ficticia',revision:2,mensaje:'  Mensaje original <b>literal</b>  ',activa:true,existe:true},{codigo_sap:'QA-B',descripcion:'Retirado ficticio',revision:4,mensaje:'Mensaje inactivo',activa:false,existe:false},{codigo_sap:'QA-C',descripcion:'Sin regla',revision:0}];
+let rows=structuredClone(seed),writes=[],allowed=true,token='qa',fail=false,resolveWrite;
+const client={rpc:async(name,args)=>{if(name.endsWith('catalogo'))return {data:structuredClone(rows)};writes.push(args);if(fail)return {error:{message:'REGLA_MODIFICADA_RECARGAR'}};if(resolveWrite)await new Promise(r=>resolveWrite=r);const result=args.p_codigos.map(p=>{const row=rows.find(r=>r.codigo_sap===p.codigo_sap);assert.equal(p.revision,row.revision);Object.assign(row,{revision:row.revision+1,mensaje:args.p_mensaje,activa:args.p_activa});return structuredClone(row);});return {data:result};}};
+const mount=(c=client)=>mountAccessoryAlertConfig({host,client:c,token,getToken:()=>token,canEdit:()=>allowed});
+const get=s=>host.querySelector(s),click=s=>get(s).click(),flush=()=>new Promise(r=>setTimeout(r,0));
+await mount();assert.equal(host.querySelectorAll('[data-rule-edit]').length,2);assert.doesNotMatch(host.textContent,/Sin regla/);assert.match(host.textContent,/Fuera del catálogo/);assert.equal(host.querySelectorAll('b b').length,0);
+get('[data-rule-state]').value='inactive';get('[data-rule-state]').dispatchEvent(new dom.window.Event('change'));assert.equal(host.querySelectorAll('[data-rule-edit]').length,1);assert.match(host.textContent,/Mensaje inactivo/);
+get('[data-rule-state]').value='';get('[data-rule-state]').dispatchEvent(new dom.window.Event('change'));
+click('[data-rule-toggle="QA-A"]');assert.equal(writes.length,0);assert.match(get('[data-rule-editor]').textContent,/Se conservará el mensaje/);click('[data-rule-cancel]');assert.equal(writes.length,0);
+click('[data-rule-toggle="QA-A"]');click('[data-rule-confirm]');await flush();assert.equal(writes.length,1);assert.equal(writes[0].p_mensaje,seed[0].mensaje);assert.equal(rows[0].activa,false);assert.equal(rows[1].revision,4);
+click('[data-rule-edit="QA-B"]');get('textarea').value='Editado <img src=x>';get('form').dispatchEvent(new dom.window.Event('submit',{cancelable:true}));await flush();assert.equal(rows[1].mensaje,'Editado <img src=x>');assert.equal(rows[1].activa,false);assert.equal(host.querySelectorAll('img').length,0);
+click('[data-alert-new]');await flush();assert.equal(get('[data-alert-count]').textContent,'0 códigos seleccionados');let choice=get('[data-alert-code="QA-C"]');choice.checked=true;choice.dispatchEvent(new dom.window.Event('change',{bubbles:true}));get('textarea').value='Borrador';click('[data-alert-back]');await flush();click('[data-rule-edit="QA-A"]');assert.equal(get('textarea').value,seed[0].mensaje);click('[data-rule-cancel]');click('[data-alert-new]');await flush();assert.equal(get('[data-alert-count]').textContent,'0 códigos seleccionados');assert.equal(get('textarea').value,'');click('[data-alert-back]');await flush();
+fail=true;click('[data-rule-toggle="QA-B"]');click('[data-rule-confirm]');await flush();assert.match(get('[role=status]').textContent,/Actualiza/);assert.equal(get('[data-rule-confirm]').disabled,true);const n=writes.length;click('[data-rule-confirm]');assert.equal(writes.length,n);fail=false;click('[data-alert-reload]');await flush();assert.equal(get('[data-alert-new]').disabled,false);
+click('[data-rule-toggle="QA-A"]');allowed=false;click('[data-rule-confirm]');assert.equal(writes.length,n);allowed=true;token='changed';click('[data-rule-confirm]');assert.equal(writes.length,n);
+let resolve;const late=mount({rpc:()=>new Promise(r=>resolve=r)});await mount();resolve({data:[]});await late;assert.equal(host.querySelectorAll('[data-rule-edit]').length,2);
+// Double click is blocked; a reply to a replaced mount cannot overwrite the new view.
+await mount();resolveWrite=true;click('[data-rule-toggle="QA-A"]');click('[data-rule-confirm]');const pendingCount=writes.length;click('[data-rule-confirm]');assert.equal(writes.length,pendingCount);assert.equal(get('[data-alert-new]').disabled,true);
+await mount();const currentHTML=host.innerHTML;const finish=resolveWrite;resolveWrite=null;finish();await flush();assert.equal(host.innerHTML,currentHTML);
+await mount({rpc:async()=>({error:{message:'Fallo de lectura sintético'}})});assert.match(host.textContent,/Reintentar carga/);
+allowed=false;await mount();assert.equal(host.querySelector('button'),null);
+console.log('PASS manager: created-only and orphan rules, state filter, escaped messages, confirmation/cancel, exact-message toggle, individual edit, clean batch boundaries, stale revision lock, reload, role/session and stale mount guards');

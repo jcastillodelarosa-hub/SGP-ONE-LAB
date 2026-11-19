@@ -1,6 +1,6 @@
 import {JSDOM} from 'jsdom';
 import assert from 'node:assert/strict';
-import {mountAccessoryAlertConfig} from '../../src/modules/accessory-alerts.js';
+import {mountAccessoryAlertBatchConfig as mountAccessoryAlertConfig} from '../../src/modules/accessory-alerts.js';
 const dom=new JSDOM('<main></main>'),host=dom.window.document.querySelector('main');
 const rows=[{codigo_sap:'A',descripcion:'Manija azul',revision:0},{codigo_sap:'B',descripcion:'Manija roja',revision:0},{codigo_sap:'C',descripcion:'Tornillo',revision:2,mensaje:'Existente',activa:true}];let writes=[],token='t',allowed=true;
 const client={rpc:async(name,args)=>{if(name.endsWith('catalogo'))return {data:structuredClone(rows)};writes.push(args);return {data:args.p_codigos.map(r=>({...r,revision:r.revision+1,mensaje:args.p_mensaje,activa:args.p_activa}))};}};

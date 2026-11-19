@@ -29,6 +29,7 @@ jobs:
           node tests/accessory-alerts/sql.mjs
           node tests/accessory-alerts/dom.mjs
           node tests/accessory-alerts/multiselect.mjs
+          node tests/accessory-alerts/manager.mjs
       - name: Install matching test browser in isolated runner
         run: node tests/accessory-alerts/node_modules/playwright/cli.js install --with-deps chromium
       - name: Synthetic create, edit, disable and no rules at 1440 and 390 pixels
