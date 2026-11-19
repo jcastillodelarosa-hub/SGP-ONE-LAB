@@ -11,3 +11,13 @@ test('completed legacy aggregate is not silently overwritten from per-order cont
 test('allocation inconsistency blocks editing and never renders misleading zero',()=>{const r=run({executions:[{id_programacion:'PLAN',estado:'MECANIZADO',cantidad_procesada:30}]});assert.equal(r.details[0].pending,null);assert.equal(r.details[0].editable,false);assert.doesNotMatch(progressDetailMarkup(r.details,'SYS',{canManage:true}),/data-progress-save/);assert.match(progressDetailMarkup(r.details,'SYS'),/Por conciliar/);});
 test('all filter includes completed orders while pending excludes them',()=>{const r=run({base:[{...base,cantidad:8}],executions:[{id_programacion:'PLAN',estado:'PROCESADO',cantidad_procesada:8}]});assert.match(progressDetailMarkup(r.details,'SYS'),/No hay órdenes/);assert.match(progressDetailMarkup(r.details,'SYS',{filter:'all'}),/ORDER/);});
 test('user data escaped in row identity, labels and warnings',()=>{const r=run();r.details[0].production='<script>x</script>';r.details[0].warnings=['<img src=x>'];const html=progressDetailMarkup(r.details,'SYS');assert.doesNotMatch(html,/<script>|<img/);assert.match(html,/&lt;script&gt;/);});
+
+test('Conciliar includes 100% processed claims, exposes the discrepancy and only offers authorized navigation',()=>{
+ const details=[{system:'X',production:'YA PROCESADA',reserve:'R1',programmed:10,received:0,processed:10,pending:0,receiptReserves:['R1'],unassigned:0,editable:false,warnings:['Procesadas supera recibidas'],assignments:[{reserva:'R1',date:'2026-11-19',shift:'TURNO 1',quantity:10,processed:10,state:'PROCESADO'}]},{system:'X',production:'ORDEN NUEVA',reserve:'R1',programmed:4,received:0,processed:0,pending:4,unassigned:4,editable:true,warnings:[],assignments:[]}];
+ const review=progressDetailMarkup(details,'X',{filter:'review',canReception:true,canProduction:true});
+ assert.match(review,/YA PROCESADA/);assert.match(review,/Base 10 · Recibidas 0 · Procesadas 10 · Pendientes 0 · Diferencia 10/);
+ assert.match(review,/data-progress-review="recepcion" data-reserve="R1"/);assert.match(review,/data-progress-review="proceso" data-date="2026-11-19" data-shift="TURNO 1"/);
+ assert.doesNotMatch(review,/ORDEN NUEVA|data-progress-save/);
+ const pending=progressDetailMarkup(details,'X');assert.match(pending,/ORDEN NUEVA/);assert.doesNotMatch(pending,/YA PROCESADA/);
+ const unauthorized=progressDetailMarkup(details,'X',{filter:'review'});assert.match(unauthorized,/YA PROCESADA/);assert.doesNotMatch(unauthorized,/data-progress-review="/);
+});
