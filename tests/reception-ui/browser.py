@@ -24,6 +24,7 @@ with sync_playwright() as p:
    table.locator('[data-rec-column="'+key+'"]').click()
    if section=='sort':page.locator('[data-menu-section="sort"] > summary').click()
   assert count()==29
+  assert page.locator('#recBody [data-receive="DEMO-EXCLUDE"]').count()==0
   assert page.locator('[data-rec-state="PENDIENTE_BODEGA"] [data-rec-reservations]').inner_text()=='26'
   assert page.locator('[data-rec-state="PENDIENTE_BODEGA"] [data-rec-windows]').inner_text()=='34'
   assert '2 reservas sin estado' in page.locator('#recSummaryUnknown').inner_text()
@@ -38,6 +39,7 @@ with sync_playwright() as p:
   column('system');page.locator('[data-column-none]').click();page.locator('[data-column-search]').fill('Sistema B')
   assert page.locator('[data-value-label]:visible').count()==1
   page.locator('[data-value-label]:visible input').check();page.locator('[data-column-cancel]').click();assert count()==29
+  assert page.locator('#recBody [data-receive="DEMO-EXCLUDE"]').count()==0
   column('system');page.locator('[data-column-none]').click();page.locator('[data-column-search]').fill('Sistema A');page.locator('[data-value-label]:visible input').check();page.locator('[data-column-apply]').click();assert count()==3
   assert 'Resultados filtrados' in page.locator('#recSummaryScope').inner_text()
   assert 'filtro activo' in pending.locator('[data-rec-column="system"]').get_attribute('aria-label')
@@ -48,6 +50,7 @@ with sync_playwright() as p:
   assert page.locator('#recReceivedBody [data-receive]').count()==2
   column('quantity');page.locator('[data-column-reset]').click();page.locator('[data-column-apply]').click();assert count()==3
   page.locator('#recClearColumns').click();assert count()==29
+  assert page.locator('#recBody [data-receive="DEMO-EXCLUDE"]').count()==0
   # Both numeric directions, null last, audit identity after sort.
   column('quantity',section='sort');page.locator('[data-column-order="desc"]').click()
   assert page.locator('#recBody [data-receive]').first.get_attribute('data-receive')=='R100'
@@ -79,6 +82,7 @@ with sync_playwright() as p:
   # Received table filters legalisation and preserves review action.
   column('legal',received);page.locator('[data-column-none]').click();page.locator('[data-column-search]').fill('SIN LEGALIZAR');page.locator('[data-value-label]:visible input').check();page.locator('[data-column-apply]').click()
   assert page.locator('#recReceivedBody [data-receive]').count()==1;assert count()==29
+  assert page.locator('#recBody [data-receive="DEMO-EXCLUDE"]').count()==0
   page.locator('#recReceivedBody [data-receive]').click();assert 'R600' in page.locator('#recModalTitle').inner_text();page.locator('#recClose').click()
   assert page.locator('#recIncomplete').inner_text()=='1' and page.locator('#recUnlegalized').inner_text()=='1'
   page.locator('#recSearch').fill('R200');assert count()==1;assert page.locator('#recReceivedBody [data-receive]').count()==0
@@ -91,6 +95,7 @@ with sync_playwright() as p:
   page.evaluate("qa.delay(45);document.querySelector('#recWeek').value=45;window.oldLoad=qa.loadReception();void 0")
   page.locator('#recWeek').fill('46');page.locator('#recWeek').press('Tab');page.wait_for_function("document.querySelector('#recSummaryScope').textContent.startsWith('Semana 46')")
   page.evaluate('qa.release();oldLoad');assert count()==29
+  assert page.locator('#recBody [data-receive="DEMO-EXCLUDE"]').count()==0
   page.evaluate('qa.delay(null)');page.locator('#recWeek').fill('45');page.locator('#recWeek').press('Tab');page.wait_for_function("document.querySelector('#recBody [data-receive]')?.dataset.receive==='W45'")
   assert count()==1 and 'Semana 45' in page.locator('#recSummaryScope').inner_text()
   page.locator('#recWeek').fill('46');page.locator('#recWeek').press('Tab');page.wait_for_function("document.querySelectorAll('#recBody [data-receive]').length===29")
