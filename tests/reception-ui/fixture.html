@@ -2,7 +2,7 @@
 <script type="module">
 import {filterReceptionRows as filterReceptionTableRows,receptionAluminumSummary,receptionQuantitySummary} from '/src/domain/reception-table.js';
 import {createReceptionColumns} from '/src/modules/reception-columns.js';
-import {indexReceptionAluminumStates,receptionAluminumStateMeta,filterReceptionQueueSystems} from '/src/domain/reception-aluminum-state.js';
+import {indexReceptionAluminumStates,receptionAluminumStateMeta} from '/src/domain/reception-aluminum-state.js';
 const html=new DOMParser().parseFromString(await (await fetch('/index.html')).text(),'text/html');
 document.querySelector('#fixture').append(html.querySelector('[data-mach-panel="recepcion"]'),html.querySelector('#recModal'));
 const source=await (await fetch('/app.js')).text();
@@ -15,10 +15,9 @@ const base=[
  {reserva:'R300',cantidad:0,sistema:'Sistema A',acabado:'BLANCO',estado:'PENDIENTE',faltantes_abiertos:0,dias_pendiente:0},
  {reserva:'R400',cantidad:null,sistema:null,acabado:null,estado:'PENDIENTE',faltantes_abiertos:0,dias_pendiente:1},
  {reserva:'R500',cantidad:7,sistema:'Sistema A',acabado:'BLANCO',estado:'RECIBIDA',legalizada:true,completa:true,faltantes_abiertos:0},
- {reserva:'R600',cantidad:3,sistema:'STARTERSYRECEPTORS',acabado:'NEGRO',estado:'RECIBIDA',legalizada:false,completa:false,faltantes_abiertos:2},
+ {reserva:'R600',cantidad:3,sistema:'Sistema B',acabado:'NEGRO',estado:'RECIBIDA',legalizada:false,completa:false,faltantes_abiertos:2},
  {reserva:'R700',cantidad:5,sistema:'Sistema A',acabado:'BLANCO',estado:'PENDIENTE',faltantes_abiertos:0},
- ...Array.from({length:24},(_,i)=>({reserva:'QA'+i,cantidad:1,sistema:'Sistema largo '+i+' · descripción adicional',acabado:'NATURAL',estado:'PENDIENTE',faltantes_abiertos:0})),
- {reserva:'DEMO-EXCLUDE',cantidad:999,sistema:'STARTERSYRECEPTORS',estado:'PENDIENTE',faltantes_abiertos:0,dias_pendiente:1}
+ ...Array.from({length:24},(_,i)=>({reserva:'QA'+i,cantidad:1,sistema:'Sistema largo '+i+' · descripción adicional',acabado:'NATURAL',estado:'PENDIENTE',faltantes_abiertos:0}))
 ];
 let failTracking=false,delayWeek=null,release,summaryCase=false;
 const summaryRows=[
@@ -41,7 +40,7 @@ const transport={rpc:async(name,args)=>{
  return {data:{rows:tracking}};
 }};
 window.calls=[];
-window.qa=new Function('filterReceptionTableRows','receptionAluminumSummary','receptionQuantitySummary','createReceptionColumns','indexReceptionAluminumStates','receptionAluminumStateMeta','filterReceptionQueueSystems','escapeHtml','getAppToken','getSupabaseClient','renderMissingEditor',code+';return {loadReception,renderReception};')(filterReceptionTableRows,receptionAluminumSummary,receptionQuantitySummary,createReceptionColumns,indexReceptionAluminumStates,receptionAluminumStateMeta,filterReceptionQueueSystems,escapeHtml,()=> 'synthetic-token',async()=>transport,()=>{});
+window.qa=new Function('filterReceptionTableRows','receptionAluminumSummary','receptionQuantitySummary','createReceptionColumns','indexReceptionAluminumStates','receptionAluminumStateMeta','escapeHtml','getAppToken','getSupabaseClient','renderMissingEditor',code+';return {loadReception,renderReception};')(filterReceptionTableRows,receptionAluminumSummary,receptionQuantitySummary,createReceptionColumns,indexReceptionAluminumStates,receptionAluminumStateMeta,escapeHtml,()=> 'synthetic-token',async()=>transport,()=>{});
 qa.failTracking=value=>failTracking=value;qa.delay=value=>delayWeek=value;qa.release=()=>release?.();
 qa.summaryCase=value=>summaryCase=value;
 // Reuse the actual production binding statements for week/search/refresh.

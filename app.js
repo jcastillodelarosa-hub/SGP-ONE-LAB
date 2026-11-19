@@ -59,7 +59,7 @@ import { buildGlassRelationGraph, traceGlassRelations, summarizeGlassBurro } fro
 import { buildGlassNodeInsights, glassCoverage, glassRackBreakdown } from "./src/domain/glass-explorer-insights.js";
 import { consolidatePieceReferences } from "./src/domain/piece-detail-views.js";
 import { mergeCarryOrdersWithGlass, glassCountLabel } from "./src/domain/carry-glass.js";
-import { indexReceptionAluminumStates, receptionAluminumStateMeta, filterReceptionQueueSystems } from "./src/domain/reception-aluminum-state.js";
+import { indexReceptionAluminumStates, receptionAluminumStateMeta } from "./src/domain/reception-aluminum-state.js";
 import { initFilePickers } from "./src/ui/file-picker.js";
 import { attachReceptionWeeks, receptionWeekOptions, filterReceptionRows, normalizeReceptionWeek, receptionGroupKey } from "./src/domain/picking-reception-weeks.js";
 import { comparePriority, priorityDepth, groupPriorityRows, splitPriorityPart, validatePriorityAssignments, hasScheduledPriority } from "./src/domain/priority-hierarchy.js";
@@ -2010,7 +2010,7 @@ async function loadReception(){
  ]);
  if(sequence!==recLoadSequence)return;
  if(reception.error)throw reception.error;
- recRows=filterReceptionQueueSystems(reception.data);
+ recRows=Array.isArray(reception.data)?reception.data:[];
  recLoadedWeek=week;recHasLoaded=true;
  const trackingOk=!tracking.error&&Array.isArray(tracking.data?.rows);
  recAluminumStateIndex=indexReceptionAluminumStates(trackingOk?tracking.data.rows:[]);
