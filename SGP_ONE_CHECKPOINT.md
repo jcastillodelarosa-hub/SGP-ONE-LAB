@@ -1,3 +1,11 @@
+## 2026-11-19 — Gestión de alertas creadas · candidata local LAB v482
+Base main v481 bbb99c3f. Lista de alertas guardadas, edición y confirmación de
+activación/inactivación por código; mensaje preservado durante toggle. Flujo
+Nueva alerta separado, sin selección ni borrador arrastrados. RPC/roles sin cambio.
+Pruebas sintéticas DOM y release verificadas; Chromium local bloqueado por socket
+EPERM. Sin SQL, datos reales, push ni publicación. Detalle:
+`docs/accessory-alerts/MANAGER_V482.md`.
+
 ## 2026-11-19 — Revisar diferencias de mecanizado · candidata LAB v481
 Programación → Resumen: aviso accionable, filtro Conciliar incluye producciones
 con alertas aunque no tengan saldo por procesar. Cifras por orden separan base,

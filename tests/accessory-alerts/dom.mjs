@@ -1,6 +1,6 @@
 import {JSDOM} from 'jsdom';
 import {readFile,writeFile} from 'node:fs/promises';import assert from 'node:assert/strict';import vm from 'node:vm';import {pathToFileURL} from 'node:url';
-import {mountAccessoryAlertConfig,accessoryAlertsMarkup} from '../../src/modules/accessory-alerts.js';
+import {mountAccessoryAlertBatchConfig as mountAccessoryAlertConfig,accessoryAlertsMarkup} from '../../src/modules/accessory-alerts.js';
 import {assemblySheetRows} from '../../src/domain/lp01-assembly-sheet.js';import {assemblySheetMarkup} from '../../src/modules/lp01-assembly-sheet.js';
 import {globalTrackingData} from '../../src/domain/lp01-tracking-global.js';import {renderTracking} from '../../src/modules/lp01-tracking.js';
 const dom=new JSDOM('<body><section id="config"></section><section id="assembly"></section><section id="tracking"></section><select id="assemblyLine"><option>PANELES_2</option></select><button id="productionPlannerTab">Planner</button><div id="productionPlannerPanel"></div></body>',{url:'http://localhost/',pretendToBeVisual:true});
