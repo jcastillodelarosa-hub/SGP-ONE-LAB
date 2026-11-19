@@ -27,12 +27,3 @@ export function indexReceptionAluminumStates(rows){
 export function receptionAluminumStateMeta(state){
  return STATE_META[state]||STATE_META.SIN_DATO;
 }
-
-// Scope this exclusion to the pending machining-reception queue. Preserve
-// already received rows for audit history and leave the source data intact.
-export function filterReceptionQueueSystems(rows){
- return (Array.isArray(rows)?rows:[]).filter(row=>{
-  const system=String(row?.sistema??'').toUpperCase().replace(/[\s_-]+/g,'');
-  return row?.estado==='RECIBIDA'||system!=='STARTERSYRECEPTORS';
- });
-}
