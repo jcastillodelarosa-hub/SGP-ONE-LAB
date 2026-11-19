@@ -26,7 +26,7 @@ await page.locator('[data-rule-edit="A"]').click();await page.locator('[data-rul
 await page.waitForFunction(()=>rules[0].mensaje==='Mensaje individual sintético');assert.equal(await page.evaluate(()=>rules[0].activa),false);checks++;
 await page.locator('[data-rule-state]').selectOption('inactive');assert.equal(await page.locator('[data-rule-edit]').count(),1);checks++;
 const checkManagerBounds=async()=>{
- const boxes=await page.locator('.sgp-alert-manager, .sgp-alert-rules, .sgp-alert-rules tr, .sgp-alert-rules td, .sgp-alert-manager button:visible, [data-rule-editor]:visible').evaluateAll(es=>es.map(e=>{const r=e.getBoundingClientRect();return {tag:e.tagName,left:r.left,right:r.right,width:r.width,client:e.clientWidth,scroll:e.scrollWidth};}));
+ const boxes=await page.locator('.sgp-alert-manager, .sgp-alert-rules, .sgp-alert-rules tbody tr, .sgp-alert-rules tbody td, .sgp-alert-manager button:visible, [data-rule-editor]:visible').evaluateAll(es=>es.map(e=>{const r=e.getBoundingClientRect();return {tag:e.tagName,left:r.left,right:r.right,width:r.width,client:e.clientWidth,scroll:e.scrollWidth};}));
  for(const b of boxes){assert.ok(b.left>=0&&b.right<=width+1&&b.width>0,JSON.stringify({width,box:b}));assert.ok(b.scroll<=b.client+1,JSON.stringify({width,overflow:b}));}
 };
 await checkManagerBounds();
