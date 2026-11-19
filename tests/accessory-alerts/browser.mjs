@@ -25,7 +25,17 @@ await page.waitForFunction(()=>!rules[0].activa);assert.equal(await page.evaluat
 await page.locator('[data-rule-edit="A"]').click();await page.locator('[data-rule-message]').fill('Mensaje individual sintético');await page.locator('[data-rule-editor] button[type="submit"]').click();
 await page.waitForFunction(()=>rules[0].mensaje==='Mensaje individual sintético');assert.equal(await page.evaluate(()=>rules[0].activa),false);checks++;
 await page.locator('[data-rule-state]').selectOption('inactive');assert.equal(await page.locator('[data-rule-edit]').count(),1);checks++;
-await page.screenshot({path:`tests/accessory-alerts/evidence/manager-${width}.png`,fullPage:true});
+const checkManagerBounds=async()=>{
+ const boxes=await page.locator('.sgp-alert-manager, .sgp-alert-rules, .sgp-alert-rules tr, .sgp-alert-rules td, .sgp-alert-manager button:visible, [data-rule-editor]:visible').evaluateAll(es=>es.map(e=>{const r=e.getBoundingClientRect();return {tag:e.tagName,left:r.left,right:r.right,width:r.width,client:e.clientWidth,scroll:e.scrollWidth};}));
+ for(const b of boxes){assert.ok(b.left>=0&&b.right<=width+1&&b.width>0,JSON.stringify({width,box:b}));assert.ok(b.scroll<=b.client+1,JSON.stringify({width,overflow:b}));}
+};
+await checkManagerBounds();
+const png=await page.screenshot({path:`tests/accessory-alerts/evidence/manager-${width}.png`,fullPage:true});assert.equal(png.readUInt32BE(16),width,'Full-page PNG must match viewport, not hidden overflow');
+await page.evaluate(async()=>{rules[0].descripcion='DESCRIPCION'.repeat(20);rules[0].mensaje='MENSAJE'.repeat(60);await mountConfig();});
+await checkManagerBounds();await page.locator('[data-rule-toggle="A"]').click();await checkManagerBounds();
+const stress=await page.screenshot({path:`tests/accessory-alerts/evidence/manager-confirm-${width}.png`,fullPage:true});assert.equal(stress.readUInt32BE(16),width);
+await page.locator('[data-rule-cancel]').click();await page.locator('[data-rule-edit="A"]').click();await checkManagerBounds();await page.locator('[data-rule-cancel]').click();checks++;
+
 assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`Manager overflow at ${width}`);
 await page.locator('[data-alert-new]').click();await page.locator('[data-alert-count]').waitFor();assert.equal(await page.locator('[data-alert-count]').textContent(),'0 códigos seleccionados');assert.equal(await page.locator('textarea').inputValue(),'');checks++;
 await page.evaluate(async()=>{window.role='CONSULTA';await mountConfig()});await page.locator('[data-qa="config"]').click();assert.equal(await page.locator('#config form').count(),0);checks++;await page.close();}
