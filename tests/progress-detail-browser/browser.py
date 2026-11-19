@@ -51,6 +51,11 @@ with sync_playwright() as p:
   page.locator('[data-progress-review="recepcion"]').click()
   page.locator('[data-progress-review="proceso"]').click()
   assert page.evaluate("navigation.length===2 && navigation[0].reserve==='RES-DEMO-2' && navigation[1].shift==='TURNO 1' && calls===3")
+  if width<500:
+   assert page.locator('.sgp-progress-scroll').evaluate('(e)=>e.scrollWidth<=e.clientWidth+1')
+   for kind in ['recepcion','proceso']:
+    b=page.locator('[data-progress-review="'+kind+'"]').bounding_box()
+    assert b['x']>=0 and b['x']+b['width']<=width
   page.screenshot(path=str(OUT/f'detail-conciliar-{width}.png'),full_page=True)
   page.locator('[data-progress-close]').click();assert page.evaluate('qaClosed && calls===3')
   assert not errors,errors;assert not external,external
