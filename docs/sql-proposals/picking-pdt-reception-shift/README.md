@@ -1,0 +1,7 @@
+# Fecha y turno de recepción de PDT aluminio · LAB v480 candidata
+Base: LAB v479 / 00fc52c498fa5deacbab0f7bd74716576a54d70d. Solo Picking → Recepción → Recibir PDT aluminio. Sin producción.
+
+- Los dos campos son operativos, editables, con turno de planta como valor inicial. La fecha corresponde al día en que inicia el turno. No se permite seleccionar un turno futuro.
+- El RPC nuevo delega la escritura al contrato v1 y conserva su bloqueo/saldo/cierre. Antes de confirmar esa misma transacción, comprueba que hubiera entregas suficientes para ese turno. Descuenta todas las recepciones ya registradas por ser un criterio conservador cuando no hay asignación entre entregas y recepciones ni fecha operativa en históricos. Por ello, puede rechazar el registro tardío de un turno previo si recepciones posteriores ya consumieron parte de su saldo. No asigna recepciones a entregas individuales ni altera el timestamp real de escritura.
+- La cola agrega fecha y turno exclusivamente como datos del historial de recepción. Las filas anteriores quedan sin esos valores; no se infieren. Entrega, PDT y órdenes conservan sus flujos.
+- Instalar primero SQL tras respaldo verificado y preflight de definiciones/ACL en el destino autorizado. El frontend no degrada a v1 para movimientos v2; un journal v1 anterior sigue usando v1. Ante reversión de frontend, conservar el esquema aditivo y el RPC para reintentos; no eliminar datos registrados. No se otorga acceso directo a la tabla privada.
