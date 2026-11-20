@@ -4,6 +4,7 @@ on:
     paths:
       - 'docs/sql-proposals/picking-audit-areas/**'
       - 'tests/picking-audit-areas/**'
+      - 'tests/picking-conciliacion/**'
       - '.github/workflows/picking-audit-areas.yml'
 permissions:
   contents: read
@@ -32,3 +33,26 @@ jobs:
         env:
           TEST_DATABASE_URL: postgresql://postgres:synthetic_test_only@localhost:5432/audit_test
         run: python3 tests/picking-audit-areas/postgres.py
+  historical-reconciliation:
+    name: Historical reconciliation prototype (synthetic only)
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: synthetic_reconciliation_only
+          POSTGRES_DB: picking_conciliacion_test
+        ports: ['55448:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - run: python3 -m pip install 'psycopg[binary]==3.2.3'
+      - name: Test attribution, atomicity, idempotency and competing delivery
+        run: python3 tests/picking-conciliacion/postgres.py
