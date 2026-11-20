@@ -120,8 +120,7 @@ export function initDeliveredOrders({getSupabaseClient,getAppToken,canViewDelive
    const rawName=String(r.nombre_responsable??'').trim();
    const name=rawName||'Nombre no disponible';
    const isMaterial=r.parte_id&&r.cantidad_ventanas_entregadas===0;
-   const quality=r.completa===true?'Sin faltantes':r.completa===false?'Con faltantes':'Registrada';
-   const label=isMaterial?'Reposición de material':r.parte_id&&r.cantidad_ventanas_entregadas!=null?r.cantidad_ventanas_entregadas+' ventanas · '+quality:quality;
+   const label=isMaterial?'Reposición de material':r.parte_id&&r.cantidad_ventanas_entregadas!=null?r.cantidad_ventanas_entregadas+' ventanas registradas':'Entrega registrada';
    return '<article class="pick-delivered-entry"><header><strong>'+safe(r.produccion||'Orden no disponible')+'</strong><span>'+safe(label)+'</span></header>'
     +'<dl><div><dt>Fecha de entrega</dt><dd>'+safe(r.fecha_operativa||'Sin dato')+'</dd></div>'
     +'<div><dt>Turno</dt><dd>'+safe(r.turno_entrega||'Sin dato')+'</dd></div><div><dt>Entregado por</dt><dd>'+safe(name)+'</dd></div>'

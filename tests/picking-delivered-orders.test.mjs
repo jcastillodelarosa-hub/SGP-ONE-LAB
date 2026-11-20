@@ -16,7 +16,7 @@ function setup(){
 test('opens by existing access, shows operational delivery fields and never falls back to usernames',async()=>{
  const s=setup(),{els}=s;
  s.setResponse(async()=>({data:{ok:true,total_rows:3,rows:[
-  {id_entrega:'one',produccion:'111 - Example',reserva:'R1',fecha_operativa:'2026-11-14',turno_entrega:'TURNO 2',nombre_responsable:'Nombre & Apellido',usuario_entrega:'cuenta-no-visible',completa:true},
+  {id_entrega:'one',produccion:'111 - Example',reserva:'R1',fecha_operativa:'2026-11-14',turno_entrega:'TURNO 2',nombre_responsable:'Nombre & Apellido',usuario_entrega:'cuenta-no-visible',completa:true,faltantes:[{id_faltante:'historical'}]},
   {id_entrega:'two',produccion:'222 - Example',reserva:'R2',fecha_operativa:'2026-11-17',turno_entrega:'TURNO 1',usuario_entrega:'fallback-no-visible',completa:false},
   {id_entrega:'three',produccion:'222 - Example',reserva:'R2',fecha_operativa:'2026-11-16',turno_entrega:'TURNO 1',parte_id:'P',cantidad_ventanas_entregadas:30,completa:true}
  ]}}));
@@ -25,7 +25,8 @@ test('opens by existing access, shows operational delivery fields and never fall
  assert.ok(els.List.innerHTML.indexOf('2026-11-17')<els.List.innerHTML.indexOf('2026-11-14'));
  assert.match(els.List.innerHTML,/2026-11-14.*TURNO 2.*Nombre &amp; Apellido/);
  assert.match(els.List.innerHTML,/Nombre no disponible/);assert.doesNotMatch(els.List.innerHTML,/no-visible/);
- assert.match(els.List.innerHTML,/30 ventanas · Sin faltantes/);
+ assert.match(els.List.innerHTML,/30 ventanas registradas/);
+ assert.doesNotMatch(els.List.innerHTML,/Sin faltantes/);
  assert.equal((els.List.innerHTML.match(/222 - Example/g)||[]).length,2);
  els.Search.value='R1';els.Search.send('input');assert.match(els.List.innerHTML,/111 - Example/);assert.doesNotMatch(els.List.innerHTML,/222 - Example/);
 });
