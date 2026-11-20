@@ -414,6 +414,7 @@ const SGP_ACCESS_TREE=[
 const SGP_WINDOWS=SGP_ACCESS_TREE.flatMap(x=>[[x.key,x.label],...(x.children||[])]);
 function accessTreeHtml(selected=[],mode='user'){return SGP_ACCESS_TREE.map(x=>{const kids=x.children||[],on=selected.includes(x.key),kidOn=kids.filter(k=>selected.includes(k[0])).length;if(!kids.length)return '<label class="access-leaf"><input type="checkbox" value="'+x.key+'" '+(on?'checked':'')+'><span><b>'+x.label+'</b></span></label>';return '<details class="access-module"><summary><span class="access-module-title">'+x.label+'</span><small>'+kidOn+'/'+kids.length+' ventanas</small></summary><div class="access-module-body"><label class="access-all"><input type="checkbox" value="'+x.key+'" '+(on?'checked':'')+'><span><b>Acceso completo al módulo</b><small>Permite todas las ventanas actuales del módulo</small></span></label>'+kids.map(k=>'<label><input type="checkbox" value="'+k[0]+'" '+(selected.includes(k[0])?'checked':'')+'><span><b>'+k[1]+'</b><small>Ventana interna</small></span></label>').join('')+'</div></details>'}).join('')}
 let currentAuth=null,currentAuthToken=null,userAdminRows=[],editingUserId=null,roleAccessRows=[];
+let syncPickingDeliveredAccess=()=>{};
 let currentPickingPdtAccess=false, currentMachWindowAccess=new Set();
 const pickingPdtRoles=new Set(['LIDER MECANIZADO','ADMINISTRADOR','COORDINADOR','PICKING','SUPERVISOR DE PICKING','RECEPCION','LIDER LINEA','LIDER','PATINADOR','CONSULTA']);
 const pickingPdtFlow=mountPickingPdtFlow({
@@ -438,11 +439,11 @@ window.addEventListener('storage',()=>{if(currentAuthToken!==getAppToken())picki
 
 async function applyUserAccess(auth,validatedToken=null){
  if(auth&&(!validatedToken||validatedToken!==getAppToken()))return;
- currentAuthToken=auth?validatedToken:null;currentAuth=auth||null;currentPickingPdtAccess=false;currentMachWindowAccess=new Set();pickingPdtFlow.reset();const token=getAppToken(),buttons=[...document.querySelectorAll('.nav [data-view]')];
+ currentAuthToken=auth?validatedToken:null;currentAuth=auth||null;currentPickingPdtAccess=false;currentMachWindowAccess=new Set();pickingPdtFlow.reset();syncPickingDeliveredAccess();const token=getAppToken(),buttons=[...document.querySelectorAll('.nav [data-view]')];
  // Presentation only: protected RPCs still validate current role and effective access.
  document.dispatchEvent(new CustomEvent('sgp:lp-role',{detail:auth?.rol||null}));
  if(!token){optDigitalHost.update();buttons.forEach(b=>b.hidden=false);return}
- if(String(auth?.rol||'').toUpperCase()==='ADMINISTRADOR'){currentPickingPdtAccess=true;refreshPickingPdtFlow();optDigitalHost.update({valid:auth?.valida===true,admin:true,username:auth?.usuario});buttons.forEach(b=>b.hidden=false);return}
+ if(String(auth?.rol||'').toUpperCase()==='ADMINISTRADOR'){currentPickingPdtAccess=true;syncPickingDeliveredAccess();refreshPickingPdtFlow();optDigitalHost.update({valid:auth?.valida===true,admin:true,username:auth?.usuario});buttons.forEach(b=>b.hidden=false);return}
  try{
    const c=await getSupabaseClient(),{data,error}=await c.rpc('sgp_mis_accesos',{p_token:token});
    if(error)throw error;
@@ -456,6 +457,7 @@ async function applyUserAccess(auth,validatedToken=null){
    const pickDelivery=document.querySelector('#pickDeliveryTab'),pickReception=document.querySelector('#pickReceptionTab');
    if(pickDelivery)pickDelivery.hidden=!(access.includes('picking')||access.includes('picking.entrega'));
    if(pickReception)pickReception.hidden=!(access.includes('picking')||access.includes('picking.recepcion'));
+   syncPickingDeliveredAccess();
    const assemblySheet=document.querySelector('#assemblySheetTab'),assemblyLocations=document.querySelector('#assemblyLocationReportTab');
    if(assemblySheet)assemblySheet.hidden=!(access.includes('ensamble')||access.includes('ensamble.hoja'));
    if(assemblyLocations)assemblyLocations.hidden=!(access.includes('ensamble')||access.includes('ensamble.ubicaciones'));
@@ -3263,7 +3265,12 @@ async function captureNcReport(){const el=document.querySelector('#ncReportCanva
 document.querySelector('#downloadNcReportImage')?.addEventListener('click',async()=>{try{const c=await captureNcReport(),a=document.createElement('a');a.download=ncReportFileName('png');a.href=c.toDataURL('image/png');a.click()}catch(e){alert('No fue posible generar la imagen: '+e.message)}});
 document.querySelector('#downloadNcReportPdf')?.addEventListener('click',async()=>{try{const c=await captureNcReport(),{jsPDF}=window.jspdf,pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'}),pw=210,ph=297,m=7,w=pw-m*2,h=c.height*w/c.width,img=c.toDataURL('image/jpeg',.94);let y=m,left=h;pdf.addImage(img,'JPEG',m,y,w,h);left-=ph-m*2;while(left>0){y=-(h-left)+m;pdf.addPage();pdf.addImage(img,'JPEG',m,y,w,h);left-=ph-m*2}pdf.save(ncReportFileName('pdf'))}catch(e){alert('No fue posible generar el PDF: '+e.message)}});
 
-initPickingDeliveryReport({getSupabaseClient,getAppToken});
+syncPickingDeliveredAccess=initPickingDeliveryReport({getSupabaseClient,getAppToken,canViewDelivered:()=>{
+ const role=String(currentAuth?.rol||'').trim().toUpperCase();
+ return currentAuth?.valida===true&&currentAuthToken===getAppToken()&&['ADMINISTRADOR','COORDINADOR','PICKING','SUPERVISOR DE PICKING'].includes(role)
+  &&(role==='ADMINISTRADOR'||currentMachWindowAccess.has('picking')||currentMachWindowAccess.has('picking.entrega'));
+}})||(()=>{});
+syncPickingDeliveredAccess();
 initPickingReceptionReport({getSupabaseClient,getAppToken});
 
 

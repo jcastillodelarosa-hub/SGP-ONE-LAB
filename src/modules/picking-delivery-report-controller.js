@@ -12,11 +12,11 @@ const missing=rows=>flattenDeliveryDetails(rows).map(f=>[f.reserva,f.parte,f.pro
 const summaryHeaders=['Sistema','Movimientos','Producciones','Cant. orden/parte','Cant. efectiva','Diferencia'];
 const detailHeaders=['Fecha','Turno','Reserva','Parte','Producción','Sistema','Entregado por','Estado','Cant. orden/parte','Cant. efectiva','Dif.'];
 const missingHeaders=['Reserva','Parte','Producción','Sistema','Perfil','Longitud','Fabricación','Marca','Cantidad','NC','Reserva solución'];
-export function initPickingDeliveryReport({getSupabaseClient,getAppToken}){
+export function initPickingDeliveryReport({getSupabaseClient,getAppToken,canViewDelivered=()=>false}){
  const report=$('pickReportPanel');if(!report)return;initReportDatePickers(report);const shiftSummary=document.createElement('div');shiftSummary.id='pickReportShiftSummary';shiftSummary.className='pick-report-shift-summary';const systems=$('pickReportSystems');if(systems){const section=systems.previousElementSibling;section?.parentNode?.insertBefore(shiftSummary,section)}
  let state=null,loadId=0;const exportButtons=()=>[$('pickReportPdf'),$('pickReportImage')].filter(Boolean);exportButtons().forEach(button=>button.disabled=true);const deliveryReport=$('pickReportDeliveryPanel')||report;
  const status=$('pickReportStatus');const brand=document.createElement('div');brand.className='pick-report-document-heading';brand.innerHTML='<img src="./favicon-sgp.svg" alt="Logotipo SGP ONE"><div><strong>SGP ONE · Reporte de Entregas de Producción</strong><small id="pickReportDocumentMeta"></small></div>';deliveryReport.prepend(brand);
- const selectTab=tab=>{for(const name of ['Delivery','Reception','Report']){const active=name===tab;const b=$('pick'+name+'Tab'),p=$('pick'+name+'Panel');if(b)b.classList.toggle('active',active);if(p)p.hidden=!active}const heading=document.querySelector('[data-view-panel="picking"] .page-heading h2');if(heading)heading.textContent=tab==='Report'?'Picking · Reportes':tab==='Reception'?'Picking · Recepción / Auditoría':'Picking · Entrega de Producciones';}
+ const selectTab=tab=>{for(const name of ['Delivery','Delivered','Reception','Report']){const active=name===tab;const b=$('pick'+name+'Tab'),p=$('pick'+name+'Panel');if(b)b.classList.toggle('active',active);if(p)p.hidden=!active}const heading=document.querySelector('[data-view-panel="picking"] .page-heading h2');if(heading)heading.textContent=tab==='Report'?'Picking · Reportes':tab==='Reception'?'Picking · Recepción / Auditoría':tab==='Delivered'?'Picking · Órdenes entregadas':'Picking · Entrega de Producciones';}
  const originalParent=report.parentNode, originalNext=report.nextSibling;
  let overlay=null,previousFocus=null;
  const closeOverlay=()=>{if(!overlay)return;report.hidden=true;if(originalNext&&originalNext.parentNode===originalParent)originalParent.insertBefore(report,originalNext);else originalParent.appendChild(report);overlay.remove();overlay=null;previousFocus?.focus();};
@@ -28,6 +28,7 @@ export function initPickingDeliveryReport({getSupabaseClient,getAppToken}){
   header.append(branding,close);shell.append(header,report);overlay.append(shell);document.body.append(overlay);report.hidden=false;overlay.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();closeOverlay();return;}if(event.key==='Tab'){const controls=[...overlay.querySelectorAll('button,input,select,summary,[tabindex="0"]')].filter(el=>!el.disabled&&el.getClientRects().length),first=controls[0],last=controls.at(-1);if(event.shiftKey&&document.activeElement===first){event.preventDefault();last?.focus()}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first?.focus()}}});
   if(!$('pickReportFrom').value)$('pickReportFrom').value=dates();if(!$('pickReportTo').value)$('pickReportTo').value=dates();close.focus();
  });
+ const syncDelivered=initDeliveredOrders({getSupabaseClient,getAppToken,canViewDelivered,open:()=>{closeOverlay();selectTab('Delivered')},close:()=>selectTab($('pickDeliveryTab')?.hidden?'Reception':'Delivery')});
  $('pickReportTab')?.addEventListener('click',()=>{closeOverlay();selectTab('Report');if(!state){$('pickReportFrom').value=dates();$('pickReportTo').value=dates()}});
  $('pickDeliveryTab')?.addEventListener('click',()=>{closeOverlay();selectTab('Delivery')});
  $('pickReceptionTab')?.addEventListener('click',()=>{closeOverlay();selectTab('Reception')});
@@ -95,4 +96,79 @@ export function initPickingDeliveryReport({getSupabaseClient,getAppToken}){
    pdf.save('SGP_Picking_Entregas_'+state.filters.fecha_inicio+'.pdf');
   }finally{holder.remove()}
  }catch(e){alert('Error PDF: '+e.message)}});
+ return syncDelivered;
+}
+
+export function initDeliveredOrders({getSupabaseClient,getAppToken,canViewDelivered,open,close}){
+ const tab=$('pickDeliveredTab'),panel=$('pickDeliveredPanel'),form=$('pickDeliveredFilters');
+ if(!tab||!panel||!form)return ()=>{};
+ const from=$('pickDeliveredFrom'),to=$('pickDeliveredTo'),shift=$('pickDeliveredShift'),search=$('pickDeliveredSearch');
+ const list=$('pickDeliveredList'),status=$('pickDeliveredStatus'),more=$('pickDeliveredMore'),pageSize=40;
+ let requestId=0,activeToken='',rows=[],limit=pageSize,ready=false;
+ const clear=message=>{requestId++;rows=[];ready=false;limit=pageSize;list.replaceChildren();status.textContent=message;more.hidden=true;};
+ const sync=()=>{
+  const enabled=canViewDelivered()&&Boolean(getAppToken()),token=enabled?getAppToken():'';
+  tab.hidden=!enabled;
+  if(token!==activeToken){clear('');search.value='';activeToken=token;}
+  if(!enabled&&!panel.hidden)close();
+ };
+ const show=()=>{
+  if(!ready||!canViewDelivered()||activeToken!==getAppToken())return;
+  const filtered=rows.filter(r=>matchesOrderSearch(r,search.value));
+  list.innerHTML=filtered.slice(0,limit).map(r=>{
+   const part=r.identificador_parte||r.parte;
+   const rawName=String(r.nombre_responsable??'').trim();
+   const name=rawName||'Nombre no disponible';
+   const isMaterial=r.parte_id&&r.cantidad_ventanas_entregadas===0;
+   const quality=r.completa===true?'Sin faltantes':r.completa===false?'Con faltantes':'Registrada';
+   const label=isMaterial?'Reposición de material':r.parte_id&&r.cantidad_ventanas_entregadas!=null?r.cantidad_ventanas_entregadas+' ventanas · '+quality:quality;
+   return '<article class="pick-delivered-entry"><header><strong>'+safe(r.produccion||'Orden no disponible')+'</strong><span>'+safe(label)+'</span></header>'
+    +'<dl><div><dt>Fecha de entrega</dt><dd>'+safe(r.fecha_operativa||'Sin dato')+'</dd></div>'
+    +'<div><dt>Turno</dt><dd>'+safe(r.turno_entrega||'Sin dato')+'</dd></div><div><dt>Entregado por</dt><dd>'+safe(name)+'</dd></div>'
+    +'<div><dt>Reserva / parte</dt><dd>'+safe(r.reserva||'Sin dato')+(part?' · '+safe(part):'')+'</dd></div></dl></article>';
+  }).join('');
+  status.textContent=filtered.length?'Mostrando '+Math.min(limit,filtered.length)+' de '+filtered.length+' entregas.':'No se encontraron entregas para estos filtros.';
+  more.hidden=limit>=filtered.length;
+ };
+ const load=async()=>{
+  sync();if(tab.hidden)return;
+  clear('Consultando entregas…');const request=requestId,token=activeToken;
+  const live=()=>request===requestId&&token===getAppToken()&&canViewDelivered();
+  try{
+   const f=normalizeReportFilters({from:from.value,to:to.value,shift:shift.value});
+   if((Date.parse(f.to)-Date.parse(f.from))/86400000>30)throw new Error('El rango máximo es de 31 días.');
+   const db=await getSupabaseClient(),collected=[];if(!live())return;
+   let total;
+   for(let offset=0;offset<=20000;offset+=500){
+    const {data,error}=await db.rpc('sgp_picking_reporte_entregas_v1',{p_token:token,p_fecha_inicio:f.from,p_fecha_fin:f.to,p_turno:f.shift||null,p_sistema:null,p_limit:500,p_offset:offset});
+    if(!live())return;
+    if(error)throw error;
+    if(!data?.ok||!Array.isArray(data.rows)||!Number.isInteger(data.total_rows)||data.total_rows<0)throw new Error('Respuesta de historial incompleta.');
+    total??=data.total_rows;
+    if(data.total_rows!==total)throw new Error('El historial cambió durante la consulta. Vuelve a consultar.');
+    if(total>20000)throw new Error('Reduce el rango de fechas.');
+    collected.push(...data.rows);
+    if(collected.length>=total||!data.rows.length)break;
+   }
+   if(collected.length!==total||new Set(collected.map(r=>r.id_entrega)).size!==total)throw new Error('El historial cambió durante la consulta. Vuelve a consultar.');
+   rows=collected.sort((a,b)=>String(b.fecha_operativa||'').localeCompare(String(a.fecha_operativa||''))||String(b.fecha_entrega||'').localeCompare(String(a.fecha_entrega||''))||String(b.id_entrega||'').localeCompare(String(a.id_entrega||'')));
+   ready=true;show();
+  }catch(e){if(live())status.textContent='No se pudieron consultar las entregas: '+(e?.message||String(e));}
+ };
+ tab.addEventListener('click',()=>{
+  sync();if(tab.hidden)return;
+  if(!from.value&&!to.value){
+   const today=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Bogota',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
+   const at=key=>today.find(p=>p.type===key).value;
+   to.value=at('year')+'-'+at('month')+'-'+at('day');
+   from.value=new Date(Date.parse(to.value)-6*86400000).toISOString().slice(0,10);
+  }
+  open();void load();
+ });
+ form.addEventListener('submit',e=>{e.preventDefault();void load();});
+ for(const input of [from,to,shift])input.addEventListener('change',()=>clear('Pulsa Consultar para aplicar los filtros.'));
+ search.addEventListener('input',()=>{limit=pageSize;show();});
+ more.addEventListener('click',()=>{limit+=pageSize;show();});
+ window.addEventListener('storage',sync);
+ sync();return sync;
 }
