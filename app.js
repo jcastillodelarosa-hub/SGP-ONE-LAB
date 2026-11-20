@@ -3269,7 +3269,7 @@ syncPickingDeliveredAccess=initPickingDeliveryReport({getSupabaseClient,getAppTo
  const role=String(currentAuth?.rol||'').trim().toUpperCase();
  return currentAuth?.valida===true&&currentAuthToken===getAppToken()&&['ADMINISTRADOR','COORDINADOR','PICKING','SUPERVISOR DE PICKING'].includes(role)
   &&(role==='ADMINISTRADOR'||currentMachWindowAccess.has('picking')||currentMachWindowAccess.has('picking.entrega'));
-}})||(()=>{});
+},selectDeliverySubtab:kind=>pickingPdtFlow.select('delivery',kind)})||(()=>{});
 syncPickingDeliveredAccess();
 initPickingReceptionReport({getSupabaseClient,getAppToken});
 

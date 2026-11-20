@@ -1,3 +1,6 @@
+## 2026-11-20 — Órdenes entregadas dentro de Entrega · candidata LAB v485
+Reubica el historial como subpestaña de Picking → Entrega, junto a Órdenes y PDT aluminio. Conserva filtros, permisos y fuente de datos de v484; sin cambios a entregas, auditorías ni ERP. No publicado.
+
 ## 2026-11-20 — Picking: solo órdenes pendientes de entrega · candidata LAB v484
 Entrega → Órdenes excluye entregas registradas (incluidas las que quedan por auditar), conserva partes con saldo de ventanas y separa la reposición de material sin ventanas nuevas. Nueva pestaña Órdenes entregadas reutiliza el reporte existente de solo lectura: fecha operativa, turno y nombre de quien efectuó la entrega; movimientos separados, filtros de fecha/turno/búsqueda y permisos vigentes. Sin cambios en Partidas abiertas, Recepción, Supabase ni registros. Pruebas focalizadas del dominio y render simulado; pendiente CI y autorización de publicación.
 
