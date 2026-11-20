@@ -1,3 +1,6 @@
+## 2026-11-20 — Picking: solo órdenes pendientes de entrega · candidata LAB v484
+Entrega → Órdenes excluye entregas registradas (incluidas las que quedan por auditar), conserva partes con saldo de ventanas y separa la reposición de material sin ventanas nuevas. Sin cambios en Partidas abiertas, Recepción, Supabase ni registros. Pruebas focalizadas del dominio y render simulado; pendiente CI y autorización de publicación.
+
 ## 2026-11-19 — Apariencia y navegación en pestaña · candidata LAB v483
 La tarjeta de preferencias locales pasa a una pestaña de Configuración. Conserva almacenamiento, controles y acceso previo de Coordinador y Administrador; sin cambios en alertas, permisos de servidor o datos. Las pestañas se ajustan en móvil. Pendiente verificación CI y publicación por separado.
 
