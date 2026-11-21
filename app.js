@@ -2290,11 +2290,15 @@ async function loadProgramming(options={}){
     c.rpc('sgp_mecanizado_cobertura_ordenes',{p_token:token,p_semana:week}),readReprogramming(c,token),
     c.rpc('sgp_mecanizado_conciliaciones_listar',{p_token:token}),ensureSharedReservations(Boolean(options.invalidateCarry))]);
    if(request!==programmingRequestSeq||token!==getAppToken())return;
-   if(a.error||b.error||cv.error||oc.error)throw (a.error||b.error||cv.error||oc.error);
+   if(a.error||b.error||cv.error||oc.error){
+    const failure=a.error||b.error||cv.error||oc.error;
+    // Preserve only independently confirmed week metadata, never partial operational rows.
+    throw Object.assign(new Error(failure.message||'No fue posible completar la consulta'),{code:failure.code,confirmedWeeks:b.error?[]:(b.data||[]).map(row=>row.semana_programacion??row.semana_prog??row.semana_origen??row.semana)});
+   }
    progRows=a.data||[];progSchedule=b.data||[];progMoves=mv.error?[]:(mv.data||[]);progMovesError=mv.error?'No fue posible comprobar reprogramaciones: '+mv.error.message:'';
    progCoverage=cv.data||[];progOrderCoverage=oc.data||[];progConfirmations=cf.error?[]:(cf.data||[]);
    machiningMetrics.sync('programming',()=>renderProgramming());window.dispatchEvent(new Event('sgp:programming-loaded'));
-  }catch(error){if(request===programmingRequestSeq&&token===getAppToken()){window.dispatchEvent(new CustomEvent('sgp:programming-error',{detail:{message:error.message||String(error)}}));const pool=document.querySelector('#progPool');if(pool)pool.innerHTML='<p role="alert">No se pudo actualizar Programación: '+escapeHtml(error.message)+'</p>';}}
+  }catch(error){if(request===programmingRequestSeq&&token===getAppToken()){window.dispatchEvent(new CustomEvent('sgp:programming-error',{detail:{message:error.message||String(error),code:error.code,confirmedWeeks:error.confirmedWeeks||[]}}));const pool=document.querySelector('#progPool');if(pool)pool.innerHTML='<p role="alert">No se pudo actualizar Programación: '+escapeHtml(error.message)+'</p>';}}
  });
 }
 function glassClass(p){p=Number(p||0);return p>=100?'good':p>=70?'mid':'low'}
