@@ -18,21 +18,25 @@ export function uniqueOpenPickingOrders(rows=[]){
  return [...unique.values()];
 }
 
+/** A production closure is evidence for reconciliation, not a Picking movement. */
+export function pickingDeliveryDisposition(row,order){
+ if(row.parte_id){
+  const {remaining,materialPending}=partDeliveryStatus(row);
+  if(remaining===0)return materialPending?'material':null;
+  if(!(remaining>0))return null;
+ }else if(String(order.entrega_estado??'').trim())return null;
+ return order.finalizada_sin_saldo===true?'reconciliation':'pending';
+}
+
 /** Receipt and audit do not undo delivery. Keep material-only replacements separate. */
 export function pickingDeliveryQueue(rows=[]){
- const pending=new Map(),material=new Map();
+ const groups={pending:new Map(),material:new Map(),reconciliation:new Map()};
  for(const {row,order} of uniqueOpenPickingOrders(rows)){
-  let target;
-  if(row.parte_id){
-   const {remaining,materialPending}=partDeliveryStatus(row);
-   target=remaining>0?pending:remaining===0&&materialPending?material:null;
-  }else{
-   target=String(order.entrega_estado??'').trim()?null:pending;
-  }
+  const target=groups[pickingDeliveryDisposition(row,order)];
   if(!target)continue;
   if(!target.has(row))target.set(row,[]);
   target.get(row).push(order);
  }
  const project=source=>[...source].map(([row,ordenes])=>({...row,ordenes}));
- return {pending:project(pending),material:project(material)};
+ return Object.fromEntries(Object.entries(groups).map(([key,value])=>[key,project(value)]));
 }

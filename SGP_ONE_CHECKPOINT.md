@@ -1,3 +1,10 @@
+## 2026-11-26 | Picking: finalizadas por conciliar · candidata LAB v486
+
+- “Por entregar” y “Partidas abiertas” excluyen producciones marcadas FINALIZADA con saldos explícitos de ensamble y empaque en cero. Las que no tienen el movimiento necesario se muestran en “Finalizadas por conciliar”, sin acción de entrega. No se filtra por antigüedad.
+- La RPC de lectura agrega un indicador por orden y mantiene su contrato anterior, roles y permisos. El frontend conserva el comportamiento anterior si el indicador falta. No cambia PDT, recepciones, auditorías, entregas guardadas ni reposición separada de material.
+- Validación de release, suite Node y recorrido en Chromium de escritorio y móvil con datos sintéticos, sin fallos. En PostgreSQL aislado, el resultado anterior se conserva al quitar el campo nuevo y la reversión recupera la función previa y sus permisos. Sin publicar ni aplicar a producción.
+- Para publicar, comprobar compatibilidad de la RPC vigente, aplicar solo la migración de lectura con aprobación, publicar la versión aprobada y verificar desde Picking la cola, la conciliación y un caso pendiente real. El rollback de la migración está en `supabase/rollback`.
+
 ## 2026-11-20 — Órdenes entregadas dentro de Entrega · candidata LAB v485
 Reubica el historial como subpestaña de Picking → Entrega, junto a Órdenes y PDT aluminio. Conserva filtros, permisos y fuente de datos de v484; sin cambios a entregas, auditorías ni ERP. No publicado.
 
