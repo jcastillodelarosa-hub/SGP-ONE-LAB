@@ -26,3 +26,37 @@ test('quantitative parts distinguish missing windows, completed delivery and mat
  assert.deepEqual(q.pending.map(r=>r.id_programacion),['P0','P3']);
  assert.deepEqual(q.material.map(r=>r.id_programacion),['P2']);
 });
+
+test('finalized orders without Picking movement are for reconciliation, not delivery',()=>{
+ const make=(id,order={},row={})=>({id_programacion:id,semana:45,reserva:'R',parte:'3',
+  ordenes:[{key_produccion:id,produccion:id,cantidad:4,...order}],...row});
+ const rows=[
+  make('fin',{finalizada_sin_saldo:true}),
+  make('new',{finalizada_sin_saldo:false}),
+  make('legacy'),
+  make('already',{finalizada_sin_saldo:true,entrega_estado:'VALIDADA'}),
+  make('p3',{finalizada_sin_saldo:true,cantidad:108},{parte_id:'p3',cantidad_ventanas:108,cantidad_entregada:0}),
+  make('p1',{finalizada_sin_saldo:true,entrega_estado:'VALIDADA'},{parte_id:'p1',cantidad_ventanas:90,cantidad_entregada:90}),
+  make('p2',{finalizada_sin_saldo:true,entrega_estado:'PENDIENTE_VALIDACION'},{parte_id:'p2',cantidad_ventanas:90,cantidad_entregada:90,pdt_abiertos:0}),
+  make('partial',{entrega_estado:'PENDIENTE_VALIDACION'},{parte_id:'partial',cantidad_ventanas:280,cantidad_entregada:30}),
+  make('replacement',{finalizada_sin_saldo:true,entrega_estado:'VALIDADA'},{parte_id:'replacement',cantidad_ventanas:90,cantidad_entregada:90,pdt_abiertos:1}),
+ ];
+ const before=JSON.stringify(rows);
+ const out=pickingDeliveryQueue(rows);
+ const ids=name=>out[name].map(row=>row.id_programacion);
+ assert.deepEqual(ids('pending'),['new','legacy','partial']);
+ assert.deepEqual(ids('reconciliation'),['fin','p3']);
+ assert.deepEqual(ids('material'),['replacement']);
+ assert.equal(JSON.stringify(rows),before);
+});
+
+test('finalized duplicates with a real delivery stay out of either queue',()=>{
+ const order={key_produccion:'K',produccion:'K',cantidad:8,finalizada_sin_saldo:true};
+ const rows=[
+  {id_programacion:'a',reserva:'R',parte:'1',ordenes:[order]},
+  {id_programacion:'b',reserva:'R',parte:'1',ordenes:[{...order,entrega_estado:'PENDIENTE_VALIDACION'}]},
+ ];
+ const queue=pickingDeliveryQueue(rows);
+ assert.equal(queue.pending.length,0);
+ assert.equal(queue.reconciliation.length,0);
+});

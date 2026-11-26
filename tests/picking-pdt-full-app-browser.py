@@ -27,6 +27,18 @@ ORDER = dict(id_programacion=ID,semana=47,reserva='QA-RESERVA',parte='1',priorid
              turno='TURNO 1',sistema='QA PANEL',acabado='QA Blanco',estado='PROCESADO',
              cantidad_ventanas=4,ordenes=[dict(produccion='QA-ORDEN-001',cantidad=4,
              estado_mecanizado='PROCESADO',novedades=0)],novedades=0)
+# Same reserve/part, different physical programs: one delivered, one finalized
+# without Picking record, and one legitimately pending old order.
+PAST = dict(ORDER,id_programacion='past',semana=45,reserva='QA-PAST',parte='3',
+            cantidad_ventanas=90,ordenes=[dict(produccion='QA-PAST-90',key_produccion='past',cantidad=90,
+            entrega_estado='VALIDADA',fecha_entrega='2026-11-07',finalizada_sin_saldo=True)])
+FINAL = dict(PAST,id_programacion='final',parte_id='final',identificador_parte='Lote P3',
+             cantidad_ventanas=108,cantidad_entregada=0,ordenes=[dict(produccion='QA-FINAL-108',
+             key_produccion='final',cantidad=108,finalizada_sin_saldo=True)])
+OLD_OPEN = dict(PAST,id_programacion='old-open',cantidad_ventanas=4,ordenes=[dict(
+                produccion='QA-OLD-OPEN',key_produccion='old',cantidad=4,finalizada_sin_saldo=False)])
+MATERIAL = dict(PAST,id_programacion='material',parte_id='material',identificador_parte='Lote P2',
+                cantidad_entregada=90,pdt_abiertos=1)
 RECEIPT = dict(id_entrega=ID,id_programacion=ID,semana=47,reserva='QA-RESERVA',parte='1',
                sistema='QA PANEL',acabado='QA Blanco',produccion='QA-ORDEN-001',proyecto='Fixture QA',
                cantidad_ventanas=4,completa=True,fecha_entrega='2026-11-18',turno_entrega='TURNO 1',
@@ -82,9 +94,9 @@ try:
                         result(dict(ok=True,contract_version=1,capabilities=CAPS,rows=[] if body.get('p_estado')=='closed' else [PDT],has_more=False,next_cursor=None));return
                     if name=='sgp_pdt_picking_avisos_v1':
                         result(dict(ok=True,contract_version=1,capabilities=CAPS,notifications=[dict(id=ID,produccion='QA-ORDEN-001',reserva='QA-RESERVA',perfil='QA-PERFIL',cantidad=2,fecha='2026-11-18T12:00:00Z',read_at=None)],unread_count=1,has_more=False,next_cursor=None));return
-                    if name=='sgp_picking_cola':result([ORDER]);return
+                    if name=='sgp_picking_cola':result([ORDER,PAST,FINAL,OLD_OPEN,MATERIAL]);return
                     if name=='sgp_picking_recepcion_cola':result([RECEIPT]);return
-                    if name=='sgp_picking_semanas':result([47]);return
+                    if name=='sgp_picking_semanas':result([45,47]);return
                     if name=='sgp_resumen_saldos_portada':result(dict(filas=[]));return
                     if name in ['sgp_configuracion_general_obtener','sgp_picking_auditoria_areas_configuracion','sgp_reservas_asociadas_listar']:
                         result([]);return
@@ -106,6 +118,15 @@ try:
             page.locator('.nav [data-view="picking"]').click()
             expect(page.locator('[data-view-panel="picking"]')).to_be_visible()
             expect(page.locator('#pickBoard')).to_contain_text('QA-RESERVA')
+            expect(page.locator('#pickBoard').get_by_text('Finalizadas por conciliar · 1')).to_be_visible()
+            expect(page.locator('#pickBoard .pick-card').filter(has_text='QA-FINAL-108')).to_have_count(0)
+            expect(page.locator('#pickOpenBoard [data-open-delivery="final"]')).to_have_count(0)
+            expect(page.locator('#pickOpenBoard [data-open-delivery="old-open"]')).to_have_count(1)
+            expect(page.locator('#pickBoard [data-pick-order-delivery="material"]')).to_have_count(1)
+            page.locator('#pickBoard').get_by_text('Finalizadas por conciliar · 1').click()
+            expect(page.locator('#pickBoard').get_by_text('QA-FINAL-108')).to_be_visible()
+            expect(page.locator('#pickBoard [data-pick-order-delivery="final"]')).to_have_count(0)
+
             expect(page.locator('#pickDeliveryPanel .picking-pdt-orders')).to_be_visible()
             expect(page.locator('#pickDeliveryPanel [data-pdt-see-ready]')).to_be_visible()
             page.locator('#pickDeliveryPanel [data-pdt-kind="pdt"]').click()
