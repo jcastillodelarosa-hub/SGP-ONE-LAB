@@ -6,9 +6,9 @@
   "project": "sgp-one-lab",
   "site": "sgp-one-lab",
   "approved_lp_files": {
-    "production-line-tabs.js": "7cb31492565f71b0b64d840012f58c572b7b7f93e4a5eb66277d7daf63ffbf84",
-    "src/modules/lp01-followup.js": "41ec28cda58298468af5e48514988b39ec5cb1a40371a65c28be2686385cfa40",
-    "src/modules/lp01-operation.js": "3f944d7dd0fd6c98072c2e31f5fb662d495a0bfd5dbe1f1a524586db1a8689cf",
+    "production-line-tabs.js": "00267d0e6d4407dc7ce0ff2d41bcb7a873c313d478dbdfdc9065cd64fd4d45ca",
+    "src/modules/lp01-followup.js": "2aefccfdc238ef3b0df2ad787fdc84def91a1442642e7d27a51e372e984ade84",
+    "src/modules/lp01-operation.js": "4802b66ced2391130e5faa6d2efdf500719d01fa631051f64775847a59b21bef",
     "src/domain/lp01-visual-bridge.js": "6d4694f08e2724a34cd23a10f15ac5dd13b5936ad161fd73f322526dc84917aa",
     "scripts/prepare-lp-main-visual.py": "fc0d59bd1192115ce575de33f4693c07028659df73092f1486644b41b0f5d27f",
     "tests/lp01-integration/fixtures/lp-synthetic.json": "ed5812201e96feff0ab8b7bf5b4bcb06567978a4ab52207ac91056a22251d81b",
@@ -24,9 +24,9 @@
     "scripts/lp-backend-readiness.py": "0347837ace3ecb08b52ac16b9fb82b1ca8b8462853a33e9d14a4f608bc92482e"
   },
   "legacy_navigation_sha256": "4f0992b1c98f4933fe5a0daa98d95fd85b35fceaffbbbd904fef7d422f21f0af",
-  "certification_reference": "docs/opt-recovery/BASELINE_V461.md",
-  "baseline_version": "sites/sgp-one-lab/versions/4f2f54061b6eb8b7",
-  "rollback_version": "sites/sgp-one-lab/versions/4f2f54061b6eb8b7",
+  "certification_reference": "https://github.com/jcastillodelarosa-hub/SGP-ONE-LAB/actions/runs/45897510922",
+  "baseline_version": "sites/sgp-one-lab/versions/8ecfaaf01c20f7d2",
+  "rollback_version": "sites/sgp-one-lab/versions/8ecfaaf01c20f7d2",
   "artifact_kind": "runtime",
   "backend_contracts_verified": true,
   "backend_probe_required": true
