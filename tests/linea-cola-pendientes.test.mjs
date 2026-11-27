@@ -42,4 +42,4 @@ test('tarjeta de reserva cerrada consolida Estados con distintivo coloreado',()=
  assert.doesNotMatch(source,/<span>Mecanizado: '\+explorerEsc/);
 });
 
-test('cola distingue saldo de ensamble de saldo sin programar y conecta el formulario',()=>{assert.match(source,/El saldo Export no equivale necesariamente al saldo sin programar/);assert.match(source,/sgpPendingCount/);assert.match(source,/sgp:line-plan-updated/);assert.match(source,/sgpPlanProduction/);});
+test('cola distingue saldo de ensamble de saldo sin programar y conecta el formulario',()=>{assert.match(source,/'Saldo Export '\+r\.saldo_ensamble/);assert.match(source,/sgpPendingCount/);assert.match(source,/sgp:line-plan-updated/);assert.match(source,/sgpPlanProduction/);});

@@ -7,7 +7,7 @@ server=ThreadingHTTPServer(('127.0.0.1',0),functools.partial(SimpleHTTPRequestHa
 threading.Thread(target=server.serve_forever,daemon=True).start()
 fixture={'contract':'GLASS-PREPARATION-1','year':2026,'week':46,'line':'PANELES_2','canWrite':True,'dates':[],'weeks':[{'year':2026,'week':46}],'fingerprints':[{'reservation':'R','priority':'1.1','fingerprint':'abc'}],'rows':[{'key':'A','reservation':'R','priority':'1.1','production':'Order A','system':'ES','finish':'White','windows':3},{'key':'B','reservation':'R','priority':'1.1','production':'Order B','system':'ES','finish':'White','windows':4}]}
 with sync_playwright() as p:
- browser=p.chromium.launch(executable_path=None if os.environ.get('CI') else shutil.which('chromium'),headless=True,args=['--no-sandbox'])
+ browser=p.chromium.launch(executable_path=os.environ.get('LP_CHROMIUM') or (None if os.environ.get('CI') else shutil.which('chromium')),headless=True,args=['--no-sandbox'])
  for width in [1366,390]:
   page=browser.new_page(viewport={'width':width,'height':800})
   page.route('**/*',lambda route: route.continue_() if route.request.url.startswith(f'http://127.0.0.1:{server.server_port}/') else route.abort())
@@ -15,8 +15,11 @@ with sync_playwright() as p:
   page.evaluate('(f)=>{document.body.innerHTML="<main id=host></main>";window.fixture=f;window.calls=[]}',fixture)
   page.evaluate('''async()=>{const{mountGlassPreparation}=await import('/src/modules/glass-preparation.js');window.ui=mountGlassPreparation(document.querySelector('#host'),{getToken:()=> 'test',getClient:async()=>({rpc:async(name,args)=>{window.calls.push({name,args});if(name.endsWith('_read'))return {data:structuredClone(window.fixture)};window.fixture.dates=args.p_command.changes.map(x=>({...x,preparation_date:x.date,revision:1}));return {data:{ok:true,id:args.p_command.id,saved:1}}}})});await window.ui.load()}''')
   assert page.locator('[data-rows] tr').count()==1
+  assert page.get_by_role('columnheader',name='Fecha solicitada').is_visible()
+  assert 'no confirma que el vidrio' not in page.locator('#host').inner_text()
   page.locator('[data-all]').check();page.locator('[data-batch-date]').fill('2026-11-10');page.locator('[data-apply]').click()
   assert page.locator('[data-date]').input_value()=='2026-11-10'
+  assert 'Sin guardar' in page.locator('[data-rows]').inner_text()
   page.locator('[data-save]').click();page.wait_for_function("document.querySelector('[data-status]').textContent==='1 fechas guardadas.'")
   assert len(page.evaluate('calls.filter(x=>x.name.endsWith("_save"))'))==1
   assert page.locator('[data-date]').input_value()=='2026-11-10'

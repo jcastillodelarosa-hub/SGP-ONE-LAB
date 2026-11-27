@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SGP ONE LAB</title>
   <link rel="icon" type="image/svg+xml" href="favicon-sgp.svg" />
-  <link rel="stylesheet" href="styles.css?v=486" />
+  <link rel="stylesheet" href="styles.css?v=487" />
   <link rel="stylesheet" href="navigation-preferences.css?v=5" />
   <link rel="stylesheet" href="design-center.css?v=2" />
   <link rel="stylesheet" href="src/modules/lp01-followup.css?v=407" />
@@ -14,7 +14,7 @@
   <link rel="stylesheet" href="src/modules/lp01-assembly-reports.css?v=407" />
   <link rel="stylesheet" href="src/modules/mecanizado-partes.css?v=1" />
   <link rel="stylesheet" href="production-line-visual-v327.css?v=1" />
-  <link rel="stylesheet" href="global-themes.css?v=1" /><link rel="stylesheet" href="picking-delivery-report.css?v=486" />
+  <link rel="stylesheet" href="global-themes.css?v=1" /><link rel="stylesheet" href="picking-delivery-report.css?v=487" />
   <script src="config.js?v=20261008-1300"></script>
 <style>
 .production-line-tabs{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0;padding:6px;background:#eaf2ff;border:1px solid #cbdcf7;border-radius:12px}
@@ -70,7 +70,7 @@
           <input id="authPassword" type="password" placeholder="Contraseña" autocomplete="current-password" />
           <button id="authLogin">Ingresar</button>
           <button id="authLogout" hidden>Cerrar sesión</button>
-          <span class="status" id="releaseVersion" title="Candidata local no publicada; sello de commit pendiente">LAB v486</span>
+          <span class="status" id="releaseVersion" title="Candidata local no publicada; sello de commit pendiente">LAB v487</span>
         </div>
       </header>
 
@@ -114,7 +114,7 @@
         </section>
 
         <section class="view" data-view-panel="ensamble" hidden>
-          <div class="page-heading"><span class="eyebrow">Operación</span><h2>Línea de Producción</h2><p>Seguimiento operativo de ensamble y empaque.</p></div>
+          <div class="page-heading"><span class="eyebrow">Operación</span><h2>Línea de Producción</h2></div>
           <div class="assembly-tabs production-line-tabs" role="tablist" aria-label="Etapas de línea de producción"><button class="active" id="productionAssemblyTab" type="button" role="tab" aria-selected="true" aria-controls="productionAssemblyPanel">Ensamble</button><button id="productionPackingTab" type="button" role="tab" aria-selected="false" aria-controls="productionPackingPanel">Empaque</button></div><div id="productionAssemblyPanel" role="tabpanel" aria-labelledby="productionAssemblyTab"><div class="assembly-tabs"><button class="active" id="assemblySheetTab">Hoja de ensamble</button><button id="assemblyLocationReportTab">Reporte de ubicaciones</button></div><div id="assemblySheetPanel"><section class="toolbar assembly-toolbar">
             <select id="assemblyWeek"><option value="">Cargando semanas…</option></select>
             <select id="assemblyLine"><option value="PANELES_2">PANELES_2</option><option value="FRAMES_2">FRAMES_2</option></select>
@@ -135,7 +135,7 @@
           </tr></thead><tbody id="assemblyBody"><tr><td colspan="16" class="empty">Sin consulta</td></tr></tbody></table></section></div>
 <div id="assemblyLocationReportPanel" hidden>
  <style>.glass-view-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 16px}.glass-view-tabs button{padding:10px 16px;border:1px solid #bfd0e4;border-radius:8px;color:#174875;background:white}.glass-view-tabs button.active{background:#1266bc;color:white;border-color:#1266bc}</style>
- <nav class="glass-view-tabs" role="tablist" aria-label="Vidrio"><button id="glassLocationsViewTab" type="button" role="tab" aria-controls="glassLocationsContent" aria-selected="true" class="active">Reporte de ubicaciones</button><button id="glassPreparationViewTab" type="button" role="tab" aria-controls="glassPreparationPanel" aria-selected="false">Fechas de preparación</button></nav>
+ <nav class="glass-view-tabs" role="tablist" aria-label="Vidrio"><button id="glassLocationsViewTab" type="button" role="tab" aria-controls="glassLocationsContent" aria-selected="true" class="active">Ubicaciones</button><button id="glassPreparationViewTab" type="button" role="tab" aria-controls="glassPreparationPanel" aria-selected="false">Fechas de preparación</button></nav>
  <div id="glassLocationsContent" role="tabpanel" aria-labelledby="glassLocationsViewTab">
  <section class="summary location-report-summary" hidden>
   <div class="metric"><span>Unidades preparadas</span><strong id="lrPrepared">—</strong></div>
@@ -147,14 +147,14 @@
  </section>
  <div id="locationReportStatus" class="daily-status">Abre esta pestaña para actualizar el reporte.</div>
  <section class="glass-efficiency" id="glassEfficiency">
-<nav class="glass-view-tabs" role="tablist" aria-label="Vista de ubicaciones"><button id="glassTableTab" type="button" role="tab" aria-controls="glassAnalysisPanel" aria-selected="true" class="active">Vista tabla</button><button id="glassTreeTab" type="button" role="tab" aria-controls="glassTreePanel" aria-selected="false">Vista árbol</button></nav>
-  <div class="glass-efficiency-head"><div><span class="eyebrow">Vidrio</span><h3>Reporte de ubicaciones</h3><p>Distribución de vidrio por producción, burro y reserva / parte.</p></div><div class="glass-efficiency-controls"><label class="glass-week-picker">Semana <select id="glassEfficiencyWeek" aria-label="Semana de programación" disabled><option value="all">Todas las semanas</option></select></label><input id="glassEfficiencySearch" type="search" placeholder="Buscar reserva, orden o burro…" aria-label="Buscar reserva, orden o burro"><label>Estado <select id="glassAnalysisState"><option value="all">Todos</option><option value="prepared">Preparado</option><option value="novelty">Novedad</option><option value="transfer">Traslado</option><option value="others">Otros</option></select></label><select id="glassEfficiencyFilter" aria-label="Filtrar distribución"><option value="all">Todas las órdenes</option><option value="multiple">2 o más burros preparados</option><option value="three">3 o más burros preparados</option></select></div></div>
+<nav class="glass-view-tabs" role="tablist" aria-label="Vista de ubicaciones"><button id="glassTableTab" type="button" role="tab" aria-controls="glassAnalysisPanel" aria-selected="true" class="active">Tabla</button><button id="glassTreeTab" type="button" role="tab" aria-controls="glassTreePanel" aria-selected="false">Árbol</button></nav>
+  <div class="glass-efficiency-head"><div><h3>Ubicaciones de vidrio</h3></div><div class="glass-efficiency-controls"><label class="glass-week-picker">Semana <select id="glassEfficiencyWeek" aria-label="Semana de programación" disabled><option value="all">Todas las semanas</option></select></label><input id="glassEfficiencySearch" type="search" placeholder="Buscar reserva, orden o burro…" aria-label="Buscar reserva, orden o burro"><label>Estado <select id="glassAnalysisState"><option value="all">Todos</option><option value="prepared">Preparado</option><option value="novelty">Novedad</option><option value="transfer">Traslado</option><option value="others">Otros</option></select></label><select id="glassEfficiencyFilter" aria-label="Filtrar distribución"><option value="all">Todas las órdenes</option><option value="multiple">2 o más burros preparados</option><option value="three">3 o más burros preparados</option></select></div></div>
   <div id="glassEfficiencyWeekStatus" class="glass-week-status" role="status" aria-live="polite">Cargando información semanal…</div>
   <div class="glass-efficiency-stats" id="glassEfficiencyStats"></div>
-  <div class="glass-analysis-toolbar"><button type="button" id="glassAnalysisRefresh">Actualizar</button><button type="button" id="glassAnalysisExport" disabled>Exportar tabla y detalle</button></div>
+  <div class="glass-analysis-toolbar"><button type="button" id="glassAnalysisRefresh">Actualizar</button><button type="button" id="glassAnalysisExport" disabled>Exportar</button></div>
 <div id="glassAnalysisPanel" role="tabpanel" aria-labelledby="glassTableTab"></div>
 <div id="glassTreePanel" role="tabpanel" aria-labelledby="glassTreeTab" hidden>
-  <div class="glass-explorer-toolbar"><label>Desplegar hasta <select id="glassReportLevel"><option value="reservations">Reservas</option><option value="parts">Prioridades / partes</option><option value="productions">Producciones</option><option value="racks">Burros</option></select></label><button type="button" id="glassReportRefresh">Actualizar</button><button type="button" id="glassReportExport" disabled>Exportar reporte</button><button type="button" id="glassExploreButton" class="primary">Explorar relaciones entre burros, órdenes y reservas</button></div>
+  <div class="glass-explorer-toolbar"><label>Desplegar hasta <select id="glassReportLevel"><option value="reservations">Reservas</option><option value="parts">Prioridades / partes</option><option value="productions">Producciones</option><option value="racks">Burros</option></select></label><button type="button" id="glassReportRefresh">Actualizar</button><button type="button" id="glassReportExport" disabled>Exportar reporte</button><button type="button" id="glassExploreButton" class="primary">Explorar relaciones</button></div>
   <div id="glassEfficiencyList" class="glass-efficiency-list"><p class="empty">Abre el reporte para cargar la distribución.</p></div>
 </div>
  </section>
@@ -165,7 +165,7 @@
  </div>
 </div></div><section id="glassPreparationPanel" role="tabpanel" aria-labelledby="glassPreparationViewTab" hidden></section>
 </div>
-</div><div id="productionPackingPanel" role="tabpanel" aria-labelledby="productionPackingTab" hidden><div class="production-packing-empty"><h3>Hoja de Empaque</h3><p>Consulta de solo lectura con datos del último Export diario. Empaque utiliza el saldo de ensamble, no el estado de mecanizado.</p><div class="packing-preview-controls"><label>Semana <select id="packingWeek"><option value="">Todas las semanas</option></select></label><label>Línea <select id="packingLine"><option value="PANELES_2">PANELES_2</option><option value="FRAMES_2">FRAMES_2</option></select></label><label>Buscar producción <input id="packingPreviewSearch" type="search" placeholder="Producción, reserva o sistema"></label><label>Disponibilidad <select id="packingPreviewFilter"><option value="all">Todas</option><option value="ready">Totalmente ensambladas</option><option value="pending">Con saldo de ensamble</option></select></label><label>Ordenar por <select id="packingPreviewSort"><option value="priority">Prioridad</option><option value="balance">Saldo de ensamble</option><option value="production">Producción</option></select></label></div><div class="packing-preview-scroll"><table class="packing-preview-table"><thead><tr><th>Prioridad programación (referencia)</th><th>Producción</th><th>Sistema</th><th>Cantidad</th><th>Ensamblado</th><th>Saldo ensamble</th><th>Disponibilidad</th><th>Saldo empaque</th><th>Comentarios empaque</th></tr></thead><tbody id="packingPreviewBody"><tr><td colspan="9">Selecciona Empaque para consultar datos actualizados.</td></tr></tbody></table></div><p class="packing-preview-note" id="packingPreviewStatus" role="status">La prioridad mostrada pertenece a Programación, no a Empaque. Las prioridades y comentarios propios de Empaque están pendientes. Consulta de solo lectura.</p></div></div>
+</div><div id="productionPackingPanel" role="tabpanel" aria-labelledby="productionPackingTab" hidden><div class="production-packing-empty"><h3>Hoja de Empaque</h3><div class="packing-preview-controls"><label>Semana <select id="packingWeek"><option value="">Todas las semanas</option></select></label><label>Línea <select id="packingLine"><option value="PANELES_2">PANELES_2</option><option value="FRAMES_2">FRAMES_2</option></select></label><label>Buscar producción <input id="packingPreviewSearch" type="search" placeholder="Producción, reserva o sistema"></label><label>Disponibilidad <select id="packingPreviewFilter"><option value="all">Todas</option><option value="ready">Totalmente ensambladas</option><option value="pending">Con saldo de ensamble</option></select></label><label>Ordenar por <select id="packingPreviewSort"><option value="priority">Prioridad</option><option value="balance">Saldo de ensamble</option><option value="production">Producción</option></select></label></div><div class="packing-preview-scroll"><table class="packing-preview-table"><thead><tr><th>Prioridad programación (referencia)</th><th>Producción</th><th>Sistema</th><th>Cantidad</th><th>Ensamblado</th><th>Saldo ensamble</th><th>Disponibilidad</th><th>Saldo empaque</th><th>Comentarios empaque</th></tr></thead><tbody id="packingPreviewBody"><tr><td colspan="9">Selecciona Empaque para consultar datos actualizados.</td></tr></tbody></table></div><p class="packing-preview-note" id="packingPreviewStatus" role="status">Solo lectura · Último Export</p></div></div>
 <div id="glassDetailModal" class="modal glass-detail-modal" hidden><div class="modal-card">
  <div class="modal-head"><div><span class="eyebrow">Ubicación de vidrio</span><h3 id="glassDetailTitle">Detalle</h3><p id="glassDetailMeta"></p></div><button id="closeGlassDetail">Cerrar</button></div>
  <div id="glassDetailSummary" class="glass-detail-summary"></div>
@@ -441,7 +441,7 @@
     </div>
   </div>
 
-  <script type="module" src="app.js?v=486-pdt"></script>
+  <script type="module" src="app.js?v=487-pdt"></script>
   <script defer src="navigation-preferences.js?v=5"></script>
   <script defer src="design-center.js?v=2"></script>
 <div id="userModal" class="modal-backdrop rec-overlay" hidden><div class="modal-card user-modal-card"><div class="modal-header"><div><strong id="userModalTitle">Nuevo usuario</strong><small>Cuenta y permisos de acceso</small></div><button id="userModalClose" class="modal-close">×</button></div><div class="user-form"><div class="rec-grid"><label>Usuario<input id="userName" autocomplete="off"></label><label>Nombre completo<input id="userFullName"></label><label>Rol<select id="userRole"><option>COORDINADOR</option><option>LIDER MECANIZADO</option><option>LIDER LINEA</option><option>SUPERVISOR ENSAMBLE</option><option>SUPERVISOR EMPAQUE</option><option>RECEPCION</option><option>PATINADOR</option><option>PICKING</option><option>SUPERVISOR DE PICKING</option><option>CONSULTA</option><option>ADMINISTRADOR</option></select></label><label>Contraseña<input id="userPassword" type="password" placeholder="Vacío = conservar contraseña"></label><div class="password-reset-wrap"><button id="resetPasswordBtn" type="button" hidden>↻ Restablecer contraseña</button><small>Asigna una nueva contraseña temporal al usuario.</small></div></div><label class="user-active"><input id="userActive" type="checkbox" checked> Usuario activo</label><div class="access-title"><b>Ventanas permitidas</b><span>El usuario solo verá las opciones seleccionadas.</span></div><div id="userAccessGrid" class="access-grid"></div></div><div class="modal-actions"><button id="userCancel">Cancelar</button><button id="userSave" class="primary">Guardar usuario</button></div></div></div>
@@ -457,12 +457,12 @@
 </div>
 <div id="glassExplorerModal" class="glass-explorer-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="glassExplorerTitle"><div class="glass-explorer-dialog"><header><div><h2 id="glassExplorerTitle">Explorador de relaciones de vidrio</h2><p>Selecciona un nodo para descubrir sus relaciones y cantidades.</p></div><button type="button" id="glassExplorerClose" aria-label="Cerrar explorador">✕</button></header><div class="glass-explorer-controls"><input id="glassExplorerSearch" type="search" placeholder="Buscar reserva, orden o burro" aria-label="Buscar nodo"><select id="glassExplorerStatus" aria-label="Estado de vidrio"><option value="all">Todos los estados</option><option value="prepared">Preparados</option><option value="novelty">Novedad</option><option value="transfer">Traslado</option><option value="others">Otros</option></select><button type="button" id="glassExplorerReset">Restablecer</button></div><div id="glassExplorerSummary" class="glass-explorer-summary"></div><div class="glass-explorer-content"><div id="glassExplorerGraph" class="glass-explorer-graph"></div><aside id="glassExplorerDetails" class="glass-explorer-details">Selecciona un nodo de la red.</aside></div><footer><span>Partes: azul claro · Producciones: azul oscuro · Burros: preparado verde, novedad amarillo, traslado naranja, otros rojo</span><button type="button" id="glassExplorerCloseBottom">Cerrar</button></footer></div></div>
 <div id="glassExplorerTooltip" class="glass-explorer-tooltip" role="tooltip" hidden></div>
-<script defer src="production-line-tabs.js?v=3"></script>
-<script defer src="planner-readonly-v326.js?v=461"></script>
-<script defer src="planner-operations-v326.js?v=461"></script>
+<script defer src="production-line-tabs.js?v=487"></script>
+<script defer src="planner-readonly-v326.js?v=487"></script>
+<script defer src="planner-operations-v326.js?v=487"></script>
 <script defer src="src/modules/lp01-workspace-e3.js?v=401"></script>
 <script defer src="mecanizado-weekly-shifts-v349.js?v=350"></script>
 <script defer src="programacion-subtabs-v350.js?v=485"></script>
-<script type="module" src="src/modules/lp01-followup.js?v=402"></script>
+<script type="module" src="src/modules/lp01-followup.js?v=487"></script>
 </body>
 </html>

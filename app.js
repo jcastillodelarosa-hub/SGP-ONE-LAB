@@ -11,7 +11,7 @@ import {createOptDigitalHost} from './src/modules/opt-digital.js';
 import {mountLineGoalsConfig} from './src/modules/line-turn-goals-config.js';
 import {mountGlassLocationAnalysis} from './src/modules/glass-location-analysis.js';
 import {glassStates,glassInsightQuantity,glassRackAppearance} from './src/domain/glass-explorer-states.js';
-import {mountGlassPreparation} from './src/modules/glass-preparation.js';
+import {mountGlassPreparation} from './src/modules/glass-preparation.js?v=487';
 import {glassLocationSummary,glassLocationReportCSV} from './src/domain/glass-location-report.js';
 import {glassLocationDetailMarkup} from './src/modules/glass-location-detail.js';
 import {createExportReview} from './src/modules/export-review.js';

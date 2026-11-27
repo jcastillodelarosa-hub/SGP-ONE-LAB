@@ -7,14 +7,14 @@
  const locations=byId('assemblyLocationReportPanel'),sheet=byId('assemblySheetPanel');
  if(!tabs||!assembly||!packing||!assemblyPanel||!packingPanel||!locations||!sheet)return;
  const planner=document.createElement('button');
- planner.type='button';planner.id='productionPlannerTab';planner.textContent='LP-01 · Programación';
- assembly.textContent='LP-02 · Ensamble';packing.textContent='LP-02 · Empaque';
+ planner.type='button';planner.id='productionPlannerTab';planner.textContent='Programación';
+ assembly.textContent='Ensamble';packing.textContent='Empaque';
  const report=document.createElement('button');
  report.type='button';report.id='productionLocationsTab';report.textContent='Reporte de ubicaciones';
  tabs.insertBefore(planner,assembly);tabs.append(report);
  const plannerPanel=document.createElement('div');
  plannerPanel.id='productionPlannerPanel';plannerPanel.className='production-packing-empty';
- plannerPanel.innerHTML='<h3>Línea de Producción · Programación</h3><p>Calendario, tabla y Kanban comparten las asignaciones consultadas. La carga programada y los saldos oficiales del Export se muestran por separado.</p>';
+ plannerPanel.innerHTML='';
  tabs.after(plannerPanel);
  const extraPanels={};
  for(const [key,id,label] of [['seguimiento','Tracking','Seguimiento'],['operacion','Operation','Operación'],['dashboard','Dashboard','Dashboard'],['reportes','Reports','Reportes']]){
@@ -42,7 +42,7 @@
   if(!table||!body||!host)return;
   const bar=document.createElement('div');
   bar.className='production-table-sortbar';
-  bar.innerHTML='<strong>Ordenar por niveles</strong><label>Nivel 1 <select data-sort-level="0"></select></label><label>Nivel 2 <select data-sort-level="1"></select></label><label>Nivel 3 <select data-sort-level="2"></select></label><button type="button" data-sort-reset>Limpiar orden</button><small>Solo cambia el orden visual; no modifica prioridades guardadas.</small>';
+  bar.innerHTML='<strong>Ordenar por niveles</strong><label>Nivel 1 <select data-sort-level="0"></select></label><label>Nivel 2 <select data-sort-level="1"></select></label><label>Nivel 3 <select data-sort-level="2"></select></label><button type="button" data-sort-reset>Limpiar orden</button>';
   table.parentElement.before(bar);
   const count=document.createElement('span');count.className='production-table-count';count.setAttribute('aria-live','polite');bar.append(count);
   const direction=document.createElement('button');direction.type='button';direction.textContent='Orden: A → Z';direction.setAttribute('aria-label','Invertir orden de filas');bar.append(direction);
@@ -51,7 +51,7 @@
   const search=document.createElement('input');
   search.type='search';search.placeholder='Filtrar filas visibles…';search.setAttribute('aria-label','Filtrar filas de la tabla');
   search.className='production-table-quickfilter';
-  bar.insertBefore(search,bar.querySelector('small'));
+  bar.insertBefore(search,count);
   const selectors=[...bar.querySelectorAll('select')];
   function filterRows(){
    const query=search.value.trim().toLocaleLowerCase('es');
@@ -112,7 +112,7 @@
  const assemblyShortcuts=document.createElement('section');
  assemblyShortcuts.className='sgp-assembly-quickviews';
  assemblyShortcuts.setAttribute('aria-label','Consultas de Ensamble');
- assemblyShortcuts.innerHTML='<strong>Programación y seguimiento</strong><div class="sgp-assembly-quicktabs"><button type="button" data-open-plan="calendar">Calendario por turno</button><button type="button" data-open-plan="pending">Pendientes</button><button type="button" data-open-plan="tracking">Seguimiento</button></div><small>Consulta las asignaciones de la línea sin abandonar el contexto de Ensamble.</small>';
+ assemblyShortcuts.innerHTML='<strong>Programación y seguimiento</strong><div class="sgp-assembly-quicktabs"><button type="button" data-open-plan="calendar">Calendario por turno</button><button type="button" data-open-plan="pending">Pendientes</button><button type="button" data-open-plan="tracking">Seguimiento</button></div>';
  const sheetHost=byId('assemblySheetPanel');
  const sheetStatus=byId('assemblyStatus');
  const sheetSummary=byId('assemblySummary');

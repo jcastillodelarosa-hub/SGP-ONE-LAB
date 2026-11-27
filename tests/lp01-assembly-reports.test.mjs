@@ -240,3 +240,14 @@ domTest('partial reload report downloads each genuine source and stale source bu
  for(const button of buttons){button.click();await flush();}assert.deepEqual(received,latest.sourceFiles.map(file=>file.id));
  current=false;buttons[1].click();await flush();assert.equal(received.length,2);
 });
+
+test('compact closure keeps provenance reachable without changing printed markup',()=>{
+ const report=model();
+ const full=assemblyReportMarkup(report);
+ const compact=assemblyReportMarkup(report,{compact:true});
+ assert.match(compact,/<details class="lp-turn-provenance"><summary>Origen del dato y trazabilidad<\/summary>[\s\S]*SHA256[\s\S]*<\/details>/);
+ assert.match(compact,/Cierre vigente/);
+ assert.match(compact,/Resultado del turno/);
+ assert.match(full,/Versión 4/);
+ assert.doesNotMatch(full,/Origen del dato y trazabilidad/);
+});

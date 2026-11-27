@@ -19,7 +19,7 @@ tracking.querySelector('[data-op-date]').value=context.date;tracking.querySelect
 const tick=()=>new Promise(resolve=>setTimeout(resolve,25));const checks=[];
 try{
  document.getElementById('productionPackingTab').click();await tick();
- assert.equal(tracking.querySelectorAll('[data-assembly-key]').length,1);assert(tracking.textContent.includes('Hoja de Empaque'));assert(tracking.textContent.includes('Programación específica de Empaque pendiente'));
+ assert.equal(tracking.querySelectorAll('[data-assembly-key]').length,1);assert(tracking.textContent.includes('Hoja de Empaque'));assert.equal(tracking.querySelector('[data-packing-plan-pending]').textContent,'Plan de Empaque no disponible · Órdenes incorporadas');
  assert.equal(tracking.querySelectorAll('[data-open],[data-assembly-glass],[data-turn-capacity]').length,0);assert.equal(operation.querySelectorAll('[data-executed],[data-bi-file],[data-close]').length,0);assert(operation.textContent.includes('Cierre de Empaque'));
  assert(calls.filter(x=>x.name==='sgp_lp_operacion_consultar').every(x=>x.args.p_etapa==='EMPAQUE'));
  tracking.querySelector('[data-assembly-detail]').click();await tick();const detail=tracking.querySelector('section[data-assembly-detail]');assert(detail);assert(detail.textContent.includes('Saldo Empaque'));assert.equal(detail.querySelector('[data-assembly-balance]').textContent,'5');assert.equal(detail.querySelectorAll('[data-assembly-glass],[data-assembly-incorporate]').length,0);
