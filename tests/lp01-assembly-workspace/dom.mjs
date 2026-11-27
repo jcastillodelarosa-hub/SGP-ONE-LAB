@@ -55,7 +55,7 @@ try{
  host.querySelector('[data-assembly-glass]').click();assert.equal(glass.length,1);
  workspace.open('ABIERTA|PANELES_2');await tick();
  const detail=host.querySelector('[data-assembly-detail]');assert(detail);await cleanReadCanLeave(detail);checks.push('Delayed clean note read does not block return from detail');const draft=document.createElement('textarea');draft.value='Preservar borrador';detail.append(draft);
- const changed=structuredClone(data);changed.catalog.productions[0].oficial.saldo_ensamble=5;changed.turn.estado='ABIERTO';workspace.update(changed,context);assert.match(host.querySelector('[data-assembly-period-state]').textContent,/^ABIERTO/);
+ const changed=structuredClone(data);changed.catalog.productions[0].oficial.saldo_ensamble=5;changed.turn.estado='ABIERTO';workspace.update(changed,context);assert.equal(host.querySelector('[data-assembly-period-state]').textContent,'Turno actual · Abierto');
  assert.equal(host.querySelector('[data-assembly-detail]'),detail);assert.equal(draft.value,'Preservar borrador');assert.equal(host.querySelector('[data-assembly-balance]').textContent,'5');assert.equal(host.querySelector('[data-assembly-realized]').textContent,'Pendiente');
  checks.push('B12 preserves its editor node/draft during quiet Export balance refresh');
  const noteSave=host.querySelector('[data-order-note-save]');const savedLabel=noteSave.textContent;noteSave.textContent='Reintentar mismo guardado';workspace.open('OTRA|PANELES_2');assert.equal(host.querySelector('section[data-assembly-detail]'),detail);assert.match(host.querySelector('[data-assembly-leave-status]').textContent,/guardado pendiente/);noteSave.textContent=savedLabel;

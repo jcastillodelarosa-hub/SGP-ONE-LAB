@@ -13,7 +13,7 @@ test('navigation renames Ensamble without changing view identity',()=>{
 });
 test('Ensamble and Empaque have independent accessible tabs',()=>{
  for(const id of ['productionAssemblyTab','productionPackingTab','productionAssemblyPanel','productionPackingPanel'])assert.ok(html.includes('id="'+id+'"'));
- assert.match(html,/production-line-tabs\.js\?v=3/);
+ assert.match(html,/production-line-tabs\.js\?v=\d+/);
  assert.match(tabs,/assemblyPanel.hidden=/);
  assert.match(tabs,/packingPanel.hidden=/);
  assert.match(html,/id="packingPreviewBody"/);
@@ -52,7 +52,7 @@ test('Empaque does not present stale or invalid balance as assembled',()=>{
 
 test('packing priority is clearly identified as programming reference',()=>{
  assert.match(html,/Prioridad programación \(referencia\)/);
- assert.match(html,/La prioridad mostrada pertenece a Programación/);
+ assert.match(html,/Solo lectura · Último Export/);
 });
 test('packing refreshes for line and week changes and discards outdated responses',()=>{
  const app=readFileSync('app.js','utf8');
@@ -146,4 +146,20 @@ test('column filter popup has a single non-conflicting layout and visible Apply 
  assert.match(tabs,/sheet-filter-values\{flex:1 1 auto!important;min-height:0!important/);
  assert.match(tabs,/sheet-apply\{flex:0 0 auto!important;position:relative!important/);
  assert.doesNotMatch(tabs,/menu\.style\.top=Math\.max/);
+});
+
+test('simplified production copy preserves operational access and alerts',()=>{
+ const get=file=>readFileSync(file,'utf8');
+ const follow=get('src/modules/lp01-followup.js');
+ const workspace=get('src/modules/lp01-assembly-workspace.js');
+ const preparation=get('src/modules/glass-preparation.js');
+ assert.doesNotMatch(html,/Seguimiento operativo de ensamble y empaque|Distribución de vidrio por producción/);
+ assert.doesNotMatch(follow,/Asignaciones consultadas y saldos oficiales separados por fuente|Consulta el contexto antes/);
+ for(const control of ['glassTableTab','glassTreeTab','glassPreparationViewTab','glassAnalysisExport'])assert.ok(html.includes('id="'+control+'"'));
+ for(const label of ['Operación del turno','Cierres del turno'])assert.ok(tabs.includes(label));
+ assert.match(workspace,/data-packing-plan-pending role="status"><strong>Plan de Empaque no disponible/);
+ assert.match(workspace,/Turno actual · /);
+ assert.match(preparation,/<th>Fecha solicitada<\/th>/);
+ assert.match(preparation,/Hay fechas sin guardar/);
+ assert.match(preparation,/data-export>Exportar Excel/);
 });

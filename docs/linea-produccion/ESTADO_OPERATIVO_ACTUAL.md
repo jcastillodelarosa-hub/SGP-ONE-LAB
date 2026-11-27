@@ -1,3 +1,19 @@
+## 2026-11-27 — Texto directo en Línea de Producción · candidata LAB v487
+
+Implementado en rama sobre main v486 (`67a7781`), sin fusión ni publicación.
+Se quitan guías permanentes y se simplifican rótulos en las cinco pestañas;
+las acciones, fuentes, saldos, afectaciones y permisos quedan intactos. Cierres
+mantiene advertencias visibles y ofrece trazabilidad desplegable sin cambiar las
+descargas. En vidrio, «Fecha solicitada» no acredita disponibilidad. Sin SQL ni datos.
+
+Pruebas: suite Node completa, verificación de release; navegador en escritorio
+(1440 px) y móvil (390 px) para navegación de las cinco pestañas, hoja y detalle
+de Ensamble/Empaque, y selección, guardado simulado y exportación de fechas de
+vidrio. La prueba antigua de arrastre exige un valor en un formulario legado y
+falla en el mismo punto en v486 y v487; no se modifica su flujo. Próximo paso:
+completar CI del PR y solicitar aprobación explícita de publicación; después
+verificar v487 en Hosting y acceso de los roles existentes sin registrar datos.
+
 ## 2026-11-16 — Jerarquía visual B, candidata v464 sobre v463
 
 B elegida por Johan; fundamento tipográfico compartido y primera aplicación

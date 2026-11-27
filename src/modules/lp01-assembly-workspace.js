@@ -70,10 +70,13 @@ export function mountAssemblyWorkspace({host,bridge,isCurrent,onClose,onReports,
  function periodLabel(){
   const schedule=data.schedule,period=schedule?.currentPeriod;
   const current=schedule?.status==='AVAILABLE'&&period&&period.date===context.date&&period.shift===context.shift;
-  return (data.turn?.estado??'Sin estado')+(period?' · Horario vigente '+period.date+' / T'+period.shift:' · Horario del servidor no disponible')+(current?' · Turno actual':'');
+  const estado=data.turn?.estado??'Sin estado';
+  const label={ABIERTO:'Abierto',CERRADO:'Cerrado',NO_ABIERTO:'No abierto',EN_REVISION:'En revisión'}[estado]??estado;
+  if(current)return 'Turno actual · '+label;
+  return label+(period?' · Vigente: '+period.date+' / T'+period.shift:' · Horario no disponible');
  }
  function header(){
-  return (context.stage==='EMPAQUE'&&rows.some(r=>r.scheduleUnavailable)?'<p class="lp-source-note" data-packing-plan-pending>Programación específica de Empaque pendiente de conectar. Se muestran las órdenes ya incorporadas a Empaque; no se copia la programación de Ensamble.</p>':'')+'<header class="lp-assembly-heading"><div><span class="eyebrow">Hoja de '+(context.stage==='EMPAQUE'?'Empaque':'Ensamble')+'</span><h3>'+esc(context.line)+' · '+esc(context.date)+' / T'+context.shift+'</h3><p data-assembly-period-state>'+esc(periodLabel())+'</p></div><div class="lp-assembly-actions"><button type="button" data-assembly-current '+(!canConsultCurrent()?'hidden':'')+'>Consultar turno actual</button><button type="button" data-assembly-close>Revisar cierre del turno</button><button type="button" data-assembly-reports>Cierres e informes</button></div></header>';
+  return (context.stage==='EMPAQUE'&&rows.some(r=>r.scheduleUnavailable)?'<div class="lp-source-note" data-packing-plan-pending role="status"><strong>Plan de Empaque no disponible</strong> · Órdenes incorporadas</div>':'')+'<header class="lp-assembly-heading"><div><span class="eyebrow">Hoja de '+(context.stage==='EMPAQUE'?'Empaque':'Ensamble')+'</span><h3>'+esc(context.line)+' · '+esc(context.date)+' / T'+context.shift+'</h3><p data-assembly-period-state>'+esc(periodLabel())+'</p></div><div class="lp-assembly-actions"><button type="button" data-assembly-current '+(!canConsultCurrent()?'hidden':'')+'>Consultar turno actual</button><button type="button" data-assembly-close>Revisar cierre del turno</button><button type="button" data-assembly-reports>Cierres e informes</button></div></header>';
  }
  function render(){
   disposeDetail();host.classList.add('lp-assembly-workspace');host.classList.toggle('has-assembly-detail',Boolean(selected));
